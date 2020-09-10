@@ -36,7 +36,7 @@
         </b:Column>
 
         <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
-            dataKeyboard="true" ui:field="portForwardingForm" b:id="portForwardingForm">
+            dataKeyboard="false" ui:field="portForwardingForm" b:id="portForwardingForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>

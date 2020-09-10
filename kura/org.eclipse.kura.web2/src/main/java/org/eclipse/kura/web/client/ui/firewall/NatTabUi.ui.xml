@@ -39,7 +39,7 @@
 
 		<!--******Modals***** -->
         <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
-            dataKeyboard="true" ui:field="natForm" b:id="natForm">
+            dataKeyboard="false" ui:field="natForm" b:id="natForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>

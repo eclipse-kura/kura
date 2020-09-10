@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2020 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -18,6 +18,8 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:firewall="urn:import:org.eclipse.kura.web.client.ui.firewall">
+
+	<ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
     <ui:style>
     .important {
@@ -59,5 +61,20 @@
             </b:Well>
         </b:Row>
 
+	    <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+	        dataKeyboard="false" ui:field="dirtyModal" b:id="dirtyModal" title="{msgs.confirm}" >
+	        <b:ModalBody>
+	            <b:Panel>
+	                <b:PanelBody>
+	                    <b.html:Span text="{msgs.deviceConfigDirty}" />
+	                </b:PanelBody>
+	            </b:Panel>
+	        </b:ModalBody>
+	        <b:ModalFooter>
+	            <b:Button ui:field="yes" addStyleNames="fa fa-check" text="{msgs.yesButton}" />
+	            <b:Button ui:field="no" addStyleNames="fa fa-times" text="{msgs.noButton}" />
+	        </b:ModalFooter>
+	    </b:Modal>
+    
     </b:Container>
 </ui:UiBinder> 

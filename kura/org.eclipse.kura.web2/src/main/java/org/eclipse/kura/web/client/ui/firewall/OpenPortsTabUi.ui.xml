@@ -36,7 +36,7 @@
         </b:Column>
 
         <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
-            dataKeyboard="true" ui:field="openPortsForm" b:id="openPortsForm">
+            dataKeyboard="false" ui:field="openPortsForm" b:id="openPortsForm">
             <b:ModalBody>
                 <b:Form>
                     <b:FieldSet>

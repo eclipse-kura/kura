@@ -16,13 +16,8 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.ui.Tab.RefreshHandler;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.ButtonGroup;
 import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.ModalBody;
-import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TabListItem;
-import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -58,6 +53,13 @@ public class FirewallPanelUi extends Composite {
     @UiField
     TabListItem ipForwarding;
 
+    @UiField
+    Modal dirtyModal;
+    @UiField
+    Button yes;
+    @UiField
+    Button no;
+
     private TabListItem currentlySelectedTab;
     private Tab.RefreshHandler openPortsHandler;
     private Tab.RefreshHandler portForwardingHandler;
@@ -72,17 +74,11 @@ public class FirewallPanelUi extends Composite {
         this.ipForwarding.setText(MSGS.firewallNat());
 
         this.openPortsHandler = new Tab.RefreshHandler(this.openPortsPanel);
-        this.openPorts.addClickHandler(event -> {
-            handleEvent(event, this.openPortsHandler);
-        });
+        this.openPorts.addClickHandler(event -> handleEvent(event, this.openPortsHandler));
         this.portForwardingHandler = new Tab.RefreshHandler(this.portForwardingPanel);
-        this.portForwarding.addClickHandler(event -> {
-            handleEvent(event, this.portForwardingHandler);
-        });
+        this.portForwarding.addClickHandler(event -> handleEvent(event, this.portForwardingHandler));
         this.ipForwardingHandler = new Tab.RefreshHandler(this.ipForwardingPanel);
-        this.ipForwarding.addClickHandler(event -> {
-            handleEvent(event, this.ipForwardingHandler);
-        });
+        this.ipForwarding.addClickHandler(event -> handleEvent(event, this.ipForwardingHandler));
     }
 
     public void initFirewallPanel() {
@@ -104,44 +100,18 @@ public class FirewallPanelUi extends Composite {
     }
 
     private void showDirtyModal(TabListItem newTabListItem, RefreshHandler newTabRefreshHandler) {
-        final Modal modal = new Modal();
-        modal.setClosable(false);
-        modal.setFade(true);
-        modal.setDataKeyboard(true);
-        modal.setDataBackdrop(ModalBackdrop.STATIC);
-
-        ModalHeader header = new ModalHeader();
-        header.setTitle(MSGS.confirm());
-        modal.add(header);
-
-        ModalBody body = new ModalBody();
-        body.add(new Span(MSGS.deviceConfigDirty()));
-        modal.add(body);
-
-        ModalFooter footer = new ModalFooter();
-        ButtonGroup group = new ButtonGroup();
-        Button yes = new Button();
-        yes.setText(MSGS.yesButton());
-        yes.addStyleName("fa fa-check");
-        yes.addClickHandler(event -> {
-            modal.hide();
+        this.yes.addClickHandler(event -> {
+            this.dirtyModal.hide();
             FirewallPanelUi.this.getTab(this.currentlySelectedTab).clear();
             FirewallPanelUi.this.currentlySelectedTab = newTabListItem;
             newTabRefreshHandler.onClick(event);
         });
-        Button no = new Button();
-        no.setText(MSGS.noButton());
-        no.addStyleName("fa fa-times");
-        no.addClickHandler(event -> {
+        this.no.addClickHandler(event -> {
             FirewallPanelUi.this.currentlySelectedTab.showTab();
-            modal.hide();
+            this.dirtyModal.hide();
         });
-        group.add(no);
-        group.add(yes);
-        footer.add(group);
-        modal.add(footer);
-        modal.show();
-        no.setFocus(true);
+        this.no.setFocus(true);
+        this.dirtyModal.show();
     }
 
     private void handleEvent(ClickEvent event, Tab.RefreshHandler handler) {

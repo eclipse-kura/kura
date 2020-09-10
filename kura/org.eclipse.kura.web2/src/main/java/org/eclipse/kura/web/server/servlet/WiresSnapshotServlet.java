@@ -129,7 +129,7 @@ public class WiresSnapshotServlet extends HttpServlet {
             response.setContentType("application/xml");
             response.setHeader("Content-Disposition",
                     "attachment; filename=graph_snapshot_" + System.currentTimeMillis() + ".xml");
-            response.setHeader("Cache-Control", "no-transform, no-cache,no-store");
+            response.setHeader("Cache-Control", "no-transform,no-cache,no-store");
 
             try (PrintWriter writer = response.getWriter()) {
                 writer.write(marshalled);

@@ -70,7 +70,7 @@ public class SecureBasicHttpContext implements HttpContext {
         response.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
         response.setHeader("X-XSS-protection", "1; mode=block");
         response.setHeader("X-Content-Type-Options", "nosniff");
-        response.setHeader("Cache-Control", "no-cache,no-store,max-age=0,must-revalidate");
+        response.setHeader("Cache-Control", "no-cache,no-store");
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Content-Security-Policy", "default-src 'self'; font-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'");
 

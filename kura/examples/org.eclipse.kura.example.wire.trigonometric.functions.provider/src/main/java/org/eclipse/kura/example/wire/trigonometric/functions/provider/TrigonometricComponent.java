@@ -12,9 +12,7 @@ package org.eclipse.kura.example.wire.trigonometric.functions.provider;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.DoubleValue;
@@ -51,7 +49,6 @@ public class TrigonometricComponent implements WireEmitter, ConfigurableComponen
         logger.info("activating...");
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
-        logger.info("activated, properties: {}", properties);
         updated(properties, componentContext);
         logger.info("activating...done");
     }
@@ -90,60 +87,42 @@ public class TrigonometricComponent implements WireEmitter, ConfigurableComponen
 
     @Override
     public void onWireReceive(WireEnvelope wireEnvelope) {
-        final Optional<Double> operand = extractOperand(wireEnvelope, this.options.getOperandName());
-        final Optional<Double> result = performTrigonometricOperation(operand);
         final Map<String, TypedValue<?>> properties = wireEnvelope.getRecords().get(0).getProperties();
-        if (result.isPresent()) {
+        final Double operand = Double.valueOf(properties.get(this.options.getOperandName()).getValue().toString());
+        final Double result = performTrigonometricOperation(operand);
+        if (result != null) {
             if (this.options.shouldEmitReceivedProperties()) {
                 final Map<String, TypedValue<?>> resultProperties = new HashMap<>(properties);
-                resultProperties.put(this.options.getResultName(), new DoubleValue(result.get()));
+                resultProperties.put(this.options.getResultName(), new DoubleValue(result));
                 this.wireSupport.emit(Collections.singletonList(new WireRecord(resultProperties)));
             } else {
                 this.wireSupport.emit(Collections.singletonList(new WireRecord(
-                        Collections.singletonMap(this.options.getResultName(), new DoubleValue(result.get())))));
+                        Collections.singletonMap(this.options.getResultName(), new DoubleValue(result)))));
             }
-
-            WireRecord toBeEmitted = new WireRecord(
-                    Collections.singletonMap(this.options.getResultName(), TypedValues.newDoubleValue(result.get())));
-            this.wireSupport.emit(Collections.singletonList(toBeEmitted));
+            final WireRecord toBeEmitted = new WireRecord(
+                    Collections.singletonMap(this.options.getResultName(), TypedValues.newDoubleValue(result)));
+            wireSupport.emit(Collections.singletonList(toBeEmitted));
         }
     }
 
-    private Optional<Double> extractOperand(WireEnvelope wireEnvelope, String operandName) {
-        if (wireEnvelope == null) {
-            return Optional.empty();
-        }
-        final List<WireRecord> records = wireEnvelope.getRecords();
-        if (records.isEmpty()) {
-            return Optional.empty();
-        }
-        final Map<String, TypedValue<?>> properties = records.get(0).getProperties();
-        if (properties.get(operandName) != null) {
-            return Optional.of(Double.valueOf(properties.get(operandName).getValue().toString()));
-        }
-        return Optional.empty();
-    }
+    private Double performTrigonometricOperation(Double operand) {
 
-    private Optional<Double> performTrigonometricOperation(Optional<Double> operand) {
-        if (operand.isPresent()) {
-            switch (this.options.getTrigonometricOperation()) {
-            case SIN:
-                return Optional.of(Math.sin(operand.get().doubleValue()));
-            case COS:
-                return Optional.of(Math.cos(operand.get().doubleValue()));
-            case TAN:
-                return Optional.of(Math.tan(operand.get().doubleValue()));
-            case ASIN:
-                return Optional.of(Math.asin(operand.get().doubleValue()));
-            case ACOS:
-                return Optional.of(Math.acos(operand.get().doubleValue()));
-            case ATAN:
-                return Optional.of(Math.atan(operand.get().doubleValue()));
-            default:
-                return Optional.empty();
-            }
+        switch (this.options.getTrigonometricOperation()) {
+        case SIN:
+            return Math.sin(operand.doubleValue());
+        case COS:
+            return Math.cos(operand.doubleValue());
+        case TAN:
+            return Math.tan(operand.doubleValue());
+        case ASIN:
+            return Math.asin(operand.doubleValue());
+        case ACOS:
+            return Math.acos(operand.doubleValue());
+        case ATAN:
+            return Math.atan(operand.doubleValue());
+        default:
+            return operand;
         }
-        return Optional.empty();
     }
 
 }

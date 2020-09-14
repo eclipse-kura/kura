@@ -57,7 +57,8 @@ public class DeviceSnapshotsServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/xml");
         response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + snapshotId + ".xml");
-        response.setHeader("Cache-Control", "no-transform, max-age=0");
+        response.setHeader("Cache-Control", "no-transform,no-cache,no-store,max-age=0,must-revalidate");
+        response.setHeader("Pragma", "no-cache");
         PrintWriter writer = response.getWriter();
         try {
 

@@ -72,6 +72,7 @@ public class SecureBasicHttpContext implements HttpContext {
         response.setHeader("X-Content-Type-Options", "nosniff");
         response.setHeader("Cache-Control", "no-cache,no-store");
         response.setHeader("Pragma", "no-cache");
+        response.setHeader("Content-Security-Policy", "default-src 'self'; font-src 'self' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'");
 
         // If a trailing "/" is used when accesssing the app, redirect
         if (request.getRequestURI().equals(this.appRoot + "/")) {

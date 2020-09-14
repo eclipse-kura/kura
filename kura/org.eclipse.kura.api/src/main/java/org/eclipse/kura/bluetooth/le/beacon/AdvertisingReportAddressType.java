@@ -19,6 +19,7 @@ package org.eclipse.kura.bluetooth.le.beacon;
  * 0x01 : Random Device Address
  * 0x02 : Public Identity Address
  * 0x03 : Random Identity Address
+ * 0xFE : Unresolved
  *
  * @since 1.3
  */

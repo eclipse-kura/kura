@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.ble;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,28 +26,23 @@ import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
+import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.types.UInt16;
 
-import tinyb.BluetoothDevice;
-import tinyb.BluetoothException;
-import tinyb.BluetoothGattService;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattService;
 
 public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
-    private static final long TIMEOUT = 30;
     private final BluetoothDevice device;
 
-    public BluetoothLeDeviceImpl(tinyb.BluetoothDevice device) {
+    public BluetoothLeDeviceImpl(BluetoothDevice device) {
         this.device = device;
     }
 
     @Override
     public BluetoothLeGattService findService(UUID uuid) throws KuraBluetoothResourceNotFoundException {
-        return findService(uuid, BluetoothLeDeviceImpl.TIMEOUT);
-    }
-
-    @Override
-    public BluetoothLeGattService findService(UUID uuid, long timeout) throws KuraBluetoothResourceNotFoundException {
-        BluetoothGattService service = this.device.find(uuid.toString(), Duration.ofSeconds(timeout));
+        BluetoothGattService service = this.device.getGattServiceByUuid(uuid.toString());
         if (service != null) {
             return new BluetoothLeGattServiceImpl(service);
         } else {
@@ -57,11 +51,16 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     }
 
     @Override
+    public BluetoothLeGattService findService(UUID uuid, long timeout) throws KuraBluetoothResourceNotFoundException {
+        return this.findService(uuid);
+    }
+
+    @Override
     public List<BluetoothLeGattService> findServices() throws KuraBluetoothResourceNotFoundException {
-        List<BluetoothGattService> tinybServices = this.device.getServices();
+        List<BluetoothGattService> serviceList = this.device.getGattServices();
         List<BluetoothLeGattService> services = new ArrayList<>();
-        if (tinybServices != null) {
-            for (BluetoothGattService service : tinybServices) {
+        if (serviceList != null) {
+            for (BluetoothGattService service : serviceList) {
                 services.add(new BluetoothLeGattServiceImpl(service));
             }
         } else {
@@ -72,55 +71,43 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public void disconnect() throws KuraBluetoothConnectionException {
-        try {
-            this.device.disconnect();
-        } catch (BluetoothException e) {
-            throw new KuraBluetoothConnectionException(e, "Disconnection from device failed");
+        if (!this.device.disconnect()) {
+            throw new KuraBluetoothConnectionException("Disconnection from device failed");
         }
     }
 
     @Override
     public void connect() throws KuraBluetoothConnectionException {
-        try {
-            this.device.connect();
-        } catch (BluetoothException e) {
-            throw new KuraBluetoothConnectionException(e, "Connection to device failed");
+        if (!this.device.connect()) {
+            throw new KuraBluetoothConnectionException("Connection to device failed");
         }
     }
 
     @Override
     public void connectProfile(UUID uuid) throws KuraBluetoothConnectionException {
-        try {
-            this.device.connectProfile(uuid.toString());
-        } catch (BluetoothException e) {
-            throw new KuraBluetoothConnectionException(e, "Connection to profile failed");
+        if (!this.device.connectProfile(uuid.toString())) {
+            throw new KuraBluetoothConnectionException("Connection to profile failed");
         }
     }
 
     @Override
     public void disconnectProfile(UUID uuid) throws KuraBluetoothConnectionException {
-        try {
-            this.device.disconnectProfile(uuid.toString());
-        } catch (BluetoothException e) {
-            throw new KuraBluetoothConnectionException(e, "Disconnection from profile failed");
+        if (!this.device.disconnectProfile(uuid.toString())) {
+            throw new KuraBluetoothConnectionException("Disconnection from profile failed");
         }
     }
 
     @Override
     public void pair() throws KuraBluetoothPairException {
-        try {
-            this.device.pair();
-        } catch (BluetoothException e) {
-            throw new KuraBluetoothPairException(e, "Pairing failed");
+        if (!this.device.pair()) {
+            throw new KuraBluetoothPairException("Pairing failed");
         }
     }
 
     @Override
     public void cancelPairing() throws KuraBluetoothPairException {
-        try {
-            this.device.cancelPairing();
-        } catch (BluetoothException e) {
-            throw new KuraBluetoothPairException(e, "Cancel pairing failed");
+        if (!this.device.cancelPairing()) {
+            throw new KuraBluetoothPairException("Cancel pairing failed");
         }
     }
 
@@ -146,12 +133,14 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public int getBluetoothClass() {
-        return this.device.getBluetoothClass();
+        Integer btClass = this.device.getBluetoothClass();
+        return btClass == null ? -1 : btClass;
     }
 
     @Override
     public short getAppearance() {
-        return this.device.getAppearance();
+        Integer appearance = this.device.getAppearance();
+        return appearance == null ? -1 : appearance.shortValue();
     }
 
     @Override
@@ -161,12 +150,14 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public boolean isPaired() {
-        return this.device.getPaired();
+        Boolean paired = this.device.isPaired();
+        return paired == null ? false : paired;
     }
 
     @Override
     public boolean isTrusted() {
-        return this.device.getTrusted();
+        Boolean trusted = this.device.isTrusted();
+        return trusted == null ? false : trusted;
     }
 
     @Override
@@ -176,7 +167,8 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public boolean isBlocked() {
-        return this.device.getBlocked();
+        Boolean blocked = this.device.isBlocked();
+        return blocked == null ? false : blocked;
     }
 
     @Override
@@ -186,24 +178,30 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public boolean isLegacyPairing() {
-        return this.device.getLegacyPairing();
+        Boolean legacyPairing = this.device.isLegacyPairing();
+        return legacyPairing == null ? false : legacyPairing;
     }
 
     @Override
     public short getRSSI() {
-        return this.device.getRSSI();
+        Short rssi = this.device.getRssi();
+        return rssi == null ? 0 : rssi;
     }
 
     @Override
     public boolean isConnected() {
-        return this.device.getConnected();
+        Boolean connected = this.device.isConnected();
+        return connected == null ? false : connected;
     }
 
     @Override
     public UUID[] getUUIDs() {
         List<UUID> uuidList = new ArrayList<>();
-        for (String uuid : this.device.getUUIDs()) {
-            uuidList.add(UUID.fromString(uuid));
+        String[] strUuids = this.device.getUuids();
+        if (strUuids != null) {
+            for (String uuid : strUuids) {
+                uuidList.add(UUID.fromString(uuid));
+            }
         }
         UUID[] uuids = new UUID[uuidList.size()];
         return uuidList.toArray(uuids);
@@ -211,7 +209,7 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public String getModalias() {
-        return this.device.getModalias();
+        return this.device.getModAlias();
     }
 
     @Override
@@ -221,37 +219,47 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
 
     @Override
     public Map<Short, byte[]> getManufacturerData() {
-        return this.device.getManufacturerData();
+        Map<Short, byte[]> manufacturerData = new HashMap<>();
+        Map<UInt16, byte[]> originalData = this.device.getManufacturerData();
+        if (originalData != null) {
+            for (Entry<UInt16, byte[]> entry : originalData.entrySet()) {
+                manufacturerData.put(entry.getKey().shortValue(), entry.getValue());
+            }
+        }
+        return manufacturerData;
     }
 
     @Override
     public Map<UUID, byte[]> getServiceData() {
         Map<UUID, byte[]> serviceData = new HashMap<>();
-        for (Entry<String, byte[]> entry : this.device.getServiceData().entrySet()) {
-            serviceData.put(UUID.fromString(entry.getKey()), entry.getValue());
+        Map<String, byte[]> originalData = this.device.getServiceData();
+        if (originalData != null) {
+            for (Entry<String, byte[]> entry : originalData.entrySet()) {
+                serviceData.put(UUID.fromString(entry.getKey()), entry.getValue());
+            }
         }
         return serviceData;
     }
 
     @Override
     public short getTxPower() {
-        return this.device.getTxPower();
+        Short txPower = this.device.getTxPower();
+        return txPower == null ? 0 : this.device.getTxPower();
     }
 
     @Override
     public boolean isServicesResolved() {
-        return this.device.getServicesResolved();
+        Boolean servicesResolved = this.device.isServicesResolved();
+        return servicesResolved == null ? false : servicesResolved;
     }
 
     @Override
-    public boolean remove() throws KuraBluetoothRemoveException {
-        boolean result = false;
+    public void remove() throws KuraBluetoothRemoveException {
         try {
-            result = this.device.remove();
-        } catch (BluetoothException e) {
+            this.device.getAdapter().removeDevice(this.device.getRawDevice());
+        } catch (DBusException e) {
             throw new KuraBluetoothRemoveException(e, "Failed to remove the device");
         }
-        return result;
     }
 
 }

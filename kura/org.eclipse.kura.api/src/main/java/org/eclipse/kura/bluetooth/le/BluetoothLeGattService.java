@@ -48,6 +48,7 @@ public interface BluetoothLeGattService {
      * @return The BluetoothLeGattCharacteristic
      * @throws KuraBluetoothResourceNotFoundException
      */
+    @Deprecated
     public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid, long timeout)
             throws KuraBluetoothResourceNotFoundException;
 

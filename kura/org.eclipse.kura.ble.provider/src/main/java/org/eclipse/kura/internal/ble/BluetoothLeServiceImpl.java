@@ -24,13 +24,16 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.osgi.service.component.ComponentContext;
 
-import tinyb.BluetoothManager;
+import org.freedesktop.dbus.exceptions.DBusException;
+
+import com.github.hypfvieh.bluetooth.DeviceManager;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter;
 
 public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     private static final Logger logger = LogManager.getLogger(BluetoothLeServiceImpl.class);
 
-    private BluetoothManager bluetoothManager;
+    private DeviceManager deviceManager;
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
@@ -38,22 +41,25 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
             startBluetoothDaemon();
         }
         try {
-            this.bluetoothManager = BluetoothManager.getBluetoothManager();
-        } catch (RuntimeException | UnsatisfiedLinkError e) {
+            this.deviceManager = DeviceManager.createInstance(false);
+        } catch (DBusException e) {
             logger.error("Failed to start bluetooth service", e);
         }
     }
 
     protected void deactivate(ComponentContext context) {
         logger.debug("Deactivating Bluetooth Service...");
-        this.bluetoothManager = null;
+        if (this.deviceManager != null) {
+            this.deviceManager.closeConnection();
+            this.deviceManager = null;
+        }
     }
 
     @Override
     public List<BluetoothLeAdapter> getAdapters() {
         List<BluetoothLeAdapter> adapters = new ArrayList<>();
-        if (this.bluetoothManager != null) {
-            for (tinyb.BluetoothAdapter adapter : this.bluetoothManager.getAdapters()) {
+        if (this.deviceManager != null) {
+            for (BluetoothAdapter adapter : this.deviceManager.getAdapters()) {
                 adapters.add(new BluetoothLeAdapterImpl(adapter));
             }
         }
@@ -63,12 +69,10 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     @Override
     public BluetoothLeAdapter getAdapter(String interfaceName) {
         BluetoothLeAdapterImpl adapter = null;
-        if (this.bluetoothManager != null) {
-            for (tinyb.BluetoothAdapter ba : this.bluetoothManager.getAdapters()) {
-                if (ba.getInterfaceName().equals(interfaceName)) {
-                    adapter = new BluetoothLeAdapterImpl(ba);
-                    break;
-                }
+        if (this.deviceManager != null) {
+            BluetoothAdapter ba = this.deviceManager.getAdapter(interfaceName);
+            if (ba != null) {
+                adapter = new BluetoothLeAdapterImpl(ba);
             }
         }
         return adapter;

@@ -12,9 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.ble;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -26,13 +26,16 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristicProperties;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattDescriptor;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 
-import tinyb.BluetoothException;
-import tinyb.BluetoothGattCharacteristic;
-import tinyb.BluetoothGattDescriptor;
+import org.freedesktop.dbus.exceptions.DBusException;
+import org.freedesktop.dbus.handlers.AbstractPropertiesChangedHandler;
+import org.freedesktop.dbus.interfaces.Properties.PropertiesChanged;
+import org.freedesktop.dbus.types.Variant;
+
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattCharacteristic;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattDescriptor;
+import com.github.hypfvieh.bluetooth.DeviceManager;
 
 public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharacteristic {
-
-    private static final long TIMEOUT = 30;
 
     private final BluetoothGattCharacteristic characteristic;
 
@@ -42,14 +45,8 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
 
     @Override
     public BluetoothLeGattDescriptor findDescriptor(UUID uuid) throws KuraBluetoothResourceNotFoundException {
-        return findDescriptor(uuid, BluetoothLeGattCharacteristicImpl.TIMEOUT);
-    }
-
-    @Override
-    public BluetoothLeGattDescriptor findDescriptor(UUID uuid, long timeout)
-            throws KuraBluetoothResourceNotFoundException {
         BluetoothGattDescriptor descriptor;
-        descriptor = this.characteristic.find(uuid.toString(), Duration.ofSeconds(timeout));
+        descriptor = this.characteristic.getGattDescriptorByUuid(uuid.toString());
         if (descriptor != null) {
             return new BluetoothLeGattDescriptorImpl(descriptor);
         } else {
@@ -58,11 +55,17 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     }
 
     @Override
+    public BluetoothLeGattDescriptor findDescriptor(UUID uuid, long timeout)
+            throws KuraBluetoothResourceNotFoundException {
+        return findDescriptor(uuid);
+    }
+
+    @Override
     public List<BluetoothLeGattDescriptor> findDescriptors() throws KuraBluetoothResourceNotFoundException {
-        List<BluetoothGattDescriptor> tinybDescriptors = this.characteristic.getDescriptors();
+        List<BluetoothGattDescriptor> descriptorList = this.characteristic.getGattDescriptors();
         List<BluetoothLeGattDescriptor> descriptors = new ArrayList<>();
-        if (tinybDescriptors != null) {
-            for (BluetoothGattDescriptor descriptor : tinybDescriptors) {
+        if (descriptorList != null) {
+            for (BluetoothGattDescriptor descriptor : descriptorList) {
                 descriptors.add(new BluetoothLeGattDescriptorImpl(descriptor));
             }
         } else {
@@ -75,8 +78,8 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     public byte[] readValue() throws KuraBluetoothIOException {
         byte[] value;
         try {
-            value = BluetoothLeGattCharacteristicImpl.this.characteristic.readValue();
-        } catch (BluetoothException e) {
+            value = this.characteristic.readValue(null);
+        } catch (DBusException e) {
             throw new KuraBluetoothIOException(e, "Read characteristic value failed");
         }
         return value;
@@ -84,10 +87,28 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
 
     @Override
     public void enableValueNotifications(Consumer<byte[]> callback) throws KuraBluetoothNotificationException {
-        BluetoothLeNotification<byte[]> notification = new BluetoothLeNotification<>(callback);
         try {
-            this.characteristic.enableValueNotifications(notification);
-        } catch (Exception e) {
+            DeviceManager.getInstance().registerPropertyHandler(new AbstractPropertiesChangedHandler() {
+                @Override
+                public void handle(PropertiesChanged props) {
+                    if (props != null) {
+                        if (!props.getPath().contains(BluetoothLeGattCharacteristicImpl.this.characteristic.getDbusPath())) {
+                            return;
+                        }
+
+                        for (Map.Entry<String, Variant<?>> entry : props.getPropertiesChanged().entrySet()) {
+                            if (entry.getKey().equals("Value")) {
+                                byte[] value = (byte[]) props.getPropertiesChanged().get("Value").getValue();
+                                if (value != null) {
+                                    callback.accept(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            this.characteristic.startNotify();
+        } catch (DBusException e) {
             throw new KuraBluetoothNotificationException(e, "Notification can't be enabled");
         }
     }
@@ -95,8 +116,8 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     @Override
     public void disableValueNotifications() throws KuraBluetoothNotificationException {
         try {
-            this.characteristic.disableValueNotifications();
-        } catch (Exception e) {
+            this.characteristic.stopNotify();
+        } catch (DBusException e) {
             throw new KuraBluetoothNotificationException(e, "Notification can't be disabled");
         }
     }
@@ -104,15 +125,19 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     @Override
     public void writeValue(byte[] value) throws KuraBluetoothIOException {
         try {
-            BluetoothLeGattCharacteristicImpl.this.characteristic.writeValue(value);
-        } catch (BluetoothException e) {
+            this.characteristic.writeValue(value, null);
+        } catch (DBusException e) {
             throw new KuraBluetoothIOException(e, "Write characteristic value failed");
         }
     }
 
     @Override
     public UUID getUUID() {
-        return UUID.fromString(this.characteristic.getUUID());
+        String uuid = this.characteristic.getUuid();
+        if (uuid == null) {
+            return null;
+        }
+        return UUID.fromString(uuid);
     }
 
     @Override
@@ -127,7 +152,8 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
 
     @Override
     public boolean isNotifying() {
-        return this.characteristic.getNotifying();
+        Boolean notifying = this.characteristic.isNotifying();
+        return notifying == null ? false : notifying;
     }
 
     @Override

@@ -308,11 +308,16 @@ public class BluetoothLeBeaconManagerImpl
 
     public void startBeaconScan(BluetoothLeAdapter adapter) throws KuraBluetoothCommandException {
         if (checkStartScanCondition(adapter.getInterfaceName())) {
+<<<<<<< HEAD
             logger.info("Starting bluetooth beacon scan on {}", adapter.getInterfaceName());
             try {
+=======
+             try {
+>>>>>>> 23f7ce8f6 (Replace TinyB library with bluez-dbus)
                 // Start scanning
                 if (!adapter.isDiscovering()) {
-                    adapter.setDiscoveryFilter(new ArrayList<>(), 0, 0, BluetoothTransportType.LE);
+                    logger.info("Starting bluetooth beacon scan on {}", adapter.getInterfaceName());
+                    adapter.setDiscoveryFilter(null, 0, 0, BluetoothTransportType.LE, true);
                     adapter.startDiscovery();
                 }
                 this.dumpProc = execBtDump(adapter.getInterfaceName());
@@ -329,7 +334,7 @@ public class BluetoothLeBeaconManagerImpl
             try {
                 // Stop scanning
                 adapter.stopDiscovery();
-                adapter.setDiscoveryFilter(new ArrayList<>(), 0, 0, BluetoothTransportType.AUTO);
+                adapter.setDiscoveryFilter(null, 0, 0, BluetoothTransportType.AUTO, false);
                 if (this.dumpProc != null) {
                     this.dumpProc.destroyBTSnoop();
                 }

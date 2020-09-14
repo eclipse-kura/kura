@@ -40,7 +40,7 @@ public enum AdvertisingReportPhy {
 
     public static AdvertisingReportPhy valueOf(byte phy) {
         AdvertisingReportPhy value;
-        
+
         if (phy == NONE.getPhyCode()) {
             value = NONE;
         } else if (phy == LE_1M.getPhyCode()) {

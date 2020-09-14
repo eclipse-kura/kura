@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,12 +22,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.Asset;
 import org.eclipse.kura.asset.AssetService;
+import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelType;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
@@ -224,7 +227,15 @@ public final class AssetCloudlet implements RequestHandler {
                 response.reportResult(assetName, asset.read(channelNames));
             }
         } catch (Exception e) {
-            response.reportAllFailed(assetName, channelNames.iterator(),
+            Set<String> filteredChannelNames = channelNames;
+            if (channelNames.isEmpty()) {
+                Map<String, Channel> assetChannels = asset.getAssetConfiguration().getAssetChannels();
+                filteredChannelNames = assetChannels.entrySet().stream()
+                        .filter(entry -> entry.getValue().getType() == ChannelType.READ
+                                || entry.getValue().getType() == ChannelType.READ_WRITE)
+                        .map(Entry<String, Channel>::getKey).collect(Collectors.toSet());
+            }
+            response.reportAllFailed(assetName, filteredChannelNames.iterator(),
                     Optional.ofNullable(e.getMessage()).orElse(UNKNOWN_ERROR_MESSAGE));
         }
     }

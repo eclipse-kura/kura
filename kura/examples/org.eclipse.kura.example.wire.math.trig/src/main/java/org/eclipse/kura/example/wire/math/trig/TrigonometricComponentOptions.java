@@ -12,8 +12,8 @@ package org.eclipse.kura.example.wire.math.trig;
 
 import java.util.Map;
 import java.util.function.Function;
-import java.util.logging.Logger;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TrigonometricComponentOptions {

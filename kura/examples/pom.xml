@@ -77,7 +77,7 @@
         <module>org.eclipse.kura.example.wire.logic.multiport.provider</module>
         <module>org.eclipse.kura.example.wire.math.multiport.provider</module>
         <module>org.eclipse.kura.example.wire.math.singleport.provider</module>
-        <module>org.eclipse.kura.example.wire.trigonometric.functions.provider</module>
+        <module>org.eclipse.kura.example.wire.math.trig</module>
         <module>org.eclipse.kura.example.driver.sensehat</module>
         <module>org.eclipse.kura.wire.devel.component.provider</module>
         <module>org.eclipse.kura.example.web.extension</module>

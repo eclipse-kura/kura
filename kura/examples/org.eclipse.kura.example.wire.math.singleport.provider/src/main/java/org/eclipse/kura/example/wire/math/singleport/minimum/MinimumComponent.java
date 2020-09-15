@@ -11,27 +11,27 @@
 package org.eclipse.kura.example.wire.math.singleport.minimum;
 
 import org.eclipse.kura.example.wire.math.singleport.AbstractSingleportMathComponent;
-import org.eclipse.kura.example.wire.math.singleport.RunningMedian;
+import org.eclipse.kura.example.wire.math.singleport.RunningExtremum;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 
 public class MinimumComponent extends AbstractSingleportMathComponent {
 
-    private RunningMedian<Double> runningMedian;
+    private RunningExtremum<Double> runningExtremum;
 
     @Override
     protected void init() {
-        this.runningMedian = null;
+        this.runningExtremum = null;
     }
 
     @Override
     public TypedValue<?> apply(TypedValue<?> t) {
-        if (runningMedian == null) {
-            this.runningMedian = new RunningMedian<>(this.options.getWindowSize());
+        if (runningExtremum == null) {
+            this.runningExtremum = new RunningExtremum<>(this.options.getWindowSize());
         }
         final double value = ((Number) t.getValue()).doubleValue();
-        this.runningMedian.add(value);
-        return TypedValues.newDoubleValue(this.runningMedian.min());
+        this.runningExtremum.add(value);
+        return TypedValues.newDoubleValue(this.runningExtremum.min());
     }
 
 }

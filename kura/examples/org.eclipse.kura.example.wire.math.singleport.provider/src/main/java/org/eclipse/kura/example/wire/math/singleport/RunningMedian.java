@@ -62,14 +62,6 @@ public class RunningMedian<T extends Number & Comparable<T>> {
         }
     }
 
-    public T min() {
-        return this.lower.firstKey();
-    }
-
-    public T max() {
-        return this.higher.lastKey();
-    }
-
     private void balance() {
         if (this.lowerCount > this.higherCount) {
             final T key = this.lower.lastKey();

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.example.wire.logic.multiport.provider.LogicalComponentOptions.OperatorOption;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireComponent;
@@ -63,7 +62,6 @@ public class LogicalComponent implements WireEmitter, ConfigurableComponent, Mul
         logger.info("updated, properties: {}", properties);
         this.options.getPortAggregatorFactory().build(this.wireSupport.getReceiverPorts())
                 .onWireReceive(this::onWireReceive);
-
         logger.info("updating...done");
     }
 
@@ -100,8 +98,8 @@ public class LogicalComponent implements WireEmitter, ConfigurableComponent, Mul
     public void onWireReceive(List<WireEnvelope> wireEnvelopes) {
         final Boolean firstOperand = extractOperand(wireEnvelopes.get(0), this.options.getFirstOperandName());
         final Boolean result;
-        if (OperatorOption.NOT.equals(this.options.getBooleanOperation())) {
-            result = !firstOperand.booleanValue();
+        if (this.options.isUnaryOperator()) {
+            result = this.options.getBooleanFunction().apply(firstOperand, null);
         } else {
             result = this.options.getBooleanFunction().apply(firstOperand,
                     extractOperand(wireEnvelopes.get(1), this.options.getSecondOperandName()));

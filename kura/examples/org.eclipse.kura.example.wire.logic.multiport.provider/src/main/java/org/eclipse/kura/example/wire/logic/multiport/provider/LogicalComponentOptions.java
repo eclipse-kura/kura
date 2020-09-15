@@ -44,23 +44,22 @@ public class LogicalComponentOptions {
     private final String secondOperandName;
     private final String resultName;
     private final BiFunction<Boolean, Boolean, Boolean> booleanFunction;
-    private final OperatorOption booleanOperation;
+    private final OperatorOption operator;
 
     private final PortAggregatorFactory portAggregatorFactory;
 
     public LogicalComponentOptions(final Map<String, Object> properties, BundleContext context) {
-        this.booleanOperation = OperatorOption
+        this.operator = OperatorOption
                 .valueOf(getSafe(properties.get(BOOLEAN_OPERATION), BOOLEAN_OPERATION_DEFAULT.name()));
-
         this.firstOperandName = getSafe(properties.get(FIRST_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.secondOperandName = getSafe(properties.get(SECOND_OPERAND_NAME_PROP_NAME), OPERAND_NAME_DEFAULT);
         this.resultName = getSafe(properties.get(RESULT_NAME_PROP_NAME), RESULT_NAME_DEFAULT);
-        this.booleanFunction = getLogicalFunction(this.booleanOperation);
+        this.booleanFunction = getLogicalFunction(this.operator);
 
         final boolean useBarrier = getSafe(properties.get(BARRIER_MODALITY_PROPERTY_KEY),
                 BARRIER_MODALITY_PROPERTY_DEFAULT);
 
-        if (useBarrier && !OperatorOption.NOT.equals(this.booleanOperation)) {
+        if (useBarrier && !OperatorOption.NOT.equals(this.operator)) {
             this.portAggregatorFactory = context
                     .getService(context.getServiceReference(BarrierAggregatorFactory.class));
         } else {
@@ -79,13 +78,12 @@ public class LogicalComponentOptions {
             return (t, u) -> !(t && u);
         case XOR:
             return (t, u) -> t ^ u;
-        case NOT: // Will never get to this case
+        case NOT:
             return (t, u) -> !t;
         case AND:
         default:
             return (t, u) -> t && u;
         }
-
     }
 
     public String getFirstOperandName() {
@@ -108,8 +106,12 @@ public class LogicalComponentOptions {
         return this.booleanFunction;
     }
 
-    public OperatorOption getBooleanOperation() {
-        return this.booleanOperation;
+    public OperatorOption getOperator() {
+        return this.operator;
+    }
+
+    public boolean isUnaryOperator() {
+        return OperatorOption.NOT.equals(this.operator);
     }
 
     @SuppressWarnings("unchecked")

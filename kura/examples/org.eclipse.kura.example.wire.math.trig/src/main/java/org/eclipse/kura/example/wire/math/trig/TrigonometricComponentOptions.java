@@ -77,7 +77,7 @@ public class TrigonometricComponentOptions {
     }
 
     public boolean shouldEmitReceivedProperties() {
-        return emitReceivedProperties;
+        return this.emitReceivedProperties;
     }
 
     public Function<Double, Double> getTrigonometricFunction() {

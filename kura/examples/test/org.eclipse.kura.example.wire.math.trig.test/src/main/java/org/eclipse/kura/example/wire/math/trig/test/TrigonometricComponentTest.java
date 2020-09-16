@@ -72,9 +72,6 @@ public class TrigonometricComponentTest {
     private static final boolean EMIT_RECEIVED_PROPERTIES_DEFAULT = false;
     private static final String TRIGONOMETRIC_OPERATION_DEFAULT = "SIN";
 
-    // tolerance for errors with inverse trigonometric functions
-    private static final double ACCEPTABLE_ERROR = 0.0000000000000004;
-
     private static WireGraphService wireGraphService;
     private static ConfigurationService configurationService;
     private static CountDownLatch dependencyLatch = new CountDownLatch(3); // initialize with number of dependencies

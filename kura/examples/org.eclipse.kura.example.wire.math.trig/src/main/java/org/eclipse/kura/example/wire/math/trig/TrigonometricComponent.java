@@ -67,22 +67,22 @@ public class TrigonometricComponent implements WireEmitter, ConfigurableComponen
 
     @Override
     public Object polled(Wire wire) {
-        return wireSupport.polled(wire);
+        return this.wireSupport.polled(wire);
     }
 
     @Override
     public void consumersConnected(Wire[] wires) {
-        wireSupport.consumersConnected(wires);
+        this.wireSupport.consumersConnected(wires);
     }
 
     @Override
     public void updated(Wire wire, Object value) {
-        wireSupport.updated(wire, value);
+        this.wireSupport.updated(wire, value);
     }
 
     @Override
     public void producersConnected(Wire[] wires) {
-        wireSupport.producersConnected(wires);
+        this.wireSupport.producersConnected(wires);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class TrigonometricComponent implements WireEmitter, ConfigurableComponen
             }
             final WireRecord toBeEmitted = new WireRecord(
                     Collections.singletonMap(this.options.getResultName(), TypedValues.newDoubleValue(result)));
-            wireSupport.emit(Collections.singletonList(toBeEmitted));
+            this.wireSupport.emit(Collections.singletonList(toBeEmitted));
         }
     }
 }

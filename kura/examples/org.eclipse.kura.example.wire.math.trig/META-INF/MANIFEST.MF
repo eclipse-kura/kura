@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Trigonometric Operations for Wires
+Bundle-Name: Trigonometric Functions for Wires
 Bundle-SymbolicName: org.eclipse.kura.example.wire.math.trig;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse Kura

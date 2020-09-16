@@ -217,10 +217,10 @@ public class TrigonometricComponentTest {
     public void testSinOperation() throws Exception {
         try {
             Map<String, Double> result = calculateResults();
-            assertTrue(0.0 == result.get("zero").doubleValue());
-            assertTrue(1.0 == result.get("halfPi").doubleValue());
-            assertTrue(Math.abs(0.0 - result.get("pi").doubleValue()) < ACCEPTABLE_ERROR);
-            assertTrue(-1.0 == result.get("threeHalvesPi").doubleValue());
+            assertTrue(Math.sin(0) == result.get("zero").doubleValue());
+            assertTrue(Math.sin(Math.PI / 2) == result.get("halfPi").doubleValue());
+            assertTrue(Math.sin(Math.PI) == result.get("pi").doubleValue());
+            assertTrue(Math.sin(Math.PI * 1.5) == result.get("threeHalvesPi").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -231,10 +231,10 @@ public class TrigonometricComponentTest {
         try {
             updateTrigonometricOperation("COS");
             Map<String, Double> result = calculateResults();
-            assertTrue(1.0 == result.get("zero").doubleValue());
-            assertTrue(Math.abs(0.0 - result.get("halfPi").doubleValue()) < ACCEPTABLE_ERROR);
-            assertTrue(-1.0 == result.get("pi").doubleValue());
-            assertTrue(Math.abs(0.0 - result.get("threeHalvesPi").doubleValue()) < ACCEPTABLE_ERROR);
+            assertTrue(Math.cos(0) == result.get("zero").doubleValue());
+            assertTrue(Math.cos(Math.PI / 2) == result.get("halfPi").doubleValue());
+            assertTrue(Math.cos(Math.PI) == result.get("pi").doubleValue());
+            assertTrue(Math.cos(Math.PI * 1.5) == result.get("threeHalvesPi").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -245,9 +245,9 @@ public class TrigonometricComponentTest {
         try {
             updateTrigonometricOperation("TAN");
             Map<String, Double> result = calculateResults();
-            assertTrue(Math.abs(0.0 - result.get("zero").doubleValue()) < ACCEPTABLE_ERROR);
-            assertTrue(Math.abs(1.0 - result.get("quarterPi").doubleValue()) < ACCEPTABLE_ERROR);
-            assertTrue(Math.abs(0.0 - result.get("pi").doubleValue()) < ACCEPTABLE_ERROR);
+            assertTrue(Math.tan(0) == result.get("zero").doubleValue());
+            assertTrue(Math.tan(Math.PI / 4) == result.get("quarterPi").doubleValue());
+            assertTrue(Math.tan(Math.PI) == result.get("pi").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -258,9 +258,9 @@ public class TrigonometricComponentTest {
         try {
             updateTrigonometricOperation("ASIN");
             Map<String, Double> result = calculateInverseResults();
-            assertTrue(0.0 == result.get("zero").doubleValue());
-            assertTrue(Math.abs((Math.PI / 6) - result.get("half").doubleValue()) < ACCEPTABLE_ERROR);
-            assertTrue((Math.PI / 2) == result.get("one").doubleValue());
+            assertTrue(Math.asin(0) == result.get("zero").doubleValue());
+            assertTrue(Math.asin(0.5) == result.get("half").doubleValue());
+            assertTrue(Math.asin(1) == result.get("one").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -271,10 +271,9 @@ public class TrigonometricComponentTest {
         try {
             updateTrigonometricOperation("ACOS");
             Map<String, Double> result = calculateInverseResults();
-            assertTrue((Math.PI / 2) == result.get("zero").doubleValue());
-            assertTrue(Math.abs((Math.PI / 3) - result.get("half").doubleValue()) < ACCEPTABLE_ERROR);
-            assertTrue(0.0 == result.get("one").doubleValue());
-
+            assertTrue(Math.acos(0) == result.get("zero").doubleValue());
+            assertTrue(Math.acos(0.5) == result.get("half").doubleValue());
+            assertTrue(Math.acos(1) == result.get("one").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }
@@ -285,9 +284,8 @@ public class TrigonometricComponentTest {
         try {
             updateTrigonometricOperation("ATAN");
             Map<String, Double> result = calculateInverseResults();
-            assertTrue(0.0 == result.get("zero").doubleValue());
-            assertTrue((Math.PI / 4) == result.get("one").doubleValue());
-
+            assertTrue(Math.atan(0) == result.get("zero").doubleValue());
+            assertTrue(Math.atan(1) == result.get("one").doubleValue());
         } catch (TimeoutException e) {
             fail("Timeout waiting for envelope");
         }

@@ -88,7 +88,7 @@ public class TrigonometricComponent implements WireEmitter, ConfigurableComponen
     @Override
     public void onWireReceive(WireEnvelope wireEnvelope) {
         final Map<String, TypedValue<?>> properties = wireEnvelope.getRecords().get(0).getProperties();
-        final Double parameter = (Double) properties.get(this.options.getParameterName()).getValue();
+        final Double parameter = ((Number) properties.get(this.options.getParameterName()).getValue()).doubleValue();
         final Double result = this.options.getTrigonometricFunction().apply(parameter);
         if (result != null) {
             if (this.options.shouldEmitReceivedProperties()) {

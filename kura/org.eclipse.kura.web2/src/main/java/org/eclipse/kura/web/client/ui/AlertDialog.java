@@ -105,7 +105,15 @@ public class AlertDialog extends Composite implements HasId {
     }
 
     public void show(String message, Severity severity, DismissListener listener) {
-        show(severity == Severity.INFO ? MSGS.confirm() : MSGS.warning(), message, severity, listener);
+        String title= "";
+        if (severity == Severity.INFO) {
+            title =  MSGS.confirm();
+        } else if (severity == Severity.ERROR) {
+            title =  MSGS.error();
+        } else {
+            title = MSGS.warning();
+        }
+        show(title, message, severity, listener);
     }
 
     public void show(String message, Severity severity, ConfirmListener listener) {
@@ -173,6 +181,7 @@ public class AlertDialog extends Composite implements HasId {
 
     public enum Severity {
         INFO,
-        ALERT
+        ALERT,
+        ERROR
     }
 }

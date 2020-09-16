@@ -34,6 +34,7 @@
 						</b:InputGroup>
 			</b:ModalBody>
 			<b:ModalFooter>
+                <b:Button type="PRIMARY" text="Reset" b:id="reset-button" ui:field="loginResetButton"/>
 				<b:SubmitButton text="Login" b:id="login-button" />
 			</b:ModalFooter>
 		

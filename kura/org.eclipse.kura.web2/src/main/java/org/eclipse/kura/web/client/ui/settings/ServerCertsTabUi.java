@@ -36,8 +36,10 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -103,21 +105,20 @@ public class ServerCertsTabUi extends Composite implements Tab {
 
     @Override
     public void refresh() {
-        if (isDirty()) {
-            setDirty(false);
-            this.storageAliasInput.setText("");
-            this.certificateInput.setText("");
-            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-        }
+        clear();
     }
 
     @Override
     public void clear() {
-        this.storageAliasInput.setText("");
-        this.certificateInput.setText("");
-        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-        this.groupCertForm.setValidationState(ValidationState.NONE);
+        setButtonsEnabled(false);
+        setDirty(false);
+        this.serverSslCertsForm.reset();
+    }
+
+    @UiHandler(value = { "storageAliasInput", "certificateInput" })
+    public void onFormBlur(BlurEvent e) {
+        setDirty(true);
+        setButtonsEnabled(true);
     }
 
     private void initForm() {
@@ -172,8 +173,6 @@ public class ServerCertsTabUi extends Composite implements Tab {
                                     @Override
                                     public void onSuccess(Integer certsStored) {
                                         clear();
-                                        setDirty(false);
-                                        setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -212,12 +211,7 @@ public class ServerCertsTabUi extends Composite implements Tab {
             yes.addStyleName("fa fa-check");
             yes.addClickHandler(event -> {
                 modal.hide();
-                setButtonsEnabled(false);
-                this.storageAliasInput.setText("");
-                this.certificateInput.setText("");
-                this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-                this.groupCertForm.setValidationState(ValidationState.NONE);
-                setDirty(false);
+                clear();
             });
             group.add(yes);
             footer.add(group);

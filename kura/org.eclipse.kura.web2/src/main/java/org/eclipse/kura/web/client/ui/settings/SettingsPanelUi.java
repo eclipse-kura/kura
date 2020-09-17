@@ -248,6 +248,7 @@ public class SettingsPanelUi extends Composite {
             if (getTab(SettingsPanelUi.this.currentlySelectedTab).isDirty()) {
                 showDirtyModal(newTabListItem, handler);
             } else {
+                getTab(SettingsPanelUi.this.currentlySelectedTab).clear();
                 SettingsPanelUi.this.currentlySelectedTab = newTabListItem;
                 getTab(SettingsPanelUi.this.currentlySelectedTab).setDirty(true);
                 handler.onClick(event);

@@ -151,13 +151,15 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
 
     @Override
     public void clear() {
-        reset();
+        restoreConfiguration(originalConfig);
+        renderForm();
+        setButtonsEnabled(false);
+        setDirty(false);
     }
 
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
-                // TODO ask for confirmation first
                 Modal modal = new Modal();
                 modal.setClosable(false);
                 modal.setFade(true);
@@ -219,8 +221,7 @@ public class CommandUserTabUi extends AbstractServicesUi implements Tab {
                                         public void onSuccess(Void result) {
                                             modal.hide();
                                             logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                            CommandUserTabUi.this.apply.setEnabled(false);
-                                            CommandUserTabUi.this.reset.setEnabled(false);
+                                            setButtonsEnabled(false);
                                             setDirty(false);
                                             CommandUserTabUi.this.originalConfig = CommandUserTabUi.this.configurableComponent;
                                             EntryClassUi.hideWaitModal();

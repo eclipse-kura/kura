@@ -32,12 +32,13 @@ import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.ModalHeader;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.constants.ModalBackdrop;
-import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -104,26 +105,25 @@ public class DeviceCertsTabUi extends Composite implements Tab {
 
     @Override
     public boolean isValid() {
-        return deviceSslCertsForm.validate();
+        return this.deviceSslCertsForm.validate();
     }
 
     @Override
     public void refresh() {
-        if (isDirty()) {
-            setDirty(false);
-            this.storageAliasInput.setText("");
-            this.certificateInput.setText("");
-            this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-        }
+        clear();
     }
 
     @Override
     public void clear() {
-        this.storageAliasInput.setText("");
-        this.certificateInput.setText("");
-        this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-        this.groupCertForm.setValidationState(ValidationState.NONE);
+        setButtonsEnabled(false);
+        setDirty(false);
+        this.deviceSslCertsForm.reset();
+    }
+
+    @UiHandler(value = { "storageAliasInput", "privateKeyInput", "certificateInput" })
+    public void onFormBlur(BlurEvent e) {
+        setDirty(true);
+        setButtonsEnabled(true);
     }
 
     private void initForm() {
@@ -186,8 +186,6 @@ public class DeviceCertsTabUi extends Composite implements Tab {
                                     @Override
                                     public void onSuccess(Integer certsStored) {
                                         clear();
-                                        setDirty(false);
-                                        setButtonsEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -226,14 +224,7 @@ public class DeviceCertsTabUi extends Composite implements Tab {
             yes.addStyleName("fa fa-check");
             yes.addClickHandler(event -> {
                 modal.hide();
-                setButtonsEnabled(false);
-                this.storageAliasInput.setText("");
-                this.privateKeyInput.setText("");
-                this.certificateInput.setText("");
-                this.groupStorageAliasForm.setValidationState(ValidationState.NONE);
-                this.groupCertForm.setValidationState(ValidationState.NONE);
-                this.groupCertForm.setValidationState(ValidationState.NONE);
-                setDirty(false);
+                clear();
             });
             group.add(yes);
             footer.add(group);

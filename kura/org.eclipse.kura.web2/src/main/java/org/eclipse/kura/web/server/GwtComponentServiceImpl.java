@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -722,15 +723,22 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         try {
             final ServiceComponentRuntime scrService = context.getService(scrServiceRef);
 
-            final Set<String> referenceInterfaces = scrService.getComponentDescriptionDTOs().stream().map(component -> {
-                ReferenceDTO[] references = component.references;
-                for (ReferenceDTO reference : references) {
-                    if (targetRef.equals(reference.name)) {
-                        return reference.interfaceName;
-                    }
-                }
-                return null;
-            }).filter(Objects::nonNull).collect(Collectors.toSet());
+            final Set<String> referenceInterfaces = scrService.getComponentDescriptionDTOs().stream()
+                    .filter(componentDescription -> scrService.getComponentConfigurationDTOs(componentDescription)
+                            .stream().anyMatch(componentConfiguration -> {
+                                String kuraServicePid = (String) componentConfiguration.properties
+                                        .get(ConfigurationService.KURA_SERVICE_PID);
+                                return kuraServicePid != null && kuraServicePid.equals(pid);
+                            }))
+                    .map(componentDescription -> {
+                        ReferenceDTO[] references = componentDescription.references;
+                        for (ReferenceDTO reference : references) {
+                            if (targetRef.equals(reference.name)) {
+                                return reference.interfaceName;
+                            }
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).collect(Collectors.toSet());
 
             referenceInterfaces.forEach(reference -> {
                 try {
@@ -740,13 +748,12 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
                         return;
                     }
 
-                    for (ServiceReference<?> serviceReference : serviceReferences) {
-                        String cloudServicePid = (String) serviceReference.getProperty(KURA_SERVICE_PID);
-                        result.add(cloudServicePid);
+                    Arrays.stream(serviceReferences).forEach(serviceReference -> {
+                        result.add((String) serviceReference.getProperty(KURA_SERVICE_PID));
                         ServiceLocator.getInstance().ungetService(serviceReference);
-                    }
+                    });
                 } catch (InvalidSyntaxException e) {
-
+                    // Nothing to do
                 }
             });
 

@@ -199,6 +199,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
         } else {
             tempName = selectedCloudServicePid;
         }
-        return tempName;
+        return tempName.substring(0, 1).toUpperCase() + tempName.substring(1);
     }
 }

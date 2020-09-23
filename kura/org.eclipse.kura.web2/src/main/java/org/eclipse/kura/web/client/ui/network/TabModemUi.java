@@ -75,6 +75,7 @@ public class TabModemUi extends Composite implements NetworkTab {
 
     private final GwtSession session;
     private final TabTcpIpUi tcpTab;
+    private final NetworkTabsUi tabs;
     private boolean dirty;
     private GwtModemInterfaceConfig selectedNetIfConfig;
     private final Map<String, String> defaultDialString = new HashMap<>();
@@ -259,11 +260,12 @@ public class TabModemUi extends Composite implements NetworkTab {
     @UiField
     HelpButton failureHelp;
 
-    public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp) {
+    public TabModemUi(GwtSession currentSession, TabTcpIpUi tcp, NetworkTabsUi tabs) {
         this.pdpInit = false;
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
         this.tcpTab = tcp;
+        this.tabs = tabs;
 
         this.defaultDialString.put(HE910, "atd*99***1#");
         this.defaultDialString.put(LE910, "atd*99***2#");
@@ -278,6 +280,9 @@ public class TabModemUi extends Composite implements NetworkTab {
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
+        if (this.tabs.getButtons() != null) {
+            this.tabs.getButtons().setApplyButtonDirty(flag);
+        }
     }
 
     @Override
@@ -1007,4 +1012,5 @@ public class TabModemUi extends Composite implements NetworkTab {
             }
         });
     }
+
 }

@@ -86,7 +86,7 @@ public class NetworkInterfacesTableUi extends Composite {
                 confirm.setFade(true);
                 confirm.setDataKeyboard(true);
                 confirm.setDataBackdrop(ModalBackdrop.STATIC);
-                
+
                 ModalBody confirmBody = new ModalBody();
                 ModalFooter confirmFooter = new ModalFooter();
 
@@ -137,7 +137,7 @@ public class NetworkInterfacesTableUi extends Composite {
             confirm.setFade(true);
             confirm.setDataKeyboard(true);
             confirm.setDataBackdrop(ModalBackdrop.STATIC);
-            
+
             ModalBody confirmBody = new ModalBody();
             ModalFooter confirmFooter = new ModalFooter();
 
@@ -145,9 +145,10 @@ public class NetworkInterfacesTableUi extends Composite {
             confirmBody.add(new Span(MSGS.deviceConfigDirty()));
             confirmFooter.add(new Button(MSGS.yesButton(), event -> {
                 confirm.hide();
-                // selection = null;
-                NetworkInterfacesTableUi.this.tabs.setDirty(false);
                 loadData();
+                NetworkInterfacesTableUi.this.tabs.setDirty(true);
+                NetworkInterfacesTableUi.this.tabs.refresh();
+                NetworkInterfacesTableUi.this.tabs.adjustInterfaceTabs();
             }));
 
             confirmFooter.add(new Button(MSGS.noButton(), event -> confirm.hide()));

@@ -21,12 +21,6 @@ import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -42,8 +36,9 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    GwtSession session;
-    boolean dirty;
+    private final GwtSession session;
+    private final NetworkTabsUi tabs;
+    private boolean dirty;
     GwtModemInterfaceConfig selectedModemIfConfig;
     boolean formInitialized;
 
@@ -67,9 +62,10 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     @UiField
     HelpButton gpsHelp;
 
-    public TabModemGpsUi(GwtSession currentSession) {
+    public TabModemGpsUi(GwtSession currentSession, NetworkTabsUi tabs) {
         initWidget(uiBinder.createAndBindUi(this));
         this.session = currentSession;
+        this.tabs = tabs;
         initForm();
 
         this.gpsHelp.setHelpText(MSGS.netModemToolTipEnableGps());
@@ -78,6 +74,9 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
+        if (this.tabs.getButtons() != null) {
+            this.tabs.getButtons().setApplyButtonDirty(flag);
+        }
     }
 
     @Override
@@ -130,54 +129,22 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     private void initForm() {
         // ENABLE GPS
         this.labelGps.setText(MSGS.netModemEnableGps());
-        this.radio1.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemGpsUi.this.radio1.isEnabled()) {
-                    TabModemGpsUi.this.helpText.clear();
-                    TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipEnableGps()));
-                }
+        this.radio1.addMouseOverHandler(event -> {
+            if (TabModemGpsUi.this.radio1.isEnabled()) {
+                TabModemGpsUi.this.helpText.clear();
+                TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipEnableGps()));
             }
         });
-        this.radio1.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
+        this.radio1.addMouseOutHandler(event -> resetHelp());
+        this.radio2.addMouseOverHandler(event -> {
+            if (TabModemGpsUi.this.radio2.isEnabled()) {
+                TabModemGpsUi.this.helpText.clear();
+                TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipEnableGps()));
             }
         });
-        this.radio2.addMouseOverHandler(new MouseOverHandler() {
-
-            @Override
-            public void onMouseOver(MouseOverEvent event) {
-                if (TabModemGpsUi.this.radio2.isEnabled()) {
-                    TabModemGpsUi.this.helpText.clear();
-                    TabModemGpsUi.this.helpText.add(new Span(MSGS.netModemToolTipEnableGps()));
-                }
-            }
-        });
-        this.radio2.addMouseOutHandler(new MouseOutHandler() {
-
-            @Override
-            public void onMouseOut(MouseOutEvent event) {
-                resetHelp();
-            }
-        });
-        this.radio1.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                TabModemGpsUi.this.dirty = true;
-            }
-        });
-        this.radio2.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> event) {
-                TabModemGpsUi.this.dirty = true;
-            }
-        });
+        this.radio2.addMouseOutHandler(event -> resetHelp());
+        this.radio1.addValueChangeHandler(event -> setDirty(true));
+        this.radio2.addValueChangeHandler(event -> setDirty(true));
 
         this.helpTitle.setText(MSGS.netHelpTitle());
         this.radio1.setText(MSGS.trueLabel());
@@ -218,10 +185,6 @@ public class TabModemGpsUi extends Composite implements NetworkTab {
     private void reset() {
         this.radio1.setValue(true);
         this.radio2.setValue(false);
-        /*
-         * radio1.setActive(false);
-         * radio2.setActive(true);
-         */
         update();
     }
 }

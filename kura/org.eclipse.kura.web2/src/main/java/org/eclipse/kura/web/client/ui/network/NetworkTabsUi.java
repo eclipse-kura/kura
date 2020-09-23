@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -68,6 +68,7 @@ public class NetworkTabsUi extends Composite {
     TabModemAntennaUi modemAntenna;
 
     GwtNetInterfaceConfig netIfConfig;
+    NetworkButtonBarUi buttons;
 
     GwtSession session;
 
@@ -81,6 +82,14 @@ public class NetworkTabsUi extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         this.session = session;
         initTabs();
+    }
+
+    public void setButtons(NetworkButtonBarUi buttons) {
+        this.buttons = buttons;
+    }
+
+    public NetworkButtonBarUi getButtons() {
+        return this.buttons;
     }
 
     public void setNetInterface(GwtNetInterfaceConfig selection) {
@@ -250,12 +259,8 @@ public class NetworkTabsUi extends Composite {
             }
         }
 
-        if (includeDhcpNat) {
-            // enable dhcp/nat tab
-            this.dhcpNatTab.setEnabled(true);
-        } else {
-            this.dhcpNatTab.setEnabled(false);
-        }
+        // enable dhcp/nat tab
+        this.dhcpNatTab.setEnabled(includeDhcpNat);
 
         if (netIfStatus.equals(IPV4_STATUS_DISABLED_MESSAGE) || netIfStatus.equals(IPV4_STATUS_UNMANAGED_MESSAGE)) {
             // disabled - remove tabs
@@ -263,17 +268,9 @@ public class NetworkTabsUi extends Composite {
         }
 
         if (this.netIfConfig instanceof GwtModemInterfaceConfig) {
-            if (((GwtModemInterfaceConfig) this.netIfConfig).isGpsSupported()
-                    && !netIfStatus.equals(IPV4_STATUS_UNMANAGED_MESSAGE)) {
-                this.modemGpsTab.setEnabled(true);
-            } else {
-                this.modemGpsTab.setEnabled(false);
-            }
-            if (isModemLTE()) {
-                this.modemAntennaTab.setEnabled(true);
-            } else {
-                this.modemAntennaTab.setEnabled(false);
-            }
+            this.modemGpsTab.setEnabled(((GwtModemInterfaceConfig) this.netIfConfig).isGpsSupported()
+                    && !netIfStatus.equals(IPV4_STATUS_UNMANAGED_MESSAGE));
+            this.modemAntennaTab.setEnabled(isModemLTE());
         }
     }
 
@@ -384,7 +381,7 @@ public class NetworkTabsUi extends Composite {
         // Modem
         this.modemTab = new AnchorListItem(MSGS.netModemCellular());
         this.visibleTabs.add(this.modemTab);
-        this.modem = new TabModemUi(this.session, this.tcpIp);
+        this.modem = new TabModemUi(this.session, this.tcpIp, this);
         this.modemTab.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.modemTab);
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.modem;
@@ -396,10 +393,9 @@ public class NetworkTabsUi extends Composite {
         // Modem Gps
         this.modemGpsTab = new AnchorListItem(MSGS.netModemGps());
         this.visibleTabs.add(this.modemGpsTab);
-        this.modemGps = new TabModemGpsUi(this.session);
+        this.modemGps = new TabModemGpsUi(this.session, this);
         this.modemGpsTab.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.modemGpsTab);
-            NetworkTabsUi.this.modemGps.refresh();  // TODO: to check if needed here or can be invoked elsewhere
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.modemGps;
             NetworkTabsUi.this.content.clear();
             NetworkTabsUi.this.content.add(NetworkTabsUi.this.modemGps);
@@ -409,10 +405,9 @@ public class NetworkTabsUi extends Composite {
         // Modem Antenna
         this.modemAntennaTab = new AnchorListItem(MSGS.netModemAntenna());
         this.visibleTabs.add(this.modemAntennaTab);
-        this.modemAntenna = new TabModemAntennaUi(this.session);
+        this.modemAntenna = new TabModemAntennaUi(this.session, this);
         this.modemAntennaTab.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.modemAntennaTab);
-            NetworkTabsUi.this.modemAntenna.refresh();  // TODO: to check if needed here or can be invoked elsewhere
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.modemAntenna;
             NetworkTabsUi.this.content.clear();
             NetworkTabsUi.this.content.add(NetworkTabsUi.this.modemAntenna);
@@ -422,7 +417,7 @@ public class NetworkTabsUi extends Composite {
         // DHCP and NAT
         this.dhcpNatTab = new AnchorListItem(MSGS.netRouter());
         this.visibleTabs.add(this.dhcpNatTab);
-        this.dhcpNat = new TabDhcpNatUi(this.session, this.tcpIp, this.wireless);
+        this.dhcpNat = new TabDhcpNatUi(this.session, this.tcpIp, this.wireless, this);
         this.dhcpNatTab.addClickHandler(event -> {
             setSelected(NetworkTabsUi.this.dhcpNatTab);
             NetworkTabsUi.this.selectedTab = NetworkTabsUi.this.dhcpNat;

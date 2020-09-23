@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2018 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,7 +26,7 @@ import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Alert;
-import org.gwtbootstrap3.client.ui.AnchorButton;
+import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.html.Text;
 
@@ -59,9 +59,9 @@ public class NetworkButtonBarUi extends Composite {
     NetworkTabsUi tabs;
 
     @UiField
-    AnchorButton apply;
+    Button apply;
     @UiField
-    AnchorButton refresh;
+    Button refresh;
 
     @UiField
     Modal incompleteFieldsModal;
@@ -80,14 +80,12 @@ public class NetworkButtonBarUi extends Composite {
     }
 
     private void initButtons() {
-
         initApplyButton();
         initRefreshButton();
+    }
 
-        this.table.interfacesGrid.getSelectionModel()
-                .addSelectionChangeHandler(event -> NetworkButtonBarUi.this.apply.setEnabled(true));
-
-        // TODO ?? how to detect changes
+    public void setApplyButtonDirty(boolean dirty) {
+        this.apply.setEnabled(dirty);
     }
 
     protected void initRefreshButton() {
@@ -95,15 +93,13 @@ public class NetworkButtonBarUi extends Composite {
         this.refresh.setText(MSGS.refresh());
         this.refresh.addClickHandler(event -> {
             NetworkButtonBarUi.this.table.refresh();
-            NetworkButtonBarUi.this.tabs.setDirty(false);
-            NetworkButtonBarUi.this.tabs.refresh();
-            NetworkButtonBarUi.this.tabs.adjustInterfaceTabs();
         });
     }
 
     protected void initApplyButton() {
         // Apply Button
         this.apply.setText(MSGS.apply());
+        this.apply.setEnabled(false);
         this.apply.addClickHandler(event -> {
             if (!NetworkButtonBarUi.this.tabs.visibleTabs.isEmpty() && NetworkButtonBarUi.this.tabs.isValid()) {
                 GwtNetInterfaceConfig prevNetIf = NetworkButtonBarUi.this.table.selectionModel.getSelectedObject();
@@ -120,7 +116,7 @@ public class NetworkButtonBarUi extends Composite {
                         newNetwork = calculateNetwork(updatedNetIf.getIpAddress(), updatedNetIf.getSubnetMask());
                         prevNetwork = calculateNetwork(Window.Location.getHost(), updatedNetIf.getSubnetMask());
                     } catch (Exception e) {
-
+                        // Do nothing
                     }
 
                     scheduleRefresh(prevNetIf, updatedNetIf, newNetwork, prevNetwork);

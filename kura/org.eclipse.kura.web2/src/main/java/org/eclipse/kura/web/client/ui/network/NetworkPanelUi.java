@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -45,6 +45,7 @@ public class NetworkPanelUi extends Composite {
     @UiField
     Container buttonBar;
 
+    private NetworkInterfacesTableUi table;
     private NetworkTabsUi tabs;
 
     private boolean isInitialized;
@@ -60,14 +61,18 @@ public class NetworkPanelUi extends Composite {
             this.tabs = new NetworkTabsUi(this.session);
             this.tabsPanel.add(this.tabs);
 
-            NetworkInterfacesTableUi table = new NetworkInterfacesTableUi(this.session, this.tabs);
+            table = new NetworkInterfacesTableUi(this.session, this.tabs);
             this.interfacesTable.add(table);
 
             NetworkButtonBarUi buttons = new NetworkButtonBarUi(this.session, this.tabs, table);
             this.buttonBar.add(buttons);
 
             this.tabs.setDirty(false);
+            this.tabs.setButtons(buttons);
             this.isInitialized = true;
+        } else {
+            this.tabs.setDirty(true);
+            this.tabs.refresh();
         }
     }
 

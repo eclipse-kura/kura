@@ -89,10 +89,10 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     interface TabTcpIpUiUiBinder extends UiBinder<Widget, TabTcpIpUi> {
     }
 
-    GwtSession session;
+    private final GwtSession session;
     boolean dirty;
-    GwtNetInterfaceConfig selectedNetIfConfig;
-    NetworkTabsUi tabs;
+    private GwtNetInterfaceConfig selectedNetIfConfig;
+    private final NetworkTabsUi tabs;
 
     @UiField
     FormGroup groupIp;
@@ -190,6 +190,9 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
+        if (this.tabs.getButtons() != null) {
+            this.tabs.getButtons().setApplyButtonDirty(flag);
+        }
     }
 
     @Override
@@ -448,13 +451,13 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
 
             String[] aDnsServers = TabTcpIpUi.this.dns.getText().split(DNS_REGEX);
             boolean validDnsList = true;
-            
+
             int dnsContentLength = TabTcpIpUi.this.dns.getText().trim().length();
             int aDnsServersSize = aDnsServers.length;
             if (dnsContentLength != 0 && aDnsServersSize == 0) {
                 validDnsList = false;
             }
-            
+
             for (String dnsEntry : aDnsServers) {
                 if (dnsEntry.trim().length() >= 0 && !dnsEntry.trim().matches(FieldType.IPv4_ADDRESS.getRegex())) {
                     validDnsList = false;
@@ -760,5 +763,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     private void initModal() {
         this.wanModal.setTitle(MSGS.warning());
         this.multipleWanWarnText.setText(MSGS.netStatusWarning());
+        this.wanModal.addHideHandler(evt -> this.setDirty(true));
     }
 }

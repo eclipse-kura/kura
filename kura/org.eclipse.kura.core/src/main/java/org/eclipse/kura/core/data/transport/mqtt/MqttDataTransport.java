@@ -759,6 +759,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             conOpt.setCleanSession((Boolean) properties.get(MQTT_CLEAN_SESSION_PROP_NAME));
 
             conOpt.setMqttVersion((Integer) properties.get(MQTT_DEFAULT_VERSION_PROP_NAME));
+            conOpt.setAutomaticReconnect(false);
 
             synchronized (this.topicContext) {
                 this.topicContext.clear();
@@ -1019,6 +1020,12 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     private void closeMqttClient() {
         try {
+            logger.info("Forcing client disconnect...");
+            mqttClient.disconnectForcibly();
+        } catch (MqttException e) {
+            logger.warn("Cannot force client disconnect", e);
+        }
+        try {
             logger.info("Closing client...");
             // prevent callbacks from a zombie client
             this.mqttClient.setCallback(null);
@@ -1030,7 +1037,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             this.mqttClient = null;
         }
     }
-
+    
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {

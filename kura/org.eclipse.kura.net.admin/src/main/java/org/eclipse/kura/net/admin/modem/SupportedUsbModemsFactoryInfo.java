@@ -38,6 +38,7 @@ import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemFactory;
 import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ModemFactory;
+import org.eclipse.kura.net.admin.modem.telefonica.TelefonicaModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
 
@@ -60,7 +61,8 @@ public class SupportedUsbModemsFactoryInfo {
         SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
         QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class),
         HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class);
-
+	    Telefonica_IK41VE(SupportedUsbModemInfo.Telefonica_IK41VE, TelefonicaModemFactory.class, HspaModemConfigGenerator.class);
+        
         private final SupportedUsbModemInfo usbModemInfo;
         private final Class<? extends CellularModemFactory> factoryClass;
         private final Class<? extends ModemPppConfigGenerator> configClass;

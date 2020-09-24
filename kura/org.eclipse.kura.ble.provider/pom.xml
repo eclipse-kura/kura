@@ -16,11 +16,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>4.1.2-SNAPSHOT</version>
+		<version>4.1.2</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.ble.provider</artifactId>
-	<version>1.0.301-SNAPSHOT</version>
+	<version>1.0.301</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

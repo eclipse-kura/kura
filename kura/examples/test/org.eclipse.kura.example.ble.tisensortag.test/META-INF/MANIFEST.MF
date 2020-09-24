@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.example.ble.tisensortag.test
 Bundle-SymbolicName: org.eclipse.kura.example.ble.tisensortag.test;singleton:=true
-Bundle-Version: 4.1.2.qualifier
+Bundle-Version: 4.1.2
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

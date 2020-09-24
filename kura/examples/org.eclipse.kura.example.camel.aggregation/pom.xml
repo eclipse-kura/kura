@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>examples</artifactId>
-		<version>4.1.2-SNAPSHOT</version>
+		<version>4.1.2</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.example.camel.aggregation</artifactId>

@@ -1,3 +1,92 @@
+Eclipse Kura - 4.1.2   - October 2020
+-------------------------------------------------------------------------
+Description:
+Eclipse Kura 4.1.2 is a service release to address various discovered bugs and functional issues.
+
+
+Changes:
+  * Enhancements
+    * Enhanced the modem support with Ublox LARA R2
+    * Improved and uniformed the Web UI Response Headers
+
+  * Bug fixes and cleanups
+    * Fixed issue with possible stale threads left by Paho during reconnections
+    * Fixed capitalization of cloud services, publishers and subscribers in the Cloud Connections view
+    * Fixed issue with target selection in Web UI
+    * Fixed issue with Assets cloudlet where a read for all channels could lead to an empty value
+    * Fixed issue with Bluetooth flags capitalization
+    * Fixed issue with AT context command for Quectel modem
+
+
+Compatibility:
+  * Eclipse Kura v4.1.2 does not introduce API breakage with previous releases.
+
+
+Target Environments:
+  * Kura is released as pre-compiled binary installers for the following platforms:
+    * Raspberry Pi 2/3 based on Raspbian
+    * Intel Up Squared board running Ubuntu 18  
+    * Intel Up Squared board running Centos 7 (Experimental)
+    * Rock960 ARM_64 running Ubuntu 16 (NN version only)
+  * Kura is also available as a pre-built Docker container 
+
+
+Bug Fixes :
+  * Fixed github issues:
+    * #3071: Stale threads related to Paho
+    * #3068: Review/Update servlet response headers
+    * #3044: Incorrect Asset status report from cloud call 
+    * #3017: Issue while accessing properties in gatt characterstics
+    * #2992: Quectel EG-25 context command is wrong
+    * #2983: UI Target selection is not working in all cases
+
+  * Merged no issue-related Pull Requests:
+    * #3078: Capitalize cloudservice, publisher and subscriber names - Backport
+    * #2991: Backport of #2957 to release-4.1.0  
+    
+    
+Know Issues :
+  * The implementation of the CryptoService performs encryption using a
+    password that is hardcoded and published.
+  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
+  * BLE also tested on the Raspberry Pi B with a Broadcom BCM20702 USB dongle and the TI SensorTag. The kernel version was
+    "Linux raspberrypi 3.18.11-v7+ #781 SMP PREEMPT Tue Apr 21 18:07:59 BST 2015 armv7l GNU/Linux".
+    Note that on the kernel "Linux version 4.1.7-v7+ (dc4@dc4-XPS13-9333) (gcc version 4.8.3 20140303 (prerelease)
+    (crosstool-NG linaro-1.13.1+bzr2650 - Linaro GCC 2014.03) ) #817 SMP PREEMPT Sat Sep 19 15:32:00 BST 2015" has a bug on
+    gatttool and the BLE connection will encounter a failure.
+  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
+    AccessPoint WiFi mode not working for Broadcom chipset.
+  * Hardware watchdog: not implemented on all platforms
+  * Only one WAN interface is currently supported. A warning in displayed
+    in the WEB UI if the user attempts to enable more than one WAN interface
+  * #2414: Rock 960: cannot get client id
+  * #2038: [Kura 3.2.0 QA] Package uninstallation log
+  * #2013: Unsaved changes dialog triggers incorrectly
+  * #1993: Search Domains Are Not Supported
+  * #1932: SystemAdminService.getUptime() returns SystemAdminService#UNKNOWN on MacOS when locale is not English
+  * #1663: Authentication Issue with Deploy V2
+  * #1572: serial modbus has errors on some hardware
+  * #1533: MqttDataTransport client-id illegal character
+  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
+  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
+  * #1195: [Net] Firewall IP Forwarding rules entered in the Web UI lost on reboot
+  * #1161: Incorrectly configuring a component can be irreversable.
+  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
+  * #1016: ConfigurationServiceImpl creates duplicate instances
+  * #797:  Design of ServiceUtil is broken
+  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
+  * #654:  Clean up static initialization around "modem" functionality
+  * #645:  Clean up internal dependencies in Kura
+  * #522:  [Net] Modem monitor should monitor interfaces, not modems
+  * #486:  Build environment broken on Windows
+  * #406:  Replace System.get* with calls to SystemService.getProperties
+  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
+  * #329:  [DEPLOY-V2] Review/refactoring needed
+  * #297:  [Status led] What connection instance controls the status led?
+  * #253:  Check if bundle contexes correctly unget services after invoking getService
+  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+
+
 Eclipse Kura - 4.1.1   - May 2020
 -------------------------------------------------------------------------
 Description:

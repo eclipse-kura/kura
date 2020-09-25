@@ -62,9 +62,7 @@ public class SupportedUsbModemsFactoryInfo {
         QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class),
         HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class);
 	Telefonica_IK41VE(SupportedUsbModemInfo.Telefonica_IK41VE, TelefonicaModemFactory.class, HspaModemConfigGenerator.class);
-	    
-	    
-        
+	
         private final SupportedUsbModemInfo usbModemInfo;
         private final Class<? extends CellularModemFactory> factoryClass;
         private final Class<? extends ModemPppConfigGenerator> configClass;

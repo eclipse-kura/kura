@@ -20,7 +20,6 @@ import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class TelefonicaModemFactory extends AbstractCellularModemFactory<TelefonicaModem> {
-
     
     private static TelefonicaModemFactory factoryInstance = null;
     private ConnectionFactory connectionFactory = null;

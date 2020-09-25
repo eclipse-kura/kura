@@ -12,9 +12,9 @@ package org.eclipse.kura.net.admin.modem.telefonica;
 
 public enum TelefonicaModemAtCommands {
     
-    getICCID("at^iccid?\r\n"),
+    getICCID("at+iccid\r\n"),
     getSimType("at^cardmode\r\n"),
-    disableURC("at^curc=0\r\n");
+    disableURC("at^dsci=0\r\n");
 
     private String command;
 

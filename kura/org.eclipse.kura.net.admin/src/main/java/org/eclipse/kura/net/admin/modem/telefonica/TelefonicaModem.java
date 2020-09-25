@@ -60,8 +60,8 @@ public class TelefonicaModem extends HspaModem {
                     throw new KuraException(KuraErrorCode.TIMED_OUT, TelefonicaModemAtCommands.getICCID.getCommand());
                 }
                 final String response = getResponseString(reply);
-                if (response.startsWith("^ICCID:")) {
-                    this.iccid = response.substring("^ICCID:".length()).trim();
+                if (response.startsWith("ICCID:")) {
+                    this.iccid = response.substring("ICCID:".length()).trim();
                 } else {
                     throw new KuraException(KuraErrorCode.BAD_REQUEST, response);
                 }

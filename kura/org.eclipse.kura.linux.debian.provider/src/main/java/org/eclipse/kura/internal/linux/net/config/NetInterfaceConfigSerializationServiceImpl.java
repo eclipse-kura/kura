@@ -20,7 +20,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -57,10 +56,13 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
     private static final String LOCALHOST = "127.0.0.1";
     private static final String CLASS_A_NETMASK = "255.0.0.0";
 
-    private static List<String> debianInterfaceComandOptions = new ArrayList<>(
-            Arrays.asList("pre-up", "up", "post-up", "pre-down", "down", "post-down"));
-    private static List<String> debianIgnoreInterfaceCommands = new ArrayList<>(
-            Arrays.asList("post-up route del default dev"));
+    private static final String REMOVE_ROUTE_COMMAND = "if ip route show dev ${IFACE} | grep default; then ip route del default dev ${IFACE}; fi";
+
+    private static List<String> debianInterfaceComandOptions = Arrays.asList("pre-up", "up", "post-up", "pre-down",
+            "down", "post-down");
+    private static List<String> debianIgnoreInterfaceCommands = Arrays.asList("post-up route del default dev", //
+            "post-up " + REMOVE_ROUTE_COMMAND //
+    );
 
     @Override
     public Properties read(String interfaceName) throws KuraException {
@@ -309,7 +311,9 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 sb.append(args[i]);
                 sb.append(' ');
             }
-            if (sb.toString().trim().equals("route del default dev " + ifaceName)) {
+            final String trimmed = sb.toString().trim();
+
+            if (trimmed.equals("route del default dev " + ifaceName) || trimmed.equals(REMOVE_ROUTE_COMMAND)) {
                 kuraProps.setProperty(DEFROUTE_PROP_NAME, "no");
             }
         }
@@ -437,9 +441,8 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 continue;
             }
             logger.debug("Writing netconfig {} for {}", netConfig.getClass(), interfaceName);
-            
+
             NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
-            
 
             // ONBOOT
             if (netConfigIP4.isAutoConnect()) {
@@ -456,9 +459,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 sb.append("dhcp\n");
                 if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
                     // delete default route if configured as LAN
-                    sb.append("\tpost-up route del default dev ");
-                    sb.append(interfaceName);
-                    sb.append("\n");
+                    sb.append("\t").append(REMOVE_ROUTE_COMMAND).append("\n");
                 }
             } else {
                 logger.debug("new config is STATIC for {}", interfaceName);
@@ -467,16 +468,14 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 sb.append("\taddress ").append(netConfigIP4.getAddress().getHostAddress()).append("\n");
 
                 // NETMASK
-                sb.append("\tnetmask ").append(netConfigIP4.getSubnetMask().getHostAddress())
-                        .append("\n");
+                sb.append("\tnetmask ").append(netConfigIP4.getSubnetMask().getHostAddress()).append("\n");
 
                 // NETWORK
                 // TODO: Handle Debian NETWORK value
 
                 // Gateway
                 if (netConfigIP4.getGateway() != null) {
-                    sb.append("\tgateway ").append(netConfigIP4.getGateway().getHostAddress())
-                            .append("\n");
+                    sb.append("\tgateway ").append(netConfigIP4.getGateway().getHostAddress()).append("\n");
                 }
             }
 

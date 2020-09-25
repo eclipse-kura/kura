@@ -62,6 +62,8 @@ public enum SupportedUsbModemInfo {
     Telefonica_IK41VE("IK41VE", "1bbb", "00b6", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
             ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "1bbb", "00b6")), "");
+    
+    
 
     private String deviceName;
     private String vendorId;

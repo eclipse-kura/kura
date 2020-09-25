@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class TelefonicaModem extends HspaModem {
 
+    
     private static final Logger logger = LoggerFactory.getLogger(TelefonicaModem.class);
 
     private boolean initialized;

@@ -11,6 +11,7 @@
 package org.eclipse.kura.net.admin.modem.telefonica;
 
 public enum TelefonicaModemAtCommands {
+    
 
     getICCID("at^iccid?\r\n"),
     getSimType("at^cardmode\r\n"),

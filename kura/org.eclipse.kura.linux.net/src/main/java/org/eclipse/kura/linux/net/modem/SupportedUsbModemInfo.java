@@ -58,7 +58,10 @@ public enum SupportedUsbModemInfo {
             ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0125")), ""),
     HUAWEI_MS2372("MS2372", "12d1", "1506", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
-            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "12d1", "1506")), "");
+            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "12d1", "1506")), ""),
+    TELEFONICA_IK41VE("IK41VE", "1bbb", "00b6", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
+            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "1bbb", "00b6")), "");
 
     private String deviceName;
     private String vendorId;

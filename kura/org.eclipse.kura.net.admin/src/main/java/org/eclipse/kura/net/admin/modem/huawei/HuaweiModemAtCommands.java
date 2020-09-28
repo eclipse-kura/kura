@@ -12,9 +12,9 @@ package org.eclipse.kura.net.admin.modem.huawei;
 
 public enum HuaweiModemAtCommands {
 
-    GET_ICCID("at+iccid\r\n"),
+    GET_ICCID("at^iccid?\r\n"),
     GET_SIM_TYPE("at^cardmode\r\n"),
-    DISABLE_URC("at^dsci=0\r\n");
+    DISABLE_URC("at^curc=0\r\n");
 
     private String command;
 

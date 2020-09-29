@@ -8,6 +8,7 @@ Changes:
   * Enhancements
     * Enhanced the modem support with Ublox LARA R2
     * Improved and uniformed the Web UI Response Headers
+    * Added support for the Telefonica modem IK41VE
 
   * Bug fixes and cleanups
     * Fixed issue with possible stale threads left by Paho during reconnections
@@ -41,6 +42,7 @@ Bug Fixes :
     * #2983: UI Target selection is not working in all cases
 
   * Merged no issue-related Pull Requests:
+    * #3086: Backport - Adding support for Telefonica modem IK41VE (#3083)
     * #3078: Capitalize cloudservice, publisher and subscriber names - Backport
     * #2991: Backport of #2957 to release-4.1.0  
     

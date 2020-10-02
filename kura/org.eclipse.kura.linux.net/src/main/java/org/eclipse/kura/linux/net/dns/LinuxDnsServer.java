@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     Eurotech
+ *     3 Port d.o.o.
  *******************************************************************************/
 package org.eclipse.kura.linux.net.dns;
 
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
@@ -261,7 +263,8 @@ public abstract class LinuxDnsServer {
 
         Set<NetworkPair<IP4Address>> allowedNetworks = this.dnsServerConfigIP4.getAllowedNetworks();
         for (NetworkPair<IP4Address> pair : allowedNetworks) {
-            sb.append(pair.getIpAddress().getHostAddress()) //
+            SubnetUtils ip = new SubnetUtils(pair.getIpAddress().getHostAddress() + "/" + pair.getPrefix());
+            sb.append(ip.getInfo().getNetworkAddress()) //
                     .append("/") //
                     .append(pair.getPrefix()) //
                     .append(";");

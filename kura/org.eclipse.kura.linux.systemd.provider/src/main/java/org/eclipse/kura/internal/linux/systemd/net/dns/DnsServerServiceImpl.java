@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and others
+ * Copyright (c) 2018, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
@@ -266,7 +267,8 @@ public class DnsServerServiceImpl implements DnsServerService {
 
         Set<NetworkPair<IP4Address>> allowedNetworks = this.dnsServerConfigIP4.getAllowedNetworks();
         for (NetworkPair<IP4Address> pair : allowedNetworks) {
-            sb.append(pair.getIpAddress().getHostAddress()) //
+            SubnetUtils ip = new SubnetUtils(pair.getIpAddress().getHostAddress() + "/" + pair.getPrefix());
+            sb.append(ip.getInfo().getNetworkAddress()) //
                     .append("/") //
                     .append(pair.getPrefix()) //
                     .append(";");

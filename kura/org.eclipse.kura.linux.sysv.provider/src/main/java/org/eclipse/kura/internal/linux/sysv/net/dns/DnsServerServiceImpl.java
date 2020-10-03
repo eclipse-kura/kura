@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and others
+ * Copyright (c) 2018, 2020 Eurotech and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,11 +17,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.SyncFailedException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.util.LinuxProcessUtil;
@@ -42,6 +42,8 @@ public class DnsServerServiceImpl implements DnsServerService {
     private static final String PERSISTENT_CONFIG_FILE_NAME = "/etc/bind/named.conf";
     private static final String RFC_1912_ZONES_FILENAME = "/etc/named.rfc1912.zones";
     private static final String PROC_STRING = "/usr/sbin/named";
+    private static final String BIND9_COMMAND = "/etc/init.d/bind9";
+    private static final String NAMED_COMMAND = "/etc/init.d/named";
 
     private DnsServerConfigIP4 dnsServerConfigIP4;
 
@@ -156,7 +158,7 @@ public class DnsServerServiceImpl implements DnsServerService {
                 stop();
             }
             // Start named
-            int result = LinuxProcessUtil.start("/etc/init.d/bind9 start");
+            int result = LinuxProcessUtil.start(getCommandName() + " start");
 
             if (result == 0) {
                 logger.debug("DNS server started.");
@@ -173,7 +175,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void stop() throws KuraException {
         try {
-            int result = LinuxProcessUtil.start("/etc/init.d/bind9 stop");
+            int result = LinuxProcessUtil.start(getCommandName() + " stop");
 
             if (result == 0) {
                 logger.debug("DNS server stopped.");
@@ -190,7 +192,7 @@ public class DnsServerServiceImpl implements DnsServerService {
     @Override
     public void restart() throws KuraException {
         try {
-            if (LinuxProcessUtil.start("/etc/init.d/named restart") == 0) {
+            if (LinuxProcessUtil.start(getCommandName() + " restart") == 0) {
                 logger.debug("DNS server restarted.");
             } else {
                 throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "error restarting");
@@ -235,17 +237,17 @@ public class DnsServerServiceImpl implements DnsServerService {
                 PrintWriter pw = new PrintWriter(fos);) {
             // build up the file
             if (isConfigured()) {
-                logger.debug("writing custom named.conf to {} with: {}", DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME,
-                        this.dnsServerConfigIP4);
+                logger.debug("writing custom named.conf to {} with: {}",
+                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
                 pw.print(getForwardingNamedFile());
             } else {
-                logger.debug("writing default named.conf to {} with: {}", DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME,
-                        this.dnsServerConfigIP4);
+                logger.debug("writing default named.conf to {} with: {}",
+                        DnsServerServiceImpl.PERSISTENT_CONFIG_FILE_NAME, this.dnsServerConfigIP4);
                 pw.print(getDefaultNamedFile());
             }
             pw.flush();
             fos.getFD().sync();
-        } 
+        }
     }
 
     private String getForwardingNamedFile() {
@@ -267,7 +269,8 @@ public class DnsServerServiceImpl implements DnsServerService {
 
         Set<NetworkPair<IP4Address>> allowedNetworks = this.dnsServerConfigIP4.getAllowedNetworks();
         for (NetworkPair<IP4Address> pair : allowedNetworks) {
-            sb.append(pair.getIpAddress().getHostAddress()) //
+            SubnetUtils ip = new SubnetUtils(pair.getIpAddress().getHostAddress() + "/" + pair.getPrefix());
+            sb.append(ip.getInfo().getNetworkAddress()) //
                     .append("/") //
                     .append(pair.getPrefix()) //
                     .append(";");
@@ -326,5 +329,9 @@ public class DnsServerServiceImpl implements DnsServerService {
                 .append(DnsServerServiceImpl.RFC_1912_ZONES_FILENAME) //
                 .append("\";\n"); //
         return sb.toString();
+    }
+
+    private String getCommandName() {
+        return new File(NAMED_COMMAND).exists() ? NAMED_COMMAND : BIND9_COMMAND;
     }
 }

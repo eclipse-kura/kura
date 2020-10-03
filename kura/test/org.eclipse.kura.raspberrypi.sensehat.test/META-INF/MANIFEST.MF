@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.raspberrypi.sensehat.test
 Bundle-SymbolicName: org.eclipse.kura.raspberrypi.sensehat.test;singleton:=true
-Bundle-Version: 4.2.0.qualifier
+Bundle-Version: 5.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: org.eclipse.kura.raspberrypi.sensehat;bundle-version="1.0.300"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -12,8 +12,10 @@ package org.eclipse.kura.web.server.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,11 +25,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.provider.AssetConstants;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
+import org.eclipse.kura.core.configuration.metatype.Tocd;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
@@ -101,22 +107,31 @@ public class WiresSnapshotServlet extends HttpServlet {
         }
 
         try {
+
             final List<ComponentConfiguration> result = new ArrayList<>();
 
-            ServiceLocator.applyToServiceOptionally(WireGraphService.class, wireGraphService -> {
-                wireGraphService.get().getWireComponentConfigurations().stream()
-                        .map(WireComponentConfiguration::getConfiguration).map(WiresSnapshotServlet::removeDefinition)
-                        .forEach(result::add);
-                return null;
-            });
+            ServiceLocator.applyToServiceOptionally(CryptoService.class, cryptoService -> {
 
-            final Set<String> driverPids = findReferencedDrivers(result);
+                ServiceLocator.applyToServiceOptionally(WireGraphService.class, wireGraphService -> {
+                    wireGraphService.get().getWireComponentConfigurations().stream()
+                            .map(WireComponentConfiguration::getConfiguration)
+                            .map(config -> removeDefinition(processPasswords(config, cryptoService)))
+                            .forEach(result::add);
+                    return null;
+                });
 
-            ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
-                configurationService.getComponentConfigurations().stream()
-                        .filter(config -> driverPids.contains(config.getPid()))
-                        .map(WiresSnapshotServlet::removeDefinition).forEach(result::add);
-                result.add(removeDefinition(configurationService.getComponentConfiguration(WIRE_GRAPH_SERVICE_PID)));
+                final Set<String> driverPids = findReferencedDrivers(result);
+
+                ServiceLocator.applyToServiceOptionally(ConfigurationService.class, configurationService -> {
+                    configurationService.getComponentConfigurations().stream()
+                            .filter(config -> driverPids.contains(config.getPid()))
+                            .map(config -> removeDefinition(processPasswords(config, cryptoService)))
+                            .forEach(result::add);
+                    result.add(
+                            removeDefinition(configurationService.getComponentConfiguration(WIRE_GRAPH_SERVICE_PID)));
+                    return null;
+                });
+
                 return null;
             });
 
@@ -138,6 +153,47 @@ public class WiresSnapshotServlet extends HttpServlet {
             logger.warn("Failed to download snapshot", e);
             throw new ServletException("Failed to download snapshot");
         }
+    }
+
+    private static ComponentConfiguration processPasswords(final ComponentConfiguration config,
+            final CryptoService cryptoService) {
+
+        final Map<String, Object> newProperties = new HashMap<>(config.getConfigurationProperties());
+
+        for (final Entry<String, Object> entry : newProperties.entrySet()) {
+
+            try {
+                final Object value = entry.getValue();
+
+                if (value instanceof Password) {
+                    entry.setValue(decrypt((Password) value, cryptoService));
+                } else if (value instanceof Password[]) {
+                    entry.setValue(decrypt((Password[]) value, cryptoService));
+                }
+            } catch (final Exception e) {
+                logger.warn("failed to process property", e);
+            }
+
+        }
+
+        return new ComponentConfigurationImpl(config.getPid(), (Tocd) config.getDefinition(), newProperties);
+    }
+
+    private static Password decrypt(final Password password, final CryptoService cryptoService) throws KuraException {
+
+        return new Password(cryptoService.decryptAes(password.getPassword()));
+
+    }
+
+    private static Password[] decrypt(final Password[] passwords, final CryptoService cryptoService)
+            throws KuraException {
+        final Password[] result = new Password[passwords.length];
+
+        for (int i = 0; i < passwords.length; i++) {
+            result[i] = decrypt(passwords[i], cryptoService);
+        }
+
+        return result;
     }
 
     private static ComponentConfiguration removeDefinition(final ComponentConfiguration config) {

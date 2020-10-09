@@ -61,7 +61,10 @@ public enum SupportedUsbModemInfo {
             ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "12d1", "1506")), ""),
     TELEFONICA_IK41VE("IK41VE", "1bbb", "00b6", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
-            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "1bbb", "00b6")), "");
+            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "1bbb", "00b6")), ""),
+    TELEFONICA_IK41UC("IK41UC", "1bbb", "0195", 3, 0, 2, 0, -1, 5000, 15000, Arrays.asList(ModemTechnologyType.LTE,
+            ModemTechnologyType.HSPA, ModemTechnologyType.HSDPA, ModemTechnologyType.UMTS,
+            ModemTechnologyType.GSM_GPRS), Arrays.asList(new UsbModemDriver("option", "1bbb", "0195")), "");
 
     private String deviceName;
     private String vendorId;

@@ -34,6 +34,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     private static final String PROP_CLOCK_PROVIDER = "clock.provider";
     private static final String PROP_CLOCK_SET_HWCLOCK = "clock.set.hwclock";
+    private static final String PROP_RTC_FILENAME = "rtc.filename";
     private static final String PROP_ENABLED = "enabled";
 
     private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);
@@ -135,7 +136,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         if (this.provider != null) {
             return this.provider.getLastSync();
         } else {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, "Clock service not configured yet");
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "Clock service not configured yet");
         }
     }
 
@@ -152,7 +153,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             this.provider = new JavaNtpClockSyncProvider();
         } else if ("ntpd".equals(sprovider)) {
             this.provider = new NtpdClockSyncProvider();
-        }         
+        }
         if (this.provider != null) {
             this.provider.init(this.properties, this);
             this.provider.start();
@@ -206,10 +207,13 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         if (this.properties.containsKey(PROP_CLOCK_SET_HWCLOCK)) {
             updateHwClock = (Boolean) this.properties.get(PROP_CLOCK_SET_HWCLOCK);
         }
+
+        String path = (String) this.properties.getOrDefault(PROP_RTC_FILENAME, "/dev/rtc0");
+
         if (updateHwClock) {
             SafeProcess proc = null;
             try {
-                proc = exec("hwclock --utc --systohc");
+                proc = exec("hwclock --utc --systohc -f " + path);
                 proc.waitFor();
                 final int rc = proc.exitValue();
                 if (rc == 0) {

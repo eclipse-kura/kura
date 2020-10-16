@@ -9,6 +9,7 @@
  * Contributors:
  *     Eurotech
  *     3 PORT d.o.o.
+ *     Sterwen-Technology
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem;
 
@@ -16,16 +17,21 @@ import java.util.List;
 
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
-import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ConfigGenerator;
-import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ModemFactory;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.huawei.HuaweiModemFactory;
+import org.eclipse.kura.net.admin.modem.quectel.bg96.QuectelBG96ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.quectel.bg96.QuectelBG96ModemFactory;
+import org.eclipse.kura.net.admin.modem.quectel.ec25.QuectelEC25ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.quectel.ec25.QuectelEC25ModemFactory;
+import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ConfigGenerator;
+import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ModemFactory;
 import org.eclipse.kura.net.admin.modem.simtech.sim7000.SimTechSim7000ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.simtech.sim7000.SimTechSim7000ModemFactory;
+import org.eclipse.kura.net.admin.modem.telefonica.TelefonicaModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ConfigGenerator;
@@ -38,7 +44,6 @@ import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemFactory;
 import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ModemFactory;
-import org.eclipse.kura.net.admin.modem.telefonica.TelefonicaModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
 
@@ -60,6 +65,8 @@ public class SupportedUsbModemsFactoryInfo {
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
         SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
         QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class),
+        QUECTEL_EC25(SupportedUsbModemInfo.QUECTEL_EC25, QuectelEC25ModemFactory.class, QuectelEC25ConfigGenerator.class),
+        QUECTEL_BG96(SupportedUsbModemInfo.QUECTEL_BG96, QuectelBG96ModemFactory.class, QuectelBG96ConfigGenerator.class),
         HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class),
         TELEFONICA_IK41VE(SupportedUsbModemInfo.TELEFONICA_IK41VE, TelefonicaModemFactory.class, HspaModemConfigGenerator.class);
 
@@ -86,9 +93,9 @@ public class SupportedUsbModemsFactoryInfo {
             return this.configClass;
         }
     }
-    
+
     private SupportedUsbModemsFactoryInfo() {
-        
+
     }
 
     public static UsbModemFactoryInfo getModem(SupportedUsbModemInfo modemInfo) {
@@ -115,6 +122,7 @@ public class SupportedUsbModemsFactoryInfo {
                 break;
             }
         }
+
         return modemFactoryInfo;
     }
 

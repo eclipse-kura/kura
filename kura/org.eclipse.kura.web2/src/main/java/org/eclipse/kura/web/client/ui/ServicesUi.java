@@ -48,6 +48,7 @@ import org.gwtbootstrap3.client.ui.html.Text;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -187,7 +188,16 @@ public class ServicesUi extends AbstractServicesUi {
                 ServicesUi.this.apply.setEnabled(false);
                 ServicesUi.this.reset.setEnabled(false);
                 setDirty(false);
-                ServicesUi.this.entryClass.fetchAvailableServices(null);
+                logger.info(MSGS.info() + ": " + "Refetching services");
+                Timer timer = new Timer() {
+
+                    @Override
+                    public void run() {
+                        ServicesUi.this.entryClass.fetchAvailableServices(null);
+                    }
+                };
+
+                timer.schedule(2000);
             });
             group.add(yes);
             footer.add(group);

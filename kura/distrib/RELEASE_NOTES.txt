@@ -35,6 +35,7 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #3104: XSRF error when resetting a configuration with target filters
     * #3088: Encoding of passwords differ between graph snapshots and full snapshots
     * #3071: Stale threads related to Paho
     * #3068: Review/Update servlet response headers

@@ -95,7 +95,7 @@ public class UnZip {
                 String fileName = validateFileName(expectedFilePath, folder.getPath());
                 File newFile = new File(fileName);
 
-                if (newFile.isDirectory()) {
+                if (expectedFilePath.endsWith("/")) {
                     newFile.mkdirs();
                     ze = zis.getNextEntry();
                     continue;

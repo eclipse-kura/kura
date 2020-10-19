@@ -70,7 +70,6 @@ public class QuectelEG25ConfigGenerator implements ModemPppConfigGenerator {
 
     @Override
     public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
-        // PDP context is fixed to 1 for this modem
         int pdpPid = 1;
         String apn = "";
         String dialString = "";
@@ -78,6 +77,7 @@ public class QuectelEG25ConfigGenerator implements ModemPppConfigGenerator {
         if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
+            pdpPid = getPdpContextNumber(dialString);
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
@@ -148,6 +148,10 @@ public class QuectelEG25ConfigGenerator implements ModemPppConfigGenerator {
         pdpcontext.append('"');
 
         return pdpcontext.toString();
+    }
+    
+    private int getPdpContextNumber(String dialString) {
+        return Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
     }
 
 }

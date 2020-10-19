@@ -71,7 +71,7 @@ public class BluetoothLeUtil {
             logger.error(COMMAND_ERROR, commandPidOf, e);
             Thread.currentThread().interrupt();
         }
-        
+
         try (InputStreamReader is = new InputStreamReader(proc.getInputStream());
                 BufferedReader br = new BufferedReader(is);) {
             String pid = br.readLine();
@@ -221,7 +221,7 @@ public class BluetoothLeUtil {
             int arrDataLength = b[ptr++];
 
             if (arrDataLength > 0) {
-                arr.setLength(b[ptr + 1]);
+                arr.setLength(arrDataLength);
             }
             byte[] arrData = new byte[arrDataLength];
             System.arraycopy(b, ptr, arrData, 0, arrDataLength);

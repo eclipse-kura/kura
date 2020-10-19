@@ -35,6 +35,8 @@ Target Environments:
 
 Bug Fixes :
   * Fixed github issues:
+    * #3113: The iBeacon Scanner sometimes fails to detect beacons
+    * #3109: Quectel modem fixed to PDP context 1
     * #3104: XSRF error when resetting a configuration with target filters
     * #3088: Encoding of passwords differ between graph snapshots and full snapshots
     * #3071: Stale threads related to Paho
@@ -46,6 +48,7 @@ Bug Fixes :
     * #2983: UI Target selection is not working in all cases
 
   * Merged no issue-related Pull Requests:
+    * #3112: Changed directory check during unzip of compressed files - backport
     * #3102: Added RTC device to clock service
     * #3094: Rollback of the CSP feature as causes problems to images in bundles.
     * #3086: Backport - Adding support for Telefonica modem IK41VE (#3083)

@@ -8,10 +8,11 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology
  *******************************************************************************/
-package org.eclipse.kura.net.admin.modem.quectel.eg25;
+package org.eclipse.kura.net.admin.modem.quectel.generic;
 
-public enum QuectelEG25AtCommands {
+public enum QuectelGenericAtCommands {
 
     GET_SIM_STATUS("at+qsimstat?\r\n"),
     GET_SIM_PIN_STATUS("at+cpin?\r\n"),
@@ -22,7 +23,7 @@ public enum QuectelEG25AtCommands {
 
     private String command;
 
-    private QuectelEG25AtCommands(String atCommand) {
+    private QuectelGenericAtCommands(String atCommand) {
         this.command = atCommand;
     }
 

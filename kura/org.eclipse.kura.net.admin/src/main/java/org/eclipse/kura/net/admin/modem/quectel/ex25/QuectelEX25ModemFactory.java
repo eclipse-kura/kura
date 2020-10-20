@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.net.admin.modem.quectel.eg25;
+package org.eclipse.kura.net.admin.modem.quectel.ex25;
 
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
 import org.eclipse.kura.net.admin.util.AbstractCellularModemFactory;
@@ -20,14 +20,14 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.tracker.ServiceTracker;
 
-public class QuectelEG25ModemFactory extends AbstractCellularModemFactory<QuectelEG25> {
+public class QuectelEX25ModemFactory extends AbstractCellularModemFactory<QuectelEX25> {
 
-    private static QuectelEG25ModemFactory factoryInstance = null;
+    private static QuectelEX25ModemFactory factoryInstance = null;
     private ConnectionFactory connectionFactory;
 
     private BundleContext bundleContext = null;
 
-    private QuectelEG25ModemFactory() {
+    private QuectelEX25ModemFactory() {
         this.bundleContext = FrameworkUtil.getBundle(NetworkConfigurationService.class).getBundleContext();
 
         ServiceTracker<ConnectionFactory, ConnectionFactory> serviceTracker = new ServiceTracker<>(this.bundleContext,
@@ -36,9 +36,9 @@ public class QuectelEG25ModemFactory extends AbstractCellularModemFactory<Quecte
         this.connectionFactory = serviceTracker.getService();
     }
 
-    public static QuectelEG25ModemFactory getInstance() {
+    public static QuectelEX25ModemFactory getInstance() {
         if (factoryInstance == null) {
-            factoryInstance = new QuectelEG25ModemFactory();
+            factoryInstance = new QuectelEX25ModemFactory();
         }
         return factoryInstance;
     }
@@ -50,7 +50,7 @@ public class QuectelEG25ModemFactory extends AbstractCellularModemFactory<Quecte
     }
 
     @Override
-    protected QuectelEG25 createCellularModem(ModemDevice modemDevice, String platform) throws Exception {
-        return new QuectelEG25(modemDevice, platform, this.connectionFactory);
+    protected QuectelEX25 createCellularModem(ModemDevice modemDevice, String platform) throws Exception {
+        return new QuectelEX25(modemDevice, platform, this.connectionFactory);
     }
 }

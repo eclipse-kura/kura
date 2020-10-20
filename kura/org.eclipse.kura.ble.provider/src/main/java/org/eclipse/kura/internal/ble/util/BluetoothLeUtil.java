@@ -28,7 +28,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 public class BluetoothLeUtil {
 
     private static final Logger logger = LogManager.getLogger(BluetoothLeUtil.class);
-    
+
     @SuppressWarnings("checkstyle:constantName")
     private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
@@ -191,7 +191,7 @@ public class BluetoothLeUtil {
             int arrDataLength = b[ptr++];
 
             if (arrDataLength > 0) {
-                arr.setLength(b[ptr + 1]);
+                arr.setLength(arrDataLength);
             }
             byte[] arrData = new byte[arrDataLength];
             System.arraycopy(b, ptr, arrData, 0, arrDataLength);

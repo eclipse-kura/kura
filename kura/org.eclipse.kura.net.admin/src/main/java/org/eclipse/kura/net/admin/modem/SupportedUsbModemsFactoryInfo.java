@@ -19,12 +19,9 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.huawei.HuaweiModemFactory;
-import org.eclipse.kura.net.admin.modem.quectel.bg96.QuectelBG96ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.quectel.bg96.QuectelBG96ModemFactory;
-import org.eclipse.kura.net.admin.modem.quectel.ec25.QuectelEC25ConfigGenerator;
-import org.eclipse.kura.net.admin.modem.quectel.ec25.QuectelEC25ModemFactory;
-import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ConfigGenerator;
-import org.eclipse.kura.net.admin.modem.quectel.eg25.QuectelEG25ModemFactory;
+import org.eclipse.kura.net.admin.modem.quectel.ex25.QuectelEX25ModemFactory;
+import org.eclipse.kura.net.admin.modem.quectel.generic.QuectelGenericConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxConfigGenerator;
 import org.eclipse.kura.net.admin.modem.sierra.mc87xx.SierraMc87xxModemFactory;
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerator;
@@ -64,9 +61,8 @@ public class SupportedUsbModemsFactoryInfo {
         UBLOX_LARA_R2(SupportedUsbModemInfo.UBLOX_LARA_R2, UbloxModemFactory.class, UbloxModemConfigGenerator.class),
         Zte_ME3630(SupportedUsbModemInfo.Zte_ME3630, ZteMe3630ModemFactory.class, ZteMe3630ConfigGenerator.class),
         SimTech_SIM7000(SupportedUsbModemInfo.SimTech_SIM7000, SimTechSim7000ModemFactory.class, SimTechSim7000ConfigGenerator.class),
-        QUECTEL_EG25(SupportedUsbModemInfo.QUECTEL_EG25, QuectelEG25ModemFactory.class, QuectelEG25ConfigGenerator.class),
-        QUECTEL_EC25(SupportedUsbModemInfo.QUECTEL_EC25, QuectelEC25ModemFactory.class, QuectelEC25ConfigGenerator.class),
-        QUECTEL_BG96(SupportedUsbModemInfo.QUECTEL_BG96, QuectelBG96ModemFactory.class, QuectelBG96ConfigGenerator.class),
+        QUECTEL_EX25(SupportedUsbModemInfo.QUECTEL_EX25, QuectelEX25ModemFactory.class, QuectelGenericConfigGenerator.class),
+        QUECTEL_BG96(SupportedUsbModemInfo.QUECTEL_BG96, QuectelBG96ModemFactory.class, QuectelGenericConfigGenerator.class),
         HUAWEI_MS2372(SupportedUsbModemInfo.HUAWEI_MS2372, HuaweiModemFactory.class, HspaModemConfigGenerator.class),
         TELEFONICA_IK41VE(SupportedUsbModemInfo.TELEFONICA_IK41VE, TelefonicaModemFactory.class, HspaModemConfigGenerator.class);
 

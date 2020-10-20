@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 3 PORT d.o.o. and/or its affiliates
+ * Copyright (c) 2019 Sterwen Technology and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -7,10 +7,9 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     3 PORT d.o.o.
+ *     Sterwen-Technology
  *******************************************************************************/
-
-package org.eclipse.kura.net.admin.modem.zte.me3630;
+package org.eclipse.kura.net.admin.modem.quectel.bg96;
 
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
@@ -19,10 +18,7 @@ import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 
-public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
-
-    private static final String OK = "OK";
-    private static final String ABORT = "ABORT";
+public class QuectelBG96ConfigGenerator implements ModemPppConfigGenerator {
 
     @Override
     public PppPeer getPppPeer(String deviceId, ModemConfig modemConfig, String logFile, String connectScript,
@@ -72,7 +68,6 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
 
     @Override
     public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
-        // PDP context is fixed to 1 for this modem
         int pdpPid = 1;
         String apn = "";
         String dialString = "";
@@ -83,18 +78,16 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\\rAT", "\"\""));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("1", "TIMEOUT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("ATH0", "\"OK-+++\\c-OK\""));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("45", "TIMEOUT"));
-        modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), OK));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\d\\d\\d\"", OK));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"ERROR\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ath\"", "\"\""));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"AT\"", "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair(formPDPcontext(pdpPid, PdpType.IP, apn), "OK"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\d\\d\\d\"", "OK"));
         modemXchange.addmodemXchangePair(new ModemXchangePair(formDialString(dialString), "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"\\c\"", "CONNECT"));
 
@@ -105,11 +98,11 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
     public ModemXchangeScript getDisconnectScript(ModemConfig modemConfig) {
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", ABORT));
-        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", ABORT));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"BUSY\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"VOICE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO CARRIER\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIALTONE\"", "ABORT"));
+        modemXchange.addmodemXchangePair(new ModemXchangePair("\"NO DIAL TONE\"", "ABORT"));
         modemXchange.addmodemXchangePair(new ModemXchangePair("BREAK", "\"\""));
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
 
@@ -120,7 +113,7 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
      * This method forms dial string
      */
     private String formDialString(String dialString) {
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         buf.append('"');
         if (dialString != null) {
             buf.append(dialString);
@@ -135,7 +128,7 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuilder pdpcontext = new StringBuilder(ZteMe3630AtCommands.pdpContext.getCommand());
+        StringBuffer pdpcontext = new StringBuffer(QuectelBG96AtCommands.PDP_CONTEXT.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');

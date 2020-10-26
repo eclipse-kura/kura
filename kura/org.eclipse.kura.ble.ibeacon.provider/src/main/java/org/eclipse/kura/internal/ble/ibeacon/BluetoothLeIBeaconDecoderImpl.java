@@ -66,16 +66,17 @@ public class BluetoothLeIBeaconDecoderImpl implements BluetoothLeIBeaconDecoder 
             byte dataType = b[ptr + 1];
 
             if (dataType == (byte) 0xFF // Data-Type: Manufacturer-Specific
-                    && Arrays.equals(IBEACON_PREFIX, Arrays.copyOfRange(b, ptr + 2, ptr + 2 + IBEACON_PREFIX.length))
-                    && ptr > 0) {
+                    && Arrays.equals(IBEACON_PREFIX, Arrays.copyOfRange(b, ptr + 2, ptr + 2 + IBEACON_PREFIX.length))) {
 
                 BluetoothLeIBeacon beacon = new BluetoothLeIBeacon();
 
-                beacon.setLeLimited((b[ptr - 1] & 0x01) == 0x01);
-                beacon.setLeGeneral((b[ptr - 1] & 0x02) == 0x02);
-                beacon.setBrEdrSupported((b[ptr - 1] & 0x04) == 0x04);
-                beacon.setLeBrController((b[ptr - 1] & 0x08) == 0x08);
-                beacon.setLeBrHost((b[ptr - 1] & 0x10) == 0x10);
+                if (ptr > 0) {
+                    beacon.setLeLimited((b[ptr - 1] & 0x01) == 0x01);
+                    beacon.setLeGeneral((b[ptr - 1] & 0x02) == 0x02);
+                    beacon.setBrEdrSupported((b[ptr - 1] & 0x04) == 0x04);
+                    beacon.setLeBrController((b[ptr - 1] & 0x08) == 0x08);
+                    beacon.setLeBrHost((b[ptr - 1] & 0x10) == 0x10);
+                }
 
                 int uuidPtr = ptr + 2 + IBEACON_PREFIX.length;
                 int majorPtr = uuidPtr + 16;

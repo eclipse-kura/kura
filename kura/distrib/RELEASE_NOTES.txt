@@ -38,7 +38,7 @@ Bug Fixes :
     * #3123: Priority description is wrong in CloudPublisher
     * #3113: The iBeacon Scanner sometimes fails to detect beacons
     * #3109: Quectel modem fixed to PDP context 1
-    * #3107: 
+    * #3107: The upload of zip archive with folders fails
     * #3104: XSRF error when resetting a configuration with target filters
     * #3088: Encoding of passwords differ between graph snapshots and full snapshots
     * #3071: Stale threads related to Paho

@@ -22,6 +22,7 @@ import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtModemPdpEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -57,6 +58,12 @@ public interface GwtNetworkService extends RemoteService {
     public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException;
 
     public List<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName, String wirelessSsid)
+            throws GwtKuraException;
+
+    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
+            throws GwtKuraException;
+
+    public String getWifiCountryCode(GwtXSRFToken xsrfToken)
             throws GwtKuraException;
 
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)

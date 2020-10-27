@@ -39,6 +39,7 @@ import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.linux.net.util.IScanTool;
+import org.eclipse.kura.linux.net.util.IwListChannelTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
@@ -71,6 +72,7 @@ import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -1226,6 +1228,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
 
         return wifiHotspotInfoList;
+    }
+
+    @Override
+    public List<WifiChannel> getWifiFrequencies(String ifaceName) throws KuraException {
+        List<WifiChannel> frequencies = IwListChannelTool.probeChannels(ifaceName, this.executorService);
+        return frequencies;
+    }
+
+    @Override
+    public String getWifiCountryCode() throws KuraException {
+        return IwListChannelTool.getWifiCountryCode(this.executorService);
     }
 
     @Override

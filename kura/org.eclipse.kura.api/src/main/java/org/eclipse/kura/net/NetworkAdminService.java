@@ -20,6 +20,7 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -213,4 +214,26 @@ public interface NetworkAdminService {
      * @return status - <i>true</i> if credentials are correct, <i>false</i> otherwise
      */
     public boolean verifyWifiCredentials(String ifaceName, WifiConfig wifiConfig, int tout);
+
+    /**
+     * Obtains information for WiFi Frequencies.
+     *
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return list of channels and frequencies.
+     * @throws KuraException
+     * @since 1.2
+     */
+    public List<WifiChannel> getWifiFrequencies(String ifaceName) throws KuraException;
+
+    /**
+     * Obtains information for WiFi Country code.
+     * 
+     * 
+     * @return Name of the Country Code or 00 if unknown.
+     * @throws KuraException
+     * @since 1.2
+     */
+    public String getWifiCountryCode() throws KuraException;
+
 }

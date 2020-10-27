@@ -13,6 +13,7 @@
 package org.eclipse.kura.net.wifi;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.NetConfig;
@@ -67,6 +68,12 @@ public class WifiConfig implements NetConfig {
 
     /** The driver of the wifi interface **/
     private String driver;
+    
+    /** Channels Frequencies **/
+    List<WifiChannel> channelFrequencies;
+    
+    /** Wifi Country Code **/
+    private String wifiCountryCode;
 
     public WifiConfig() {
         super();
@@ -85,6 +92,8 @@ public class WifiConfig implements NetConfig {
         this.hwMode = hwMode;
         this.broadcast = broadcast;
         this.bgscan = bgscan;
+        this.channelFrequencies = null;
+        this.wifiCountryCode = null;
     }
 
     public WifiMode getMode() {
@@ -200,6 +209,14 @@ public class WifiConfig implements NetConfig {
         this.ignoreSSID = ignoreSSID;
     }
 
+    public String getWifiCountryCode() {
+        return wifiCountryCode;
+    }
+
+    public void setWifiCountryCode(String wifiCountryCode) {
+        this.wifiCountryCode = wifiCountryCode;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 29;
@@ -208,6 +225,7 @@ public class WifiConfig implements NetConfig {
         result = prime * result + (this.mode == null ? 0 : this.mode.hashCode());
         result = prime * result + (this.ssid == null ? 0 : this.ssid.hashCode());
         result = prime * result + (this.driver == null ? 0 : this.driver.hashCode());
+        result = prime * result + (this.wifiCountryCode == null ? 0 : this.wifiCountryCode.hashCode());
 
         if (this.channels != null) {
             for (int channel : this.channels) {
@@ -310,6 +328,14 @@ public class WifiConfig implements NetConfig {
         return this.mode != null ? true : false;
     }
 
+    public List<WifiChannel> getChannelFrequencies() {
+        return channelFrequencies;
+    }
+
+    public void setChannelFrequencies(List<WifiChannel> channelFrequencies) {
+        this.channelFrequencies = channelFrequencies;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -356,6 +382,10 @@ public class WifiConfig implements NetConfig {
         sb.append("broadcast: ").append(this.broadcast).append(" :: ");
         if (this.bgscan != null) {
             sb.append("bgscan: ").append(this.bgscan);
+        }
+
+        if (this.channelFrequencies != null) {
+            sb.append("channelFrequencies: ").append(this.channelFrequencies);
         }
 
         sb.append("]");

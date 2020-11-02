@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wire Component test utilities
 Bundle-SymbolicName: org.eclipse.kura.util.wire.test;singleton:=true
-Bundle-Version: 4.1.2
+Bundle-Version: 4.1.3.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-Category: Kura Wires
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

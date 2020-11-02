@@ -96,7 +96,7 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
+        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
         String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
         assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
@@ -118,7 +118,7 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
+        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
         String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
         assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
         assertNotEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
@@ -138,7 +138,7 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
+        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
         assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
@@ -157,7 +157,7 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
+        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
         assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);

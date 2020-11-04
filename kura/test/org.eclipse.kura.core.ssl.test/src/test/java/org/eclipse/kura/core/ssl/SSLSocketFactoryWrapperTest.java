@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -96,9 +99,10 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
         String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        List<String> expectedProtocols= Arrays.asList( new String[]{"TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols) && resultProtocols.containsAll(expectedProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
@@ -118,9 +122,11 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
         String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        
+        List<String> expectedProtocols= Arrays.asList( new String[]{"TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols) && resultProtocols.containsAll(expectedProtocols));
         assertNotEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
@@ -138,8 +144,9 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        List<String> expectedProtocols= Arrays.asList( new String[]{"TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols) && resultProtocols.containsAll(expectedProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
 
@@ -157,8 +164,9 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1.2", "TLSv1.1", "TLSv1" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        List<String> expectedProtocols= Arrays.asList( new String[]{"TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols) && resultProtocols.containsAll(expectedProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Asset Provider Test
 Bundle-SymbolicName: org.eclipse.kura.asset.provider.test
-Bundle-Version: 4.1.2
+Bundle-Version: 4.1.3.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Fragment-Host: org.eclipse.kura.asset.provider;bundle-version="2.0.202"

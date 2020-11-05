@@ -346,7 +346,7 @@ public class FileServlet extends HttpServlet {
                             .append(ze.getName()).toString();
                     String fileName = validateFileName(expectedFilePath, localFolder.getPath());
                     File newFile = new File(fileName);
-                    if (newFile.isDirectory()) {
+                    if (ze.isDirectory()) {
                         newFile.mkdirs();
                         ze = zis.getNextEntry();
                         continue;

@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  *
  * Contributors:
- *     Eurotech
+ *     Sterwen-Technology
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.quectel.bg96;
 

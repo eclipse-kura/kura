@@ -14,6 +14,7 @@ package org.eclipse.kura.http.server.manager;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpServiceOptions {
 
@@ -26,12 +27,19 @@ public class HttpServiceOptions {
 
     static final String DEFAULT_HTTPS_KEYSTORE_PASSWORD = "changeit";
 
+    static final String PROP_REVOCATION_ENABLED = "https.revocation.check.enabled";
+    static final String PROP_REVOCATION_URI = "https.client.revocation.url";
+    static final String PROP_REVOCATION_SOFT_FAIL = "https.client.revocation.soft.fail";
+
     private static final Property<Boolean> HTTP_ENABLED = new Property<>(PROP_HTTP_ENABLED, true);
     private static final Property<Integer> HTTP_PORT = new Property<>(PROP_HTTP_PORT, 80);
     private static final Property<Boolean> HTTPS_ENABLED = new Property<>(PROP_HTTPS_ENABLED, false);
     private static final Property<Integer> HTTPS_PORT = new Property<>(PROP_HTTPS_PORT, 443);
     private static final Property<String> HTTPS_KEYSTORE_PASSWORD = new Property<>(PROP_HTTPS_KEYSTORE_PASSWORD,
             DEFAULT_HTTPS_KEYSTORE_PASSWORD);
+    private static final Property<Boolean> REVOCATION_ENABLED = new Property<>(PROP_REVOCATION_ENABLED, false);
+    private static final Property<String> REVOCATION_URI = new Property<>(PROP_REVOCATION_URI, "[]");
+    private static final Property<Boolean> REVOCATION_SOFT_FAIL = new Property<>(PROP_REVOCATION_SOFT_FAIL, false);
 
     private final boolean httpEnabled;
     private final int httpPort;
@@ -39,6 +47,9 @@ public class HttpServiceOptions {
     private final int httpsPort;
     private final String httpsKeystorePath;
     private final char[] httpsKeystorePasswordArray;
+    private final boolean isRevocationEnabled;
+    private final String certificateRevocationUri;
+    private final boolean isRevocationSoftFailEnabled;
 
     public HttpServiceOptions(final Map<String, Object> properties, final String kuraHome) {
         Property<String> httpsKeystorePathProp = new Property<>(PROP_HTTPS_KEYSTORE_PATH,
@@ -50,6 +61,9 @@ public class HttpServiceOptions {
         this.httpsPort = HTTPS_PORT.get(properties);
         this.httpsKeystorePath = httpsKeystorePathProp.get(properties);
         this.httpsKeystorePasswordArray = HTTPS_KEYSTORE_PASSWORD.get(properties).toCharArray();
+        this.isRevocationEnabled = REVOCATION_ENABLED.get(properties);
+        this.certificateRevocationUri = REVOCATION_URI.get(properties);
+        this.isRevocationSoftFailEnabled = REVOCATION_SOFT_FAIL.get(properties);
     }
 
     public boolean isHttpEnabled() {
@@ -76,16 +90,26 @@ public class HttpServiceOptions {
         return this.httpsKeystorePasswordArray;
     }
 
+    public boolean isRevocationEnabled() {
+        return this.isRevocationEnabled;
+    }
+
+    public String getRevocationURI() {
+        return this.certificateRevocationUri;
+    }
+
+    public boolean isRevocationSoftFailEnabled() {
+        return this.isRevocationSoftFailEnabled;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.httpEnabled ? 1231 : 1237);
-        result = prime * result + this.httpPort;
-        result = prime * result + (this.httpsEnabled ? 1231 : 1237);
         result = prime * result + Arrays.hashCode(this.httpsKeystorePasswordArray);
-        result = prime * result + (this.httpsKeystorePath == null ? 0 : this.httpsKeystorePath.hashCode());
-        result = prime * result + this.httpsPort;
+        result = prime * result + Objects.hash(this.certificateRevocationUri, this.httpEnabled, this.httpPort,
+                this.httpsEnabled, this.httpsKeystorePath, this.httpsPort, this.isRevocationEnabled,
+                this.isRevocationSoftFailEnabled);
         return result;
     }
 
@@ -101,31 +125,13 @@ public class HttpServiceOptions {
             return false;
         }
         HttpServiceOptions other = (HttpServiceOptions) obj;
-        if (this.httpEnabled != other.httpEnabled) {
-            return false;
-        }
-        if (this.httpPort != other.httpPort) {
-            return false;
-        }
-        if (this.httpsEnabled != other.httpsEnabled) {
-            return false;
-        }
-        if (!Arrays.equals(this.httpsKeystorePasswordArray, other.httpsKeystorePasswordArray)) {
-            return false;
-        }
-        if (this.httpsKeystorePath == null) {
-            if (other.httpsKeystorePath != null) {
-                return false;
-            }
-        } else if (!this.httpsKeystorePath.equals(other.httpsKeystorePath)) {
-            return false;
-        }
-
-        boolean result = true;
-        if (this.httpsPort != other.httpsPort) {
-            result = false;
-        }
-        return result;
+        return Objects.equals(this.certificateRevocationUri, other.certificateRevocationUri)
+                && this.httpEnabled == other.httpEnabled && this.httpPort == other.httpPort
+                && this.httpsEnabled == other.httpsEnabled
+                && Arrays.equals(this.httpsKeystorePasswordArray, other.httpsKeystorePasswordArray)
+                && Objects.equals(this.httpsKeystorePath, other.httpsKeystorePath) && this.httpsPort == other.httpsPort
+                && this.isRevocationEnabled == other.isRevocationEnabled
+                && this.isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled;
     }
 
 }

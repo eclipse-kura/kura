@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -47,7 +47,12 @@ final class KeyStoreManagement {
         saveKeyStore(keystore, ENV_JAVA_KEYSTORE, new String(password).toCharArray());
     }
 
-    private static KeyStore loadKeyStore(String location, char[] password)
+    static void saveKeyStore(String keystorePath, KeyStore keystore, char[] password)
+            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        saveKeyStore(keystore, keystorePath, new String(password).toCharArray());
+    }
+
+    static KeyStore loadKeyStore(String location, char[] password)
             throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
         FileInputStream is = null;
         try {

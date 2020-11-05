@@ -177,6 +177,18 @@ public class HttpService implements ConfigurableComponent {
             config.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
         }
 
+        final boolean isRevocationEnabled = this.options.isRevocationEnabled();
+
+        config.put("org.eclipse.kura.revocation.check.enabled", isRevocationEnabled);
+
+        final String ocspURI = this.options.getRevocationURI();
+        final boolean softFail = this.options.isRevocationSoftFailEnabled();
+
+        if (isRevocationEnabled && !ocspURI.trim().isEmpty()) {
+            config.put("org.eclipse.kura.revocation.crl.path", ocspURI);
+            config.put("org.eclipse.kura.revocation.soft.fail", softFail);
+        }
+
         return config;
     }
 

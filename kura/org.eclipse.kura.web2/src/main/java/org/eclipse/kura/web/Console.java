@@ -58,6 +58,7 @@ import org.eclipse.kura.web.server.servlet.LogServlet;
 import org.eclipse.kura.web.server.servlet.RedirectServlet;
 import org.eclipse.kura.web.server.servlet.SendStatusServlet;
 import org.eclipse.kura.web.server.servlet.SkinServlet;
+import org.eclipse.kura.web.server.servlet.SslAuthenticationServlet;
 import org.eclipse.kura.web.server.servlet.WiresBlinkServlet;
 import org.eclipse.kura.web.server.servlet.WiresSnapshotServlet;
 import org.eclipse.kura.web.session.Attributes;
@@ -95,6 +96,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
     private static final String CONSOLE_PATH = ADMIN_ROOT + "/console";
 
     private static final String PASSWORD_AUTH_PATH = LOGIN_MODULE_PATH + "/password";
+    private static final String CERT_AUTH_PATH = LOGIN_MODULE_PATH + "/cert";
 
     private static final Logger logger = LoggerFactory.getLogger(Console.class);
 
@@ -265,6 +267,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.httpService.unregister(AUTH_RESOURCE_PATH);
         this.httpService.unregister(CONSOLE_RESOURCE_PATH);
         this.httpService.unregister(PASSWORD_AUTH_PATH);
+        this.httpService.unregister(CERT_AUTH_PATH);
         this.httpService.unregister(LOGIN_MODULE_PATH + "/banner");
         this.httpService.unregister(DENALI_MODULE_PATH + "/session");
         this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
@@ -333,7 +336,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         return session;
     }
 
-    final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH));
+    final Set<String> authenticationPaths = new HashSet<>(Arrays.asList(AUTH_PATH, PASSWORD_AUTH_PATH, CERT_AUTH_PATH));
 
     private HttpContext initSessionContext(final HttpContext defaultContext) {
 
@@ -387,6 +390,8 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
                 new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, this.sessionContext);
+        this.httpService.registerServlet(CERT_AUTH_PATH, new SslAuthenticationServlet(CONSOLE_PATH), null,
+                sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,

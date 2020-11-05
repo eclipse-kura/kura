@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2016 Eurotech and/or its affiliates
+    Copyright (c) 2011, 2020 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -51,21 +51,21 @@
                 <g:HTMLPanel ui:field="description">
                 </g:HTMLPanel>
 
-                <b:Form ui:field="appCertsForm">
+                <b:Form ui:field="serverSslCertsForm">
                     <b:FieldSet>
-                        <b:FormGroup ui:field="groupStorageAlias">
-                            <b:FormLabel for="formStorageAlias"
+                        <b:FormGroup ui:field="groupStorageAliasForm">
+                            <b:FormLabel for="storageAliasInput"
                                 ui:field="storageAliasLabel" />
                             <b:Input type="TEXT" b:id="storageAlias"
-                                ui:field="formStorageAlias" />
+                                ui:field="storageAliasInput" />
                         </b:FormGroup>
 
-                        <b:FormGroup ui:field="groupFormCert">
-                            <b:FormLabel for="formCert"
+                        <b:FormGroup ui:field="groupCertForm">
+                            <b:FormLabel for="certificateInput"
                                 ui:field="certificateLabel" />
-                            <b:TextArea b:id="formCert"
+                            <b:TextArea b:id="certificateInput"
                                 addStyleNames="{style.center-panel}"
-                                ui:field="formCert" />
+                                ui:field="certificateInput" />
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>

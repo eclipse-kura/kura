@@ -5,7 +5,7 @@
    <service>
        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   
+
    <reference name="CryptoService"
    			  bind="setCryptoService"
    			  unbind="unsetCryptoService"
@@ -16,8 +16,9 @@
               cardinality="1..1"
               policy="static"
               interface="org.eclipse.kura.system.SystemService"/>
-   <reference name="ConfigurationService" 
+   <reference name="ConfigurationService"
               bind="setConfigurationService"
               unbind="unsetConfigurationService"
-              interface="org.eclipse.kura.configuration.ConfigurationService"/> 
+              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
 </scr:component>

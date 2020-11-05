@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -42,7 +42,6 @@ import org.gwtbootstrap3.client.ui.html.Strong;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -101,6 +100,7 @@ public class LoginUi extends Composite implements Context {
         initWidget(uiBinder.createAndBindUi(this));
 
         addAuthenticationHandler(new PasswordAuthenticationHandler());
+        addAuthenticationHandler(new CertificateAuthenticationHandler());
 
         this.authenticationMethod.setSelectedIndex(0);
         this.authenticationMethod
@@ -158,7 +158,7 @@ public class LoginUi extends Composite implements Context {
         this.loginDialog.show();
         initLoginBannerModal();
     }
-    
+
     @UiHandler("loginResetButton")
     public void onFormResetClick(ClickEvent event) {
         loginForm.reset();
@@ -306,6 +306,25 @@ public class LoginUi extends Composite implements Context {
                         }
                     });
 
+        }
+
+    }
+
+    private class CertificateAuthenticationHandler implements AuthenticationHandler {
+
+        @Override
+        public String getName() {
+            return "Certificate";
+        }
+
+        @Override
+        public WidgetFactory getLoginDialogElement() {
+            return null;
+        }
+
+        @Override
+        public void authenticate(String userName, Callback<String, String> callback) {
+            Window.Location.assign("https://" + Window.Location.getHostName() + ":4443/admin/login/cert");
         }
 
     }

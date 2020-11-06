@@ -19,6 +19,7 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModem;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,9 +116,9 @@ public class HuaweiModem extends HspaModem {
             sleep(5000);
             try {
                 UsbModemDriver modemDriver = getModemDriver();
-                modemDriver.disable();
+                modemDriver.disable((UsbModemDevice) getModemDevice());
                 sleep(1000);
-                modemDriver.enable();
+                modemDriver.enable((UsbModemDevice) getModemDevice());
                 logger.info("reset() :: modem reset successful");
                 break;
             } catch (Exception e) {

@@ -21,6 +21,7 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModem;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class UbloxModem extends HspaModem {
     public void reset() throws KuraException {
         UsbModemDriver modemDriver = getModemDriver();
         try {
-            modemDriver.reset();
+            modemDriver.reset((UsbModemDevice) getModemDevice());
         } catch (KuraException e) {
             logger.warn("Modem reset failed");
             throw e;

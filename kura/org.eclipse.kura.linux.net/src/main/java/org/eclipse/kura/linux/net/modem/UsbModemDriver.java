@@ -15,6 +15,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.linux.net.modem.GatewayModemDriver;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -58,7 +59,7 @@ public class UsbModemDriver {
         return this.product;
     }
 
-    public void enable() throws KuraException {
+    public void enable(UsbModemDevice device) throws KuraException {
         BundleContext context = FrameworkUtil.getBundle(UsbModemDriver.class).getBundleContext();
         ServiceReference<GatewayModemDriver>[] serviceReferences = ServiceUtil.getServiceReferences(context,
                 GatewayModemDriver.class, null);
@@ -66,13 +67,13 @@ public class UsbModemDriver {
         // There will be at maximum one per gateway
         for (ServiceReference<GatewayModemDriver> reference : serviceReferences) {
             GatewayModemDriver gatewayModemDriver = context.getService(reference);
-            gatewayModemDriver.enable(this.vendor, this.product);
+            gatewayModemDriver.enable(device);
 
             context.ungetService(reference);
         }
     }
 
-    public void disable() throws KuraException {
+    public void disable(UsbModemDevice device) throws KuraException {
         BundleContext context = FrameworkUtil.getBundle(UsbModemDriver.class).getBundleContext();
         ServiceReference<GatewayModemDriver>[] serviceReferences = ServiceUtil.getServiceReferences(context,
                 GatewayModemDriver.class, null);
@@ -80,13 +81,13 @@ public class UsbModemDriver {
         // There will be at maximum one per gateway
         for (ServiceReference<GatewayModemDriver> reference : serviceReferences) {
             GatewayModemDriver gatewayModemDriver = context.getService(reference);
-            gatewayModemDriver.disable(this.vendor, this.product);
+            gatewayModemDriver.disable(device);
 
             context.ungetService(reference);
         }
     }
 
-    public void reset() throws KuraException {
+    public void reset(UsbModemDevice device) throws KuraException {
         BundleContext context = FrameworkUtil.getBundle(UsbModemDriver.class).getBundleContext();
         ServiceReference<GatewayModemDriver>[] serviceReferences = ServiceUtil.getServiceReferences(context,
                 GatewayModemDriver.class, null);
@@ -94,7 +95,7 @@ public class UsbModemDriver {
         // There will be at maximum one per gateway
         for (ServiceReference<GatewayModemDriver> reference : serviceReferences) {
             GatewayModemDriver gatewayModemDriver = context.getService(reference);
-            gatewayModemDriver.reset(this.vendor, this.product);
+            gatewayModemDriver.reset(device);
 
             context.ungetService(reference);
         }

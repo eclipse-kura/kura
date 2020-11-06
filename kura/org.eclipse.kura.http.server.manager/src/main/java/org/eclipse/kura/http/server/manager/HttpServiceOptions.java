@@ -15,6 +15,9 @@ package org.eclipse.kura.http.server.manager;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+
+import org.eclipse.kura.util.configuration.Property;
 
 public class HttpServiceOptions {
 
@@ -28,7 +31,8 @@ public class HttpServiceOptions {
     static final String DEFAULT_HTTPS_KEYSTORE_PASSWORD = "changeit";
 
     static final String PROP_REVOCATION_ENABLED = "https.revocation.check.enabled";
-    static final String PROP_REVOCATION_URI = "https.client.revocation.url";
+    static final String PROP_OCSP_URI = "https.client.ocsp.url";
+    static final String PROP_CRL_PATH = "https.client.crl.path";
     static final String PROP_REVOCATION_SOFT_FAIL = "https.client.revocation.soft.fail";
 
     private static final Property<Boolean> HTTP_ENABLED = new Property<>(PROP_HTTP_ENABLED, true);
@@ -38,7 +42,8 @@ public class HttpServiceOptions {
     private static final Property<String> HTTPS_KEYSTORE_PASSWORD = new Property<>(PROP_HTTPS_KEYSTORE_PASSWORD,
             DEFAULT_HTTPS_KEYSTORE_PASSWORD);
     private static final Property<Boolean> REVOCATION_ENABLED = new Property<>(PROP_REVOCATION_ENABLED, false);
-    private static final Property<String> REVOCATION_URI = new Property<>(PROP_REVOCATION_URI, "[]");
+    private static final Property<String> OCSP_URI = new Property<>(PROP_OCSP_URI, String.class);
+    private static final Property<String> CRL_PATH = new Property<>(PROP_CRL_PATH, String.class);
     private static final Property<Boolean> REVOCATION_SOFT_FAIL = new Property<>(PROP_REVOCATION_SOFT_FAIL, false);
 
     private final boolean httpEnabled;
@@ -48,7 +53,8 @@ public class HttpServiceOptions {
     private final String httpsKeystorePath;
     private final char[] httpsKeystorePasswordArray;
     private final boolean isRevocationEnabled;
-    private final String certificateRevocationUri;
+    private final Optional<String> ocspUri;
+    private final Optional<String> crlPath;
     private final boolean isRevocationSoftFailEnabled;
 
     public HttpServiceOptions(final Map<String, Object> properties, final String kuraHome) {
@@ -62,7 +68,8 @@ public class HttpServiceOptions {
         this.httpsKeystorePath = httpsKeystorePathProp.get(properties);
         this.httpsKeystorePasswordArray = HTTPS_KEYSTORE_PASSWORD.get(properties).toCharArray();
         this.isRevocationEnabled = REVOCATION_ENABLED.get(properties);
-        this.certificateRevocationUri = REVOCATION_URI.get(properties);
+        this.ocspUri = OCSP_URI.getOptional(properties);
+        this.crlPath = CRL_PATH.getOptional(properties);
         this.isRevocationSoftFailEnabled = REVOCATION_SOFT_FAIL.get(properties);
     }
 
@@ -94,8 +101,12 @@ public class HttpServiceOptions {
         return this.isRevocationEnabled;
     }
 
-    public String getRevocationURI() {
-        return this.certificateRevocationUri;
+    public Optional<String> getOcspURI() {
+        return this.ocspUri;
+    }
+
+    public Optional<String> getCrlPath() {
+        return this.crlPath;
     }
 
     public boolean isRevocationSoftFailEnabled() {
@@ -106,10 +117,9 @@ public class HttpServiceOptions {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + Arrays.hashCode(this.httpsKeystorePasswordArray);
-        result = prime * result + Objects.hash(this.certificateRevocationUri, this.httpEnabled, this.httpPort,
-                this.httpsEnabled, this.httpsKeystorePath, this.httpsPort, this.isRevocationEnabled,
-                this.isRevocationSoftFailEnabled);
+        result = prime * result + Arrays.hashCode(httpsKeystorePasswordArray);
+        result = prime * result + Objects.hash(crlPath, httpEnabled, httpPort, httpsEnabled, httpsKeystorePath,
+                httpsPort, isRevocationEnabled, isRevocationSoftFailEnabled, ocspUri);
         return result;
     }
 
@@ -125,13 +135,13 @@ public class HttpServiceOptions {
             return false;
         }
         HttpServiceOptions other = (HttpServiceOptions) obj;
-        return Objects.equals(this.certificateRevocationUri, other.certificateRevocationUri)
-                && this.httpEnabled == other.httpEnabled && this.httpPort == other.httpPort
-                && this.httpsEnabled == other.httpsEnabled
-                && Arrays.equals(this.httpsKeystorePasswordArray, other.httpsKeystorePasswordArray)
-                && Objects.equals(this.httpsKeystorePath, other.httpsKeystorePath) && this.httpsPort == other.httpsPort
-                && this.isRevocationEnabled == other.isRevocationEnabled
-                && this.isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled;
+        return Objects.equals(crlPath, other.crlPath) && httpEnabled == other.httpEnabled && httpPort == other.httpPort
+                && httpsEnabled == other.httpsEnabled
+                && Arrays.equals(httpsKeystorePasswordArray, other.httpsKeystorePasswordArray)
+                && Objects.equals(httpsKeystorePath, other.httpsKeystorePath) && httpsPort == other.httpsPort
+                && isRevocationEnabled == other.isRevocationEnabled
+                && isRevocationSoftFailEnabled == other.isRevocationSoftFailEnabled
+                && Objects.equals(ocspUri, other.ocspUri);
     }
 
 }

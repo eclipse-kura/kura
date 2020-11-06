@@ -151,8 +151,11 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         sslContextFactory.setValidatePeerCerts(isRevocationEnabled);
 
         if (isRevocationEnabled) {
-            final Object ocspURI = settings.get("org.eclipse.kura.revocation.crl.path");
+            final Object ocspURI = settings.get("org.eclipse.kura.revocation.ocsp.uri");
             sslContextFactory.setOcspResponderURL(ocspURI instanceof String ? (String) ocspURI : null);
+
+            final Object crlPath = settings.get("org.eclipse.kura.revocation.crl.path");
+            sslContextFactory.setCrlPath(crlPath instanceof String ? (String) crlPath : null);
         }
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();

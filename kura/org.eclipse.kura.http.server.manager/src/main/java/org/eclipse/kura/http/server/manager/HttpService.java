@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -181,11 +182,17 @@ public class HttpService implements ConfigurableComponent {
 
         config.put("org.eclipse.kura.revocation.check.enabled", isRevocationEnabled);
 
-        final String ocspURI = this.options.getRevocationURI();
+        final Optional<String> ocspURI = this.options.getOcspURI();
+        final Optional<String> crlPath = this.options.getCrlPath();
         final boolean softFail = this.options.isRevocationSoftFailEnabled();
 
-        if (isRevocationEnabled && !ocspURI.trim().isEmpty()) {
-            config.put("org.eclipse.kura.revocation.crl.path", ocspURI);
+        if (isRevocationEnabled) {
+            if (ocspURI.isPresent() && !ocspURI.get().trim().isEmpty()) {
+                config.put("org.eclipse.kura.revocation.ocsp.uri", ocspURI.get());
+            }
+            if (crlPath.isPresent() && !crlPath.get().trim().isEmpty()) {
+                config.put("org.eclipse.kura.revocation.crl.path", crlPath.get());
+            }
             config.put("org.eclipse.kura.revocation.soft.fail", softFail);
         }
 

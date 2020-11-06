@@ -80,13 +80,21 @@
             default="false"
             description="Specifies whether to check revocation status of client certificats."/>
 
-        <AD id="https.client.revocation.url"
+        <AD id="https.client.ocsp.url"
             name="Https Client Revocation URL"
             type="String"
             cardinality="0"
             required="false"
             default=""
             description="Specifies the URI for OCSP responders."/>
+            
+        <AD id="https.client.crl.path"
+            name="Https Client CRL path"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Specifies the path for the CRL for client certificate revcation check."/>
 
         <AD id="https.client.revocation.soft.fail"
             name="Https Revocation Soft-fail Enabled"
@@ -94,7 +102,7 @@
             cardinality="0"
             required="false"
             default="false"
-            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able to connect to Internet, the certificate of the user that is trying to log will be rejected."/>
+            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected."/>
 
     </OCD>
 

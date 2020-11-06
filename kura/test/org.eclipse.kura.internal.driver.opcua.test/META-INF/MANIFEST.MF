@@ -14,7 +14,8 @@ Bundle-ClassPath: .,
  lib/metrics-core.jar
 Bundle-ActivationPolicy: lazy
 Fragment-Host: org.eclipse.kura.driver.opcua.provider
-Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
+Import-Package: javax.xml.bind,
+ org.eclipse.kura.core.testutil;version="1.0.0",
  org.junit;version="4.12.0",
  org.junit.runners;version="4.12.0",
  org.mockito;version="1.10.19",

@@ -65,6 +65,18 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
             <version>${org.eclipse.milo.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+    		<groupId>jakarta.activation</groupId>
+    		<artifactId>jakarta.activation-api</artifactId>
+    		<version>1.2.2</version>
+    		<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.3</version>
+			<scope>test</scope>
+		</dependency>
 
     </dependencies>
 
@@ -237,6 +249,16 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                            <id>jakarta.xml.bind-api</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>jakarta.activation-api</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                     <dependencies>
 <!--                         <dependency> -->
@@ -322,6 +344,14 @@ Copyright (c) 2017, 2019 Eurotech and/or its affiliates and others
                         <dependency>
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.logging.log4j.api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.activation-api</artifactId>
                         </dependency>
                     </dependencies>
                 </configuration>

@@ -8,13 +8,19 @@
  *******************************************************************************/
 package org.eclipse.kura.core.ssl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -34,9 +40,9 @@ public class SSLSocketFactoryWrapperTest {
         SSLSocketFactory factory = mock(SSLSocketFactory.class);
         SSLSocketFactoryWrapper wrapper = new SSLSocketFactoryWrapper(factory, "ciphers", false);
 
-        assertEquals(factory, (SSLSocketFactory) TestUtil.getFieldValue(wrapper, "sslsf"));
-        assertEquals("ciphers", (String) TestUtil.getFieldValue(wrapper, "ciphers"));
-        assertEquals(false, (Boolean) TestUtil.getFieldValue(wrapper, "hostnameVerification"));
+        assertEquals(factory, TestUtil.getFieldValue(wrapper, "sslsf"));
+        assertEquals("ciphers", TestUtil.getFieldValue(wrapper, "ciphers"));
+        assertEquals(false, TestUtil.getFieldValue(wrapper, "hostnameVerification"));
     }
 
     @Test
@@ -76,14 +82,15 @@ public class SSLSocketFactoryWrapperTest {
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
         String[] expectedProtocols = { "TLSv1.1", "TLSv1.2" };
-        String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
+        String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
         assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
         assertTrue(resultSocket.getTcpNoDelay());
     }
-    
+
     @Test
     public void testCreateSocketByHostAndPort() throws IOException, NoSuchAlgorithmException {
         SSLContext sslCtx = SSLContext.getDefault();
@@ -96,17 +103,20 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
-        String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
+                && resultProtocols.containsAll(expectedProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
         assertTrue(resultSocket.getTcpNoDelay());
-        
+
         resultSocket.close();
     }
-    
+
     @Test
     public void testCreateSocketNoHostnameVerification() throws IOException, NoSuchAlgorithmException {
         SSLContext sslCtx = SSLContext.getDefault();
@@ -118,47 +128,53 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
-        String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
+
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
+                && resultProtocols.containsAll(expectedProtocols));
         assertNotEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
         assertTrue(resultSocket.getTcpNoDelay());
     }
-    
+
     @Test
     public void testCreateSocketNullCyphers() throws IOException, NoSuchAlgorithmException {
         SSLContext sslCtx = SSLContext.getDefault();
         SSLSocketFactory factory = sslCtx.getSocketFactory();
-        SSLSocketFactoryWrapper wrapper = new SSLSocketFactoryWrapper(factory,
-                null, true);
+        SSLSocketFactoryWrapper wrapper = new SSLSocketFactoryWrapper(factory, null, true);
 
         Socket resultSocket = wrapper.createSocket();
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
+                && resultProtocols.containsAll(expectedProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
 
         assertTrue(resultSocket.getTcpNoDelay());
     }
-    
+
     @Test
     public void testCreateSocketEmptyCyphers() throws IOException, NoSuchAlgorithmException {
         SSLContext sslCtx = SSLContext.getDefault();
         SSLSocketFactory factory = sslCtx.getSocketFactory();
-        SSLSocketFactoryWrapper wrapper = new SSLSocketFactoryWrapper(factory,
-                "", true);
+        SSLSocketFactoryWrapper wrapper = new SSLSocketFactoryWrapper(factory, "", true);
 
         Socket resultSocket = wrapper.createSocket();
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        String[] expectedProtocols = { "TLSv1", "TLSv1.1", "TLSv1.2" };
-        assertArrayEquals(expectedProtocols, resultParameters.getProtocols());
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
+        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
+                && resultProtocols.containsAll(expectedProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
 

@@ -34,13 +34,13 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.api.ClientExtensionBundle;
 import org.eclipse.kura.web.server.GwtAssetServiceImpl;
-import org.eclipse.kura.web.server.GwtBannerServiceImpl;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudConnectionServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
 import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
+import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
 import org.eclipse.kura.web.server.GwtPasswordAuthenticationServiceImpl;
@@ -268,7 +268,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.httpService.unregister(CONSOLE_RESOURCE_PATH);
         this.httpService.unregister(PASSWORD_AUTH_PATH);
         this.httpService.unregister(CERT_AUTH_PATH);
-        this.httpService.unregister(LOGIN_MODULE_PATH + "/banner");
+        this.httpService.unregister(LOGIN_MODULE_PATH + "/loginInfo");
         this.httpService.unregister(DENALI_MODULE_PATH + "/session");
         this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/status");
@@ -381,7 +381,7 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         this.httpService.registerResources(ADMIN_ROOT, "www", resourceContext);
         this.httpService.registerResources(AUTH_PATH, "www/auth.html", this.sessionContext);
         this.httpService.registerResources(CONSOLE_PATH, "www/denali.html", this.sessionContext);
-        this.httpService.registerServlet(LOGIN_MODULE_PATH + "/banner", new GwtBannerServiceImpl(), null,
+        this.httpService.registerServlet(LOGIN_MODULE_PATH + "/loginInfo", new GwtLoginInfoServiceImpl(), null,
                 resourceContext);
 
         this.httpService.registerServlet("/", new RedirectServlet("/"::equals, this.appRoot), null, resourceContext);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,5 +17,5 @@ public interface AuthenticationHandler {
 
     public WidgetFactory getLoginDialogElement();
 
-    public void authenticate(final String userName, final Callback<String, String> callback);
+    public void authenticate(final Callback<String, String> callback);
 }

@@ -110,6 +110,15 @@
             default="false"
             description="If set to true, new passwords will be accepted only if containing both uppercase and lowercase alphanumeric characters.">
         </AD>
+        
+        <AD id="enabled.auth.methods"
+           name="Enabled authentication methods"
+           type="String"
+           cardinality="10"
+           required="false"
+           default="Password,Certificate,,,,,,,,"
+           description="The list of the enabled authentication methods">
+         </AD>
 
     </OCD>
 

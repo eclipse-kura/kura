@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,8 @@ public class ConsoleOptions {
     private static final String PROP_PW_REQUIRE_SPECIAL_CHARS = "new.password.require.special.characters";
     private static final String PROP_PW_REQUIRE_BOTH_CASES = "new.password.require.both.cases";
 
+    private static final String PROP_ENABLED_AUTH_METHODS = "enabled.auth.methods";
+
     private static final Property<String> CONSOLE_USERNAME = new Property<>(PROP_CONSOLE_USERNAME, "admin");
     private static final Property<String> CONSOLE_PASSWORD = new Property<>(PROP_CONSOLE_PASSWORD, "admin");
     private static final Property<String> CONSOLE_APP_ROOT = new Property<>(PROP_APP_ROOT, "/admin/console");
@@ -44,6 +46,8 @@ public class ConsoleOptions {
     private static final Property<Boolean> PW_REQUIRE_SPECIAL_CHARS = new Property<>(PROP_PW_REQUIRE_SPECIAL_CHARS,
             false);
     private static final Property<Boolean> PW_REQUIRE_BOTH_CASES = new Property<>(PROP_PW_REQUIRE_BOTH_CASES, false);
+    private static final Property<String[]> ENABLED_AUTH_METHODS = new Property<>(PROP_ENABLED_AUTH_METHODS,
+            new String[] { "Password", "Certificate" });
 
     private final String username;
     private final String userPassword;
@@ -52,6 +56,7 @@ public class ConsoleOptions {
     private final boolean bannerEnabled;
     private final String bannerContent;
     private final GwtConsoleUserOptions userOptions;
+    private final String[] enabledAuthMethods;
 
     public ConsoleOptions(Map<String, Object> properties) {
         this.username = CONSOLE_USERNAME.get(properties);
@@ -61,6 +66,7 @@ public class ConsoleOptions {
         this.bannerEnabled = ACCESS_BANNER_ENABLED.get(properties);
         this.bannerContent = ACCESS_BANNER_CONTENT.get(properties);
         this.userOptions = extractUserOptions(properties);
+        this.enabledAuthMethods = ENABLED_AUTH_METHODS.getOptional(properties).orElse(new String[] {});
     }
 
     public String getUsername() {
@@ -100,6 +106,10 @@ public class ConsoleOptions {
         result.setPasswordRequireBothCases(PW_REQUIRE_BOTH_CASES.get(properties));
 
         return result;
+    }
+
+    public String[] getEnabledAuthMethods() {
+        return enabledAuthMethods;
     }
 
 }

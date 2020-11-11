@@ -8,11 +8,11 @@
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>p2-repo-equinox_3.12.50</artifactId>
+    <artifactId>p2-repo-equinox_3.16.0</artifactId>
     <packaging>pom</packaging>
 
     <properties>
-        <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Oxygen.2-201711300510/equinox-SDK-Oxygen.2.zip</equinox.download.url>
+        <equinox.download.url>https://archive.eclipse.org/equinox/drops/R-4.17-202009021800/equinox-SDK-4.17.zip</equinox.download.url>
     </properties>
 
     <build>
@@ -96,13 +96,25 @@
                                     <artifactId>jetty-util</artifactId>
                                     <version>${org.eclipse.jetty.util.version}</version>
                                 </artifactItem>
-                                <!--
-                                    use wireadming 1.0.800, remove this on full Equinox upgrade
-                                -->
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.io</artifactId>
+                                    <version>${org.eclipse.equinox.io.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.util</artifactId>
+                                    <version>${org.eclipse.equinox.util.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.platform</groupId>
+                                    <artifactId>org.eclipse.equinox.util</artifactId>
+                                    <version>${org.eclipse.equinox.util.version}</version>
+                                </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.platform</groupId>
                                     <artifactId>org.eclipse.equinox.wireadmin</artifactId>
-                                    <version>1.0.800</version>
+                                    <version>${org.eclipse.equinox.wireadmin.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -157,10 +169,6 @@
                                         <exclude name="plugins/org.eclipse.equinox.console.ssh*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.simpleconfig*.jar" />
                                         <exclude name="plugins/org.eclipse.equinox.http.servletbridge*.jar" />
-                                        <!--
-                                            use wireadming 1.0.800, remove this on full Equinox upgrade
-                                        -->
-                                        <exclude name="plugins/org.eclipse.equinox.wireadmin*.jar" />
 
                                         <include name="plugins/org.eclipse.equinox.launcher_*.jar" />
                                         <include name="plugins/org.eclipse.equinox.launcher.source_*.jar" />
@@ -210,9 +218,10 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
-                                <!--
-                                    use wireadming 1.0.800, remove this on full Equinox upgrade
-                                -->
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.io.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.util.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.util_${org.eclipse.equinox.util.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.wireadmin_${org.eclipse.equinox.wireadmin.version}.jar" />
                             </target>
@@ -226,9 +235,9 @@
                         </goals>
                         <configuration>
                             <target>
-                                <delete dir="../../kura/target-definition/equinox_3.12.50/" />
-                                <mkdir dir="../../kura/target-definition/equinox_3.12.50/repository" />
-                                <copy todir="../../kura/target-definition/equinox_3.12.50/repository">
+                                <delete dir="../../kura/target-definition/equinox_3.16.0/" />
+                                <mkdir dir="../../kura/target-definition/equinox_3.16.0/repository" />
+                                <copy todir="../../kura/target-definition/equinox_3.16.0/repository">
                                     <fileset dir="${project.build.directory}/repository" />
                                 </copy>
                             </target>
@@ -253,7 +262,7 @@
             <!-- profile for falling back to non-mirror download links -->
             <id>no-mirror</id>
             <properties>
-                <equinox.download.url>http://archive.eclipse.org/equinox/drops/R-Oxygen.2-201711300510/equinox-SDK-Oxygen.2.zip</equinox.download.url>
+                <equinox.download.url>https://archive.eclipse.org/equinox/drops/R-4.17-202009021800/equinox-SDK-4.17.zip</equinox.download.url>
             </properties>
         </profile>
     </profiles>

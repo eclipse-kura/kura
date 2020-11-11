@@ -98,7 +98,7 @@
 
 
 		<condition property="kura.osgi.repo"
-			value="../../target-platform/p2-repo-equinox_3.12.50/target/source">
+			value="../../target-platform/p2-repo-equinox_3.16.0/target/source">
 			<or>
 				<not>
 					<isset property="kura.osgi" />
@@ -109,7 +109,7 @@
 
 		<copy file="src/main/resources/${build.name}/snapshot_0.xml"
 			tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
-		<copy file="src/main/osgi/equinox_3.12.50/configuration/config.ini"
+		<copy file="src/main/osgi/equinox_3.16.0/configuration/config.ini"
 			tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
 		<!-- Copy jdk.dio files -->

@@ -171,6 +171,9 @@ public class HttpService implements ConfigurableComponent {
         config.put(JettyConstants.HTTP_PORT, this.options.getHttpPort());
         config.put(JettyConstants.HTTP_ENABLED, this.options.isHttpEnabled());
 
+        config.put("kura.https.client.auth.enabled", this.options.isHttpsClientAuthEnabled());
+        config.put("kura.https.client.auth.port", this.options.getHttpsClientAuthPort());
+
         final String customizerClass = System
                 .getProperty(JettyConstants.PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
 

@@ -81,7 +81,11 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServerConnector serverConnector = (ServerConnector) connector;
 
-        addClientAuthSslConnector(serverConnector.getServer(), settings);
+        final boolean isHttpsClientAuthEnabled = (Boolean) settings.get("kura.https.client.auth.enabled");
+
+        if (isHttpsClientAuthEnabled) {
+            addClientAuthSslConnector(serverConnector.getServer(), settings);
+        }
 
         return connector;
     }
@@ -163,7 +167,10 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
-        connector.setPort(4443);
+
+        final int httpsClientAuthPort = (Integer) settings.get("kura.https.client.auth.port");
+
+        connector.setPort(httpsClientAuthPort);
 
         customizeConnector(connector);
 

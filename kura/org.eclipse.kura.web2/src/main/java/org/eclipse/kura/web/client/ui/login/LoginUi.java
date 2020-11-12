@@ -9,13 +9,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.login;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
@@ -106,22 +104,25 @@ public class LoginUi extends Composite implements Context {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
-    private void initLoginBannerModal(final String banner) {
+    private void initLoginBannerModal(final GwtLoginInfo loginInfo) {
         this.accessBannerModal.setTitle(MSGS.warning());
         this.buttonAccessBannerModalOk.setText(MSGS.okButton());
 
-        if (banner != null) {
-            LoginUi.this.accessBannerModalPannelBody.setText(banner);
+        if (loginInfo.getBannerContent() != null) {
+            LoginUi.this.accessBannerModalPannelBody.setText(loginInfo.getBannerContent());
             LoginUi.this.accessBannerModal.show();
         }
     }
 
-    private void initAuthenticationHandlers(final String[] methods) {
+    private void initAuthenticationHandlers(final GwtLoginInfo loginInfo) {
 
-        enabledAuthenticationHandlers = Arrays.stream(methods).collect(Collectors.toSet());
+        enabledAuthenticationHandlers = loginInfo.getEnabledAuthMethods();
 
         addAuthenticationHandler(new PasswordAuthenticationHandler());
-        addAuthenticationHandler(new CertificateAuthenticationHandler());
+
+        if (loginInfo.getCertAuthPort() != null) {
+            addAuthenticationHandler(new CertificateAuthenticationHandler(loginInfo.getCertAuthPort()));
+        }
 
         authenticationMethod.addChangeHandler(e -> setAuthenticationMethod(authenticationMethod.getSelectedItemText()));
 
@@ -161,8 +162,8 @@ public class LoginUi extends Composite implements Context {
 
             @Override
             public void onSuccess(final GwtLoginInfo result) {
-                initLoginBannerModal(result.getBannerContent());
-                initAuthenticationHandlers(result.getEnabledAuthMethods());
+                initLoginBannerModal(result);
+                initAuthenticationHandlers(result);
             }
         });
 
@@ -355,6 +356,12 @@ public class LoginUi extends Composite implements Context {
 
     private class CertificateAuthenticationHandler implements AuthenticationHandler {
 
+        private final int clientAuthPort;
+
+        public CertificateAuthenticationHandler(final int clientAuthPort) {
+            this.clientAuthPort = clientAuthPort;
+        }
+
         @Override
         public String getName() {
             return "Certificate";
@@ -371,7 +378,8 @@ public class LoginUi extends Composite implements Context {
 
         @Override
         public void authenticate(Callback<String, String> callback) {
-            Window.Location.assign("https://" + Window.Location.getHostName() + ":4443/admin/login/cert");
+            Window.Location
+                    .assign("https://" + Window.Location.getHostName() + ":" + clientAuthPort + "/admin/login/cert");
         }
 
     }

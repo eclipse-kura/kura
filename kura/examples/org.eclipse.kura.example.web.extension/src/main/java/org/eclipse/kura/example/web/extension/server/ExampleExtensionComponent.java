@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,7 +10,10 @@
 package org.eclipse.kura.example.web.extension.server;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 import javax.servlet.ServletException;
@@ -40,6 +43,12 @@ public class ExampleExtensionComponent {
         @Override
         public String getEntryPointUrl() {
             return "/exampleext/exampleext.nocache.js";
+        }
+
+        @Override
+        public Set<String> getProvidedAuthenticationMethods() {
+
+            return Collections.unmodifiableSet(new HashSet<>(Arrays.asList("Always Fails", "Always Succeeds")));
         }
     };
 

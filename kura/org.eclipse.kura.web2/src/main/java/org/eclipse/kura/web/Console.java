@@ -16,10 +16,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -28,8 +30,9 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
+import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.api.ClientExtensionBundle;
@@ -80,7 +83,7 @@ import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.Console {
+public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.api.Console {
 
     private static final String EVENT_PATH = "/event";
 
@@ -170,6 +173,14 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
     protected void activate(ComponentContext context, Map<String, Object> properties) {
         setInstance(this);
+        try {
+            setConsoleOptions(properties == null ? ConsoleOptions.defaultConfiguration(cryptoService)
+                    : ConsoleOptions.fromProperties(properties, cryptoService));
+        } catch (final Exception e) {
+            logger.warn("failed to build console options", e);
+            return;
+        }
+
         // Check if web interface is enabled.
         boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
 
@@ -226,7 +237,14 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
     }
 
     private void doUpdate(Map<String, Object> properties) {
-        ConsoleOptions options = new ConsoleOptions(properties);
+        ConsoleOptions options;
+        try {
+            options = properties == null ? ConsoleOptions.defaultConfiguration(cryptoService)
+                    : ConsoleOptions.fromProperties(properties, cryptoService);
+        } catch (final Exception e) {
+            logger.warn("failed to build console options", e);
+            return;
+        }
 
         Console.setConsoleOptions(options);
 
@@ -453,6 +471,31 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
         return this.loginExtensions;
     }
 
+    public Set<String> getBuiltinAuthenticationMethods() {
+        return new HashSet<>(Arrays.asList("Certificate", "Password"));
+    }
+
+    public Set<String> getAuthenticationMethods() {
+        final Set<String> result = new LinkedHashSet<>();
+
+        result.add("Password");
+        result.add("Certificate");
+
+        Stream.concat(loginExtensions.stream(), consoleExtensions.stream()).forEach(b -> {
+            for (final ClientExtensionBundle bundle : loginExtensions) {
+                final Set<String> providedMethods = bundle.getProvidedAuthenticationMethods();
+
+                if (providedMethods == null) {
+                    continue;
+                }
+
+                result.addAll(providedMethods);
+            }
+        });
+
+        return result;
+    }
+
     private static final class ServletRegistration {
 
         private final String path;
@@ -496,24 +539,33 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
 
     }
 
+    private void refreshOptions() {
+        setConsoleOptions(ConsoleOptions
+                .fromProperties(getConsoleOptions().getConfiguration().getConfigurationProperties(), cryptoService));
+    }
+
     @Override
     public void registerConsoleExtensionBundle(ClientExtensionBundle extension) {
         this.consoleExtensions.add(extension);
+        refreshOptions();
     }
 
     @Override
     public void unregisterConsoleExtensionBundle(ClientExtensionBundle extension) {
         this.consoleExtensions.remove(extension);
+        refreshOptions();
     }
 
     @Override
     public void registerLoginExtensionBundle(ClientExtensionBundle extension) {
         this.loginExtensions.add(extension);
+        refreshOptions();
     }
 
     @Override
     public void unregisterLoginExtensionBundle(ClientExtensionBundle extension) {
         this.loginExtensions.remove(extension);
+        refreshOptions();
     }
 
     @Override
@@ -557,6 +609,11 @@ public class Console implements ConfigurableComponent, org.eclipse.kura.web.api.
     @Override
     public Optional<String> getUsername(HttpSession session) {
         return Optional.ofNullable(session.getAttribute(Attributes.AUTORIZED_USER.getValue())).map(o -> (String) o);
+    }
+
+    @Override
+    public ComponentConfiguration getConfiguration() throws KuraException {
+        return consoleOptions.getConfiguration();
     }
 
 }

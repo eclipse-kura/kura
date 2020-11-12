@@ -19,6 +19,7 @@ import static org.eclipse.kura.web.client.util.FilterBuilder.or;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -88,7 +89,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class EntryClassUi extends Composite implements Context {
+public class EntryClassUi extends Composite implements Context, ServicesUi.Listener {
 
     interface EntryClassUIUiBinder extends UiBinder<Widget, EntryClassUi> {
     }
@@ -684,7 +685,7 @@ public class EntryClassUi extends Composite implements Context {
     public void render(GwtConfigComponent item) {
         // Do everything Content Panel related in ServicesUi
         this.contentPanelBody.clear();
-        this.servicesUi = new ServicesUi(item, this);
+        this.servicesUi = new ServicesUi(item, Optional.of(this));
         this.contentPanel.setVisible(true);
 
         if (item != null) {
@@ -945,5 +946,10 @@ public class EntryClassUi extends Composite implements Context {
         this.alertDialog.show(message,
                 severity == AlertSeverity.INFO ? AlertDialog.Severity.INFO : AlertDialog.Severity.ALERT,
                 callback::accept);
+    }
+
+    @Override
+    public void onConfigurationChanged() {
+        fetchAvailableServices(null);
     }
 }

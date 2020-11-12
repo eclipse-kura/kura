@@ -25,6 +25,9 @@ public class HttpServiceOptions {
     static final String PROP_HTTP_PORT = "http.port";
     static final String PROP_HTTPS_ENABLED = "https.enabled";
     static final String PROP_HTTPS_PORT = "https.port";
+    static final String PROP_HTTPS_CLIENT_AUTH_ENABLED = "https.client.auth.enabled";
+    static final String PROP_HTTPS_CLIENT_AUTH_PORT = "https.client.auth.port";
+
     static final String PROP_HTTPS_KEYSTORE_PATH = "https.keystore.path";
     static final String PROP_HTTPS_KEYSTORE_PASSWORD = "https.keystore.password";
 
@@ -39,6 +42,9 @@ public class HttpServiceOptions {
     private static final Property<Integer> HTTP_PORT = new Property<>(PROP_HTTP_PORT, 80);
     private static final Property<Boolean> HTTPS_ENABLED = new Property<>(PROP_HTTPS_ENABLED, false);
     private static final Property<Integer> HTTPS_PORT = new Property<>(PROP_HTTPS_PORT, 443);
+    private static final Property<Boolean> HTTPS_CLIENT_AUTH_ENABLED = new Property<>(PROP_HTTPS_CLIENT_AUTH_ENABLED,
+            false);
+    private static final Property<Integer> HTTPS_CLIENT_AUTH_PORT = new Property<>(PROP_HTTPS_CLIENT_AUTH_PORT, 4443);
     private static final Property<String> HTTPS_KEYSTORE_PASSWORD = new Property<>(PROP_HTTPS_KEYSTORE_PASSWORD,
             DEFAULT_HTTPS_KEYSTORE_PASSWORD);
     private static final Property<Boolean> REVOCATION_ENABLED = new Property<>(PROP_REVOCATION_ENABLED, false);
@@ -50,6 +56,8 @@ public class HttpServiceOptions {
     private final int httpPort;
     private final boolean httpsEnabled;
     private final int httpsPort;
+    private final boolean httpsClientAuthEnabled;
+    private final int httpsClientAuthPort;
     private final String httpsKeystorePath;
     private final char[] httpsKeystorePasswordArray;
     private final boolean isRevocationEnabled;
@@ -65,6 +73,8 @@ public class HttpServiceOptions {
         this.httpPort = HTTP_PORT.get(properties);
         this.httpsEnabled = HTTPS_ENABLED.get(properties);
         this.httpsPort = HTTPS_PORT.get(properties);
+        this.httpsClientAuthEnabled = HTTPS_CLIENT_AUTH_ENABLED.get(properties);
+        this.httpsClientAuthPort = HTTPS_CLIENT_AUTH_PORT.get(properties);
         this.httpsKeystorePath = httpsKeystorePathProp.get(properties);
         this.httpsKeystorePasswordArray = HTTPS_KEYSTORE_PASSWORD.get(properties).toCharArray();
         this.isRevocationEnabled = REVOCATION_ENABLED.get(properties);
@@ -87,6 +97,14 @@ public class HttpServiceOptions {
 
     public int getHttpsPort() {
         return this.httpsPort;
+    }
+
+    public boolean isHttpsClientAuthEnabled() {
+        return this.httpsClientAuthEnabled;
+    }
+
+    public int getHttpsClientAuthPort() {
+        return this.httpsClientAuthPort;
     }
 
     public String getHttpsKeystorePath() {

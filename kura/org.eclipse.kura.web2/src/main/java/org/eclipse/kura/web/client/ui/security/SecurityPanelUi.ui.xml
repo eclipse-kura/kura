@@ -46,6 +46,8 @@
                         ui:field="certificateList" active="true"/>
                     <b:TabListItem dataTarget="#httpServicePanel" text="Http Service"
                         ui:field="httpService" />
+                    <b:TabListItem dataTarget="#consolePanel" text="Web Console"
+                        ui:field="console" />
                     <b:TabListItem dataTarget="#securityPanel" text="Security Policies"
                         ui:field="security" visible="false"/>
                 </b:NavTabs>
@@ -53,8 +55,9 @@
                 	<b:TabPane b:id="certificateListPanel" active="true">
                         <security:CertificateListTabUi ui:field="certificateListPanel"></security:CertificateListTabUi>
                     </b:TabPane>
-                    <b:TabPane b:id="httpServicePanel">
-                        <security:HttpServiceTabUi ui:field="httpServicePanel"></security:HttpServiceTabUi>
+                    <b:TabPane b:id="httpServicePanel" ui:field="httpServicePanel">
+                    </b:TabPane>
+                    <b:TabPane b:id="consolePanel" ui:field="consolePanel">
                     </b:TabPane>
                     <b:TabPane b:id="securityPanel">
                         <security:SecurityTabUi ui:field="securityPanel"></security:SecurityTabUi>

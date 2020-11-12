@@ -11,8 +11,6 @@ package org.eclipse.kura.web.server;
 
 import static java.util.Objects.isNull;
 
-import java.util.Arrays;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -60,7 +58,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
         }
 
         try {
-            if (!Arrays.stream(Console.getConsoleOptions().getEnabledAuthMethods()).anyMatch("Password"::equals)) {
+            if (!Console.getConsoleOptions().isAuthenticationMethodEnabled("Password")) {
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
 

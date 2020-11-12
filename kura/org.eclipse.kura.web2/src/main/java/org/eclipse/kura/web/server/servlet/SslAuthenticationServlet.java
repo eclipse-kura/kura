@@ -13,7 +13,6 @@ package org.eclipse.kura.web.server.servlet;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Optional;
 
 import javax.naming.ldap.LdapName;
@@ -57,7 +56,7 @@ public class SslAuthenticationServlet extends HttpServlet {
         }
 
         try {
-            if (!Arrays.stream(Console.getConsoleOptions().getEnabledAuthMethods()).anyMatch("Certificate"::equals)) {
+            if (!Console.getConsoleOptions().isAuthenticationMethodEnabled("Certificate")) {
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
 

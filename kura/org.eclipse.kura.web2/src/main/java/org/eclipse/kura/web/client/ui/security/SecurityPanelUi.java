@@ -11,14 +11,22 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.service.GwtComponentService;
+import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabContent;
@@ -41,6 +49,8 @@ public class SecurityPanelUi extends Composite {
     private static final Messages MSGS = GWT.create(Messages.class);
 
     private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
+    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     interface SecurityPanelUiUiBinder extends UiBinder<Widget, SecurityPanelUi> {
     }
@@ -50,7 +60,9 @@ public class SecurityPanelUi extends Composite {
     @UiField
     CertificateListTabUi certificateListPanel;
     @UiField
-    HttpServiceTabUi httpServicePanel;
+    TabPane httpServicePanel;
+    @UiField
+    TabPane consolePanel;
     @UiField
     SecurityTabUi securityPanel;
 
@@ -58,6 +70,8 @@ public class SecurityPanelUi extends Composite {
     TabListItem certificateList;
     @UiField
     TabListItem httpService;
+    @UiField
+    TabListItem console;
     @UiField
     TabListItem security;
 
@@ -92,8 +106,20 @@ public class SecurityPanelUi extends Composite {
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
         this.certificateList.addClickHandler(new Tab.RefreshHandler(this.certificateListPanel));
-        this.httpService.addClickHandler(event -> this.httpServicePanel.load());
+        this.httpService.addClickHandler(
+                e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", httpServicePanel));
+        this.console.addClickHandler(e -> this.loadServiceConfig("org.eclipse.kura.web.Console", consolePanel));
         this.security.addClickHandler(new Tab.RefreshHandler(this.securityPanel));
+    }
+
+    public void loadServiceConfig(final String pid, final TabPane panel) {
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(
+                token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, c.callback(result -> {
+                    for (GwtConfigComponent config : result) {
+                        panel.clear();
+                        panel.add(new ServicesUi(config));
+                    }
+                })))));
     }
 
     public void load() {
@@ -107,7 +133,7 @@ public class SecurityPanelUi extends Composite {
     public boolean isDirty() {
         boolean certListDirty = this.certificateListPanel.isDirty();
         boolean securityDirty = this.securityPanel.isDirty();
-        boolean httpServiceDirty = this.httpServicePanel.isDirty();
+        boolean httpServiceDirty = getHttpServiceConfigUi().map(ServicesUi::isDirty).orElse(false);
 
         return certListDirty || httpServiceDirty || securityDirty;
     }
@@ -132,6 +158,10 @@ public class SecurityPanelUi extends Composite {
     public void setDirty(boolean b) {
         this.certificateListPanel.setDirty(b);
         this.securityPanel.setDirty(b);
-        this.httpServicePanel.setDirty(b);
+        getHttpServiceConfigUi().ifPresent(u -> u.setDirty(b));
+    }
+
+    public Optional<ServicesUi> getHttpServiceConfigUi() {
+        return Optional.ofNullable(((ServicesUi) this.httpServicePanel.getWidget(0)));
     }
 }

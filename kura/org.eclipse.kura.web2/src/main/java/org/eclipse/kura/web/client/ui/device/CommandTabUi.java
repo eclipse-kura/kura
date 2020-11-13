@@ -183,6 +183,8 @@ public class CommandTabUi extends Composite {
 
         });
 
+        this.docPath.getElement().setAttribute("accept", ".sh,.zip");
+
     }
 
     public void display(String string) {

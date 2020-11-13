@@ -30,6 +30,7 @@ public interface GatewayModemDriver {
      * @param vendor
      * @param product
      * @throws KuraException
+     * @deprecated use the {@link #enable(ModemDevice modemDevice)} method
      */
     @Deprecated
     public void enable(String vendor, String product) throws KuraException;
@@ -40,6 +41,7 @@ public interface GatewayModemDriver {
      * @param vendor
      * @param product
      * @throws KuraException
+     * @deprecated use the {@link #disable(ModemDevice modemDevice)} method
      */
     @Deprecated
     public void disable(String vendor, String product) throws KuraException;
@@ -50,6 +52,7 @@ public interface GatewayModemDriver {
      * @param vendor
      * @param product
      * @throws KuraException
+     * @deprecated use the {@link #reset(ModemDevice modemDevice)} method
      */
     @Deprecated
     public void reset(String vendor, String product) throws KuraException;
@@ -61,6 +64,7 @@ public interface GatewayModemDriver {
      * @param product
      * @return a {@link BoardPowerState} representing the current status
      * @throws KuraException
+     * @deprecated use the {@link #getState(ModemDevice modemDevice)} method
      */
     @Deprecated
     public BoardPowerState getState(String vendor, String product) throws KuraException;
@@ -70,6 +74,7 @@ public interface GatewayModemDriver {
      *
      * @param modemDevice
      * @throws KuraException
+     * @since 1.6
      */
     public default void enable(ModemDevice modemDevice) throws KuraException {
         if (modemDevice instanceof UsbModemDevice) {
@@ -84,6 +89,7 @@ public interface GatewayModemDriver {
      *
      * @param modemDevice
      * @throws KuraException
+     * @since 1.6
      */
     public default void disable(ModemDevice modemDevice) throws KuraException {
         if (modemDevice instanceof UsbModemDevice) {
@@ -98,6 +104,7 @@ public interface GatewayModemDriver {
      *
      * @param modemDevice
      * @throws KuraException
+     * @since 1.6
      */
     public default void reset(ModemDevice modemDevice) throws KuraException {
         if (modemDevice instanceof UsbModemDevice) {
@@ -113,6 +120,7 @@ public interface GatewayModemDriver {
      * @param modemDevice
      * @return a {@link BoardPowerState} representing the current status
      * @throws KuraException
+     * @since 1.6
      */
     public default BoardPowerState getState(ModemDevice modemDevice) throws KuraException {
         if (modemDevice instanceof UsbModemDevice) {

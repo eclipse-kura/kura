@@ -41,7 +41,7 @@ public class SupportedUsbModemsInfo {
         return null;
     }
 
-    public static boolean isSupported(String vendorId, String productId, String productName) {
-        return SupportedUsbModems.isSupported(vendorId, productId, productName);
+    public static boolean isSupported(UsbDevice usbDevice) {
+        return SupportedUsbModems.isSupported(usbDevice);
     }
 }

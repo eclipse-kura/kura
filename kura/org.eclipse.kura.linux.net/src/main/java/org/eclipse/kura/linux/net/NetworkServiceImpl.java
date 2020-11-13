@@ -229,8 +229,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     private void addUsbDevices(List<? extends AbstractUsbDevice> usbDevices) {
         for (AbstractUsbDevice device : usbDevices) {
-            if (SupportedUsbModemsInfo.isSupported(device.getVendorId(), device.getProductId(),
-                    device.getProductName())) {
+            if (SupportedUsbModemsInfo.isSupported(device)) {
                 String usbPort = device.getUsbPort();
                 UsbModemDevice usbModem;
                 if (this.usbModems.get(usbPort) == null) {

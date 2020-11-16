@@ -68,7 +68,7 @@ final class KeyStoreManagement {
         }
     }
 
-    private static void saveKeyStore(KeyStore keystore, String location, char[] password)
+    static void saveKeyStore(KeyStore keystore, String location, char[] password)
             throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
         FileOutputStream fos = null;
         try {

@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificateInfo;
 import org.eclipse.kura.certificate.CertificateType;
@@ -50,6 +49,8 @@ public class CertificatesManager implements CertificatesService {
     public static final String APP_ID = "org.eclipse.kura.core.certificates.CertificatesManager";
 
     private static final String RESOURCE_CERTIFICATE_DM = "dm";
+    private static final String RESOURCE_CERTIFICATE_LOGIN = "login";
+    private static final String RESOURCE_CERTIFICATE_BUNDLE = "bundle";
 
     private static final String HTTP_SERVICE_PID = "org.eclipse.kura.http.server.manager.HttpService";
     private static final String SSL_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
@@ -104,8 +105,36 @@ public class CertificatesManager implements CertificatesService {
     }
 
     @Override
-    public void storeCertificate(Certificate arg1, String alias) throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    public void storeCertificate(Certificate cert, String alias) throws KuraException {
+        if (alias.startsWith(RESOURCE_CERTIFICATE_DM) || alias.startsWith(RESOURCE_CERTIFICATE_BUNDLE)) {
+            storeTrustRepoCertificate(cert, alias);
+        } else if (alias.startsWith(RESOURCE_CERTIFICATE_LOGIN)) {
+            storeLoginCertificate(cert, alias);
+        }
+    }
+
+    private void storeLoginCertificate(Certificate arg1, String alias) throws KuraException {
+        String path = getLoginKeystorePath();
+
+        try {
+            char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
+            KeyStore ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
+            ks.setCertificateEntry(alias, arg1);
+            KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
+        } catch (Exception e) {
+            throw KuraException.internalError("Error adding the certificate to the keystore");
+        }
+    }
+
+    private void storeTrustRepoCertificate(Certificate arg1, String alias) throws KuraException {
+        try {
+            char[] keystorePassword = this.cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
+            KeyStore ks = KeyStoreManagement.loadKeyStore(DEFAULT_KEYSTORE, keystorePassword);
+            ks.setCertificateEntry(alias, arg1);
+            KeyStoreManagement.saveKeyStore(DEFAULT_KEYSTORE, ks, keystorePassword);
+        } catch (Exception e) {
+            throw KuraException.internalError("Error adding the certificate to the keystore");
+        }
     }
 
     @Override
@@ -255,8 +284,24 @@ public class CertificatesManager implements CertificatesService {
     }
 
     @Override
-    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
+    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] certificateChain)
             throws KuraException {
-        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+        if (alias.startsWith(RESOURCE_CERTIFICATE_LOGIN)) {
+            storeLoginKeyPair(alias, privateKey, certificateChain);
+        }
+    }
+
+    private void storeLoginKeyPair(String alias, PrivateKey privateKey, Certificate[] certificateChain)
+            throws KuraException {
+        String path = getLoginKeystorePath();
+
+        try {
+            char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
+            KeyStore ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
+            ks.setKeyEntry(alias, privateKey, keystorePassword, certificateChain);
+            KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
+        } catch (Exception e) {
+            throw KuraException.internalError("Error adding a key pair to the keystore");
+        }
     }
 }

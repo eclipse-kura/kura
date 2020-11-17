@@ -76,6 +76,11 @@
                         	<level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                        	<id>jaxb-runtime</id>
+                        	<level>4</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                 </configuration>
             </plugin>
@@ -84,8 +89,8 @@
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 
@@ -119,6 +124,26 @@
                                 <type>eclipse-plugin</type>
                                 <id>org.eclipse.equinox.cm</id>
                                 <versionRange>1</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.annotation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.xml.bind-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.activation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>com.sun.xml.bind.jaxb-osgi</id>
+                                <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>
                     </dependency-resolution>

@@ -960,7 +960,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 boolean modemReset = false;
 
                 NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
-                logger.info("BBBBB " + modem.getManufacturer() + " " + netInterfaceStatus);
+                logger.debug("Modem {} configured as {}", modem.getManufacturer(), netInterfaceStatus);
 
                 final String ifaceName = networkService.getModemPppPort(modem.getModemDevice());
 

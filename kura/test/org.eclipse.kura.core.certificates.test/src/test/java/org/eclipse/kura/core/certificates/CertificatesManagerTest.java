@@ -50,7 +50,6 @@ public class CertificatesManagerTest {
         assertNull(certificate);
     }
 
-    @Test(expected = KuraException.class)
     public void testStoreCertificate() throws KuraException {
         // Not implemented, always throws an exception
         CertificatesManager manager = new CertificatesManager();

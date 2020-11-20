@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2020 Eurotech and/or its affiliates
+     All rights reserved. This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License v1.0
+     which accompanies this distribution, and is available at
+     http://www.eclipse.org/legal/epl-v10.html
+    Contributors:
+      Eurotech
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl"
+         name="UserAdmin Store"
+         description="This component provides snapshot-based persistence to the OSGi UserAdmin service.">
+
+        <Icon resource="DenaliService" size="32"/>
+
+		<AD id="roles.config"
+        	name="Roles configuration"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="{}"
+        	description="The currently defined UserAdmin Roles, User and Groups.">
+        </AD>
+
+        <AD id="write.delay.ms"
+        	name="Write Delay (milliseconds)"
+        	type="Long"
+        	cardinality="0"
+        	required="true"
+        	default="5000"
+        	description="This service defers the snapshot updates required for persisting changes made through UserAdmin APIs. The snapshot update is performed Write Delay milliseconds after the last change performed through UserAdmin APIs.">
+        </AD>
+
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
+        <Object ocdref="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl"/>
+    </Designate>
+</MetaData>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" configuration-policy="require" name="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
+   <implementation class="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl"/>
+   <service>
+      <provide interface="org.apache.felix.useradmin.RoleRepositoryStore"/>
+      <provide interface="org.osgi.service.event.EventHandler"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <property name="event.topics" type="String">org/osgi/service/useradmin/UserAdmin/ROLE_CREATED
+org/osgi/service/useradmin/UserAdmin/ROLE_CHANGED
+org/osgi/service/useradmin/UserAdmin/ROLE_REMOVED
+   </property>
+</scr:component>

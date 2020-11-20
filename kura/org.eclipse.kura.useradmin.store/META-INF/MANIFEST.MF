@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Kura Asset Accessor Provider
+Bundle-SymbolicName: org.eclipse.kura.useradmin.store;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v1.0
+Bundle-Category: Asset-Driver Management
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Service-Component: OSGI-INF/*.xml,
+ OSGI-INF/org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: com.eclipsesource.json;version="0.9.5",
+ org.apache.felix.useradmin;version="[1.0,1.1)",
+ org.eclipse.kura;version="1.6.0",
+ org.eclipse.kura.configuration;version="1.2.0",
+ org.eclipse.kura.util.configuration;version="1.0.0",
+ org.osgi.framework;version="1.8.0",
+ org.osgi.service.component;version="1.3.0",
+ org.osgi.service.event;version="1.3.1",
+ org.osgi.service.useradmin;version="[1.1,1.2)",
+ org.slf4j;version="1.7.25"

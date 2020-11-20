@@ -8,8 +8,9 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology
  *******************************************************************************/
-package org.eclipse.kura.net.admin.modem.quectel.eg25;
+package org.eclipse.kura.net.admin.modem.quectel.generic;
 
 import org.eclipse.kura.net.admin.modem.ModemPppConfigGenerator;
 import org.eclipse.kura.net.admin.modem.PppPeer;
@@ -18,7 +19,7 @@ import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 
-public class QuectelEG25ConfigGenerator implements ModemPppConfigGenerator {
+public class QuectelGenericConfigGenerator implements ModemPppConfigGenerator {
 
     private static final String ABORT = "ABORT";
 
@@ -133,7 +134,7 @@ public class QuectelEG25ConfigGenerator implements ModemPppConfigGenerator {
      */
     private String formPDPcontext(int pdpPid, PdpType pdpType, String apn) {
 
-        StringBuilder pdpcontext = new StringBuilder(QuectelEG25AtCommands.PDP_CONTEXT.getCommand());
+        StringBuilder pdpcontext = new StringBuilder(QuectelGenericAtCommands.PDP_CONTEXT.getCommand());
         pdpcontext.append('=');
         pdpcontext.append(pdpPid);
         pdpcontext.append(',');

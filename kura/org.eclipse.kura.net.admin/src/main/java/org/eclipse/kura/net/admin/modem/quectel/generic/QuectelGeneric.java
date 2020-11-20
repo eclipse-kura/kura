@@ -8,8 +8,9 @@
  *
  * Contributors:
  *     Eurotech
+ *     Sterwen-Technology
  *******************************************************************************/
-package org.eclipse.kura.net.admin.modem.quectel.eg25;
+package org.eclipse.kura.net.admin.modem.quectel.generic;
 
 import java.io.IOException;
 import java.util.List;
@@ -30,12 +31,12 @@ import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QuectelEG25 extends HspaModem implements HspaCellularModem {
+public class QuectelGeneric extends HspaModem implements HspaCellularModem {
 
-    private static final Logger logger = LoggerFactory.getLogger(QuectelEG25.class);
+    private static final Logger logger = LoggerFactory.getLogger(QuectelGeneric.class);
     private static final String MODEM_NOT_AVAILABLE = "Modem not available for AT commands: ";
 
-    public QuectelEG25(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
+    public QuectelGeneric(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         super(device, platform, connectionFactory);
 
@@ -62,7 +63,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
                 logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
             }
         } catch (KuraException e) {
-            logger.error("Failed to initialize " + QuectelEG25.class.getName(), e);
+            logger.error("Failed to initialize " + QuectelGeneric.class.getName(), e);
         }
     }
 
@@ -80,7 +81,7 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
 
         synchronized (this.atLock) {
             logger.debug("sendCommand getSimStatus :: {} command to port {}",
-                    QuectelEG25AtCommands.GET_SIM_STATUS.getCommand(), port);
+                    QuectelGenericAtCommands.GET_SIM_STATUS.getCommand(), port);
             byte[] reply = null;
             CommConnection commAtConnection = null;
             try {
@@ -88,11 +89,11 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
                 commAtConnection = openSerialPort(port);
                 if (!isAtReachable(commAtConnection)) {
                     throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            MODEM_NOT_AVAILABLE + QuectelEG25.class.getName());
+                            MODEM_NOT_AVAILABLE + QuectelGeneric.class.getName());
                 }
 
-                reply = commAtConnection.sendCommand(QuectelEG25AtCommands.GET_SIM_STATUS.getCommand().getBytes(), 1000,
-                        100);
+                reply = commAtConnection.sendCommand(QuectelGenericAtCommands.GET_SIM_STATUS.getCommand().getBytes(),
+                        1000, 100);
                 if (reply != null) {
                     String simStatus = getResponseString(reply);
                     String[] simStatusSplit = simStatus.split(",");
@@ -118,16 +119,17 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
         ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
         synchronized (this.atLock) {
             logger.debug("sendCommand getRegistrationStatus :: {}",
-                    QuectelEG25AtCommands.GET_REGISTRATION_STATUS.getCommand());
+                    QuectelGenericAtCommands.GET_REGISTRATION_STATUS.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEG25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                        MODEM_NOT_AVAILABLE + QuectelGeneric.class.getName());
             }
             try {
-                reply = commAtConnection
-                        .sendCommand(QuectelEG25AtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(), 1000, 100);
+                reply = commAtConnection.sendCommand(
+                        QuectelGenericAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -168,16 +170,17 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
         long txCnt = 0;
         synchronized (this.atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
-                    QuectelEG25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
+                    QuectelGenericAtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEG25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                        MODEM_NOT_AVAILABLE + QuectelGeneric.class.getName());
             }
             try {
                 reply = commAtConnection.sendCommand(
-                        QuectelEG25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(), 1000, 100);
+                        QuectelGenericAtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -198,16 +201,17 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
         long rxCnt = 0;
         synchronized (this.atLock) {
             logger.debug("sendCommand getGprsSessionDataVolume :: {}",
-                    QuectelEG25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
+                    QuectelGenericAtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEG25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                        MODEM_NOT_AVAILABLE + QuectelGeneric.class.getName());
             }
             try {
                 reply = commAtConnection.sendCommand(
-                        QuectelEG25AtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(), 1000, 100);
+                        QuectelGenericAtCommands.GET_GPRS_SESSION_DATA_VOLUME.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -228,16 +232,17 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
         String serviceType = null;
         synchronized (this.atLock) {
             logger.debug("sendCommand getMobileStationClass :: {}",
-                    QuectelEG25AtCommands.GET_MOBILESTATION_CLASS.getCommand());
+                    QuectelGenericAtCommands.GET_MOBILESTATION_CLASS.getCommand());
             byte[] reply = null;
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE + QuectelEG25.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                        MODEM_NOT_AVAILABLE + QuectelGeneric.class.getName());
             }
             try {
-                reply = commAtConnection
-                        .sendCommand(QuectelEG25AtCommands.GET_MOBILESTATION_CLASS.getCommand().getBytes(), 1000, 100);
+                reply = commAtConnection.sendCommand(
+                        QuectelGenericAtCommands.GET_MOBILESTATION_CLASS.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -333,4 +338,23 @@ public class QuectelEG25 extends HspaModem implements HspaCellularModem {
         }
     }
 
+    @Override
+    public boolean hasDiversityAntenna() {
+        return false; // To be activated later
+    }
+
+    @Override
+    public boolean isDiversityEnabled() {
+        return false;
+    }
+
+    @Override
+    public void enableDiversity() throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public void disableDiversity() throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
 }

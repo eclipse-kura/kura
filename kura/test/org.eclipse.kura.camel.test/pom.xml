@@ -13,8 +13,7 @@
      Eurotech
      
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -39,7 +38,18 @@
                 <configuration>
                     <providerHint>junit4</providerHint>
                     <failIfNoTests>false</failIfNoTests>
-
+                    <!-- <appArgLine>-consoleLog -console 1450</appArgLine>
+                    <argLine>${tycho.argline}
+                        -DbuildingWithTycho=true
+                        -Dosgi.locking=none
+                        -Dds.showtrace=true
+                        -Djava.io.tmpdir=/tmp
+                        -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
+                        -Dosgi.clean=true
+                        -Dorg.eclipse.kura.mode=emulator
+                        -Dkura.snapshots=${project.basedir}/target/
+                        -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
+                        -Ddpa.configuration=/tmp/kura/dpa.properties -Dosgi.noShutdown=true</argLine> -->
                     <bundleStartLevel>
                         <bundleStartLevel>
                             <id>org.eclipse.equinox.cm</id>
@@ -72,16 +82,27 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                        	<id>org.apache.logging.log4j.slf4j-impl</id>
-                        	<level>4</level>
+                            <id>org.apache.logging.log4j.slf4j-impl</id>
+                            <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                        	<id>jaxb-runtime</id>
-                        	<level>4</level>
+                            <id>com.sun.xml.bind.jaxb-osgi</id>
+                            <level>1</level>
+                            <autoStart>true</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>org.glassfish.hk2.osgi-resource-locator</id>
+                            <level>1</level>
                             <autoStart>true</autoStart>
                         </bundle>
                     </bundleStartLevel>
+                    <dependencies>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>org.eclipse.equinox.console</artifactId>
+                        </dependency>
+                    </dependencies>
                 </configuration>
             </plugin>
 
@@ -143,6 +164,11 @@
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>com.sun.xml.bind.jaxb-osgi</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>org.glassfish.hk2.osgi-resource-locator</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

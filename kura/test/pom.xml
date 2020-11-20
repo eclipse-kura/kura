@@ -230,7 +230,7 @@
     </properties>
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>
-        <!--<module>org.eclipse.kura.camel.test</module>-->
+        <module>org.eclipse.kura.camel.test</module>
         <module>org.eclipse.kura.cloud.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>

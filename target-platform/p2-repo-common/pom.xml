@@ -497,6 +497,11 @@
                                     <artifactId>jaxb-osgi</artifactId>
                                     <version>${jaxb-osgi.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.glassfish.hk2</groupId>
+                                    <artifactId>osgi-resource-locator</artifactId>
+                                    <version>${osgi-resource-locator.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -581,6 +586,7 @@
                                 <move file="target/source/plugins/jakarta.xml.soap-api.jar" tofile="target/source/plugins/jakarta.xml.soap-api_${jakarta.xml.soap-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.annotation-api.jar" tofile="target/source/plugins/jakarta.annotation-api_${jakarta.annotation-api.version}.jar"/>
                                 <move file="target/source/plugins/jaxb-osgi.jar" tofile="target/source/plugins/jaxb-osgi_${jaxb-osgi.version}.jar"/>
+                                <move file="target/source/plugins/osgi-resource-locator.jar" tofile="target/source/plugins/osgi-resource-locator_${osgi-resource-locator.version}.jar"/>
                                 <!-- Artemis Broker -->
                                 <move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>
                                 <move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar"/>

@@ -72,7 +72,6 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
 
     @Override
     public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
-        // PDP context is fixed to 1 for this modem
         int pdpPid = 1;
         String apn = "";
         String dialString = "";
@@ -80,6 +79,7 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
         if (modemConfig != null) {
             apn = modemConfig.getApn();
             dialString = modemConfig.getDialString();
+            pdpPid = getPdpContextNumber(dialString);
         }
 
         ModemXchangeScript modemXchange = new ModemXchangeScript();
@@ -114,6 +114,14 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
         modemXchange.addmodemXchangePair(new ModemXchangePair("\"+++ATH\"", "\"\""));
 
         return modemXchange;
+    }
+
+    private int getPdpContextNumber(String dialString) {
+        int pdpPid = 1;
+        if (!dialString.isEmpty() && dialString.contains("atd*99***")) {
+            pdpPid = Integer.parseInt(dialString.substring("atd*99***".length(), dialString.length() - 1));
+        }
+        return pdpPid;
     }
 
     /*

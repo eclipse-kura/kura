@@ -57,12 +57,7 @@ public class SelfConfiguringComponentProperty<T> {
     public void fillValue(final Map<String, Object> properties) {
         if (value.isPresent() && !properties.containsKey(ad.getId())) {
             if (ad.getType() == Scalar.PASSWORD) {
-                try {
-                    properties.put(this.ad.getId(),
-                            new Password(unwrapCryptoService().decryptAes(value.get().toString().toCharArray())));
-                } catch (KuraException e) {
-                    throw new IllegalStateException("failed to decrypt password", e);
-                }
+                properties.put(this.ad.getId(), new Password(value.get().toString().toCharArray()));
             } else {
                 properties.put(this.ad.getId(), value.get());
             }
@@ -78,12 +73,7 @@ public class SelfConfiguringComponentProperty<T> {
         } else if (this.ad.getType() == Scalar.PASSWORD && providedValue instanceof Password) {
             final Password providedPassword = (Password) providedValue;
 
-            try {
-                this.value = Optional
-                        .of((T) new String(unwrapCryptoService().encryptAes((providedPassword.getPassword()))));
-            } catch (KuraException e) {
-                throw new IllegalStateException("failed to encrypt password", e);
-            }
+            this.value = Optional.of((T) new String((providedPassword.getPassword())));
         }
     }
 

@@ -1,15 +1,20 @@
 [Unit]
 Description=Kura
-Wants=networking.service
-After=networking.service
+Wants=networking.service dbus.service
+After=networking.service dbus.service
 
 [Service]
+User=kurad
+Group=kurad
 Type=forking
 ExecStart=/bin/sh INSTALL_DIR/kura/bin/start_kura_background.sh
 ExecStopPost=/bin/sh -c 'if [ -f /tmp/watchdog ]; then echo w > `cat /tmp/watchdog`; fi'
 PIDFile=/var/run/kura.pid
 Restart=on-failure
 RestartSec=5
+SuccessExitStatus=143
+KillMode=process
+AmbientCapabilities=cap_net_admin cap_net_raw cap_dac_override cap_dac_read_search cap_net_bind_service cap_sys_boot cap_kill cap_sys_module cap_sys_time cap_sys_tty_config cap_syslog
 
 [Install]
 WantedBy=multi-user.target

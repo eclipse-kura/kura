@@ -75,6 +75,7 @@ function preRemove {
     rm -rf /tmp/kura
 
     if [ -d "${INSTALL_DIR}/kura" ] ; then
+      ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -u
       PARENT=`readlink -f ${INSTALL_DIR}/kura`
       rm -rf ${INSTALL_DIR}/kura
       rm -rf $PARENT

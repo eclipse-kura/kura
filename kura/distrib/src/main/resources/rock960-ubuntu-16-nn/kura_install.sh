@@ -34,6 +34,11 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
 
+#set up users and grant permissions to them
+cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
+chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i 
+
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 

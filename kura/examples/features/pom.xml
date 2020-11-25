@@ -38,9 +38,9 @@
             <layout>p2</layout>
         </repository>
         <repository>
-            <id>p2-repo-equinox_3.12.50</id>
+            <id>p2-repo-equinox_3.16.0</id>
             <layout>p2</layout>
-            <url>file:///${kura.basedir}/target-definition/equinox_3.12.50/repository/</url>
+            <url>file:///${kura.basedir}/target-definition/equinox_3.16.0/repository/</url>
         </repository>
         <repository>
             <id>p2-repo-common</id>

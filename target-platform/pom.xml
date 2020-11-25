@@ -25,7 +25,7 @@
         <module>org.apache.log4j2-api-config</module>
         <module>org.eclipse.kura.jetty.customizer</module>
 		<module>p2-repo-common</module>
-        <module>p2-repo-equinox_3.12.50</module>
+        <module>p2-repo-equinox_3.16.0</module>
         <module>p2-repo-test-deps</module>
     </modules>
 

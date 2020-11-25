@@ -32,9 +32,9 @@
 
     <repositories>
         <repository>
-            <id>p2-repo-equinox_3.12.50</id>
+            <id>p2-repo-equinox_3.16.0</id>
             <layout>p2</layout>
-            <url>file:///${basedir}/../../../target-platform/p2-repo-equinox_3.12.50/target/repository/</url>
+            <url>file:///${basedir}/../../../target-platform/p2-repo-equinox_3.16.0/target/repository/</url>
         </repository>
         <repository>
             <id>p2-repo-common</id>

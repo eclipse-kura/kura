@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,13 +11,13 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
+import java.util.Optional;
+
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.model.GwtSession;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -76,6 +76,7 @@ public class CommandTabUi extends Composite {
     String command;
     String password;
     SafeHtmlBuilder safeHtml = new SafeHtmlBuilder();
+    Optional<AsyncCallback<Void>> requestCallback = Optional.empty();
 
     public CommandTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -107,27 +108,56 @@ public class CommandTabUi extends Composite {
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
-            CommandTabUi.this.commandForm.reset();
-            CommandTabUi.this.formExecute.setFocus(true);
+            this.commandForm.reset();
+            this.formExecute.setFocus(true);
             display(MSGS.deviceCommandNoOutput());
         });
 
         this.execute.setText(MSGS.deviceCommandExecute());
+
         this.execute.addClickHandler(
-                event -> CommandTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                event -> RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> {
+                    this.xsrfTokenField.setValue(token.getToken());
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                    }
+                    requestCallback = Optional.of(c.callback(new AsyncCallback<Void>() {
 
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        CommandTabUi.this.xsrfTokenField.setValue(token.getToken());
-                        CommandTabUi.this.commandForm.submit();
-                        CommandTabUi.this.formExecute.setFocus(true);
-                    }
-                }));
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            display(caught.getMessage());
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            CommandTabUi.this.gwtXSRFService.generateSecurityToken(
+                                    c.callback(t -> CommandTabUi.this.gwtDeviceService.executeCommand(t,
+                                            CommandTabUi.this.formExecute.getText(),
+                                            CommandTabUi.this.formPassword.getText(),
+                                            c.callback(new AsyncCallback<String>() {
+
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    if (caught.getLocalizedMessage()
+                                                            .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
+                                                        display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
+                                                    } else if (caught.getLocalizedMessage()
+                                                            .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
+                                                        display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
+                                                    } else {
+                                                        display(MSGS.error() + "\n" + caught.getLocalizedMessage());
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onSuccess(String result) {
+                                                    display(result);
+                                                }
+                                            }))));
+                        }
+                    }));
+
+                    this.commandForm.submit();
+                    this.formExecute.setFocus(true);
+                }))));
 
         this.commandForm.setEncoding(FormPanel.ENCODING_MULTIPART);
         this.commandForm.setMethod(FormPanel.METHOD_POST);
@@ -135,53 +165,25 @@ public class CommandTabUi extends Composite {
 
         this.commandForm.addSubmitCompleteHandler(event -> {
 
+            if (!requestCallback.isPresent()) {
+                return;
+            }
+
+            final AsyncCallback<Void> callback = requestCallback.get();
+
             String result = event.getResults();
 
             if (result.contains("HTTP ERROR")) {
-                display(MSGS.fileUploadFailure());
+                callback.onFailure(new IllegalStateException(MSGS.fileUploadFailure()));
             } else {
-                EntryClassUi.showWaitModal();
-                CommandTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(ex);
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        CommandTabUi.this.gwtDeviceService.executeCommand(token,
-                                CommandTabUi.this.formExecute.getText(), CommandTabUi.this.formPassword.getText(),
-                                new AsyncCallback<String>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        if (caught.getLocalizedMessage()
-                                                .equals(GwtKuraErrorCode.SERVICE_NOT_ENABLED.toString())) {
-                                            display(MSGS.error() + "\n" + MSGS.commandServiceNotEnabled());
-                                        } else if (caught.getLocalizedMessage()
-                                                .equals(GwtKuraErrorCode.ILLEGAL_ARGUMENT.toString())) {
-                                            display(MSGS.error() + "\n" + MSGS.commandPasswordNotCorrect());
-                                        } else {
-                                            display(MSGS.error() + "\n" + caught.getLocalizedMessage());
-                                        }
-                                        EntryClassUi.hideWaitModal();
-                                    }
-
-                                    @Override
-                                    public void onSuccess(String result) {
-                                        display(result);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-
-                                });
-                    }
-
-                });
+                callback.onSuccess(null);
             }
 
+            requestCallback = Optional.empty();
+
         });
+
+        this.docPath.getElement().setAttribute("accept", ".sh,.zip");
 
     }
 

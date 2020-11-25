@@ -26,6 +26,7 @@ public class SupportedUsbModemsInfo {
         return getModem(usbDevice.getVendorId(), usbDevice.getProductId(), usbDevice.getProductName());
     }
 
+    @Deprecated
     public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
         if (vendorId == null || productId == null) {
             return null;
@@ -39,6 +40,11 @@ public class SupportedUsbModemsInfo {
         }
 
         return null;
+    }
+
+    @Deprecated
+    public static boolean isSupported(String vendorId, String productId, String productName) {
+        return SupportedUsbModems.isSupported(vendorId, productId, productName);
     }
 
     public static boolean isSupported(UsbDevice usbDevice) {

@@ -92,14 +92,33 @@ public class SupportedUsbModems {
         }
     }
 
+    @Deprecated
+    public static SupportedUsbModemInfo getModem(String vendorId, String productId) {
+        if (vendorId == null || productId == null) {
+            return null;
+        }
+
+        return getModemInternal(vendorId, productId, "");
+    }
+
+    @Deprecated
+    public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
+        if (vendorId == null || productId == null) {
+            return null;
+        }
+
+        return getModemInternal(vendorId, productId, productName);
+    }
+
     public static SupportedUsbModemInfo getModem(UsbDevice usbDevice) {
         if (usbDevice == null) {
             return null;
         }
-        String vendorId = usbDevice.getVendorId();
-        String productId = usbDevice.getProductId();
-        String productName = usbDevice.getProductName();
 
+        return getModemInternal(usbDevice.getVendorId(), usbDevice.getProductId(), usbDevice.getProductName());
+    }
+
+    private static SupportedUsbModemInfo getModemInternal(String vendorId, String productId, String productName) {
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
             if (vendorId.equals(modem.getVendorId()) && productId.equals(modem.getProductId())
                     && (modem.getProductName().isEmpty() || productName.equals(modem.getProductName()))) {
@@ -108,6 +127,11 @@ public class SupportedUsbModems {
         }
 
         return null;
+    }
+
+    @Deprecated
+    public static boolean isSupported(String vendorId, String productId, String productName) {
+        return SupportedUsbModems.getModem(vendorId, productId, productName) != null;
     }
 
     public static boolean isSupported(UsbDevice usbDevice) {

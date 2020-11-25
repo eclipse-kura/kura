@@ -138,6 +138,25 @@ public class SupportedUsbModems {
         return SupportedUsbModems.getModem(usbDevice) != null;
     }
 
+    @Deprecated
+    public static boolean isAttached(String vendor, String product, CommandExecutorService executorService)
+            throws IOException {
+        boolean retVal = false;
+        if (vendor == null || product == null) {
+            return retVal;
+        }
+        List<LsusbEntry> lsusbEntries = getLsusbInfo(executorService);
+        if (!lsusbEntries.isEmpty()) {
+            for (LsusbEntry lsusbEntry : lsusbEntries) {
+                if (vendor.equals(lsusbEntry.vendor) && product.equals(lsusbEntry.product)) {
+                    retVal = true;
+                    break;
+                }
+            }
+        }
+        return retVal;
+    }
+
     public static boolean isAttached(UsbModemDevice usbModemDevice) throws IOException {
         if (usbModemDevice == null) {
             return false;
@@ -159,6 +178,18 @@ public class SupportedUsbModems {
             return retVal;
         }
         return retVal;
+    }
+
+    @Deprecated
+    private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries,
+            CommandExecutorService executorService) throws IOException {
+        boolean attached = false;
+        if (lsusbEntries == null || lsusbEntries.isEmpty()) {
+            attached = isAttached(vendor, product, executorService);
+        } else {
+            return isAttached(vendor, product, lsusbEntries);
+        }
+        return attached;
     }
 
     private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws IOException {

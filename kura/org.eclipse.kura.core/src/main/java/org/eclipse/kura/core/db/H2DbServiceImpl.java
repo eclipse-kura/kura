@@ -20,7 +20,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +79,8 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final AtomicInteger pendingUpdates = new AtomicInteger();
 
+    private ExecutorService executorService;
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -119,6 +124,9 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             logger.warn("Interrupted while waiting for db shutdown");
             Thread.currentThread().interrupt();
         }
+
+        this.executorService.shutdown();
+        awaitExecutorServiceTermination();
         try {
             shutdownDb();
         } catch (SQLException e) {
@@ -154,20 +162,36 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             syncWithExecutor();
         }
 
-        final Lock lock = this.rwLock.readLock();
-        lock.lock();
-        Connection connection = null;
+        Future<T> result = this.executorService.submit(() -> {
+            final Lock lock = this.rwLock.readLock();
+            lock.lock();
+            Connection connection = null;
+            try {
+                connection = getConnectionInternal();
+                return callable.call(connection);
+            } catch (final SQLException e) {
+                logger.warn("Db operation failed");
+                rollback(connection);
+                throw e;
+            } finally {
+                close(connection);
+                lock.unlock();
+            }
+        });
         try {
-            connection = getConnectionInternal();
-            return callable.call(connection);
-        } catch (final SQLException e) {
-            logger.warn("Db operation failed", e);
-            rollback(connection);
-            throw e;
-        } finally {
-            close(connection);
-            lock.unlock();
+            return result.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SQLException(e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new IllegalStateException(e);
         }
+
     }
 
     @Override
@@ -279,6 +303,12 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
                 restartDefragTask(newConfiguration);
             }
 
+            if (this.executorService != null) {
+                this.executorService.shutdown();
+                awaitExecutorServiceTermination();
+            }
+            this.executorService = Executors.newFixedThreadPool(newConfiguration.getConnectionPoolMaxSize());
+
             this.configuration = newConfiguration;
             activeInstances.put(baseUrl, this);
 
@@ -290,6 +320,15 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         } finally {
             lock.unlock();
             this.pendingUpdates.decrementAndGet();
+        }
+    }
+
+    private void awaitExecutorServiceTermination() {
+        try {
+            this.executorService.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e1) {
+            logger.warn("Interrupted while waiting for db shutdown");
+            Thread.currentThread().interrupt();
         }
     }
 

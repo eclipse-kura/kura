@@ -526,18 +526,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
         
-        if (topic.contains("BIRTH")) {
-            Runnable myRunnable = () -> {
-                try {
-                    Thread.sleep(2);
-                } catch (InterruptedException e) {
-                }
-                onConnectionLost(null);
-            };
-            Thread thread = new Thread(myRunnable);
-            thread.start();
-        }
-
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
         logger.info("Stored message on topic: {}, priority: {}", topic, priority);
 

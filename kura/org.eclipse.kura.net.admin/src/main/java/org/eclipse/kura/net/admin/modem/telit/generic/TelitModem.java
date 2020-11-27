@@ -731,7 +731,7 @@ public abstract class TelitModem {
 
         UsbModemDriver modemDriver = getModemDriver();
         if (modemDriver != null) {
-            modemDriver.disable();
+            modemDriver.disable((UsbModemDevice) getModemDevice());
         } else {
             throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE);
         }
@@ -741,7 +741,7 @@ public abstract class TelitModem {
 
         UsbModemDriver modemDriver = getModemDriver();
         if (modemDriver != null) {
-            modemDriver.enable();
+            modemDriver.enable((UsbModemDevice) getModemDevice());
         } else {
             throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE);
         }

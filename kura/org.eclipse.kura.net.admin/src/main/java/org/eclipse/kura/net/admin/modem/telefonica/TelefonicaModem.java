@@ -19,12 +19,13 @@ import org.eclipse.kura.comm.CommConnection;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.admin.modem.hspa.HspaModem;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TelefonicaModem extends HspaModem {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TelefonicaModem.class);
 
     private boolean initialized;
@@ -47,8 +48,8 @@ public class TelefonicaModem extends HspaModem {
                 }
 
                 try {
-                    reply = commAtConnection.sendCommand(TelefonicaModemAtCommands.getICCID.getCommand().getBytes(), 1000,
-                            100);
+                    reply = commAtConnection.sendCommand(TelefonicaModemAtCommands.getICCID.getCommand().getBytes(),
+                            1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
                     throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -112,8 +113,8 @@ public class TelefonicaModem extends HspaModem {
     @Override
     public void reset() throws KuraException {
         UsbModemDriver modemDriver = getModemDriver();
-        modemDriver.disable();
-        modemDriver.enable();
+        modemDriver.disable((UsbModemDevice) getModemDevice());
+        modemDriver.enable((UsbModemDevice) getModemDevice());
     }
 
     private void disableURC() throws KuraException {

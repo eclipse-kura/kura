@@ -559,7 +559,6 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             logger.debug("tracked modems: {}", modems.keySet());
 
             for (final Entry<String, MonitoredModem> e : this.modems.entrySet()) {
-
                 logger.debug("processing modem {}", e.getKey());
                 processMonitor(newInterfaceStatuses, e.getKey(), e.getValue());
             }
@@ -961,6 +960,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                 boolean modemReset = false;
 
                 NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(modem.getConfiguration());
+                logger.debug("Modem {} configured as {}", modem.getManufacturer(), netInterfaceStatus);
 
                 final String ifaceName = networkService.getModemPppPort(modem.getModemDevice());
 

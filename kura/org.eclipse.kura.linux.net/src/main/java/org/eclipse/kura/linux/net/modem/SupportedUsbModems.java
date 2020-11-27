@@ -12,8 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.modem;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,8 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.usb.UsbDevice;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +78,7 @@ public class SupportedUsbModems {
         }
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
             try {
-                if (isAttached(modem.getVendorId(), modem.getProductId(), lsusbEntries, executorService)) {
+                if (isAttached(modem.getVendorId(), modem.getProductId(), lsusbEntries)) {
                     // modprobe driver
                     logger.info("The {}:{} USB modem device is attached", modem.getVendorId(), modem.getProductId());
                     List<? extends UsbModemDriver> drivers = modem.getDeviceDrivers();
@@ -87,25 +92,33 @@ public class SupportedUsbModems {
         }
     }
 
+    @Deprecated
     public static SupportedUsbModemInfo getModem(String vendorId, String productId) {
         if (vendorId == null || productId == null) {
             return null;
         }
 
-        for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
-            if (vendorId.equals(modem.getVendorId()) && productId.equals(modem.getProductId())) {
-                return modem;
-            }
-        }
-
-        return null;
+        return getModemInternal(vendorId, productId, "");
     }
 
+    @Deprecated
     public static SupportedUsbModemInfo getModem(String vendorId, String productId, String productName) {
         if (vendorId == null || productId == null) {
             return null;
         }
 
+        return getModemInternal(vendorId, productId, productName);
+    }
+
+    public static SupportedUsbModemInfo getModem(UsbDevice usbDevice) {
+        if (usbDevice == null) {
+            return null;
+        }
+
+        return getModemInternal(usbDevice.getVendorId(), usbDevice.getProductId(), usbDevice.getProductName());
+    }
+
+    private static SupportedUsbModemInfo getModemInternal(String vendorId, String productId, String productName) {
         for (SupportedUsbModemInfo modem : SupportedUsbModemInfo.values()) {
             if (vendorId.equals(modem.getVendorId()) && productId.equals(modem.getProductId())
                     && (modem.getProductName().isEmpty() || productName.equals(modem.getProductName()))) {
@@ -116,10 +129,16 @@ public class SupportedUsbModems {
         return null;
     }
 
+    @Deprecated
     public static boolean isSupported(String vendorId, String productId, String productName) {
         return SupportedUsbModems.getModem(vendorId, productId, productName) != null;
     }
 
+    public static boolean isSupported(UsbDevice usbDevice) {
+        return SupportedUsbModems.getModem(usbDevice) != null;
+    }
+
+    @Deprecated
     public static boolean isAttached(String vendor, String product, CommandExecutorService executorService)
             throws IOException {
         boolean retVal = false;
@@ -138,12 +157,44 @@ public class SupportedUsbModems {
         return retVal;
     }
 
+    public static boolean isAttached(UsbModemDevice usbModemDevice) throws IOException {
+        if (usbModemDevice == null) {
+            return false;
+        }
+
+        StringBuilder usbFilePath = new StringBuilder("/sys/bus/usb/devices/").append(usbModemDevice.getUsbPort())
+                .append("/");
+        return readUsbConfig(usbFilePath.toString() + "idVendor", usbModemDevice.getVendorId())
+                && readUsbConfig(usbFilePath.toString() + "idProduct", usbModemDevice.getProductId());
+    }
+
+    private static boolean readUsbConfig(String usbConfigFilename, String usbConfigValue) {
+        boolean retVal = false;
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(usbConfigFilename)))) {
+            if (br.readLine().equals(usbConfigValue)) {
+                retVal = true;
+            }
+        } catch (IOException e) {
+            return retVal;
+        }
+        return retVal;
+    }
+
+    @Deprecated
     private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries,
             CommandExecutorService executorService) throws IOException {
         boolean attached = false;
         if (lsusbEntries == null || lsusbEntries.isEmpty()) {
             attached = isAttached(vendor, product, executorService);
         } else {
+            return isAttached(vendor, product, lsusbEntries);
+        }
+        return attached;
+    }
+
+    private static boolean isAttached(String vendor, String product, List<LsusbEntry> lsusbEntries) throws IOException {
+        boolean attached = false;
+        if (lsusbEntries != null) {
             for (LsusbEntry lsusbEntry : lsusbEntries) {
                 if (vendor != null && product != null && vendor.equals(lsusbEntry.vendor)
                         && product.equals(lsusbEntry.product)) {

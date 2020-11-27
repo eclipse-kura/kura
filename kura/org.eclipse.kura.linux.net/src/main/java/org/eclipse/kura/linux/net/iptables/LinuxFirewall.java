@@ -531,6 +531,13 @@ public class LinuxFirewall {
 
     private void update() throws KuraException {
         synchronized (lock) {
+            this.iptables.save();
+            IptablesConfig newIptablesConfig = new IptablesConfig(this.executorService);
+            newIptablesConfig.restore();
+            this.verbatimFilterPolicies = newIptablesConfig.getVerbatimFilterPolicies();
+            this.verbatimFilterRules = newIptablesConfig.getVerbatimFilterRules();
+            this.verbatimNatPolicies = newIptablesConfig.getVerbatimNatPolicies();
+            this.verbatimNatRules = newIptablesConfig.getVerbatimNatRules();
             applyRules();
             this.iptables.save();
         }

@@ -30,6 +30,11 @@ if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
     mkdir ${INSTALL_DIR}/kura/.data
 fi
 
+#set up users and grant permissions to them
+cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
+chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i -nn 
+
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh

@@ -15,7 +15,7 @@ INSTALL_DIR=/opt/eclipse
 
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
-
+        
 #set up Kura init
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
@@ -33,6 +33,11 @@ mkdir -p ${INSTALL_DIR}/kura/data
 if [ ! -d /etc/sysconfig ]; then
     mkdir /etc/sysconfig
 fi
+
+#set up users and grant permissions to them
+cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
+chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i 
 
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces

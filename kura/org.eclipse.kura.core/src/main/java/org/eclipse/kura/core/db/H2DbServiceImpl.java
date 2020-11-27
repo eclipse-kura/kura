@@ -21,14 +21,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -80,8 +80,8 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final AtomicInteger pendingUpdates = new AtomicInteger();
 
-    private final AtomicReference<ExecutorService> atomicExecutorService = new AtomicReference<>(
-            Executors.newFixedThreadPool(10));
+    private final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>());
 
     // ----------------------------------------------------------------
     //
@@ -127,7 +127,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             Thread.currentThread().interrupt();
         }
 
-        this.atomicExecutorService.get().shutdown();
+        this.executorService.shutdown();
         awaitExecutorServiceTermination();
         try {
             shutdownDb();
@@ -164,7 +164,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             syncWithExecutor();
         }
 
-        Future<T> result = this.atomicExecutorService.get().submit(() -> {
+        final Future<T> result = this.executorService.submit(() -> {
             final Lock executorlock = this.rwLock.readLock();
             executorlock.lock();
             Connection connection = null;
@@ -308,9 +308,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
             if (this.configuration == null
                     || newConfiguration.getConnectionPoolMaxSize() != this.configuration.getConnectionPoolMaxSize()) {
-                this.atomicExecutorService.get().shutdown();
-                this.atomicExecutorService
-                        .getAndSet(Executors.newFixedThreadPool(newConfiguration.getConnectionPoolMaxSize()));
+                this.executorService.setMaximumPoolSize(newConfiguration.getConnectionPoolMaxSize());
             }
 
             this.configuration = newConfiguration;
@@ -329,7 +327,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     private void awaitExecutorServiceTermination() {
         try {
-            this.atomicExecutorService.get().awaitTermination(1, TimeUnit.MINUTES);
+            this.executorService.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e1) {
             logger.warn("Interrupted while waiting for db shutdown");
             Thread.currentThread().interrupt();

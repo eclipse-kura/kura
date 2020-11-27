@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.Charsets;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
@@ -49,6 +50,7 @@ public class IptablesConfig {
     private static final String FORWARD_POLICY = ":FORWARD DROP [0:0]";
     private static final String ALLOW_ALL_TRAFFIC_TO_LOOPBACK = "-A INPUT -i lo -j ACCEPT";
     private static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT";
+    private static final String DOCKER = "docker";
 
     private static final String[] ALLOW_ICMP = {
             "-A INPUT -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT",
@@ -62,6 +64,10 @@ public class IptablesConfig {
     private final Set<PortForwardRule> portForwardRules;
     private final Set<NATRule> autoNatRules;
     private final Set<NATRule> natRules;
+    private List<String> verbatimNatPolicies = new ArrayList<>();
+    private List<String> verbatimNatRules = new ArrayList<>();
+    private List<String> verbatimFilterPolicies = new ArrayList<>();
+    private List<String> verbatimFilterRules = new ArrayList<>();
     private boolean allowIcmp;
     private CommandExecutorService executorService;
 
@@ -88,6 +94,38 @@ public class IptablesConfig {
         this.natRules = natRules;
         this.allowIcmp = allowIcmp;
         this.executorService = executorService;
+    }
+
+    public List<String> getVerbatimNatPolicies() {
+        return verbatimNatPolicies;
+    }
+
+    public void setVerbatimNatPolicies(List<String> verbatimNatPolicies) {
+        this.verbatimNatPolicies = verbatimNatPolicies;
+    }
+
+    public List<String> getVerbatimNatRules() {
+        return verbatimNatRules;
+    }
+
+    public void setVerbatimNatRules(List<String> verbatimNatRules) {
+        this.verbatimNatRules = verbatimNatRules;
+    }
+
+    public List<String> getVerbatimFilterPolicies() {
+        return verbatimFilterPolicies;
+    }
+
+    public void setVerbatimFilterPolicies(List<String> verbatimFilterPolicies) {
+        this.verbatimFilterPolicies = verbatimFilterPolicies;
+    }
+
+    public List<String> getVerbatimFilterRules() {
+        return verbatimFilterRules;
+    }
+
+    public void setVerbatimFilterRules(List<String> verbatimFilterRules) {
+        this.verbatimFilterRules = verbatimFilterRules;
     }
 
     /*
@@ -211,6 +249,7 @@ public class IptablesConfig {
             writer.println(INPUT_POLICY);
             writer.println(FORWARD_POLICY);
             writer.println(OUTPUT_POLICY);
+            this.verbatimFilterPolicies.stream().forEach(writer::println);
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             if (this.allowIcmp) {
@@ -257,8 +296,10 @@ public class IptablesConfig {
                     }
                 }
             }
+            this.verbatimFilterRules.stream().forEach(writer::println);
             writer.println(COMMIT);
             writer.println("*nat");
+            this.verbatimNatPolicies.stream().forEach(writer::println);
             if (this.portForwardRules != null && !this.portForwardRules.isEmpty()) {
                 for (PortForwardRule portForwardRule : this.portForwardRules) {
                     writer.println(portForwardRule.getNatPreroutingChainRule());
@@ -289,6 +330,7 @@ public class IptablesConfig {
                     writer.println(natRule.getNatPostroutingChainRule());
                 }
             }
+            this.verbatimNatRules.stream().forEach(writer::println);
             writer.println(COMMIT);
         } catch (Exception e) {
             logger.error("save() :: failed to clear all chains ", e);
@@ -316,7 +358,7 @@ public class IptablesConfig {
                 if ("".equals(line)) {
                     continue;
                 }
-                if (line.startsWith("#") || line.startsWith(":")) {
+                if (line.startsWith("#")) {
                     continue;
                 }
                 if ("*nat".equals(line)) {
@@ -330,6 +372,14 @@ public class IptablesConfig {
                     if (readingFilterTable) {
                         readingFilterTable = false;
                     }
+                } else if (readingNatTable && line.startsWith(":") && StringUtils.containsIgnoreCase(line, DOCKER)) {
+                    this.verbatimNatPolicies.add(line);
+                } else if (readingNatTable && StringUtils.containsIgnoreCase(line, DOCKER)) {
+                    this.verbatimNatRules.add(line);
+                } else if (readingFilterTable && line.startsWith(":") && StringUtils.containsIgnoreCase(line, DOCKER)) {
+                    this.verbatimFilterPolicies.add(line);
+                } else if (readingFilterTable && StringUtils.containsIgnoreCase(line, DOCKER)) {
+                    this.verbatimFilterRules.add(line);
                 } else if (readingNatTable && line.startsWith("-A PREROUTING")) {
                     natPreroutingChain.add(new NatPreroutingChainRule(line));
                 } else if (readingNatTable && line.startsWith("-A POSTROUTING")) {

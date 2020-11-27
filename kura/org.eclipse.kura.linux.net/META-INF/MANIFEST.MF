@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.linux.net
 Bundle-SymbolicName: org.eclipse.kura.linux.net;singleton:=true
-Bundle-Version: 1.0.600.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
@@ -40,7 +40,7 @@ Import-Package: javax.microedition.io,
 Export-Package: org.eclipse.kura.internal.board;version="1.0.0";x-internal:=true,
  org.eclipse.kura.internal.linux.net;version="1.0.0";x-internal:=true,
  org.eclipse.kura.internal.linux.net.dns;version="1.0.0";x-internal:=true,
- org.eclipse.kura.internal.linux.net.modem;version="1.0.0";x-internal:=true,
+ org.eclipse.kura.internal.linux.net.modem;version="1.1.0";x-internal:=true,
  org.eclipse.kura.internal.linux.net.wifi;version="1.0.0";x-internal:=true,
  org.eclipse.kura.linux.net;version="1.0.9";
   uses:="org.osgi.service.component,

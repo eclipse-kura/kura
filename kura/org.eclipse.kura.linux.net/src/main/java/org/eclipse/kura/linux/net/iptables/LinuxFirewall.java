@@ -73,6 +73,7 @@ public class LinuxFirewall {
             logger.error("cannot create or read file", e); // File did not exist and was created
         }
         try {
+            // Update iptables config in the filesystem
             this.iptables.save();
             initialize();
         } catch (KuraException e) {
@@ -531,7 +532,9 @@ public class LinuxFirewall {
 
     private void update() throws KuraException {
         synchronized (lock) {
+            // Write down the current config in the filesystem
             this.iptables.save();
+            // Get the modifications, add the new rules, apply them and save the result
             IptablesConfig newIptablesConfig = new IptablesConfig(this.executorService);
             newIptablesConfig.restore();
             this.verbatimFilterPolicies = newIptablesConfig.getVerbatimFilterPolicies();

@@ -339,7 +339,7 @@ public class IptablesConfig {
     }
 
     /*
-     * Populates the m_localRules, m_portForwardRules, m_natRules, and m_autoNatRules by parsing
+     * Populates the localRules, portForwardRules, natRules, and autoNatRules by parsing
      * the iptables configuration file.
      */
     @SuppressWarnings("checkstyle:methodLength")

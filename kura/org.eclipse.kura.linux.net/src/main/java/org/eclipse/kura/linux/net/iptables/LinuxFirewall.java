@@ -49,10 +49,10 @@ public class LinuxFirewall {
     private Set<PortForwardRule> portForwardRules;
     private Set<NATRule> autoNatRules;
     private Set<NATRule> natRules;
-    private List<String> verbatimNatPolicies;
-    private List<String> verbatimNatRules;
-    private List<String> verbatimFilterPolicies;
-    private List<String> verbatimFilterRules;
+    private List<String> dockerNatPolicies;
+    private List<String> dockerNatRules;
+    private List<String> dockerFilterPolicies;
+    private List<String> dockerFilterRules;
     private boolean allowIcmp;
     private boolean allowForwarding;
     private final IptablesConfig iptables;
@@ -88,10 +88,10 @@ public class LinuxFirewall {
         this.portForwardRules = this.iptables.getPortForwardRules();
         this.autoNatRules = this.iptables.getAutoNatRules();
         this.natRules = this.iptables.getNatRules();
-        this.verbatimNatPolicies = this.iptables.getVerbatimNatPolicies();
-        this.verbatimNatRules = this.iptables.getVerbatimNatRules();
-        this.verbatimFilterPolicies = this.iptables.getVerbatimFilterPolicies();
-        this.verbatimFilterRules = this.iptables.getVerbatimFilterRules();
+        this.dockerNatPolicies = this.iptables.getdockerNatPolicies();
+        this.dockerNatRules = this.iptables.getdockerNatRules();
+        this.dockerFilterPolicies = this.iptables.getdockerFilterPolicies();
+        this.dockerFilterRules = this.iptables.getdockerFilterRules();
         this.allowIcmp = true;
         this.allowForwarding = false;
         logger.debug("initialize() :: Parsing current firewall configuraion");
@@ -467,10 +467,10 @@ public class LinuxFirewall {
         }
         IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
                 this.natRules, this.allowIcmp, this.executorService);
-        newIptables.setVerbatimFilterPolicies(this.verbatimFilterPolicies);
-        newIptables.setVerbatimNatPolicies(this.verbatimNatPolicies);
-        newIptables.setVerbatimFilterRules(this.verbatimFilterRules);
-        newIptables.setVerbatimNatRules(this.verbatimNatRules);
+        newIptables.setdockerFilterPolicies(this.dockerFilterPolicies);
+        newIptables.setdockerNatPolicies(this.dockerNatPolicies);
+        newIptables.setdockerFilterRules(this.dockerFilterRules);
+        newIptables.setdockerNatRules(this.dockerNatRules);
         newIptables.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
         newIptables.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
         logger.debug("Managing port forwarding...");
@@ -537,10 +537,10 @@ public class LinuxFirewall {
             // Get the modifications, add the new rules, apply them and save the result
             IptablesConfig newIptablesConfig = new IptablesConfig(this.executorService);
             newIptablesConfig.restore();
-            this.verbatimFilterPolicies = newIptablesConfig.getVerbatimFilterPolicies();
-            this.verbatimFilterRules = newIptablesConfig.getVerbatimFilterRules();
-            this.verbatimNatPolicies = newIptablesConfig.getVerbatimNatPolicies();
-            this.verbatimNatRules = newIptablesConfig.getVerbatimNatRules();
+            this.dockerFilterPolicies = newIptablesConfig.getdockerFilterPolicies();
+            this.dockerFilterRules = newIptablesConfig.getdockerFilterRules();
+            this.dockerNatPolicies = newIptablesConfig.getdockerNatPolicies();
+            this.dockerNatRules = newIptablesConfig.getdockerNatRules();
             applyRules();
             this.iptables.save();
         }

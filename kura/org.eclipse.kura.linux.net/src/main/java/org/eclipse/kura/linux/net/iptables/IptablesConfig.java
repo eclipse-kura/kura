@@ -64,10 +64,10 @@ public class IptablesConfig {
     private final Set<PortForwardRule> portForwardRules;
     private final Set<NATRule> autoNatRules;
     private final Set<NATRule> natRules;
-    private List<String> verbatimNatPolicies = new ArrayList<>();
-    private List<String> verbatimNatRules = new ArrayList<>();
-    private List<String> verbatimFilterPolicies = new ArrayList<>();
-    private List<String> verbatimFilterRules = new ArrayList<>();
+    private List<String> dockerNatPolicies = new ArrayList<>();
+    private List<String> dockerNatRules = new ArrayList<>();
+    private List<String> dockerFilterPolicies = new ArrayList<>();
+    private List<String> dockerFilterRules = new ArrayList<>();
     private boolean allowIcmp;
     private CommandExecutorService executorService;
 
@@ -96,36 +96,36 @@ public class IptablesConfig {
         this.executorService = executorService;
     }
 
-    public List<String> getVerbatimNatPolicies() {
-        return verbatimNatPolicies;
+    public List<String> getdockerNatPolicies() {
+        return dockerNatPolicies;
     }
 
-    public void setVerbatimNatPolicies(List<String> verbatimNatPolicies) {
-        this.verbatimNatPolicies = verbatimNatPolicies;
+    public void setdockerNatPolicies(List<String> dockerNatPolicies) {
+        this.dockerNatPolicies = dockerNatPolicies;
     }
 
-    public List<String> getVerbatimNatRules() {
-        return verbatimNatRules;
+    public List<String> getdockerNatRules() {
+        return dockerNatRules;
     }
 
-    public void setVerbatimNatRules(List<String> verbatimNatRules) {
-        this.verbatimNatRules = verbatimNatRules;
+    public void setdockerNatRules(List<String> dockerNatRules) {
+        this.dockerNatRules = dockerNatRules;
     }
 
-    public List<String> getVerbatimFilterPolicies() {
-        return verbatimFilterPolicies;
+    public List<String> getdockerFilterPolicies() {
+        return dockerFilterPolicies;
     }
 
-    public void setVerbatimFilterPolicies(List<String> verbatimFilterPolicies) {
-        this.verbatimFilterPolicies = verbatimFilterPolicies;
+    public void setdockerFilterPolicies(List<String> dockerFilterPolicies) {
+        this.dockerFilterPolicies = dockerFilterPolicies;
     }
 
-    public List<String> getVerbatimFilterRules() {
-        return verbatimFilterRules;
+    public List<String> getdockerFilterRules() {
+        return dockerFilterRules;
     }
 
-    public void setVerbatimFilterRules(List<String> verbatimFilterRules) {
-        this.verbatimFilterRules = verbatimFilterRules;
+    public void setdockerFilterRules(List<String> dockerFilterRules) {
+        this.dockerFilterRules = dockerFilterRules;
     }
 
     /*
@@ -249,7 +249,7 @@ public class IptablesConfig {
             writer.println(INPUT_POLICY);
             writer.println(FORWARD_POLICY);
             writer.println(OUTPUT_POLICY);
-            this.verbatimFilterPolicies.stream().forEach(writer::println);
+            this.dockerFilterPolicies.stream().forEach(writer::println);
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             if (this.allowIcmp) {
@@ -296,10 +296,10 @@ public class IptablesConfig {
                     }
                 }
             }
-            this.verbatimFilterRules.stream().forEach(writer::println);
+            this.dockerFilterRules.stream().forEach(writer::println);
             writer.println(COMMIT);
             writer.println("*nat");
-            this.verbatimNatPolicies.stream().forEach(writer::println);
+            this.dockerNatPolicies.stream().forEach(writer::println);
             if (this.portForwardRules != null && !this.portForwardRules.isEmpty()) {
                 for (PortForwardRule portForwardRule : this.portForwardRules) {
                     writer.println(portForwardRule.getNatPreroutingChainRule());
@@ -330,7 +330,7 @@ public class IptablesConfig {
                     writer.println(natRule.getNatPostroutingChainRule());
                 }
             }
-            this.verbatimNatRules.stream().forEach(writer::println);
+            this.dockerNatRules.stream().forEach(writer::println);
             writer.println(COMMIT);
         } catch (Exception e) {
             logger.error("save() :: failed to clear all chains ", e);
@@ -373,13 +373,13 @@ public class IptablesConfig {
                         readingFilterTable = false;
                     }
                 } else if (readingNatTable && line.startsWith(":") && StringUtils.containsIgnoreCase(line, DOCKER)) {
-                    this.verbatimNatPolicies.add(line);
+                    this.dockerNatPolicies.add(line);
                 } else if (readingNatTable && StringUtils.containsIgnoreCase(line, DOCKER)) {
-                    this.verbatimNatRules.add(line);
+                    this.dockerNatRules.add(line);
                 } else if (readingFilterTable && line.startsWith(":") && StringUtils.containsIgnoreCase(line, DOCKER)) {
-                    this.verbatimFilterPolicies.add(line);
+                    this.dockerFilterPolicies.add(line);
                 } else if (readingFilterTable && StringUtils.containsIgnoreCase(line, DOCKER)) {
-                    this.verbatimFilterRules.add(line);
+                    this.dockerFilterRules.add(line);
                 } else if (readingNatTable && line.startsWith("-A PREROUTING")) {
                     natPreroutingChain.add(new NatPreroutingChainRule(line));
                 } else if (readingNatTable && line.startsWith("-A POSTROUTING")) {

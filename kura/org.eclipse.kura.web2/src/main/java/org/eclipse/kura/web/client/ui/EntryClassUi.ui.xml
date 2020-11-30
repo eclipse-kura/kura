@@ -71,6 +71,16 @@
 		padding-left: 10px;
 		padding-right: 0px;
 		}
+		
+		.user-name {
+		padding-left: 6px;
+		padding-right: 6px;
+		font-weight: bold;
+		}
+		
+		.user-icon {
+		padding-right: 6px;
+		}
 
 		.content-panel-body {
 		padding: 1px;
@@ -120,6 +130,8 @@
 									addStyleNames="glyphicon glyphicon-menu-hamburger sidebar-button"></b:Button>
 								<b:Panel addStyleNames="{style.image} headerLogo" />
 								<b:Container fluid="true" addStyleNames="logout-ui header-logout-ui">
+								    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
+									<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameSmall" />
 									<b:Button text="Logout" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
 										ui:field="headerLogoutButton" />
 								</b:Container>
@@ -173,6 +185,10 @@
 									    <b:AnchorListItem icon="SHIELD"
 											iconFixedWidth="true" text="{msgs.security}"
 											ui:field="security" />
+											
+										<b:AnchorListItem icon="USER"
+											iconFixedWidth="true" text="{msgs.users}"
+											ui:field="users" />
 
 										<b:AnchorListItem icon="GEAR"
 											iconFixedWidth="true" text="{msgs.settings}"
@@ -182,7 +198,7 @@
 							</b:Panel>
 						</b:Column>
 						<b:Column size="MD_12"
-							addStyleNames="{style.services-list}">
+							addStyleNames="{style.services-list}" ui:field="servicesContainer">
 							<b:Panel>
 								<b:PanelHeader>
 									<b:Heading size="H3" text="Services" />
@@ -217,6 +233,9 @@
 					</b:Row>
 				</b:Column>
 				<b:Container fluid="true" addStyleNames="logout-ui">
+				    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
+					<b.html:Span text="Logged in as" />
+					<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameLarge" />
 					<b:Button text="Logout" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
 										ui:field="logoutButton" />
 				</b:Container>

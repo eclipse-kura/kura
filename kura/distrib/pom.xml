@@ -2,11 +2,11 @@
 <!--
 
     Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
     SPDX-License-Identifier: EPL-2.0
 
     Contributors:
@@ -516,6 +516,11 @@
                                     <artifactId>org.eclipse.kura.cloudconnection.raw.mqtt.provider</artifactId>
                                     <version>${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.useradmin.store</artifactId>
+                                    <version>${org.eclipse.kura.useradmin.store.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -730,6 +735,8 @@
                                     tofile="target/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.useradmin.store.jar"
+                                    tofile="target/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

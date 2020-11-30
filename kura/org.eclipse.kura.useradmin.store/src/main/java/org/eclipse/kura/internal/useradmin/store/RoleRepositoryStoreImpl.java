@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+
 package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.ArrayList;
@@ -14,22 +24,23 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.useradmin.RoleFactory;
 import org.apache.felix.useradmin.RoleRepositoryStore;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.User;
+import org.osgi.service.useradmin.UserAdminEvent;
+import org.osgi.service.useradmin.UserAdminListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonObject.Member;
+import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonValue;
 
-public class RoleRepositoryStoreImpl implements RoleRepositoryStore, EventHandler, ConfigurableComponent {
+public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminListener, ConfigurableComponent {
 
     private static final String INTERNAL_UPDATE_ID_PROP_NAME = "internal.update.id";
 
@@ -61,6 +72,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, EventHandle
     public synchronized void update(final Map<String, Object> properties) {
 
         if (isSelfUpdate(properties)) {
+            logger.info("ignoring self update");
             return;
         }
 
@@ -153,7 +165,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, EventHandle
         options = new RoleRepositoryStoreOptions(properties);
 
         try {
-            roles = decode(options.getRolesConfig());
+            roles = decode(options);
         } catch (final Exception e) {
             logger.warn("failed to deserialize roles", e);
         }
@@ -171,38 +183,53 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, EventHandle
     }
 
     private synchronized void storeNow() {
-        final JsonObject stored = new JsonObject();
-
-        for (final Role role : roles.values()) {
-            stored.add(role.getName(), RoleSerializer.serializeRole(role));
-        }
-
-        final Map<String, Object> properties = new RoleRepositoryStoreOptions(stored.toString(),
-                options.getWriteDelayMs()).toProperties();
-
-        properties.put(INTERNAL_UPDATE_ID_PROP_NAME, getNextUpdateId());
-
         try {
-            configurationService.updateConfiguration(RoleRepositoryStoreImpl.class.getName(), properties);
-        } catch (final KuraException e) {
-            logger.warn("Failed to store configuration", e);
-        }
+            final JsonArray rolesArray = new JsonArray();
+            final JsonArray usersArray = new JsonArray();
+            final JsonArray groupsArray = new JsonArray();
 
-        storeTask = Optional.empty();
-    }
+            for (final Role role : roles.values()) {
+                final int type = role.getType();
 
-    private final Map<String, Role> decode(final String encodedRoles) throws DeserializationException {
-        try {
-            final JsonObject object = Json.parse(encodedRoles).asObject();
-            final Map<String, Role> result = new HashMap<>();
-
-            for (final Member member : object) {
-                final Role role = RoleSerializer.deserializeRole(member.getValue().asObject());
-                result.put(member.getName(), role);
+                if (type == Role.ROLE) {
+                    rolesArray.add(RoleSerializer.serializeRole(role));
+                } else if (type == Role.USER) {
+                    usersArray.add(RoleSerializer.serializeRole(role));
+                } else if (type == Role.GROUP) {
+                    groupsArray.add(RoleSerializer.serializeRole(role));
+                }
             }
 
-            for (final Member member : object) {
-                RoleSerializer.assignMembers(member.getValue().asObject(), result.get(member.getName()), result);
+            final Map<String, Object> properties = new RoleRepositoryStoreOptions(rolesArray.toString(), //
+                    usersArray.toString(), //
+                    groupsArray.toString(), //
+                    options.getWriteDelayMs() //
+            ).toProperties();
+
+            properties.put(INTERNAL_UPDATE_ID_PROP_NAME, getNextUpdateId());
+
+            configurationService.updateConfiguration(RoleRepositoryStoreImpl.class.getName(), properties);
+        } catch (final Exception e) {
+            logger.warn("Failed to store configuration", e);
+        } finally {
+            storeTask = Optional.empty();
+        }
+
+    }
+
+    private final Map<String, Role> decode(final RoleRepositoryStoreOptions options) throws DeserializationException {
+        try {
+            final Map<String, Role> result = new HashMap<>();
+
+            decode(Json.parse(options.getRolesConfig()).asArray(), Role.class, result);
+            decode(Json.parse(options.getUsersConfig()).asArray(), User.class, result);
+
+            final JsonArray groups = Json.parse(options.getGroupsConfig()).asArray();
+
+            decode(groups, Group.class, result);
+
+            for (final JsonValue member : groups) {
+                RoleSerializer.assignMembers(member.asObject(), result);
             }
 
             return result;
@@ -215,8 +242,17 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, EventHandle
 
     }
 
+    private void decode(final JsonArray array, final Class<? extends Role> classz, final Map<String, Role> target)
+            throws DeserializationException {
+        for (final JsonValue member : array) {
+            final Role role = RoleSerializer.deserializeRole(classz, member.asObject());
+            target.put(role.getName(), role);
+        }
+    }
+
     @Override
-    public void handleEvent(Event event) {
+    public void roleChanged(UserAdminEvent arg0) {
+        logger.info("received event");
         scheduleStore();
     }
 

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ *******************************************************************************/
+
 package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.Dictionary;
@@ -23,13 +33,14 @@ class RoleSerializer {
 
     private static final String NAME = "name";
 
-    private static final String ROLE_PROPERTIES = "roleProperties";
-    private static final String ROLE_TYPE = "roleType";
+    private static final String ROLE_PROPERTIES = "properties";
+    private static final String USER_CREDENTIALS = "credentials";
 
-    private static final String USER_CREDENTIALS = "userCredentials";
+    private static final String GROUP_BASIC_MEMBERS = "basicMembers";
+    private static final String GROUP_REQUIRED_MEMBERS = "requiredMembers";
 
-    private static final String GROUP_BASIC_MEMBERS = "groupBasicMembers";
-    private static final String GROUP_REQUIRED_MEMBERS = "groupRequiredMembers";
+    private RoleSerializer() {
+    }
 
     private static JsonArray serializeByteArray(final byte[] value) {
         final JsonArray result = new JsonArray();
@@ -42,7 +53,12 @@ class RoleSerializer {
     }
 
     private static JsonArray serializeRoleNames(final Role[] roles) {
+
         final JsonArray result = new JsonArray();
+
+        if (roles == null) {
+            return result;
+        }
 
         for (final Role r : roles) {
             result.add(r.getName());
@@ -85,21 +101,29 @@ class RoleSerializer {
         final JsonObject result = new JsonObject();
 
         result.add(NAME, role.getName());
-        result.add(ROLE_PROPERTIES, serializeProperties(role.getProperties()));
-        result.add(ROLE_TYPE, role.getType());
+
+        if (!role.getProperties().isEmpty()) {
+            result.add(ROLE_PROPERTIES, serializeProperties(role.getProperties()));
+        }
 
         if (role instanceof User) {
             final User asUser = (User) role;
 
-            result.add(USER_CREDENTIALS, serializeProperties(asUser.getCredentials()));
+            if (!asUser.getCredentials().isEmpty()) {
+                result.add(USER_CREDENTIALS, serializeProperties(asUser.getCredentials()));
+            }
         }
 
         if (role instanceof Group) {
             final Group asGroup = (Group) role;
 
-            result.add(GROUP_BASIC_MEMBERS, serializeRoleNames(asGroup.getMembers()));
-            result.add(GROUP_REQUIRED_MEMBERS, serializeRoleNames(asGroup.getRequiredMembers()));
+            if (asGroup.getMembers() != null) {
+                result.add(GROUP_BASIC_MEMBERS, serializeRoleNames(asGroup.getMembers()));
+            }
 
+            if (asGroup.getRequiredMembers() != null) {
+                result.add(GROUP_REQUIRED_MEMBERS, serializeRoleNames(asGroup.getRequiredMembers()));
+            }
         }
 
         return result;
@@ -128,9 +152,22 @@ class RoleSerializer {
         }
     }
 
-    static Role deserializeRole(final JsonObject object) throws DeserializationException {
+    @SuppressWarnings("unchecked")
+    static <T extends Role> T deserializeRole(final Class<T> classz, final JsonObject object)
+            throws DeserializationException {
         try {
-            final int type = object.get(ROLE_TYPE).asInt();
+            final int type;
+
+            if (classz == Role.class) {
+                type = Role.ROLE;
+            } else if (classz == User.class) {
+                type = Role.USER;
+            } else if (classz == Group.class) {
+                type = Role.GROUP;
+            } else {
+                throw new IllegalArgumentException("Unsupported role type");
+            }
+
             final String name = object.get(NAME).asString();
 
             final Role result = RoleFactory.createRole(type, name);
@@ -145,10 +182,12 @@ class RoleSerializer {
                 final User asUser = (User) result;
                 final JsonValue userCredentials = object.get(USER_CREDENTIALS);
 
-                deserializeProperties(userCredentials.asObject(), asUser.getCredentials());
+                if (userCredentials != null) {
+                    deserializeProperties(userCredentials.asObject(), asUser.getCredentials());
+                }
             }
 
-            return result;
+            return (T) result;
         } catch (final Exception e) {
             throw new DeserializationException("failed to deserialize role", e);
         }
@@ -170,9 +209,11 @@ class RoleSerializer {
         }
     }
 
-    static void assignMembers(final JsonObject object, final Role role, final Map<String, Role> roles)
-            throws DeserializationException {
+    static void assignMembers(final JsonObject object, final Map<String, Role> roles) throws DeserializationException {
         try {
+            final String name = object.get(NAME).asString();
+
+            final Role role = roles.get(name);
 
             if (!(role instanceof Group)) {
                 return;

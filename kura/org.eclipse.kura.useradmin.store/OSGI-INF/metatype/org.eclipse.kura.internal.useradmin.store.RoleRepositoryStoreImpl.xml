@@ -16,12 +16,30 @@
         <Icon resource="DenaliService" size="32"/>
 
 		<AD id="roles.config"
-        	name="Roles configuration"
+        	name="Role configuration"
         	type="String"
         	cardinality="0"
         	required="true"
-        	default="{}"
-        	description="The currently defined UserAdmin Roles, User and Groups.">
+        	default="[]"
+        	description="The currently defined UserAdmin Roles.">
+        </AD>
+        
+        <AD id="users.config"
+        	name="User configuration"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="[]"
+        	description="The currently defined UserAdmin Users.">
+        </AD>
+        
+        <AD id="groups.config"
+        	name="Group configuration"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="[]"
+        	description="The currently defined UserAdmin Groups.">
         </AD>
 
         <AD id="write.delay.ms"

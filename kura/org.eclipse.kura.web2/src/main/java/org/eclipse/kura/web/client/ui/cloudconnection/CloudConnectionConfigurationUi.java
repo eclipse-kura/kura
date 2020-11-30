@@ -23,8 +23,8 @@ import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtCloudConnectionService;
+import org.eclipse.kura.web.shared.service.GwtCloudConnectionServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
@@ -42,7 +42,7 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
     private static ServiceConfigurationUiUiBinder uiBinder = GWT.create(ServiceConfigurationUiUiBinder.class);
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+    private final GwtCloudConnectionServiceAsync gwtCloudService = GWT.create(GwtCloudConnectionService.class);
 
     private boolean dirty;
     private boolean initialized;
@@ -154,8 +154,8 @@ public class CloudConnectionConfigurationUi extends AbstractServicesUi {
                             }
                             RequestQueue.submit(context -> CloudConnectionConfigurationUi.this.gwtXSRFService
                                     .generateSecurityToken(context
-                                            .callback(token -> CloudConnectionConfigurationUi.this.gwtComponentService
-                                                    .updateComponentConfiguration(token,
+                                            .callback(token -> CloudConnectionConfigurationUi.this.gwtCloudService
+                                                    .updateStackComponentConfiguration(token,
                                                             CloudConnectionConfigurationUi.this.configurableComponent,
                                                             context.callback(result -> {
                                                                 logger.info(MSGS.info() + ": "

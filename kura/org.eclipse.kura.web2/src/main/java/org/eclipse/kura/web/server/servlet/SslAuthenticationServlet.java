@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.UserManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +41,11 @@ public class SslAuthenticationServlet extends HttpServlet {
     private static final long serialVersionUID = -2371828320004624864L;
 
     private final String redirectPath;
+    private final UserManager userManager;
 
-    public SslAuthenticationServlet(final String redirectPath) {
+    public SslAuthenticationServlet(final String redirectPath, final UserManager userManager) {
         this.redirectPath = redirectPath;
+        this.userManager = userManager;
     }
 
     @Override
@@ -77,7 +80,13 @@ public class SslAuthenticationServlet extends HttpServlet {
                 throw new IllegalArgumentException("Certificate common name is not present");
             }
 
-            console.setAuthenticated(session, Console.getConsoleOptions().getUsername());
+            final String commonName = (String) commonNameRdn.get().getValue();
+
+            if (!userManager.getUserConfig(commonName).isPresent()) {
+                throw new IllegalArgumentException("Common Name " + commonName + " is not associated with an user");
+            }
+
+            console.setAuthenticated(session, commonName);
             sendRedirect(resp, redirectPath);
 
         } catch (final Exception e) {

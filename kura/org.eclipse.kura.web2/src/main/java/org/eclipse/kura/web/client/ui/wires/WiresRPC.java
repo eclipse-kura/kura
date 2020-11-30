@@ -22,8 +22,8 @@ import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
@@ -34,8 +34,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public final class WiresRPC {
 
-    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private static final GwtWireGraphServiceAsync gwtWireGraphService = GWT.create(GwtWireGraphService.class);
+    private static final GwtDriverAndAssetServiceAsync gwtAssetService = GWT.create(GwtDriverAndAssetService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private WiresRPC() {
@@ -176,7 +176,7 @@ public final class WiresRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtComponentService.createFactoryComponent(result, factoryPid, pid, new AsyncCallback<Void>() {
+                gwtAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {

@@ -63,6 +63,14 @@ body {
 	margin-right: 0 !important;
 }
 
+#users-panel .panel-heading {
+	border-bottom: solid 1px #ddd;
+}
+
+#users-panel .panel-heading + .row {
+	margin-bottom: 0.3cm;
+}
+
 .panel:not(.help-panel):not(.network-interfaces-panel):not(.packages-dropzone-message), .panel-header:not(.help-panel) {
 	border: none !important;
 	border-radius: 0 !important;

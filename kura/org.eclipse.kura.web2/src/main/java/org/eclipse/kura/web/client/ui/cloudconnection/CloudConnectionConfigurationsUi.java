@@ -17,14 +17,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import org.eclipse.kura.web.client.util.request.RequestQueue;
-import org.eclipse.kura.web.shared.FilterUtil;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtCloudEntry;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.service.GwtCloudConnectionService;
 import org.eclipse.kura.web.shared.service.GwtCloudConnectionServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Anchor;
@@ -45,7 +42,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
             .create(CloudServiceConfigurationsUiUiBinder.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCloudConnectionServiceAsync gwtCloudService = GWT.create(GwtCloudConnectionService.class);
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
     private TabListItem currentlySelectedTab;
 
@@ -132,37 +128,29 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     private void getPubSubConfiguration(final String pid) {
-        RequestQueue.submit(
-                context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> this.gwtComponentService
-                        .findFilteredComponentConfiguration(token, pid, context.callback(confs -> {
-                            this.connectionNavtabs.clear();
-                            renderTabs(confs.get(0), true);
-                        })))));
+        RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context
+                .callback(token -> this.gwtCloudService.getPubSubConfiguration(token, pid, context.callback(conf -> {
+                    this.connectionNavtabs.clear();
+                    renderTabs(conf, true);
+                })))));
     }
 
     private void getCloudStackConfigurations(final String factoryPid, final String cloudServicePid) {
-        RequestQueue.submit(context -> this.gwtCloudService.findStackPidsByFactory(factoryPid, cloudServicePid,
-                context.callback(pidsResult -> {
-                    if (pidsResult.isEmpty()) {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> this.gwtCloudService
+                .getStackConfigurationsByFactory(factoryPid, cloudServicePid, c.callback(result -> {
+                    if (result.isEmpty()) {
                         return;
                     }
 
-                    this.gwtXSRFService.generateSecurityToken(
-                            context.callback(token -> this.gwtComponentService.findComponentConfigurations(token,
-                                    FilterUtil.getPidFilter(pidsResult.iterator()), context.callback(result -> {
-                                        final ArrayList<GwtConfigComponent> sorted = new ArrayList<>(result);
-                                        sorted.sort(Comparator.comparing(this::getSimplifiedComponentName));
-                                        this.connectionNavtabs.clear();
-                                        boolean isFirstEntry = true;
-                                        for (GwtConfigComponent pair : sorted) {
-                                            if (pidsResult.contains(pair.getComponentId())) {
-                                                renderTabs(pair, isFirstEntry);
-                                                isFirstEntry = false;
-                                            }
-                                        }
-                                    }))));
-                })));
-
+                    final ArrayList<GwtConfigComponent> sorted = new ArrayList<>(result);
+                    sorted.sort(Comparator.comparing(this::getSimplifiedComponentName));
+                    this.connectionNavtabs.clear();
+                    boolean isFirstEntry = true;
+                    for (GwtConfigComponent pair : sorted) {
+                        renderTabs(pair, isFirstEntry);
+                        isFirstEntry = false;
+                    }
+                })))));
     }
 
     private void renderTabs(GwtConfigComponent config, boolean isFirstEntry) {

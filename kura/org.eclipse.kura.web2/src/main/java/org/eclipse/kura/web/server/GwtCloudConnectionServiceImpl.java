@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -43,10 +43,12 @@ import org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceReferenceConsumer;
 import org.eclipse.kura.web.session.Attributes;
+import org.eclipse.kura.web.shared.FilterUtil;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudComponentFactories;
@@ -54,6 +56,7 @@ import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry.GwtCloudConnectionType;
 import org.eclipse.kura.web.shared.model.GwtCloudEntry;
 import org.eclipse.kura.web.shared.model.GwtCloudPubSubEntry;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCloudConnectionService;
 import org.osgi.framework.BundleContext;
@@ -163,8 +166,8 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
     }
 
     @Override
-    public List<String> findStackPidsByFactory(final String factoryPid, final String cloudServicePid)
-            throws GwtKuraException {
+    public List<GwtConfigComponent> getStackConfigurationsByFactory(final String factoryPid,
+            final String cloudServicePid) throws GwtKuraException {
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -177,11 +180,14 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             }
         });
 
+        final List<GwtConfigComponent> configs = GwtComponentServiceInternal.findComponentConfigurations(session,
+                FilterUtil.getPidFilter(result.iterator()));
+
         auditLogger.info(
-                "UI CloudConnection - Success - Successfully listed stack pids by factory for user: {}, session {}",
+                "UI CloudConnection - Success - Successfully obtained stack configurations by factory for user: {}, session {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
-        return result;
+        return configs;
     }
 
     @Override
@@ -471,5 +477,26 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
             };
         }
         return null;
+    }
+
+    @Override
+    public GwtConfigComponent getPubSubConfiguration(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        return GwtComponentServiceInternal.findFilteredComponentConfiguration(session, pid).get(0);
+    }
+
+    @Override
+    public void updateStackComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent component)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        GwtComponentServiceInternal.updateComponentConfiguration(session, component);
     }
 }

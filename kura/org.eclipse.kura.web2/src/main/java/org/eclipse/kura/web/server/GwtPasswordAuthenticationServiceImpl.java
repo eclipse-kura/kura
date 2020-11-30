@@ -19,8 +19,8 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.web.AuthenticationManager;
 import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.UserManager;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService;
@@ -40,12 +40,11 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
      */
     private static final long serialVersionUID = 1L;
 
-    private final AuthenticationManager authenticationManager;
+    private final UserManager userManager;
     private final String redirectPath;
 
-    public GwtPasswordAuthenticationServiceImpl(final AuthenticationManager authenticationManager,
-            final String redirectPath) {
-        this.authenticationManager = authenticationManager;
+    public GwtPasswordAuthenticationServiceImpl(final UserManager userManager, final String redirectPath) {
+        this.userManager = userManager;
         this.redirectPath = redirectPath;
     }
 
@@ -65,9 +64,8 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
 
-            if (!this.authenticationManager.authenticate(username, password)) {
-                throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
-            }
+            this.userManager.authenticateWithPassword(username, password);
+            Console.instance().setAuthenticated(session, username);
 
             session.setAttribute(Attributes.AUTORIZED_USER.getValue(), username);
             logger.info("UI Login - Success - Login for user: {}, session id: {}, request IP: {}", username,

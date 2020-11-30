@@ -18,11 +18,13 @@ import java.util.Optional;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.gwtbootstrap3.client.ui.Alert;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.ListItem;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.base.HasId;
-import org.gwtbootstrap3.client.ui.html.Span;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Strong;
+import org.gwtbootstrap3.client.ui.html.UnorderedList;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -48,11 +50,13 @@ public class AlertDialog extends Composite implements HasId {
     @UiField
     ModalFooter alertFooter;
     @UiField
-    Span messageText;
+    Paragraph messageText;
     @UiField
     Alert alertBody;
     @UiField
     Strong alertText;
+    @UiField
+    UnorderedList extraItems;
 
     private final Modal modal;
 
@@ -88,10 +92,16 @@ public class AlertDialog extends Composite implements HasId {
         this.modal.setClosable(listener == null);
     }
 
-    public void show(String title, String message, Severity severity, DismissListener listener) {
+    public void show(String title, String message, Severity severity, DismissListener listener, String... extraItems) {
         setAlertText(message, severity);
         setTitle(title);
         setListener(listener);
+        this.extraItems.clear();
+        if (extraItems != null) {
+            for (final String extraItem : extraItems) {
+                this.extraItems.add(new ListItem(extraItem));
+            }
+        }
         this.modal.show();
     }
 
@@ -108,11 +118,11 @@ public class AlertDialog extends Composite implements HasId {
     }
 
     public void show(String message, Severity severity, DismissListener listener) {
-        String title= "";
+        String title = "";
         if (severity == Severity.INFO) {
-            title =  MSGS.confirm();
+            title = MSGS.confirm();
         } else if (severity == Severity.ERROR) {
-            title =  MSGS.error();
+            title = MSGS.error();
         } else {
             title = MSGS.warning();
         }

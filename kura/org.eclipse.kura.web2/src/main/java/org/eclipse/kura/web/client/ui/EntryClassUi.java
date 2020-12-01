@@ -922,6 +922,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             showStatusPanel();
         }
         fetchUserOptions();
+
+        Window.addWindowClosingHandler(e -> {
+            if (isUiDirty()) {
+                e.setMessage(MSGS.deviceConfigDirty());
+            }
+        });
     }
 
     private void showStatusPanel() {

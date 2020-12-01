@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
@@ -29,6 +30,7 @@ import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web2.ext.WidgetFactory;
+import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.NavTabs;
 import org.gwtbootstrap3.client.ui.TabContent;
 import org.gwtbootstrap3.client.ui.TabListItem;
@@ -36,6 +38,7 @@ import org.gwtbootstrap3.client.ui.TabPane;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -84,6 +87,11 @@ public class SecurityPanelUi extends Composite {
     @UiField
     HTMLPanel securityIntro;
 
+    @UiField
+    AlertDialog alertDialog;
+
+    private TabListItem selected = certificateList;
+
     public SecurityPanelUi() {
         logger.log(Level.FINER, "Initiating SecurityPanelUI...");
 
@@ -106,11 +114,12 @@ public class SecurityPanelUi extends Composite {
         };
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
-        this.certificateList.addClickHandler(new Tab.RefreshHandler(this.certificateListPanel));
-        this.httpService.addClickHandler(
-                e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", httpServicePanel));
-        this.console.addClickHandler(e -> this.loadServiceConfig("org.eclipse.kura.web.Console", consolePanel));
-        this.security.addClickHandler(new Tab.RefreshHandler(this.securityPanel));
+        this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
+        this.httpService.addClickHandler(addDirtyCheck(
+                e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", httpServicePanel)));
+        this.console.addClickHandler(
+                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console", consolePanel)));
+        this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
     public void loadServiceConfig(final String pid, final TabPane panel) {
@@ -162,7 +171,31 @@ public class SecurityPanelUi extends Composite {
         getHttpServiceConfigUi().ifPresent(u -> u.setDirty(b));
     }
 
+    private ClickHandler addDirtyCheck(final ClickHandler handler) {
+        return e -> {
+            final TabListItem newSelection = (TabListItem) ((Anchor) e.getSource()).getParent();
+            if (isDirty()) {
+                this.alertDialog.show(MSGS.deviceConfigDirty(), accepted -> {
+                    if (accepted) {
+                        setDirty(false);
+                        handler.onClick(e);
+                        selected = newSelection;
+                    } else {
+                        selected.showTab();
+                    }
+                });
+            } else {
+                handler.onClick(e);
+                selected = newSelection;
+            }
+        };
+    }
+
     public Optional<ServicesUi> getHttpServiceConfigUi() {
+        if (this.httpServicePanel.getWidgetCount() == 0) {
+            return Optional.empty();
+        }
+
         return Optional.ofNullable(((ServicesUi) this.httpServicePanel.getWidget(0)));
     }
 }

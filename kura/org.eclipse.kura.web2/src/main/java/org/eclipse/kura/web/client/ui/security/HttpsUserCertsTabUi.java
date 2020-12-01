@@ -12,11 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
-import org.eclipse.kura.web.client.util.FailureHandler;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -26,13 +27,16 @@ import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.ValidationChangedEvent.ValidationChangedHandler;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -78,6 +82,8 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
+        this.reset.setEnabled(flag);
+        this.apply.setEnabled(isValid());
     }
 
     @Override
@@ -87,7 +93,7 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
 
     @Override
     public boolean isValid() {
-        return isServerCertValid();
+        return this.certificateInput.validate();
     }
 
     @Override
@@ -107,74 +113,66 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
         title.append("</p>");
         this.description.add(new Span(title.toString()));
 
+        final Validator<String> validator = new Validator<String>() {
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                final List<EditorError> result = new ArrayList<>();
+
+                if (value == null || value.isEmpty()) {
+                    result.add(new BasicEditorError(editor, value, MSGS.formRequiredParameter()));
+                }
+
+                return result;
+            }
+        };
+
+        final ValidationChangedHandler validationChangeHandler = e -> this.apply.setEnabled(isValid());
+
+        this.certificateInput.addValidationChangedHandler(validationChangeHandler);
+
+        this.certificateInput.addValidator(validator);
+
+        this.certificateInput.addKeyUpHandler(e -> {
+            this.certificateInput.validate();
+            setDirty(true);
+        });
+
         this.certificateLabel.setText(MSGS.loginAddCertLabel());
         this.certificateInput.setVisibleLines(20);
         this.certificateInput.addChangeHandler(event -> {
-            isServerCertValid();
+            this.certificateInput.validate();
             setDirty(true);
-            HttpsUserCertsTabUi.this.apply.setEnabled(true);
-            HttpsUserCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
             reset();
             setDirty(false);
-            HttpsUserCertsTabUi.this.apply.setEnabled(false);
-            HttpsUserCertsTabUi.this.reset.setEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
             if (isValid()) {
-                EntryClassUi.showWaitModal();
-                HttpsUserCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        HttpsUserCertsTabUi.this.gwtCertificatesService.storeLoginPublicChain(token,
-                                HttpsUserCertsTabUi.this.certificateInput.getValue(), new AsyncCallback<Integer>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        FailureHandler.showErrorMessage("Error storing login certificates",
-                                                caught.getStackTrace());
-                                        EntryClassUi.hideWaitModal();
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Integer certsStored) {
-                                        reset();
-                                        setDirty(false);
-                                        HttpsUserCertsTabUi.this.apply.setEnabled(false);
-                                        HttpsUserCertsTabUi.this.reset.setEnabled(false);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-                                });
-                    }
-                });
+                RequestQueue.submit(
+                        c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> this.gwtCertificatesService
+                                .storeLoginPublicChain(token, this.certificateInput.getValue(), c.callback(ok -> {
+                                    reset();
+                                    setDirty(false);
+                                })))));
             }
         });
+
+        this.certificateInput.validate();
     }
 
     private void reset() {
         this.certificateInput.setText("");
-    }
-
-    private boolean isServerCertValid() {
-        if (this.certificateInput.getText() == null || "".equals(this.certificateInput.getText().trim())) {
-            this.groupCertForm.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupCertForm.setValidationState(ValidationState.NONE);
-            return true;
-        }
     }
 
     @Override

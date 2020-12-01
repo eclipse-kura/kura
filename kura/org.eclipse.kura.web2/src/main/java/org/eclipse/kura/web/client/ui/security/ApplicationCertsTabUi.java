@@ -12,11 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
-import org.eclipse.kura.web.client.util.FailureHandler;
-import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -27,13 +28,16 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.constants.ValidationState;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.ValidationChangedEvent.ValidationChangedHandler;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -84,14 +88,16 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
 
     @Override
     public boolean isValid() {
-        boolean validAlias = isAliasValid();
-        boolean validAppCert = isAppCertValid();
+        boolean validAlias = this.formStorageAlias.validate();
+        boolean validAppCert = this.formCert.validate();
         return validAlias && validAppCert;
     }
 
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
+        this.reset.setEnabled(flag);
+        this.apply.setEnabled(isValid());
     }
 
     @Override
@@ -110,93 +116,81 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     private void initForm() {
         this.description.add(new Span("<p>" + MSGS.settingsAddBundleCertsDescription() + "</p>"));
 
+        final Validator<String> validator = new Validator<String>() {
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                final List<EditorError> result = new ArrayList<>();
+
+                if (value == null || value.isEmpty()) {
+                    result.add(new BasicEditorError(editor, value, MSGS.formRequiredParameter()));
+                }
+
+                return result;
+            }
+        };
+
+        final ValidationChangedHandler validationChangeHandler = e -> this.apply.setEnabled(isValid());
+
+        this.formCert.addValidationChangedHandler(validationChangeHandler);
+        this.formStorageAlias.addValidationChangedHandler(validationChangeHandler);
+
+        this.formCert.addValidator(validator);
+        this.formStorageAlias.addValidator(validator);
+
+        this.formCert.addKeyUpHandler(e -> {
+            this.formCert.validate();
+            setDirty(true);
+        });
+        this.formStorageAlias.addKeyUpHandler(e -> {
+            this.formStorageAlias.validate();
+            setDirty(true);
+        });
+
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
         this.formStorageAlias.addChangeHandler(event -> {
-            isAliasValid();
+            this.formStorageAlias.validate();
             setDirty(true);
-            ApplicationCertsTabUi.this.apply.setEnabled(true);
-            ApplicationCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
         this.formCert.setVisibleLines(20);
         this.formCert.addChangeHandler(event -> {
-            isAppCertValid();
+            this.formCert.validate();
             setDirty(true);
-            ApplicationCertsTabUi.this.apply.setEnabled(true);
-            ApplicationCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
             reset();
             setDirty(false);
-            ApplicationCertsTabUi.this.apply.setEnabled(false);
-            ApplicationCertsTabUi.this.reset.setEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
             if (isValid()) {
-                EntryClassUi.showWaitModal();
-                ApplicationCertsTabUi.this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+                RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
+                        c.callback(token -> this.gwtCertificatesService.storeApplicationPublicChain(token,
+                                this.formCert.getValue(), this.formStorageAlias.getValue(), c.callback(ok -> {
+                                    reset();
+                                    setDirty(false);
+                                })))));
 
-                    @Override
-                    public void onFailure(Throwable ex) {
-                        FailureHandler.handle(ex);
-                        EntryClassUi.hideWaitModal();
-                    }
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken token) {
-                        ApplicationCertsTabUi.this.gwtCertificatesService.storeApplicationPublicChain(token,
-                                ApplicationCertsTabUi.this.formCert.getValue(),
-                                ApplicationCertsTabUi.this.formStorageAlias.getValue(), new AsyncCallback<Integer>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        FailureHandler.handle(caught);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Integer certsStored) {
-                                        reset();
-                                        setDirty(false);
-                                        ApplicationCertsTabUi.this.apply.setEnabled(false);
-                                        ApplicationCertsTabUi.this.reset.setEnabled(false);
-                                        EntryClassUi.hideWaitModal();
-                                    }
-                                });
-                    }
-                });
             }
         });
+
+        this.formCert.validate();
+        this.formStorageAlias.validate();
     }
 
     private void reset() {
         this.formStorageAlias.setText("");
         this.formCert.setText("");
-    }
-
-    private boolean isAliasValid() {
-        if (this.formStorageAlias.getText() == null || "".equals(this.formStorageAlias.getText().trim())) {
-            this.groupStorageAlias.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupStorageAlias.setValidationState(ValidationState.NONE);
-            return true;
-        }
-    }
-
-    private boolean isAppCertValid() {
-        if (this.formCert.getText() == null || "".equals(this.formCert.getText().trim())) {
-            this.groupFormCert.setValidationState(ValidationState.ERROR);
-            return false;
-        } else {
-            this.groupFormCert.setValidationState(ValidationState.NONE);
-            return true;
-        }
     }
 
     @Override

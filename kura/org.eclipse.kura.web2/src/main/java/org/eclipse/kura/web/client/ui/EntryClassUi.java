@@ -780,7 +780,8 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     public boolean isUiDirty() {
         return isServicesUiDirty() || isNetworkDirty() || isFirewallDirty() || isSettingsDirty()
-                || isCloudServicesDirty() || isWiresDirty() || isDriversAndTwinsDirty() || isUsersDirty();
+                || isCloudServicesDirty() || isWiresDirty() || isDriversAndTwinsDirty() || isUsersDirty()
+                || isSecurityDirty();
     }
 
     public boolean isServicesUiDirty() {
@@ -802,6 +803,14 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     public boolean isFirewallDirty() {
         if (this.firewall.isVisible()) {
             return this.firewallBinder.isDirty();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isSecurityDirty() {
+        if (this.security.isVisible()) {
+            return this.securityBinder.isDirty();
         } else {
             return false;
         }
@@ -891,6 +900,9 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         }
         if (this.cloudServices.isVisible()) {
             this.cloudServicesBinder.setDirty(false);
+        }
+        if (this.security.isVisible()) {
+            this.securityBinder.setDirty(false);
         }
         if (this.wires.isVisible()) {
             this.wiresBinder.clearDirtyState();

@@ -159,6 +159,10 @@
 										<b:AnchorListItem icon="BRIEFCASE"
 											iconFixedWidth="true" text="{msgs.packages}"
 											ui:field="packages" />
+											
+									    <b:AnchorListItem icon="SHIELD"
+											iconFixedWidth="true" text="{msgs.security}"
+											ui:field="security" />
 
 										<b:AnchorListItem icon="GEAR"
 											iconFixedWidth="true" text="{msgs.settings}"

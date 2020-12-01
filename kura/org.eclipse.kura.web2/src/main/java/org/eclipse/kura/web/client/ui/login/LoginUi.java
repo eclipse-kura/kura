@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -9,16 +9,19 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.login;
 
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.service.GwtBannerService;
-import org.eclipse.kura.web.shared.service.GwtBannerServiceAsync;
+import org.eclipse.kura.web.shared.model.GwtLoginInfo;
+import org.eclipse.kura.web.shared.service.GwtLoginInfoService;
+import org.eclipse.kura.web.shared.service.GwtLoginInfoServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationServiceAsync;
 import org.eclipse.kura.web2.ext.AlertSeverity;
@@ -37,12 +40,12 @@ import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.constants.InputType;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -61,13 +64,11 @@ public class LoginUi extends Composite implements Context {
     private static final LoginUiBinder uiBinder = GWT.create(LoginUiBinder.class);
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private final GwtBannerServiceAsync gwtBannerService = GWT.create(GwtBannerService.class);
+    private final GwtLoginInfoServiceAsync gwtLoginInfoService = GWT.create(GwtLoginInfoService.class);
 
     interface LoginUiBinder extends UiBinder<Widget, LoginUi> {
     }
 
-    @UiField
-    Input usernameInput;
     @UiField
     AlertDialog alertDialog;
     @UiField
@@ -94,53 +95,49 @@ public class LoginUi extends Composite implements Context {
     private Widget authenticationMethodWidget;
     private AuthenticationHandler authenticationHandler;
 
-    private final Map<String, AuthenticationHandler> authenticationHandlers = new HashMap<>();
+    private Set<String> enabledAuthenticationHandlers = new HashSet<>();
+
+    private final Map<String, AuthenticationHandler> authenticationHandlers = new LinkedHashMap<>();
 
     public LoginUi() {
         initWaitModal();
         initWidget(uiBinder.createAndBindUi(this));
-
-        addAuthenticationHandler(new PasswordAuthenticationHandler());
-
-        this.authenticationMethod.setSelectedIndex(0);
-        this.authenticationMethod
-                .addChangeHandler(e -> setAuthenticationMethod(this.authenticationMethod.getSelectedItemText()));
-
-        setAuthenticationMethod("Password");
-
-        ExtensionRegistry.get().addExtensionConsumer(e -> e.onLoad(this));
     }
 
-    private void initLoginBannerModal() {
+    private void initLoginBannerModal(final GwtLoginInfo loginInfo) {
         this.accessBannerModal.setTitle(MSGS.warning());
         this.buttonAccessBannerModalOk.setText(MSGS.okButton());
 
-        this.gwtBannerService.getLoginBanner(new AsyncCallback<String>() {
+        if (loginInfo.getBannerContent() != null) {
+            LoginUi.this.accessBannerModalPannelBody.setText(loginInfo.getBannerContent());
+            LoginUi.this.accessBannerModal.show();
+        }
+    }
 
-            @Override
-            public void onFailure(Throwable caught) {
-                // Nothing to do
-            }
+    private void initAuthenticationHandlers(final GwtLoginInfo loginInfo) {
 
-            @Override
-            public void onSuccess(String banner) {
-                if (banner != null) {
-                    LoginUi.this.accessBannerModalPannelBody.setText(banner);
-                    LoginUi.this.accessBannerModal.show();
-                }
-            }
-        });
+        enabledAuthenticationHandlers = loginInfo.getEnabledAuthMethods();
+
+        addAuthenticationHandler(new PasswordAuthenticationHandler());
+
+        if (loginInfo.getCertAuthPort() != null) {
+            addAuthenticationHandler(new CertificateAuthenticationHandler(loginInfo.getCertAuthPort()));
+        }
+
+        authenticationMethod.addChangeHandler(e -> setAuthenticationMethod(authenticationMethod.getSelectedItemText()));
+
+        ExtensionRegistry.get().addExtensionConsumer(e -> e.onLoad(LoginUi.this));
+
     }
 
     @Override
     protected void onAttach() {
         super.onAttach();
-        this.usernameInput.setFocus(true);
 
         this.loginForm.addSubmitHandler(e -> {
             e.cancel();
             this.waitModal.show();
-            this.authenticationHandler.authenticate(this.usernameInput.getValue(), new Callback<String, String>() {
+            this.authenticationHandler.authenticate(new Callback<String, String>() {
 
                 @Override
                 public void onSuccess(String result) {
@@ -156,9 +153,22 @@ public class LoginUi extends Composite implements Context {
         });
 
         this.loginDialog.show();
-        initLoginBannerModal();
+        this.gwtLoginInfoService.getLoginInfo(new AsyncCallback<GwtLoginInfo>() {
+
+            @Override
+            public void onFailure(final Throwable caught) {
+                // do nothing
+            }
+
+            @Override
+            public void onSuccess(final GwtLoginInfo result) {
+                initLoginBannerModal(result);
+                initAuthenticationHandlers(result);
+            }
+        });
+
     }
-    
+
     @UiHandler("loginResetButton")
     public void onFormResetClick(ClickEvent event) {
         loginForm.reset();
@@ -214,10 +224,20 @@ public class LoginUi extends Composite implements Context {
     public void addAuthenticationHandler(final AuthenticationHandler authenticationHandler) {
         final String name = authenticationHandler.getName();
 
+        if (!enabledAuthenticationHandlers.contains(name)) {
+            return;
+        }
+
         this.authenticationHandlers.put(name, authenticationHandler);
         this.authenticationMethod.addItem(name);
 
-        this.authenticationMethodGroup.setVisible(this.authenticationHandlers.size() > 1);
+        if (this.authenticationHandlers.size() == 1) {
+            this.authenticationMethod.setSelectedIndex(0);
+            this.authenticationMethodGroup.setVisible(false);
+            setAuthenticationMethod(authenticationHandler.getName());
+        }
+
+        this.authenticationMethodGroup.setVisible(this.authenticationHandlers.size() >= 2);
     }
 
     @Override
@@ -252,10 +272,31 @@ public class LoginUi extends Composite implements Context {
 
     private class PasswordAuthenticationHandler implements AuthenticationHandler {
 
+        private final FormGroup group = new FormGroup();
+
+        private final InputGroup usernameGroup = new InputGroup();
+        private final Input usernameInput = new Input();
+
         private final InputGroup passwordGroup = new InputGroup();
         private final Input passwordInput = new Input();
 
         public PasswordAuthenticationHandler() {
+
+            this.usernameGroup.addStyleName("login-input");
+
+            this.usernameInput.setPlaceholder("Enter username");
+            this.usernameInput.setType(InputType.TEXT);
+            this.usernameInput.setAutoComplete(false);
+            this.usernameInput.setId("login-user");
+
+            final InputGroupAddon usernameAddon = new InputGroupAddon();
+            usernameAddon.setIcon(IconType.USER);
+            usernameAddon.setIconSize(IconSize.LARGE);
+            usernameAddon.addStyleName("login-icon");
+
+            this.usernameGroup.add(usernameAddon);
+            this.usernameGroup.add(usernameInput);
+
             this.passwordGroup.addStyleName("login-input");
 
             this.passwordInput.setPlaceholder("Enter password");
@@ -263,13 +304,16 @@ public class LoginUi extends Composite implements Context {
             this.passwordInput.setAutoComplete(false);
             this.passwordInput.setId("login-password");
 
-            final InputGroupAddon addon = new InputGroupAddon();
-            addon.setIcon(IconType.KEY);
-            addon.setIconSize(IconSize.LARGE);
-            addon.addStyleName("login-icon");
+            final InputGroupAddon passwordAddon = new InputGroupAddon();
+            passwordAddon.setIcon(IconType.KEY);
+            passwordAddon.setIconSize(IconSize.LARGE);
+            passwordAddon.addStyleName("login-icon");
 
-            this.passwordGroup.add(addon);
+            this.passwordGroup.add(passwordAddon);
             this.passwordGroup.add(this.passwordInput);
+
+            this.group.add(usernameGroup);
+            this.group.add(passwordGroup);
         }
 
         @Override
@@ -281,14 +325,14 @@ public class LoginUi extends Composite implements Context {
         public WidgetFactory getLoginDialogElement() {
             return () -> {
                 this.passwordInput.setValue("");
-                return this.passwordGroup;
+                return this.group;
             };
         }
 
         @Override
-        public void authenticate(final String userName, final Callback<String, String> callback) {
-            LoginUi.this.pwdAutenticationService.authenticate(userName, this.passwordInput.getValue(),
-                    new AsyncCallback<String>() {
+        public void authenticate(final Callback<String, String> callback) {
+            LoginUi.this.pwdAutenticationService.authenticate(this.usernameInput.getValue(),
+                    this.passwordInput.getValue(), new AsyncCallback<String>() {
 
                         @Override
                         public void onSuccess(final String redirectPath) {
@@ -306,6 +350,36 @@ public class LoginUi extends Composite implements Context {
                         }
                     });
 
+        }
+
+    }
+
+    private class CertificateAuthenticationHandler implements AuthenticationHandler {
+
+        private final int clientAuthPort;
+
+        public CertificateAuthenticationHandler(final int clientAuthPort) {
+            this.clientAuthPort = clientAuthPort;
+        }
+
+        @Override
+        public String getName() {
+            return "Certificate";
+        }
+
+        @Override
+        public WidgetFactory getLoginDialogElement() {
+            return () -> {
+                final Paragraph paragraph = new Paragraph();
+                paragraph.setText("Press Login to perform certificate based authentication.");
+                return paragraph;
+            };
+        }
+
+        @Override
+        public void authenticate(Callback<String, String> callback) {
+            Window.Location
+                    .assign("https://" + Window.Location.getHostName() + ":" + clientAuthPort + "/admin/login/cert");
         }
 
     }

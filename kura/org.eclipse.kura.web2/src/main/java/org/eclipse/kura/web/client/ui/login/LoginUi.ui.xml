@@ -1,6 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 
-<!-- Copyright (c) 2019 Eurotech and/or its affiliates All rights reserved. 
+<!-- Copyright (c) 2019, 2020 Eurotech and/or its affiliates All rights reserved. 
 	This program and the accompanying materials are made available under the 
 	terms of the Eclipse Public License v1.0 which accompanies this distribution, 
 	and is available at http://www.eclipse.org/legal/epl-v10.html -->
@@ -26,12 +26,6 @@
                                 </b:ListBox>
                             </g:FlowPanel>
                         </b:FormGroup>
-						<b:InputGroup addStyleNames="login-input">
-							<b:InputGroupAddon icon="USER" iconSize="LARGE"
-								addStyleNames="login-icon" />
-							<b:Input placeholder="Enter username" allowBlank="false" type="TEXT"
-								autoComplete="false" ui:field="usernameInput" b:id="login-user" />
-						</b:InputGroup>
 			</b:ModalBody>
 			<b:ModalFooter>
                 <b:Button type="PRIMARY" text="Reset" b:id="reset-button" ui:field="loginResetButton"/>

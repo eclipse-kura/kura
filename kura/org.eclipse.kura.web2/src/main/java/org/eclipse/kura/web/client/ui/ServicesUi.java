@@ -16,6 +16,7 @@
 package org.eclipse.kura.web.client.ui;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.logging.Level;
 
 import org.eclipse.kura.web.client.util.FailureHandler;
@@ -72,7 +73,6 @@ public class ServicesUi extends AbstractServicesUi {
     AnchorListItem service;
     TextBox validated;
     FormGroup validatedGroup;
-    EntryClassUi entryClass;
     Modal modal;
 
     @UiField
@@ -104,13 +104,15 @@ public class ServicesUi extends AbstractServicesUi {
     @UiField
     ModalBody deleteModalBody;
 
+    private final Optional<Listener> listener;
+
     //
     // Public methods
     //
-    public ServicesUi(final GwtConfigComponent addedItem, EntryClassUi entryClassUi) {
+    public ServicesUi(final GwtConfigComponent addedItem, final Optional<Listener> listener) {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
-        this.entryClass = entryClassUi;
+        this.listener = listener;
         this.originalConfig = addedItem;
         restoreConfiguration(this.originalConfig);
         this.fields.clear();
@@ -137,6 +139,10 @@ public class ServicesUi extends AbstractServicesUi {
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
         this.delete.setEnabled(this.configurableComponent.isFactoryComponent());
+    }
+
+    public ServicesUi(final GwtConfigComponent addedItem) {
+        this(addedItem, Optional.empty());
     }
 
     @Override
@@ -193,7 +199,7 @@ public class ServicesUi extends AbstractServicesUi {
 
                     @Override
                     public void run() {
-                        ServicesUi.this.entryClass.fetchAvailableServices(null);
+                        listener.ifPresent(Listener::onConfigurationChanged);
                     }
                 };
 
@@ -337,8 +343,8 @@ public class ServicesUi extends AbstractServicesUi {
                                             ServicesUi.this.reset.setEnabled(false);
                                             setDirty(false);
                                             ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
-                                            context.defer(2000,
-                                                    () -> ServicesUi.this.entryClass.fetchAvailableServices(null));
+                                            context.defer(2000, () -> ServicesUi.this.listener
+                                                    .ifPresent(Listener::onConfigurationChanged));
                                         }
                                     })))));
 
@@ -370,5 +376,10 @@ public class ServicesUi extends AbstractServicesUi {
     private void initInvalidDataModal() {
         this.incompleteFieldsModal.setTitle(MSGS.warning());
         this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+    }
+
+    public interface Listener {
+
+        public void onConfigurationChanged();
     }
 }

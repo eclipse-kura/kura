@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -35,6 +35,12 @@ public class ExampleAuthenticationHandler implements Extension {
 
     private class AlwaysSucceeds implements AuthenticationHandler {
 
+        private final Input usernameInput = new Input();
+
+        public AlwaysSucceeds() {
+            usernameInput.setPlaceholder("Enter user name");
+        }
+
         @Override
         public String getName() {
             return "Always Succeeds";
@@ -42,12 +48,12 @@ public class ExampleAuthenticationHandler implements Extension {
 
         @Override
         public WidgetFactory getLoginDialogElement() {
-            return null;
+            return () -> usernameInput;
         }
 
         @Override
-        public void authenticate(final String userName, final Callback<String, String> callback) {
-            DUMMY_AUTH.login(userName, new AsyncCallback<String>() {
+        public void authenticate(final Callback<String, String> callback) {
+            DUMMY_AUTH.login(usernameInput.getText(), new AsyncCallback<String>() {
 
                 @Override
                 public void onSuccess(String result) {
@@ -101,8 +107,8 @@ public class ExampleAuthenticationHandler implements Extension {
         }
 
         @Override
-        public void authenticate(final String userName, final Callback<String, String> callback) {
-            callback.onFailure(userName + " is not authorized, message: " + this.exampleWidget.getText());
+        public void authenticate(final Callback<String, String> callback) {
+            callback.onFailure("not authorized, message: " + this.exampleWidget.getText());
         }
     }
 

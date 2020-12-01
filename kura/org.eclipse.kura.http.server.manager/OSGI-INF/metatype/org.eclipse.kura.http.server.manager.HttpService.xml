@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2019 Eurotech and/or its affiliates
+    Copyright (c) 2019, 2020 Eurotech and/or its affiliates
 
      All rights reserved. This program and the accompanying materials
      are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,7 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.http.server.manager.HttpService"
-         name="HttpService" 
+         name="HttpService"
          description="This service allows the user to enable and configure the http and https connectors in Kura web server. Every change to this service will cause a restart of the web server and a possible temporary UI unavailability.">
 
         <AD id="http.enabled"
@@ -25,18 +25,18 @@
             default="true"
             description="Specifies if the http service is enabled.">
         </AD>
-        
-        <AD id="http.port"  
+
+        <AD id="http.port"
             name="HTTP Port"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="80" 
+            default="80"
             min = "1"
             max = "65535"
             description="Allows to specify the port used by the http service for plain, unencrypted communication.">
         </AD>
-        
+
         <AD id="https.enabled"
             name="HTTPS Enabled"
             type="Boolean"
@@ -45,34 +45,87 @@
             default="false"
             description="Specifies if the https service is enabled.">
         </AD>
-        
-        <AD id="https.port"  
+
+        <AD id="https.port"
             name="HTTPS Port"
             type="Integer"
-            cardinality="0" 
+            cardinality="0"
             required="true"
-            default="443" 
+            default="443"
             min = "1"
             max = "65535"
             description="Allows to specify the port used by the https service for encrypted communication.">
         </AD>
-        
-        <AD id="https.keystore.path"  
+
+        <AD id="https.client.auth.enabled"
+            name="HTTPS Client Authentication Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Specifies if the HTTPS client autentication is enabled on the dedicated port.">
+        </AD>
+
+        <AD id="https.client.auth.port"
+            name="HTTPS Client Authentication Port"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="4443"
+            min = "1"
+            max = "65535"
+            description="Allows to specify the port used by the https service for encrypted communication with client authentication.">
+        </AD>
+
+        <AD id="https.keystore.path"
             name="HTTPS Keystore Path"
             type="String"
-            cardinality="0" 
+            cardinality="0"
             required="false"
             description="Specifies the path to the keystore used for https communication."/>
-        
-        <AD id="https.keystore.password"  
+
+        <AD id="https.keystore.password"
             name="HTTPS Keystore Password"
             type="Password"
-            cardinality="0" 
+            cardinality="0"
             required="false"
-            default="changeit" 
+            default="changeit"
             description="Specifies the password for accessing and verifying the configured keystore."/>
+
+        <AD id="https.revocation.check.enabled"
+            name="Https Revocation Check Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="Specifies whether to check revocation status of client certificats."/>
+
+        <AD id="https.client.ocsp.url"
+            name="Https Client Revocation URL"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Specifies the URI for OCSP responders."/>
+
+        <AD id="https.client.crl.path"
+            name="Https Client CRL path"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="Specifies the path for the CRL for client certificate revocation check."/>
+
+        <AD id="https.client.revocation.soft.fail"
+            name="Https Revocation Soft-fail Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected."/>
+
     </OCD>
-    
+
     <Designate pid="org.eclipse.kura.http.server.manager.HttpService">
         <Object ocdref="org.eclipse.kura.http.server.manager.HttpService"/>
     </Designate>

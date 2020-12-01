@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019 Eurotech and/or its affiliates
+ * Copyright (c) 2019, 2020 Eurotech and/or its affiliates
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,8 +31,8 @@ public class AuthenticationHandlerAdapter implements Adapter<AuthenticationHandl
         obj.set(GET_NAME, new SupplierAdapter<>(new IdentityAdapter<>()).adaptNullable(authenticationHandler::getName));
         obj.set(GET_LOGIN_DIALOG_ELEMENT, new SupplierAdapter<>(new WidgetFactoryAdapter())
                 .adaptNullable(authenticationHandler::getLoginDialogElement));
-        obj.set(AUTHENTICATE, new BiConsumerAdapter<>(new IdentityAdapter<String>(), CALLBACK_ADAPTER)
-                .adaptNullable(authenticationHandler::authenticate));
+        obj.set(AUTHENTICATE,
+                new ConsumerAdapter<>(CALLBACK_ADAPTER).adaptNullable(authenticationHandler::authenticate));
 
         return obj;
     }
@@ -56,14 +56,13 @@ public class AuthenticationHandlerAdapter implements Adapter<AuthenticationHandl
             }
 
             @Override
-            public void authenticate(final String userName, final Callback<String, String> callback) {
+            public void authenticate(final Callback<String, String> callback) {
 
                 final JsObject obj = jsAuthenticationHandler.cast();
 
-                final JavaScriptObject jsString = new IdentityAdapter<>().adaptNullable(userName);
                 final JavaScriptObject jsCallback = CALLBACK_ADAPTER.adaptNullable(callback);
 
-                obj.call(AUTHENTICATE, JsObject.toArray(jsString, jsCallback));
+                obj.call(AUTHENTICATE, JsObject.toArray(jsCallback));
             }
         };
     }

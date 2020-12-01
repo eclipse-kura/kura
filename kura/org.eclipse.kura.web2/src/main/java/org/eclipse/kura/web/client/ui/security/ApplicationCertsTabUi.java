@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.settings;
+package org.eclipse.kura.web.client.ui.security;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -77,7 +77,8 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         initForm();
 
         setDirty(false);
-        setButtonsEnabled(false);
+        this.apply.setEnabled(false);
+        this.reset.setEnabled(false);
     }
 
     @Override
@@ -105,11 +106,6 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         }
     }
 
-    @Override
-    public void clear() {
-        reset();
-    }
-
     private void initForm() {
         this.description.add(new Span("<p>" + MSGS.settingsAddBundleCertsDescription() + "</p>"));
 
@@ -117,7 +113,8 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         this.formStorageAlias.addChangeHandler(event -> {
             isAliasValid();
             setDirty(true);
-            setButtonsEnabled(true);
+            ApplicationCertsTabUi.this.apply.setEnabled(true);
+            ApplicationCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
@@ -125,14 +122,16 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         this.formCert.addChangeHandler(event -> {
             isAppCertValid();
             setDirty(true);
-            setButtonsEnabled(true);
+            ApplicationCertsTabUi.this.apply.setEnabled(true);
+            ApplicationCertsTabUi.this.reset.setEnabled(true);
         });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
             reset();
             setDirty(false);
-            setButtonsEnabled(false);
+            ApplicationCertsTabUi.this.apply.setEnabled(false);
+            ApplicationCertsTabUi.this.reset.setEnabled(false);
         });
 
         this.apply.setText(MSGS.apply());
@@ -163,7 +162,8 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
                                     public void onSuccess(Integer certsStored) {
                                         reset();
                                         setDirty(false);
-                                        setButtonsEnabled(false);
+                                        ApplicationCertsTabUi.this.apply.setEnabled(false);
+                                        ApplicationCertsTabUi.this.reset.setEnabled(false);
                                         EntryClassUi.hideWaitModal();
                                     }
                                 });
@@ -174,7 +174,6 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     }
 
     private void reset() {
-        setButtonsEnabled(false);
         this.formStorageAlias.setText("");
         this.formCert.setText("");
     }
@@ -199,9 +198,9 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         }
     }
 
-    private void setButtonsEnabled(boolean state) {
-        ApplicationCertsTabUi.this.apply.setEnabled(state);
-        ApplicationCertsTabUi.this.reset.setEnabled(state);
-    }
+    @Override
+    public void clear() {
+        // TODO Auto-generated method stub
 
+    }
 }

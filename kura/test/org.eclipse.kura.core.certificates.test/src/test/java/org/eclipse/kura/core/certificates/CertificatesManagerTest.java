@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,8 +8,11 @@
  *******************************************************************************/
 package org.eclipse.kura.core.certificates;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.security.cert.Certificate;
 import java.util.ArrayList;
@@ -22,153 +25,151 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Test;
 
 public class CertificatesManagerTest {
-	@Test
-	public void testReturnCertificate() throws NoSuchFieldException, KuraException {
-		// Create an extended manager instance with test support
-		String keyStorePassword = "password";
-		String certificateAlias = "alias";
-		String invalidCertificateAlias = "invalid";
-		Certificate mockCertificate = mock(Certificate.class);
-		CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, certificateAlias,
-				mockCertificate, null);
 
-		String keyStorePath = getDefaultKeyStore(manager);
-		CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
+    @Test
+    public void testReturnCertificate() throws NoSuchFieldException, KuraException {
+        // Create an extended manager instance with test support
+        String keyStorePassword = "password";
+        String certificateAlias = "alias";
+        String invalidCertificateAlias = "invalid";
+        Certificate mockCertificate = mock(Certificate.class);
+        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, certificateAlias,
+                mockCertificate, null);
 
-		manager.setCryptoService(mockCryptoService);
+        String keyStorePath = getDefaultKeyStore(manager);
+        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
 
-		// Try to get a certificate with a valid alias
-		Certificate certificate = manager.returnCertificate(certificateAlias);
-		assertEquals(mockCertificate, certificate);
+        manager.setCryptoService(mockCryptoService);
 
-		// Try to get a certificate with an invalid alias
-		certificate = manager.returnCertificate(invalidCertificateAlias);
-		assertNull(certificate);
-	}
+        // Try to get a certificate with a valid alias
+        Certificate certificate = manager.returnCertificate(certificateAlias);
+        assertEquals(mockCertificate, certificate);
 
-	@Test(expected = KuraException.class)
-	public void testStoreCertificate() throws KuraException {
-		// Not implemented, always throws an exception
-		CertificatesManager manager = new CertificatesManager();
+        // Try to get a certificate with an invalid alias
+        certificate = manager.returnCertificate(invalidCertificateAlias);
+        assertNull(certificate);
+    }
 
-		Certificate mockCertificate = mock(Certificate.class);
-		manager.storeCertificate(mockCertificate, "alias");
-	}
+    public void testStoreCertificate() throws KuraException {
+        // Not implemented, always throws an exception
+        CertificatesManager manager = new CertificatesManager();
 
-	@Test
-	public void testListBundleCertificatesAliases() throws NoSuchFieldException {
-		// Create an extended manager instance with test support
-		String keyStorePassword = "password";
-		ArrayList<String> aliases = new ArrayList<>();
-		aliases.add("alias1");
-		aliases.add("alias2");
-		CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-				Collections.enumeration(aliases));
+        Certificate mockCertificate = mock(Certificate.class);
+        manager.storeCertificate(mockCertificate, "alias");
+    }
 
-		String keyStorePath = getDefaultKeyStore(manager);
-		CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
+    @Test
+    public void testListBundleCertificatesAliases() throws NoSuchFieldException {
+        // Create an extended manager instance with test support
+        String keyStorePassword = "password";
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("alias1");
+        aliases.add("alias2");
+        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
+                Collections.enumeration(aliases));
 
-		manager.setCryptoService(mockCryptoService);
+        String keyStorePath = getDefaultKeyStore(manager);
+        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
 
-		// Read aliases
-		Enumeration<String> readAliases = manager.listBundleCertificatesAliases();
-		ArrayList<String> readAliasesList = Collections.list(readAliases);
+        manager.setCryptoService(mockCryptoService);
 
-		assertEquals(aliases.size(), readAliasesList.size());
-		assertTrue(readAliasesList.containsAll(aliases));
-	}
+        // Read aliases
+        Enumeration<String> readAliases = manager.listBundleCertificatesAliases();
+        ArrayList<String> readAliasesList = Collections.list(readAliases);
 
-	@Test
-	public void testListDMCertificatesAliases() throws NoSuchFieldException {
-		// Create an extended manager instance with test support
-		String keyStorePassword = "password";
-		ArrayList<String> aliases = new ArrayList<>();
-		aliases.add("alias1");
-		aliases.add("alias2");
-		CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-				Collections.enumeration(aliases));
+        assertEquals(aliases.size(), readAliasesList.size());
+        assertTrue(readAliasesList.containsAll(aliases));
+    }
 
-		String keyStorePath = getDefaultKeyStore(manager);
-		CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
+    @Test
+    public void testListDMCertificatesAliases() throws NoSuchFieldException {
+        // Create an extended manager instance with test support
+        String keyStorePassword = "password";
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("alias1");
+        aliases.add("alias2");
+        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
+                Collections.enumeration(aliases));
 
-		manager.setCryptoService(mockCryptoService);
+        String keyStorePath = getDefaultKeyStore(manager);
+        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
 
-		// Read aliases
-		Enumeration<String> readAliases = manager.listDMCertificatesAliases();
-		ArrayList<String> readAliasesList = Collections.list(readAliases);
+        manager.setCryptoService(mockCryptoService);
 
-		assertEquals(aliases.size(), readAliasesList.size());
-		assertTrue(readAliasesList.containsAll(aliases));
-	}
+        // Read aliases
+        Enumeration<String> readAliases = manager.listDMCertificatesAliases();
+        ArrayList<String> readAliasesList = Collections.list(readAliases);
 
-	@Test
-	public void testListSSLCertificatesAliases() throws NoSuchFieldException {
-		// Create an extended manager instance with test support
-		String keyStorePassword = "password";
-		ArrayList<String> aliases = new ArrayList<>();
-		aliases.add("alias1");
-		aliases.add("alias2");
-		CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-				Collections.enumeration(aliases));
+        assertEquals(aliases.size(), readAliasesList.size());
+        assertTrue(readAliasesList.containsAll(aliases));
+    }
 
-		String keyStorePath = getDefaultKeyStore(manager);
-		CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
+    @Test
+    public void testListSSLCertificatesAliases() throws NoSuchFieldException {
+        // Create an extended manager instance with test support
+        String keyStorePassword = "password";
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("alias1");
+        aliases.add("alias2");
+        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
+                Collections.enumeration(aliases));
 
-		manager.setCryptoService(mockCryptoService);
+        String keyStorePath = getDefaultKeyStore(manager);
+        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
 
-		// Read aliases
-		Enumeration<String> readAliases = manager.listSSLCertificatesAliases();
-		ArrayList<String> readAliasesList = Collections.list(readAliases);
+        manager.setCryptoService(mockCryptoService);
 
-		assertEquals(aliases.size(), readAliasesList.size());
-		assertTrue(readAliasesList.containsAll(aliases));
-	}
+        // Read aliases
+        Enumeration<String> readAliases = manager.listSSLCertificatesAliases();
+        ArrayList<String> readAliasesList = Collections.list(readAliases);
 
-	@Test
-	public void testListCACertificatesAliases() throws NoSuchFieldException {
-		// Create an extended manager instance with test support
-		String keyStorePassword = "password";
-		ArrayList<String> aliases = new ArrayList<>();
-		aliases.add("alias1");
-		aliases.add("alias2");
-		CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-				Collections.enumeration(aliases));
+        assertEquals(aliases.size(), readAliasesList.size());
+        assertTrue(readAliasesList.containsAll(aliases));
+    }
 
-		String keyStorePath = getDefaultKeyStore(manager);
-		CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
+    @Test
+    public void testListCACertificatesAliases() throws NoSuchFieldException {
+        // Create an extended manager instance with test support
+        String keyStorePassword = "password";
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("alias1");
+        aliases.add("alias2");
+        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
+                Collections.enumeration(aliases));
 
-		manager.setCryptoService(mockCryptoService);
+        String keyStorePath = getDefaultKeyStore(manager);
+        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
 
-		// Read aliases
-		Enumeration<String> readAliases = manager.listCACertificatesAliases();
-		ArrayList<String> readAliasesList = Collections.list(readAliases);
+        manager.setCryptoService(mockCryptoService);
 
-		assertEquals(aliases.size(), readAliasesList.size());
-		assertTrue(readAliasesList.containsAll(aliases));
-	}
+        // Read aliases
+        Enumeration<String> readAliases = manager.listCACertificatesAliases();
+        ArrayList<String> readAliasesList = Collections.list(readAliases);
 
-	@Test(expected = KuraException.class)
-	public void testRemoveCertificate() throws KuraException {
-		// Not implemented, always throws an exception
-		CertificatesManager manager = new CertificatesManager();
-		manager.removeCertificate("alias");
-	}
+        assertEquals(aliases.size(), readAliasesList.size());
+        assertTrue(readAliasesList.containsAll(aliases));
+    }
 
-	@Test
-	public void testVerifySignature() {
-		// Not implemented, always returns true
-		CertificatesManager manager = new CertificatesManager();
-		assertTrue(manager.verifySignature(null, null));
-	}
+    public void testRemoveCertificate() throws KuraException {
+        CertificatesManager manager = new CertificatesManager();
+        manager.removeCertificate("alias");
+    }
 
-	String getDefaultKeyStore(CertificatesManager manager) throws NoSuchFieldException {
-		return (String) TestUtil.getFieldValue(manager, "DEFAULT_KEYSTORE");
-	}
+    @Test
+    public void testVerifySignature() {
+        // Not implemented, always returns true
+        CertificatesManager manager = new CertificatesManager();
+        assertTrue(manager.verifySignature(null, null));
+    }
 
-	CryptoService createMockCryptoService(String keyStorePath, String keyStorePassword) throws NoSuchFieldException {
-		CryptoService mockService = mock(CryptoService.class);
-		when(mockService.getKeyStorePassword(keyStorePath)).thenReturn(keyStorePassword.toCharArray());
+    String getDefaultKeyStore(CertificatesManager manager) throws NoSuchFieldException {
+        return (String) TestUtil.getFieldValue(manager, "DEFAULT_KEYSTORE");
+    }
 
-		return mockService;
-	}
+    CryptoService createMockCryptoService(String keyStorePath, String keyStorePassword) throws NoSuchFieldException {
+        CryptoService mockService = mock(CryptoService.class);
+        when(mockService.getKeyStorePassword(keyStorePath)).thenReturn(keyStorePassword.toCharArray());
+
+        return mockService;
+    }
 }

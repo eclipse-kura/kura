@@ -56,7 +56,7 @@
             max = "65535"
             description="Allows to specify the port used by the https service for encrypted communication.">
         </AD>
-        
+
         <AD id="https.client.auth.enabled"
             name="HTTPS Client Authentication Enabled"
             type="Boolean"
@@ -107,14 +107,14 @@
             required="false"
             default=""
             description="Specifies the URI for OCSP responders."/>
-            
+
         <AD id="https.client.crl.path"
             name="Https Client CRL path"
             type="String"
             cardinality="0"
             required="false"
             default=""
-            description="Specifies the path for the CRL for client certificate revcation check."/>
+            description="Specifies the path for the CRL for client certificate revocation check."/>
 
         <AD id="https.client.revocation.soft.fail"
             name="Https Revocation Soft-fail Enabled"

@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eurotech and/or its affiliates
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ * Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web;
 
 import java.util.List;
@@ -13,17 +24,6 @@ import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.crypto.CryptoService;
 
-/*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates
- *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- * Eurotech
- *******************************************************************************/
 public class SelfConfiguringComponentProperty<T> {
 
     private static final Pattern COMMA = Pattern.compile(",");

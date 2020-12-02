@@ -3,11 +3,34 @@
 iptables_config_file=/etc/sysconfig/iptables
 ipforward_file=/proc/sys/net/ipv4/ip_forward
 enable_ipforwarding=false;
+
 iptables-restore < $iptables_config_file
+
+# create custom chains if needed
+custom_filter_chains=(input-kura output-kura forward-kura)
+for custom_chain in ${custom_filter_chains[@]}; do
+    chain=(${custom_chain//-/ })
+    iptables -C ${chain[0]^^} -j $custom_chain> /dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        iptables -N $custom_chain -t filter > /dev/null 2>&1
+        iptables -A ${chain[0]^^} -j $custom_chain > /dev/null 2>&1
+    fi
+done
+custom_nat_chains=(prerouting-kura postrouting-kura)
+for custom_chain in ${custom_nat_chains[@]}; do
+    chain=(${custom_chain//-/ }[0])
+    iptables -C ${chain[0]^^} -j $custom_chain> /dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        iptables -N $custom_chain -t nat > /dev/null 2>&1
+        iptables -A ${chain[0]^^} -j $custom_chain > /dev/null 2>&1
+    fi
+done
+
+# enable ip forwarding if needed
 while IFS='' read -r line || [[ -n "$line" ]]; do
-    if [[ $line =~ "-A FORWARD" ]]; then
-	enable_ipforwarding=true
-	break
+    if [[ $line =~ "-A forward-kura" ]]; then
+        enable_ipforwarding=true
+        break
     fi
 done < $iptables_config_file
 if [ $enable_ipforwarding = true ]; then
@@ -15,5 +38,8 @@ if [ $enable_ipforwarding = true ]; then
 else
     echo "0" > $ipforward_file
 fi
+
 # source a custom firewall script
-source /etc/init.d/firewall_cust 2> /dev/null
+if [ -f /etc/init.d/firewall_cust ]; then
+    source /etc/init.d/firewall_cust 2> /dev/null
+fi

@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.certificates;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -205,10 +206,15 @@ public class CertificatesManager implements CertificatesService {
 
     private void removeCertificate(String alias, String path)
             throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
+        if (path == null || !(new File(path).exists())) {
+            return;
+        }
         char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
         KeyStore ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
-        ks.deleteEntry(alias);
-        KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
+        if (ks.getCertificate(alias) != null) {
+            ks.deleteEntry(alias);
+            KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
+        }
     }
 
     @Override

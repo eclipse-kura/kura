@@ -26,6 +26,7 @@ import java.util.Dictionary;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.SessionCookieConfig;
 
@@ -81,7 +82,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServerConnector serverConnector = (ServerConnector) connector;
 
-        final boolean isHttpsClientAuthEnabled = (Boolean) settings.get("kura.https.client.auth.enabled");
+        final boolean isHttpsClientAuthEnabled = getOrDefault(settings, "kura.https.client.auth.enabled", false);
 
         if (isHttpsClientAuthEnabled) {
             addClientAuthSslConnector(serverConnector.getServer(), settings);
@@ -91,8 +92,6 @@ public class KuraJettyCustomizer extends JettyCustomizer {
     }
 
     private void addClientAuthSslConnector(final Server server, final Dictionary<String, ?> settings) {
-
-        final boolean isRevocationEnabled = (Boolean) settings.get("org.eclipse.kura.revocation.check.enabled");
 
         final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server() {
 
@@ -113,7 +112,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                     if (responderURL != null) {
                         revocationChecker.setOcspResponder(new URI(responderURL));
                     }
-                    final Object softFail = settings.get("org.eclipse.kura.revocation.soft.fail");
+                    final Object softFail = getOrDefault(settings, "org.eclipse.kura.revocation.soft.fail", false);
                     if (softFail instanceof Boolean && (boolean) softFail) {
                         revocationChecker.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL,
                                 PKIXRevocationChecker.Option.NO_FALLBACK));
@@ -139,11 +138,17 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             }
         };
 
-        final String keyStorePath = (String) settings.get(JettyConstants.SSL_KEYSTORE);
-        final String keyStorePassword = (String) settings.get(JettyConstants.SSL_PASSWORD);
+        final Optional<String> keyStorePath = getOptional(settings, JettyConstants.SSL_KEYSTORE, String.class);
+        final Optional<String> keyStorePassword = getOptional(settings, JettyConstants.SSL_PASSWORD, String.class);
 
-        sslContextFactory.setKeyStorePath(keyStorePath);
-        sslContextFactory.setKeyStorePassword(keyStorePassword);
+        if (!(keyStorePath.isPresent() || !keyStorePassword.isPresent())) {
+            return;
+        }
+
+        final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled", true);
+
+        sslContextFactory.setKeyStorePath(keyStorePath.get());
+        sslContextFactory.setKeyStorePassword(keyStorePassword.get());
         sslContextFactory.setKeyStoreType("JKS");
         sslContextFactory.setProtocol("TLS");
         sslContextFactory.setTrustManagerFactoryAlgorithm("PKIX");
@@ -155,11 +160,10 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         sslContextFactory.setValidatePeerCerts(isRevocationEnabled);
 
         if (isRevocationEnabled) {
-            final Object ocspURI = settings.get("org.eclipse.kura.revocation.ocsp.uri");
-            sslContextFactory.setOcspResponderURL(ocspURI instanceof String ? (String) ocspURI : null);
-
-            final Object crlPath = settings.get("org.eclipse.kura.revocation.crl.path");
-            sslContextFactory.setCrlPath(crlPath instanceof String ? (String) crlPath : null);
+            getOptional(settings, "org.eclipse.kura.revocation.ocsp.uri", String.class)
+                    .ifPresent(sslContextFactory::setOcspResponderURL);
+            getOptional(settings, "org.eclipse.kura.revocation.crl.path", String.class)
+                    .ifPresent(sslContextFactory::setCrlPath);
         }
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();
@@ -168,9 +172,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
 
-        final int httpsClientAuthPort = (Integer) settings.get("kura.https.client.auth.port");
-
-        connector.setPort(httpsClientAuthPort);
+        connector.setPort(getOrDefault(settings, "kura.https.client.auth.port", 4443));
 
         customizeConnector(connector);
 
@@ -206,6 +208,29 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
             customizers.add(customizer);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T getOrDefault(final Dictionary<String, ?> properties, final String key, final T defaultValue) {
+        final Object raw = properties.get(key);
+
+        if (defaultValue.getClass().isInstance(raw)) {
+            return (T) raw;
+        }
+
+        return defaultValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Optional<T> getOptional(final Dictionary<String, ?> properties, final String key,
+            final Class<T> classz) {
+        final Object raw = properties.get(key);
+
+        if (classz.isInstance(raw)) {
+            return Optional.of((T) raw);
+        }
+
+        return Optional.empty();
     }
 
 }

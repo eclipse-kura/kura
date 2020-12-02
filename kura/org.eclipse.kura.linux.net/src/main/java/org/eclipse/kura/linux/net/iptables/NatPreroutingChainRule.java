@@ -86,7 +86,7 @@ public class NatPreroutingChainRule {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("-A PREROUTING");
+        StringBuilder sb = new StringBuilder("-A prerouting-kura");
         if (this.permittedNetwork != null && !this.permittedNetwork.equals("0.0.0.0")) {
             sb.append(" -s ").append(this.permittedNetwork).append('/').append(this.permittedNetworkMask);
         }

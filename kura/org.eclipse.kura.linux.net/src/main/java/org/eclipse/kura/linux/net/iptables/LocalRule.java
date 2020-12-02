@@ -351,14 +351,15 @@ public class LocalRule {
      * Converts the <code>LocalRule</code> to a <code>String</code>.
      * Returns one of the following iptables strings depending on the <code>LocalRule</code> format:
      * <code>
-     * <p>  -A INPUT -p {protocol} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} -s {permittedNetwork} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} -s {permittedNetwork} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
-     * <p>  -A INPUT -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} -s {permittedNetwork} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} -s {permittedNetwork} --sport {sourcePort1:sourcePort2} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --dport {port} -j ACCEPT
+     * <p>  -A input-kura -p {protocol} -s {permittedNetwork} -m mac --mac-source {permittedMAC} --sport {sourcePort1:sourcePort2} 
+     *       --dport {port} -j ACCEPT
      * </code>
      */
     @Override
@@ -380,18 +381,18 @@ public class LocalRule {
     private String getLocalRuleWithPort(String interfaceString) {
         String localRuleString = "";
         if (this.permittedMAC == null && this.sourcePortRange == null) {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " --dport " + this.port + " -j ACCEPT";
         } else if (this.permittedMAC == null) {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " --sport " + this.sourcePortRange
                     + " --dport " + this.port + " -j ACCEPT";
         } else if (this.sourcePortRange == null) {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC
                     + " --dport " + this.port + " -j ACCEPT";
         } else {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC
                     + " --sport " + this.sourcePortRange + " --dport " + this.port + " -j ACCEPT";
         }
@@ -401,18 +402,18 @@ public class LocalRule {
     private String getLocalRuleWithoutPort(String interfaceString) {
         String localRuleString = "";
         if (this.permittedMAC == null && this.sourcePortRange == null) {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " --dport " + this.portRange + " -j ACCEPT";
         } else if (this.permittedMAC == null) {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " --sport " + this.sourcePortRange
                     + " --dport " + this.portRange + " -j ACCEPT";
         } else if (this.sourcePortRange == null) {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC
                     + " --dport " + this.portRange + " -j ACCEPT";
         } else {
-            localRuleString = "-A INPUT -p " + this.protocol + " -s " + this.permittedNetworkString
+            localRuleString = "-A input-kura -p " + this.protocol + " -s " + this.permittedNetworkString
                     + (interfaceString != null ? interfaceString : "") + " -m mac --mac-source " + this.permittedMAC
                     + " --sport " + this.sourcePortRange + " --dport " + this.portRange + " -j ACCEPT";
         }

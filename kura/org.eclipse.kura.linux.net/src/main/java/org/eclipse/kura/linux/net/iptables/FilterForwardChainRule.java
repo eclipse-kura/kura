@@ -83,7 +83,7 @@ public class FilterForwardChainRule {
 
     public List<String> toStrings() {
         List<String> ret = new ArrayList<>();
-        StringBuilder sb = new StringBuilder("-A FORWARD");
+        StringBuilder sb = new StringBuilder("-A forward-kura");
         if (this.srcNetwork != null) {
             sb.append(" -s ") //
                     .append(this.srcNetwork) //
@@ -116,7 +116,7 @@ public class FilterForwardChainRule {
         }
         sb.append(" -j ACCEPT");
         ret.add(sb.toString());
-        sb = new StringBuilder("-A FORWARD");
+        sb = new StringBuilder("-A forward-kura");
         if (this.dstNetwork != null) {
             sb.append(" -s ") //
                     .append(this.dstNetwork) //

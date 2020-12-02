@@ -49,10 +49,10 @@ public class LinuxFirewall {
     private Set<PortForwardRule> portForwardRules;
     private Set<NATRule> autoNatRules;
     private Set<NATRule> natRules;
-    private List<String> dockerNatPolicies;
-    private List<String> dockerNatRules;
-    private List<String> dockerFilterPolicies;
-    private List<String> dockerFilterRules;
+    // private List<String> additionalNatPolicies;
+    // private List<String> additionalNatRules;
+    // private List<String> additionalFilterPolicies;
+    // private List<String> additionalFilterRules;
     private boolean allowIcmp;
     private boolean allowForwarding;
     private final IptablesConfig iptables;
@@ -88,10 +88,10 @@ public class LinuxFirewall {
         this.portForwardRules = this.iptables.getPortForwardRules();
         this.autoNatRules = this.iptables.getAutoNatRules();
         this.natRules = this.iptables.getNatRules();
-        this.dockerNatPolicies = this.iptables.getdockerNatPolicies();
-        this.dockerNatRules = this.iptables.getdockerNatRules();
-        this.dockerFilterPolicies = this.iptables.getdockerFilterPolicies();
-        this.dockerFilterRules = this.iptables.getdockerFilterRules();
+        // this.additionalNatPolicies = this.iptables.getAdditionalNatPolicies();
+        // this.additionalNatRules = this.iptables.getAdditionalNatRules();
+        // this.additionalFilterPolicies = this.iptables.getAdditionalFilterPolicies();
+        // this.additionalFilterRules = this.iptables.getAdditionalFilterRules();
         this.allowIcmp = true;
         this.allowForwarding = false;
         logger.debug("initialize() :: Parsing current firewall configuraion");
@@ -467,12 +467,12 @@ public class LinuxFirewall {
         }
         IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
                 this.natRules, this.allowIcmp, this.executorService);
-        newIptables.setdockerFilterPolicies(this.dockerFilterPolicies);
-        newIptables.setdockerNatPolicies(this.dockerNatPolicies);
-        newIptables.setdockerFilterRules(this.dockerFilterRules);
-        newIptables.setdockerNatRules(this.dockerNatRules);
+        // newIptables.setAdditionalFilterPolicies(this.additionalFilterPolicies);
+        // newIptables.setAdditionalNatPolicies(this.additionalNatPolicies);
+        // newIptables.setAdditionalFilterRules(this.additionalFilterRules);
+        // newIptables.setAdditionalNatRules(this.additionalNatRules);
         newIptables.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
-        newIptables.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        newIptables.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME + "_1");
         logger.debug("Managing port forwarding...");
         enableForwarding(this.allowForwarding);
         runCustomFirewallScript();
@@ -534,13 +534,14 @@ public class LinuxFirewall {
         synchronized (lock) {
             // Write down the current config in the filesystem
             this.iptables.save();
-            // Get the modifications, add the new rules, apply them and save the result
-            IptablesConfig newIptablesConfig = new IptablesConfig(this.executorService);
-            newIptablesConfig.restore();
-            this.dockerFilterPolicies = newIptablesConfig.getdockerFilterPolicies();
-            this.dockerFilterRules = newIptablesConfig.getdockerFilterRules();
-            this.dockerNatPolicies = newIptablesConfig.getdockerNatPolicies();
-            this.dockerNatRules = newIptablesConfig.getdockerNatRules();
+            // // Get the modifications, add the new rules, apply them and save the result
+            // IptablesConfig newIptablesConfig = new IptablesConfig(this.executorService);
+            // newIptablesConfig.restore();
+            // this.additionalFilterPolicies = newIptablesConfig.getAdditionalFilterPolicies();
+            // this.additionalFilterRules = newIptablesConfig.getAdditionalFilterRules();
+            // this.additionalNatPolicies = newIptablesConfig.getAdditionalNatPolicies();
+            // this.additionalNatRules = newIptablesConfig.getAdditionalNatRules();
+            this.iptables.flush();
             applyRules();
             this.iptables.save();
         }

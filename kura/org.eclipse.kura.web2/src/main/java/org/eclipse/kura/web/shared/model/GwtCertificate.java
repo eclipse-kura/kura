@@ -13,8 +13,6 @@
 package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -39,40 +37,5 @@ public class GwtCertificate extends GwtBaseModel implements IsSerializable, Seri
 
     public void setType(String type) {
         set("type", type);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof GwtNetInterfaceConfig)) {
-            return false;
-        }
-
-        Map<String, Object> properties = getProperties();
-        Map<String, Object> otherProps = ((GwtCertificate) o).getProperties();
-
-        if (properties != null) {
-            if (otherProps == null) {
-                return false;
-            }
-            if (properties.size() != otherProps.size()) {
-                return false;
-            }
-
-            for (Entry<String, Object> entry : properties.entrySet()) {
-                final Object oldVal = entry.getValue();
-                final Object newVal = otherProps.get(entry.getKey());
-                if (oldVal != null) {
-                    if (!oldVal.equals(newVal)) {
-                        return false;
-                    }
-                } else if (newVal != null) {
-                    return false;
-                }
-            }
-        } else if (otherProps != null) {
-            return false;
-        }
-
-        return true;
     }
 }

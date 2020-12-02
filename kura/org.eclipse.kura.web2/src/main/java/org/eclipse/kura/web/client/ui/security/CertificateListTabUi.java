@@ -28,13 +28,12 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
-import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
@@ -72,9 +71,8 @@ public class CertificateListTabUi extends Composite implements Tab {
     Button closeModalButton;
 
     @UiField
-    CellTable<GwtCertificate> certificatesGrid = new CellTable<>();
+    CellTable<GwtCertificate> certificatesGrid;
 
-    GwtCertificate selected;
     final SingleSelectionModel<GwtCertificate> selectionModel = new SingleSelectionModel<>();
 
     private final ListDataProvider<GwtCertificate> certificatesDataProvider = new ListDataProvider<>();
@@ -83,7 +81,6 @@ public class CertificateListTabUi extends Composite implements Tab {
         logger.log(Level.FINER, "Initiating CertificatesTabUI...");
         initWidget(uiBinder.createAndBindUi(this));
         initTable();
-        this.certificatesGrid.setSelectionModel(this.selectionModel);
 
         initInterfaceButtons();
     }
@@ -108,19 +105,12 @@ public class CertificateListTabUi extends Composite implements Tab {
                 c.callback(token -> this.gwtCertificatesService.listCertificates(c.callback(result -> {
                     CertificateListTabUi.this.certificatesDataProvider.getList().clear();
                     for (GwtCertificate pair : result) {
-                        this.certificatesDataProvider.getList().add(pair);
+                        if (pair != null) {
+                            this.certificatesDataProvider.getList().add(pair);
+                        }
                     }
-
-                    int snapshotsDataSize = this.certificatesDataProvider.getList().size();
-                    if (snapshotsDataSize == 0) {
-                        this.certificatesGrid.setVisible(false);
-                    } else {
-                        this.certificatesGrid.setVisibleRange(0, snapshotsDataSize);
-                        this.certificatesGrid.setVisible(true);
-                    }
-
-                    ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
-                    this.certificatesDataProvider.flush();
+                    this.certificatesGrid.setVisible(!this.certificatesDataProvider.getList().isEmpty());
+                    // ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
                 })))));
     }
 
@@ -133,7 +123,6 @@ public class CertificateListTabUi extends Composite implements Tab {
                 return String.valueOf(object.getAlias());
             }
         };
-        col1.setCellStyleNames("status-table-row");
         this.certificatesGrid.addColumn(col1, MSGS.certificateAlias());
 
         TextColumn<GwtCertificate> col2 = new TextColumn<GwtCertificate>() {
@@ -143,11 +132,8 @@ public class CertificateListTabUi extends Composite implements Tab {
                 return String.valueOf(object.getType().toString());
             }
         };
-        col2.setCellStyleNames("status-table-row");
         col2.setSortable(true);
         this.certificatesGrid.addColumn(col2, MSGS.certificateType());
-
-        this.certificatesDataProvider.addDataDisplay(this.certificatesGrid);
 
         ListHandler<GwtCertificate> columnSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
         columnSortHandler.setComparator(col2, (o1, o2) -> {
@@ -161,8 +147,12 @@ public class CertificateListTabUi extends Composite implements Tab {
             }
             return -1;
         });
-        this.certificatesGrid.addColumnSortHandler(columnSortHandler);
+
         this.certificatesGrid.getColumnSortList().push(col2);
+        this.certificatesGrid.addColumnSortHandler(columnSortHandler);
+
+        this.certificatesDataProvider.addDataDisplay(this.certificatesGrid);
+        this.certificatesGrid.setSelectionModel(this.selectionModel);
     }
 
     private void initInterfaceButtons() {
@@ -177,18 +167,18 @@ public class CertificateListTabUi extends Composite implements Tab {
 
         this.uninstall.setText(MSGS.packageDeleteButton());
         this.uninstall.addClickHandler(event -> {
-            this.selected = this.selectionModel.getSelectedObject();
-            if (this.selected != null) {
+            final GwtCertificate selected = this.selectionModel.getSelectedObject();
+            if (selected != null) {
                 final Modal modal = new Modal();
                 ModalBody modalBody = new ModalBody();
                 ModalFooter modalFooter = new ModalFooter();
                 modal.setClosable(true);
                 modal.setTitle(MSGS.confirm());
-                modalBody.add(new Span(MSGS.securityUninstallCertificate(this.selected.getAlias())));
+                modalBody.add(new Span(MSGS.securityUninstallCertificate(selected.getAlias())));
                 modalFooter.add(new Button(MSGS.noButton(), event11 -> modal.hide()));
                 modalFooter.add(new Button(MSGS.yesButton(), event12 -> {
                     modal.hide();
-                    uninstall(this.selected);
+                    uninstall(selected);
                 }));
 
                 modal.add(modalBody);

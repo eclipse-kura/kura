@@ -77,21 +77,33 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
     @Override
     public Object customizeHttpsConnector(final Object connector, final Dictionary<String, ?> settings) {
-
-        customizeConnector(connector);
+        if (!(connector instanceof ServerConnector)) {
+            return connector;
+        }
 
         final ServerConnector serverConnector = (ServerConnector) connector;
 
-        final boolean isHttpsClientAuthEnabled = getOrDefault(settings, "kura.https.client.auth.enabled", false);
+        if (getOrDefault(settings, "kura.https.no.client.auth.disabled", false)) {
+            return createClientAuthSslConnector(serverConnector.getServer(), settings).orElse(null);
+        }
 
-        if (isHttpsClientAuthEnabled) {
-            addClientAuthSslConnector(serverConnector.getServer(), settings);
+        customizeConnector(connector);
+
+        if (getOrDefault(settings, "kura.https.client.auth.enabled", false)) {
+
+            final Optional<ServerConnector> httpsClientAuthConnector = createClientAuthSslConnector(
+                    serverConnector.getServer(), settings);
+
+            if (httpsClientAuthConnector.isPresent()) {
+                serverConnector.getServer().addConnector(httpsClientAuthConnector.get());
+            }
         }
 
         return connector;
     }
 
-    private void addClientAuthSslConnector(final Server server, final Dictionary<String, ?> settings) {
+    private Optional<ServerConnector> createClientAuthSslConnector(final Server server,
+            final Dictionary<String, ?> settings) {
 
         final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server() {
 
@@ -142,7 +154,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         final Optional<String> keyStorePassword = getOptional(settings, JettyConstants.SSL_PASSWORD, String.class);
 
         if (!(keyStorePath.isPresent() || !keyStorePassword.isPresent())) {
-            return;
+            return Optional.empty();
         }
 
         final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled", true);
@@ -171,12 +183,9 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
-
         connector.setPort(getOrDefault(settings, "kura.https.client.auth.port", 4443));
 
-        customizeConnector(connector);
-
-        server.addConnector(connector);
+        return Optional.of(connector);
     }
 
     private void customizeConnector(Object connector) {

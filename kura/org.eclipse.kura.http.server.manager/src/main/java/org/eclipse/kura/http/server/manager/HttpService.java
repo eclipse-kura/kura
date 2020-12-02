@@ -182,10 +182,15 @@ public class HttpService implements ConfigurableComponent {
         }
 
         config.put(JettyConstants.HTTPS_PORT, this.options.getHttpsPort());
-        config.put(JettyConstants.HTTPS_ENABLED, this.options.isHttpsEnabled());
+        config.put(JettyConstants.HTTPS_ENABLED,
+                this.options.isHttpsEnabled() || this.options.isHttpsClientAuthEnabled());
         config.put(JettyConstants.HTTPS_HOST, "0.0.0.0");
         config.put(JettyConstants.SSL_KEYSTORE, this.options.getHttpsKeystorePath());
         config.put(JettyConstants.SSL_PASSWORD, new String(decryptedPassword));
+
+        if (!this.options.isHttpsEnabled()) {
+            config.put("kura.https.no.client.auth.disabled", true);
+        }
 
         config.put("kura.https.client.auth.enabled", this.options.isHttpsClientAuthEnabled());
         config.put("kura.https.client.auth.port", this.options.getHttpsClientAuthPort());

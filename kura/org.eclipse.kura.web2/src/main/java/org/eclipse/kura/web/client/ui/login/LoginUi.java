@@ -40,6 +40,7 @@ import org.gwtbootstrap3.client.ui.InputGroup;
 import org.gwtbootstrap3.client.ui.InputGroupAddon;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
+import org.gwtbootstrap3.client.ui.SubmitButton;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.constants.InputType;
@@ -48,10 +49,8 @@ import org.gwtbootstrap3.client.ui.html.Strong;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -91,7 +90,9 @@ public class LoginUi extends Composite implements Context {
     @UiField
     FormGroup authenticationMethodGroup;
     @UiField
-    Button loginResetButton;
+    Paragraph noAuthMethodsWarning;
+    @UiField
+    SubmitButton loginButton;
 
     private PopupPanel waitModal;
 
@@ -172,11 +173,6 @@ public class LoginUi extends Composite implements Context {
 
     }
 
-    @UiHandler("loginResetButton")
-    public void onFormResetClick(ClickEvent event) {
-        loginForm.reset();
-    }
-
     private void setAuthenticationMethod(final String authenticationMethod) {
 
         this.authenticationHandler = this.authenticationHandlers.get(authenticationMethod);
@@ -239,6 +235,9 @@ public class LoginUi extends Composite implements Context {
             this.authenticationMethodGroup.setVisible(false);
             setAuthenticationMethod(authenticationHandler.getName());
         }
+
+        this.noAuthMethodsWarning.setVisible(false);
+        this.loginButton.setVisible(true);
 
         this.authenticationMethodGroup.setVisible(this.authenticationHandlers.size() >= 2);
     }

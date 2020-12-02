@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +21,7 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.ServicesUi;
+import org.eclipse.kura.web.client.ui.ServicesUi.ValidationResult;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -115,19 +118,28 @@ public class SecurityPanelUi extends Composite {
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
         this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
-        this.httpService.addClickHandler(addDirtyCheck(
-                e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", httpServicePanel)));
-        this.console.addClickHandler(
-                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console", consolePanel)));
+        this.httpService.addClickHandler(
+                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService",
+                        httpServicePanel, Optional.empty())));
+        this.console.addClickHandler(addDirtyCheck(
+                e -> this.loadServiceConfig("org.eclipse.kura.web.Console", consolePanel, Optional.of(config -> {
+                    final List<ValidationResult> result = new ArrayList<>();
+                    if (!config.getParameters().stream()
+                            .anyMatch(p -> p.getId().startsWith("auth.method") && "true".equals(p.getValue()))) {
+                        result.add(ValidationResult.warning(MSGS.securityAllAuthMethodsDisabled()));
+                    }
+                    return result;
+                }))));
         this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
-    public void loadServiceConfig(final String pid, final TabPane panel) {
+    public void loadServiceConfig(final String pid, final TabPane panel,
+            final Optional<ServicesUi.Validator> validator) {
         RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(
                 token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, c.callback(result -> {
                     for (GwtConfigComponent config : result) {
                         panel.clear();
-                        panel.add(new ServicesUi(config));
+                        panel.add(new ServicesUi(config, Optional.empty(), validator));
                     }
                 })))));
     }

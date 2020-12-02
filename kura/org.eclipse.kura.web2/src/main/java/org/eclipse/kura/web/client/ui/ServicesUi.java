@@ -18,9 +18,12 @@
  */
 package org.eclipse.kura.web.client.ui;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
@@ -71,6 +74,8 @@ public class ServicesUi extends AbstractServicesUi {
     private boolean initialized;
     private GwtConfigComponent originalConfig;
 
+    private final Optional<Validator> validator;
+
     NavPills menu;
     PanelBody content;
     AnchorListItem service;
@@ -106,14 +111,18 @@ public class ServicesUi extends AbstractServicesUi {
     ModalHeader deleteModalHeader;
     @UiField
     ModalBody deleteModalBody;
+    @UiField
+    AlertDialog alertDialog;
 
     private final Optional<Listener> listener;
 
     //
     // Public methods
     //
-    public ServicesUi(final GwtConfigComponent addedItem, final Optional<Listener> listener) {
+    public ServicesUi(final GwtConfigComponent addedItem, final Optional<Listener> listener,
+            final Optional<Validator> validator) {
         initWidget(uiBinder.createAndBindUi(this));
+        this.validator = validator;
         this.initialized = false;
         this.listener = listener;
         this.originalConfig = addedItem;
@@ -144,8 +153,12 @@ public class ServicesUi extends AbstractServicesUi {
         this.delete.setEnabled(this.configurableComponent.isFactoryComponent());
     }
 
+    public ServicesUi(final GwtConfigComponent addedItem, final Optional<Listener> listener) {
+        this(addedItem, listener, Optional.empty());
+    }
+
     public ServicesUi(final GwtConfigComponent addedItem) {
-        this(addedItem, Optional.empty());
+        this(addedItem, Optional.empty(), Optional.empty());
     }
 
     @Override
@@ -296,68 +309,58 @@ public class ServicesUi extends AbstractServicesUi {
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
-                // TODO ask for confirmation first
-                this.modal = new Modal();
 
-                ModalHeader header = new ModalHeader();
-                header.setTitle(MSGS.confirm());
-                this.modal.add(header);
+                final List<String> messages;
 
-                ModalBody body = new ModalBody();
-                body.add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
-                this.modal.add(body);
+                if (validator.isPresent()) {
+                    final List<ValidationResult> result = validator.get().validate(this.configurableComponent);
+                    messages = result.stream().map(ValidationResult::getMessage).collect(Collectors.toList());
 
-                ModalFooter footer = new ModalFooter();
-                ButtonGroup group = new ButtonGroup();
-                Button no = new Button();
-                no.setText(MSGS.noButton());
-                no.addStyleName("fa fa-times");
-                no.addClickHandler(event -> ServicesUi.this.modal.hide());
-
-                group.add(no);
-                Button yes = new Button();
-                yes.setText(MSGS.yesButton());
-                yes.addStyleName("fa fa-check");
-                yes.addClickHandler(event -> {
-                    try {
-                        getUpdatedConfiguration();
-                    } catch (Exception ex) {
-                        FailureHandler.handle(ex);
+                    if (result.stream().anyMatch(r -> r instanceof Error)) {
+                        alertDialog.show(MSGS.confirm(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
+                                null, messages.toArray(new String[messages.size()]));
                         return;
                     }
-                    RequestQueue.submit(context -> ServicesUi.this.gwtXSRFService.generateSecurityToken(context
-                            .callback(token -> ServicesUi.this.gwtComponentService.updateComponentConfiguration(token,
-                                    ServicesUi.this.configurableComponent, context.callback(new AsyncCallback<Void>() {
+                } else {
+                    messages = Collections.emptyList();
+                }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            FailureHandler.handle(caught);
-                                            errorLogger.log(Level.SEVERE,
-                                                    caught.getLocalizedMessage() != null ? caught.getLocalizedMessage()
-                                                            : caught.getClass().getName(),
-                                                    caught);
-                                        }
+                alertDialog.show(MSGS.confirm(),
+                        MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()),
+                        AlertDialog.Severity.INFO, ok -> {
+                            if (ok) {
+                                RequestQueue.submit(context -> ServicesUi.this.gwtXSRFService.generateSecurityToken(
+                                        context.callback(token -> ServicesUi.this.gwtComponentService
+                                                .updateComponentConfiguration(token,
+                                                        ServicesUi.this.configurableComponent,
+                                                        context.callback(new AsyncCallback<Void>() {
 
-                                        @Override
-                                        public void onSuccess(Void result) {
-                                            ServicesUi.this.modal.hide();
-                                            logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                            ServicesUi.this.apply.setEnabled(false);
-                                            ServicesUi.this.reset.setEnabled(false);
-                                            setDirty(false);
-                                            ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
-                                            context.defer(2000, () -> ServicesUi.this.listener
-                                                    .ifPresent(Listener::onConfigurationChanged));
-                                        }
-                                    })))));
+                                                            @Override
+                                                            public void onFailure(Throwable caught) {
+                                                                FailureHandler.handle(caught);
+                                                                errorLogger.log(Level.SEVERE,
+                                                                        caught.getLocalizedMessage() != null
+                                                                                ? caught.getLocalizedMessage()
+                                                                                : caught.getClass().getName(),
+                                                                        caught);
+                                                            }
 
-                });
-                group.add(yes);
-                footer.add(group);
-                this.modal.add(footer);
-                this.modal.show();
-                no.setFocus(true);
+                                                            @Override
+                                                            public void onSuccess(Void result) {
+                                                                logger.info(MSGS.info() + ": "
+                                                                        + MSGS.deviceConfigApplied());
+                                                                ServicesUi.this.apply.setEnabled(false);
+                                                                ServicesUi.this.reset.setEnabled(false);
+                                                                setDirty(false);
+                                                                ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
+                                                                context.defer(2000, () -> ServicesUi.this.listener
+                                                                        .ifPresent(Listener::onConfigurationChanged));
+                                                            }
+                                                        })))));
+                            }
+                        }, messages.toArray(new String[messages.size()]));
             }
+
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
             this.incompleteFieldsModal.show();
@@ -384,5 +387,49 @@ public class ServicesUi extends AbstractServicesUi {
     public interface Listener {
 
         public void onConfigurationChanged();
+    }
+
+    public interface ValidationResult {
+
+        public String getMessage();
+
+        public static ValidationResult warning(final String message) {
+            return new Warning(message);
+        }
+
+        public static ValidationResult error(final String message) {
+            return new Error(message);
+        }
+    }
+
+    public static class Warning implements ValidationResult {
+
+        private final String message;
+
+        private Warning(final String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    public static class Error implements ValidationResult {
+
+        private final String message;
+
+        private Error(final String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    public interface Validator {
+
+        public List<ValidationResult> validate(final GwtConfigComponent config);
     }
 }

@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <equinox.download.url>https://archive.eclipse.org/equinox/drops/R-4.17-202009021800/equinox-SDK-4.17.zip</equinox.download.url>
+        <equinox.download.url>https://www.eclipse.org/downloads/download.php?file&#61;/equinox/drops/R-4.17-202009021800/equinox-SDK-4.17.zip&#38;r&#61;1</equinox.download.url>
     </properties>
 
     <build>

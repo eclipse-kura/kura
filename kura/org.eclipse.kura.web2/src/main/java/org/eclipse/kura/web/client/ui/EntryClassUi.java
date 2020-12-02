@@ -372,14 +372,19 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.driversAndAssetsServices.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.driversAndAssetsServices(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
-            EntryClassUi.this.driversAndTwinsBinder.refresh();
-        }));
+        this.driversAndAssetsServices.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.driversAndAssetsServices) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.driversAndAssetsServices(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.driversAndTwinsBinder);
+                EntryClassUi.this.driversAndTwinsBinder.refresh();
+            });
+        });
     }
 
     private void initWiresPanel() {
@@ -388,14 +393,19 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.wires.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.wires(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
-            EntryClassUi.this.wiresBinder.load();
-        }));
+        this.wires.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.wires) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.wires);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.wires(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.wiresBinder);
+                EntryClassUi.this.wiresBinder.load();
+            });
+        });
     }
 
     private void initCloudServicesPanel() {
@@ -404,15 +414,20 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.cloudServices.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.cloudServices(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
-            EntryClassUi.this.cloudServicesBinder.refresh();
+        this.cloudServices.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.cloudServices) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.cloudServices);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.cloudServices(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.cloudServicesBinder);
+                EntryClassUi.this.cloudServicesBinder.refresh();
 
-        }));
+            });
+        });
     }
 
     private void initSettingsPanel() {
@@ -421,15 +436,20 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.settings.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.settings(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
-            EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
-            EntryClassUi.this.settingsBinder.load();
-        }));
+        this.settings.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.settings) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.settings);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.settings(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.settingsBinder);
+                EntryClassUi.this.settingsBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.settingsBinder.load();
+            });
+        });
     }
 
     private void initSecurityPanel() {
@@ -438,15 +458,20 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.security.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.security);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.security(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.securityBinder);
-            EntryClassUi.this.securityBinder.setSession(EntryClassUi.this.currentSession);
-            EntryClassUi.this.securityBinder.load();
-        }));
+        this.security.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.security) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.security);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.security(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.securityBinder);
+                EntryClassUi.this.securityBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.securityBinder.load();
+            });
+        });
     }
 
     private void initUsersPanel() {
@@ -455,14 +480,19 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.users.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.users);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.users(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.usersBinder);
-            EntryClassUi.this.usersBinder.refresh();
-        }));
+        this.users.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.users) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.users);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.users(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.usersBinder);
+                EntryClassUi.this.usersBinder.refresh();
+            });
+        });
     }
 
     private void initPackagesPanel() {
@@ -471,42 +501,57 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.packages.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.packages(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
-            EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
-            EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
-            EntryClassUi.this.packagesBinder.refresh();
-        }));
+        this.packages.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.packages) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.packages);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.packages(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.packagesBinder);
+                EntryClassUi.this.packagesBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.packagesBinder.setMainUi(EntryClassUi.this.ui);
+                EntryClassUi.this.packagesBinder.refresh();
+            });
+        });
     }
 
     private void initFirewallPanel() {
         if (this.firewall.isVisible()) {
-            this.firewall.addClickHandler(event -> confirmIfUiDirty(() -> {
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.firewall(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
-                EntryClassUi.this.firewallBinder.initFirewallPanel();
-            }));
+            this.firewall.addClickHandler(event -> {
+                if (this.selectedAnchorListItem == this.firewall) {
+                    return;
+                }
+                confirmIfUiDirty(() -> {
+                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.firewall);
+                    EntryClassUi.this.contentPanel.setVisible(true);
+                    setHeader(MSGS.firewall(), null);
+                    EntryClassUi.this.contentPanelBody.clear();
+                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.firewallBinder);
+                    EntryClassUi.this.firewallBinder.initFirewallPanel();
+                });
+            });
         }
     }
 
     private void initNetworkPanel() {
         if (this.network.isVisible()) {
-            this.network.addClickHandler(event -> confirmIfUiDirty(() -> {
-                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
-                EntryClassUi.this.contentPanel.setVisible(true);
-                setHeader(MSGS.network(), null);
-                EntryClassUi.this.contentPanelBody.clear();
-                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
-                EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
-                EntryClassUi.this.networkBinder.initNetworkPanel();
-            }));
+            this.network.addClickHandler(event -> {
+                if (this.selectedAnchorListItem == this.network) {
+                    return;
+                }
+                confirmIfUiDirty(() -> {
+                    EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.network);
+                    EntryClassUi.this.contentPanel.setVisible(true);
+                    setHeader(MSGS.network(), null);
+                    EntryClassUi.this.contentPanelBody.clear();
+                    EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.networkBinder);
+                    EntryClassUi.this.networkBinder.setSession(EntryClassUi.this.currentSession);
+                    EntryClassUi.this.networkBinder.initNetworkPanel();
+                });
+            });
         }
     }
 
@@ -516,15 +561,20 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.device.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader(MSGS.device(), null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
-            EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
-            EntryClassUi.this.deviceBinder.initDevicePanel();
-        }));
+        this.device.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.device) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.device);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader(MSGS.device(), null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.deviceBinder);
+                EntryClassUi.this.deviceBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.deviceBinder.initDevicePanel();
+            });
+        });
     }
 
     private void initStatusPanel(final EntryClassUi instanceReference) {
@@ -533,16 +583,21 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        this.status.addClickHandler(event -> confirmIfUiDirty(() -> {
-            EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
-            EntryClassUi.this.contentPanel.setVisible(true);
-            setHeader("Status", null);
-            EntryClassUi.this.contentPanelBody.clear();
-            EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
-            EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
-            EntryClassUi.this.statusBinder.setParent(instanceReference);
-            EntryClassUi.this.statusBinder.loadStatusData();
-        }));
+        this.status.addClickHandler(event -> {
+            if (this.selectedAnchorListItem == this.status) {
+                return;
+            }
+            confirmIfUiDirty(() -> {
+                EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.status);
+                EntryClassUi.this.contentPanel.setVisible(true);
+                setHeader("Status", null);
+                EntryClassUi.this.contentPanelBody.clear();
+                EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.statusBinder);
+                EntryClassUi.this.statusBinder.setSession(EntryClassUi.this.currentSession);
+                EntryClassUi.this.statusBinder.setParent(instanceReference);
+                EntryClassUi.this.statusBinder.loadStatusData();
+            });
+        });
     }
 
     private void filterAvailableServices(String serviceName) {

@@ -34,6 +34,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
@@ -41,7 +42,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class CertificateListTabUi extends Composite implements Tab {
+public class CertificateListTabUi extends Composite implements Tab, CertificateModalListener {
 
     private static CertificateListTabUiUiBinder uiBinder = GWT.create(CertificateListTabUiUiBinder.class);
     private static final Logger logger = Logger.getLogger(CertificateListTabUi.class.getSimpleName());
@@ -110,7 +111,7 @@ public class CertificateListTabUi extends Composite implements Tab {
                         }
                     }
                     this.certificatesGrid.setVisible(!this.certificatesDataProvider.getList().isEmpty());
-                    // ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
+                    ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
                 })))));
     }
 
@@ -214,19 +215,19 @@ public class CertificateListTabUi extends Composite implements Tab {
         this.certAddModalBody.clear();
 
         if (selectedCertType == CertType.APPLICATION_CERT) {
-            ApplicationCertsTabUi appCertPanel = new ApplicationCertsTabUi();
+            ApplicationCertsTabUi appCertPanel = new ApplicationCertsTabUi(this);
             this.certAddModalBody.add(appCertPanel);
         } else if (selectedCertType == CertType.DEVICE_SSL_CERT) {
-            DeviceCertsTabUi deviceCertsTabUi = new DeviceCertsTabUi();
+            DeviceCertsTabUi deviceCertsTabUi = new DeviceCertsTabUi(this);
             this.certAddModalBody.add(deviceCertsTabUi);
         } else if (selectedCertType == CertType.SERVER_SSL_CERT) {
-            ServerCertsTabUi serverCertsTabUi = new ServerCertsTabUi();
+            ServerCertsTabUi serverCertsTabUi = new ServerCertsTabUi(this);
             this.certAddModalBody.add(serverCertsTabUi);
         } else if (selectedCertType == CertType.HTTPS_CLIENT_CERT) {
-            HttpsUserCertsTabUi httpsUserCertsTabUi = new HttpsUserCertsTabUi();
+            HttpsUserCertsTabUi httpsUserCertsTabUi = new HttpsUserCertsTabUi(this);
             this.certAddModalBody.add(httpsUserCertsTabUi);
         } else if (selectedCertType == CertType.HTTPS_SERVER_CERT) {
-            HttpsServerCertsTabUi httpsServerCertsTabUi = new HttpsServerCertsTabUi();
+            HttpsServerCertsTabUi httpsServerCertsTabUi = new HttpsServerCertsTabUi(this);
             this.certAddModalBody.add(httpsServerCertsTabUi);
         }
 
@@ -273,5 +274,15 @@ public class CertificateListTabUi extends Composite implements Tab {
     public void clear() {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void onApply() {
+        this.certAddModal.hide();
+    }
+
+    @Override
+    public void onKeystoreChanged() {
+        this.refresh();
     }
 }

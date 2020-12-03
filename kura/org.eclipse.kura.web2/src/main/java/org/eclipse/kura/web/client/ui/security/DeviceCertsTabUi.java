@@ -54,6 +54,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
 
+    private final CertificateModalListener listener;
+
     private boolean dirty;
 
     @UiField
@@ -83,7 +85,8 @@ public class DeviceCertsTabUi extends Composite implements Tab {
     @UiField
     Button apply;
 
-    public DeviceCertsTabUi() {
+    public DeviceCertsTabUi(final CertificateModalListener listener) {
+        this.listener = listener;
         initWidget(uiBinder.createAndBindUi(this));
         initForm();
 
@@ -201,12 +204,14 @@ public class DeviceCertsTabUi extends Composite implements Tab {
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
             if (isValid()) {
+                this.listener.onApply();
                 RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
                         c.callback(token -> this.gwtCertificatesService.storeSSLPublicPrivateKeys(token,
                                 this.privateKeyInput.getValue(), this.certificateInput.getValue(), null,
                                 this.storageAliasInput.getValue(), c.callback(ok -> {
                                     reset();
                                     setDirty(false);
+                                    listener.onKeystoreChanged();
                                 })))));
             }
         });

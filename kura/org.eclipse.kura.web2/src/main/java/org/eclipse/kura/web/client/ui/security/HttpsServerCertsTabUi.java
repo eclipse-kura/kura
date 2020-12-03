@@ -54,6 +54,8 @@ public class HttpsServerCertsTabUi extends Composite implements Tab {
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCertificatesServiceAsync gwtCertificatesService = GWT.create(GwtCertificatesService.class);
 
+    private final CertificateModalListener listener;
+
     private boolean dirty;
 
     @UiField
@@ -83,7 +85,8 @@ public class HttpsServerCertsTabUi extends Composite implements Tab {
     @UiField
     Button apply;
 
-    public HttpsServerCertsTabUi() {
+    public HttpsServerCertsTabUi(final CertificateModalListener listener) {
+        this.listener = listener;
         initWidget(uiBinder.createAndBindUi(this));
         initForm();
 
@@ -200,6 +203,7 @@ public class HttpsServerCertsTabUi extends Composite implements Tab {
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
             if (isValid()) {
+                this.listener.onApply();
                 RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
                         c.callback(token -> this.gwtCertificatesService.storeLoginPublicPrivateKeys(token,
                                 HttpsServerCertsTabUi.this.privateKeyInput.getValue(),
@@ -207,6 +211,7 @@ public class HttpsServerCertsTabUi extends Composite implements Tab {
                                 HttpsServerCertsTabUi.this.storageAliasInput.getValue(), c.callback(ok -> {
                                     reset();
                                     setDirty(false);
+                                    listener.onKeystoreChanged();
                                 })))));
             }
         });

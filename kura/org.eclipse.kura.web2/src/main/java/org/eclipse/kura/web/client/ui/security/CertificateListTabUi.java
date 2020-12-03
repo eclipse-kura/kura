@@ -207,7 +207,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
         this.closeModalButton.setText(MSGS.closeButton());
         this.nextStepButton.setVisible(true);
-        this.nextStepButton.setText(MSGS.submitButton());
+        this.nextStepButton.setText(MSGS.next());
         this.nextStepButton.addClickHandler(event -> {
             CertType selectedCertType = CertType.fromValue(certType.getSelectedValue());
 

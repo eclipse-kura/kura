@@ -49,7 +49,7 @@
                             <b:Button ui:field="newIdentity"
                                 addStyleNames="fa fa-plus" text="{msgs.usersNewIdentity}"></b:Button>
                             <b:Button ui:field="delete"
-                                addStyleNames="fa fa-trash" text="{msgs.delete}" enabled="false"></b:Button>
+                                addStyleNames="fa fa-trash" text="{msgs.usersDeleteIdentity}" enabled="false"></b:Button>
                         </b:ButtonGroup>
                     </b:NavPills>
                 </b:Panel>

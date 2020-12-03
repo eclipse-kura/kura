@@ -75,10 +75,6 @@ public class IptablesConfig {
     private final Set<PortForwardRule> portForwardRules;
     private final Set<NATRule> autoNatRules;
     private final Set<NATRule> natRules;
-    // private List<String> additionalNatPolicies = new ArrayList<>();
-    // private List<String> additionalNatRules = new ArrayList<>();
-    // private List<String> additionalFilterPolicies = new ArrayList<>();
-    // private List<String> additionalFilterRules = new ArrayList<>();
     private boolean allowIcmp;
     private CommandExecutorService executorService;
 
@@ -106,38 +102,6 @@ public class IptablesConfig {
         this.allowIcmp = allowIcmp;
         this.executorService = executorService;
     }
-
-    // public List<String> getAdditionalNatPolicies() {
-    // return additionalNatPolicies;
-    // }
-    //
-    // public void setAdditionalNatPolicies(List<String> dockerNatPolicies) {
-    // this.additionalNatPolicies = dockerNatPolicies;
-    // }
-    //
-    // public List<String> getAdditionalNatRules() {
-    // return additionalNatRules;
-    // }
-    //
-    // public void setAdditionalNatRules(List<String> dockerNatRules) {
-    // this.additionalNatRules = dockerNatRules;
-    // }
-    //
-    // public List<String> getAdditionalFilterPolicies() {
-    // return additionalFilterPolicies;
-    // }
-    //
-    // public void setAdditionalFilterPolicies(List<String> dockerFilterPolicies) {
-    // this.additionalFilterPolicies = dockerFilterPolicies;
-    // }
-    //
-    // public List<String> getAdditionalFilterRules() {
-    // return additionalFilterRules;
-    // }
-    //
-    // public void setAdditionalFilterRules(List<String> dockerFilterRules) {
-    // this.additionalFilterRules = dockerFilterRules;
-    // }
 
     /*
      * Clears all chains
@@ -443,10 +407,6 @@ public class IptablesConfig {
                     natPreroutingChain.add(new NatPreroutingChainRule(line));
                 } else if (readingNatTable && line.startsWith("-A postrouting-kura")) {
                     natPostroutingChain.add(new NatPostroutingChainRule(line));
-                    // } else if (readingNatTable && line.startsWith(":")) {
-                    // this.additionalNatPolicies.add(line);
-                    // } else if (readingNatTable) {
-                    // this.additionalNatRules.add(line);
                 } else if (readingFilterTable && line.startsWith("-A forward-kura")) {
                     filterForwardChain.add(new FilterForwardChainRule(line));
                 } else if (readingFilterTable && line.startsWith("-A input-kura")) {
@@ -475,10 +435,6 @@ public class IptablesConfig {
                     } catch (KuraException e) {
                         logger.error("Failed to parse Local Rule: {} ", line, e);
                     }
-                    // } else if (readingFilterTable && line.startsWith(":")) {
-                    // this.additionalFilterPolicies.add(line);
-                    // } else if (readingFilterTable) {
-                    // this.additionalFilterRules.add(line);
                 }
             }
 

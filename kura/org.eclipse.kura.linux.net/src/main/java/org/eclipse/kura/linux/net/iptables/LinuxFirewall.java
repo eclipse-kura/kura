@@ -52,10 +52,6 @@ public class LinuxFirewall {
     private Set<PortForwardRule> portForwardRules;
     private Set<NATRule> autoNatRules;
     private Set<NATRule> natRules;
-    // private List<String> additionalNatPolicies;
-    // private List<String> additionalNatRules;
-    // private List<String> additionalFilterPolicies;
-    // private List<String> additionalFilterRules;
     private boolean allowIcmp;
     private boolean allowForwarding;
     private final IptablesConfig iptables;
@@ -91,10 +87,6 @@ public class LinuxFirewall {
         this.portForwardRules = this.iptables.getPortForwardRules();
         this.autoNatRules = this.iptables.getAutoNatRules();
         this.natRules = this.iptables.getNatRules();
-        // this.additionalNatPolicies = this.iptables.getAdditionalNatPolicies();
-        // this.additionalNatRules = this.iptables.getAdditionalNatRules();
-        // this.additionalFilterPolicies = this.iptables.getAdditionalFilterPolicies();
-        // this.additionalFilterRules = this.iptables.getAdditionalFilterRules();
         this.allowIcmp = true;
         this.allowForwarding = false;
         logger.debug("initialize() :: Parsing current firewall configuraion");
@@ -398,10 +390,6 @@ public class LinuxFirewall {
         }
         IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
                 this.natRules, this.allowIcmp, this.executorService);
-        // newIptables.setAdditionalFilterPolicies(this.additionalFilterPolicies);
-        // newIptables.setAdditionalNatPolicies(this.additionalNatPolicies);
-        // newIptables.setAdditionalFilterRules(this.additionalFilterRules);
-        // newIptables.setAdditionalNatRules(this.additionalNatRules);
         newIptables.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
         newIptables.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
         logger.debug("Managing port forwarding...");
@@ -463,15 +451,8 @@ public class LinuxFirewall {
 
     private void update() throws KuraException {
         synchronized (lock) {
-            // Write down the current config in the filesystem
+            // Write down the current config in the filesystem before adding/removing rules
             this.iptables.save();
-            // // Get the modifications, add the new rules, apply them and save the result
-            // IptablesConfig newIptablesConfig = new IptablesConfig(this.executorService);
-            // newIptablesConfig.restore();
-            // this.additionalFilterPolicies = newIptablesConfig.getAdditionalFilterPolicies();
-            // this.additionalFilterRules = newIptablesConfig.getAdditionalFilterRules();
-            // this.additionalNatPolicies = newIptablesConfig.getAdditionalNatPolicies();
-            // this.additionalNatRules = newIptablesConfig.getAdditionalNatRules();
             this.iptables.flush();
             applyRules();
             this.iptables.save();

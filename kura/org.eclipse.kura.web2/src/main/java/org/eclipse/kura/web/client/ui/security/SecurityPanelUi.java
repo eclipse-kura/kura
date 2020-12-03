@@ -13,8 +13,10 @@
 package org.eclipse.kura.web.client.ui.security;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,9 +24,11 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.ui.ServicesUi.ValidationResult;
+import org.eclipse.kura.web.client.ui.ServicesUi.Validator;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
@@ -120,16 +124,9 @@ public class SecurityPanelUi extends Composite {
         this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
         this.httpService.addClickHandler(
                 addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService",
-                        httpServicePanel, Optional.empty())));
-        this.console.addClickHandler(addDirtyCheck(
-                e -> this.loadServiceConfig("org.eclipse.kura.web.Console", consolePanel, Optional.of(config -> {
-                    final List<ValidationResult> result = new ArrayList<>();
-                    if (!config.getParameters().stream()
-                            .anyMatch(p -> p.getId().startsWith("auth.method") && "true".equals(p.getValue()))) {
-                        result.add(ValidationResult.warning(MSGS.securityAllAuthMethodsDisabled()));
-                    }
-                    return result;
-                }))));
+                        httpServicePanel, Optional.of(getHttpServiceOptionsValidator()))));
+        this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
+                consolePanel, Optional.of(getConsoleOptionsValidator()))));
         this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
@@ -200,6 +197,77 @@ public class SecurityPanelUi extends Composite {
                 handler.onClick(e);
                 selected = newSelection;
             }
+        };
+    }
+
+    private static boolean isEnabledBooleanParameter(final GwtConfigParameter param, final String prefix) {
+        return param.getId().startsWith(prefix) && "true".equals(param.getValue());
+    }
+
+    private static boolean isEmptyParameter(final GwtConfigParameter param, final String prefix) {
+        return param.getId().startsWith(prefix) && (param.getValue() == null || param.getValue().trim().isEmpty());
+    }
+
+    private Validator getConsoleOptionsValidator() {
+        return config -> {
+            final List<ValidationResult> result = new ArrayList<>();
+            if (!config.getParameters().stream().anyMatch(p -> isEnabledBooleanParameter(p, "auth.method"))) {
+                result.add(ValidationResult.warning(MSGS.securityAllAuthMethodsDisabled()));
+            }
+            return result;
+        };
+    }
+
+    private Validator getHttpServiceOptionsValidator() {
+        return config -> {
+            final List<ValidationResult> result = new ArrayList<>();
+
+            boolean isHttpEnabled = false;
+            boolean isHttpsEnabled = false;
+            boolean isHttpsClientAuthEnabled = false;
+            boolean haveHttpsKeystorePath = true;
+            boolean haveHttpsKeystorePassword = true;
+            final Set<Integer> ports = new HashSet<>();
+
+            for (final GwtConfigParameter p : config.getParameters()) {
+                if (isEnabledBooleanParameter(p, "http.enabled")) {
+                    isHttpEnabled = true;
+                }
+                if (isEnabledBooleanParameter(p, "https.enabled")) {
+                    isHttpsEnabled = true;
+                }
+                if (isEnabledBooleanParameter(p, "https.client.auth.enabled")) {
+                    isHttpsClientAuthEnabled = true;
+                }
+                if (p.getId().endsWith("port")) {
+                    try {
+                        ports.add(Integer.parseInt(p.getValue()));
+                    } catch (final Exception e) {
+                        // do nothing
+                    }
+                }
+                if (isEmptyParameter(p, "https.keystore.path")) {
+                    haveHttpsKeystorePath = false;
+                }
+                if (isEmptyParameter(p, "https.keystore.password")) {
+                    haveHttpsKeystorePassword = false;
+                }
+            }
+
+            if (!isHttpEnabled && !isHttpsEnabled && !isHttpsClientAuthEnabled) {
+                result.add(ValidationResult.warning(MSGS.securityAllConnectorsDisabled()));
+            }
+
+            if (ports.size() != 3) {
+                result.add(ValidationResult.error(MSGS.securityPortConflictOrInvalidPort()));
+            }
+
+            if ((isHttpsEnabled || isHttpsClientAuthEnabled)
+                    && (!haveHttpsKeystorePath || !haveHttpsKeystorePassword)) {
+                result.add(ValidationResult.error(MSGS.securityHttpsEnabledButKeystoreParametersMissing()));
+            }
+
+            return result;
         };
     }
 

@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -309,6 +310,7 @@ public class ServicesUi extends AbstractServicesUi {
     private void apply() {
         if (isValid()) {
             if (isDirty()) {
+                this.configurableComponent = getUpdatedConfiguration();
 
                 final List<String> messages;
 
@@ -316,8 +318,8 @@ public class ServicesUi extends AbstractServicesUi {
                     final List<ValidationResult> result = validator.get().validate(this.configurableComponent);
                     messages = result.stream().map(ValidationResult::getMessage).collect(Collectors.toList());
 
-                    if (result.stream().anyMatch(r -> r instanceof Error)) {
-                        alertDialog.show(MSGS.confirm(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
+                    if (result.stream().anyMatch(r -> r instanceof ServicesUi.Error)) {
+                        alertDialog.show(MSGS.warning(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
                                 null, messages.toArray(new String[messages.size()]));
                         return;
                     }
@@ -363,7 +365,8 @@ public class ServicesUi extends AbstractServicesUi {
 
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            this.incompleteFieldsModal.show();
+            alertDialog.show(MSGS.warning(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
+                    (ConfirmListener) null);
         }
     }
 

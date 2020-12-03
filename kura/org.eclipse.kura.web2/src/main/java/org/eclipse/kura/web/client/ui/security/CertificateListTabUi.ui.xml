@@ -23,6 +23,10 @@
     .important {
     	font-weight: bold;
     }
+    
+    .modal-scroll-panel {
+    	max-height: 70vh;
+    }
     </ui:style>
 
     <b:Container fluid="true">
@@ -45,7 +49,9 @@
                     ui:field="certificatesGrid" />
             </b:Row>
             <b:Modal title="Add Certificate" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="certAddModal" ui:field="certAddModal" closable="false">
-  				<b:ModalBody b:id="certAddModalBody" ui:field="certAddModalBody"/>
+  				<b:ModalBody b:id="certAddModalBody">
+  				    <g:ScrollPanel ui:field="certAddModalBody" addStyleNames="{style.modal-scroll-panel}"/>
+  				</b:ModalBody>
   				<b:ModalFooter>
   					<b:Button dataDismiss="MODAL" b:id="closeModalButton" ui:field="closeModalButton">Close</b:Button>
   					<b:Button type="PRIMARY" b:id="nextStepButton" ui:field="nextStepButton">Do something</b:Button>

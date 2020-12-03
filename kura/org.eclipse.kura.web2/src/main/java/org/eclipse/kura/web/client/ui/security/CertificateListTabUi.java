@@ -38,6 +38,7 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -65,7 +66,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     @UiField
     Modal certAddModal;
     @UiField
-    ModalBody certAddModalBody;
+    ScrollPanel certAddModalBody;
     @UiField
     Button nextStepButton;
     @UiField

@@ -12,6 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.certificate;
 
+/**
+ * Identifies a certificate alias with the corresponding {@link CertificateType}
+ *
+ * @since 2.2
+ */
 public class CertificateInfo {
 
     private final String alias;

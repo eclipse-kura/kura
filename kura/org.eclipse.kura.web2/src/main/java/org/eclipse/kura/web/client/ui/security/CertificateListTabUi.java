@@ -111,6 +111,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
                         }
                     }
                     this.certificatesGrid.setVisible(!this.certificatesDataProvider.getList().isEmpty());
+                    this.selectionModel.clear();
                     ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
                 })))));
     }
@@ -149,6 +150,10 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
             return -1;
         });
 
+        this.selectionModel.addSelectionChangeHandler(e -> {
+            this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null);
+        });
+
         this.certificatesGrid.getColumnSortList().push(col2);
         this.certificatesGrid.addColumnSortHandler(columnSortHandler);
 
@@ -166,7 +171,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
             this.certAddModal.show();
         });
 
-        this.uninstall.setText(MSGS.packageDeleteButton());
+        this.uninstall.setText(MSGS.delete());
         this.uninstall.addClickHandler(event -> {
             final GwtCertificate selected = this.selectionModel.getSelectedObject();
             if (selected != null) {

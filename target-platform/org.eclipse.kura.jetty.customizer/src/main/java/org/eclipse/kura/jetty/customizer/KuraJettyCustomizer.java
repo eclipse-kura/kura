@@ -10,7 +10,6 @@
  * Contributors:
  *  Red Hat Inc
  *  Eurotech
- *
  *******************************************************************************/
 package org.eclipse.kura.jetty.customizer;
 

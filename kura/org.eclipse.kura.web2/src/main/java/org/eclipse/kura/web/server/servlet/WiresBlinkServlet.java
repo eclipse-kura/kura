@@ -21,7 +21,9 @@ import java.io.PrintStream;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -82,11 +84,28 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
 
     private static ServiceRegistration<WireAdminListener> registration;
 
+    private boolean shutdown = false;
+
     /** {@inheritDoc} */
     @Override
     public void destroy() {
         super.destroy();
         requests.clear();
+    }
+
+    public synchronized void stop() {
+        logger.info("stopping WiresBlinkServlet...");
+        shutdown = true;
+
+        final Iterator<Entry<String, RequestContext>> iter = requests.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            final Entry<String, RequestContext> next = iter.next();
+
+            next.getValue().close();
+            iter.remove();
+        }
+        logger.info("stopping WiresBlinkServlet...done");
     }
 
     /**
@@ -125,17 +144,27 @@ public final class WiresBlinkServlet extends HttpServlet implements WireAdminLis
             return;
         }
 
-        // set the response headers for SSE
-        response.setContentType("text/event-stream");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-control", "no-cache");
-        response.setHeader("Connection", "keep-alive");
-        response.setHeader("Access-Control-Allow-Origin", "*"); // required for IE9
-        response.setHeader("Content-Encoding", "identity"); // allow compressed data
-
         final RequestContext context;
 
         synchronized (this) {
+
+            if (shutdown) {
+                try {
+                    response.sendError(400);
+                } catch (final Exception e) {
+                    logger.warn("Failed to send status");
+                }
+                return;
+            }
+
+            // set the response headers for SSE
+            response.setContentType("text/event-stream");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Cache-control", "no-cache");
+            response.setHeader("Connection", "keep-alive");
+            response.setHeader("Access-Control-Allow-Origin", "*"); // required for IE9
+            response.setHeader("Content-Encoding", "identity"); // allow compressed data
+
             final OutputStream outputStream;
 
             try {

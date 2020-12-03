@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -27,16 +29,28 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements GwtEventService, EventHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GwtEventServiceImpl.class);
 
     private static final long serialVersionUID = 4948177265652519828L;
 
     private static final int MAX_EVENT_COUNT = 50;
 
-    private final LinkedList<String> topics = new LinkedList<>();
-    private final LinkedList<GwtEventInfo> events = new LinkedList<>();
+    private final ArrayList<String> topics = new ArrayList<>();
+    private final Deque<GwtEventInfo> events = new LinkedList<>();
     private ServiceRegistration<EventHandler> registration;
+    private boolean shutdown = false;
+
+    @Override
+    public void destroy() {
+        logger.info("destroying GwtEventService...");
+        super.destroy();
+        logger.info("destroying GwtEventService...done");
+    }
 
     public GwtEventServiceImpl() {
         for (ForwardedEventTopic topic : ForwardedEventTopic.values()) {
@@ -75,8 +89,6 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     public void start() {
-        stop();
-
         Dictionary<String, Object> map = new Hashtable<>();
 
         map.put(EventConstants.EVENT_TOPIC, this.topics.toArray(new String[this.topics.size()]));
@@ -86,10 +98,17 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
     }
 
     public void stop() {
+        logger.info("stopping GwtEventService...");
         if (this.registration != null) {
             this.registration.unregister();
             this.registration = null;
         }
+
+        synchronized (this) {
+            shutdown = true;
+            notifyAll();
+        }
+        logger.info("stopping GwtEventService...done");
     }
 
     @Override
@@ -102,10 +121,12 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             return result;
         }
 
-        try {
-            this.wait(POLL_TIMEOUT_SECONDS * 1000L);
-        } catch (InterruptedException e) {
-            return new LinkedList<>();
+        if (!this.shutdown) {
+            try {
+                this.wait(POLL_TIMEOUT_SECONDS * 1000L);
+            } catch (InterruptedException e) {
+                return new LinkedList<>();
+            }
         }
 
         return getEvents(timestamp);

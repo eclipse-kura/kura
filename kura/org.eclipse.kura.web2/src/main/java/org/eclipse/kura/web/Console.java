@@ -129,6 +129,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private EventAdmin eventAdmin;
     private UserManager userManager;
     private GwtEventServiceImpl eventService;
+    private WiresBlinkServlet wiresBlinkService;
 
     private HttpContext sessionContext;
 
@@ -201,7 +202,6 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
             setComponentContext(context);
             this.userManager = new UserManager(this.userAdmin, this.cryptoService);
-            this.eventService = new GwtEventServiceImpl();
 
             doUpdate(properties);
 
@@ -330,6 +330,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
         this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
         this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
+        this.wiresBlinkService.stop();
         this.httpService.unregister(ADMIN_ROOT + "/sse");
         this.eventService.stop();
         this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
@@ -414,6 +415,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     private synchronized void initHTTPService() throws NamespaceException, ServletException {
 
+        this.eventService = new GwtEventServiceImpl();
+        this.wiresBlinkService = new WiresBlinkServlet();
+
         final HttpContext defaultContext = this.httpService.createDefaultHttpContext();
         final HttpContext resourceContext = initResourceContext(defaultContext);
         this.sessionContext = initSessionContext(defaultContext);
@@ -473,7 +477,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetservices", new GwtDriverAndAssetServiceImpl(),
                 null, this.sessionContext);
-        this.httpService.registerServlet(ADMIN_ROOT + "/sse", new WiresBlinkServlet(), null, this.sessionContext);
+        this.httpService.registerServlet(ADMIN_ROOT + "/sse", this.wiresBlinkService, null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + EVENT_PATH, this.eventService, null, this.sessionContext);
 
         for (final ServletRegistration reg : this.securedServlets) {

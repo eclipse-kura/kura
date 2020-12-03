@@ -26,7 +26,7 @@
 
 <g:FormPanel ui:field="loginForm">
 		<b:Modal ui:field="loginDialog" title="Login" closable="false"
-			fade="false" dataBackdrop="FALSE" addStyleNames="login-form">
+			fade="false" dataBackdrop="FALSE" addStyleNames="login-form" visible="false">
 			
 			<b:ModalBody ui:field="loginModalBody">
 						<b.html:Paragraph text="Web UI access is not enabled." ui:field="noAuthMethodsWarning" />

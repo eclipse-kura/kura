@@ -156,18 +156,18 @@ public class LoginUi extends Composite implements Context {
             });
         });
 
-        this.loginDialog.show();
         this.gwtLoginInfoService.getLoginInfo(new AsyncCallback<GwtLoginInfo>() {
 
             @Override
             public void onFailure(final Throwable caught) {
-                // do nothing
+                loginDialog.show();
             }
 
             @Override
             public void onSuccess(final GwtLoginInfo result) {
                 initLoginBannerModal(result);
                 initAuthenticationHandlers(result);
+                loginDialog.show();
             }
         });
 

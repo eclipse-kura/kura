@@ -820,6 +820,8 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/javax.servlet_${javax.servlet.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.fileupload_${org.apache.commons.fileupload.version}.jar@3:start" />

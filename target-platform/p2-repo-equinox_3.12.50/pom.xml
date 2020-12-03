@@ -96,6 +96,11 @@
                                     <artifactId>jetty-util</artifactId>
                                     <version>${org.eclipse.jetty.util.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-util-ajax</artifactId>
+                                    <version>${org.eclipse.jetty.util.ajax.version}</version>
+                                </artifactItem>
                                 <!--
                                     use wireadming 1.0.800, remove this on full Equinox upgrade
                                 -->
@@ -210,6 +215,8 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-util-ajax.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar" />
                                 <!--
                                     use wireadming 1.0.800, remove this on full Equinox upgrade
                                 -->

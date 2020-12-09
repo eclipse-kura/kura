@@ -4,7 +4,7 @@ Bundle-Name: Kura Localization
 Bundle-SymbolicName: org.eclipse.kura.localization;singleton:=true
 Bundle-Version: 1.0.500.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-License: Eclipse Public License v1.0
+Bundle-License: Eclipse Public License v2.0
 Bundle-Category: Localization
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: org.eclipse.kura.localization;version="1.0.0"

@@ -16,4 +16,4 @@ Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Eclipse-BuddyPolicy: ext
 Bundle-Vendor: Eclipse Kura
-Bundle-License: Eclipse Public License v1.0
+Bundle-License: Eclipse Public License v2.0

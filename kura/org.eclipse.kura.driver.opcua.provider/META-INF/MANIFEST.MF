@@ -4,7 +4,7 @@ Bundle-Name: OPC-UA Driver
 Bundle-SymbolicName: org.eclipse.kura.driver.opcua.provider;singleton:=true
 Bundle-Version: 1.0.500.qualifier
 Bundle-Vendor: Eclipse Kura
-Bundle-License: Eclipse Public License v1.0
+Bundle-License: Eclipse Public License v2.0
 Bundle-Category: Asset-Driver Management
 Bundle-ActivationPolicy: lazy
 Import-Package: javax.crypto,

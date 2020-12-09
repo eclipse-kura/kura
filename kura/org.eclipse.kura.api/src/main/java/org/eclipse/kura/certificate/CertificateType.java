@@ -12,11 +12,28 @@
  *******************************************************************************/
 package org.eclipse.kura.certificate;
 
+/**
+ * Identifies the supported certificate types
+ *
+ * @since 2.2
+ */
 public enum CertificateType {
 
+    /**
+     * Device Management certificate
+     */
     DM,
+    /**
+     * Bundle certificate
+     */
     BUNDLE,
+    /**
+     * SSL certificate
+     */
     SSL,
+    /**
+     * Login certificate
+     */
     LOGIN;
 
     public static CertificateType getCertificateType(String stringCertificateType) {

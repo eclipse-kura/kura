@@ -97,6 +97,11 @@
                                     <version>${org.eclipse.jetty.util.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.eclipse.jetty</groupId>
+                                    <artifactId>jetty-util-ajax</artifactId>
+                                    <version>${org.eclipse.jetty.util.ajax.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.eclipse.platform</groupId>
                                     <artifactId>org.eclipse.equinox.io</artifactId>
                                     <version>${org.eclipse.equinox.io.version}</version>
@@ -213,6 +218,8 @@
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.servlet_${org.eclipse.jetty.servlet.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/jetty-util.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util_${org.eclipse.jetty.util.version}.jar" />
+                                <move file="${project.build.directory}/source/plugins/jetty-util-ajax.jar"
+                                    tofile="${project.build.directory}/source/plugins/org.eclipse.jetty.util.ajax_${org.eclipse.jetty.util.ajax.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.io.jar"
                                     tofile="${project.build.directory}/source/plugins/org.eclipse.equinox.io_${org.eclipse.equinox.io.version}.jar" />
                                 <move file="${project.build.directory}/source/plugins/org.eclipse.equinox.util.jar"

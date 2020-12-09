@@ -526,7 +526,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
-
+        
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
         logger.info("Stored message on topic: {}, priority: {}", topic, priority);
 
@@ -620,10 +620,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
                                 logger.info("Maximum number of connection attempts reached. Requested reboot...");
                             }
                         }
-                    } catch (Error e) {
-                        // There's nothing we can do here but log an exception.
-                        logger.error("Unexpected Error. Task will be terminated", e);
-                        throw e;
                     } finally {
                         if (connected) {
                             unregisterAsCriticalComponent();

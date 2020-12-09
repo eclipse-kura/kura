@@ -21,9 +21,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
@@ -32,6 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.db.H2DbService;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -76,6 +82,16 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
     private final AtomicInteger pendingUpdates = new AtomicInteger();
+    private final ThreadLocal<Boolean> isOnExecutor = new ThreadLocal<Boolean>() {
+
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
+    private final ThreadPoolExecutor executorService = new ThreadPoolExecutor(0, 10, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>());
 
     // ----------------------------------------------------------------
     //
@@ -100,6 +116,19 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
+        final String kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
+        final ThreadFactory defaultFactory = executorService.getThreadFactory();
+        final AtomicInteger threadNumber = new AtomicInteger();
+
+        executorService.setThreadFactory(r -> {
+            final Thread result = defaultFactory.newThread(() -> {
+                isOnExecutor.set(true);
+                r.run();
+            });
+            result.setName("H2DbService_" + kuraServicePid + "_" + threadNumber.getAndIncrement());
+            return result;
+        });
+
         this.executor = Executors.newSingleThreadScheduledExecutor();
         updated(properties);
 
@@ -120,6 +149,9 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             logger.warn("Interrupted while waiting for db shutdown");
             Thread.currentThread().interrupt();
         }
+
+        this.executorService.shutdown();
+        awaitExecutorServiceTermination();
         try {
             shutdownDb();
         } catch (SQLException e) {
@@ -149,26 +181,49 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         }
     }
 
+    private <T> T withConnectionInternal(ConnectionCallable<T> callable) throws SQLException {
+        final Lock executorlock = this.rwLock.readLock();
+        executorlock.lock();
+        Connection connection = null;
+        try {
+            connection = getConnectionInternal();
+            return callable.call(connection);
+        } catch (final SQLException e) {
+            logger.warn("Db operation failed");
+            rollback(connection);
+            throw e;
+        } finally {
+            close(connection);
+            executorlock.unlock();
+        }
+    }
+
     @Override
     public <T> T withConnection(ConnectionCallable<T> callable) throws SQLException {
         if (this.pendingUpdates.get() > 0) {
             syncWithExecutor();
         }
 
-        final Lock lock = this.rwLock.readLock();
-        lock.lock();
-        Connection connection = null;
-        try {
-            connection = getConnectionInternal();
-            return callable.call(connection);
-        } catch (final SQLException e) {
-            logger.warn("Db operation failed", e);
-            rollback(connection);
-            throw e;
-        } finally {
-            close(connection);
-            lock.unlock();
+        if (isOnExecutor.get()) {
+            return withConnectionInternal(callable);
         }
+
+        final Future<T> result = this.executorService.submit(() -> withConnectionInternal(callable));
+
+        try {
+            return result.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SQLException(e);
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof SQLException) {
+                throw (SQLException) e.getCause();
+            } else if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            }
+            throw new IllegalStateException(e);
+        }
+
     }
 
     @Override
@@ -280,6 +335,11 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
                 restartDefragTask(newConfiguration);
             }
 
+            if (this.configuration == null
+                    || newConfiguration.getConnectionPoolMaxSize() != this.configuration.getConnectionPoolMaxSize()) {
+                this.executorService.setMaximumPoolSize(newConfiguration.getConnectionPoolMaxSize());
+            }
+
             this.configuration = newConfiguration;
             activeInstances.put(baseUrl, this);
 
@@ -291,6 +351,15 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         } finally {
             lock.unlock();
             this.pendingUpdates.decrementAndGet();
+        }
+    }
+
+    private void awaitExecutorServiceTermination() {
+        try {
+            this.executorService.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e1) {
+            logger.warn("Interrupted while waiting for db shutdown");
+            Thread.currentThread().interrupt();
         }
     }
 

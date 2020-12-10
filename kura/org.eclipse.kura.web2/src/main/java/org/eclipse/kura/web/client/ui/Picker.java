@@ -58,28 +58,30 @@ public class Picker extends Composite implements HasId {
 
         this.yes.addClickHandler(e -> {
             dismissAction = Optional.of(State::onAccept);
-            this.modal.hide();
+            onHide();
         });
         this.no.addClickHandler(e -> {
+            onHide();
+        });
+        this.modal.addHiddenHandler(e -> onHide());
+    }
+
+    public void onHide() {
+        if (!state.isPresent()) {
+            return;
+        }
+
+        final State<?> currentState = this.state.get();
+
+        if (dismissAction.isPresent()) {
+            final Consumer<State<?>> currentAction = dismissAction.get();
+            this.dismissAction = Optional.empty();
+            currentAction.accept(currentState);
+        }
+        if (this.state.isPresent() && this.state.get() == currentState) {
             this.modal.hide();
-        });
-        this.modal.addHiddenHandler(e -> {
-            if (!state.isPresent()) {
-                return;
-            }
-
-            final State<?> currentState = this.state.get();
-
-            if (dismissAction.isPresent()) {
-                final Consumer<State<?>> currentAction = dismissAction.get();
-                this.dismissAction = Optional.empty();
-                currentAction.accept(currentState);
-            }
-            if (this.state.isPresent() && this.state.get() == currentState) {
-                this.modal.hide();
-                this.state = Optional.empty();
-            }
-        });
+            this.state = Optional.empty();
+        }
     }
 
     @Override

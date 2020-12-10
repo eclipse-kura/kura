@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,6 +27,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RpcRequestBuilder;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
+import com.google.gwt.user.client.rpc.StatusCodeException;
 
 public final class EventService {
 
@@ -83,6 +84,13 @@ public final class EventService {
 
         @Override
         public void onFailure(Throwable caught) {
+            if (caught instanceof StatusCodeException) {
+                final StatusCodeException statusCodeException = (StatusCodeException) caught;
+                if (statusCodeException.getStatusCode() == 401) {
+                    FailureHandler.handle(caught);
+                }
+            }
+
             startResendTimer(ON_FAILURE_RESEND_DELAY);
         }
 

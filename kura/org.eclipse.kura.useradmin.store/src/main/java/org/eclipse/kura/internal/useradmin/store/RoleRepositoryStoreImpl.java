@@ -26,11 +26,15 @@ import org.apache.felix.useradmin.RoleFactory;
 import org.apache.felix.useradmin.RoleRepositoryStore;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.internal.useradmin.store.RoleSerializer.RoleBuilder;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
+import org.osgi.service.useradmin.UserAdmin;
 import org.osgi.service.useradmin.UserAdminEvent;
 import org.osgi.service.useradmin.UserAdminListener;
 import org.slf4j.Logger;
@@ -64,7 +68,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
-        doUpdate(properties);
+        doUpdate(properties, RoleFactory::createRole);
 
         logger.info("activating...done");
     }
@@ -78,7 +82,40 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
         logger.info("updating...");
 
-        doUpdate(properties);
+        final RoleBuilder roleBuilder;
+
+        final BundleContext bundleContext = FrameworkUtil.getBundle(RoleRepositoryStoreImpl.class).getBundleContext();
+
+        final ServiceReference<UserAdmin> userAdminRef = bundleContext.getServiceReference(UserAdmin.class);
+
+        final UserAdmin userAdmin;
+
+        if (userAdminRef != null) {
+            userAdmin = bundleContext.getService(userAdminRef);
+        } else {
+            userAdmin = null;
+        }
+
+        if (userAdmin != null) {
+            roleBuilder = (type, name) -> userAdmin.createRole(name, type);
+
+            final Set<String> roleNames = new HashSet<>(roles.keySet());
+
+            for (final String name : roleNames) {
+                userAdmin.removeRole(name);
+            }
+
+        } else {
+            roleBuilder = RoleFactory::createRole;
+        }
+
+        try {
+            doUpdate(properties, roleBuilder);
+        } finally {
+            if (userAdmin != null) {
+                bundleContext.ungetService(userAdminRef);
+            }
+        }
 
         logger.info("updating...done");
     }
@@ -161,11 +198,11 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         return updateId;
     }
 
-    private void doUpdate(final Map<String, Object> properties) {
+    private void doUpdate(final Map<String, Object> properties, final RoleBuilder roleBuilder) {
         options = new RoleRepositoryStoreOptions(properties);
 
         try {
-            roles = decode(options);
+            roles = decode(options, roleBuilder);
         } catch (final Exception e) {
             logger.warn("failed to deserialize roles", e);
         }
@@ -217,16 +254,17 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
     }
 
-    private final Map<String, Role> decode(final RoleRepositoryStoreOptions options) throws DeserializationException {
+    private final Map<String, Role> decode(final RoleRepositoryStoreOptions options, final RoleBuilder roleBuilder)
+            throws DeserializationException {
         try {
             final Map<String, Role> result = new HashMap<>();
 
-            decode(Json.parse(options.getRolesConfig()).asArray(), Role.class, result);
-            decode(Json.parse(options.getUsersConfig()).asArray(), User.class, result);
+            decode(Json.parse(options.getRolesConfig()).asArray(), Role.class, result, roleBuilder);
+            decode(Json.parse(options.getUsersConfig()).asArray(), User.class, result, roleBuilder);
 
             final JsonArray groups = Json.parse(options.getGroupsConfig()).asArray();
 
-            decode(groups, Group.class, result);
+            decode(groups, Group.class, result, roleBuilder);
 
             for (final JsonValue member : groups) {
                 RoleSerializer.assignMembers(member.asObject(), result);
@@ -242,18 +280,17 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
     }
 
-    private void decode(final JsonArray array, final Class<? extends Role> classz, final Map<String, Role> target)
-            throws DeserializationException {
+    private void decode(final JsonArray array, final Class<? extends Role> classz, final Map<String, Role> target,
+            final RoleBuilder roleBuilder) throws DeserializationException {
         for (final JsonValue member : array) {
-            final Role role = RoleSerializer.deserializeRole(classz, member.asObject());
+            final Role role = RoleSerializer.deserializeRole(classz, member.asObject(), roleBuilder);
             target.put(role.getName(), role);
         }
     }
 
     @Override
     public void roleChanged(UserAdminEvent arg0) {
-        logger.info("received event");
+        logger.debug("received event");
         scheduleStore();
     }
-
 }

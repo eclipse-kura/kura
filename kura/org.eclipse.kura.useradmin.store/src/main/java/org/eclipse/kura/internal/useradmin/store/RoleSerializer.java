@@ -15,7 +15,6 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.apache.felix.useradmin.RoleFactory;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
@@ -153,8 +152,8 @@ class RoleSerializer {
     }
 
     @SuppressWarnings("unchecked")
-    static <T extends Role> T deserializeRole(final Class<T> classz, final JsonObject object)
-            throws DeserializationException {
+    static <T extends Role> T deserializeRole(final Class<T> classz, final JsonObject object,
+            final RoleBuilder roleBuilder) throws DeserializationException {
         try {
             final int type;
 
@@ -170,7 +169,7 @@ class RoleSerializer {
 
             final String name = object.get(NAME).asString();
 
-            final Role result = RoleFactory.createRole(type, name);
+            final Role result = roleBuilder.build(type, name);
 
             final JsonValue roleProperties = object.get(ROLE_PROPERTIES);
 
@@ -238,4 +237,8 @@ class RoleSerializer {
         }
     }
 
+    public interface RoleBuilder {
+
+        public Role build(final int type, final String name);
+    }
 }

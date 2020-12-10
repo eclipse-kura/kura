@@ -79,7 +79,13 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
             @Override
             public String getValue(GwtUserConfig object) {
-                return object.getUserName();
+                final String userName = object.getUserName();
+
+                if (userName.startsWith(" ") || userName.endsWith(" ")) {
+                    return '"' + userName + '"';
+                } else {
+                    return userName;
+                }
             }
         };
 
@@ -105,12 +111,14 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
             picker.builder(GwtUserConfig.class) //
                     .setTitle(MSGS.usersCreateIdentity()) //
                     .setMessage(MSGS.usersIdentityName()) //
-                    .setValidator((editor, str) -> {
-                        if (str == null || str.trim().isEmpty()) {
+                    .setValidator((editor, userName) -> {
+                        if (userName == null || userName.trim().isEmpty()) {
                             throw new IllegalArgumentException(MSGS.usersIdentityNameEmpty());
                         }
 
-                        final String userName = str.trim();
+                        if (userName.startsWith(" ") || userName.endsWith(" ")) {
+                            throw new IllegalArgumentException(MSGS.usersIdentityLeadingOrTrailingSpaces());
+                        }
 
                         if (dataProvider.getList().stream().anyMatch(d -> d.getUserName().equals(userName))) {
                             throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());

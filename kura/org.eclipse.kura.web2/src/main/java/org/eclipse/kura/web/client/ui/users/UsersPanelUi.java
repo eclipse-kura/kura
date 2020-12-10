@@ -110,11 +110,13 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                             throw new IllegalArgumentException(MSGS.usersIdentityNameEmpty());
                         }
 
-                        if (dataProvider.getList().stream().anyMatch(d -> d.getUserName().equals(str))) {
+                        final String userName = str.trim();
+
+                        if (dataProvider.getList().stream().anyMatch(d -> d.getUserName().equals(userName))) {
                             throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());
                         }
 
-                        return new GwtUserConfig(str, new HashSet<>(), false);
+                        return new GwtUserConfig(userName, new HashSet<>(), false);
                     }).setOnPick(user -> {
                         dataProvider.getList().add(user);
                         setDirty(true);

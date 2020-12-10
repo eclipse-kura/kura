@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -25,11 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.eclipse.kura.KuraConnectException;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloud.CloudService;
 import org.eclipse.kura.cloudconnection.CloudConnectionManager;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
@@ -38,8 +33,6 @@ import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
-import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionInfo;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -70,7 +63,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final String POSITION_STATUS = "positionStatus";
 
     private static final Logger logger = LoggerFactory.getLogger(GwtStatusServiceImpl.class);
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final long serialVersionUID = 8256280782910423734L;
 
@@ -91,190 +83,6 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         pairs.addAll(getPositionStatus());
 
         return new ArrayList<>(pairs);
-    }
-
-    @Override
-    public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
-                .getServiceReferences(CloudService.class, null);
-
-        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-            if (cloudServicePid.endsWith(connectionId)) {
-                String dataServiceRef = (String) cloudServiceReference
-                        .getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance()
-                        .getServiceReferences(DataService.class, dataServiceRef);
-
-                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
-                    DataService dataService = ServiceLocator.getInstance().getService(dataServiceReference);
-                    if (dataService != null) {
-                        GwtKuraException gwtKuraException = null;
-                        int counter = 10;
-                        try {
-                            dataService.connect();
-                            while (!dataService.isConnected() && counter > 0) {
-                                Thread.sleep(1000);
-                                counter--;
-                            }
-                        } catch (KuraConnectException e) {
-                            logger.warn("Error connecting");
-                            gwtKuraException = new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
-                                    "Error connecting. Please review your configuration.");
-                        } catch (InterruptedException e) {
-                            logger.warn("Interrupt Exception");
-                            gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e,
-                                    "Interrupt Exception");
-                        } catch (IllegalStateException e) {
-                            logger.warn("Illegal client state");
-                            gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e,
-                                    "Illegal client state");
-                        }
-
-                        if (gwtKuraException != null) {
-                            auditLogger.warn(
-                                    "UI Status - Failure - Failed to connect data service for user: {}, session: {}, connection id: {}",
-                                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(),
-                                    connectionId);
-                            throw gwtKuraException;
-                        }
-                    }
-                    ServiceLocator.getInstance().ungetService(dataServiceReference);
-                }
-            }
-            ServiceLocator.getInstance().ungetService(cloudServiceReference);
-        }
-
-        Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceLocator
-                .getInstance().getServiceReferences(CloudConnectionManager.class, null);
-
-        for (ServiceReference<CloudConnectionManager> cloudConnectionManagerReference : cloudConnectionManagerReferences) {
-            String cloudConnectionManagerPid = (String) cloudConnectionManagerReference.getProperty(KURA_SERVICE_PID);
-            if (cloudConnectionManagerPid.endsWith(connectionId)) {
-                CloudConnectionManager cloudConnectionManager = ServiceLocator.getInstance()
-                        .getService(cloudConnectionManagerReference);
-                try {
-                    cloudConnectionManager.connect();
-                } catch (KuraException e) {
-                    logger.warn("Error connecting");
-                    auditLogger.warn(
-                            "UI Status - Failure - Failed to connect data service for user: {}, session: {}, connection id: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
-                    throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
-                            "Error connecting. Please review your configuration.");
-                }
-            }
-            ServiceLocator.getInstance().ungetService(cloudConnectionManagerReference);
-        }
-
-        auditLogger.info(
-                "UI Status - Success - Successfully connected data service for user: {}, session: {}, connection id: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
-    }
-
-    @Override
-    public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
-                .getServiceReferences(CloudService.class, null);
-
-        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-            if (cloudServicePid.endsWith(connectionId)) {
-                String dataServiceRef = (String) cloudServiceReference
-                        .getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance()
-                        .getServiceReferences(DataService.class, dataServiceRef);
-
-                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
-                    DataService dataService = ServiceLocator.getInstance().getService(dataServiceReference);
-                    if (dataService != null) {
-                        dataService.disconnect(10);
-                    }
-                    ServiceLocator.getInstance().ungetService(dataServiceReference);
-                }
-            }
-            ServiceLocator.getInstance().ungetService(cloudServiceReference);
-        }
-
-        Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceLocator
-                .getInstance().getServiceReferences(CloudConnectionManager.class, null);
-
-        for (ServiceReference<CloudConnectionManager> cloudConnectionManagerReference : cloudConnectionManagerReferences) {
-            String cloudConnectionManagerPid = (String) cloudConnectionManagerReference.getProperty(KURA_SERVICE_PID);
-            if (cloudConnectionManagerPid.endsWith(connectionId)) {
-                CloudConnectionManager cloudConnectionManager = ServiceLocator.getInstance()
-                        .getService(cloudConnectionManagerReference);
-                try {
-                    cloudConnectionManager.disconnect();
-                } catch (KuraException e) {
-                    logger.warn("Error disconnecting");
-                    auditLogger.warn(
-                            "UI Status - Failure - Failed to disconnect data service for user: {}, session: {}, connection id: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
-                    throw new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
-                            "Error disconnecting. Please review your configuration.");
-                }
-            }
-            ServiceLocator.getInstance().ungetService(cloudConnectionManagerReference);
-        }
-
-        auditLogger.info(
-                "UI Status - Success - Successfully disconnected data service for user: {}, session: {}, connection id: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), connectionId);
-    }
-
-    @Override
-    public boolean isConnected(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-        boolean isConnected = false;
-
-        Collection<ServiceReference<CloudService>> cloudServiceReferences = ServiceLocator.getInstance()
-                .getServiceReferences(CloudService.class, null);
-
-        for (ServiceReference<CloudService> cloudServiceReference : cloudServiceReferences) {
-            String cloudServicePid = (String) cloudServiceReference.getProperty(KURA_SERVICE_PID);
-            if (cloudServicePid.endsWith(connectionId)) {
-                String dataServiceRef = (String) cloudServiceReference
-                        .getProperty(DATA_SERVICE_REFERENCE_NAME + ComponentConstants.REFERENCE_TARGET_SUFFIX);
-                Collection<ServiceReference<DataService>> dataServiceReferences = ServiceLocator.getInstance()
-                        .getServiceReferences(DataService.class, dataServiceRef);
-
-                for (ServiceReference<DataService> dataServiceReference : dataServiceReferences) {
-                    DataService dataService = ServiceLocator.getInstance().getService(dataServiceReference);
-                    if (dataService != null) {
-                        isConnected = dataService.isConnected();
-                    }
-                    ServiceLocator.getInstance().ungetService(dataServiceReference);
-                }
-            }
-            ServiceLocator.getInstance().ungetService(cloudServiceReference);
-        }
-
-        Collection<ServiceReference<CloudConnectionManager>> cloudConnectionManagerReferences = ServiceLocator
-                .getInstance().getServiceReferences(CloudConnectionManager.class, null);
-
-        for (ServiceReference<CloudConnectionManager> cloudConnectionManagerReference : cloudConnectionManagerReferences) {
-            String cloudConnectionManagerPid = (String) cloudConnectionManagerReference.getProperty(KURA_SERVICE_PID);
-            if (cloudConnectionManagerPid.endsWith(connectionId)) {
-                CloudConnectionManager cloudConnectionManager = ServiceLocator.getInstance()
-                        .getService(cloudConnectionManagerReference);
-
-                isConnected = cloudConnectionManager.isConnected();
-            }
-            ServiceLocator.getInstance().ungetService(cloudConnectionManagerReference);
-        }
-
-        return isConnected;
     }
 
     private List<GwtGroupedNVPair> getCloudStatus() throws GwtKuraException {

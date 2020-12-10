@@ -35,8 +35,6 @@ import org.eclipse.kura.web.shared.service.GwtCloudConnectionService;
 import org.eclipse.kura.web.shared.service.GwtCloudConnectionServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtStatusService;
-import org.eclipse.kura.web.shared.service.GwtStatusServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -68,7 +66,6 @@ public class CloudInstancesUi extends Composite {
     private final ListDataProvider<GwtCloudEntry> cloudServicesDataProvider = new ListDataProvider<>();
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtCloudConnectionServiceAsync gwtCloudConnection = GWT.create(GwtCloudConnectionService.class);
-    private final GwtStatusServiceAsync gwtStatusService = GWT.create(GwtStatusService.class);
 
     private final CloudConnectionsUi cloudServicesUi;
 
@@ -551,7 +548,7 @@ public class CloudInstancesUi extends Composite {
 
     private void connectDisconnectDataService(final String connectionId) {
         RequestQueue.submit(context -> this.gwtXSRFService
-                .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtStatusService
+                .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtCloudConnection
                         .isConnected(token, connectionId, context.callback(isConnected -> {
                             if (isConnected) {
                                 CloudInstancesUi.this.disconnectDataService(connectionId);
@@ -564,15 +561,15 @@ public class CloudInstancesUi extends Composite {
     private void connectDataService(final String connectionId) {
 
         RequestQueue.submit(context -> this.gwtXSRFService
-                .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtStatusService
-                        .connectDataService(token, connectionId, context.<Void>callback()))));
+                .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtCloudConnection
+                        .connectDataService(token, connectionId, context.<Void> callback()))));
     }
 
     private void disconnectDataService(final String connectionId) {
 
         RequestQueue.submit(context -> this.gwtXSRFService
-                .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtStatusService
-                        .disconnectDataService(token, connectionId, context.<Void>callback()))));
+                .generateSecurityToken(context.callback(token -> CloudInstancesUi.this.gwtCloudConnection
+                        .disconnectDataService(token, connectionId, context.<Void> callback()))));
 
     }
 

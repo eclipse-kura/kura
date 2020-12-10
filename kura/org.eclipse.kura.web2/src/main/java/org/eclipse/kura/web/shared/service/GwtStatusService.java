@@ -39,24 +39,4 @@ public interface GwtStatusService extends RemoteService {
      */
     public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
             throws GwtKuraException;
-
-    /**
-     * Connects the local MQTT client to the specified broker.
-     *
-     * @param xsrfToken
-     *            - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
-     * @throws GwtKuraException
-     */
-    public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
-
-    /**
-     * Disconnects the local MQTT client.
-     *
-     * @param xsrfToken
-     *            - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
-     * @throws GwtKuraException
-     */
-    public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
-
-    public boolean isConnected(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 }

@@ -38,12 +38,14 @@ import org.eclipse.kura.web.client.ui.settings.SettingsPanelUi;
 import org.eclipse.kura.web.client.ui.status.StatusPanelUi;
 import org.eclipse.kura.web.client.ui.users.UsersPanelUi;
 import org.eclipse.kura.web.client.ui.wires.WiresPanelUi;
+import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.Request;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
@@ -87,6 +89,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -240,13 +243,34 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     };
 
     private final EntryClassUi ui;
-    private final GwtUserData userData;
+    private GwtUserData userData;
 
     private GwtSession currentSession;
     private GwtConfigComponent selected = null;
 
     private ServicesUi servicesUi;
     private AnchorListItem selectedAnchorListItem;
+
+    private final Timer userConfigReloadTimer = new Timer() {
+
+        @Override
+        public void run() {
+            RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(
+                    c.callback(token -> gwtSessionService.getUserConfig(token, c.callback(config -> {
+                        if (config == null) {
+                            logout();
+                            return;
+                        }
+
+                        if (!config.equals(userData)) {
+                            alertDialog.show(MSGS.usersIdentityConfigChanged(userData.getUserName()),
+                                    AlertDialog.Severity.ALERT, (ConfirmListener) null);
+                        }
+
+                        userData = config;
+                    })))), false);
+        }
+    };
 
     private static GwtConsoleUserOptions userOptions;
 
@@ -686,33 +710,15 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initLogoutButtons() {
-        final ClickHandler logoutHandler = e -> confirmIfUiDirty(
-                () -> this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-                    @Override
-                    public void onSuccess(GwtXSRFToken result) {
-                        EntryClassUi.this.gwtSessionService.logout(result, new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Window.Location.reload();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                FailureHandler.handle(caught);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        FailureHandler.handle(caught);
-                    }
-                }));
+        final ClickHandler logoutHandler = e -> confirmIfUiDirty(() -> logout());
 
         this.logoutButton.addClickHandler(logoutHandler);
         this.headerLogoutButton.addClickHandler(logoutHandler);
+    }
+
+    private void logout() {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
+                c.callback(token -> gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
     }
 
     private void initServicesTree() {
@@ -995,6 +1001,17 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 e.setMessage(MSGS.deviceConfigDirty());
             }
         });
+
+        final EventService.Handler userAdminEventHandler = e -> {
+            userConfigReloadTimer.schedule(1000);
+        };
+
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CREATED, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CREATED_SHORT, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
     }
 
     private void showStatusPanel() {

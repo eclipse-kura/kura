@@ -15,7 +15,6 @@ package org.eclipse.kura.web;
 import static org.eclipse.kura.web.session.SecurityHandler.chain;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -79,7 +78,6 @@ import org.eclipse.kura.web.session.RoutingSecurityHandler;
 import org.eclipse.kura.web.session.SecurityHandler;
 import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
 import org.eclipse.kura.web.session.SessionExpirationSecurityHandler;
-import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -576,6 +574,10 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         }
     }
 
+    public UserManager getUserManager() {
+        return userManager;
+    }
+
     @Override
     public void registerConsoleExtensionBundle(ClientExtensionBundle extension) {
         configUpdateExecutor.execute(() -> {
@@ -634,18 +636,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     @Override
     public String setAuthenticated(final HttpSession session, final String user) {
-
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
 
-        final Optional<GwtUserConfig> userData = userManager.getUserConfig(user);
-
-        if (userData.isPresent()) {
-            session.setAttribute(Attributes.IS_ADMIN.getValue(), userData.get().isAdmin());
-            session.setAttribute(Attributes.PERMISSIONS.getValue(), userData.get().getPermissions());
-        } else {
-            session.setAttribute(Attributes.IS_ADMIN.getValue(), false);
-            session.setAttribute(Attributes.PERMISSIONS.getValue(), Collections.emptySet());
-        }
+        session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), userManager.getCredentialsHash(user));
 
         return CONSOLE_PATH;
     }

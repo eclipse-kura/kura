@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -29,7 +30,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.UserManager;
 import org.eclipse.kura.web.session.Attributes;
+import org.eclipse.kura.web.shared.model.GwtUserConfig;
 
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPCRequest;
@@ -194,16 +198,27 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
         final HttpSession session = getThreadLocalRequest().getSession(false);
 
-        final Object rawPermissions = session.getAttribute(Attributes.PERMISSIONS.getValue());
-        final Object rawIsAdmin = session.getAttribute(Attributes.IS_ADMIN.getValue());
+        final UserManager userManager = Console.instance().getUserManager();
 
-        if (!(rawPermissions instanceof Set) || !(rawIsAdmin instanceof Boolean)) {
+        final Object rawUserName = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+
+        if (!(rawUserName instanceof String)) {
             throw new KuraPermissionException();
         }
 
-        final Set<?> permissions = (Set<?>) rawPermissions;
+        final String userName = (String) rawUserName;
 
-        if (!(Boolean) rawIsAdmin && !permissions.containsAll(requiredPermissions)) {
+        final Optional<GwtUserConfig> config = userManager.getUserConfig(userName);
+
+        if (!config.isPresent()) {
+            throw new KuraPermissionException();
+        }
+
+        if (config.get().isAdmin()) {
+            return;
+        }
+
+        if (!config.get().getPermissions().containsAll(requiredPermissions)) {
             throw new KuraPermissionException();
         }
     }

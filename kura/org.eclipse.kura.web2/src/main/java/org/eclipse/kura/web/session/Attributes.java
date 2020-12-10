@@ -16,8 +16,7 @@ public enum Attributes {
 
     AUTORIZED_USER("org.eclipse.kura.web.user"),
     LAST_ACTIVITY("org.eclipse.kura.web.lastActivity"),
-    PERMISSIONS("org.eclipse.kura.web.permissions"),
-    IS_ADMIN("org.eclipse.kura.web.isAdmin");
+    CREDENTIALS_HASH("org.eclipse.kura.web.credentialsHash");
 
     private String value;
 

@@ -173,6 +173,22 @@ public class UserManager {
 
     }
 
+    public Optional<Integer> getCredentialsHash(final String userName) {
+        final Optional<User> user = getUser(userName);
+
+        if (!user.isPresent()) {
+            return Optional.empty();
+        }
+
+        final Dictionary<?, ?> credentials = user.get().getCredentials();
+
+        if (credentials == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(credentials.hashCode());
+    }
+
     @SuppressWarnings("unchecked")
     public void setUserConfig(final Set<GwtUserConfig> userData) throws KuraException {
         foreachUser((name, user) -> {

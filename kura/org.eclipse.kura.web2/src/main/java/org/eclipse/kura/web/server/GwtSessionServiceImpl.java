@@ -86,12 +86,16 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
-        if (session != null) {
-            final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
-            return userManager.getUserConfig((String) username)
-                    .orElseThrow(() -> new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED));
-        } else {
+        if (session == null) {
             throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
         }
+
+        final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+
+        if (!(username instanceof String)) {
+            throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
+        }
+
+        return userManager.getUserConfig((String) username).orElse(null);
     }
 }

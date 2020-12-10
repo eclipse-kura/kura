@@ -13,10 +13,13 @@
 package org.eclipse.kura.web.session;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.eclipse.kura.web.Console;
 
 public class SessionAutorizationSecurityHandler implements SecurityHandler {
 
@@ -30,7 +33,14 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
 
         final Object authorized = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
 
-        return authorized instanceof String;
+        if (!(authorized instanceof String)) {
+            return false;
+        }
+
+        final String userName = (String) authorized;
+
+        return Objects.equals(session.getAttribute(Attributes.CREDENTIALS_HASH.getValue()),
+                Console.instance().getUserManager().getCredentialsHash(userName));
     }
 
 }

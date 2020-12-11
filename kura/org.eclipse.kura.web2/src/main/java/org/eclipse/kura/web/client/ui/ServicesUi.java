@@ -319,7 +319,7 @@ public class ServicesUi extends AbstractServicesUi {
                     messages = result.stream().map(ValidationResult::getMessage).collect(Collectors.toList());
 
                     if (result.stream().anyMatch(r -> r instanceof ServicesUi.Error)) {
-                        alertDialog.show(MSGS.warning(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ALERT,
+                        alertDialog.show(MSGS.error(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
                                 null, messages.toArray(new String[messages.size()]));
                         return;
                     }

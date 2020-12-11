@@ -520,12 +520,10 @@ public class DeploymentAgent implements DeploymentAgentService {
             return;
         }
 
-        try {
-            FileOutputStream fos = new FileOutputStream(this.dpaConfPath);
+        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
-            fos.close();
         } catch (IOException e) {
             logger.error("Error writing package configuration file", e);
         }
@@ -540,12 +538,10 @@ public class DeploymentAgent implements DeploymentAgentService {
             return;
         }
 
-        try {
-            FileOutputStream fos = new FileOutputStream(this.dpaConfPath);
+        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
             deployedPackages.store(fos, null);
             fos.flush();
             fos.getFD().sync();
-            fos.close();
         } catch (IOException e) {
             logger.error("Error writing package configuration file", e);
         }

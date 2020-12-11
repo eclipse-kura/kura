@@ -212,9 +212,7 @@ public class CryptoServiceImpl implements CryptoService {
     @Override
     public void setKeyStorePassword(String keyStorePath, char[] password) throws KuraException {
         Properties props = new Properties();
-        FileInputStream fis;
-        try {
-            fis = new FileInputStream(this.keystorePasswordPath);
+        try (FileInputStream fis = new FileInputStream(this.keystorePasswordPath)) {
             props.load(fis);
         } catch (IOException e) {
             // Not loading from an existing file

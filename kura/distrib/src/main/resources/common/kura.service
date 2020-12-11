@@ -1,7 +1,7 @@
 [Unit]
 Description=Kura
 Wants=networking.service dbus.service
-After=networking.service dbus.service docker.service
+After=networking.service dbus.service docker.service multi-user.target
 
 [Service]
 User=kurad

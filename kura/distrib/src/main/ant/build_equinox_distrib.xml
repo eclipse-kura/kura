@@ -28,7 +28,8 @@
 		<property name="binary.folder" value="bin" />
 		<property name="snapshots.folder" value="${user.config.folder}/snapshots" />
 		<property name="security.folder" value="${user.config.folder}/security" />
-		<property name="console.folder" value="${user.config.folder}/console" />
+		<property name="console.folder" value="console" />
+		<property name="log4j.folder" value="log4j" />
 
 		<!-- Loads entries from a manifest file. @jar The jar from where to read
 			@prefix A prefix to prepend -->
@@ -286,7 +287,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
-        -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
+        -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -331,7 +332,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
-        -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
+        -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -374,7 +375,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
         -Ddpa.configuration=${DIR}/data/dpa.properties \
-        -Dlog4j.configurationFile=file:${DIR}/user/log4j.xml \
+        -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
         -Djdk.tls.trustNameService=true \
@@ -443,13 +444,13 @@ fi]]>
 				prefix="${build.output.name}/${user.config.folder}/" />
 			
 			<zipfileset file="src/main/resources/common/favicon/favicon-16x16.png"
-				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+				prefix="${build.output.name}/${console.folder}/skin/" />
 			<zipfileset file="src/main/resources/common/favicon/favicon-32x32.png"
-				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+				prefix="${build.output.name}/${console.folder}/skin/" />
 			<zipfileset file="src/main/resources/common/favicon/favicon-96x96.png"
-				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+				prefix="${build.output.name}/${console.folder}/skin/" />
 			<zipfileset file="src/main/resources/common/favicon/favicon.ico"
-				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
+				prefix="${build.output.name}/${console.folder}/skin/" />
 
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura_install.sh"
@@ -561,7 +562,7 @@ fi]]>
 			<zipfileset file="notice.html" prefix="${build.output.name}/" />
 			<zipfileset file="epl-v10.html" prefix="${build.output.name}/" />
 			<zipfileset file="src/main/resources/${build.name}/log4j.xml"
-				prefix="${build.output.name}/${user.config.folder}/" />
+				prefix="${build.output.name}/${log4j.folder}/" />
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura.properties"
 				prefix="${build.output.name}/${framework.config.folder}/" />

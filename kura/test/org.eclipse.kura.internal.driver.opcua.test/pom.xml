@@ -69,6 +69,18 @@
             <version>${org.eclipse.milo.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+    		<groupId>jakarta.activation</groupId>
+    		<artifactId>jakarta.activation-api</artifactId>
+    		<version>1.2.2</version>
+    		<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.3</version>
+			<scope>test</scope>
+		</dependency>
 
     </dependencies>
 
@@ -241,6 +253,16 @@
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
+                        <bundle>
+                            <id>jakarta.xml.bind-api</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
+                        <bundle>
+                            <id>jakarta.activation-api</id>
+                            <level>4</level>
+                            <autoStart>false</autoStart>
+                        </bundle>
                     </bundleStartLevel>
                     <dependencies>
 <!--                         <dependency> -->
@@ -327,6 +349,14 @@
                             <type>p2-installable-unit</type>
                             <artifactId>org.apache.logging.log4j.api</artifactId>
                         </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.xml.bind-api</artifactId>
+                        </dependency>
+                        <dependency>
+                            <type>p2-installable-unit</type>
+                            <artifactId>jakarta.activation-api</artifactId>
+                        </dependency>
                     </dependencies>
                 </configuration>
             </plugin>
@@ -395,6 +425,11 @@
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>org.apache.logging.log4j.slf4j-impl</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.annotation-api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

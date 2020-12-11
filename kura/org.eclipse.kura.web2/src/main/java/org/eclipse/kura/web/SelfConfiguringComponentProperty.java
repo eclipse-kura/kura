@@ -166,7 +166,6 @@ public class SelfConfiguringComponentProperty<T> {
         return cryptoService.get();
     }
 
-    @SuppressWarnings("unchecked")
     private Optional<T> extractDefault(final AD ad) {
 
         final String defaultValue = ad.getDefault();
@@ -184,7 +183,7 @@ public class SelfConfiguringComponentProperty<T> {
             final List<?> result = COMMA.splitAsStream(defaultValue).map(String::trim).filter(String::isEmpty)
                     .map(s -> extractScalar(scalar, s)).collect(Collectors.toList());
 
-            return Optional.of((T) result.toArray(null));
+            return Optional.of((T) result.toArray());
         }
 
     }

@@ -107,12 +107,12 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
+
         String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
                 "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
-        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1" });
         List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
-        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
-                && resultProtocols.containsAll(expectedProtocols));
+        assertTrue(expectedProtocols.size() >= resultProtocols.size() && expectedProtocols.containsAll(resultProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
@@ -132,13 +132,13 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
+
         String[] expectedCiphers = { "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256",
                 "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256" };
 
-        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1" });
         List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
-        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
-                && resultProtocols.containsAll(expectedProtocols));
+        assertTrue(expectedProtocols.size() >= resultProtocols.size() && expectedProtocols.containsAll(resultProtocols));
         assertNotEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertArrayEquals(expectedCiphers, resultParameters.getCipherSuites());
 
@@ -155,10 +155,9 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1" });
         List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
-        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
-                && resultProtocols.containsAll(expectedProtocols));
+        assertTrue(expectedProtocols.size() >= resultProtocols.size() && expectedProtocols.containsAll(resultProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
 
@@ -175,10 +174,9 @@ public class SSLSocketFactoryWrapperTest {
         assertTrue(resultSocket instanceof SSLSocket);
 
         SSLParameters resultParameters = ((SSLSocket) resultSocket).getSSLParameters();
-        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1", "TLSv1" });
+        List<String> expectedProtocols = Arrays.asList(new String[] { "TLSv1.3", "TLSv1.2", "TLSv1.1", "TLSv1" });
         List<String> resultProtocols = Arrays.asList(resultParameters.getProtocols());
-        assertTrue(expectedProtocols.size() == resultProtocols.size() && expectedProtocols.containsAll(resultProtocols)
-                && resultProtocols.containsAll(expectedProtocols));
+        assertTrue(expectedProtocols.size() >= resultProtocols.size() && expectedProtocols.containsAll(resultProtocols));
         assertEquals("HTTPS", resultParameters.getEndpointIdentificationAlgorithm());
         assertNotEquals(0, resultParameters.getCipherSuites().length);
 

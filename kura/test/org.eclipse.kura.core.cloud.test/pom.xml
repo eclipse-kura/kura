@@ -313,6 +313,11 @@
                                 <id>org.eclipse.kura.emulator.watchdog</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.annotation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
                         </extraRequirements>
                     </dependency-resolution>
                 </configuration>

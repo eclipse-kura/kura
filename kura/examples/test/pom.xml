@@ -223,6 +223,11 @@
                                 <id>org.eclipse.kura.api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.annotation-api</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
                         </extraRequirements>
                     </dependency-resolution>
                 </configuration>
@@ -259,7 +264,7 @@
         <kura.basedir>${project.basedir}/../..</kura.basedir>
         <tycho.argline>${jacocoArgs} -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml</tycho.argline>
         
-        <jacoco.version>0.8.1</jacoco.version>
+        <jacoco.version>0.8.6</jacoco.version>
         <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
         <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
     </properties>

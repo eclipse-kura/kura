@@ -52,8 +52,9 @@
                         -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
 <!--
                        -Dosgi.noShutdown=true
+                      
                     <appArgLine>-consoleLog -console 1450</appArgLine>
--->
+ -->
                     <bundleStartLevel>
                         <bundle>
                             <id>org.apache.felix.scr</id>
@@ -358,6 +359,11 @@
                             <requirement>
                                 <type>p2-installable-unit</type>
                                 <id>org.apache.logging.log4j.slf4j-impl</id>
+                                <versionRange>0.0.0</versionRange>
+                            </requirement>
+                            <requirement>
+                                <type>p2-installable-unit</type>
+                                <id>jakarta.annotation-api</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                         </extraRequirements>

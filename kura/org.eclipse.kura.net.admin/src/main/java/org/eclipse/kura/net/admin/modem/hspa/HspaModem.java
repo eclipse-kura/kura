@@ -265,6 +265,11 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
+    public boolean isGpsEnabled() {
+        return false;
+    }
+
+    @Override
     public void enableGps() throws KuraException {
         logger.warn("Modem GPS not supported");
     }
@@ -448,11 +453,6 @@ public class HspaModem implements HspaCellularModem {
             throw new KuraException(KuraErrorCode.SERIAL_PORT_INVALID_CONFIGURATION, "URI Syntax Exception");
         }
         return commURI;
-    }
-
-    @Override
-    public boolean isGpsEnabled() {
-        return false;
     }
 
     protected CommConnection openSerialPort(String port) throws KuraException {

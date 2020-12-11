@@ -38,109 +38,139 @@ public class QuectelEX25 extends QuectelGeneric {
     }
 
     @Override
-    public void enableGps() throws KuraException {
+    public boolean isGpsEnabled() {
         synchronized (this.atLock) {
-            CommConnection commAtConnection = openSerialPort(getAtPort());
-            if (!isAtReachable(commAtConnection)) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + QuectelEX25.class.getName());
-            }
-            String gpsEnableCommand = QuectelGenericAtCommands.ENABLE_GPS.getCommand();
-            String gpsEnableNMEAcommand = QuectelGenericAtCommands.ENABLE_NMEA_GPS.getCommand();
-
-            byte[] reply;
-            int numAttempts = 3;
-            while (numAttempts > 0) {
-                getAtPort();
-                getGpsPort();
-                try {
-                    logger.debug("enableGps() :: sendCommand gpsEnable :: {}", gpsEnableCommand);
-                    commAtConnection.sendCommand(gpsEnableCommand.getBytes(), 1000, 100);
-
-                    logger.debug("enableGps() :: sendCommand gpsEnableNMEA :: {}", gpsEnableNMEAcommand);
-                    reply = commAtConnection.sendCommand(gpsEnableNMEAcommand.getBytes(), 3000, 100);
-                } catch (IOException e) {
+            boolean isEnabled = false;
+            CommConnection commAtConnection = null;
+            try {
+                commAtConnection = openSerialPort(getAtPort());
+                if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, e);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                            MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + QuectelEX25.class.getName());
                 }
+                String reply;
+                String isGpsEnabledCommand = QuectelGenericAtCommands.IS_GPS_ENABLED.getCommand();
+                reply = sendCommand(commAtConnection, isGpsEnabledCommand);
+                isEnabled = reply != null && reply.contains("+QGPS: 1");
+            } catch (KuraException e) {
+                logger.error("Failed to connect to modem", e);
+            } finally {
+                try {
+                    if (commAtConnection != null) {
+                        closeSerialPort(commAtConnection);
+                    }
+                } catch (KuraException e) {
+                    logger.error("Failed to close CommConnection", e);
+                }
+            }
+            return isEnabled;
+        }
+    }
 
-                if (reply != null && reply.length > 0) {
-                    String sReply = getResponseString(reply);
-                    if (sReply != null && sReply.isEmpty()) {
-                        logger.info("enableGps() :: Modem replied to the {} command with 'OK'", gpsEnableNMEAcommand);
+    @Override
+    public void enableGps() throws KuraException {
+        if (!isGpsEnabled()) {
+            synchronized (this.atLock) {
+                CommConnection commAtConnection = getCommConnection();
+                String reply;
+                String gpsEnableCommand = QuectelGenericAtCommands.ENABLE_GPS.getCommand();
+                reply = sendCommand(commAtConnection, gpsEnableCommand);
+                if (logger.isInfoEnabled()) {
+                    if (reply != null && reply.isEmpty()) {
+                        logger.info("enableGps() :: Modem replied to the {} command with 'OK'",
+                                gpsEnableCommand.replace("\r\n", ""));
                         logger.info("enableGps() :: !!! Modem GPS enabled !!!");
-                        break;
+                    } else {
+                        logger.info("enableGps() :: Modem replied to the {} command with '{}'",
+                                gpsEnableCommand.replace("\r\n", ""), reply);
+                        logger.info("enableGps() :: !!! Modem GPS NOT enabled !!!");
                     }
                 }
-                numAttempts--;
-                sleep(2000);
-            }
 
-            closeSerialPort(commAtConnection);
+                String gpsEnableNMEACommand = QuectelGenericAtCommands.ENABLE_NMEA_GPS.getCommand();
+                reply = sendCommand(commAtConnection, gpsEnableNMEACommand);
+                if (logger.isInfoEnabled()) {
+                    if (reply != null && reply.isEmpty()) {
+                        logger.info("enableGps() :: Modem replied to the {} command with 'OK'",
+                                gpsEnableNMEACommand.replace("\r\n", ""));
+                    } else {
+                        logger.info("enableGps() :: Modem replied to the {} command with '{}'",
+                                gpsEnableNMEACommand.replace("\r\n", ""), reply);
+                    }
+                }
+                closeSerialPort(commAtConnection);
+            }
         }
     }
 
     @Override
     public void disableGps() throws KuraException {
-        synchronized (this.atLock) {
-            CommConnection commAtConnection = openSerialPort(getAtPort());
+        if (isGpsEnabled()) {
+            synchronized (this.atLock) {
+                CommConnection commAtConnection = getCommConnection();
+                String reply;
+                String gpsDisableCommand = QuectelGenericAtCommands.DISABLE_GPS.getCommand();
+                reply = sendCommand(commAtConnection, gpsDisableCommand);
+                if (logger.isInfoEnabled()) {
+                    if (reply != null && reply.isEmpty()) {
+                        logger.info("disableGps() :: Modem replied to the {} command with 'OK'",
+                                gpsDisableCommand.replace("\r\n", ""));
+                        logger.info("disableGps() :: !!! Modem GPS disabled !!!");
+                    } else {
+                        logger.info("disableGps() :: Modem replied to the {} command with '{}'",
+                                gpsDisableCommand.replace("\r\n", ""), reply);
+                        logger.info("disableGps() :: !!! Modem GPS NOT disabled !!!");
+                    }
+                }
+                String gpsDisableNMEACommand = QuectelGenericAtCommands.DISABLE_NMEA_GPS.getCommand();
+                reply = sendCommand(commAtConnection, gpsDisableNMEACommand);
+                if (logger.isInfoEnabled()) {
+                    if (reply != null && reply.isEmpty()) {
+                        logger.info("disableGps() :: Modem replied to the {} command with 'OK'",
+                                gpsDisableNMEACommand.replace("\r\n", ""));
+                    } else {
+                        logger.info("disableGps() :: Modem replied to the {} command with '{}'",
+                                gpsDisableNMEACommand.replace("\r\n", ""), reply);
+                    }
+                }
+                closeSerialPort(commAtConnection);
+            }
+        }
+    }
+
+    private CommConnection getCommConnection() throws KuraException {
+        CommConnection commAtConnection = openSerialPort(getAtPort());
+        if (!isAtReachable(commAtConnection)) {
+            closeSerialPort(commAtConnection);
+            throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                    MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + QuectelEX25.class.getName());
+        }
+        return commAtConnection;
+    }
+
+    private String sendCommand(CommConnection commAtConnection, String command) throws KuraException {
+        byte[] reply;
+        String stringReply = "";
+        int numAttempts = 3;
+        while (numAttempts > 0) {
             try {
-                // String atPort = getAtPort();
-                // String gpsPort = getGpsPort();
-                // if (atPort.equals(gpsPort) && !isAtReachable(commAtConnection)) {
-                // int numAttempts = 3;
-                // while (numAttempts > 0) {
-                // logger.debug("disableGps() :: sendCommand escapeSequence {}",
-                // TelitModemAtCommands.escapeSequence.getCommand());
-                //
-                // sleep(1000); // do not send anything for 1 second before the escape sequence
-                // byte[] reply = commAtConnection
-                // .sendCommand(TelitModemAtCommands.escapeSequence.getCommand().getBytes(), 1000, 1100);
-                //
-                // if (reply != null && reply.length > 0) {
-                // String sReply = new String(reply);
-                // if (sReply.contains("NO CARRIER")) {
-                // logger.info(
-                // "disableGps() :: Modem replied with 'NO CARRIER' to the +++ escape sequence");
-                // sleep(2000);
-                // if (isAtReachable(commAtConnection)) {
-                // logger.info("disableGps() :: !!! Modem GPS disabled !!!, OK");
-                // break;
-                // } else {
-                // logger.error("disableGps() :: [1] Failed to disable modem GPS");
-                // numAttempts--;
-                // }
-                // } else {
-                // if (isAtReachable(commAtConnection)) {
-                // logger.warn("disableGps() :: Modem didn't reply with 'NO CARRIER' "
-                // + "to the +++ escape sequence but port is AT reachable");
-                // logger.info("disableGps() :: Will assume that GPS is disabled");
-                // break;
-                // } else {
-                // logger.error("disableGps() :: [2] Failed to disable modem GPS");
-                // numAttempts--;
-                // }
-                // }
-                // } else {
-                // logger.error("disableGps() :: [3] Failed to disable modem GPS");
-                // numAttempts--;
-                // }
-                // sleep(2000);
-                // }
-                // } else {
-                // logger.warn("disableGps() :: Modem GPS has already been disabled");
-                // }
-
-                logger.debug("disableGps() :: sendCommand gpsPowerDown :: {}",
-                        QuectelGenericAtCommands.DISABLE_GPS.getCommand());
-                commAtConnection.sendCommand(QuectelGenericAtCommands.DISABLE_GPS.getCommand().getBytes(), 1000, 100);
-
+                logger.debug("sendCommand :: {}", command);
+                reply = commAtConnection.sendCommand(command.getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, e);
             }
-            closeSerialPort(commAtConnection);
+
+            if (reply != null && reply.length > 0) {
+                stringReply = getResponseString(reply);
+                if (stringReply != null && !stringReply.contains("ERROR")) {
+                    return stringReply;
+                }
+            }
+            numAttempts--;
+            sleep(2000);
         }
+        return stringReply;
     }
 }

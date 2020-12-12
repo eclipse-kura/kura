@@ -1,13 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eurotech and/or its affiliates and others
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.ArrayList;
@@ -99,7 +101,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         if (userAdmin != null) {
             roleBuilder = (type, name) -> userAdmin.createRole(name, type);
 
-            final Set<String> roleNames = new HashSet<>(roles.keySet());
+            final Set<String> roleNames = new HashSet<>(this.roles.keySet());
 
             for (final String name : roleNames) {
                 userAdmin.removeRole(name);
@@ -123,7 +125,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     public void deactivate() {
         logger.info("deactivating...");
 
-        executorService.shutdown();
+        this.executorService.shutdown();
 
         logger.info("deactivating...done");
     }
@@ -131,20 +133,20 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     @Override
     public synchronized Role addRole(final String name, final int type) throws Exception {
 
-        if (roles.containsKey(name)) {
+        if (this.roles.containsKey(name)) {
             return null;
         }
 
         final Role role = RoleFactory.createRole(type, name);
 
-        roles.put(name, role);
+        this.roles.put(name, role);
 
         return role;
     }
 
     @Override
     public synchronized Role getRoleByName(final String name) throws Exception {
-        return roles.get(name);
+        return this.roles.get(name);
     }
 
     @SuppressWarnings("unchecked")
@@ -161,7 +163,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
         final List<Role> result = new ArrayList<>();
 
-        for (final Role role : roles.values()) {
+        for (final Role role : this.roles.values()) {
             if (!filter.isPresent() || filter.get().match(role.getProperties())) {
                 result.add(role);
             }
@@ -172,7 +174,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
     @Override
     public synchronized Role removeRole(final String role) throws Exception {
-        return Optional.ofNullable(roles.remove(role)).orElse(null);
+        return Optional.ofNullable(this.roles.remove(role)).orElse(null);
     }
 
     private boolean isSelfUpdate(final Map<String, Object> properties) {
@@ -181,8 +183,8 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
         if (id instanceof Long) {
             final long updateId = (Long) id;
 
-            if (updateIds.contains(updateId)) {
-                updateIds.remove(updateId);
+            if (this.updateIds.contains(updateId)) {
+                this.updateIds.remove(updateId);
                 return true;
             }
         }
@@ -191,18 +193,18 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     }
 
     public long getNextUpdateId() {
-        final long updateId = nextUpdateId++;
+        final long updateId = this.nextUpdateId++;
 
-        updateIds.add(updateId);
+        this.updateIds.add(updateId);
 
         return updateId;
     }
 
     private void doUpdate(final Map<String, Object> properties, final RoleBuilder roleBuilder) {
-        options = new RoleRepositoryStoreOptions(properties);
+        this.options = new RoleRepositoryStoreOptions(properties);
 
         try {
-            roles = decode(options, roleBuilder);
+            this.roles = decode(this.options, roleBuilder);
         } catch (final Exception e) {
             logger.warn("failed to deserialize roles", e);
         }
@@ -210,13 +212,13 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
     private synchronized void scheduleStore() {
 
-        if (storeTask.isPresent()) {
-            storeTask.get().cancel(false);
-            storeTask = Optional.empty();
+        if (this.storeTask.isPresent()) {
+            this.storeTask.get().cancel(false);
+            this.storeTask = Optional.empty();
         }
 
-        storeTask = Optional
-                .of(executorService.schedule(this::storeNow, options.getWriteDelayMs(), TimeUnit.MILLISECONDS));
+        this.storeTask = Optional.of(
+                this.executorService.schedule(this::storeNow, this.options.getWriteDelayMs(), TimeUnit.MILLISECONDS));
     }
 
     private synchronized void storeNow() {
@@ -225,7 +227,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
             final JsonArray usersArray = new JsonArray();
             final JsonArray groupsArray = new JsonArray();
 
-            for (final Role role : roles.values()) {
+            for (final Role role : this.roles.values()) {
                 final int type = role.getType();
 
                 if (type == Role.ROLE) {
@@ -240,16 +242,16 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
             final Map<String, Object> properties = new RoleRepositoryStoreOptions(rolesArray.toString(), //
                     usersArray.toString(), //
                     groupsArray.toString(), //
-                    options.getWriteDelayMs() //
+                    this.options.getWriteDelayMs() //
             ).toProperties();
 
             properties.put(INTERNAL_UPDATE_ID_PROP_NAME, getNextUpdateId());
 
-            configurationService.updateConfiguration(RoleRepositoryStoreImpl.class.getName(), properties);
+            this.configurationService.updateConfiguration(RoleRepositoryStoreImpl.class.getName(), properties);
         } catch (final Exception e) {
             logger.warn("Failed to store configuration", e);
         } finally {
-            storeTask = Optional.empty();
+            this.storeTask = Optional.empty();
         }
 
     }

@@ -1,13 +1,15 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eurotech and/or its affiliates and others
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
  *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.HashMap;
@@ -47,28 +49,28 @@ public class RoleRepositoryStoreOptions {
     }
 
     public String getRolesConfig() {
-        return rolesConfig;
+        return this.rolesConfig;
     }
 
     public String getUsersConfig() {
-        return usersConfig;
+        return this.usersConfig;
     }
 
     public String getGroupsConfig() {
-        return groupsConfig;
+        return this.groupsConfig;
     }
 
     public long getWriteDelayMs() {
-        return writeDelayMs;
+        return this.writeDelayMs;
     }
 
     public Map<String, Object> toProperties() {
         final Map<String, Object> result = new HashMap<>();
 
-        result.put(ROLES_CONFIG_ID, rolesConfig);
-        result.put(USERS_CONFIG_ID, usersConfig);
-        result.put(GROUPS_CONFIG_ID, groupsConfig);
-        result.put(WRITE_DELAY_MS_ID, writeDelayMs);
+        result.put(ROLES_CONFIG_ID, this.rolesConfig);
+        result.put(USERS_CONFIG_ID, this.usersConfig);
+        result.put(GROUPS_CONFIG_ID, this.groupsConfig);
+        result.put(WRITE_DELAY_MS_ID, this.writeDelayMs);
 
         return result;
     }

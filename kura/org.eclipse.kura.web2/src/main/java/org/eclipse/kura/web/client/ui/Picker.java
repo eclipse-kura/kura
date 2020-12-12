@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
 import static java.util.Objects.requireNonNull;
@@ -57,7 +69,7 @@ public class Picker extends Composite implements HasId {
         this.modal.setHideOtherModals(false);
 
         this.yes.addClickHandler(e -> {
-            dismissAction = Optional.of(State::onAccept);
+            this.dismissAction = Optional.of(State::onAccept);
             onHide();
         });
         this.no.addClickHandler(e -> {
@@ -67,14 +79,14 @@ public class Picker extends Composite implements HasId {
     }
 
     public void onHide() {
-        if (!state.isPresent()) {
+        if (!this.state.isPresent()) {
             return;
         }
 
         final State<?> currentState = this.state.get();
 
-        if (dismissAction.isPresent()) {
-            final Consumer<State<?>> currentAction = dismissAction.get();
+        if (this.dismissAction.isPresent()) {
+            final Consumer<State<?>> currentAction = this.dismissAction.get();
             this.dismissAction = Optional.empty();
             currentAction.accept(currentState);
         }
@@ -141,34 +153,34 @@ public class Picker extends Composite implements HasId {
         private Input initInput() {
             final Input result = new Input();
             result.addKeyUpHandler(e -> result.validate());
-            if (customizer.isPresent()) {
-                customizer.get().accept(result);
+            if (this.customizer.isPresent()) {
+                this.customizer.get().accept(result);
             }
             return result;
         }
 
         public void pick() {
-            requireNonNull(validator, "validator cannot be null");
-            requireNonNull(consumer, "onPick cannot be null");
-            requireNonNull(title, "title cannot be null");
+            requireNonNull(this.validator, "validator cannot be null");
+            requireNonNull(this.consumer, "onPick cannot be null");
+            requireNonNull(this.title, "title cannot be null");
 
-            Picker.this.modal.setTitle(title);
+            Picker.this.modal.setTitle(this.title);
 
-            if (message.isPresent()) {
-                Picker.this.label.setText(message.get());
+            if (this.message.isPresent()) {
+                Picker.this.label.setText(this.message.get());
             } else {
                 Picker.this.label.setText("");
             }
 
             final Input input = initInput();
 
-            final State<U> state = new State<>(input, validator, consumer, onCancel.orElse(() -> {
+            final State<U> state = new State<>(input, this.validator, this.consumer, this.onCancel.orElse(() -> {
             }));
 
             Picker.this.state = Optional.of(state);
             Picker.this.dismissAction = Optional.of(State::onCancel);
 
-            inputPanel.add(input);
+            Picker.this.inputPanel.add(input);
 
             input.validate();
             Picker.this.modal.show();
@@ -194,45 +206,45 @@ public class Picker extends Composite implements HasId {
             this.consumer = consumer;
             this.onDismiss = onCancel;
             this.value.setValidators(this);
-            this.submitHandler = form.addSubmitHandler(e -> {
+            this.submitHandler = Picker.this.form.addSubmitHandler(e -> {
                 e.cancel();
                 if (value.validate()) {
-                    dismissAction = Optional.of(State::onAccept);
-                    modal.hide();
+                    Picker.this.dismissAction = Optional.of(State::onAccept);
+                    Picker.this.modal.hide();
                 }
             });
-            this.shownHandler = modal.addShownHandler(e -> {
+            this.shownHandler = Picker.this.modal.addShownHandler(e -> {
                 value.setFocus(true);
             });
         }
 
         public void update(final Editor<String> editor, final String valueString) {
             try {
-                currentValue = Optional.of(builder.apply(editor, valueString));
-                yes.setEnabled(true);
+                this.currentValue = Optional.of(this.builder.apply(editor, valueString));
+                Picker.this.yes.setEnabled(true);
             } catch (final Exception e) {
-                currentValue = Optional.empty();
-                yes.setEnabled(false);
+                this.currentValue = Optional.empty();
+                Picker.this.yes.setEnabled(false);
                 throw e;
             }
         }
 
         public void onAccept() {
             cleanup();
-            if (currentValue.isPresent()) {
-                consumer.accept(currentValue.get());
+            if (this.currentValue.isPresent()) {
+                this.consumer.accept(this.currentValue.get());
             }
         }
 
         public void onCancel() {
             cleanup();
-            onDismiss.run();
+            this.onDismiss.run();
         }
 
         private void cleanup() {
-            inputPanel.clear();
-            submitHandler.removeHandler();
-            shownHandler.removeHandler();
+            Picker.this.inputPanel.clear();
+            this.submitHandler.removeHandler();
+            this.shownHandler.removeHandler();
         }
 
         @Override

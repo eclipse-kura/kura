@@ -105,57 +105,55 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
         this.dataProvider.addDataDisplay(this.userTable);
 
-        this.userTable.setSelectionModel(selectionModel);
+        this.userTable.setSelectionModel(this.selectionModel);
 
         this.selectionModel.addSelectionChangeHandler(e -> {
             this.config.clear();
 
-            final GwtUserConfig userData = selectionModel.getSelectedObject();
+            final GwtUserConfig userData = this.selectionModel.getSelectedObject();
 
             if (userData != null) {
-                showConfigUi(new UserConfigUi(userData, definedPermissions, this));
+                showConfigUi(new UserConfigUi(userData, this.definedPermissions, this));
             }
 
             updateButtonState();
         });
 
-        this.newIdentity.addClickHandler(e -> {
-            picker.builder(GwtUserConfig.class) //
-                    .setTitle(MSGS.usersCreateIdentity()) //
-                    .setMessage(MSGS.usersIdentityName()) //
-                    .setValidator((editor, userName) -> {
-                        if (userName == null || userName.trim().isEmpty()) {
-                            throw new IllegalArgumentException(MSGS.usersIdentityNameEmpty());
-                        }
+        this.newIdentity.addClickHandler(e -> this.picker.builder(GwtUserConfig.class) //
+                .setTitle(MSGS.usersCreateIdentity()) //
+                .setMessage(MSGS.usersIdentityName()) //
+                .setValidator((editor, userName) -> {
+                    if (userName == null || userName.trim().isEmpty()) {
+                        throw new IllegalArgumentException(MSGS.usersIdentityNameEmpty());
+                    }
 
-                        if (userName.startsWith(" ") || userName.endsWith(" ")) {
-                            throw new IllegalArgumentException(MSGS.usersIdentityLeadingOrTrailingSpaces());
-                        }
+                    if (userName.startsWith(" ") || userName.endsWith(" ")) {
+                        throw new IllegalArgumentException(MSGS.usersIdentityLeadingOrTrailingSpaces());
+                    }
 
-                        if (dataProvider.getList().stream().anyMatch(d -> d.getUserName().equals(userName))) {
-                            throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());
-                        }
+                    if (this.dataProvider.getList().stream().anyMatch(d -> d.getUserName().equals(userName))) {
+                        throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());
+                    }
 
-                        return new GwtUserConfig(userName, new HashSet<>(), false);
-                    }).setOnPick(user -> {
-                        dataProvider.getList().add(user);
-                        setDirty(true);
-                    }).pick();
-        });
+                    return new GwtUserConfig(userName, new HashSet<>(), false);
+                }).setOnPick(user -> {
+                    this.dataProvider.getList().add(user);
+                    setDirty(true);
+                }).pick());
 
-        this.delete.addClickHandler(e -> alertDialog.show(MSGS.usersConfirmDeleteIdentity(), () -> {
-            dataProvider.getList().remove(selectionModel.getSelectedObject());
+        this.delete.addClickHandler(e -> this.alertDialog.show(MSGS.usersConfirmDeleteIdentity(), () -> {
+            this.dataProvider.getList().remove(this.selectionModel.getSelectedObject());
             clearConfigUi();
             setDirty(true);
         }));
 
-        this.reset.addClickHandler(e -> alertDialog.show(MSGS.deviceConfigDirty(), this::refresh));
+        this.reset.addClickHandler(e -> this.alertDialog.show(MSGS.deviceConfigDirty(), this::refresh));
         this.apply.addClickHandler(e -> {
             final List<String> warnings = getWarnings();
 
-            alertDialog.show(MSGS.confirm(), MSGS.usersConfirmApply(), AlertDialog.Severity.INFO, ok -> {
+            this.alertDialog.show(MSGS.confirm(), MSGS.usersConfirmApply(), AlertDialog.Severity.INFO, ok -> {
                 if (ok) {
-                    this.apply();
+                    apply();
                 }
             }, warnings.toArray(new String[warnings.size()]));
         });
@@ -165,16 +163,16 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     private List<String> getWarnings() {
         final List<String> result = new ArrayList<>();
 
-        if (dataProvider.getList().isEmpty()) {
+        if (this.dataProvider.getList().isEmpty()) {
             result.add(MSGS.usersEmpty());
             return result;
         }
 
-        if (!dataProvider.getList().stream().anyMatch(u -> u.getPermissions().contains(KuraPermission.ADMIN))) {
+        if (this.dataProvider.getList().stream().noneMatch(u -> u.getPermissions().contains(KuraPermission.ADMIN))) {
             result.add(MSGS.usersNoAdmin());
         }
 
-        dataProvider.getList().stream().filter(u -> u.getPermissions().isEmpty())
+        this.dataProvider.getList().stream().filter(u -> u.getPermissions().isEmpty())
                 .forEach(u -> result.add(MSGS.usersNoPermissions(u.getUserName())));
 
         return result;
@@ -187,11 +185,9 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     }
 
     private void apply() {
-        final Set<GwtUserConfig> asSet = new HashSet<>(dataProvider.getList());
-        RequestQueue.submit(c -> gwtXsrfService.generateSecurityToken(
-                c.callback(token -> gwtUserService.setUserConfig(token, asSet, c.callback(result -> {
-                    refresh();
-                })))));
+        final Set<GwtUserConfig> asSet = new HashSet<>(this.dataProvider.getList());
+        RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(
+                c.callback(token -> this.gwtUserService.setUserConfig(token, asSet, c.callback(result -> refresh())))));
     }
 
     private void showConfigUi(final UserConfigUi ui) {
@@ -214,7 +210,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
     @Override
     public boolean isDirty() {
-        return isDirty;
+        return this.isDirty;
     }
 
     @Override
@@ -226,22 +222,21 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     public void refresh() {
         clearConfigUi();
 
-        RequestQueue.submit(c -> gwtXsrfService
-                .generateSecurityToken(c.callback(token -> gwtUserService.getUserConfig(token, c.callback(result -> {
-                    final List<GwtUserConfig> list = dataProvider.getList();
+        RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(
+                c.callback(token -> this.gwtUserService.getUserConfig(token, c.callback(result -> {
+                    final List<GwtUserConfig> list = this.dataProvider.getList();
                     list.clear();
                     list.addAll(result);
                 })))));
-        RequestQueue.submit(c -> gwtXsrfService.generateSecurityToken(
-                c.callback(token -> gwtUserService.getDefinedPermissions(token, c.callback(result -> {
-                    definedPermissions = result;
-                })))));
+        RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService
+                .getDefinedPermissions(token, c.callback(result -> this.definedPermissions = result)))));
 
         setDirty(false);
     }
 
     @Override
     public void clear() {
+        // Not needed
     }
 
     @Override

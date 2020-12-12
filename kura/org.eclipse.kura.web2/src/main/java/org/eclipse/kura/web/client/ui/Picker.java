@@ -72,9 +72,7 @@ public class Picker extends Composite implements HasId {
             this.dismissAction = Optional.of(State::onAccept);
             onHide();
         });
-        this.no.addClickHandler(e -> {
-            onHide();
-        });
+        this.no.addClickHandler(e -> onHide());
         this.modal.addHiddenHandler(e -> onHide());
     }
 
@@ -174,10 +172,10 @@ public class Picker extends Composite implements HasId {
 
             final Input input = initInput();
 
-            final State<U> state = new State<>(input, this.validator, this.consumer, this.onCancel.orElse(() -> {
+            final State<U> localState = new State<>(input, this.validator, this.consumer, this.onCancel.orElse(() -> {
             }));
 
-            Picker.this.state = Optional.of(state);
+            Picker.this.state = Optional.of(localState);
             Picker.this.dismissAction = Optional.of(State::onCancel);
 
             Picker.this.inputPanel.add(input);
@@ -213,9 +211,7 @@ public class Picker extends Composite implements HasId {
                     Picker.this.modal.hide();
                 }
             });
-            this.shownHandler = Picker.this.modal.addShownHandler(e -> {
-                value.setFocus(true);
-            });
+            this.shownHandler = Picker.this.modal.addShownHandler(e -> value.setFocus(true));
         }
 
         public void update(final Editor<String> editor, final String valueString) {

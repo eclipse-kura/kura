@@ -69,7 +69,7 @@ public class UserConfigUi extends Composite {
     public UserConfigUi(final GwtUserConfig userData, final Set<String> definedPermissions, final Listener listener) {
         this.listener = listener;
         this.userData = userData;
-        hasPassword = userData.isPasswordAuthEnabled();
+        this.hasPassword = userData.isPasswordAuthEnabled();
         this.passwordStrengthValidators = PasswordStrengthValidators.fromConfig(EntryClassUi.getUserOptions());
         initWidget(uiBinder.createAndBindUi(this));
         initTable(userData, definedPermissions);
@@ -87,7 +87,7 @@ public class UserConfigUi extends Composite {
         };
 
         assignedColumn.setFieldUpdater((index, object, value) -> {
-            final boolean assigned = Boolean.valueOf(value);
+            final boolean assigned = Boolean.parseBoolean(value);
             final String permissionName = object.getName();
 
             object.setAssigned(assigned);
@@ -98,7 +98,7 @@ public class UserConfigUi extends Composite {
                 userData.getPermissions().remove(permissionName);
             }
 
-            listener.onUserDataChanged(userData);
+            this.listener.onUserDataChanged(userData);
         });
 
         final TextColumn<AssignedPermission> nameColumn = new TextColumn<AssignedPermission>() {
@@ -113,7 +113,7 @@ public class UserConfigUi extends Composite {
         this.permissionTable.addColumn(nameColumn, MSGS.usersPermissionName());
         this.dataProvider.addDataDisplay(this.permissionTable);
 
-        final List<AssignedPermission> tableContent = dataProvider.getList();
+        final List<AssignedPermission> tableContent = this.dataProvider.getList();
 
         for (final String permission : definedPermissions) {
             tableContent.add(new AssignedPermission(permission, userData.getPermissions().contains(permission)));
@@ -124,18 +124,18 @@ public class UserConfigUi extends Composite {
         updatePasswordWidgetState();
 
         this.passwordEnabled.addChangeHandler(e -> {
-            userData.setPasswordAuthEnabled(true);
-            listener.onUserDataChanged(userData);
+            this.userData.setPasswordAuthEnabled(true);
+            this.listener.onUserDataChanged(this.userData);
             updatePasswordWidgetState();
-            if (!hasPassword) {
+            if (!this.hasPassword) {
                 pickPassword();
             }
         });
 
         this.passwordDisabled.addChangeHandler(e -> {
-            userData.setPasswordAuthEnabled(false);
-            userData.setNewPassword(Optional.empty());
-            listener.onUserDataChanged(userData);
+            this.userData.setPasswordAuthEnabled(false);
+            this.userData.setNewPassword(Optional.empty());
+            this.listener.onUserDataChanged(this.userData);
             updatePasswordWidgetState();
         });
 
@@ -144,10 +144,10 @@ public class UserConfigUi extends Composite {
 
     private void pickPassword() {
         final Runnable onDismiss = () -> {
-            if (!hasPassword) {
-                passwordEnabled.setValue(false);
-                passwordDisabled.setValue(true);
-                userData.setPasswordAuthEnabled(false);
+            if (!this.hasPassword) {
+                this.passwordEnabled.setValue(false);
+                this.passwordDisabled.setValue(true);
+                this.userData.setPasswordAuthEnabled(false);
                 updatePasswordWidgetState();
             }
         };
@@ -161,7 +161,7 @@ public class UserConfigUi extends Composite {
                     if (password == null || password.trim().isEmpty()) {
                         throw new IllegalArgumentException(MSGS.usersPasswordEmpty());
                     }
-                    for (final Validator<String> validator : passwordStrengthValidators) {
+                    for (final Validator<String> validator : this.passwordStrengthValidators) {
                         final List<EditorError> errors = validator.validate(editor, password);
                         if (!errors.isEmpty()) {
                             throw new IllegalArgumentException(errors.get(0).getMessage());
@@ -169,27 +169,26 @@ public class UserConfigUi extends Composite {
                     }
 
                     return password;
-                }).setOnPick(newPassword -> {
-                    this.picker.builder(String.class) //
-                            .setTitle(MSGS.usersConfirmPassword()) //
-                            .setMessage(MSGS.usersRepeatPassword()) //
-                            .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
-                            .setOnCancel(onDismiss) //
-                            .setValidator((e, confirm) -> {
-                                if (!newPassword.equals(confirm)) {
-                                    throw new IllegalArgumentException(MSGS.usersPasswordMismatch());
-                                }
+                }).setOnPick(newPassword -> this.picker.builder(String.class) //
+                        .setTitle(MSGS.usersConfirmPassword()) //
+                        .setMessage(MSGS.usersRepeatPassword()) //
+                        .setInputCustomizer(input -> input.setType(InputType.PASSWORD)) //
+                        .setOnCancel(onDismiss) //
+                        .setValidator((e, confirm) -> {
+                            if (!newPassword.equals(confirm)) {
+                                throw new IllegalArgumentException(MSGS.usersPasswordMismatch());
+                            }
 
-                                return confirm;
-                            }).setOnPick(p -> {
-                                userData.setNewPassword(Optional.of(p));
-                                listener.onUserDataChanged(userData);
-                            }).pick();
-                }).pick();
+                            return confirm;
+                        }).setOnPick(p -> {
+                            this.userData.setNewPassword(Optional.of(p));
+                            this.listener.onUserDataChanged(this.userData);
+                        }).pick())
+                .pick();
     }
 
     public void updatePasswordWidgetState() {
-        final boolean isPasswordEnabled = userData.isPasswordAuthEnabled();
+        final boolean isPasswordEnabled = this.userData.isPasswordAuthEnabled();
 
         this.passwordEnabled.setValue(isPasswordEnabled);
         this.passwordDisabled.setValue(!isPasswordEnabled);
@@ -208,7 +207,7 @@ public class UserConfigUi extends Composite {
         }
 
         public boolean isAssigned() {
-            return assigned;
+            return this.assigned;
         }
 
         public void setAssigned(boolean assigned) {
@@ -216,7 +215,7 @@ public class UserConfigUi extends Composite {
         }
 
         public String getName() {
-            return name;
+            return this.name;
         }
     }
 

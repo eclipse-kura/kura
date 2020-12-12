@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -72,6 +73,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class GwtComponentServiceInternal {
 
@@ -665,52 +667,30 @@ public class GwtComponentServiceInternal {
         final Bundle[] bundles = FrameworkUtil.getBundle(GwtWireGraphService.class).getBundleContext().getBundles();
         for (final Bundle bundle : bundles) {
             final Enumeration<URL> enumeration = bundle.findEntries("OSGI-INF", "*.xml", false);
-            if (enumeration != null) {
-                while (enumeration.hasMoreElements()) {
-                    final URL entry = enumeration.nextElement();
-                    try (InputStreamReader inputStream = new InputStreamReader(entry.openConnection().getInputStream());
-                            BufferedReader reader = new BufferedReader(inputStream);) {
-                        final StringBuilder contents = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            contents.append(line);
-                        }
-                        // Configuration Policy=Require and
-                        // SelfConfiguringComponent or ConfigurableComponent
-                        if ((contents.toString().contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP)
-                                || contents.toString()
-                                        .contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP))
-                                && contents.toString().contains(GwtServerUtil.PATTERN_CONFIGURATION_REQUIRE)) {
-                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-                            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-                            dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-                            dbf.setXIncludeAware(false);
-                            dbf.setExpandEntityReferences(false);
+            if (Objects.isNull(enumeration)) {
+                continue;
+            }
 
-                            final Document dom = dbf.newDocumentBuilder()
-                                    .parse(entry.openConnection().getInputStream());
-                            final NodeList nl = dom.getElementsByTagName("property");
-                            for (int i = 0; i < nl.getLength(); i++) {
-                                final Node n = nl.item(i);
-                                if (n instanceof Element) {
-                                    final String name = ((Element) n).getAttribute("name");
-                                    if ("service.pid".equals(name)) {
-                                        final String factoryPid = ((Element) n).getAttribute("value");
-                                        if (contents.toString().contains(PATTERN_SERVICE_PROVIDE_DRIVER)) {
-                                            driverFactoriesPids.add(factoryPid);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (final Exception ex) {
-                        auditLogger.info(
-                                "UI Component - Failure - Failed to list driver factories for user: {}, session: {}",
-                                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
-                        throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE);
+            while (enumeration.hasMoreElements()) {
+                final URL entry = enumeration.nextElement();
+                try (InputStreamReader inputStream = new InputStreamReader(entry.openConnection().getInputStream());
+                        BufferedReader reader = new BufferedReader(inputStream);) {
+                    final StringBuilder contents = getManifestContent(reader);
+                    // Configuration Policy=Require and
+                    // SelfConfiguringComponent or ConfigurableComponent
+                    if ((contents.toString().contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP)
+                            || contents.toString().contains(GwtServerUtil.PATTERN_SERVICE_PROVIDE_CONFIGURABLE_COMP))
+                            && contents.toString().contains(GwtServerUtil.PATTERN_CONFIGURATION_REQUIRE)) {
+                        driverFactoriesPids.addAll(manageRequiredConfigurableComponents(entry, contents));
                     }
+                } catch (final Exception ex) {
+                    auditLogger.info(
+                            "UI Component - Failure - Failed to list driver factories for user: {}, session: {}",
+                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+                    throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE);
                 }
             }
+
         }
 
         auditLogger.info("UI Component - Success - Successfully listed driver factories for user: {}, session: {}",
@@ -719,8 +699,42 @@ public class GwtComponentServiceInternal {
         return driverFactoriesPids;
     }
 
-    public static List<String> getPidsFromTarget(HttpSession session, String pid, String targetRef)
-            throws GwtKuraException {
+    private static StringBuilder getManifestContent(BufferedReader reader) throws IOException {
+        final StringBuilder contents = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            contents.append(line);
+        }
+        return contents;
+    }
+
+    private static List<String> manageRequiredConfigurableComponents(final URL entry, final StringBuilder contents)
+            throws ParserConfigurationException, SAXException, IOException {
+        List<String> driverFactoriesPids = new ArrayList<>();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        dbf.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
+
+        final Document dom = dbf.newDocumentBuilder().parse(entry.openConnection().getInputStream());
+        final NodeList nl = dom.getElementsByTagName("property");
+        for (int i = 0; i < nl.getLength(); i++) {
+            final Node n = nl.item(i);
+            if (n instanceof Element) {
+                final String name = ((Element) n).getAttribute("name");
+                if ("service.pid".equals(name)) {
+                    final String factoryPid = ((Element) n).getAttribute("value");
+                    if (contents.toString().contains(PATTERN_SERVICE_PROVIDE_DRIVER)) {
+                        driverFactoriesPids.add(factoryPid);
+                    }
+                }
+            }
+        }
+        return driverFactoriesPids;
+    }
+
+    public static List<String> getPidsFromTarget(HttpSession session, String pid, String targetRef) {
 
         List<String> result = new ArrayList<>();
 

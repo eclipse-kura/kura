@@ -35,14 +35,14 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
     public void createUser(final GwtXSRFToken token, final String userName) throws GwtKuraException {
         checkXSRFToken(token);
 
-        userManager.createUser(userName);
+        this.userManager.createUser(userName);
     }
 
     @Override
     public void deleteUser(final GwtXSRFToken token, final String userName) throws GwtKuraException {
         checkXSRFToken(token);
 
-        userManager.deleteUser(userName);
+        this.userManager.deleteUser(userName);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
         checkXSRFToken(token);
 
         try {
-            userManager.setUserPassword(userName, password);
+            this.userManager.setUserPassword(userName, password);
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -61,14 +61,14 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
     public Set<String> getDefinedPermissions(final GwtXSRFToken token) throws GwtKuraException {
         checkXSRFToken(token);
 
-        return userManager.getDefinedPermissions();
+        return this.userManager.getDefinedPermissions();
     }
 
     @Override
     public Set<GwtUserConfig> getUserConfig(final GwtXSRFToken token) throws GwtKuraException {
         checkXSRFToken(token);
 
-        return userManager.getUserConfig();
+        return this.userManager.getUserConfig();
     }
 
     @Override
@@ -76,7 +76,7 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
         checkXSRFToken(token);
 
         try {
-            userManager.setUserConfig(userConfig);
+            this.userManager.setUserConfig(userConfig);
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }

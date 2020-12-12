@@ -77,7 +77,7 @@
 			<entry key="kura.plugins"
 				value="${kura.install.dir}/${kura.symlink}/${plugins.folder}" />
 			<entry key="kura.packages"
-				value="${kura.install.dir}/${kura.symlink}/${data.folder}/packages" />
+				value="${kura.install.dir}/${kura.symlink}/packages" />
 
 			<entry key="kura.marketplace.compatibility.version" value="KURA_${kura.version}" />
 
@@ -246,7 +246,7 @@
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/dpa.properties">
 			<entry key="kura"
-				value="file:${kura.install.dir}/${kura.symlink}/${data.folder}/packages/${build.output.name}.dp" />
+				value="file:${kura.install.dir}/${kura.symlink}/packages/${build.output.name}.dp" />
 		</propertyfile>
 
 		<!-- Set web UI port -->
@@ -286,7 +286,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.home=${DIR} \
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
-        -Ddpa.configuration=${DIR}/data/dpa.properties \
+        -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
@@ -331,7 +331,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.home=${DIR} \
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
-        -Ddpa.configuration=${DIR}/data/dpa.properties \
+        -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \
@@ -374,7 +374,7 @@ if [ -z "$KURA_RUNNING" ] ; then
         -Dkura.home=${DIR} \
         -Dkura.configuration=file:${DIR}/framework/kura.properties \
         -Dkura.custom.configuration=file:${DIR}/user/kura_custom.properties \
-        -Ddpa.configuration=${DIR}/data/dpa.properties \
+        -Ddpa.configuration=${DIR}/packages/dpa.properties \
         -Dlog4j.configurationFile=file:${DIR}/log4j/log4j.xml \
         -Djava.security.policy=${DIR}/framework/jdk.dio.policy \
         -Djdk.dio.registry=${DIR}/framework/jdk.dio.properties \

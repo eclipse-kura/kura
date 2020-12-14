@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -16,11 +16,13 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 
 import org.eclipse.kura.cloud.CloudService;
-import org.eclipse.kura.cloud.factory.CloudServiceFactory;
+import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtCloudComponentFactories;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
 import org.eclipse.kura.web.shared.model.GwtCloudEntry;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -43,6 +45,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  *
  */
 @RemoteServiceRelativePath("cloudservices")
+@RequiredPermissions(KuraPermission.CLOUD_CONNECTION_ADMIN)
 public interface GwtCloudConnectionService extends RemoteService {
 
     /**
@@ -57,21 +60,8 @@ public interface GwtCloudConnectionService extends RemoteService {
      */
     public List<GwtCloudEntry> findCloudEntries() throws GwtKuraException;
 
-    /**
-     * Returns a list of PIDs that compose the cloud stack referenced by the specified factory and cloud service.
-     *
-     * @param factoryPid
-     *            the PID of the {@link CloudServiceFactory} this CloudService was registered with
-     * @param cloudServicePid
-     *            the PID of the selected Cloud Service
-     * @return the list of <i>kura.service.pid</i>s associated with the specified factory component
-     *         configuration.
-     * @throws GwtKuraException
-     *             when service referencing fails
-     * @throws GwtKuraException
-     *             if the invocation of the corresponding factory method returns an exception
-     */
-    public List<String> findStackPidsByFactory(String factoryPid, String cloudServicePid) throws GwtKuraException;
+    public List<GwtConfigComponent> getStackConfigurationsByFactory(final String factoryPid,
+            final String cloudServicePid) throws GwtKuraException;
 
     /**
      * Returns a string that represents the suggested cloud service PID, for the specified factory. If the factory does
@@ -139,4 +129,28 @@ public interface GwtCloudConnectionService extends RemoteService {
 
     public void deletePubSubInstance(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
 
+    public GwtConfigComponent getPubSubConfiguration(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
+
+    public void updateStackComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent component)
+            throws GwtKuraException;
+
+    /**
+     * Connects the local MQTT client to the specified broker.
+     *
+     * @param xsrfToken
+     *            - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
+     * @throws GwtKuraException
+     */
+    public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
+
+    /**
+     * Disconnects the local MQTT client.
+     *
+     * @param xsrfToken
+     *            - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
+     * @throws GwtKuraException
+     */
+    public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
+
+    public boolean isConnected(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 }

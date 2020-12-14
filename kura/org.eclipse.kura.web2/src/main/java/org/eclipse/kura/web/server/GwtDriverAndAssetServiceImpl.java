@@ -45,6 +45,7 @@ import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.session.Attributes;
@@ -54,14 +55,14 @@ import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtAssetService {
+public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtDriverAndAssetService {
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -353,5 +354,57 @@ public class GwtAssetServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         session.setAttribute("kura.csv.download." + id, out.toString());
 
         return id;
+    }
+
+    @Override
+    public void createDriverOrAssetConfiguration(GwtXSRFToken token, String factoryPid, String pid)
+            throws GwtKuraException {
+        // TODO restrict this to work only driver and asset configurations
+
+        checkXSRFToken(token);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        GwtComponentServiceInternal.createFactoryComponent(session, factoryPid, pid);
+    }
+
+    @Override
+    public void createDriverOrAssetConfiguration(GwtXSRFToken token, String factoryPid, String pid,
+            GwtConfigComponent config) throws GwtKuraException {
+        // TODO restrict this to work only driver and asset configurations
+
+        checkXSRFToken(token);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        GwtComponentServiceInternal.createFactoryComponent(session, factoryPid, pid, config);
+    }
+
+    @Override
+    public void updateDriverOrAssetConfiguration(GwtXSRFToken token, GwtConfigComponent config)
+            throws GwtKuraException {
+        // TODO restrict this to work only driver and asset configurations
+
+        checkXSRFToken(token);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        GwtComponentServiceInternal.updateComponentConfiguration(session, config);
+    }
+
+    @Override
+    public void deleteDriverOrAssetConfiguration(GwtXSRFToken token, String pid, boolean takeSnapshot)
+            throws GwtKuraException {
+        // TODO restrict this to work only driver and asset configurations
+
+        checkXSRFToken(token);
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        GwtComponentServiceInternal.deleteFactoryConfiguration(session, pid, takeSnapshot);
     }
 }

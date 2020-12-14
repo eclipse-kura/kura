@@ -19,23 +19,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 
 public class ConsoleOptions {
-
-    private final SelfConfiguringComponentProperty<String> username = new SelfConfiguringComponentProperty<>(
-            new AdBuilder("console.username.value", "Console Username", Tscalar.STRING) //
-                    .setDefault("admin") //
-                    .setDescription("Device's web username.") //
-                    .build(), //
-            String.class);
-
-    private final SelfConfiguringComponentProperty<String> userPassword;
 
     private final SelfConfiguringComponentProperty<String> appRoot = new SelfConfiguringComponentProperty<>(
             new AdBuilder("app.root", "Web Server Entry Point", Tscalar.STRING) //
@@ -107,17 +98,13 @@ public class ConsoleOptions {
     private final Map<String, SelfConfiguringComponentProperty<Boolean>> authenticationMethodProperties = new HashMap<>();
     private final ComponentConfiguration config;
 
-    private ConsoleOptions(final CryptoService cryptoService) {
-        this.userPassword = initPasswordProperty(cryptoService);
-
+    private ConsoleOptions() throws KuraException {
         initProperties();
 
         this.config = toComponentConfiguration();
     }
 
-    private ConsoleOptions(final Map<String, Object> properties, final CryptoService cryptoService) {
-        this.userPassword = initPasswordProperty(cryptoService);
-
+    private ConsoleOptions(final Map<String, Object> properties) throws KuraException {
         initProperties();
 
         for (final SelfConfiguringComponentProperty<?> property : configurationProperties) {
@@ -127,21 +114,12 @@ public class ConsoleOptions {
         this.config = toComponentConfiguration();
     }
 
-    public static ConsoleOptions defaultConfiguration(final CryptoService cryptoService) {
-        return new ConsoleOptions(cryptoService);
+    public static ConsoleOptions defaultConfiguration() throws KuraException {
+        return new ConsoleOptions();
     }
 
-    public static ConsoleOptions fromProperties(final Map<String, Object> properties,
-            final CryptoService cryptoService) {
-        return new ConsoleOptions(properties, cryptoService);
-    }
-
-    public String getUsername() {
-        return this.username.get();
-    }
-
-    public String getUserPassword() {
-        return this.userPassword.get();
+    public static ConsoleOptions fromProperties(final Map<String, Object> properties) throws KuraException {
+        return new ConsoleOptions(properties);
     }
 
     public String getAppRoot() {
@@ -191,8 +169,6 @@ public class ConsoleOptions {
     }
 
     private void initProperties() {
-        configurationProperties.add(username);
-        configurationProperties.add(userPassword);
         configurationProperties.add(appRoot);
         configurationProperties.add(sessionMaxInactivityInterval);
         configurationProperties.add(bannerEnabled);
@@ -203,16 +179,6 @@ public class ConsoleOptions {
         configurationProperties.add(passwordRequireBothCases);
 
         addAuthenticationMethodProperties();
-    }
-
-    private static SelfConfiguringComponentProperty<String> initPasswordProperty(final CryptoService cryptoService) {
-
-        return new SelfConfiguringComponentProperty<>(
-                new AdBuilder("console.password.value", "Console Password", Tscalar.PASSWORD) //
-                        .setDefault("admin") //
-                        .setDescription("Device's web console password. A non empty value should be set.") //
-                        .build(), //
-                String.class, cryptoService);
     }
 
     private ComponentConfiguration toComponentConfiguration() {

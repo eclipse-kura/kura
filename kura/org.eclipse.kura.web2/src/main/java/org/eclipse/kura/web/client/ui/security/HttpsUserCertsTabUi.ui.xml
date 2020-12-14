@@ -60,6 +60,7 @@
                             <b:TextArea b:id="certificateInput"
                                 addStyleNames="{style.center-panel}"
                                 ui:field="certificateInput" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>

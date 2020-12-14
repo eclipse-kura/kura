@@ -2,13 +2,13 @@
 <!--
 
     Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
 	 Eurotech
      Red Hat Inc
@@ -96,7 +96,7 @@
 				<configuration>
 					<style>OBF</style> <!-- DETAILED https://support.google.com/code/answer/55203?topic=10212 -->
 					<failOnError>true</failOnError>
-					<extraJvmArgs>-Xmx512M -Xss1024k -XX:+UseParallelGC</extraJvmArgs>
+					<extraJvmArgs>-Xmx2048M -Xss1024k -XX:+UseParallelGC</extraJvmArgs>
 					<localWorkers>2</localWorkers>
 					<runTarget>denali.html</runTarget>
 					<i18nMessagesBundle>org.eclipse.kura.web.client.messages.Messages</i18nMessagesBundle>

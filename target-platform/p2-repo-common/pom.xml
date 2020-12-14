@@ -502,6 +502,11 @@
                                     <artifactId>osgi-resource-locator</artifactId>
                                     <version>${osgi-resource-locator.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.useradmin</artifactId>
+                                    <version>${org.apache.felix.useradmin.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -607,6 +612,7 @@
                                 <move file="target/source/plugins/geronimo-jms_2.0_spec.jar" tofile="target/source/plugins/geronimo-jms_2.0_spec_${org.apache.geronimo.specs.jms.version}.jar"/>
                                 <move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.activemq.artemis.jar" tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar"/>
+                                <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

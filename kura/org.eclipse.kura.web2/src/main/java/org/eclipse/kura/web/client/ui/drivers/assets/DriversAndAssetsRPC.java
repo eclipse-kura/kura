@@ -22,10 +22,8 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtWireComposerStaticInfo;
 import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
@@ -39,8 +37,7 @@ public final class DriversAndAssetsRPC {
     private DriversAndAssetsRPC() {
     }
 
-    private static final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
-    private static final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
+    private static final GwtDriverAndAssetServiceAsync gwtAssetService = GWT.create(GwtDriverAndAssetService.class);
     private static final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private static final GwtWireGraphServiceAsync gwtWireGraphService = GWT.create(GwtWireGraphService.class);
 
@@ -116,7 +113,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtComponentService.updateComponentConfiguration(result, config, new AsyncCallback<Void>() {
+                gwtAssetService.updateDriverOrAssetConfiguration(result, config, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -147,7 +144,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtComponentService.createFactoryComponent(result, factoryPid, pid, configuration,
+                gwtAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid, configuration,
                         new AsyncCallback<Void>() {
 
                             @Override
@@ -178,7 +175,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtComponentService.deleteFactoryConfiguration(result, pid, true, new AsyncCallback<Void>() {
+                gwtAssetService.deleteDriverOrAssetConfiguration(result, pid, true, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {
@@ -239,7 +236,7 @@ public final class DriversAndAssetsRPC {
 
             @Override
             public void onSuccess(GwtXSRFToken result) {
-                gwtComponentService.createFactoryComponent(result, factoryPid, pid, new AsyncCallback<Void>() {
+                gwtAssetService.createDriverOrAssetConfiguration(result, factoryPid, pid, new AsyncCallback<Void>() {
 
                     @Override
                     public void onFailure(Throwable ex) {

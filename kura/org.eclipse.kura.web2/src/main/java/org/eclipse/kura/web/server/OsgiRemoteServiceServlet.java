@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,18 +14,54 @@ package org.eclipse.kura.web.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.web.Console;
+import org.eclipse.kura.web.UserManager;
+import org.eclipse.kura.web.session.Attributes;
+import org.eclipse.kura.web.shared.model.GwtUserConfig;
+
+import com.google.gwt.user.client.rpc.SerializationException;
+import com.google.gwt.user.server.rpc.RPCRequest;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.google.gwt.user.server.rpc.SerializationPolicyLoader;
 
 public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
+
+    private final Set<String> servicePermissionRequirements = new HashSet<>();
+    private final Map<Method, Set<String>> methodPermissionRequirements = new HashMap<>();
+
+    public OsgiRemoteServiceServlet() {
+        for (final Class<?> intf : getClass().getInterfaces()) {
+            final RequiredPermissions permissions = intf.getAnnotation(RequiredPermissions.class);
+
+            if (permissions != null) {
+                servicePermissionRequirements.addAll(Arrays.asList(permissions.value()));
+            }
+
+            for (final Method method : intf.getMethods()) {
+                final RequiredPermissions methodPermissions = method.getAnnotation(RequiredPermissions.class);
+
+                if (methodPermissions != null) {
+                    methodPermissionRequirements.put(method, new HashSet<>(Arrays.asList(methodPermissions.value())));
+                }
+            }
+        }
+    }
 
     private static final long serialVersionUID = -8826193840033103296L;
 
@@ -135,5 +171,74 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
             }
         }
         return serializationPolicy;
+    }
+
+    @Override
+    public String processCall(final RPCRequest rpcRequest) throws SerializationException {
+
+        checkPermissions(rpcRequest);
+
+        return super.processCall(rpcRequest);
+    }
+
+    private void checkPermissions(final RPCRequest request) {
+        final Method method = request.getMethod();
+
+        final Set<String> requiredPermissions;
+
+        if (methodPermissionRequirements.containsKey(method)) {
+            requiredPermissions = methodPermissionRequirements.get(method);
+        } else {
+            requiredPermissions = servicePermissionRequirements;
+        }
+
+        if (requiredPermissions.isEmpty()) {
+            return;
+        }
+
+        final HttpSession session = getThreadLocalRequest().getSession(false);
+
+        final UserManager userManager = Console.instance().getUserManager();
+
+        final Object rawUserName = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+
+        if (!(rawUserName instanceof String)) {
+            throw new KuraPermissionException();
+        }
+
+        final String userName = (String) rawUserName;
+
+        final Optional<GwtUserConfig> config = userManager.getUserConfig(userName);
+
+        if (!config.isPresent()) {
+            throw new KuraPermissionException();
+        }
+
+        if (config.get().isAdmin()) {
+            return;
+        }
+
+        if (!config.get().getPermissions().containsAll(requiredPermissions)) {
+            throw new KuraPermissionException();
+        }
+    }
+
+    @Override
+    protected void doUnexpectedFailure(Throwable e) {
+        if (e instanceof KuraPermissionException) {
+            try {
+                getThreadLocalResponse().sendError(401);
+                return;
+            } catch (IOException e1) {
+                // ignore
+            }
+        }
+        super.doUnexpectedFailure(e);
+    }
+
+    private class KuraPermissionException extends RuntimeException {
+
+        private static final long serialVersionUID = 7782509676228955785L;
+
     }
 }

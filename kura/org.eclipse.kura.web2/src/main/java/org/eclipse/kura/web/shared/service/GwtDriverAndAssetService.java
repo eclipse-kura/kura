@@ -15,7 +15,9 @@ package org.eclipse.kura.web.shared.service;
 import java.io.IOException;
 import java.util.List;
 
+import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -29,8 +31,10 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  * In particular, it provides a way to read, write and list asset instances.
  *
  */
+
+@RequiredPermissions(KuraPermission.WIRES_ADMIN)
 @RemoteServiceRelativePath("assetservices")
-public interface GwtAssetService extends RemoteService {
+public interface GwtDriverAndAssetService extends RemoteService {
 
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException;
 
@@ -42,4 +46,14 @@ public interface GwtAssetService extends RemoteService {
     public int convertToCsv(GwtXSRFToken token, String driverPid, GwtConfigComponent assetConfig)
             throws GwtKuraException, IOException;
 
+    public void createDriverOrAssetConfiguration(GwtXSRFToken token, String factoryPid, String pid)
+            throws GwtKuraException;
+
+    public void createDriverOrAssetConfiguration(GwtXSRFToken token, String factoryPid, String pid,
+            GwtConfigComponent config) throws GwtKuraException;
+
+    public void updateDriverOrAssetConfiguration(GwtXSRFToken token, GwtConfigComponent config) throws GwtKuraException;
+
+    public void deleteDriverOrAssetConfiguration(GwtXSRFToken token, String pid, boolean takeSnapshot)
+            throws GwtKuraException;
 }

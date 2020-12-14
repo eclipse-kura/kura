@@ -14,13 +14,16 @@ package org.eclipse.kura.web.shared.service;
 
 import java.util.List;
 
+import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtCertificate;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
+@RequiredPermissions(KuraPermission.ADMIN)
 @RemoteServiceRelativePath("certificate")
 public interface GwtCertificatesService extends RemoteService {
 

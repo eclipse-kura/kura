@@ -48,8 +48,8 @@ import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtAssetService;
-import org.eclipse.kura.web.shared.service.GwtAssetServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
+import org.eclipse.kura.web.shared.service.GwtDriverAndAssetServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
@@ -89,7 +89,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class AssetConfigurationUi extends AbstractServicesUi implements HasConfiguration {
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
-    private final GwtAssetServiceAsync gwtAssetService = GWT.create(GwtAssetService.class);
+    private final GwtDriverAndAssetServiceAsync gwtAssetService = GWT.create(GwtDriverAndAssetService.class);
 
     interface AssetConfigurationUiBinder extends UiBinder<Widget, AssetConfigurationUi> {
     }

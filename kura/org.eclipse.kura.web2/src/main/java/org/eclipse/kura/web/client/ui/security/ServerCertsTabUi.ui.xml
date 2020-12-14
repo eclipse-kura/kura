@@ -59,6 +59,7 @@
                                 ui:field="storageAliasLabel" />
                             <b:Input type="TEXT" b:id="storageAlias"
                                 ui:field="storageAliasInput" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
 
                         <b:FormGroup ui:field="groupCertForm">
@@ -67,6 +68,7 @@
                             <b:TextArea b:id="certificateInput"
                                 addStyleNames="{style.center-panel}"
                                 ui:field="certificateInput" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
                     </b:FieldSet>
                 </b:Form>

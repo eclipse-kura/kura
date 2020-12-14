@@ -22,10 +22,11 @@
     <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
              dataKeyboard="true" ui:field="alert" addStyleNames="confirm-dialog">
        <b:ModalBody>
-           <b.html:Span ui:field="messageText" />
+           <b.html:Paragraph ui:field="messageText" />
            <b:Alert ui:field="alertBody" type="DANGER">
                     <b.html:Strong ui:field="alertText" />
            </b:Alert>
+           <b.html:UnorderedList ui:field="extraItems" />
        </b:ModalBody>
 
        <b:ModalFooter ui:field="alertFooter">

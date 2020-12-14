@@ -108,6 +108,8 @@
 
         <module>org.eclipse.kura.http.server.manager</module>
 
+        <module>org.eclipse.kura.useradmin.store</module>
+
         <module>features</module>
         <module>emulator</module>
 

@@ -102,12 +102,10 @@ public class HttpService implements ConfigurableComponent {
         this.options = new HttpServiceOptions(properties, this.systemService.getKuraHome());
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        if (keystoreExists(this.options.getHttpsKeystorePath())) {
-            if (isFirstBoot()) {
-                changeDefaultKeystorePassword();
-            } else {
-                activateHttpService();
-            }
+        if (keystoreExists(this.options.getHttpsKeystorePath()) && isFirstBoot()) {
+            changeDefaultKeystorePassword();
+        } else {
+            activateHttpService();
         }
 
         logger.info("Activating... Done.");
@@ -124,14 +122,13 @@ public class HttpService implements ConfigurableComponent {
             logger.debug("Updating, new props");
             this.options = updatedOptions;
 
+            deactivateHttpService();
+
             if (keystoreExists(this.options.getHttpsKeystorePath())) {
-
-                deactivateHttpService();
-
                 accessKeystore();
-
-                activateHttpService();
             }
+
+            activateHttpService();
         }
 
         logger.info("Updating... Done.");
@@ -154,10 +151,27 @@ public class HttpService implements ConfigurableComponent {
 
         final Hashtable<String, Object> config = new Hashtable<>();
 
-        config.put(JettyConstants.HTTPS_PORT, this.options.getHttpsPort());
-        config.put(JettyConstants.HTTPS_ENABLED, this.options.isHttpsEnabled());
-        config.put(JettyConstants.HTTPS_HOST, "0.0.0.0");
-        config.put(JettyConstants.SSL_KEYSTORE, this.options.getHttpsKeystorePath());
+        config.put(JettyConstants.HTTP_PORT, this.options.getHttpPort());
+        config.put(JettyConstants.HTTP_ENABLED, this.options.isHttpEnabled());
+
+        final String customizerClass = System
+                .getProperty(JettyConstants.PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
+
+        if (customizerClass instanceof String) {
+            config.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
+        }
+
+        if (!(options.isHttpsEnabled() || options.isHttpsClientAuthEnabled())) {
+            return config;
+        }
+
+        if (!keystoreExists(options.getHttpsKeystorePath())) {
+            logger.warn("HTTPS is enabled but keystore at {} does not exist, disabling HTTPS",
+                    options.getHttpsKeystorePath());
+            config.put(JettyConstants.HTTPS_ENABLED, false);
+            config.put("kura.https.client.auth.enabled", false);
+            return config;
+        }
 
         char[] decryptedPassword;
         try {
@@ -167,19 +181,19 @@ public class HttpService implements ConfigurableComponent {
             decryptedPassword = this.options.getHttpsKeystorePassword();
         }
 
+        config.put(JettyConstants.HTTPS_PORT, this.options.getHttpsPort());
+        config.put(JettyConstants.HTTPS_ENABLED,
+                this.options.isHttpsEnabled() || this.options.isHttpsClientAuthEnabled());
+        config.put(JettyConstants.HTTPS_HOST, "0.0.0.0");
+        config.put(JettyConstants.SSL_KEYSTORE, this.options.getHttpsKeystorePath());
         config.put(JettyConstants.SSL_PASSWORD, new String(decryptedPassword));
-        config.put(JettyConstants.HTTP_PORT, this.options.getHttpPort());
-        config.put(JettyConstants.HTTP_ENABLED, this.options.isHttpEnabled());
+
+        if (!this.options.isHttpsEnabled()) {
+            config.put("kura.https.no.client.auth.disabled", true);
+        }
 
         config.put("kura.https.client.auth.enabled", this.options.isHttpsClientAuthEnabled());
         config.put("kura.https.client.auth.port", this.options.getHttpsClientAuthPort());
-
-        final String customizerClass = System
-                .getProperty(JettyConstants.PROPERTY_PREFIX + JettyConstants.CUSTOMIZER_CLASS);
-
-        if (customizerClass instanceof String) {
-            config.put(JettyConstants.CUSTOMIZER_CLASS, customizerClass);
-        }
 
         final boolean isRevocationEnabled = this.options.isRevocationEnabled();
 

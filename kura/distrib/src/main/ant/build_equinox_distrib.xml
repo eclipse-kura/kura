@@ -441,7 +441,7 @@ fi]]>
 
 			<zipfileset file="src/main/resources/common/kura_custom.properties"
 				prefix="${build.output.name}/${user.config.folder}/" />
-			
+
 			<zipfileset file="src/main/resources/common/favicon/favicon-16x16.png"
 				prefix="${build.output.name}/${user.config.folder}/console/skin/" />
 			<zipfileset file="src/main/resources/common/favicon/favicon-32x32.png"
@@ -681,6 +681,9 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.linux_${org.eclipse.kura.linux.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 
 		<antcall target="camel-jar" />
@@ -902,6 +905,10 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.gson_${com.google.gson.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.csv_${org.apache.commons.csv.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar@3:start" />
 		</propertyfile>
 	</target>
 

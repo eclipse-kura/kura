@@ -29,7 +29,15 @@ public enum ForwardedEventTopic {
     BUNDLE_UPDATED("org/osgi/framework/BundleEvent/UPDATED"),
     BUNDLE_UNINSTALLED("org/osgi/framework/BundleEvent/UNINSTALLED"),
     BUNDLE_RESOLVED("org/osgi/framework/BundleEvent/RESOLVED"),
-    BUNDLE_UNRESOLVED("org/osgi/framework/BundleEvent/UNRESOLVED");
+    BUNDLE_UNRESOLVED("org/osgi/framework/BundleEvent/UNRESOLVED"),
+
+    ROLE_CREATED("org/osgi/service/useradmin/UserAdmin/ROLE_CREATED"),
+    ROLE_CHANGED("org/osgi/service/useradmin/UserAdmin/ROLE_CHANGED"),
+    ROLE_REMOVED("org/osgi/service/useradmin/UserAdmin/ROLE_REMOVED"),
+
+    ROLE_CREATED_SHORT("ROLE_CREATED"),
+    ROLE_CHANGED_SHORT("ROLE_CHANGED"),
+    ROLE_REMOVED_SHORT("ROLE_REMOVED");
 
     private final String topic;
 

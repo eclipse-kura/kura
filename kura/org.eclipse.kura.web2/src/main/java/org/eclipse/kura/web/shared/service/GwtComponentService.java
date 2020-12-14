@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -16,7 +16,9 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
@@ -29,6 +31,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  *
  */
 @RemoteServiceRelativePath("component")
+@RequiredPermissions(KuraPermission.ADMIN)
 public interface GwtComponentService extends RemoteService {
 
     /**
@@ -154,9 +157,6 @@ public interface GwtComponentService extends RemoteService {
 
     public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
             throws GwtKuraException;
-
-    public GwtConfigComponent findWireComponentConfigurationFromPid(GwtXSRFToken xsrfToken, String pid,
-            String factoryPid, Map<String, Object> extraProps) throws GwtKuraException;
 
     /**
      * Returns the driver factory IDs for the available configurable or self configuring components.

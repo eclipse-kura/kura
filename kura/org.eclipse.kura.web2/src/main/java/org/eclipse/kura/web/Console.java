@@ -14,8 +14,6 @@ package org.eclipse.kura.web;
 
 import static org.eclipse.kura.web.session.SecurityHandler.chain;
 
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +22,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
@@ -31,6 +32,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.felix.useradmin.RoleRepositoryStore;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
@@ -39,11 +41,11 @@ import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.api.ClientExtensionBundle;
-import org.eclipse.kura.web.server.GwtAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudConnectionServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
+import org.eclipse.kura.web.server.GwtDriverAndAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
 import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
 import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
@@ -55,6 +57,7 @@ import org.eclipse.kura.web.server.GwtSecurityTokenServiceImpl;
 import org.eclipse.kura.web.server.GwtSessionServiceImpl;
 import org.eclipse.kura.web.server.GwtSnapshotServiceImpl;
 import org.eclipse.kura.web.server.GwtStatusServiceImpl;
+import org.eclipse.kura.web.server.GwtUserServiceImpl;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.servlet.ChannelServlet;
@@ -75,7 +78,10 @@ import org.eclipse.kura.web.session.RoutingSecurityHandler;
 import org.eclipse.kura.web.session.SecurityHandler;
 import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
 import org.eclipse.kura.web.session.SessionExpirationSecurityHandler;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -83,6 +89,7 @@ import org.osgi.service.event.EventProperties;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,9 +122,12 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     private SystemService systemService;
     private CryptoService cryptoService;
 
+    private UserAdmin userAdmin;
+
     private EventAdmin eventAdmin;
-    private AuthenticationManager authMgr;
+    private UserManager userManager;
     private GwtEventServiceImpl eventService;
+    private WiresBlinkServlet wiresBlinkService;
 
     private HttpContext sessionContext;
 
@@ -130,6 +140,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     private static ConsoleOptions consoleOptions;
 
+    private final ExecutorService configUpdateExecutor = Executors.newSingleThreadExecutor();
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -140,32 +152,20 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService = httpService;
     }
 
-    public void unsetHttpService(HttpService httpService) {
-        this.httpService = null;
-    }
-
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
-    }
-
-    public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
     }
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
-    public void unsetCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
-    }
-
     public void setEventAdminService(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
 
-    public void unsetEventAdminService(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+    public void setUserAdmin(final UserAdmin userAdmin) {
+        this.userAdmin = userAdmin;
     }
 
     // ----------------------------------------------------------------
@@ -175,46 +175,50 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext context, Map<String, Object> properties) {
-        setInstance(this);
-        try {
-            setConsoleOptions(properties == null ? ConsoleOptions.defaultConfiguration(cryptoService)
-                    : ConsoleOptions.fromProperties(properties, cryptoService));
-        } catch (final Exception e) {
-            logger.warn("failed to build console options", e);
-            return;
-        }
 
-        // Check if web interface is enabled.
-        boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
+        configUpdateExecutor.execute(() -> {
+            waitUserAdminReady();
 
-        if (!webEnabled) {
-            logger.info("Web interface disabled in Kura properties file.");
-            return;
-        }
+            setInstance(this);
+            try {
+                setConsoleOptions(properties == null ? ConsoleOptions.defaultConfiguration()
+                        : ConsoleOptions.fromProperties(properties));
+            } catch (final Exception e) {
+                logger.warn("failed to build console options", e);
+                return;
+            }
 
-        logger.info("activate...");
+            // Check if web interface is enabled.
+            boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
 
-        setComponentContext(context);
-        this.authMgr = AuthenticationManager.getInstance();
-        this.eventService = new GwtEventServiceImpl();
+            if (!webEnabled) {
+                logger.info("Web interface disabled in Kura properties file.");
+                return;
+            }
 
-        doUpdate(properties);
+            logger.info("activate...");
 
-        Map<String, Object> props = new HashMap<>();
-        props.put("kura.version", this.systemService.getKuraVersion());
-        EventProperties eventProps = new EventProperties(props);
-        logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
-        this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
-    }
+            setComponentContext(context);
+            this.userManager = new UserManager(this.userAdmin, this.cryptoService);
 
-    private void updateAuthenticationManager(String username, String password)
-            throws KuraException, NoSuchAlgorithmException, UnsupportedEncodingException {
+            doUpdate(properties);
 
-        char[] decryptedPassword = this.cryptoService.decryptAes(password.toCharArray());
-        char[] propertyPassword = this.cryptoService.sha1Hash(new String(decryptedPassword)).toCharArray();
+            Map<String, Object> props = new HashMap<>();
+            props.put("kura.version", this.systemService.getKuraVersion());
+            EventProperties eventProps = new EventProperties(props);
 
-        this.authMgr.setUsername(username);
-        this.authMgr.setPassword(propertyPassword);
+            try {
+                logger.info("initializing useradmin...");
+                this.userManager.update(consoleOptions);
+                logger.info("initializing useradmin...done");
+            } catch (final Exception e) {
+                logger.warn("failed to update UserAdmin", e);
+            }
+
+            logger.info("postInstalledEvent() :: posting KuraConfigReadyEvent");
+
+            this.eventAdmin.postEvent(new Event(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC, eventProps));
+        });
     }
 
     private void setAppRoot(String propertiesAppRoot) {
@@ -230,20 +234,22 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     protected void updated(Map<String, Object> properties) {
-        boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
-        if (!webEnabled) {
-            return;
-        }
+        configUpdateExecutor.execute(() -> {
+            boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
+            if (!webEnabled) {
+                return;
+            }
 
-        unregisterServlet();
-        doUpdate(properties);
+            unregisterServlet();
+            doUpdate(properties);
+        });
     }
 
     private void doUpdate(Map<String, Object> properties) {
         ConsoleOptions options;
         try {
-            options = properties == null ? ConsoleOptions.defaultConfiguration(cryptoService)
-                    : ConsoleOptions.fromProperties(properties, cryptoService);
+            options = properties == null ? ConsoleOptions.defaultConfiguration()
+                    : ConsoleOptions.fromProperties(properties);
         } catch (final Exception e) {
             logger.warn("failed to build console options", e);
             return;
@@ -252,7 +258,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         Console.setConsoleOptions(options);
 
         try {
-            updateAuthenticationManager(options.getUsername(), options.getUserPassword());
+            this.userManager.update(consoleOptions);
         } catch (Exception e) {
             logger.warn("Error Updating Web properties", e);
         }
@@ -268,9 +274,19 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     protected void deactivate(BundleContext context) {
-        logger.info("deactivate...");
+        configUpdateExecutor.submit(() -> {
+            logger.info("deactivate...");
 
-        unregisterServlet();
+            unregisterServlet();
+        });
+
+        configUpdateExecutor.shutdown();
+        try {
+            configUpdateExecutor.awaitTermination(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted while waiting executor termination");
+            Thread.currentThread().interrupt();
+        }
     }
 
     // ----------------------------------------------------------------
@@ -300,6 +316,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.unregister(DENALI_MODULE_PATH + "/snapshot");
         this.httpService.unregister(DENALI_MODULE_PATH + "/certificate");
         this.httpService.unregister(DENALI_MODULE_PATH + "/security");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/users");
         this.httpService.unregister(DENALI_MODULE_PATH + "/file");
         this.httpService.unregister(DENALI_MODULE_PATH + "/device_snapshots");
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetsUpDownload");
@@ -311,6 +328,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
         this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
         this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
+        this.wiresBlinkService.stop();
         this.httpService.unregister(ADMIN_ROOT + "/sse");
         this.eventService.stop();
         this.httpService.unregister(DENALI_MODULE_PATH + EVENT_PATH);
@@ -395,6 +413,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     private synchronized void initHTTPService() throws NamespaceException, ServletException {
 
+        this.eventService = new GwtEventServiceImpl();
+        this.wiresBlinkService = new WiresBlinkServlet();
+
         final HttpContext defaultContext = this.httpService.createDefaultHttpContext();
         final HttpContext resourceContext = initResourceContext(defaultContext);
         this.sessionContext = initSessionContext(defaultContext);
@@ -410,14 +431,14 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.registerServlet(CONSOLE_RESOURCE_PATH, new SendStatusServlet(404), null, resourceContext);
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
-                new GwtPasswordAuthenticationServiceImpl(this.authMgr, CONSOLE_PATH), null, this.sessionContext);
-        this.httpService.registerServlet(CERT_AUTH_PATH, new SslAuthenticationServlet(CONSOLE_PATH), null,
+                new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), null, this.sessionContext);
+        this.httpService.registerServlet(CERT_AUTH_PATH, new SslAuthenticationServlet(CONSOLE_PATH, userManager), null,
                 sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(userManager), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
                 this.sessionContext);
@@ -437,6 +458,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/security", new GwtSecurityServiceImpl(), null,
                 this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(userManager), null,
+                this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/file", new FileServlet(), null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/device_snapshots", new DeviceSnapshotsServlet(), null,
                 this.sessionContext);
@@ -450,9 +473,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/wiresSnapshot", new WiresSnapshotServlet(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetservices", new GwtAssetServiceImpl(), null,
-                this.sessionContext);
-        this.httpService.registerServlet(ADMIN_ROOT + "/sse", new WiresBlinkServlet(), null, this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/assetservices", new GwtDriverAndAssetServiceImpl(),
+                null, this.sessionContext);
+        this.httpService.registerServlet(ADMIN_ROOT + "/sse", this.wiresBlinkService, null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + EVENT_PATH, this.eventService, null, this.sessionContext);
 
         for (final ServletRegistration reg : this.securedServlets) {
@@ -543,32 +566,49 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     private void refreshOptions() {
-        setConsoleOptions(ConsoleOptions
-                .fromProperties(getConsoleOptions().getConfiguration().getConfigurationProperties(), cryptoService));
+        try {
+            setConsoleOptions(
+                    ConsoleOptions.fromProperties(getConsoleOptions().getConfiguration().getConfigurationProperties()));
+        } catch (final Exception e) {
+            logger.warn("Failed to update options", e);
+        }
+    }
+
+    public UserManager getUserManager() {
+        return userManager;
     }
 
     @Override
     public void registerConsoleExtensionBundle(ClientExtensionBundle extension) {
-        this.consoleExtensions.add(extension);
-        refreshOptions();
+        configUpdateExecutor.execute(() -> {
+            this.consoleExtensions.add(extension);
+            refreshOptions();
+        });
+
     }
 
     @Override
     public void unregisterConsoleExtensionBundle(ClientExtensionBundle extension) {
-        this.consoleExtensions.remove(extension);
-        refreshOptions();
+        configUpdateExecutor.execute(() -> {
+            this.consoleExtensions.remove(extension);
+            refreshOptions();
+        });
     }
 
     @Override
     public void registerLoginExtensionBundle(ClientExtensionBundle extension) {
-        this.loginExtensions.add(extension);
-        refreshOptions();
+        configUpdateExecutor.execute(() -> {
+            this.loginExtensions.add(extension);
+            refreshOptions();
+        });
     }
 
     @Override
     public void unregisterLoginExtensionBundle(ClientExtensionBundle extension) {
-        this.loginExtensions.remove(extension);
-        refreshOptions();
+        configUpdateExecutor.execute(() -> {
+            this.loginExtensions.remove(extension);
+            refreshOptions();
+        });
     }
 
     @Override
@@ -596,8 +636,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     @Override
     public String setAuthenticated(final HttpSession session, final String user) {
-
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
+
+        session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), userManager.getCredentialsHash(user));
 
         return CONSOLE_PATH;
     }
@@ -617,6 +658,28 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     @Override
     public ComponentConfiguration getConfiguration() throws KuraException {
         return consoleOptions.getConfiguration();
+    }
+
+    private void waitUserAdminReady() {
+        final BundleContext context = FrameworkUtil.getBundle(Console.class).getBundleContext();
+
+        while (true) {
+
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            final ServiceReference<RoleRepositoryStore> ref = context.getServiceReference(RoleRepositoryStore.class);
+
+            final Bundle[] usingBundles = ref.getUsingBundles();
+
+            if (usingBundles != null && usingBundles.length > 0) {
+                break;
+            }
+
+        }
     }
 
 }

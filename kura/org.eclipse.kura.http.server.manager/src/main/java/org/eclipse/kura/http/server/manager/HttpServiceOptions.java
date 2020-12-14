@@ -136,8 +136,9 @@ public class HttpServiceOptions {
         final int prime = 31;
         int result = 1;
         result = prime * result + Arrays.hashCode(httpsKeystorePasswordArray);
-        result = prime * result + Objects.hash(crlPath, httpEnabled, httpPort, httpsEnabled, httpsKeystorePath,
-                httpsPort, isRevocationEnabled, isRevocationSoftFailEnabled, ocspUri);
+        result = prime * result + Objects.hash(crlPath, httpEnabled, httpPort, httpsClientAuthEnabled,
+                httpsClientAuthPort, httpsEnabled, httpsKeystorePath, httpsPort, isRevocationEnabled,
+                isRevocationSoftFailEnabled, ocspUri);
         return result;
     }
 
@@ -154,7 +155,8 @@ public class HttpServiceOptions {
         }
         HttpServiceOptions other = (HttpServiceOptions) obj;
         return Objects.equals(crlPath, other.crlPath) && httpEnabled == other.httpEnabled && httpPort == other.httpPort
-                && httpsEnabled == other.httpsEnabled
+                && httpsClientAuthEnabled == other.httpsClientAuthEnabled
+                && httpsClientAuthPort == other.httpsClientAuthPort && httpsEnabled == other.httpsEnabled
                 && Arrays.equals(httpsKeystorePasswordArray, other.httpsKeystorePasswordArray)
                 && Objects.equals(httpsKeystorePath, other.httpsKeystorePath) && httpsPort == other.httpsPort
                 && isRevocationEnabled == other.isRevocationEnabled

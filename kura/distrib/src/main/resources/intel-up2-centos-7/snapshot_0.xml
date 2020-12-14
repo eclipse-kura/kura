@@ -2,13 +2,13 @@
 <!--
 
     Copyright (c) 2011, 2020 Red Hat Inc and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
 	 Red Hat Inc
 
@@ -739,6 +739,16 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="users.config" type="String">
+                <esf:value>[{"name":"kura.user.admin","credentials":{"kura.password":"0DPiKuNIrrVmD8IUCuw1hQxNqZc="}},{"name":"kura.user.appadmin","credentials":{"kura.password":"+vXYYcLmIiWoZlD3j02C5WGdH4o="}},{"name":"kura.user.netadmin","credentials":{"kura.password":"2SiZyMumjIG/SWGXxPD9yw3UTSY="}}]</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="groups.config" type="String">
+                <esf:value>[{"name":"kura.permission.kura.wires.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin","basicMembers":["kura.user.appadmin","kura.user.netadmin"]},{"name":"kura.permission.kura.device","basicMembers":["kura.user.netadmin"]},{"name":"kura.permission.kura.packages.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.network.admin","basicMembers":["kura.user.netadmin"]}]</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

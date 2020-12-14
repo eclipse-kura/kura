@@ -20,7 +20,12 @@ public enum QuectelGenericAtCommands {
     GET_MOBILESTATION_CLASS("at+cgclass?\r\n"),
     GET_REGISTRATION_STATUS("at+cgreg?\r\n"),
     GET_GPRS_SESSION_DATA_VOLUME("at+qgdcnt?\r\n"),
-    PDP_CONTEXT("at+cgdcont");
+    PDP_CONTEXT("at+cgdcont"),
+    ENABLE_GPS("at+qgps=1\r\n"),
+    DISABLE_GPS("at+qgpsend\r\n"),
+    IS_GPS_ENABLED("at+qgps?\r\n"),
+    ENABLE_NMEA_GPS("at+qgpscfg=\"nmeasrc\",1\r\n"),
+    DISABLE_NMEA_GPS("at+qgpscfg=\"nmeasrc\",0\r\n");
 
     private String command;
 

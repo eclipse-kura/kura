@@ -55,7 +55,7 @@ public enum SupportedUsbModemInfo {
             ModemTechnologyType.UMTS), Arrays.asList(new OptionModemDriver("19d2", "1476")), ""),
     SimTech_SIM7000("SIM7000", "1e0e", "9001", 5, 0, 3, 2, 3, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.GSM_GPRS), Arrays.asList(new OptionModemDriver("1e0e", "9001")), ""),
-    QUECTEL_EX25("EX25", "2c7c", "0125", 4, 0, 2, 3, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
+    QUECTEL_EX25("EX25", "2c7c", "0125", 4, 0, 2, 3, 1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,
             ModemTechnologyType.HSPA,
             ModemTechnologyType.UMTS), Arrays.asList(new UsbModemDriver("cdc_acm", "2c7c", "0125")), ""),
     QUECTEL_BG96("BG96", "2c7c", "0296", 4, 0, 2, 3, -1, 5000, 10000, Arrays.asList(ModemTechnologyType.LTE,

@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -45,15 +46,14 @@ public class LinuxFirewall {
     private static Object lock = new Object();
 
     private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
-    private static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
     private static final String CUSTOM_FIREWALL_SCRIPT_NAME = "/etc/init.d/firewall_cust";
 
-    private Set<LocalRule> localRules;
-    private Set<PortForwardRule> portForwardRules;
-    private Set<NATRule> autoNatRules;
-    private Set<NATRule> natRules;
-    private boolean allowIcmp;
-    private boolean allowForwarding;
+    private Set<LocalRule> localRules = new LinkedHashSet<>();
+    private Set<PortForwardRule> portForwardRules = new LinkedHashSet<>();
+    private Set<NATRule> autoNatRules = new LinkedHashSet<>();
+    private Set<NATRule> natRules = new LinkedHashSet<>();
+    private boolean allowIcmp = false;
+    private boolean allowForwarding = false;
     private final IptablesConfig iptables;
     private final CommandExecutorService executorService;
 
@@ -61,17 +61,10 @@ public class LinuxFirewall {
         this.executorService = executorService;
         this.iptables = new IptablesConfig(this.executorService);
         try {
-            File cfgFile = new File(FIREWALL_CONFIG_FILE_NAME);
+            File cfgFile = new File(IptablesConfig.FIREWALL_CONFIG_FILE_NAME);
             if (!cfgFile.exists()) {
                 this.iptables.applyBlockPolicy();
-                this.iptables.save();
-            } else {
-                logger.debug("{} file already exists", cfgFile);
             }
-        } catch (KuraException e) {
-            logger.error("cannot create or read file", e); // File did not exist and was created
-        }
-        try {
             // Update iptables config in the filesystem
             this.iptables.save();
             initialize();
@@ -109,7 +102,7 @@ public class LinuxFirewall {
             } else {
                 newLocalRule = new LocalRule(port, protocol,
                         new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0),
-                        permittedInterfaceName, permittedInterfaceName, permittedMAC, sourcePortRange);
+                        permittedInterfaceName, unpermittedInterfaceName, permittedMAC, sourcePortRange);
             }
 
             ArrayList<LocalRule> locRules = new ArrayList<>();

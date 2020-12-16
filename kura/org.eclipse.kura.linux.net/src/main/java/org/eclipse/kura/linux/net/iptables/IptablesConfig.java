@@ -46,14 +46,16 @@ public class IptablesConfig {
 
     public static final String FIREWALL_CONFIG_FILE_NAME = "/etc/sysconfig/iptables";
     public static final String FIREWALL_TMP_CONFIG_FILE_NAME = "/tmp/iptables";
-    private static final String NAT = "*nat";
-    private static final String FILTER = "*filter";
+    private static final String FILTER = "filter";
+    private static final String NAT = "nat";
+    private static final String STAR_NAT = "*" + NAT;
+    private static final String STAR_FILTER = "*" + FILTER;
     private static final String COMMIT = "COMMIT";
-    private static final String INPUT_KURA_CHAIN = "input-kura";
-    private static final String OUTPUT_KURA_CHAIN = "output-kura";
-    private static final String FORWARD_KURA_CHAIN = "forward-kura";
-    private static final String PREROUTING_KURA_CHAIN = "prerouting-kura";
-    private static final String POSTROUTING_KURA_CHAIN = "postrouting-kura";
+    public static final String INPUT_KURA_CHAIN = "input-kura";
+    public static final String OUTPUT_KURA_CHAIN = "output-kura";
+    public static final String FORWARD_KURA_CHAIN = "forward-kura";
+    public static final String PREROUTING_KURA_CHAIN = "prerouting-kura";
+    public static final String POSTROUTING_KURA_CHAIN = "postrouting-kura";
     private static final String RETURN_PREROUTING_KURA_CHAIN = "-A prerouting-kura -j RETURN";
     private static final String RETURN_POSTROUTING_KURA_CHAIN = "-A postrouting-kura -j RETURN";
     private static final String RETURN_INPUT_KURA_CHAIN = "-A input-kura -j RETURN";
@@ -109,9 +111,9 @@ public class IptablesConfig {
     public void clearAllChains() throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
                 PrintWriter writer = new PrintWriter(fos)) {
-            writer.println(NAT);
+            writer.println(STAR_NAT);
             writer.println(COMMIT);
-            writer.println(FILTER);
+            writer.println(STAR_FILTER);
             writer.println(COMMIT);
 
             File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
@@ -126,9 +128,9 @@ public class IptablesConfig {
     public void applyBlockPolicy() throws KuraException {
         try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
                 PrintWriter writer = new PrintWriter(fos)) {
-            writer.println(NAT);
+            writer.println(STAR_NAT);
             writer.println(COMMIT);
-            writer.println(FILTER);
+            writer.println(STAR_FILTER);
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             writer.println(COMMIT);
@@ -147,13 +149,13 @@ public class IptablesConfig {
      */
     public void flush() {
         try {
-            internalFlush(INPUT_KURA_CHAIN, "filter");
-            internalFlush(OUTPUT_KURA_CHAIN, "filter");
-            internalFlush(FORWARD_KURA_CHAIN, "filter");
-            internalFlush(INPUT_KURA_CHAIN, "nat");
-            internalFlush(OUTPUT_KURA_CHAIN, "nat");
-            internalFlush(PREROUTING_KURA_CHAIN, "nat");
-            internalFlush(POSTROUTING_KURA_CHAIN, "nat");
+            internalFlush(INPUT_KURA_CHAIN, FILTER);
+            internalFlush(OUTPUT_KURA_CHAIN, FILTER);
+            internalFlush(FORWARD_KURA_CHAIN, FILTER);
+            internalFlush(INPUT_KURA_CHAIN, NAT);
+            internalFlush(OUTPUT_KURA_CHAIN, NAT);
+            internalFlush(PREROUTING_KURA_CHAIN, NAT);
+            internalFlush(POSTROUTING_KURA_CHAIN, NAT);
         } catch (KuraException e) {
             logger.error("Failed to flush rules", e);
         }
@@ -255,9 +257,9 @@ public class IptablesConfig {
             AtomicBoolean readingFilterTable = new AtomicBoolean(false);
             lines.forEach(line -> {
                 line = line.trim();
-                if (NAT.equals(line)) {
+                if (STAR_NAT.equals(line)) {
                     readingNatTable.set(true);
-                } else if (FILTER.equals(line)) {
+                } else if (STAR_FILTER.equals(line)) {
                     readingFilterTable.set(true);
                 } else if (COMMIT.equals(line)) {
                     if (readingNatTable.get()) {
@@ -392,9 +394,9 @@ public class IptablesConfig {
                 if ("".equals(line) || line.startsWith("#") || line.startsWith(":") || line.contains("RETURN")) {
                     continue;
                 }
-                if (NAT.equals(line)) {
+                if (STAR_NAT.equals(line)) {
                     readingNatTable = true;
-                } else if (FILTER.equals(line)) {
+                } else if (STAR_FILTER.equals(line)) {
                     readingFilterTable = true;
                 } else if (COMMIT.equals(line)) {
                     if (readingNatTable) {

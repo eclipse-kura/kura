@@ -129,10 +129,17 @@ public class IptablesConfig {
         try (FileOutputStream fos = new FileOutputStream(FIREWALL_TMP_CONFIG_FILE_NAME);
                 PrintWriter writer = new PrintWriter(fos)) {
             writer.println(STAR_NAT);
+            writer.println(RETURN_POSTROUTING_KURA_CHAIN);
+            writer.println(RETURN_PREROUTING_KURA_CHAIN);
+            writer.println(RETURN_INPUT_KURA_CHAIN);
+            writer.println(RETURN_OUTPUT_KURA_CHAIN);
             writer.println(COMMIT);
             writer.println(STAR_FILTER);
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
+            writer.println(RETURN_INPUT_KURA_CHAIN);
+            writer.println(RETURN_OUTPUT_KURA_CHAIN);
+            writer.println(RETURN_FORWARD_KURA_CHAIN);
             writer.println(COMMIT);
 
             File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
@@ -178,7 +185,35 @@ public class IptablesConfig {
      * Saves (using iptables-save) the current iptables config into /etc/sysconfig/iptables
      */
     public void save() throws KuraException {
-        internalSave(null);
+        // internalSave(null);
+        try (FileOutputStream fos = new FileOutputStream(FIREWALL_CONFIG_FILE_NAME);
+                PrintWriter writer = new PrintWriter(fos)) {
+            writer.println(STAR_FILTER);
+            writer.println(":INPUT DROP [0:0]");
+            writer.println(":FORWARD DROP [0:0]");
+            writer.println(":OUTPUT ACCEPT [0:0]");
+            writer.println(":input-kura - [0:0]");
+            writer.println(":output-kura - [0:0]");
+            writer.println(":forward-kura - [0:0]");
+            writer.println("-A INPUT -j input-kura");
+            writer.println("-A OUTPUT -j output-kura");
+            writer.println("-A FORWARD -j forward-kura");
+            writer.println(COMMIT);
+            saveFilterTable(writer);
+            writer.println(STAR_NAT);
+            writer.println(":INPUT ACCEPT [0:0]");
+            writer.println(":OUTPUT ACCEPT [0:0]");
+            writer.println(":PREROUTING ACCEPT [0:0]");
+            writer.println(":POSTROUTING ACCEPT [0:0]");
+            writer.println(":prerouting-kura - [0:0]");
+            writer.println(":postrouting-kura - [0:0]");
+            writer.println("-A PREROUTING -j prerouting-kura");
+            writer.println("-A POSTROUTING -j postrouting-kura");
+            saveFilterTable(writer);
+            writer.println(COMMIT);
+        } catch (IOException e) {
+            throw new KuraIOException(e, "save() :: failed to save rules on file");
+        }
     }
 
     private void internalSave(String path) throws KuraException {
@@ -269,7 +304,6 @@ public class IptablesConfig {
                     if (readingFilterTable.get()) {
                         readingFilterTable.set(false);
                         saveFilterTable(writer);
-                        writer.println(RETURN_FORWARD_KURA_CHAIN);
                     }
                 }
                 writer.println(line);
@@ -336,6 +370,7 @@ public class IptablesConfig {
         }
         writer.println(RETURN_INPUT_KURA_CHAIN);
         writer.println(RETURN_OUTPUT_KURA_CHAIN);
+        writer.println(RETURN_FORWARD_KURA_CHAIN);
     }
 
     private void saveNatTable(PrintWriter writer) {

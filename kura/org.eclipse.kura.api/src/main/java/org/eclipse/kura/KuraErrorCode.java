@@ -235,5 +235,11 @@ public enum KuraErrorCode {
      * 
      * @since 2.0
      */
-    DISCONNECTION_FAILED;
+    DISCONNECTION_FAILED,
+    /**
+     * Error during IO operation.
+     * 
+     * @since 2.2
+     */
+    IO_ERROR;
 }

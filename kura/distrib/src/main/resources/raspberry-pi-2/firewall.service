@@ -1,6 +1,6 @@
 [Unit]
 Description=Firewall configuration
-Before=network-pre.target
+Before=network-pre.target docker.service
 Wants=network-pre.target
 
 [Service]

@@ -123,7 +123,7 @@ public class NatPostroutingChainRule {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (this.masquerade) {
-            sb.append("-A POSTROUTING");
+            sb.append("-A postrouting-kura");
             if (this.srcNetwork != null && !this.srcNetwork.equals("0.0.0.0")) {
                 sb.append(" -s ").append(this.srcNetwork).append('/').append(this.srcMask);
             }

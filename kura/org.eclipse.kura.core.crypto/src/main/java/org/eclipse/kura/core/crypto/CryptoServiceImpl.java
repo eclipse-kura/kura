@@ -154,16 +154,6 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public String sha1Hash(String s) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest cript = MessageDigest.getInstance("SHA-1");
-        cript.reset();
-        cript.update(s.getBytes(StandardCharsets.UTF_8));
-
-        byte[] encodedBytes = cript.digest();
-        return base64Encode(encodedBytes);
-    }
-
-    @Override
     public String encodeBase64(String stringValue) throws UnsupportedEncodingException {
         if (stringValue == null) {
             return null;
@@ -245,5 +235,15 @@ public class CryptoServiceImpl implements CryptoService {
 
     private static Key generateKey() {
         return new SecretKeySpec(SECRET_KEY, ALGORITHM);
+    }
+
+    @Override
+    public String hash(String s, String algorithm) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+        messageDigest.reset();
+        messageDigest.update(s.getBytes(StandardCharsets.UTF_8));
+
+        byte[] encodedBytes = messageDigest.digest();
+        return base64Encode(encodedBytes);
     }
 }

@@ -63,9 +63,9 @@ public class UserManager {
         final User asUser = (User) role;
 
         try {
-            String sha1Password = cryptoService.sha1Hash(password);
+            String sha256Password = cryptoService.sha256Hash(password);
 
-            if (!Objects.equals(sha1Password, asUser.getCredentials().get(PASSWORD_PROPERTY))) {
+            if (!Objects.equals(sha256Password, asUser.getCredentials().get(PASSWORD_PROPERTY))) {
                 throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
             }
         } catch (final KuraException e) {
@@ -128,7 +128,7 @@ public class UserManager {
         final User user = getUser(userName).orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND));
 
         try {
-            user.getCredentials().put(PASSWORD_PROPERTY, cryptoService.sha1Hash(userPassword));
+            user.getCredentials().put(PASSWORD_PROPERTY, cryptoService.sha256Hash(userPassword));
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
         }
@@ -221,7 +221,7 @@ public class UserManager {
 
                 if (password.isPresent()) {
                     try {
-                        credentials.put(PASSWORD_PROPERTY, cryptoService.sha1Hash(password.get()));
+                        credentials.put(PASSWORD_PROPERTY, cryptoService.sha256Hash(password.get()));
                     } catch (final Exception e) {
                         throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
                     }

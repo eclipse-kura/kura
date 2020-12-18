@@ -239,7 +239,7 @@
     <esf:configuration pid="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="users.config" type="String">
-                <esf:value>[{"name":"kura.user.admin","credentials":{"kura.password":"0DPiKuNIrrVmD8IUCuw1hQxNqZc="}},{"name":"kura.user.appadmin","credentials":{"kura.password":"+vXYYcLmIiWoZlD3j02C5WGdH4o="}},{"name":"kura.user.netadmin","credentials":{"kura.password":"2SiZyMumjIG/SWGXxPD9yw3UTSY="}}]</esf:value>
+                <esf:value>[{"name":"kura.user.admin","credentials":{"kura.password":"jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg="}},{"name":"kura.user.appadmin","credentials":{"kura.password":"3hPckF8Zc+IF3pVineBvck3zJERUl8itosySULE1hpM="}},{"name":"kura.user.netadmin","credentials":{"kura.password":"3PgDKAMCxgRWBHiT1dEBS97bPqt7xckgdwrADJiDoWg="}}]</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="groups.config" type="String">
                 <esf:value>[{"name":"kura.permission.kura.wires.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.admin","basicMembers":["kura.user.admin"]},{"name":"kura.permission.kura.cloud.connection.admin","basicMembers":["kura.user.appadmin","kura.user.netadmin"]},{"name":"kura.permission.kura.device","basicMembers":["kura.user.netadmin"]},{"name":"kura.permission.kura.packages.admin","basicMembers":["kura.user.appadmin"]},{"name":"kura.permission.kura.network.admin","basicMembers":["kura.user.netadmin"]}]</esf:value>

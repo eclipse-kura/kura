@@ -7,8 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Bundle-Category: Asset-Driver Management
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Service-Component: OSGI-INF/*.xml,
- OSGI-INF/org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl.xml
+Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
  org.apache.felix.useradmin;version="[1.0,1.1)",

@@ -27,6 +27,9 @@ import static org.mockito.Mockito.mock;
  *******************************************************************************/
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -47,6 +50,7 @@ public class FirewallTestUtils {
     protected static Command commandFlushOutputNat;
     protected static Command commandFlushPreroutingNat;
     protected static Command commandFlushPostroutingNat;
+    protected static List<Command> commandApplyList;
 
     protected static void setUpMock() {
         executorServiceMock = mock(CommandExecutorService.class);
@@ -81,6 +85,32 @@ public class FirewallTestUtils {
         commandFlushPostroutingNat = new Command(new String[] { "iptables", "-F", "postrouting-kura", "-t", "nat" });
         commandFlushPostroutingNat.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandFlushPostroutingNat)).thenReturn(successStatus);
+        commandApplyList = new ArrayList<>();
+        commandApplyList.add(new Command("iptables -P INPUT DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -P FORWARD DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -N input-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -N output-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -N forward-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -N input-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N output-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N prerouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N postrouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C INPUT -j input-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -C OUTPUT -j output-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -C FORWARD -j forward-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -C INPUT -j input-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C OUTPUT -j output-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C PREROUTING -j prerouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C POSTROUTING -j postrouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A input-kura -j RETURN".split(" ")));
+        commandApplyList.add(new Command("iptables -A output-kura -j RETURN".split(" ")));
+        commandApplyList.add(new Command("iptables -A forward-kura -j RETURN".split(" ")));
+        commandApplyList.add(new Command("iptables -A input-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A output-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A prerouting-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A postrouting-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.stream().forEach(c -> c.setExecuteInAShell(true));
+        commandApplyList.stream().forEach(c -> when(executorServiceMock.execute(c)).thenReturn(successStatus));
     }
 
 }

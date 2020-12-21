@@ -17,9 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
@@ -29,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -55,10 +54,10 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     }
 
     @Test
-    public void flushTest() throws KuraException {
+    public void clearAllKuraChainsTest() throws KuraException {
         setUpMock();
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
-        iptablesConfig.flush();
+        iptablesConfig.clearAllKuraChains();
 
         verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
@@ -79,6 +78,15 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     }
 
     @Test
+    public void saveWithFilenameTest() throws KuraException {
+        setUpMock();
+        IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
+        iptablesConfig.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+
+        verify(executorServiceMock, times(1)).execute(commandSaveTmp);
+    }
+
+    @Test
     public void restoreWithFilenameTest() throws KuraException {
         setUpMock();
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
@@ -88,7 +96,7 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     }
 
     @Test
-    public void saveWithFilenameTest() throws KuraException, IOException {
+    public void saveKuraChainsTest() throws KuraException, IOException {
         setUpMock();
         Set<LocalRule> localRules = new LinkedHashSet<>();
         localRules.add(new LocalRule(5400, "tcp",
@@ -108,23 +116,11 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         IptablesConfig iptablesConfig = new IptablesConfig(localRules, portForwardRules, autoNatRules, natRules, true,
                 executorServiceMock);
 
-        try (FileOutputStream fos = new FileOutputStream(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
-                PrintWriter writer = new PrintWriter(fos)) {
-            writer.println("*nat");
-            writer.println("COMMIT");
-            writer.println("*filter");
-            writer.println("COMMIT");
-        } catch (IOException e) {
-            throw new KuraIOException(e, "failed to write dummy file");
-        }
-
         try {
-            iptablesConfig.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+            iptablesConfig.saveKuraChains();
         } catch (KuraIOException e) {
             // do nothing...
         }
-
-        verify(executorServiceMock, times(1)).execute(commandSaveTmp);
 
         AtomicBoolean isLocalRulePresent = new AtomicBoolean(false);
         AtomicBoolean[] isPortForwardRulePresent = { new AtomicBoolean(false), new AtomicBoolean(false),
@@ -185,6 +181,19 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         File configFile = new File(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
         Files.deleteIfExists(configFile.toPath());
 
+    }
+
+    @Test
+    public void applyRulesTest() {
+        setUpMock();
+
+        IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
+        iptablesConfig.applyRules();
+
+        // commandApplyList.stream().forEach(c -> verify(executorServiceMock, times(1)).execute(c));
+        for (Command c : commandApplyList) {
+            verify(executorServiceMock, times(1)).execute(c);
+        }
     }
 
 }

@@ -31,16 +31,6 @@ import org.junit.Test;
 
 public class LinuxFirewallTest extends FirewallTestUtils {
 
-    // @SuppressWarnings("unused")
-    // @Test
-    // public void LinuxFirewallConstructorTest() {
-    // setUpMock();
-    // new LinuxFirewall(executorServiceMock);
-    //
-    // verify(executorServiceMock, atLeast(1)).execute(commandRestore);
-    // verify(executorServiceMock, times(1)).execute(commandSave);
-    // }
-
     @Test
     public void addLocalRuleTest() throws KuraException {
         setUpMock();

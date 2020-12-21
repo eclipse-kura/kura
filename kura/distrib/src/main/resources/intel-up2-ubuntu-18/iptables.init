@@ -7,10 +7,10 @@
 :output-kura - [0:0]
 :postrouting-kura - [0:0]
 :prerouting-kura - [0:0]
--A PREROUTING -j prerouting-kura
--A INPUT -j input-kura
--A OUTPUT -j output-kura
--A POSTROUTING -j postrouting-kura
+-I PREROUTING -j prerouting-kura
+-I INPUT -j input-kura
+-I OUTPUT -j output-kura
+-I POSTROUTING -j postrouting-kura
 -A prerouting-kura -j RETURN
 -A input-kura -j RETURN
 -A output-kura -j RETURN
@@ -24,9 +24,9 @@ COMMIT
 :input-kura - [0:0]
 :forward-kura - [0:0]
 :output-kura - [0:0]
--A INPUT -j input-kura
--A FORWARD -j forward-kura
--A OUTPUT -j output-kura
+-I INPUT -j input-kura
+-I FORWARD -j forward-kura
+-I OUTPUT -j output-kura
 -A input-kura -i enp3s0 -p tcp -m tcp --dport 8000 -j ACCEPT
 -A input-kura -i enp2s0 -p tcp -m tcp --dport 8000 -j ACCEPT
 -A input-kura -i wlp4s0 -p tcp -m tcp --dport 8000 -j ACCEPT

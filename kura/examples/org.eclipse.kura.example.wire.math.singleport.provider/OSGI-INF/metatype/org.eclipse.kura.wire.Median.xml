@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     
-    Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2020 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,9 @@
      
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.Variance" 
-         name="Variance" 
-         description="A wire component that finds the variance value of a numeric property in a fixed size buffer containing the last received values, emitting the result. For comparison, values are promoted to double which is also the type of the result.">
+    <OCD id="org.eclipse.kura.wire.Median" 
+         name="Median" 
+         description="A wire component that finds the median value of a numeric property in a fixed size buffer containing the last received values, emitting the result. For comparison, values are promoted to double which is also the type of the result.">
          
          <AD id="operand.name"
             name="operand.name"
@@ -52,7 +52,7 @@
         </AD>
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.Variance" factoryPid="org.eclipse.kura.wire.Variance">
-        <Object ocdref="org.eclipse.kura.wire.Variance"/>
+    <Designate pid="org.eclipse.kura.wire.Median" factoryPid="org.eclipse.kura.wire.Median">
+        <Object ocdref="org.eclipse.kura.wire.Median"/>
     </Designate>
 </MetaData>

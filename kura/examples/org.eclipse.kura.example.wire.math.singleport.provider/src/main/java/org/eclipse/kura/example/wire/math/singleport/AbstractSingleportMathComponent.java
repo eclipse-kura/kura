@@ -119,5 +119,4 @@ public abstract class AbstractSingleportMathComponent
                     .singletonList(new WireRecord(Collections.singletonMap(this.options.getResultName(), result))));
         }
     }
-
 }

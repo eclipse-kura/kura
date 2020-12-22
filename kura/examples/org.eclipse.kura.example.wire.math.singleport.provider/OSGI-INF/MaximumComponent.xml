@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     
-    Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2020 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -14,14 +14,14 @@
      
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
-               name="org.eclipse.kura.wire.GainOffset"
+               name="org.eclipse.kura.wire.Maximum"
                activate="activate"
                deactivate="deactivate"
                modified="updated"
                enabled="true"
                immediate="true"
                configuration-policy="require">
-   <implementation class="org.eclipse.kura.example.wire.math.singleport.gainoffset.GainOffsetComponent"/>
+   <implementation class="org.eclipse.kura.example.wire.math.singleport.maximum.MaximumComponent"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
       <provide interface="org.eclipse.kura.wire.WireComponent"/>
@@ -36,7 +36,7 @@
    	          name="WireHelperService"
    	          policy="static"
    	          unbind="unbindWireHelperService"/>
-   <property name="service.pid" value="org.eclipse.kura.wire.GainOffset"/>
+   <property name="service.pid" value="org.eclipse.kura.wire.Maximum"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <property name="input.cardinality.minimum" type="Integer" value="1"/>
    <property name="input.cardinality.maximum" type="Integer" value="1"/>

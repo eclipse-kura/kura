@@ -4,35 +4,53 @@ iptables_config_file=/etc/sysconfig/iptables
 ipforward_file=/proc/sys/net/ipv4/ip_forward
 enable_ipforwarding=false;
 
-iptables-restore < $iptables_config_file
+if [ -f $iptables_config_file ]; then
+	iptables-restore < $iptables_config_file
+fi
 
 # create custom chains if needed
 custom_filter_chains=(input-kura output-kura forward-kura)
 for custom_chain in ${custom_filter_chains[@]}; do
     chain=(${custom_chain//-/ })
-    iptables -C ${chain[0]^^} -j $custom_chain> /dev/null 2>&1
+    iptables -C ${chain[0]^^} -j $custom_chain -t filter > /dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         iptables -N $custom_chain -t filter > /dev/null 2>&1
-        iptables -A ${chain[0]^^} -j $custom_chain > /dev/null 2>&1
+        iptables -I ${chain[0]^^} -t filter -j $custom_chain > /dev/null 2>&1
     fi
 done
-custom_nat_chains=(prerouting-kura postrouting-kura)
+custom_nat_chains=(prerouting-kura postrouting-kura input-kura output-kura)
 for custom_chain in ${custom_nat_chains[@]}; do
     chain=(${custom_chain//-/ }[0])
-    iptables -C ${chain[0]^^} -j $custom_chain> /dev/null 2>&1
+    iptables -C ${chain[0]^^} -j $custom_chain -t nat > /dev/null 2>&1
     if [[ $? -ne 0 ]]; then
         iptables -N $custom_chain -t nat > /dev/null 2>&1
-        iptables -A ${chain[0]^^} -j $custom_chain > /dev/null 2>&1
+        iptables -I ${chain[0]^^} -t nat -j $custom_chain > /dev/null 2>&1
     fi
 done
 
+# configure policies for standard chains
+policy=$(iptables -nL -t filter | grep policy | grep INPUT)
+if [[ "$policy" == *ACCEPT* ]]; then
+	iptables -P INPUT DROP
+fi
+policy=$(iptables -nL -t filter | grep policy | grep OUTPUT)
+if [[ "$policy" == *DROP* ]]; then
+	iptables -P OUTPUT ACCEPT
+fi
+policy=$(iptables -nL -t filter | grep policy | grep FORWARD)
+if [[ "$policy" == *ACCEPT* ]]; then
+	iptables -P FORWARD DROP
+fi
+
 # enable ip forwarding if needed
-while IFS='' read -r line || [[ -n "$line" ]]; do
-    if [[ $line =~ "-A forward-kura" ]]; then
-        enable_ipforwarding=true
-        break
-    fi
-done < $iptables_config_file
+if [ -f $iptables_config_file ]; then
+	while IFS='' read -r line || [[ -n "$line" ]]; do
+	    if [[ $line =~ "-A forward-kura" ]]; then
+	        enable_ipforwarding=true
+	        break
+	    fi
+	done < $iptables_config_file
+fi
 if [ $enable_ipforwarding = true ]; then
     echo "1" > $ipforward_file
 else

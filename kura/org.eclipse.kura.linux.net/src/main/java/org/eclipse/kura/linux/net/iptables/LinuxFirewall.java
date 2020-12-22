@@ -24,10 +24,7 @@ import java.util.Set;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.KuraProcessExecutionErrorException;
-import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
@@ -46,7 +43,6 @@ public class LinuxFirewall {
     private static Object lock = new Object();
 
     private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
-    private static final String CUSTOM_FIREWALL_SCRIPT_NAME = "/etc/init.d/firewall_cust";
 
     private Set<LocalRule> localRules = new LinkedHashSet<>();
     private Set<PortForwardRule> portForwardRules = new LinkedHashSet<>();
@@ -61,12 +57,12 @@ public class LinuxFirewall {
         this.executorService = executorService;
         this.iptables = new IptablesConfig(this.executorService);
         try {
-            File cfgFile = new File(IptablesConfig.FIREWALL_CONFIG_FILE_NAME);
+            File cfgFile = new File(IptablesConfigConstants.FIREWALL_CONFIG_FILE_NAME);
             if (!cfgFile.exists()) {
-                this.iptables.applyBlockPolicy();
+                IptablesConfig minimalConfig = new IptablesConfig(new LinkedHashSet<>(), new LinkedHashSet<>(),
+                        new LinkedHashSet<>(), new LinkedHashSet<>(), false, executorService);
+                minimalConfig.applyRules();
             }
-            // Update iptables config in the filesystem
-            this.iptables.save();
             initialize();
         } catch (KuraException e) {
             logger.error("failed to initialize LinuxFirewall", e);
@@ -82,7 +78,7 @@ public class LinuxFirewall {
         this.natRules = this.iptables.getNatRules();
         this.allowIcmp = true;
         this.allowForwarding = false;
-        logger.debug("initialize() :: Parsing current firewall configuraion");
+        logger.debug("initialize() :: Parsing current firewall configuration");
     }
 
     @SuppressWarnings("checkstyle:parameterNumber")
@@ -383,11 +379,9 @@ public class LinuxFirewall {
         }
         IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
                 this.natRules, this.allowIcmp, this.executorService);
-        newIptables.save(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
-        newIptables.restore(IptablesConfig.FIREWALL_TMP_CONFIG_FILE_NAME);
+        newIptables.applyRules();
         logger.debug("Managing port forwarding...");
         enableForwarding(this.allowForwarding);
-        runCustomFirewallScript();
     }
 
     private static void enableForwarding(boolean allow) throws KuraException {
@@ -400,22 +394,6 @@ public class LinuxFirewall {
         } catch (IOException e) {
             throw new KuraIOException(e, "Failed to enable/disable forwarding");
         }
-    }
-
-    /*
-     * Runs custom firewall script
-     */
-    private void runCustomFirewallScript() throws KuraException {
-        File file = new File(CUSTOM_FIREWALL_SCRIPT_NAME);
-        if (file.exists()) {
-            logger.info("Running custom firewall script - {}", CUSTOM_FIREWALL_SCRIPT_NAME);
-            Command command = new Command(new String[] { "sh", CUSTOM_FIREWALL_SCRIPT_NAME });
-            CommandStatus status = this.executorService.execute(command);
-            if (!status.getExitStatus().isSuccessful()) {
-                throw new KuraProcessExecutionErrorException("Failed to apply custom firewall script");
-            }
-        }
-
     }
 
     public void enable() throws KuraException {
@@ -444,11 +422,9 @@ public class LinuxFirewall {
 
     private void update() throws KuraException {
         synchronized (lock) {
-            // Write down the current config in the filesystem before adding/removing rules
-            this.iptables.save();
-            this.iptables.flush();
+            this.iptables.clearAllKuraChains();
             applyRules();
-            this.iptables.save();
+            this.iptables.saveKuraChains();
         }
     }
 }

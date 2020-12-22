@@ -15,7 +15,6 @@ package org.eclipse.kura.linux.net.iptables;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -31,16 +30,6 @@ import org.eclipse.kura.net.NetworkPair;
 import org.junit.Test;
 
 public class LinuxFirewallTest extends FirewallTestUtils {
-
-    @SuppressWarnings("unused")
-    @Test
-    public void LinuxFirewallConstructorTest() {
-        setUpMock();
-        new LinuxFirewall(executorServiceMock);
-
-        verify(executorServiceMock, atLeast(1)).execute(commandRestore);
-        verify(executorServiceMock, times(1)).execute(commandSave);
-    }
 
     @Test
     public void addLocalRuleTest() throws KuraException {
@@ -74,8 +63,12 @@ public class LinuxFirewallTest extends FirewallTestUtils {
             // do nothing...
         }
 
-        verify(executorServiceMock, atLeast(1)).execute(commandRestore);
-        verify(executorServiceMock, times(2)).execute(commandSave);
+        assertTrue(linuxFirewall.getLocalRules().stream().anyMatch(rule -> {
+            return rule.getPort() == 5400 && rule.getProtocol().equals("tcp")
+                    && rule.getPermittedInterfaceName().equals("eth0")
+                    && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
+                    && rule.getSourcePortRange().equals("10100:10200");
+        }));
         verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushForwardFilter);
@@ -119,8 +112,14 @@ public class LinuxFirewallTest extends FirewallTestUtils {
             // do nothing...
         }
 
-        verify(executorServiceMock, atLeast(1)).execute(commandRestore);
-        verify(executorServiceMock, times(2)).execute(commandSave);
+        assertTrue(linuxFirewall.getPortForwardRules().stream().anyMatch(rule -> {
+            return rule.getInboundIface().equals("eth0") && rule.getOutboundIface().equals("eth1")
+                    && rule.getAddress().equals("172.16.0.1") && rule.getProtocol().equals("tcp")
+                    && rule.getInPort() == 3040 && rule.getOutPort() == 4050 && rule.isMasquerade()
+                    && rule.getPermittedNetwork().equals("172.16.0.100") && rule.getPermittedNetworkMask() == 32
+                    && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
+                    && rule.getSourcePortRange().equals("10100:10200");
+        }));
         verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushForwardFilter);
@@ -158,8 +157,10 @@ public class LinuxFirewallTest extends FirewallTestUtils {
             // do nothing...
         }
 
-        verify(executorServiceMock, atLeast(1)).execute(commandRestore);
-        verify(executorServiceMock, times(2)).execute(commandSave);
+        assertTrue(linuxFirewall.getAutoNatRules().stream().anyMatch(rule -> {
+            return rule.getSourceInterface().equals("eth0") && rule.getDestinationInterface().equals("eth1")
+                    && rule.isMasquerade();
+        }));
         verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushForwardFilter);
@@ -174,14 +175,14 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         setUpMock();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
         try {
-            linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1", "172.16.0.2", true);
+            linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true);
         } catch (KuraIOException e) {
             // do nothing...
         }
 
         assertTrue(linuxFirewall.getNatRules().stream().anyMatch(rule -> {
             return rule.getSourceInterface().equals("eth0") && rule.getDestinationInterface().equals("eth1")
-                    && rule.getSource().equals("172.16.0.1") && rule.getDestination().equals("172.16.0.2")
+                    && rule.getSource().equals("172.16.0.1/32") && rule.getDestination().equals("172.16.0.2/32")
                     && rule.isMasquerade();
         }));
     }
@@ -192,14 +193,17 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
         List<NATRule> rules = new ArrayList<>();
         try {
-            rules.add(new NATRule("eth0", "eth1", "tcp", "172.16.0.1", "172.16.0.2", true));
-            linuxFirewall.addAutoNatRules(rules);
+            rules.add(new NATRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true));
+            linuxFirewall.addNatRules(rules);
         } catch (KuraIOException e) {
             // do nothing...
         }
 
-        verify(executorServiceMock, atLeast(1)).execute(commandRestore);
-        verify(executorServiceMock, times(2)).execute(commandSave);
+        assertTrue(linuxFirewall.getNatRules().stream().anyMatch(rule -> {
+            return rule.getSourceInterface().equals("eth0") && rule.getDestinationInterface().equals("eth1")
+                    && rule.getSource().equals("172.16.0.1/32") && rule.getDestination().equals("172.16.0.2/32")
+                    && rule.isMasquerade();
+        }));
         verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
         verify(executorServiceMock, times(1)).execute(commandFlushForwardFilter);
@@ -345,7 +349,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         setUpMock();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
         try {
-            linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1", "172.16.0.2", true);
+            linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true);
         } catch (KuraIOException e) {
             // do nothing...
         }

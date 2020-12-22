@@ -275,7 +275,6 @@
         <module>org.eclipse.kura.example.wire.math.singleport.provider.test</module>
         <module>org.eclipse.kura.example.testutil</module>
         <module>org.eclipse.kura.example.wire.logic.multiport.provider.test</module>
-        <module>org.eclipse.kura.example.wire.trigonometric.functions.provider.test</module>
         <module>org.eclipse.kura.example.wire.math.trig.test</module>
     </modules>
 

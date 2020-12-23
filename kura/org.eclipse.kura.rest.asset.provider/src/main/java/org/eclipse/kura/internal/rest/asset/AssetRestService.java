@@ -38,9 +38,13 @@ import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.type.TypedValue;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -60,21 +64,44 @@ public class AssetRestService {
     private AssetService assetService;
     private Gson channelSerializer;
 
+    private UserAdmin userAdmin;
+    private Thread userAdminUpdateThread = new Thread(() -> {
+        waitUserAdminReady();
+
+        userAdmin.createRole("kura.permission.rest.assets", Role.GROUP);
+    });
+
+    protected void setUserAdmin(UserAdmin userAdmin) {
+        this.userAdmin = userAdmin;
+    }
+
     protected void setAssetService(AssetService assetService) {
         this.assetService = assetService;
+    }
+
+    public void activate() {
+        this.userAdminUpdateThread.start();
+    }
+
+    public void deactivate() {
+        try {
+            this.userAdminUpdateThread.join(30000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @GET
     @RolesAllowed("assets")
     @Produces(MediaType.APPLICATION_JSON)
     public List<String> listAssetPids() throws InvalidSyntaxException {
-        return getAssetServiceReferences().stream()
-                .map(reference -> (String) reference.getProperty("kura.service.pid")).collect(Collectors.toList());
+        return getAssetServiceReferences().stream().map(reference -> (String) reference.getProperty("kura.service.pid"))
+                .collect(Collectors.toList());
     }
 
     protected Collection<ServiceReference<Asset>> getAssetServiceReferences() throws InvalidSyntaxException {
-        return FrameworkUtil.getBundle(AssetRestService.class).getBundleContext()
-                .getServiceReferences(Asset.class, null);
+        return FrameworkUtil.getBundle(AssetRestService.class).getBundleContext().getServiceReferences(Asset.class,
+                null);
     }
 
     @GET
@@ -145,5 +172,28 @@ public class AssetRestService {
                     }).create();
         }
         return channelSerializer;
+    }
+
+    private void waitUserAdminReady() {
+        final BundleContext context = FrameworkUtil.getBundle(AssetRestService.class).getBundleContext();
+
+        while (true) {
+
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            final ServiceReference<?> ref = context
+                    .getServiceReference("org.apache.felix.useradmin.RoleRepositoryStore");
+
+            final Bundle[] usingBundles = ref.getUsingBundles();
+
+            if (usingBundles != null && usingBundles.length > 0) {
+                break;
+            }
+
+        }
     }
 }

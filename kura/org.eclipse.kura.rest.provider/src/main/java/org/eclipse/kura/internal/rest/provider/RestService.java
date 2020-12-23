@@ -13,19 +13,21 @@
 
 package org.eclipse.kura.internal.rest.provider;
 
-import static java.util.Objects.isNull;
-
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.util.Arrays;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
+import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -36,8 +38,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.osgi.service.useradmin.Group;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.User;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,49 +50,48 @@ import com.eclipsesource.jaxrs.provider.security.AuthenticationHandler;
 import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
 
 @Provider
-public class RestService
-        implements ConfigurableComponent, AuthenticationHandler, AuthorizationHandler, ContainerResponseFilter {
+public class RestService implements AuthenticationHandler, AuthorizationHandler, ContainerResponseFilter {
+
+    private static final String KURA_PASSWORD_CREDENTIAL = "kura.password";
+
+    private static final String KURA_PERMISSION_PREFIX = "kura.permission.";
+    private static final String KURA_PERMISSION_REST_PREFIX = KURA_PERMISSION_PREFIX + "rest.";
+    private static final String KURA_USER_PREFIX = "kura.user.";
 
     private static final String REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST = "Rest - Failure - "
             + "Received unauthorized REST request. Method: {}, path: {}, request IP: {}";
-    private static final Logger logger = LoggerFactory.getLogger(RestService.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
     private static final Response UNAUTHORIZED_RESPONSE = Response.status(Response.Status.UNAUTHORIZED)
             .header("WWW-Authenticate", "Basic realm=\"kura-rest-api\"").build();
 
-    private Map<String, User> users;
-
     private CryptoService cryptoService;
+    private UserAdmin userAdmin;
 
     @Context
     private HttpServletRequest sr;
+
+    public void setUserAdmin(final UserAdmin userAdmin) {
+        this.userAdmin = userAdmin;
+    }
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
-    public void activate(Map<String, Object> properties) {
-        logger.info("activating...");
-        updated(properties);
-        logger.info("activating...done");
-    }
-
-    public void deactivate() {
-        logger.info("deactivating...");
-        logger.info("deactivating...done");
-    }
-
-    public void updated(Map<String, Object> properties) {
-        logger.info("updating...");
-        this.users = User.fromOptions(new RestServiceOptions(properties));
-        logger.info("updating...done");
-    }
-
     @Override
     public boolean isUserInRole(Principal requestUser, String role) {
-        return ((User) requestUser).getRoles().contains(role);
+
+        try {
+            final User user = (User) this.userAdmin.getRole(KURA_USER_PREFIX + requestUser.getName());
+
+            return containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_REST_PREFIX + role), user)
+                    || containsBasicMember(this.userAdmin.getRole(KURA_PERMISSION_PREFIX + "kura.admin"), user);
+
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
     @Override
@@ -96,45 +100,26 @@ public class RestService
         String path = getRequestPath(request);
 
         String requestIp = request.getHeaderString("X-FORWARDED-FOR");
-        if (isNull(requestIp)) {
+        if (requestIp == null) {
             requestIp = this.sr.getRemoteAddr();
         }
 
-        String authHeader = request.getHeaderString("Authorization");
-        if (authHeader == null) {
-            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
-            request.abortWith(UNAUTHORIZED_RESPONSE);
-            return null;
-        }
-
-        StringTokenizer tokens = new StringTokenizer(authHeader);
-        String authScheme = tokens.nextToken();
-        if (!"Basic".equals(authScheme)) {
-            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
-            request.abortWith(UNAUTHORIZED_RESPONSE);
-            return null;
-        }
-
-        final String credentials = new String(BASE64_DECODER.decode(tokens.nextToken()), StandardCharsets.UTF_8);
-
-        int colon = credentials.indexOf(':');
-        String userName = credentials.substring(0, colon);
-        String requestPassword = credentials.substring(colon + 1);
-
-        final User user = this.users.get(userName);
-
         try {
-            final char[] userPassword = user.getPassword().getPassword();
-            if (userPassword.length == 0 && requestPassword.isEmpty()
-                    || Arrays.equals(userPassword, this.cryptoService.encryptAes(requestPassword.toCharArray()))) {
-                return user;
+
+            final Optional<Principal> fromCertificateAuth = performCertificateAuthentication(request);
+
+            if (fromCertificateAuth.isPresent()) {
+                return fromCertificateAuth.get();
             }
-        } catch (Exception e) {
+
+            return performBasicAuthentication(request).orElseThrow(IllegalStateException::new);
+
+        } catch (final Exception e) {
+            auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
+            request.abortWith(UNAUTHORIZED_RESPONSE);
+            return null;
         }
 
-        auditLogger.warn(REST_FAILURE_RECEIVED_UNAUTHORIZED_REQUEST, request.getMethod(), path, requestIp);
-        request.abortWith(UNAUTHORIZED_RESPONSE);
-        return null;
     }
 
     private String getRequestPath(ContainerRequestContext request) {
@@ -154,16 +139,103 @@ public class RestService
 
     @Override
     public String getAuthenticationScheme() {
-        return SecurityContext.BASIC_AUTH;
+        return null;
+    }
+
+    private Optional<Principal> performBasicAuthentication(final ContainerRequestContext request)
+            throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+        String authHeader = request.getHeaderString("Authorization");
+        if (authHeader == null) {
+            return Optional.empty();
+        }
+
+        StringTokenizer tokens = new StringTokenizer(authHeader);
+        String authScheme = tokens.nextToken();
+        if (!"Basic".equals(authScheme)) {
+            return Optional.empty();
+        }
+
+        final String credentials = new String(BASE64_DECODER.decode(tokens.nextToken()), StandardCharsets.UTF_8);
+
+        int colon = credentials.indexOf(':');
+        String userName = credentials.substring(0, colon);
+        String requestPassword = credentials.substring(colon + 1);
+
+        final User user = (User) userAdmin.getRole(KURA_USER_PREFIX + userName);
+
+        final String passwordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
+
+        if (cryptoService.sha256Hash(requestPassword).equals(passwordHash)) {
+            return Optional.of(() -> userName);
+        } else {
+            return Optional.empty();
+        }
+
+    }
+
+    private Optional<Principal> performCertificateAuthentication(final ContainerRequestContext context) {
+        try {
+
+            final Object clientCertificatesRaw = context.getProperty("javax.servlet.request.X509Certificate");
+
+            if (!(clientCertificatesRaw instanceof X509Certificate[])) {
+                return Optional.empty();
+            }
+
+            final X509Certificate[] clientCertificates = (X509Certificate[]) clientCertificatesRaw;
+
+            if (clientCertificates.length == 0) {
+                throw new IllegalArgumentException("Certificate chain is empty");
+            }
+
+            final LdapName ldapName = new LdapName(clientCertificates[0].getSubjectX500Principal().getName());
+
+            final Optional<Rdn> commonNameRdn = ldapName.getRdns().stream()
+                    .filter(r -> "cn".equalsIgnoreCase(r.getType())).findAny();
+
+            if (!commonNameRdn.isPresent()) {
+                throw new IllegalArgumentException("Certificate common name is not present");
+            }
+
+            final String commonName = (String) commonNameRdn.get().getValue();
+
+            if (this.userAdmin.getRole(KURA_USER_PREFIX + commonName) instanceof User) {
+                return Optional.of(() -> commonName);
+            }
+
+            return Optional.empty();
+
+        } catch (final Exception e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         String path = getRequestPath(requestContext);
-        String user = requestContext.getSecurityContext().getUserPrincipal().getName();
-
         int responseStatus = responseContext.getStatus();
+        final SecurityContext context = requestContext.getSecurityContext();
+
+        if (context == null) {
+            auditLogger.warn(
+                    "Rest - Warning - No security context method: {}, path: {}, response code: {}, message: {}",
+                    requestContext.getMethod(), path, responseStatus, responseContext.getEntity());
+            return;
+        }
+
+        final Principal principal = context.getUserPrincipal();
+
+        if (principal == null) {
+            auditLogger.warn(
+                    "Rest - Warning - User not authenticated method: {}, path: {}, response code: {}, message: {}",
+                    requestContext.getMethod(), path, responseStatus, responseContext.getEntity());
+            return;
+        }
+
+        final String user = principal.getName();
+
         if (responseStatus == Response.Status.OK.getStatusCode()) {
             auditLogger.info("Rest - Success - Request succeeded for user: {}, method: {}, path: {}", user,
                     requestContext.getMethod(), path);
@@ -173,5 +245,27 @@ public class RestService
                     user, requestContext.getMethod(), path, responseStatus, responseContext.getEntity());
         }
 
+    }
+
+    private static boolean containsBasicMember(final Role group, final User user) {
+        if (!(group instanceof Group)) {
+            return false;
+        }
+
+        final Group asGroup = (Group) group;
+
+        final Role[] members = asGroup.getMembers();
+
+        if (members == null) {
+            return false;
+        }
+
+        for (final Role member : members) {
+            if (member.getName().equals(user.getName())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

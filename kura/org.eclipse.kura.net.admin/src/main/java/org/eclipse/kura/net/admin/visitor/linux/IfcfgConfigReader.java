@@ -38,6 +38,7 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -59,6 +60,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
     private static IfcfgConfigReader instance;
 
     private static NetInterfaceConfigSerializationService netConfigManager; // can be null
+    private static SystemService systemService;
 
     public static IfcfgConfigReader getInstance() {
         if (instance == null) {
@@ -67,6 +69,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             ServiceReference<NetInterfaceConfigSerializationService> netConfigManagerSR = context
                     .getServiceReference(NetInterfaceConfigSerializationService.class);
             netConfigManager = context.getService(netConfigManagerSR);
+            ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
+            systemService = context.getService(systemServiceSR);
         }
         return instance;
     }
@@ -243,9 +247,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
             netInterfaceStatus = NetInterfaceStatus.valueOf(kuraExtendedProps.getProperty(sb.toString()));
         } else {
-            // FIXME: add a check for global property in kura.properties
             if (isVirtual(ifaceName, kuraExtendedProps)) {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusUnmanaged;
+                netInterfaceStatus = NetInterfaceStatus.valueOf(systemService.getNetVirtualDevicesConfig());
             } else {
                 netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
             }

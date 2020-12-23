@@ -375,9 +375,8 @@ public class NetworkConfigurationServiceImpl
     private boolean shouldSkipNetworkConfiguration(String interfaceName) {
         boolean result = false;
 
-        // ignore mon interface, redpine vlan interface and usb0 for beaglebone
-        if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")
-                || interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device"))) {
+        // ignore mon and redpine vlan interface
+        if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")) {
             result = true;
         }
 

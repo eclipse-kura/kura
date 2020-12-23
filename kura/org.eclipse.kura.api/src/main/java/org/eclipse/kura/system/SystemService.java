@@ -41,6 +41,10 @@ public interface SystemService {
     public static final String KEY_KURA_VERSION = "kura.version";
 
     /**
+     * @since 2.2
+     */
+    public static final String KEY_KURA_NET_VIRTUAL_DEVICES_CONFIG = "kura.net.virtual.devices.config";
+    /**
      * @since 2.0
      */
     public static final String KEY_KURA_FRAMEWORK_CONFIG_DIR = "kura.framework.config";
@@ -489,5 +493,13 @@ public interface SystemService {
      * @since 2.0
      */
     public String getHostname();
+
+    /**
+     * Returns the default configuration for virtual network interfaces
+     * 
+     * @return a String that represent the default configuration for virtual interfaces
+     * @since 2.2
+     */
+    public String getNetVirtualDevicesConfig();
 
 }

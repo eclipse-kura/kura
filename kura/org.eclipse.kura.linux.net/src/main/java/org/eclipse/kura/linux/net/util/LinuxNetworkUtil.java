@@ -1088,4 +1088,25 @@ public class LinuxNetworkUtil {
         sb.append("'").append(cmd).append("' interrupted");
         return sb.toString();
     }
+
+    public boolean isVirtual(String interfaceName) {
+        boolean virtual = false;
+        Command command = new Command(new String[] { "ls", "-all", "/sys/class/net", "|", "grep", interfaceName });
+        command.setExecuteInAShell(true);
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        command.setErrorStream(new ByteArrayOutputStream());
+        CommandStatus status = this.executorService.execute(command);
+        if (status.getExitStatus().isSuccessful()) {
+            virtual = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
+                    .contains("virtual");
+        } else {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Failed to check if interface is virtual {}",
+                        new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(), Charsets.UTF_8));
+            }
+        }
+        return virtual;
+    }
+
 }

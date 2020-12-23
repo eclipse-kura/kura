@@ -492,11 +492,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             logger.debug("Ignoring redpine vlan interface.");
             return null;
         }
-        // ignore usb0 for beaglebone
-        if (interfaceName.startsWith("usb0") && "beaglebone".equals(System.getProperty("target.device"))) {
-            logger.debug("Ignoring usb0 for beaglebone.");
-            return null;
-        }
         // ignore unconfigured modem interface
         if (interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
             logger.debug("Ignoring unconfigured modem interface {}", interfaceName);
@@ -532,7 +527,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             netInterface.setLoopback(false);
             netInterface.setPointToPoint(false);
             netInterface.setUp(isUp);
-            netInterface.setVirtual(isVirtual());
+            netInterface.setVirtual(isVirtual(interfaceName));
             netInterface.setUsbDevice(getUsbDevice(interfaceName));
             netInterface.setState(getState(interfaceName, isUp));
             netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
@@ -573,7 +568,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             wifiInterface.setLoopback(false);
             wifiInterface.setPointToPoint(false);
             wifiInterface.setUp(isUp);
-            wifiInterface.setVirtual(isVirtual());
+            wifiInterface.setVirtual(isVirtual(interfaceName));
             wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
             wifiInterface.setState(getState(interfaceName, isUp));
             wifiInterface.setNetInterfaceAddresses(getWifiInterfaceAddresses(interfaceName, isUp));
@@ -825,7 +820,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         }
 
         modemInterface.setUp(isUp);
-        modemInterface.setVirtual(isVirtual());
+        modemInterface.setVirtual(isVirtual(interfaceName));
         modemInterface.setNetInterfaceAddresses(getModemInterfaceAddresses(interfaceName, isUp));
 
         return modemInterface;
@@ -1083,9 +1078,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         return null;
     }
 
-    private boolean isVirtual() {
-        // FIXME - assuming only one to one relationship for network interfaces today
-        return false;
+    private boolean isVirtual(String interfaceName) {
+        return this.linuxNetworkUtil.isVirtual(interfaceName);
     }
 
     private boolean hasCorrectNumberOfResources(final SupportedUsbModemInfo modemInfo,

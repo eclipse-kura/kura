@@ -94,6 +94,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             }
 
             Properties kuraProps = netConfigManager.read(interfaceName);
+            kuraExtendedProps.put("net.interface." + interfaceName + ".config.virtual",
+                    String.valueOf(netInterfaceConfig.isVirtual()));
 
             IfaceConfig ifaceConfig = getIfaceConfig(interfaceName, kuraProps, kuraExtendedProps);
 
@@ -241,10 +243,24 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
             netInterfaceStatus = NetInterfaceStatus.valueOf(kuraExtendedProps.getProperty(sb.toString()));
         } else {
-            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+            // FIXME: add a check for global property in kura.properties
+            if (isVirtual(ifaceName, kuraExtendedProps)) {
+                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusUnmanaged;
+            } else {
+                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+            }
         }
         logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, ifaceName);
         return netInterfaceStatus;
+    }
+
+    private boolean isVirtual(String ifaceName, Properties kuraExtendedProps) {
+        Boolean virtual = false;
+        StringBuilder sb = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.virtual");
+        if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+            virtual = Boolean.valueOf(kuraExtendedProps.getProperty(sb.toString()));
+        }
+        return virtual;
     }
 
     private NetInterfaceStatus getNetInterfaceStatus(NetInterfaceStatus netInterfaceStatus, boolean autoConnect,

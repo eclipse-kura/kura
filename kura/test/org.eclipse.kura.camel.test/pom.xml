@@ -32,158 +32,35 @@
 
     <build>
         <plugins>
+			<plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compiletests</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-surefire-plugin</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <providerHint>junit4</providerHint>
-                    <failIfNoTests>false</failIfNoTests>
-                    <!-- <appArgLine>-consoleLog -console 1450</appArgLine>
-                    <argLine>${tycho.argline}
-                        -DbuildingWithTycho=true
-                        -Dosgi.locking=none
-                        -Dds.showtrace=true
-                        -Djava.io.tmpdir=/tmp
-                        -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
-                        -Dosgi.clean=true
-                        -Dorg.eclipse.kura.mode=emulator
-                        -Dkura.snapshots=${project.basedir}/target/
-                        -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
-                        -Ddpa.configuration=/tmp/kura/dpa.properties -Dosgi.noShutdown=true</argLine> -->
-                    <bundleStartLevel>
-                        <bundleStartLevel>
-                            <id>org.eclipse.equinox.cm</id>
-                            <autoStart>true</autoStart>
-                            <level>1</level>
-                        </bundleStartLevel>
-                        <bundleStartLevel>
-                            <id>org.apache.camel.camel-core</id>
-                            <autoStart>true</autoStart>
-                            <level>2</level>
-                        </bundleStartLevel>
-                        <bundleStartLevel>
-                            <id>org.eclipse.kura.camel</id>
-                            <autoStart>true</autoStart>
-                            <level>3</level>
-                        </bundleStartLevel>
-                        <bundle>
-                            <id>org.apache.log4j2-api-config</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.apache.logging.log4j.api</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.apache.logging.log4j.core</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.apache.logging.log4j.slf4j-impl</id>
-                            <level>4</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>com.sun.xml.bind.jaxb-osgi</id>
-                            <level>1</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                        <bundle>
-                            <id>org.glassfish.hk2.osgi-resource-locator</id>
-                            <level>1</level>
-                            <autoStart>true</autoStart>
-                        </bundle>
-                    </bundleStartLevel>
-                    <dependencies>
-                        <dependency>
-                            <type>p2-installable-unit</type>
-                            <artifactId>org.eclipse.equinox.console</artifactId>
-                        </dependency>
-                    </dependencies>
-                </configuration>
             </plugin>
-
             <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
+            	<groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-surefire-plugin</artifactId>
             </plugin>
-
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>target-platform-configuration</artifactId>
-                <configuration>
-                    <dependency-resolution>
-                        <extraRequirements>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.hamcrest</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>org.apache.logging.log4j.api</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>org.apache.logging.log4j.core</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.apache.log4j2-api-config</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>eclipse-plugin</type>
-                                <id>org.eclipse.equinox.cm</id>
-                                <versionRange>1</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>jakarta.annotation-api</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>jakarta.xml.bind-api</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>jakarta.activation-api</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>com.sun.xml.bind.jaxb-osgi</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                            <requirement>
-                                <type>p2-installable-unit</type>
-                                <id>org.glassfish.hk2.osgi-resource-locator</id>
-                                <versionRange>0.0.0</versionRange>
-                            </requirement>
-                        </extraRequirements>
-                    </dependency-resolution>
-                </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
+		</plugins>
     </build>
 </project>

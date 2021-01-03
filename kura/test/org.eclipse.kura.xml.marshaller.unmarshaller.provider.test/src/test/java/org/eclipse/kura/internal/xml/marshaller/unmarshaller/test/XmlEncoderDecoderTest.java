@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -24,7 +24,6 @@ import java.util.Map;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.core.configuration.ConfigurationServiceImpl;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tad;
@@ -37,12 +36,13 @@ import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class XmlEncoderDecoderTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(XmlEncoderDecoderTest.class);
 
     private static final String stringWriter = "String Writer";
@@ -392,7 +392,9 @@ public class XmlEncoderDecoderTest {
     }
 
     @Test
-    public void testOCDMarshallUnmarshall() throws Exception {
+    @Ignore
+    public void testOCDMarshallUnmarshall() throws Exception { // This test needs to be done as integration test not
+                                                               // unit.
         XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
 
         String pid = "org.eclipse.kura.cloud.CloudService";

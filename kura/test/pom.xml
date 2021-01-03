@@ -100,11 +100,20 @@
                         -Djava.io.tmpdir=/tmp
                         -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage
                         -Dosgi.clean=true
-                        -Dorg.eclipse.kura.mode=emulator
-                        -Dkura.snapshots=${project.basedir}/target/
+                        -Dkura.home=${project.basedir}/target/kura
+                        -Dkura.plugins=${project.basedir}/target/kura/plugins
+                        -Dkura.packages=${project.basedir}/target/kura/data/packages
+                        -Dkura.data=${project.basedir}/target/kura/data
+                        -Dkura.tmp=${project.basedir}/target/kura/tmp
+                        -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
+                        -Dorg.eclipse.kura.mode=emulator
                         -Ddpa.configuration=/tmp/kura/dpa.properties</argLine>
                         <dependencies>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.equinox.ds</artifactId>
+                            </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.apache.felix.scr</artifactId>
@@ -193,8 +202,21 @@
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.kura.core</artifactId>
                             </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>com.h2database</artifactId>
+                            </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.equinox.wireadmin</artifactId>
+                            </dependency>
                         </dependencies>
                         <bundleStartLevel>
+                            <bundle>
+                                <id>org.eclipse.equinox.ds</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
                             <bundle>
                                 <id>org.apache.felix.scr</id>
                                 <level>4</level>
@@ -256,6 +278,11 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>org.eclipse.equinox.wireadmin</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>org.eclipse.osgi.services</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -306,6 +333,11 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>com.h2database</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>org.junit</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -327,16 +359,6 @@
                             </bundle>
                             <bundle>
                                 <id>org.eclipse.kura.core.crypto</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.emulator</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
-                                <id>org.eclipse.kura.emulator.net</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -371,17 +393,57 @@
                                 <level>3</level>
                             </bundleStartLevel>
                             <bundle>
-                                <id>org.eclipse.kura.emulator.gpio</id>
-                                <level>4</level>
-                                <autoStart>true</autoStart>
-                            </bundle>
-                            <bundle>
                                 <id>org.eclipse.kura.core.status</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>org.eclipse.kura.emulator</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.emulator.net</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.emulator.gpio</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>org.eclipse.kura.emulator.watchdog</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.emulator.usb</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.wire.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.wire.helper.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.wire.component.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.wire.script.filter.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.protocol.can</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
@@ -459,6 +521,61 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.emulator</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.emulator.net</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.emulator.watchdog</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.emulator.gpio</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.core.cloud</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.core.comm</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.wire.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.wire.helper.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.wire.component.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -474,42 +591,27 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.emulator</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.emulator.net</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.wire.helper.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.xml.marshaller.unmarshaller.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.json.marshaller.unmarshaller.provider</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.emulator.gpio</id>
-                                    <versionRange>0.0.0</versionRange>
-                                </requirement>
-                                <requirement>
-                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.status</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
-                                    <id>org.eclipse.kura.emulator.watchdog</id>
+                                    <id>org.eclipse.kura.core.deployment</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.core.net</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.deployment.agent</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.wire.script.filter.provider</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                             </extraRequirements>

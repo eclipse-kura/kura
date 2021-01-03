@@ -86,9 +86,10 @@
                         <parallel>both</parallel> -->
 
                     <useUnlimitedThreads>true</useUnlimitedThreads>
-                    <argLine>${tycho.argline}
+                    <argLine>${tycho.testArgLine}
                         -DbuildingWithTycho=true -Dosgi.locking=none
                         -Dds.showtrace=true -Djava.io.tmpdir=/tmp
+                        -Dlog4j.configurationFile=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml
                         ${kura.vm.args}
                         ${moquette.vm.args}
                     </argLine>

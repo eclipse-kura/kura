@@ -22,7 +22,7 @@
     enabled="true"
     immediate="true"
     configuration-policy="require">
-	<implementation class="org.eclipse.kura.stress.Stress"/>
+	<implementation class="org.eclipse.kura.stress.HeapStress"/>
 
    <!-- If the component is configurable through the Kura ConfigurationService, it must expose a Service. -->
    <property name="service.pid" type="String" value="org.eclipse.kura.stress.Stress"/>

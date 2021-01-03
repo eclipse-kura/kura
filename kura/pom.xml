@@ -133,10 +133,6 @@
 
         <!-- Jacoco version -->
         <jacoco.version>0.8.6</jacoco.version>
-        <jacoco.reportDir>target/jacoco/</jacoco.reportDir>
-        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
 
         <!-- BND baseline plugin -->
         <bnd.baseline.version>3.4.0</bnd.baseline.version>

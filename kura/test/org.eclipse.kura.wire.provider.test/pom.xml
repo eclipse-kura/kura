@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,6 @@
 	
 	Contributors:
 	 Eurotech
-     Amit Kumar Mondal
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -28,8 +27,8 @@
     <packaging>eclipse-test-plugin</packaging>
 
     <properties>
-		<kura.basedir>${project.basedir}/../..</kura.basedir>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <kura.basedir>${project.basedir}/../..</kura.basedir>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <build>

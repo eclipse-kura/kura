@@ -648,8 +648,8 @@
     </properties>
     <modules>
         <module>org.eclipse.kura.asset.provider.test</module>
+        <module>org.eclipse.kura.asset.helper.provider.test</module>
         <module>org.eclipse.kura.camel.test</module>
-        <module>org.eclipse.kura.cloud.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration.test</module>
@@ -678,7 +678,6 @@
         <module>org.eclipse.kura.internal.driver.ibeacon.test</module>
         <module>org.eclipse.kura.internal.driver.opcua.test</module>
         <module>org.eclipse.kura.internal.driver.s7plc.test</module>
-        <module>org.eclipse.kura.internal.wire.test</module>
         <module>org.eclipse.kura.linux.clock.test</module>
         <module>org.eclipse.kura.linux.gpio.test</module>
         <module>org.eclipse.kura.linux.net.test</module>
@@ -695,6 +694,7 @@
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
         <module>org.eclipse.kura.wire.script.filter.provider.test</module>
+        <module>org.eclipse.kura.wire.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
         <!--

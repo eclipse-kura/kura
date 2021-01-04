@@ -36,6 +36,7 @@
         <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
         <org.jooq.jool.version>0.9.10</org.jooq.jool.version>
         <com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.internal.driver.opcua.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <build>

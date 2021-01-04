@@ -29,6 +29,7 @@
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
 		<osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.internal.driver.ble.xdk.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	
 	<build>

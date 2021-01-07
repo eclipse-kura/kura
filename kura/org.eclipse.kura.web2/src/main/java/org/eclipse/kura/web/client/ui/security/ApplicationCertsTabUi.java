@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,7 +29,6 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
-import org.gwtbootstrap3.client.ui.form.validator.ValidationChangedEvent.ValidationChangedHandler;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -100,7 +99,7 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     public void setDirty(boolean flag) {
         this.dirty = flag;
         this.reset.setEnabled(flag);
-        this.apply.setEnabled(isValid());
+        this.apply.setEnabled(flag);
     }
 
     @Override
@@ -138,11 +137,6 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
             }
         };
 
-        final ValidationChangedHandler validationChangeHandler = e -> this.apply.setEnabled(isValid());
-
-        this.formCert.addValidationChangedHandler(validationChangeHandler);
-        this.formStorageAlias.addValidationChangedHandler(validationChangeHandler);
-
         this.formCert.addValidator(validator);
         this.formStorageAlias.addValidator(validator);
 
@@ -156,17 +150,8 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         });
 
         this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
-        this.formStorageAlias.addChangeHandler(event -> {
-            this.formStorageAlias.validate();
-            setDirty(true);
-        });
-
         this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
         this.formCert.setVisibleLines(20);
-        this.formCert.addChangeHandler(event -> {
-            this.formCert.validate();
-            setDirty(true);
-        });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
@@ -176,8 +161,9 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
+            final boolean isValid = isValid();
+            this.listener.onApply(isValid);
             if (isValid()) {
-                this.listener.onApply();
                 RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
                         c.callback(token -> this.gwtCertificatesService.storeApplicationPublicChain(token,
                                 this.formCert.getValue(), this.formStorageAlias.getValue(), c.callback(ok -> {
@@ -188,14 +174,11 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
 
             }
         });
-
-        this.formCert.validate();
-        this.formStorageAlias.validate();
     }
 
     private void reset() {
-        this.formStorageAlias.setText("");
-        this.formCert.setText("");
+        this.formStorageAlias.reset();
+        this.formCert.reset();
     }
 
     @Override

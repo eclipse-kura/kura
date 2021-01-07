@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,7 +28,6 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
-import org.gwtbootstrap3.client.ui.form.validator.ValidationChangedEvent.ValidationChangedHandler;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
@@ -86,7 +85,7 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
     public void setDirty(boolean flag) {
         this.dirty = flag;
         this.reset.setEnabled(flag);
-        this.apply.setEnabled(isValid());
+        this.apply.setEnabled(flag);
     }
 
     @Override
@@ -135,10 +134,6 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
             }
         };
 
-        final ValidationChangedHandler validationChangeHandler = e -> this.apply.setEnabled(isValid());
-
-        this.certificateInput.addValidationChangedHandler(validationChangeHandler);
-
         this.certificateInput.addValidator(validator);
 
         this.certificateInput.addKeyUpHandler(e -> {
@@ -148,10 +143,6 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
 
         this.certificateLabel.setText(MSGS.loginAddCertLabel());
         this.certificateInput.setVisibleLines(20);
-        this.certificateInput.addChangeHandler(event -> {
-            this.certificateInput.validate();
-            setDirty(true);
-        });
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
@@ -161,8 +152,9 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> {
-            if (isValid()) {
-                this.listener.onApply();
+            final boolean isValid = isValid();
+            this.listener.onApply(isValid);
+            if (isValid) {
                 RequestQueue.submit(
                         c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> this.gwtCertificatesService
                                 .storeLoginPublicChain(token, this.certificateInput.getValue(), c.callback(ok -> {
@@ -172,12 +164,10 @@ public class HttpsUserCertsTabUi extends Composite implements Tab {
                                 })))));
             }
         });
-
-        this.certificateInput.validate();
     }
 
     private void reset() {
-        this.certificateInput.setText("");
+        this.certificateInput.reset();
     }
 
     @Override

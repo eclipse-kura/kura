@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,7 @@ package org.eclipse.kura.web.client.ui.security;
 
 public interface CertificateModalListener {
 
-    public void onApply();
+    public void onApply(final boolean isConfigurationValid);
 
     public void onKeystoreChanged();
 }

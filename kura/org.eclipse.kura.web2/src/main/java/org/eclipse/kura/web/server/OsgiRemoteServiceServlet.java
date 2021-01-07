@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -227,7 +227,7 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
     protected void doUnexpectedFailure(Throwable e) {
         if (e instanceof KuraPermissionException) {
             try {
-                getThreadLocalResponse().sendError(401);
+                getThreadLocalResponse().sendError(403);
                 return;
             } catch (IOException e1) {
                 // ignore

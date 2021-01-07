@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,8 +39,9 @@ public class FailureHandler {
     public static void handle(Throwable caught, String name) {
         if (caught instanceof StatusCodeException) {
             final StatusCodeException statusCodeException = (StatusCodeException) caught;
-            if (statusCodeException.getStatusCode() == 401) {
-                showErrorMessage("The session has expired", null);
+            if (statusCodeException.getStatusCode() == 401 || statusCodeException.getStatusCode() == 403) {
+                showErrorMessage(statusCodeException.getStatusCode() == 401 ? MSGS.sessionExpiredError()
+                        : MSGS.unauthorizedError(), null);
                 Timer timer = new Timer() {
 
                     @Override

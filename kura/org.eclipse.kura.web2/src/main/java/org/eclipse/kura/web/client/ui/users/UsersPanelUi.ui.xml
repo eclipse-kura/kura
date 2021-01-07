@@ -35,6 +35,10 @@
     .small-text {
     	font-size: 0.90em;
     }
+    
+    .spaces-visible {
+    	white-space: pre
+    }
     </ui:style>
 
     <b:Container fluid="true" b:id="users-panel">
@@ -67,7 +71,7 @@
 					<b:PanelBody>
 	                	<gwt:CellTable bordered="true" condensed="true"
 	                    striped="true" hover="true" height="100%" width="100%"
-	                    ui:field="userTable" />
+	                    ui:field="userTable" addStyleNames="{style.spaces-visible}"/>
 	                </b:PanelBody>
                 </b:Column>
                 <b:Column size="MD_8">

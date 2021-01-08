@@ -25,6 +25,7 @@
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.rest.asset.provider.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
 	<artifactId>org.eclipse.kura.rest.asset.provider</artifactId>

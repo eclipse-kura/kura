@@ -11,7 +11,7 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.stress;
+package org.eclipse.kura.stress.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.stress.HeapStress;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -47,7 +48,7 @@ public class StressTest {
         // initialize stress parameters
         Map<String, Object> properties = setupStressConfig();
 
-        Stress stress = new Stress();
+        HeapStress stress = new HeapStress();
         stress.activate(componentContext, properties);
 
         // check Stress initialized correctly
@@ -82,7 +83,7 @@ public class StressTest {
         // initialize stress parameters
         Map<String, Object> properties = setupStressConfig();
 
-        Stress stress = new Stress();
+        HeapStress stress = new HeapStress();
         stress.activate(componentContext, properties);
 
         // let the stress run for a while
@@ -101,7 +102,7 @@ public class StressTest {
         // initialize stress parameters
         Map<String, Object> properties = setupStressConfig();
 
-        Stress stress = new Stress();
+        HeapStress stress = new HeapStress();
         stress.activate(componentContext, properties);
 
         // let the stress run for a while then update config

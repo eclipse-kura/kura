@@ -25,9 +25,9 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Stress implements ConfigurableComponent {
+public class HeapStress implements ConfigurableComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(Stress.class);
+    private static final Logger logger = LoggerFactory.getLogger(HeapStress.class);
 
     private static final String HEAP_ENABLE_PROP_NAME = "heap.enable";
     private static final String HEAP_THREADS_PROP_NAME = "heap.threads";
@@ -49,7 +49,7 @@ public class Stress implements ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    public Stress() {
+    public HeapStress() {
         super();
         this.worker = Executors.newScheduledThreadPool(5);
         this.handle = new ArrayList<ScheduledFuture<?>>();
@@ -61,7 +61,7 @@ public class Stress implements ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("Activating Stress...");
 
         this.properties = properties;
@@ -74,7 +74,7 @@ public class Stress implements ConfigurableComponent {
         logger.info("Activating Stress... Done.");
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    public void deactivate(ComponentContext componentContext) {
         logger.debug("Deactivating Stress...");
 
         // shutting down the worker and cleaning up the properties

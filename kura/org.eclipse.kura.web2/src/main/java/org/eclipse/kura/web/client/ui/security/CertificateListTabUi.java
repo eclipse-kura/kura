@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtCertificate;
@@ -71,6 +73,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     Button nextStepButton;
     @UiField
     Button closeModalButton;
+    @UiField
+    AlertDialog alertDialog;
 
     @UiField
     CellTable<GwtCertificate> certificatesGrid;
@@ -283,8 +287,12 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     }
 
     @Override
-    public void onApply() {
-        this.certAddModal.hide();
+    public void onApply(final boolean isValid) {
+        if (isValid) {
+            this.certAddModal.hide();
+        } else {
+            alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR, (ConfirmListener) null);
+        }
     }
 
     @Override

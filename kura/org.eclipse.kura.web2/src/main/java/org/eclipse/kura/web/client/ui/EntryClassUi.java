@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -983,6 +983,17 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         userNameLarge.setText(userData.getUserName());
         userNameSmall.setText(userData.getUserName());
 
+        final EventService.Handler userAdminEventHandler = e -> {
+            userConfigReloadTimer.schedule(1000);
+        };
+
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CREATED, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CREATED_SHORT, userAdminEventHandler);
+        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
+
         if (userData.getPermissions().isEmpty()) {
             alertDialog.show("The current user has no permissions", Severity.ALERT, (ConfirmListener) null);
             return;
@@ -1002,16 +1013,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             }
         });
 
-        final EventService.Handler userAdminEventHandler = e -> {
-            userConfigReloadTimer.schedule(1000);
-        };
-
-        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
-        EventService.subscribe(ForwardedEventTopic.ROLE_CREATED, userAdminEventHandler);
-        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
-        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
-        EventService.subscribe(ForwardedEventTopic.ROLE_CREATED_SHORT, userAdminEventHandler);
-        EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
     }
 
     private void showStatusPanel() {

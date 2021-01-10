@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,7 @@ import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
@@ -160,11 +161,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             } else if (kuraFrameworkConfig != null) {
                 File kuraPropsFile = new File(kuraFrameworkConfig + File.separator + KURA_PROPS_FILE);
                 if (kuraPropsFile.exists()) {
-                    final FileReader fr = new FileReader(kuraPropsFile);
-                    try {
+                    try (final FileReader fr = new FileReader(kuraPropsFile)) {
                         kuraDefaults.load(fr);
-                    } finally {
-                        fr.close();
                     }
                     logger.info("Loaded File kura.properties: {}", kuraPropsFile);
                 } else {
@@ -1204,5 +1202,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         }
 
         return hostname;
+    }
+
+    @Override
+    public String getNetVirtualDevicesConfig() {
+        String status = NetInterfaceStatus.netIPv4StatusDisabled.name();
+        String virtualDefaultConfig = this.kuraProperties.getProperty(KEY_KURA_NET_VIRTUAL_DEVICES_CONFIG);
+        if (virtualDefaultConfig != null && virtualDefaultConfig.equalsIgnoreCase("unmanaged")) {
+            status = NetInterfaceStatus.netIPv4StatusUnmanaged.name();
+        }
+        return status;
     }
 }

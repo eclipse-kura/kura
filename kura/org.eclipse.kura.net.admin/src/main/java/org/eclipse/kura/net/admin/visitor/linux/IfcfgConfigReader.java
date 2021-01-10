@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -59,6 +60,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
     private static IfcfgConfigReader instance;
 
     private static NetInterfaceConfigSerializationService netConfigManager; // can be null
+    private static SystemService systemService;
 
     public static IfcfgConfigReader getInstance() {
         if (instance == null) {
@@ -67,6 +69,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             ServiceReference<NetInterfaceConfigSerializationService> netConfigManagerSR = context
                     .getServiceReference(NetInterfaceConfigSerializationService.class);
             netConfigManager = context.getService(netConfigManagerSR);
+            ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
+            systemService = context.getService(systemServiceSR);
         }
         return instance;
     }
@@ -94,6 +98,8 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             }
 
             Properties kuraProps = netConfigManager.read(interfaceName);
+            kuraExtendedProps.put("net.interface." + interfaceName + ".config.virtual",
+                    String.valueOf(netInterfaceConfig.isVirtual()));
 
             IfaceConfig ifaceConfig = getIfaceConfig(interfaceName, kuraProps, kuraExtendedProps);
 
@@ -241,10 +247,23 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
             netInterfaceStatus = NetInterfaceStatus.valueOf(kuraExtendedProps.getProperty(sb.toString()));
         } else {
-            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+            if (isVirtual(ifaceName, kuraExtendedProps)) {
+                netInterfaceStatus = NetInterfaceStatus.valueOf(systemService.getNetVirtualDevicesConfig());
+            } else {
+                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+            }
         }
         logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, ifaceName);
         return netInterfaceStatus;
+    }
+
+    private boolean isVirtual(String ifaceName, Properties kuraExtendedProps) {
+        Boolean virtual = false;
+        StringBuilder sb = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.virtual");
+        if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+            virtual = Boolean.valueOf(kuraExtendedProps.getProperty(sb.toString()));
+        }
+        return virtual;
     }
 
     private NetInterfaceStatus getNetInterfaceStatus(NetInterfaceStatus netInterfaceStatus, boolean autoConnect,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,10 @@ public interface SystemService {
     public static final String KEY_KURA_NAME = "kura.name";
     public static final String KEY_KURA_VERSION = "kura.version";
 
+    /**
+     * @since 2.2
+     */
+    public static final String KEY_KURA_NET_VIRTUAL_DEVICES_CONFIG = "kura.net.virtual.devices.config";
     /**
      * @since 2.0
      */
@@ -489,5 +493,13 @@ public interface SystemService {
      * @since 2.0
      */
     public String getHostname();
+
+    /**
+     * Returns the default configuration for virtual network interfaces
+     * 
+     * @return a String that represent the default configuration for virtual interfaces
+     * @since 2.2
+     */
+    public String getNetVirtualDevicesConfig();
 
 }

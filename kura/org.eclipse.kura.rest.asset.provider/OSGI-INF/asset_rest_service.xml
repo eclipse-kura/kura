@@ -13,10 +13,11 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.eclipse.kura.internal.rest.asset.AssetRestService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" name="org.eclipse.kura.internal.rest.asset.AssetRestService">
    <implementation class="org.eclipse.kura.internal.rest.asset.AssetRestService"/>
    <reference bind="setAssetService" cardinality="1..1" interface="org.eclipse.kura.asset.AssetService" name="AssetService" policy="static"/>
    <service>
       <provide interface="org.eclipse.kura.internal.rest.asset.AssetRestService"/>
    </service>
+   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
 </scr:component>

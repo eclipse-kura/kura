@@ -12,7 +12,7 @@ ARG PACKED=false
 
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \
-  GIT_BRANCH=${GIT_BRANCH:-develop} \
+  GIT_BRANCH=${GIT_BRANCH:-fix_docker-files-location} \
   JAVA_HOME=/usr/lib/jvm/jre-1.8.0 \
   MAVEN_PROPS=-DskipTests \
   KURA_DIR=/opt/eclipse/kura \

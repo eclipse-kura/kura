@@ -22,14 +22,14 @@ if [ -n "${PERSISTENT_DIR}" ]; then
 		cp -r "${KURA_DIR}/user/snapshots" "${PERSISTENT_DIR}/user"
 	fi
 	
-	if [ ! -f "${PERSISTENT_DIR}/data/dpa.properties" ]; then
+	if [ ! -f "${PERSISTENT_DIR}/packages/dpa.properties" ]; then
 		
 		echo "Re-registering packages:"
 		
 		# re-register packages with new properties file
 		
-		for i in $(ls "${KURA_DIR}/kura/data/packages/"*.dp); do
-			DPA_PROPERTIES="${PERSISTENT_DIR}/data/dpa.properties" dp-register "$i"
+		for i in $(ls "${KURA_DIR}/kura/packages/"*.dp); do
+			DPA_PROPERTIES="${PERSISTENT_DIR}/packages/dpa.properties" dp-register "$i"
 		done 
 	fi
 fi

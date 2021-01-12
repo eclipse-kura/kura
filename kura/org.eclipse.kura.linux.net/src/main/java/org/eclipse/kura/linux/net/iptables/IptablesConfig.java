@@ -21,6 +21,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -182,13 +183,19 @@ public class IptablesConfig extends IptablesConfigConstants {
             saveNatTable(writer);
             writer.println(COMMIT);
         } catch (IOException e) {
-            throw new KuraIOException(e, "save() :: failed to save rules on file");
+            throw new KuraIOException(e, "save() :: failed to create rules file");
         }
 
         File file = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
-        if (!file.exists() || !file.renameTo(new File(FIREWALL_CONFIG_FILE_NAME))) {
-            throw new KuraIOException("save() :: failed to save rules on file");
+        if (file.exists()) {
+            try {
+                Files.move(file.toPath(), new File(FIREWALL_CONFIG_FILE_NAME).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                throw new KuraIOException("save() :: failed to save rules on file");
+            }
         }
+
     }
 
     private void internalSave(String path) {

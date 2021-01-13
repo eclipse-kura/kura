@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.IndexedPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class SecurityPanelUi extends Composite {
@@ -152,9 +153,10 @@ public class SecurityPanelUi extends Composite {
     public boolean isDirty() {
         boolean certListDirty = this.certificateListPanel.isDirty();
         boolean securityDirty = this.securityPanel.isDirty();
-        boolean httpServiceDirty = getHttpServiceConfigUi().map(ServicesUi::isDirty).orElse(false);
+        boolean webConsoleDirty = isServicesUiDirty(this.consolePanel);
+        boolean httpServiceDirty = isServicesUiDirty(this.httpServicePanel);
 
-        return certListDirty || httpServiceDirty || securityDirty;
+        return certListDirty || httpServiceDirty || securityDirty || webConsoleDirty;
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -177,7 +179,8 @@ public class SecurityPanelUi extends Composite {
     public void setDirty(boolean b) {
         this.certificateListPanel.setDirty(b);
         this.securityPanel.setDirty(b);
-        getHttpServiceConfigUi().ifPresent(u -> u.setDirty(b));
+        getServicesUi(this.httpServicePanel).ifPresent(u -> u.setDirty(b));
+        getServicesUi(this.consolePanel).ifPresent(u -> u.setDirty(b));
     }
 
     private ClickHandler addDirtyCheck(final ClickHandler handler) {
@@ -271,11 +274,20 @@ public class SecurityPanelUi extends Composite {
         };
     }
 
-    public Optional<ServicesUi> getHttpServiceConfigUi() {
-        if (this.httpServicePanel.getWidgetCount() == 0) {
-            return Optional.empty();
+    public Optional<ServicesUi> getServicesUi(final IndexedPanel parent) {
+
+        for (int i = 0; i < parent.getWidgetCount(); i++) {
+            final Widget child = parent.getWidget(i);
+
+            if (child instanceof ServicesUi) {
+                return Optional.of((ServicesUi) child);
+            }
         }
 
-        return Optional.ofNullable(((ServicesUi) this.httpServicePanel.getWidget(0)));
+        return Optional.empty();
+    }
+
+    public boolean isServicesUiDirty(final IndexedPanel parent) {
+        return getServicesUi(parent).map(ServicesUi::isDirty).orElse(false);
     }
 }

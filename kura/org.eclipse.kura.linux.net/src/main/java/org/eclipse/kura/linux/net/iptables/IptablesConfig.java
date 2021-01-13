@@ -626,6 +626,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     public void applyRules() {
         applyPolicies();
         createKuraChains();
+        writeLoopbackRules();
         writeLocalRulesToFilterTable(null);
         writePortForwardRulesToFilterTable(null);
         writeAutoNatRulesToFilterTable(null);
@@ -694,6 +695,10 @@ public class IptablesConfig extends IptablesConfigConstants {
                 && execute(rule.split(" ")).getExitStatus().getExitCode() != 0) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
+    }
+
+    private void writeLoopbackRules() {
+        execute((IPTABLES_COMMAND + " " + ALLOW_ALL_TRAFFIC_TO_LOOPBACK + " -t " + FILTER).split(" "));
     }
 
     private void createKuraChainsReturnRules() {

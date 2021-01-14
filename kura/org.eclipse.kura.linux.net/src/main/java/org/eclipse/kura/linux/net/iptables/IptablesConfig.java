@@ -223,7 +223,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         command.setErrorStream(err);
         command.setOutputStream(out);
         CommandStatus status = this.executorService.execute(command);
-        if (!status.getExitStatus().isSuccessful()) {
+        if (logger.isWarnEnabled() && !status.getExitStatus().isSuccessful()) {
             logger.warn("execute command {} failed", command);
         }
         if (logger.isDebugEnabled()) {

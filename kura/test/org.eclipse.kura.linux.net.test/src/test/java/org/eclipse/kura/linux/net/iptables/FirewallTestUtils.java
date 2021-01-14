@@ -109,6 +109,7 @@ public class FirewallTestUtils {
         commandApplyList.add(new Command("iptables -A output-kura -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A prerouting-kura -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A postrouting-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A input-kura -i lo -j ACCEPT -t filter".split(" ")));
         commandApplyList.stream().forEach(c -> c.setExecuteInAShell(true));
         commandApplyList.stream().forEach(c -> when(executorServiceMock.execute(c)).thenReturn(successStatus));
     }

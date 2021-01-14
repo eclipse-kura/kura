@@ -223,9 +223,6 @@ public class IptablesConfig extends IptablesConfigConstants {
         command.setErrorStream(err);
         command.setOutputStream(out);
         CommandStatus status = this.executorService.execute(command);
-        if (logger.isWarnEnabled() && !status.getExitStatus().isSuccessful()) {
-            logger.warn("execute command {} failed", command);
-        }
         if (logger.isDebugEnabled()) {
             logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
             logger.debug("execute stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
@@ -630,7 +627,9 @@ public class IptablesConfig extends IptablesConfigConstants {
     public void applyRules() {
         applyPolicies();
         createKuraChains();
-        writeLoopbackRules();
+        applyLoopbackRules();
+        applyIncomingToOutcomingRules();
+        applyIcmpRules();
         writeLocalRulesToFilterTable(null);
         writePortForwardRulesToFilterTable(null);
         writeAutoNatRulesToFilterTable(null);
@@ -701,8 +700,24 @@ public class IptablesConfig extends IptablesConfigConstants {
         }
     }
 
-    private void writeLoopbackRules() {
+    private void applyLoopbackRules() {
         execute((IPTABLES_COMMAND + " " + ALLOW_ALL_TRAFFIC_TO_LOOPBACK + " -t " + FILTER).split(" "));
+    }
+
+    private void applyIncomingToOutcomingRules() {
+        execute((IPTABLES_COMMAND + " " + ALLOW_ONLY_INCOMING_TO_OUTGOING + " -t " + FILTER).split(" "));
+    }
+
+    private void applyIcmpRules() {
+        if (this.allowIcmp) {
+            for (String allowIcmpRule : ALLOW_ICMP) {
+                execute((IPTABLES_COMMAND + " " + allowIcmpRule + " -t " + FILTER).split(" "));
+            }
+        } else {
+            for (String doNotAllowIcmpRule : DO_NOT_ALLOW_ICMP) {
+                execute((IPTABLES_COMMAND + " " + doNotAllowIcmpRule + " -t " + FILTER).split(" "));
+            }
+        }
     }
 
     private void createKuraChainsReturnRules() {

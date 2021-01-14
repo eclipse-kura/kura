@@ -223,6 +223,9 @@ public class IptablesConfig extends IptablesConfigConstants {
         command.setErrorStream(err);
         command.setOutputStream(out);
         CommandStatus status = this.executorService.execute(command);
+        if (!status.getExitStatus().isSuccessful()) {
+            logger.warn("execute command {} failed", command);
+        }
         if (logger.isDebugEnabled()) {
             logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
             logger.debug("execute stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
@@ -365,7 +368,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         if (this.natRules != null && !this.natRules.isEmpty()) {
             for (NATRule natRule : this.natRules) {
                 if (writer == null) {
-                    execute((IPTABLES_COMMAND + " -t " + NAT + natRule.getNatPostroutingChainRule()).split(" "));
+                    execute((IPTABLES_COMMAND + " -t " + NAT + " " + natRule.getNatPostroutingChainRule()).split(" "));
                 } else {
                     writer.println(natRule.getNatPostroutingChainRule());
                 }
@@ -386,7 +389,7 @@ public class IptablesConfig extends IptablesConfigConstants {
                         .count() > 0;
                 if (!found) {
                     if (writer == null) {
-                        execute((IPTABLES_COMMAND + " -t " + NAT + autoNatRule.getNatPostroutingChainRule())
+                        execute((IPTABLES_COMMAND + " -t " + NAT + " " + autoNatRule.getNatPostroutingChainRule())
                                 .split(" "));
                     } else {
                         writer.println(autoNatRule.getNatPostroutingChainRule());
@@ -401,8 +404,9 @@ public class IptablesConfig extends IptablesConfigConstants {
         if (this.portForwardRules != null && !this.portForwardRules.isEmpty()) {
             for (PortForwardRule portForwardRule : this.portForwardRules) {
                 if (writer == null) {
-                    execute((IPTABLES_COMMAND + " -t " + NAT + portForwardRule.getNatPreroutingChainRule()).split(" "));
-                    execute((IPTABLES_COMMAND + " -t " + NAT + portForwardRule.getNatPostroutingChainRule())
+                    execute((IPTABLES_COMMAND + " -t " + NAT + " " + portForwardRule.getNatPreroutingChainRule())
+                            .split(" "));
+                    execute((IPTABLES_COMMAND + " -t " + NAT + " " + portForwardRule.getNatPostroutingChainRule())
                             .split(" "));
                 } else {
                     writer.println(portForwardRule.getNatPreroutingChainRule());

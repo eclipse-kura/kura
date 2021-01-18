@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     
-    Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.ScriptFilter" 
          name="Javascript Filter" 
-         description="A wire component that provides scrpiting functionalities in JavaScript.">
+         description="A wire component that provides scripting functionalities in JavaScript.">
 
         <AD id="script"
             name="script"

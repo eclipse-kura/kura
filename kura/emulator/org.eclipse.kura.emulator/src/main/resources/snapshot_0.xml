@@ -208,34 +208,6 @@
           </esf:property>
         </esf:properties>
     </esf:configuration>
-        <esf:configuration pid="org.eclipse.kura.http.server.manager.HttpService">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="https.port" type="Integer">
-                <esf:value>4442</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="https.enabled" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="http.enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="http.port" type="Integer">
-                <esf:value>80</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="https.keystore.path" type="String">
-                <esf:value>/tmp/kura/user/security/httpskeystore.ks</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="true" name="https.keystore.password" type="Password">
-                <esf:value>Y2hhbmdlaXQ=</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="users.config" type="String">

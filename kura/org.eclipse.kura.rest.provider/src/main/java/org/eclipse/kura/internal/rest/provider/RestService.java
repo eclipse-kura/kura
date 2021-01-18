@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,17 +19,23 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringTokenizer;
 
+import javax.annotation.Priority;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Context;
@@ -38,7 +44,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.useradmin.Group;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.User;
@@ -50,7 +60,10 @@ import com.eclipsesource.jaxrs.provider.security.AuthenticationHandler;
 import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
 
 @Provider
-public class RestService implements AuthenticationHandler, AuthorizationHandler, ContainerResponseFilter {
+public class RestService
+        implements AuthenticationHandler, AuthorizationHandler, ConfigurableComponent, ContainerResponseFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
     private static final String KURA_PASSWORD_CREDENTIAL = "kura.password";
 
@@ -63,11 +76,17 @@ public class RestService implements AuthenticationHandler, AuthorizationHandler,
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
+
     private static final Response UNAUTHORIZED_RESPONSE = Response.status(Response.Status.UNAUTHORIZED)
             .header("WWW-Authenticate", "Basic realm=\"kura-rest-api\"").build();
+    private static final Response NOT_FOUND_RESPONSE = Response.status(Response.Status.NOT_FOUND).build();
 
     private CryptoService cryptoService;
     private UserAdmin userAdmin;
+
+    RestServiceOptions options;
+
+    private final List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
 
     @Context
     private HttpServletRequest sr;
@@ -78,6 +97,37 @@ public class RestService implements AuthenticationHandler, AuthorizationHandler,
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
+    }
+
+    public void activate(final Map<String, Object> properties) {
+        logger.info("activating...");
+
+        final BundleContext bundleContext = FrameworkUtil.getBundle(RestService.class).getBundleContext();
+
+        registeredServices
+                .add(bundleContext.registerService(ContainerRequestFilter.class, new IncomingPortCheckFilter(), null));
+
+        options = new RestServiceOptions(properties);
+
+        logger.info("activating...done");
+    }
+
+    public void update(final Map<String, Object> properties) {
+        logger.info("updating...");
+
+        options = new RestServiceOptions(properties);
+
+        logger.info("updating...done");
+    }
+
+    public void deactivate() {
+        logger.info("deactivating...");
+
+        for (final ServiceRegistration<?> reg : registeredServices) {
+            reg.unregister();
+        }
+
+        logger.info("deactivating...done");
     }
 
     @Override
@@ -211,6 +261,28 @@ public class RestService implements AuthenticationHandler, AuthorizationHandler,
         }
     }
 
+    private static boolean containsBasicMember(final Role group, final User user) {
+        if (!(group instanceof Group)) {
+            return false;
+        }
+
+        final Group asGroup = (Group) group;
+
+        final Role[] members = asGroup.getMembers();
+
+        if (members == null) {
+            return false;
+        }
+
+        for (final Role member : members) {
+            if (member.getName().equals(user.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
@@ -247,25 +319,28 @@ public class RestService implements AuthenticationHandler, AuthorizationHandler,
 
     }
 
-    private static boolean containsBasicMember(final Role group, final User user) {
-        if (!(group instanceof Group)) {
-            return false;
-        }
+    @Provider
+    @Priority(Priorities.AUTHENTICATION - 100)
+    private class IncomingPortCheckFilter implements ContainerRequestFilter {
 
-        final Group asGroup = (Group) group;
+        @Context
+        private HttpServletRequest sr;
 
-        final Role[] members = asGroup.getMembers();
+        @Override
+        public void filter(final ContainerRequestContext request) throws IOException {
+            final Set<Integer> allowedPorts = options.getAllowedPorts();
 
-        if (members == null) {
-            return false;
-        }
+            if (allowedPorts.isEmpty()) {
+                return;
+            }
 
-        for (final Role member : members) {
-            if (member.getName().equals(user.getName())) {
-                return true;
+            final int port = sr.getLocalPort();
+
+            if (!allowedPorts.contains(port)) {
+                request.abortWith(NOT_FOUND_RESPONSE);
             }
         }
 
-        return false;
     }
+
 }

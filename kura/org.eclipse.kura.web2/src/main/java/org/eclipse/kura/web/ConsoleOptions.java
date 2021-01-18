@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 
 public class ConsoleOptions {
@@ -94,6 +96,15 @@ public class ConsoleOptions {
                             .build(), //
             Boolean.class);
 
+    private final SelfConfiguringComponentProperty<Integer[]> allowedPorts = new SelfConfiguringComponentProperty<>(
+            new AdBuilder("allowed.ports", "Allowed ports", Tscalar.INTEGER) //
+                    .setRequired(false) //
+                    .setCardinality(3) //
+                    .setDescription(
+                            "If set to a non empty list, Web Console access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration.") //
+                    .build(), //
+            Integer[].class);
+
     private final List<SelfConfiguringComponentProperty<?>> configurationProperties = new ArrayList<>();
     private final Map<String, SelfConfiguringComponentProperty<Boolean>> authenticationMethodProperties = new HashMap<>();
     private final ComponentConfiguration config;
@@ -143,6 +154,26 @@ public class ConsoleOptions {
                 .collect(Collectors.toSet());
     }
 
+    public Set<Integer> getAllowedPorts() {
+        return GwtServerUtil.getArrayProperty(this.allowedPorts.get(), Integer.class);
+    }
+
+    public boolean isPortAllowed(final int port) {
+        final Optional<Integer[]> ports = this.allowedPorts.getOptional();
+
+        if (!ports.isPresent() || ports.get().length == 0) {
+            return true;
+        }
+
+        for (final Integer allowed : ports.get()) {
+            if (allowed != null && allowed == port) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public ComponentConfiguration getConfiguration() {
         return this.config;
     }
@@ -177,6 +208,7 @@ public class ConsoleOptions {
         configurationProperties.add(passwordRequireDigits);
         configurationProperties.add(passwordRequireSpecialCharacters);
         configurationProperties.add(passwordRequireBothCases);
+        configurationProperties.add(allowedPorts);
 
         addAuthenticationMethodProperties();
     }

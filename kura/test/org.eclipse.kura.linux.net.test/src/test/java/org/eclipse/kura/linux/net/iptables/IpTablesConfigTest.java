@@ -190,7 +190,6 @@ public class IpTablesConfigTest extends FirewallTestUtils {
         IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
         iptablesConfig.applyRules();
 
-        // commandApplyList.stream().forEach(c -> verify(executorServiceMock, times(1)).execute(c));
         for (Command c : commandApplyList) {
             verify(executorServiceMock, times(1)).execute(c);
         }

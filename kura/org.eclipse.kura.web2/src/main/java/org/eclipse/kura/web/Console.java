@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -176,7 +176,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     protected void activate(ComponentContext context, Map<String, Object> properties) {
 
-        configUpdateExecutor.execute(() -> {
+        this.configUpdateExecutor.execute(() -> {
             waitUserAdminReady();
 
             setInstance(this);
@@ -234,7 +234,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     protected void updated(Map<String, Object> properties) {
-        configUpdateExecutor.execute(() -> {
+        this.configUpdateExecutor.execute(() -> {
             boolean webEnabled = Boolean.parseBoolean(this.systemService.getKuraWebEnabled());
             if (!webEnabled) {
                 return;
@@ -274,15 +274,15 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     protected void deactivate(BundleContext context) {
-        configUpdateExecutor.submit(() -> {
+        this.configUpdateExecutor.submit(() -> {
             logger.info("deactivate...");
 
             unregisterServlet();
         });
 
-        configUpdateExecutor.shutdown();
+        this.configUpdateExecutor.shutdown();
         try {
-            configUpdateExecutor.awaitTermination(1, TimeUnit.MINUTES);
+            this.configUpdateExecutor.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             logger.warn("Interrupted while waiting executor termination");
             Thread.currentThread().interrupt();
@@ -432,14 +432,14 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
         this.httpService.registerServlet(PASSWORD_AUTH_PATH,
                 new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), null, this.sessionContext);
-        this.httpService.registerServlet(CERT_AUTH_PATH, new SslAuthenticationServlet(CONSOLE_PATH, userManager), null,
-                sessionContext);
+        this.httpService.registerServlet(CERT_AUTH_PATH, new SslAuthenticationServlet(CONSOLE_PATH, this.userManager),
+                null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(userManager), null,
-                this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(this.userManager),
+                null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(), null,
@@ -458,7 +458,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/security", new GwtSecurityServiceImpl(), null,
                 this.sessionContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(userManager), null,
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/users", new GwtUserServiceImpl(this.userManager), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/file", new FileServlet(), null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/device_snapshots", new DeviceSnapshotsServlet(), null,
@@ -507,8 +507,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         result.add("Password");
         result.add("Certificate");
 
-        Stream.concat(loginExtensions.stream(), consoleExtensions.stream()).forEach(b -> {
-            for (final ClientExtensionBundle bundle : loginExtensions) {
+        Stream.concat(this.loginExtensions.stream(), this.consoleExtensions.stream()).forEach(b -> {
+            for (final ClientExtensionBundle bundle : this.loginExtensions) {
                 final Set<String> providedMethods = bundle.getProvidedAuthenticationMethods();
 
                 if (providedMethods == null) {
@@ -575,12 +575,12 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     public UserManager getUserManager() {
-        return userManager;
+        return this.userManager;
     }
 
     @Override
     public void registerConsoleExtensionBundle(ClientExtensionBundle extension) {
-        configUpdateExecutor.execute(() -> {
+        this.configUpdateExecutor.execute(() -> {
             this.consoleExtensions.add(extension);
             refreshOptions();
         });
@@ -589,7 +589,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     @Override
     public void unregisterConsoleExtensionBundle(ClientExtensionBundle extension) {
-        configUpdateExecutor.execute(() -> {
+        this.configUpdateExecutor.execute(() -> {
             this.consoleExtensions.remove(extension);
             refreshOptions();
         });
@@ -597,7 +597,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     @Override
     public void registerLoginExtensionBundle(ClientExtensionBundle extension) {
-        configUpdateExecutor.execute(() -> {
+        this.configUpdateExecutor.execute(() -> {
             this.loginExtensions.add(extension);
             refreshOptions();
         });
@@ -605,7 +605,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
     @Override
     public void unregisterLoginExtensionBundle(ClientExtensionBundle extension) {
-        configUpdateExecutor.execute(() -> {
+        this.configUpdateExecutor.execute(() -> {
             this.loginExtensions.remove(extension);
             refreshOptions();
         });
@@ -638,14 +638,14 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     public String setAuthenticated(final HttpSession session, final String user) {
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
 
-        session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), userManager.getCredentialsHash(user));
+        session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), this.userManager.getCredentialsHash(user));
 
         return CONSOLE_PATH;
     }
 
     @Override
-    public void checkXSRFToken(final HttpSession session, final String token) throws KuraException {
-        if (!KuraRemoteServiceServlet.isValidXSRFToken(session, token)) {
+    public void checkXSRFToken(final HttpServletRequest req, final String token) throws KuraException {
+        if (!KuraRemoteServiceServlet.isValidXSRFToken(req, token)) {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
         }
     }

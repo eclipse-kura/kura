@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -200,7 +200,9 @@ public class XmlConfigPropertiesAdapter {
                     adaptedValue.setValues(stringValues);
                 }
 
-                adaptedValues.add(adaptedValue);
+                if (adaptedValue.getValues() == null || adaptedValue.getValues().length > 0) {
+                    adaptedValues.add(adaptedValue);
+                }
             }
         }
 

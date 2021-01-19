@@ -23,7 +23,6 @@
             type="Integer"
             cardinality="3"
             required="false"
-            default="80"
             min="1"
             max="65535"
             description="Specifies a list of ports for unencrypted HTTP. If set to an empty list, unencrypted HTTP will be disabled.">
@@ -34,7 +33,6 @@
             type="Integer"
             cardinality="3"
             required="false"
-            default=""
             min="1"
             max="65535"
             description="Specifies a list of ports for HTTPS without client side certificate authentication. If set to an empty list, HTTPS without client side certificate authentication will be disabled.">
@@ -45,7 +43,6 @@
             type="Integer"
             cardinality="3"
             required="false"
-            default=""
             min="1"
             max="65535"
             description="Specifies a list of ports for HTTPS with client side certificate authentication. If set to an empty list, HTTPS with client side certificate authentication will be disabled.">

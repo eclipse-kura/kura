@@ -38,7 +38,7 @@ public class HttpServiceOptions {
     static final String PROP_CRL_PATH = "https.client.crl.path";
     static final String PROP_REVOCATION_SOFT_FAIL = "https.client.revocation.soft.fail";
 
-    private static final Property<Integer[]> HTTP_PORTS = new Property<>(PROP_HTTP_PORTS, new Integer[] { 80 });
+    private static final Property<Integer[]> HTTP_PORTS = new Property<>(PROP_HTTP_PORTS, new Integer[] {});
     private static final Property<Integer[]> HTTPS_PORTS = new Property<>(PROP_HTTPS_PORTS, new Integer[] {});
     private static final Property<Integer[]> HTTPS_CLIENT_AUTH_PORTS = new Property<>(PROP_HTTPS_CLIENT_AUTH_PORTS,
             new Integer[] {});

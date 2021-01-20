@@ -129,7 +129,7 @@ public class KuraRemoteServiceServlet extends RemoteServiceServlet {
             CryptoService cryptoService = ServiceLocator.getInstance().getService(ref);
             serverXSRFToken = cryptoService.sha1Hash(cookie.get().getValue());
         } catch (GwtKuraException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw new RpcTokenException("Unable to generate XSRF cookie: the crypto service is unavailable!");
+            throw new RpcTokenException("Unable to verify the XSRF token: the crypto service is unavailable!");
         } finally {
             context.ungetService(ref);
         }

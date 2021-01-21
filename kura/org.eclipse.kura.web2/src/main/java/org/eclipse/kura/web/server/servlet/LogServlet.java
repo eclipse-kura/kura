@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
@@ -47,6 +50,8 @@ public class LogServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+    private static final String JOURNALD_LOG_FILE = "/tmp/kura_journal.log";
+    private static final String JOURNALCTL_CMD = "/usr/bin/eth_journalctl";
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
@@ -59,6 +64,17 @@ public class LogServlet extends HttpServlet {
         } catch (GwtKuraException e1) {
             logger.warn("Unable to get service");
             auditLogger.warn("UI Log Download - Failure - Failed to get System Service for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
+            return;
+        }
+
+        PrivilegedExecutorService pes = null;
+        try {
+            pes = locator.getService(PrivilegedExecutorService.class);
+        } catch (GwtKuraException e1) {
+            logger.warn("Unable to get service");
+            auditLogger.warn(
+                    "UI Log Download - Failure - Failed to get Privileged Executor Service for user: {}, session: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
             return;
         }
@@ -81,6 +97,9 @@ public class LogServlet extends HttpServlet {
             }
         });
 
+        if (writeJournaldLog(pes)) {
+            fileList.add(new File(JOURNALD_LOG_FILE));
+        }
         createReply(httpServletResponse, fileList);
 
         auditLogger.info("UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
@@ -110,7 +129,6 @@ public class LogServlet extends HttpServlet {
                 zipFile(bytes, zos, file);
             }
             zos.flush();
-            zos.close();
             baos.flush();
             return baos.toByteArray();
         }
@@ -131,4 +149,15 @@ public class LogServlet extends HttpServlet {
         }
     }
 
+    private boolean writeJournaldLog(PrivilegedExecutorService pes) {
+        File ethJournalctl = new File(JOURNALCTL_CMD);
+        if (ethJournalctl.exists() && !ethJournalctl.isDirectory()) {
+            Command command = new Command(new String[] { JOURNALCTL_CMD, "-d", JOURNALD_LOG_FILE, "-e" });
+            CommandStatus status = pes.execute(command);
+            return status.getExitStatus().isSuccessful();
+        } else {
+            return false;
+        }
+
+    }
 }

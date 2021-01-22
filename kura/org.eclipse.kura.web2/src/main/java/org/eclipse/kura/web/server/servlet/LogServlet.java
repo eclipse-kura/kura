@@ -51,14 +51,14 @@ public class LogServlet extends HttpServlet {
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final String JOURNALD_LOG_FILE = "/tmp/kura_journal.log";
-    private static final String JOURNALCTL_CMD = "eth_journalctl";
+    private static final String JOURNALCTL_CMD = "journalctl";
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         HttpSession session = httpServletRequest.getSession(false);
 
-        ServiceLocator locator = ServiceLocator.getInstance();
         SystemService ss = null;
+        ServiceLocator locator = ServiceLocator.getInstance();
         try {
             ss = locator.getService(SystemService.class);
         } catch (GwtKuraException e1) {
@@ -97,7 +97,7 @@ public class LogServlet extends HttpServlet {
             }
         });
 
-        if (writeJournaldLog(pes)) {
+        if (writeJournaldLog(pes, ss)) {
             fileList.add(new File(JOURNALD_LOG_FILE));
         }
         createReply(httpServletResponse, fileList);
@@ -150,8 +150,12 @@ public class LogServlet extends HttpServlet {
         }
     }
 
-    private boolean writeJournaldLog(PrivilegedExecutorService pes) {
-        Command command = new Command(new String[] { JOURNALCTL_CMD, "-d", JOURNALD_LOG_FILE, "-e" });
+    private boolean writeJournaldLog(PrivilegedExecutorService pes, SystemService ss) {
+        String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
+                "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
+        Command command = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", "kura", "-o", "verbose",
+                "--output-fields=" + outputFields, ">", JOURNALD_LOG_FILE });
+        command.setExecuteInAShell(true);
         CommandStatus status = pes.execute(command);
         return status.getExitStatus().isSuccessful();
     }

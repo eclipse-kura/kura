@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -50,7 +50,8 @@ public class LogServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
-    private static final String JOURNALD_LOG_FILE = "/tmp/kura_journal.log";
+    private static final String KURA_JOURNAL_LOG_FILE = "/tmp/kura_journal.log";
+    private static final String SYSTEM_JOURNAL_LOG_FILE = "/tmp/system_journal.log";
     private static final String JOURNALCTL_CMD = "journalctl";
 
     @Override
@@ -97,8 +98,9 @@ public class LogServlet extends HttpServlet {
             }
         });
 
-        if (writeJournaldLog(pes, ss)) {
-            fileList.add(new File(JOURNALD_LOG_FILE));
+        if (writeJournalLog(pes, ss)) {
+            fileList.add(new File(KURA_JOURNAL_LOG_FILE));
+            fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
         }
         createReply(httpServletResponse, fileList);
         removeTmpFiles();
@@ -150,21 +152,29 @@ public class LogServlet extends HttpServlet {
         }
     }
 
-    private boolean writeJournaldLog(PrivilegedExecutorService pes, SystemService ss) {
+    private boolean writeJournalLog(PrivilegedExecutorService pes, SystemService ss) {
         String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
                 "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
-        Command command = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", "kura", "-o", "verbose",
-                "--output-fields=" + outputFields, ">", JOURNALD_LOG_FILE });
-        command.setExecuteInAShell(true);
-        CommandStatus status = pes.execute(command);
-        return status.getExitStatus().isSuccessful();
+
+        Command commandKura = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", "kura", "-o", "verbose",
+                "--output-fields=" + outputFields, ">", KURA_JOURNAL_LOG_FILE });
+        commandKura.setExecuteInAShell(true);
+        CommandStatus statusKura = pes.execute(commandKura);
+
+        Command commandSystem = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-o", "verbose",
+                "--output-fields=" + outputFields, ">", SYSTEM_JOURNAL_LOG_FILE });
+        commandSystem.setExecuteInAShell(true);
+        CommandStatus statusSystem = pes.execute(commandSystem);
+
+        return statusKura.getExitStatus().isSuccessful() && statusSystem.getExitStatus().isSuccessful();
     }
 
     private void removeTmpFiles() {
         try {
-            Files.deleteIfExists(new File(JOURNALD_LOG_FILE).toPath());
+            Files.deleteIfExists(new File(KURA_JOURNAL_LOG_FILE).toPath());
+            Files.deleteIfExists(new File(SYSTEM_JOURNAL_LOG_FILE).toPath());
         } catch (IOException e) {
-            logger.warn("Unable to delete temporary log file", e);
+            logger.warn("Unable to delete temporary log files", e);
         }
     }
 }

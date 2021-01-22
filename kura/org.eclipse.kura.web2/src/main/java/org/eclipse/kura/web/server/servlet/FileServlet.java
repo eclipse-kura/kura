@@ -488,7 +488,7 @@ public class FileServlet extends HttpServlet {
             auditLogger.info(
                     "UI Asset - Success - Successfully parsed CSV asset configuration for user: {}, session: {}, asset PID: {}, driver PID: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), assetPid, driverPid);
-        } catch (KuraException | GwtKuraException | InterruptedException e) {
+        } catch (GwtKuraException e) {
             logger.error("Error updating device configuration", e);
             auditLogger.warn(
                     "UI Asset - Failure - Failed to manage asset configuration upload for user: {}, session: {}. Cause: Error updating device configuration",

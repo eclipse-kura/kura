@@ -1,27 +1,40 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import java.util.UUID;
+import static java.util.Objects.isNull;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Optional;
+
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.web.server.util.ServiceLocator;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.SerializationException;
 
 /**
@@ -46,7 +59,7 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
             threadRequest.set(getThreadLocalRequest());
             return super.processCall(payload);
         } finally {
-            threadRequest.set(null);
+            threadRequest.remove();
         }
     }
 
@@ -61,16 +74,25 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
 
     @Override
     public GwtXSRFToken generateSecurityToken() {
-        GwtXSRFToken token = null;
 
-        // Before to generate a token we must to check if the user is correctly authenticated
-        HttpSession session = getHttpSession();
-        if (session != null) {
-            token = new GwtXSRFToken(UUID.randomUUID().toString());
-            session.setAttribute(XSRF_TOKEN_KEY, token);
+        HttpServletRequest httpServletRequest = getRequest();
+        Optional<Cookie> cookie = Arrays.stream(httpServletRequest.getCookies())
+                .filter(c -> "JSESSIONID".equals(c.getName())).findAny();
 
-            logger.debug("Generated XSRF token: {} for HTTP session: {}", token.getToken(), session.getId());
+        if (!cookie.isPresent() || isNull(cookie.get().getValue()) || cookie.get().getValue().isEmpty()) {
+            throw new RpcTokenException("Unable to generate XSRF cookie: the session cookie is not set or empty!");
         }
-        return token;
+
+        final BundleContext context = FrameworkUtil.getBundle(GwtSecurityTokenServiceImpl.class).getBundleContext();
+        final ServiceReference<CryptoService> ref = context.getServiceReference(CryptoService.class);
+        try {
+            CryptoService cryptoService = ServiceLocator.getInstance().getService(ref);
+            return new GwtXSRFToken(cryptoService.sha1Hash(cookie.get().getValue()));
+        } catch (GwtKuraException | NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new RpcTokenException("Unable to generate XSRF cookie: the crypto service is unavailable!");
+        } finally {
+            context.ungetService(ref);
+        }
+
     }
 }

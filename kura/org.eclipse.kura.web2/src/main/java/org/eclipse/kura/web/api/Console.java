@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraException;
@@ -43,5 +44,5 @@ public interface Console {
 
     public String setAuthenticated(final HttpSession session, final String user);
 
-    public void checkXSRFToken(final HttpSession session, final String token) throws KuraException;
+    public void checkXSRFToken(final HttpServletRequest req, final String token) throws KuraException;
 }

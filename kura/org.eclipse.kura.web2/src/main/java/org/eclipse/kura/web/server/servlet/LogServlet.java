@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -34,6 +34,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
@@ -47,18 +50,32 @@ public class LogServlet extends HttpServlet {
 
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+    private static final String KURA_JOURNAL_LOG_FILE = "/tmp/kura_journal.log";
+    private static final String SYSTEM_JOURNAL_LOG_FILE = "/tmp/system_journal.log";
+    private static final String JOURNALCTL_CMD = "journalctl";
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         HttpSession session = httpServletRequest.getSession(false);
 
-        ServiceLocator locator = ServiceLocator.getInstance();
         SystemService ss = null;
+        ServiceLocator locator = ServiceLocator.getInstance();
         try {
             ss = locator.getService(SystemService.class);
         } catch (GwtKuraException e1) {
             logger.warn("Unable to get service");
             auditLogger.warn("UI Log Download - Failure - Failed to get System Service for user: {}, session: {}",
+                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
+            return;
+        }
+
+        PrivilegedExecutorService pes = null;
+        try {
+            pes = locator.getService(PrivilegedExecutorService.class);
+        } catch (GwtKuraException e1) {
+            logger.warn("Unable to get service");
+            auditLogger.warn(
+                    "UI Log Download - Failure - Failed to get Privileged Executor Service for user: {}, session: {}",
                     session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
             return;
         }
@@ -81,7 +98,12 @@ public class LogServlet extends HttpServlet {
             }
         });
 
+        if (writeJournalLog(pes, ss)) {
+            fileList.add(new File(KURA_JOURNAL_LOG_FILE));
+            fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
+        }
         createReply(httpServletResponse, fileList);
+        removeTmpFiles();
 
         auditLogger.info("UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
@@ -110,7 +132,6 @@ public class LogServlet extends HttpServlet {
                 zipFile(bytes, zos, file);
             }
             zos.flush();
-            zos.close();
             baos.flush();
             return baos.toByteArray();
         }
@@ -131,4 +152,29 @@ public class LogServlet extends HttpServlet {
         }
     }
 
+    private boolean writeJournalLog(PrivilegedExecutorService pes, SystemService ss) {
+        String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
+                "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
+
+        Command commandKura = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", "kura", "-o", "verbose",
+                "--output-fields=" + outputFields, ">", KURA_JOURNAL_LOG_FILE });
+        commandKura.setExecuteInAShell(true);
+        CommandStatus statusKura = pes.execute(commandKura);
+
+        Command commandSystem = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-o", "verbose",
+                "--output-fields=" + outputFields, ">", SYSTEM_JOURNAL_LOG_FILE });
+        commandSystem.setExecuteInAShell(true);
+        CommandStatus statusSystem = pes.execute(commandSystem);
+
+        return statusKura.getExitStatus().isSuccessful() && statusSystem.getExitStatus().isSuccessful();
+    }
+
+    private void removeTmpFiles() {
+        try {
+            Files.deleteIfExists(new File(KURA_JOURNAL_LOG_FILE).toPath());
+            Files.deleteIfExists(new File(SYSTEM_JOURNAL_LOG_FILE).toPath());
+        } catch (IOException e) {
+            logger.warn("Unable to delete temporary log files", e);
+        }
+    }
 }

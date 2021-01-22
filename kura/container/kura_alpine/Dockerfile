@@ -57,6 +57,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     install -m 0777 -d "${KURA_DIR}/data" && \
     sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
     ln -s /bin/bash /usr/bin/bash && \
+    mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \
     PATH=$PATH":/usr/lib/jvm/java-1.8-openjdk/bin" && \
     unpack-kura && \

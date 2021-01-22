@@ -51,7 +51,7 @@ public class LogServlet extends HttpServlet {
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final String JOURNALD_LOG_FILE = "/tmp/kura_journal.log";
-    private static final String JOURNALCTL_CMD = "/usr/bin/eth_journalctl";
+    private static final String JOURNALCTL_CMD = "eth_journalctl";
 
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
@@ -101,6 +101,7 @@ public class LogServlet extends HttpServlet {
             fileList.add(new File(JOURNALD_LOG_FILE));
         }
         createReply(httpServletResponse, fileList);
+        removeTmpFiles();
 
         auditLogger.info("UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
@@ -150,14 +151,16 @@ public class LogServlet extends HttpServlet {
     }
 
     private boolean writeJournaldLog(PrivilegedExecutorService pes) {
-        File ethJournalctl = new File(JOURNALCTL_CMD);
-        if (ethJournalctl.exists() && !ethJournalctl.isDirectory()) {
-            Command command = new Command(new String[] { JOURNALCTL_CMD, "-d", JOURNALD_LOG_FILE, "-e" });
-            CommandStatus status = pes.execute(command);
-            return status.getExitStatus().isSuccessful();
-        } else {
-            return false;
-        }
+        Command command = new Command(new String[] { JOURNALCTL_CMD, "-d", JOURNALD_LOG_FILE, "-e" });
+        CommandStatus status = pes.execute(command);
+        return status.getExitStatus().isSuccessful();
+    }
 
+    private void removeTmpFiles() {
+        try {
+            Files.deleteIfExists(new File(JOURNALD_LOG_FILE).toPath());
+        } catch (IOException e) {
+            logger.warn("Unable to delete temporary log file", e);
+        }
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -180,6 +180,11 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core</artifactId>
                                     <version>${org.eclipse.kura.core.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.system</artifactId>
+                                    <version>${org.eclipse.kura.core.system.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -602,6 +607,8 @@
                                     tofile="target/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.jar"
                                     tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.system.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.certificates.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.cloud.jar"

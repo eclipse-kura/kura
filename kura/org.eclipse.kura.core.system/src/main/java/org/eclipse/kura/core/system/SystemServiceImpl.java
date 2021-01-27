@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.system;
 
+import static java.lang.Thread.currentThread;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,16 +35,18 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.StringJoiner;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.IOUtil;
-import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -428,6 +432,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(DB_WRITE_DELAY_MILLIES_PROPNAME,
                         System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME));
             }
+            if (System.getProperty(KEY_CPU_VERSION) != null) {
+                this.kuraProperties.put(KEY_CPU_VERSION, System.getProperty(KEY_CPU_VERSION));
+            }
 
             if (getKuraHome() == null) {
                 logger.error("Did not initialize kura.home");
@@ -491,7 +498,17 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     protected String readResource(String resource) throws IOException {
-        return IOUtil.readResource(resource);
+        if (resource == null) {
+            return null;
+        }
+
+        final URL resourceUrl = currentThread().getContextClassLoader().getResource(resource);
+
+        if (resourceUrl == null) {
+            return null;
+        }
+
+        return IOUtils.toString(resourceUrl);
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -581,7 +598,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
             byte[] mac = network.getHardwareAddress();
-            macAddress = NetUtil.hardwareAddressToString(mac);
+            macAddress = hardwareAddressToString(mac);
             logger.info("macAddress {}", macAddress);
         } catch (UnknownHostException | SocketException e) {
             logger.error(e.getLocalizedMessage());
@@ -596,7 +613,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (interfaces != null) {
                 for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
                     if (iface.getName() != null && primaryNetworkInterfaceName.equals(iface.getName())) {
-                        macAddress = NetUtil.hardwareAddressToString(iface.getHardwareAddress());
+                        macAddress = hardwareAddressToString(iface.getHardwareAddress());
                         break;
                     }
                 }
@@ -1212,5 +1229,66 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             status = NetInterfaceStatus.netIPv4StatusUnmanaged.name();
         }
         return status;
+    }
+
+    private static String hardwareAddressToString(byte[] macAddress) {
+        if (macAddress == null) {
+            return "N/A";
+        }
+
+        if (macAddress.length != 6) {
+            throw new IllegalArgumentException("macAddress is invalid");
+        }
+
+        StringJoiner sj = new StringJoiner(":");
+        for (byte item : macAddress) {
+            sj.add(String.format("%02X", item));
+        }
+
+        return sj.toString();
+    }
+
+    @Override
+    public String getCpuVersion() {
+        if (kuraProperties.get(KEY_CPU_VERSION) instanceof String) {
+            return (String) kuraProperties.get(KEY_CPU_VERSION);
+        }
+
+        if (OS_LINUX.equals(getOsName())) {
+            try {
+                return probeCpuVersionLinux();
+            } catch (final Exception e) {
+                // do nothing
+            }
+        }
+
+        return "unknown";
+    }
+
+    private static String probeCpuVersionLinux() throws IOException {
+        try (final BufferedReader reader = new BufferedReader(new FileReader("/proc/cpuinfo"))) {
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                final int separatorIndex = line.indexOf(':');
+
+                if (separatorIndex == -1) {
+                    continue;
+                }
+
+                final String key = line.substring(0, separatorIndex).trim();
+
+                if (key.equals("model name")) {
+                    return line.substring(separatorIndex + 1).trim();
+                }
+            }
+        }
+
+        throw new IOException("Could not retrieve cpu version");
+    }
+
+    @Override
+    public Optional<ExtendedProperties> getExtendedProperties() {
+        return Optional.empty();
     }
 }

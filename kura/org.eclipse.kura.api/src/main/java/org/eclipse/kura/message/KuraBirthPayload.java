@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,7 @@ import static org.eclipse.kura.message.KuraDeviceProfile.AVAILABLE_PROCESSORS_KE
 import static org.eclipse.kura.message.KuraDeviceProfile.BIOS_VERSION_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_INTERFACE_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.CONNECTION_IP_KEY;
+import static org.eclipse.kura.message.KuraDeviceProfile.CPU_VERSION_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.DEFAULT_APPLICATION_FRAMEWORK;
 import static org.eclipse.kura.message.KuraDeviceProfile.DISPLAY_NAME_KEY;
 import static org.eclipse.kura.message.KuraDeviceProfile.FIRMWARE_VERSION_KEY;
@@ -52,6 +53,7 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String MODEM_IMSI_KEY = "modem_imsi";
     private static final String MODEM_ICCID_KEY = "modem_iccid";
     private static final String MODEM_RSSI_KEY = "modem_rssi";
+    private static final String MODEM_FIRMWARE_VERSION = "modem_firmware_version";
     private static final String PAYLOAD_ENCODING_KEY = "payload_encoding";
 
     public String getUptime() {
@@ -84,6 +86,13 @@ public class KuraBirthPayload extends KuraPayload {
 
     public String getBiosVersion() {
         return (String) getMetric(BIOS_VERSION_KEY);
+    }
+
+    /**
+     * @since 2.2
+     */
+    public String getCpuVersion() {
+        return (String) getMetric(CPU_VERSION_KEY);
     }
 
     public String getOs() {
@@ -182,6 +191,13 @@ public class KuraBirthPayload extends KuraPayload {
         return (String) getMetric(MODEM_RSSI_KEY);
     }
 
+    /**
+     * @since 2.2
+     */
+    public String getModemFirmwareVersion() {
+        return (String) getMetric(MODEM_FIRMWARE_VERSION);
+    }
+
     public String getPayloadEncoding() {
         return (String) getMetric(PAYLOAD_ENCODING_KEY);
     }
@@ -200,6 +216,7 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("getAvailableProcessors()=").append(getAvailableProcessors()).append(", ");
         sb.append("getTotalMemory()=").append(getTotalMemory()).append(", ");
         sb.append("getBiosVersion()=").append(getBiosVersion()).append(", ");
+        sb.append("getCpuVersion()=").append(getCpuVersion()).append(", ");
         sb.append("getOs()=").append(getOs()).append(", ");
         sb.append("getOsVersion()=").append(getOsVersion()).append(", ");
         sb.append("getOsArch()=").append(getOsArch()).append(", ");
@@ -242,6 +259,7 @@ public class KuraBirthPayload extends KuraPayload {
         private String serialNumber;
         private String firmwareVersion;
         private String biosVersion;
+        private String cpuVersion;
         private String os;
         private String osVersion;
         private String jvmName;
@@ -260,6 +278,7 @@ public class KuraBirthPayload extends KuraPayload {
         private String modemIccid;
         private String modemImsi;
         private String modemRssi;
+        private String modemFirmwareVersion;
         private String payloadEncoding;
 
         private KuraPosition position;
@@ -326,6 +345,14 @@ public class KuraBirthPayload extends KuraPayload {
 
         public KuraBirthPayloadBuilder withBiosVersion(String biosVersion) {
             this.biosVersion = biosVersion;
+            return this;
+        }
+
+        /**
+         * @since 2.2
+         */
+        public KuraBirthPayloadBuilder withCpuVersion(String cpuVersion) {
+            this.cpuVersion = cpuVersion;
             return this;
         }
 
@@ -410,6 +437,14 @@ public class KuraBirthPayload extends KuraPayload {
             return this;
         }
 
+        /**
+         * @since 2.2
+         */
+        public KuraBirthPayloadBuilder withModemFirmwareVersion(String modemFirmwareVersion) {
+            this.modemFirmwareVersion = modemFirmwareVersion;
+            return this;
+        }
+
         public KuraBirthPayloadBuilder withPosition(KuraPosition position) {
             this.position = position;
             return this;
@@ -432,6 +467,7 @@ public class KuraBirthPayload extends KuraPayload {
             birthPayload.addMetric(SERIAL_NUMBER_KEY, this.serialNumber);
             birthPayload.addMetric(FIRMWARE_VERSION_KEY, this.firmwareVersion);
             birthPayload.addMetric(BIOS_VERSION_KEY, this.biosVersion);
+            birthPayload.addMetric(CPU_VERSION_KEY, this.cpuVersion);
             birthPayload.addMetric(OS_KEY, this.os);
             birthPayload.addMetric(OS_VERSION_KEY, this.osVersion);
             birthPayload.addMetric(JVM_NAME_KEY, this.jvmName);
@@ -458,6 +494,7 @@ public class KuraBirthPayload extends KuraPayload {
             birthPayload.addMetric(MODEM_ICCID_KEY, this.modemIccid);
             birthPayload.addMetric(MODEM_IMSI_KEY, this.modemImsi);
             birthPayload.addMetric(MODEM_RSSI_KEY, this.modemRssi);
+            birthPayload.addMetric(MODEM_FIRMWARE_VERSION, this.modemFirmwareVersion);
             birthPayload.addMetric(PAYLOAD_ENCODING_KEY, this.payloadEncoding);
             birthPayload.setPosition(this.position);
 

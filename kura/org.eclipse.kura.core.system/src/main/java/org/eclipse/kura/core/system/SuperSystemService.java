@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,8 +13,8 @@
 package org.eclipse.kura.core.system;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 
-import org.apache.commons.io.Charsets;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -30,21 +30,32 @@ public class SuperSystemService {
     private static final Logger logger = LoggerFactory.getLogger(SuperSystemService.class);
 
     protected static String runSystemCommand(String[] commandLine, boolean runInShell,
-            CommandExecutorService executorService) {
+            CommandExecutorService executorService, boolean allowFailure) {
         String response = "";
         Command command = new Command(commandLine);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         command.setExecuteInAShell(runInShell);
         CommandStatus status = executorService.execute(command);
-        if (status.getExitStatus().isSuccessful()) {
-            response = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8);
+        if (status.getExitStatus().isSuccessful() || allowFailure) {
+            response = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                    StandardCharsets.UTF_8);
         } else {
             if (logger.isErrorEnabled()) {
                 logger.error("failed to run commands {}", String.join(" ", commandLine));
             }
         }
         return response;
+    }
+
+    protected static String runSystemCommand(String[] commandLine, boolean runInShell,
+            CommandExecutorService executorService) {
+        return runSystemCommand(commandLine, runInShell, executorService, false);
+    }
+
+    protected static String runSystemCommand(String commandLine, boolean runInShell,
+            CommandExecutorService executorService, boolean allowFailure) {
+        return runSystemCommand(commandLine.split("\\s+"), runInShell, executorService, allowFailure);
     }
 
     protected static String runSystemCommand(String commandLine, boolean runInShell,

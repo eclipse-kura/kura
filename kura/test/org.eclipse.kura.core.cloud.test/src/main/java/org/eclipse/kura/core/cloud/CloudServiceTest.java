@@ -260,17 +260,12 @@ public class CloudServiceTest {
     public void shouldSupportExtendedPropertiesSerialization()
             throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
 
-        final Map<String, Object> first = new HashMap<>();
+        final Map<String, String> first = new HashMap<>();
 
         first.put("string", "str");
-        first.put("short", (short) 1);
-        first.put("int", 2);
-        first.put("long", 3L);
-        first.put("float", (float) 4.0f);
-        first.put("double", 5.0d);
-        first.put("boolean", true);
+        first.put("foo", "bar");
 
-        final Map<String, Object> empty = Collections.emptyMap();
+        final Map<String, String> empty = Collections.emptyMap();
 
         final ExtendedPropertyGroup firstGroup = new ExtendedPropertyGroup("first", first);
         final ExtendedPropertyGroup emptyGroup = new ExtendedPropertyGroup("empty", empty);
@@ -288,14 +283,9 @@ public class CloudServiceTest {
 
         final JsonObject firstObject = groups.get("first").asObject();
 
-        assertEquals(7, firstObject.size());
+        assertEquals(2, firstObject.size());
         assertEquals("str", firstObject.get("string").asString());
-        assertEquals(1, firstObject.get("short").asInt());
-        assertEquals(2, firstObject.get("int").asInt());
-        assertEquals(3, firstObject.get("long").asInt());
-        assertEquals(4, firstObject.get("float").asInt());
-        assertEquals(5, firstObject.get("double").asInt());
-        assertEquals(true, firstObject.get("boolean").asBoolean());
+        assertEquals("bar", firstObject.get("foo").asString());
 
         final JsonObject emptyObject = groups.get("empty").asObject();
 

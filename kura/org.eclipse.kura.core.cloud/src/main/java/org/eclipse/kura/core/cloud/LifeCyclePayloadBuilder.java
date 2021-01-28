@@ -34,9 +34,7 @@ import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 
 /**
  * Utility class to build lifecycle payload messages.
@@ -296,15 +294,15 @@ public class LifeCyclePayloadBuilder {
         for (final ExtendedPropertyGroup group : groups) {
             final JsonObject properties = new JsonObject();
 
-            for (final Entry<String, Object> entry : group.getProperties().entrySet()) {
-                final Object value = entry.getValue();
+            for (final Entry<String, String> entry : group.getProperties().entrySet()) {
+                final String value = entry.getValue();
 
                 if (value == null) {
                     logger.warn("found null extended property: group {} property {}", group.getName(), entry.getKey());
                     continue;
                 }
 
-                properties.add(entry.getKey(), toJsonPrimitive(value));
+                properties.add(entry.getKey(), value);
             }
 
             jsonProperties.add(group.getName(), properties);
@@ -313,28 +311,5 @@ public class LifeCyclePayloadBuilder {
         result.add("properties", jsonProperties);
 
         return Optional.of(result.toString());
-    }
-
-    private JsonValue toJsonPrimitive(final Object value) {
-        final JsonValue propertyValue;
-
-        if (value instanceof Boolean) {
-            propertyValue = Json.value((Boolean) value);
-        } else if (value instanceof Short) {
-            propertyValue = Json.value((Short) value);
-        } else if (value instanceof Integer) {
-            propertyValue = Json.value((Integer) value);
-        } else if (value instanceof Long) {
-            propertyValue = Json.value((Long) value);
-        } else if (value instanceof Float) {
-            propertyValue = Json.value((Float) value);
-        } else if (value instanceof Double) {
-            propertyValue = Json.value((Double) value);
-        } else if (value instanceof Byte) {
-            propertyValue = Json.value((Byte) value);
-        } else {
-            propertyValue = Json.value(value.toString());
-        }
-        return propertyValue;
     }
 }

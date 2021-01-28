@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class ExtendedPropertyGroup {
 
     private final String name;
-    private final Map<String, Object> properties;
+    private final Map<String, String> properties;
 
     /**
      * Creates a new {@link ExtendedPropertyGroup} instance.
@@ -40,7 +40,7 @@ public class ExtendedPropertyGroup {
      * @param properties
      *            the property map, must not be null
      */
-    public ExtendedPropertyGroup(final String name, final Map<String, Object> properties) {
+    public ExtendedPropertyGroup(final String name, final Map<String, String> properties) {
         if (requireNonNull(name, "name cannot be null").trim().isEmpty()) {
             throw new IllegalArgumentException("name cannot be empty");
         }
@@ -63,7 +63,7 @@ public class ExtendedPropertyGroup {
      * 
      * @return the group properties.
      */
-    public Map<String, Object> getProperties() {
+    public Map<String, String> getProperties() {
         return properties;
     }
 }

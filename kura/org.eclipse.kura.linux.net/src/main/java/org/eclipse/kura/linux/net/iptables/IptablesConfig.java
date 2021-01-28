@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,9 @@ public class IptablesConfig extends IptablesConfigConstants {
     private final Set<NATRule> autoNatRules;
     private final Set<NATRule> natRules;
     private boolean allowIcmp;
+    private Set<String> additionalFilterRules;
+    private Set<String> additionalNatRules;
+    private Set<String> additionalMangleRules;
     private CommandExecutorService executorService;
 
     public IptablesConfig() {
@@ -53,13 +56,14 @@ public class IptablesConfig extends IptablesConfigConstants {
         this.portForwardRules = new LinkedHashSet<>();
         this.autoNatRules = new LinkedHashSet<>();
         this.natRules = new LinkedHashSet<>();
+        this.additionalFilterRules = new LinkedHashSet<>();
+        this.additionalNatRules = new LinkedHashSet<>();
+        this.additionalMangleRules = new LinkedHashSet<>();
+        this.allowIcmp = true;
     }
 
     public IptablesConfig(CommandExecutorService executorService) {
-        this.localRules = new LinkedHashSet<>();
-        this.portForwardRules = new LinkedHashSet<>();
-        this.autoNatRules = new LinkedHashSet<>();
-        this.natRules = new LinkedHashSet<>();
+        this();
         this.executorService = executorService;
     }
 
@@ -70,7 +74,34 @@ public class IptablesConfig extends IptablesConfigConstants {
         this.autoNatRules = autoNatRules;
         this.natRules = natRules;
         this.allowIcmp = allowIcmp;
+        this.additionalFilterRules = new LinkedHashSet<>();
+        this.additionalNatRules = new LinkedHashSet<>();
+        this.additionalMangleRules = new LinkedHashSet<>();
         this.executorService = executorService;
+    }
+
+    public Set<String> getAdditionalFilterRules() {
+        return additionalFilterRules;
+    }
+
+    public void setAdditionalFilterRules(Set<String> additionalFilterRules) {
+        this.additionalFilterRules = additionalFilterRules;
+    }
+
+    public Set<String> getAdditionalNatRules() {
+        return additionalNatRules;
+    }
+
+    public void setAdditionalNatRules(Set<String> additionalNatRules) {
+        this.additionalNatRules = additionalNatRules;
+    }
+
+    public Set<String> getAdditionalMangleRules() {
+        return additionalMangleRules;
+    }
+
+    public void setAdditionalMangleRules(Set<String> additionalMangleRules) {
+        this.additionalMangleRules = additionalMangleRules;
     }
 
     /*
@@ -82,6 +113,8 @@ public class IptablesConfig extends IptablesConfigConstants {
             writer.println(STAR_NAT);
             writer.println(COMMIT);
             writer.println(STAR_FILTER);
+            writer.println(COMMIT);
+            writer.println(STAR_MANGLE);
             writer.println(COMMIT);
 
             File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
@@ -105,6 +138,8 @@ public class IptablesConfig extends IptablesConfigConstants {
             writer.println(ALLOW_ALL_TRAFFIC_TO_LOOPBACK);
             writer.println(ALLOW_ONLY_INCOMING_TO_OUTGOING);
             writer.println(COMMIT);
+            writer.println(STAR_MANGLE);
+            writer.println(COMMIT);
 
             File configFile = new File(FIREWALL_TMP_CONFIG_FILE_NAME);
             if (configFile.exists()) {
@@ -126,6 +161,11 @@ public class IptablesConfig extends IptablesConfigConstants {
         internalFlush(OUTPUT_KURA_CHAIN, NAT);
         internalFlush(PREROUTING_KURA_CHAIN, NAT);
         internalFlush(POSTROUTING_KURA_CHAIN, NAT);
+        internalFlush(INPUT_KURA_CHAIN, MANGLE);
+        internalFlush(OUTPUT_KURA_CHAIN, MANGLE);
+        internalFlush(FORWARD_KURA_CHAIN, MANGLE);
+        internalFlush(PREROUTING_KURA_CHAIN, MANGLE);
+        internalFlush(POSTROUTING_KURA_CHAIN, MANGLE);
     }
 
     private void internalFlush(String chain, String table) {
@@ -178,6 +218,24 @@ public class IptablesConfig extends IptablesConfigConstants {
             writer.println(ADD_INPUT_KURA_CHAIN);
             writer.println(ADD_OUTPUT_KURA_CHAIN);
             saveNatTable(writer);
+            writer.println(COMMIT);
+            writer.println(STAR_MANGLE);
+            writer.println(INPUT_ACCEPT_POLICY);
+            writer.println(OUTPUT_ACCEPT_POLICY);
+            writer.println(FORWARD_ACCEPT_POLICY);
+            writer.println(PREROUTING_ACCEPT_POLICY);
+            writer.println(POSTROUTING_ACCEPT_POLICY);
+            writer.println(PREROUTING_KURA_POLICY);
+            writer.println(POSTROUTING_KURA_POLICY);
+            writer.println(INPUT_KURA_POLICY);
+            writer.println(OUTPUT_KURA_POLICY);
+            writer.println(FORWARD_KURA_POLICY);
+            writer.println(ADD_PREROUTING_KURA_CHAIN);
+            writer.println(ADD_POSTROUTING_KURA_CHAIN);
+            writer.println(ADD_INPUT_KURA_CHAIN);
+            writer.println(ADD_OUTPUT_KURA_CHAIN);
+            writer.println(ADD_FORWARD_KURA_CHAIN);
+            saveMangleTable(writer);
             writer.println(COMMIT);
         } catch (IOException e) {
             throw new KuraIOException(e, "save() :: failed to create rules file");
@@ -278,6 +336,7 @@ public class IptablesConfig extends IptablesConfigConstants {
         writePortForwardRulesToFilterTable(writer);
         writeAutoNatRulesToFilterTable(writer);
         writeNatRulesToFilterTable(writer);
+        writeAdditionalRulesToFilterTable(writer);
         writer.println(RETURN_INPUT_KURA_CHAIN);
         writer.println(RETURN_OUTPUT_KURA_CHAIN);
         writer.println(RETURN_FORWARD_KURA_CHAIN);
@@ -367,10 +426,33 @@ public class IptablesConfig extends IptablesConfigConstants {
         }
     }
 
+    private void writeAdditionalRulesToFilterTable(PrintWriter writer) {
+        for (String filterRule : this.additionalFilterRules) {
+            if (writer == null) {
+                CommandStatus status = execute((IPTABLES_COMMAND + " -t " + FILTER + " " + filterRule).split(" "));
+                if (!status.getExitStatus().isSuccessful()) {
+                    logger.error("Failed to apply additional rules to filter table");
+                }
+            } else {
+                writer.println(filterRule);
+            }
+        }
+    }
+
+    // private String replaceVariables(String floodProtection) {
+    // return floodProtection
+    // .replace("KURA_CONN_LIMIT", Integer.toString(floodingProtectionConfiguration.getConnLimit()))
+    // .replace("KURA_LIMIT", Integer.toString(floodingProtectionConfiguration.getLimit()))
+    // .replace("KURA_BURST_LIMIT", Integer.toString(floodingProtectionConfiguration.getBurstLimit()))
+    // .replace("KURA_RST_LIMIT", Integer.toString(floodingProtectionConfiguration.getRstLimit()))
+    // .replace("KURA_RST_BURST_LIMIT", Integer.toString(floodingProtectionConfiguration.getRstBurstLimit()));
+    // }
+
     private void saveNatTable(PrintWriter writer) {
         writePortForwardRulesToNatTable(writer);
         writeAutoNatRulesToNatTable(writer);
         writeNatRulesToNatTable(writer);
+        writeAdditionalRulesToNatTable(writer);
         writer.println(RETURN_POSTROUTING_KURA_CHAIN);
         writer.println(RETURN_PREROUTING_KURA_CHAIN);
         writer.println(RETURN_INPUT_KURA_CHAIN);
@@ -432,6 +514,41 @@ public class IptablesConfig extends IptablesConfigConstants {
                     writer.println(portForwardRule.getNatPostroutingChainRule());
                 }
             });
+        }
+    }
+
+    private void writeAdditionalRulesToNatTable(PrintWriter writer) {
+        for (String natRule : this.additionalNatRules) {
+            if (writer == null) {
+                CommandStatus status = execute((IPTABLES_COMMAND + " -t " + FILTER + " " + natRule).split(" "));
+                if (!status.getExitStatus().isSuccessful()) {
+                    logger.error("Failed to apply additional rules to nat table");
+                }
+            } else {
+                writer.println(natRule);
+            }
+        }
+    }
+
+    private void saveMangleTable(PrintWriter writer) {
+        writeAdditionalRulesToMangleTable(writer);
+        writer.println(RETURN_POSTROUTING_KURA_CHAIN);
+        writer.println(RETURN_PREROUTING_KURA_CHAIN);
+        writer.println(RETURN_INPUT_KURA_CHAIN);
+        writer.println(RETURN_OUTPUT_KURA_CHAIN);
+        writer.println(RETURN_FORWARD_KURA_CHAIN);
+    }
+
+    private void writeAdditionalRulesToMangleTable(PrintWriter writer) {
+        for (String mangleRule : this.additionalMangleRules) {
+            if (writer == null) {
+                CommandStatus status = execute((IPTABLES_COMMAND + " -t " + MANGLE + " " + mangleRule).split(" "));
+                if (!status.getExitStatus().isSuccessful()) {
+                    logger.error("Failed to apply prerouting rules to mangle table");
+                }
+            } else {
+                writer.println(mangleRule);
+            }
         }
     }
 
@@ -643,8 +760,8 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     /*
-     * Applies the rules contained in the localRules, portForwardRules, natRules, and autoNatRules
-     * and force the polices for input and forward chains
+     * Applies the rules contained in the localRules, portForwardRules, natRules, and autoNatRules,
+     * force the polices for input and forward chains and apply flooding protection rules if needed.
      */
     public void applyRules() {
         applyPolicies();
@@ -659,6 +776,9 @@ public class IptablesConfig extends IptablesConfigConstants {
         writePortForwardRulesToNatTable(null);
         writeAutoNatRulesToNatTable(null);
         writeNatRulesToNatTable(null);
+        writeAdditionalRulesToFilterTable(null);
+        writeAdditionalRulesToNatTable(null);
+        writeAdditionalRulesToMangleTable(null);
         createKuraChainsReturnRules();
     }
 
@@ -777,6 +897,26 @@ public class IptablesConfig extends IptablesConfigConstants {
             logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
         }
         rule = IPTABLES_COMMAND + " " + RETURN_POSTROUTING_KURA_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_INPUT_KURA_CHAIN + " -t " + MANGLE;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_OUTPUT_KURA_CHAIN + " -t " + MANGLE;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_PREROUTING_KURA_CHAIN + " -t " + MANGLE;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_POSTROUTING_KURA_CHAIN + " -t " + MANGLE;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_FORWARD_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
         }

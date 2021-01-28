@@ -753,6 +753,7 @@
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
+        <module>org.eclipse.kura.network.threat.manager.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

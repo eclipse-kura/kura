@@ -96,10 +96,18 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
+        updateComponentConfigurationInternal(gwtCompConfig);
+    }
 
-        GwtComponentServiceInternal.updateComponentConfiguration(session, gwtCompConfig);
+    @Override
+    public void updateComponentConfigurations(GwtXSRFToken xsrfToken, List<GwtConfigComponent> gwtCompConfigs)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        for (GwtConfigComponent gwtCompConfig : gwtCompConfigs) {
+            updateComponentConfigurationInternal(gwtCompConfig);
+        }
+
     }
 
     @Override
@@ -174,6 +182,13 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
         final HttpSession session = request.getSession(false);
 
         return GwtComponentServiceInternal.getPidsFromTarget(session, pid, targetRef);
+    }
+
+    private void updateComponentConfigurationInternal(GwtConfigComponent gwtCompConfig) throws GwtKuraException {
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        GwtComponentServiceInternal.updateComponentConfiguration(session, gwtCompConfig);
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,8 +51,13 @@ public class LinuxFirewall {
     private Set<NATRule> natRules = new LinkedHashSet<>();
     private boolean allowIcmp = false;
     private boolean allowForwarding = false;
+    private final Set<String> additionalFilterRules = new HashSet<>();
+    private final Set<String> additionalNatRules = new HashSet<>();
+    private final Set<String> additionalMangleRules = new HashSet<>();
     private final IptablesConfig iptables;
     private final CommandExecutorService executorService;
+
+    // make it singleton in some way...
 
     public LinuxFirewall(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -377,8 +383,12 @@ public class LinuxFirewall {
                 || this.natRules != null && !this.natRules.isEmpty()) {
             this.allowForwarding = true;
         }
+        // Non posso usare direttamente this.iptables????
         IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
                 this.natRules, this.allowIcmp, this.executorService);
+        newIptables.setAdditionalFilterRules(this.additionalFilterRules);
+        newIptables.setAdditionalNatRules(this.additionalNatRules);
+        newIptables.setAdditionalMangleRules(this.additionalMangleRules);
         newIptables.applyRules();
         logger.debug("Managing port forwarding...");
         enableForwarding(this.allowForwarding);
@@ -420,8 +430,39 @@ public class LinuxFirewall {
         this.allowForwarding = false;
     }
 
+    public void setAdditionalRules(Set<String> filterRules, Set<String> natRules, Set<String> mangleRules)
+            throws KuraException {
+        this.additionalFilterRules.clear();
+        this.additionalFilterRules.addAll(filterRules);
+        this.additionalNatRules.clear();
+        this.additionalNatRules.addAll(natRules);
+        this.additionalMangleRules.clear();
+        this.additionalMangleRules.addAll(mangleRules);
+        update();
+    }
+    // public void setAdditionalFilterRules(Set<String> filterRules) {
+    // // For now we replace all the rules...
+    // this.additionalFilterRules.clear();
+    // this.additionalFilterRules.addAll(filterRules);
+    // }
+    //
+    // public void setAdditionalNatRules(Set<String> natRules) {
+    // // For now we replace all the rules...
+    // this.additionalNatRules.clear();
+    // this.additionalNatRules.addAll(natRules);
+    // }
+    //
+    // public void setAdditionalMangleRules(Set<String> filterRules) {
+    // // For now we replace all the rules...
+    // this.additionalMangleRules.clear();
+    // this.additionalMangleRules.addAll(filterRules);
+    // }
+
     private void update() throws KuraException {
         synchronized (lock) {
+            this.iptables.setAdditionalFilterRules(this.additionalFilterRules);
+            this.iptables.setAdditionalNatRules(this.additionalNatRules);
+            this.iptables.setAdditionalMangleRules(this.additionalMangleRules);
             this.iptables.clearAllKuraChains();
             applyRules();
             this.iptables.saveKuraChains();

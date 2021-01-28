@@ -526,6 +526,11 @@
                                     <artifactId>org.eclipse.kura.useradmin.store</artifactId>
                                     <version>${org.eclipse.kura.useradmin.store.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.network.threat.manager</artifactId>
+                                    <version>${org.eclipse.kura.network.threat.manager.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -744,6 +749,8 @@
                                     tofile="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.useradmin.store.jar"
                                     tofile="target/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.network.threat.manager.jar"
+                                    tofile="target/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

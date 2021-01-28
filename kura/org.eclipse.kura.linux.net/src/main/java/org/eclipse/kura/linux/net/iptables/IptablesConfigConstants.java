@@ -6,8 +6,10 @@ public class IptablesConfigConstants {
     protected static final String FIREWALL_TMP_CONFIG_FILE_NAME = "/tmp/iptables";
     protected static final String FILTER = "filter";
     protected static final String NAT = "nat";
+    protected static final String MANGLE = "mangle";
     protected static final String STAR_NAT = "*" + NAT;
     protected static final String STAR_FILTER = "*" + FILTER;
+    protected static final String STAR_MANGLE = "*" + MANGLE;
     protected static final String COMMIT = "COMMIT";
     protected static final String IPTABLES_COMMAND = "iptables";
     protected static final String FORWARD = "FORWARD";
@@ -42,6 +44,7 @@ public class IptablesConfigConstants {
     protected static final String PREROUTING_ACCEPT_POLICY = ":PREROUTING ACCEPT [0:0]";
     protected static final String INPUT_ACCEPT_POLICY = ":INPUT ACCEPT [0:0]";
     protected static final String OUTPUT_ACCEPT_POLICY = ":OUTPUT ACCEPT [0:0]";
+    protected static final String FORWARD_ACCEPT_POLICY = ":FORWARD ACCEPT [0:0]";
     protected static final String FORWARD_DROP_POLICY = ":FORWARD DROP [0:0]";
     protected static final String INPUT_DROP_POLICY = ":INPUT DROP [0:0]";
     protected static final String[] IPTABLES_CREATE_INPUT_KURA_CHAIN = { IPTABLES_COMMAND, "-N", INPUT_KURA_CHAIN, "-t",

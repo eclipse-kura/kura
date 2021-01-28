@@ -33,4 +33,6 @@ public interface GwtSecurityService extends RemoteService {
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public boolean isThreatManagerAvailable();
 }

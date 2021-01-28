@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.security.IntrusionDetectionConfiguration;
 import org.junit.Test;
 
 public class LinuxFirewallTest extends FirewallTestUtils {
@@ -34,7 +35,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addLocalRuleTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100:10200");
         } catch (KuraIOException e) {
@@ -52,7 +55,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addLocalRulesTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<LocalRule> rules = new ArrayList<>();
         try {
             rules.add(new LocalRule(5400, "tcp",
@@ -81,7 +86,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addPortForwardTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
                     "32", "00:11:22:33:44:55:66", "10100:10200");
@@ -102,7 +109,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addPortForwardRulesTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<PortForwardRule> rules = new ArrayList<>();
         try {
             rules.add(new PortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100", 32,
@@ -132,7 +141,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addAutoNatRuleTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", true);
         } catch (KuraIOException e) {
@@ -148,7 +159,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addAutoNatRulesTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<NATRule> rules = new ArrayList<>();
         try {
             rules.add(new NATRule("eth0", "eth1", true));
@@ -173,7 +186,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addNatRuleTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true);
         } catch (KuraIOException e) {
@@ -190,7 +205,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addNatRulesTest() throws KuraException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<NATRule> rules = new ArrayList<>();
         try {
             rules.add(new NATRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true));
@@ -216,7 +233,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteLocalRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100:10200");
         } catch (KuraIOException e) {
@@ -241,7 +260,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deletePortForwardRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
                     "32", "00:11:22:33:44:55:66", "10100:10200");
@@ -266,7 +287,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAutoNatRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", true);
         } catch (KuraIOException e) {
@@ -289,7 +312,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllLocalRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100:10200");
         } catch (KuraIOException e) {
@@ -308,7 +333,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllPortForwardRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
                     "32", "00:11:22:33:44:55:66", "10100:10200");
@@ -328,7 +355,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllAutoNatRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", true);
         } catch (KuraIOException e) {
@@ -347,7 +376,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllNatRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
+        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true);
         } catch (KuraIOException e) {

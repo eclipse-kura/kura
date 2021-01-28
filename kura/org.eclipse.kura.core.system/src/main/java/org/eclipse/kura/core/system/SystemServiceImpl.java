@@ -954,7 +954,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     @Override
     public int getFileCommandZipMaxUploadNumber() {
         final Optional<String> commandMaxFilesUpload = getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
-        if (commandMaxFilesUpload != null && commandMaxFilesUpload.get().trim().length() > 0) {
+        if (commandMaxFilesUpload.isPresent() && commandMaxFilesUpload.get().trim().length() > 0) {
             return Integer.parseInt(commandMaxFilesUpload.get());
         }
         logger.warn(
@@ -1306,14 +1306,36 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         final String externalProvider = this.kuraProperties.getProperty(key + PROPERTY_PROVIDER_SUFFIX);
 
         if (externalProvider != null) {
-            final String result = runSystemCommand(externalProvider, true, executorService);
+            final String result = processCommandOutput(runSystemCommand(externalProvider, true, executorService));
 
-            if (result != null) {
+            if (result != null && !result.isEmpty()) {
                 return Optional.of(result);
             }
         }
 
         return Optional.empty();
+    }
+
+    private String processCommandOutput(final String result) {
+        if (result == null) {
+            return null;
+        }
+
+        final String trimmed = result.trim();
+
+        if (trimmed.isEmpty()) {
+            return trimmed;
+        }
+
+        int i;
+
+        for (i = trimmed.length() - 1; i > 0; i--) {
+            if (trimmed.charAt(i) != '\n') {
+                break;
+            }
+        }
+
+        return trimmed.substring(0, i + 1);
     }
 
     @Override

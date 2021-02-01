@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -124,21 +126,37 @@ public class SecurityPanelUi extends Composite {
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
         this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
+
         this.httpService.addClickHandler(
-                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService",
-                        httpServicePanel, Optional.of(getHttpServiceOptionsValidator()))));
+                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", //
+                        httpServicePanel, //
+                        getHttpServiceOptionsValidator(), //
+                        ui -> ui.onApply(err -> {
+                            ui.setDirty(false);
+                            Window.Location.reload();
+                        }))));
         this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
-                consolePanel, Optional.of(getConsoleOptionsValidator()))));
+                consolePanel, getConsoleOptionsValidator())));
         this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
-    public void loadServiceConfig(final String pid, final TabPane panel,
-            final Optional<ServicesUi.Validator> validator) {
+    public void loadServiceConfig(final String pid, final TabPane panel, final ServicesUi.Validator validator) {
+        loadServiceConfig(pid, panel, validator, ui -> {
+        });
+    }
+
+    public void loadServiceConfig(final String pid, final TabPane panel, final ServicesUi.Validator validator,
+            final Consumer<ServicesUi> customizer) {
         RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(
                 token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, c.callback(result -> {
                     for (GwtConfigComponent config : result) {
                         panel.clear();
-                        panel.add(new ServicesUi(config, Optional.empty(), validator));
+
+                        final ServicesUi ui = new ServicesUi(config, Optional.empty(), Optional.of(validator));
+
+                        customizer.accept(ui);
+
+                        panel.add(ui);
                     }
                 })))));
     }

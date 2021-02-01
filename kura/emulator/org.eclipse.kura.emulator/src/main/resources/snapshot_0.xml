@@ -208,6 +208,13 @@
           </esf:property>
         </esf:properties>
     </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.http.server.manager.HttpService">
+        <esf:properties>
+            <esf:property array="true" encrypted="false" name="http.ports" type="Integer">
+                <esf:value>8080</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.internal.useradmin.store.RoleRepositoryStoreImpl">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="users.config" type="String">

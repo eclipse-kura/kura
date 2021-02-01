@@ -269,7 +269,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     }
 
     // command service defaults getters
-    private String getDefaultWorkDir() {
+    public String getDefaultWorkDir() {
 
         String workDir = (String) this.properties.get(COMMAND_WORKDIR_ID);
         if (workDir != null && !workDir.isEmpty()) {
@@ -407,4 +407,5 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
             }
         }
     }
+
 }

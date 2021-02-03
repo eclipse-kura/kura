@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -70,9 +70,9 @@ public class LifeCyclePayloadBuilder {
                 .withModelName(deviceProfile.getModelName()).withModelId(deviceProfile.getModelId())
                 .withPartNumber(deviceProfile.getPartNumber()).withSerialNumber(deviceProfile.getSerialNumber())
                 .withFirmwareVersion(deviceProfile.getFirmwareVersion()).withBiosVersion(deviceProfile.getBiosVersion())
-                .withOs(deviceProfile.getOs()).withOsVersion(deviceProfile.getOsVersion())
-                .withJvmName(deviceProfile.getJvmName()).withJvmVersion(deviceProfile.getJvmVersion())
-                .withJvmProfile(deviceProfile.getJvmProfile())
+                .withCpuVersion(deviceProfile.getCpuVersion()).withOs(deviceProfile.getOs())
+                .withOsVersion(deviceProfile.getOsVersion()).withJvmName(deviceProfile.getJvmName())
+                .withJvmVersion(deviceProfile.getJvmVersion()).withJvmProfile(deviceProfile.getJvmProfile())
                 .withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
                 .withConnectionInterface(deviceProfile.getConnectionInterface())
                 .withConnectionIp(deviceProfile.getConnectionIp()).withAcceptEncoding(acceptEncoding)
@@ -97,6 +97,12 @@ public class LifeCyclePayloadBuilder {
 
         if (this.cloudConnectionManagerImpl.rssi != null && this.cloudConnectionManagerImpl.rssi.length() > 0) {
             birthPayloadBuilder.withModemRssi(this.cloudConnectionManagerImpl.rssi);
+        }
+
+        if (this.cloudConnectionManagerImpl.modemFwVer != null
+                && this.cloudConnectionManagerImpl.modemFwVer.length() > 0
+                && !this.cloudConnectionManagerImpl.modemFwVer.equals(ERROR)) {
+            birthPayloadBuilder.withModemFirmwareVersion(this.cloudConnectionManagerImpl.modemFwVer);
         }
 
         if (deviceProfile.getLatitude() != null && deviceProfile.getLongitude() != null) {
@@ -192,6 +198,7 @@ public class LifeCyclePayloadBuilder {
         kuraDeviceProfile.setBiosVersion(systemService.getBiosVersion());
         kuraDeviceProfile.setOs(systemService.getOsName());
         kuraDeviceProfile.setOsVersion(systemService.getOsVersion());
+        kuraDeviceProfile.setCpuVersion(systemService.getCpuVersion());
         kuraDeviceProfile.setJvmName(systemService.getJavaVmName());
         kuraDeviceProfile.setJvmVersion(systemService.getJavaVmVersion() + " " + systemService.getJavaVmInfo());
         kuraDeviceProfile.setJvmProfile(systemService.getJavaVendor() + " " + systemService.getJavaVersion());

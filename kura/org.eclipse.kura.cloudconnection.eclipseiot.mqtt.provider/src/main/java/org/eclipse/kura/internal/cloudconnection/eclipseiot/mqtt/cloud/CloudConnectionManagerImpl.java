@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -111,6 +111,7 @@ public class CloudConnectionManagerImpl
     String iccid;
     String imsi;
     String rssi;
+    String modemFwVer;
 
     private boolean birthPublished;
 
@@ -320,10 +321,12 @@ public class CloudConnectionManagerImpl
             this.imsi = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
             this.iccid = (String) modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
             this.rssi = (String) modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
+            this.modemFwVer = (String) modemReadyEvent.getProperty(ModemReadyEvent.FW_VERSION);
             logger.trace("handleEvent() :: IMEI={}", this.imei);
             logger.trace("handleEvent() :: IMSI={}", this.imsi);
             logger.trace("handleEvent() :: ICCID={}", this.iccid);
             logger.trace("handleEvent() :: RSSI={}", this.rssi);
+            logger.trace("handleEvent() :: FW_VERSION={}", this.modemFwVer);
 
             if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection()
                     && !((this.imei == null || this.imei.length() == 0 || ERROR.equals(this.imei))

@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.core.system;
 
+import static java.lang.Thread.currentThread;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,16 +35,18 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.StringJoiner;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.util.IOUtil;
-import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -51,6 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SystemServiceImpl extends SuperSystemService implements SystemService {
+
+    private static final String PROPERTY_PROVIDER_SUFFIX = ".provider";
 
     private static final String DMIDECODE_COMMAND = "dmidecode -t system";
 
@@ -428,6 +434,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 this.kuraProperties.put(DB_WRITE_DELAY_MILLIES_PROPNAME,
                         System.getProperty(DB_WRITE_DELAY_MILLIES_PROPNAME));
             }
+            if (System.getProperty(KEY_CPU_VERSION) != null) {
+                this.kuraProperties.put(KEY_CPU_VERSION, System.getProperty(KEY_CPU_VERSION));
+            }
 
             if (getKuraHome() == null) {
                 logger.error("Did not initialize kura.home");
@@ -491,7 +500,17 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     protected String readResource(String resource) throws IOException {
-        return IOUtil.readResource(resource);
+        if (resource == null) {
+            return null;
+        }
+
+        final URL resourceUrl = currentThread().getContextClassLoader().getResource(resource);
+
+        if (resourceUrl == null) {
+            return null;
+        }
+
+        return IOUtils.toString(resourceUrl);
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -581,7 +600,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
             byte[] mac = network.getHardwareAddress();
-            macAddress = NetUtil.hardwareAddressToString(mac);
+            macAddress = hardwareAddressToString(mac);
             logger.info("macAddress {}", macAddress);
         } catch (UnknownHostException | SocketException e) {
             logger.error(e.getLocalizedMessage());
@@ -596,7 +615,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (interfaces != null) {
                 for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
                     if (iface.getName() != null && primaryNetworkInterfaceName.equals(iface.getName())) {
-                        macAddress = NetUtil.hardwareAddressToString(iface.getHardwareAddress());
+                        macAddress = hardwareAddressToString(iface.getHardwareAddress());
                         break;
                     }
                 }
@@ -635,8 +654,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getPrimaryNetworkInterfaceName() {
-        if (this.kuraProperties.getProperty(KEY_PRIMARY_NET_IFACE) != null) {
-            return this.kuraProperties.getProperty(KEY_PRIMARY_NET_IFACE);
+        final Optional<String> propertyValue = getProperty(KEY_PRIMARY_NET_IFACE);
+
+        if (propertyValue.isPresent()) {
+            return propertyValue.get();
         } else {
             if (OS_MAC_OSX.equals(getOsName())) {
                 return "en0";
@@ -653,14 +674,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getPlatform() {
-        return this.kuraProperties.getProperty(KEY_PLATFORM);
+        return getProperty(KEY_PLATFORM).orElse(null);
     }
 
     @Override
     public String getOsArch() {
-        String override = this.kuraProperties.getProperty(KEY_OS_ARCH);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_OS_ARCH);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_OS_ARCH);
@@ -668,9 +689,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getOsName() {
-        String override = this.kuraProperties.getProperty(KEY_OS_NAME);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_OS_NAME);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_OS_NAME);
@@ -678,9 +699,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getOsVersion() {
-        String override = this.kuraProperties.getProperty(KEY_OS_VER);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_OS_VER);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         StringBuilder sbOsVersion = new StringBuilder();
@@ -710,19 +731,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getOsDistro() {
-        return this.kuraProperties.getProperty(KEY_OS_DISTRO);
+        return getProperty(KEY_OS_DISTRO).orElse(null);
     }
 
     @Override
     public String getOsDistroVersion() {
-        return this.kuraProperties.getProperty(KEY_OS_DISTRO_VER);
+        return getProperty(KEY_OS_DISTRO_VER).orElse(null);
     }
 
     @Override
     public String getJavaVendor() {
-        String override = this.kuraProperties.getProperty(KEY_JAVA_VENDOR);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_JAVA_VENDOR);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_JAVA_VENDOR);
@@ -730,9 +751,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getJavaVersion() {
-        String override = this.kuraProperties.getProperty(KEY_JAVA_VERSION);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_JAVA_VERSION);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_JAVA_VERSION);
@@ -740,9 +761,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getJavaVmName() {
-        String override = this.kuraProperties.getProperty(KEY_JAVA_VM_NAME);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_JAVA_VM_NAME);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_JAVA_VM_NAME);
@@ -750,9 +771,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getJavaVmVersion() {
-        String override = this.kuraProperties.getProperty(KEY_JAVA_VM_VERSION);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_JAVA_VM_VERSION);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_JAVA_VM_VERSION);
@@ -760,9 +781,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getJavaVmInfo() {
-        String override = this.kuraProperties.getProperty(KEY_JAVA_VM_INFO);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_JAVA_VM_INFO);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_JAVA_VM_INFO);
@@ -770,9 +791,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getOsgiFwName() {
-        String override = this.kuraProperties.getProperty(KEY_OSGI_FW_NAME);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_OSGI_FW_NAME);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_OSGI_FW_NAME);
@@ -780,9 +801,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getOsgiFwVersion() {
-        String override = this.kuraProperties.getProperty(KEY_OSGI_FW_VERSION);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_OSGI_FW_VERSION);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_OSGI_FW_VERSION);
@@ -810,9 +831,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getFileSeparator() {
-        String override = this.kuraProperties.getProperty(KEY_FILE_SEP);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_FILE_SEP);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_FILE_SEP);
@@ -820,74 +841,78 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getJavaHome() {
-        String override = this.kuraProperties.getProperty(KEY_JAVA_HOME);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_JAVA_HOME);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         return System.getProperty(KEY_JAVA_HOME);
     }
 
     public String getKuraName() {
-        return this.kuraProperties.getProperty(KEY_KURA_NAME);
+        return getProperty(KEY_KURA_NAME).orElse(null);
     }
 
     @Override
     public String getKuraVersion() {
-        return this.kuraProperties.getProperty(KEY_KURA_VERSION);
+        return getProperty(KEY_KURA_VERSION).orElse(null);
     }
 
     @Override
     public String getKuraMarketplaceCompatibilityVersion() {
-        String marketplaceCompatibilityVersion = this.kuraProperties
-                .getProperty(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION);
-        if (marketplaceCompatibilityVersion == null) {
+        final Optional<String> override = getProperty(KEY_KURA_MARKETPLACE_COMPATIBILITY_VERSION);
+        final String marketplaceCompatibilityVersion;
+
+        if (override.isPresent()) {
+            marketplaceCompatibilityVersion = override.get();
+        } else {
             marketplaceCompatibilityVersion = getKuraVersion();
         }
+
         return marketplaceCompatibilityVersion.replaceAll("KURA[-_ ]", "").replaceAll("[-_]", ".");
     }
 
     @Override
     public String getKuraFrameworkConfigDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR);
+        return getProperty(KEY_KURA_FRAMEWORK_CONFIG_DIR).orElse(null);
     }
 
     @Override
     public String getKuraUserConfigDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_USER_CONFIG_DIR);
+        return getProperty(KEY_KURA_USER_CONFIG_DIR).orElse(null);
     }
 
     @Override
     public String getKuraHome() {
-        return this.kuraProperties.getProperty(KEY_KURA_HOME_DIR);
+        return getProperty(KEY_KURA_HOME_DIR).orElse(null);
     }
 
     public String getKuraPluginsDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_PLUGINS_DIR);
+        return getProperty(KEY_KURA_PLUGINS_DIR).orElse(null);
     }
 
     @Override
     public String getKuraDataDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_DATA_DIR);
+        return getProperty(KEY_KURA_DATA_DIR).orElse(null);
     }
 
     @Override
     public String getKuraTemporaryConfigDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_TMP_DIR);
+        return getProperty(KEY_KURA_TMP_DIR).orElse(null);
     }
 
     @Override
     public String getKuraSnapshotsDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_SNAPSHOTS_DIR);
+        return getProperty(KEY_KURA_SNAPSHOTS_DIR).orElse(null);
     }
 
     @Override
     public int getKuraSnapshotsCount() {
         int iMaxCount = 10;
-        String maxCount = this.kuraProperties.getProperty(KEY_KURA_SNAPSHOTS_COUNT);
-        if (maxCount != null && maxCount.trim().length() > 0) {
+        final Optional<String> maxCount = getProperty(KEY_KURA_SNAPSHOTS_COUNT);
+        if (maxCount.isPresent() && maxCount.get().trim().length() > 0) {
             try {
-                iMaxCount = Integer.parseInt(maxCount);
+                iMaxCount = Integer.parseInt(maxCount.get());
             } catch (NumberFormatException nfe) {
                 logger.error("Error - Invalid kura.snapshots.count setting. Using default.", nfe);
             }
@@ -897,9 +922,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public int getKuraWifiTopChannel() {
-        String topWifiChannel = this.kuraProperties.getProperty(KEY_KURA_WIFI_TOP_CHANNEL);
-        if (topWifiChannel != null && topWifiChannel.trim().length() > 0) {
-            return Integer.parseInt(topWifiChannel);
+        final Optional<String> topWifiChannel = getProperty(KEY_KURA_WIFI_TOP_CHANNEL);
+        if (topWifiChannel.isPresent() && topWifiChannel.get().trim().length() > 0) {
+            return Integer.parseInt(topWifiChannel.get());
         }
 
         logger.warn("The last wifi channel is not defined for this system - setting to lowest common value of 11");
@@ -908,19 +933,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getKuraStyleDirectory() {
-        return this.kuraProperties.getProperty(KEY_KURA_STYLE_DIR);
+        return getProperty(KEY_KURA_STYLE_DIR).orElse(null);
     }
 
     @Override
     public String getKuraWebEnabled() {
-        return this.kuraProperties.getProperty(KEY_KURA_HAVE_WEB_INTER);
+        return getProperty(KEY_KURA_HAVE_WEB_INTER).orElse(null);
     }
 
     @Override
     public int getFileCommandZipMaxUploadSize() {
-        String commandMaxUpload = this.kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE);
-        if (commandMaxUpload != null && commandMaxUpload.trim().length() > 0) {
-            return Integer.parseInt(commandMaxUpload);
+        final Optional<String> commandMaxUpload = getProperty(KEY_FILE_COMMAND_ZIP_MAX_SIZE);
+        if (commandMaxUpload.isPresent() && commandMaxUpload.get().trim().length() > 0) {
+            return Integer.parseInt(commandMaxUpload.get());
         }
         logger.warn("Maximum command line upload size not available. Set default to 100 MB");
         return 100;
@@ -928,9 +953,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public int getFileCommandZipMaxUploadNumber() {
-        String commandMaxFilesUpload = this.kuraProperties.getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
-        if (commandMaxFilesUpload != null && commandMaxFilesUpload.trim().length() > 0) {
-            return Integer.parseInt(commandMaxFilesUpload);
+        final Optional<String> commandMaxFilesUpload = getProperty(KEY_FILE_COMMAND_ZIP_MAX_NUMBER);
+        if (commandMaxFilesUpload.isPresent() && commandMaxFilesUpload.get().trim().length() > 0) {
+            return Integer.parseInt(commandMaxFilesUpload.get());
         }
         logger.warn(
                 "Missing the parameter that specifies the maximum number of files uploadable using the command servlet. Set default to 1024 files");
@@ -939,9 +964,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getBiosVersion() {
-        String override = this.kuraProperties.getProperty(KEY_BIOS_VERSION);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_BIOS_VERSION);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String biosVersion = UNSUPPORTED;
@@ -976,9 +1001,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getDeviceName() {
-        String override = this.kuraProperties.getProperty(KEY_DEVICE_NAME);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_DEVICE_NAME);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String deviceName = UNKNOWN;
@@ -999,9 +1024,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getFirmwareVersion() {
-        String override = this.kuraProperties.getProperty(KEY_FIRMWARE_VERSION);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_FIRMWARE_VERSION);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String fwVersion = UNSUPPORTED;
@@ -1020,9 +1045,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getModelId() {
-        String override = this.kuraProperties.getProperty(KEY_MODEL_ID);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_MODEL_ID);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String modelId = UNKNOWN;
@@ -1051,9 +1076,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getModelName() {
-        String override = this.kuraProperties.getProperty(KEY_MODEL_NAME);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_MODEL_NAME);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String modelName = UNKNOWN;
@@ -1083,9 +1108,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getPartNumber() {
-        String override = this.kuraProperties.getProperty(KEY_PART_NUMBER);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_PART_NUMBER);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String partNumber = UNSUPPORTED;
@@ -1101,9 +1126,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public String getSerialNumber() {
-        String override = this.kuraProperties.getProperty(KEY_SERIAL_NUM);
-        if (override != null) {
-            return override;
+        final Optional<String> override = getProperty(KEY_SERIAL_NUM);
+        if (override.isPresent()) {
+            return override.get();
         }
 
         String serialNum = UNKNOWN;
@@ -1133,18 +1158,18 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public char[] getJavaKeyStorePassword() {
-        String keyStorePwd = this.kuraProperties.getProperty(KEY_KURA_KEY_STORE_PWD);
-        if (keyStorePwd != null) {
-            return keyStorePwd.toCharArray();
+        final Optional<String> keyStorePwd = getProperty(KEY_KURA_KEY_STORE_PWD);
+        if (keyStorePwd.isPresent()) {
+            return keyStorePwd.get().toCharArray();
         }
         return new char[0];
     }
 
     @Override
     public char[] getJavaTrustStorePassword() {
-        String trustStorePwd = this.kuraProperties.getProperty(KEY_KURA_TRUST_STORE_PWD);
-        if (trustStorePwd != null) {
-            return trustStorePwd.toCharArray();
+        final Optional<String> trustStorePwd = getProperty(KEY_KURA_TRUST_STORE_PWD);
+        if (trustStorePwd.isPresent()) {
+            return trustStorePwd.get().toCharArray();
         }
         return new char[0];
     }
@@ -1159,10 +1184,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public List<String> getDeviceManagementServiceIgnore() {
-        String servicesToIgnore = this.kuraProperties.getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE);
+        final Optional<String> servicesToIgnore = getProperty(CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE);
         List<String> services = new ArrayList<>();
-        if (servicesToIgnore != null && !servicesToIgnore.trim().isEmpty()) {
-            String[] servicesArray = servicesToIgnore.split(",");
+        if (servicesToIgnore.isPresent() && !servicesToIgnore.get().trim().isEmpty()) {
+            String[] servicesArray = servicesToIgnore.get().split(",");
             if (servicesArray != null && servicesArray.length > 0) {
                 services = Arrays.asList(servicesArray);
             }
@@ -1212,5 +1237,109 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             status = NetInterfaceStatus.netIPv4StatusUnmanaged.name();
         }
         return status;
+    }
+
+    private static String hardwareAddressToString(byte[] macAddress) {
+        if (macAddress == null) {
+            return "N/A";
+        }
+
+        if (macAddress.length != 6) {
+            throw new IllegalArgumentException("macAddress is invalid");
+        }
+
+        StringJoiner sj = new StringJoiner(":");
+        for (byte item : macAddress) {
+            sj.add(String.format("%02X", item));
+        }
+
+        return sj.toString();
+    }
+
+    @Override
+    public String getCpuVersion() {
+        final Optional<String> override = getProperty(KEY_CPU_VERSION);
+        if (override.isPresent()) {
+            return override.get();
+        }
+
+        if (OS_LINUX.equals(getOsName())) {
+            try {
+                return probeCpuVersionLinux();
+            } catch (final Exception e) {
+                // do nothing
+            }
+        }
+
+        return "unknown";
+    }
+
+    private static String probeCpuVersionLinux() throws IOException {
+        try (final BufferedReader reader = new BufferedReader(new FileReader("/proc/cpuinfo"))) {
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                final int separatorIndex = line.indexOf(':');
+
+                if (separatorIndex == -1) {
+                    continue;
+                }
+
+                final String key = line.substring(0, separatorIndex).trim();
+
+                if (key.equals("model name")) {
+                    return line.substring(separatorIndex + 1).trim();
+                }
+            }
+        }
+
+        throw new IOException("Could not retrieve cpu version");
+    }
+
+    protected Optional<String> getProperty(final String key) {
+        final String prop = this.kuraProperties.getProperty(key);
+
+        if (prop != null) {
+            return Optional.of(prop);
+        }
+
+        final String externalProvider = this.kuraProperties.getProperty(key + PROPERTY_PROVIDER_SUFFIX);
+
+        if (externalProvider != null) {
+            final String result = processCommandOutput(runSystemCommand(externalProvider, true, executorService));
+
+            if (result != null && !result.isEmpty()) {
+                return Optional.of(result);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private String processCommandOutput(final String result) {
+        if (result == null) {
+            return null;
+        }
+
+        final String trimmed = result.trim();
+
+        if (trimmed.isEmpty()) {
+            return trimmed;
+        }
+
+        int i;
+
+        for (i = trimmed.length() - 1; i > 0; i--) {
+            if (trimmed.charAt(i) != '\n') {
+                break;
+            }
+        }
+
+        return trimmed.substring(0, i + 1);
+    }
+
+    @Override
+    public Optional<ExtendedProperties> getExtendedProperties() {
+        return Optional.empty();
     }
 }

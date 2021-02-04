@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,6 +50,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -123,21 +126,37 @@ public class SecurityPanelUi extends Composite {
         this.gwtSecurityService.isSecurityServiceAvailable(callback);
 
         this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
+
         this.httpService.addClickHandler(
-                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService",
-                        httpServicePanel, Optional.of(getHttpServiceOptionsValidator()))));
+                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", //
+                        httpServicePanel, //
+                        getHttpServiceOptionsValidator(), //
+                        ui -> ui.onApply(err -> {
+                            ui.setDirty(false);
+                            Window.Location.reload();
+                        }))));
         this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
-                consolePanel, Optional.of(getConsoleOptionsValidator()))));
+                consolePanel, getConsoleOptionsValidator())));
         this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
-    public void loadServiceConfig(final String pid, final TabPane panel,
-            final Optional<ServicesUi.Validator> validator) {
+    public void loadServiceConfig(final String pid, final TabPane panel, final ServicesUi.Validator validator) {
+        loadServiceConfig(pid, panel, validator, ui -> {
+        });
+    }
+
+    public void loadServiceConfig(final String pid, final TabPane panel, final ServicesUi.Validator validator,
+            final Consumer<ServicesUi> customizer) {
         RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(c.callback(
                 token -> gwtComponentService.findFilteredComponentConfiguration(token, pid, c.callback(result -> {
                     for (GwtConfigComponent config : result) {
                         panel.clear();
-                        panel.add(new ServicesUi(config, Optional.empty(), validator));
+
+                        final ServicesUi ui = new ServicesUi(config, Optional.empty(), Optional.of(validator));
+
+                        customizer.accept(ui);
+
+                        panel.add(ui);
                     }
                 })))));
     }
@@ -214,7 +233,7 @@ public class SecurityPanelUi extends Composite {
     private Validator getConsoleOptionsValidator() {
         return config -> {
             final List<ValidationResult> result = new ArrayList<>();
-            if (!config.getParameters().stream().anyMatch(p -> isEnabledBooleanParameter(p, "auth.method"))) {
+            if (config.getParameters().stream().noneMatch(p -> isEnabledBooleanParameter(p, "auth.method"))) {
                 result.add(ValidationResult.warning(MSGS.securityAllAuthMethodsDisabled()));
             }
             return result;
@@ -225,29 +244,28 @@ public class SecurityPanelUi extends Composite {
         return config -> {
             final List<ValidationResult> result = new ArrayList<>();
 
-            boolean isHttpEnabled = false;
-            boolean isHttpsEnabled = false;
-            boolean isHttpsClientAuthEnabled = false;
+            final Set<Integer> ports = new HashSet<>();
+            final Set<Integer> httpPorts = new HashSet<>();
+            final Set<Integer> httpsPorts = new HashSet<>();
+            final Set<Integer> httpsClientAuthPorts = new HashSet<>();
             boolean haveHttpsKeystorePath = true;
             boolean haveHttpsKeystorePassword = true;
-            final Set<Integer> ports = new HashSet<>();
 
             for (final GwtConfigParameter p : config.getParameters()) {
-                if (isEnabledBooleanParameter(p, "http.enabled")) {
-                    isHttpEnabled = true;
-                }
-                if (isEnabledBooleanParameter(p, "https.enabled")) {
-                    isHttpsEnabled = true;
-                }
-                if (isEnabledBooleanParameter(p, "https.client.auth.enabled")) {
-                    isHttpsClientAuthEnabled = true;
-                }
-                if (p.getId().endsWith("port")) {
-                    try {
-                        ports.add(Integer.parseInt(p.getValue()));
-                    } catch (final Exception e) {
-                        // do nothing
-                    }
+                if (p.getId().endsWith("ports")) {
+                    getIntegerFieldValues(p, port -> {
+                        if (ports.contains(port)) {
+                            result.add(ValidationResult.error(MSGS.securityPortConflictOrInvalidPort()));
+                        }
+                        ports.add(port);
+                        if (p.getId().startsWith("http.")) {
+                            httpPorts.add(port);
+                        } else if (p.getId().startsWith("https.ports")) {
+                            httpsPorts.add(port);
+                        } else if (p.getId().startsWith("https.client")) {
+                            httpsClientAuthPorts.add(port);
+                        }
+                    });
                 }
                 if (isEmptyParameter(p, "https.keystore.path")) {
                     haveHttpsKeystorePath = false;
@@ -257,21 +275,33 @@ public class SecurityPanelUi extends Composite {
                 }
             }
 
-            if (!isHttpEnabled && !isHttpsEnabled && !isHttpsClientAuthEnabled) {
+            if (httpPorts.isEmpty() && httpsPorts.isEmpty() && httpsClientAuthPorts.isEmpty()) {
                 result.add(ValidationResult.warning(MSGS.securityAllConnectorsDisabled()));
             }
 
-            if (ports.size() != 3) {
-                result.add(ValidationResult.error(MSGS.securityPortConflictOrInvalidPort()));
-            }
-
-            if ((isHttpsEnabled || isHttpsClientAuthEnabled)
+            if ((!httpsPorts.isEmpty() || !httpsClientAuthPorts.isEmpty())
                     && (!haveHttpsKeystorePath || !haveHttpsKeystorePassword)) {
                 result.add(ValidationResult.error(MSGS.securityHttpsEnabledButKeystoreParametersMissing()));
             }
 
             return result;
         };
+    }
+
+    private void getIntegerFieldValues(final GwtConfigParameter param, final IntConsumer consumer) {
+        final String[] values = param.getValues();
+
+        if (values == null) {
+            return;
+        }
+
+        for (final String value : values) {
+            if (value == null || value.trim().isEmpty()) {
+                continue;
+            }
+
+            consumer.accept(Integer.parseInt(value));
+        }
     }
 
     public Optional<ServicesUi> getServicesUi(final IndexedPanel parent) {

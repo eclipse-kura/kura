@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,12 @@ package org.eclipse.kura.web.server.util;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
@@ -453,6 +456,25 @@ public final class GwtServerUtil {
             return null;
         }
         return toGwtConfigComponent(descriptor.getPid(), channelDescriptor);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Set<T> getArrayProperty(final Object raw, final Class<T> elementValue) {
+        if (!(raw instanceof Object[])) {
+            return Collections.emptySet();
+        }
+
+        final Object[] asArray = (Object[]) raw;
+
+        final Set<T> result = new HashSet<>();
+
+        for (final Object o : asArray) {
+            if (elementValue.isInstance(o)) {
+                result.add((T) o);
+            }
+        }
+
+        return result;
     }
 
 }

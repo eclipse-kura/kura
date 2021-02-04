@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -116,6 +117,7 @@ public class ServicesUi extends AbstractServicesUi {
     AlertDialog alertDialog;
 
     private final Optional<Listener> listener;
+    private Optional<Consumer<Optional<Throwable>>> onApply = Optional.empty();
 
     //
     // Public methods
@@ -345,6 +347,8 @@ public class ServicesUi extends AbstractServicesUi {
                                                                                 ? caught.getLocalizedMessage()
                                                                                 : caught.getClass().getName(),
                                                                         caught);
+                                                                onApply.ifPresent(
+                                                                        action -> action.accept(Optional.of(caught)));
                                                             }
 
                                                             @Override
@@ -357,6 +361,8 @@ public class ServicesUi extends AbstractServicesUi {
                                                                 ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
                                                                 context.defer(2000, () -> ServicesUi.this.listener
                                                                         .ifPresent(Listener::onConfigurationChanged));
+                                                                onApply.ifPresent(
+                                                                        action -> action.accept(Optional.empty()));
                                                             }
                                                         })))));
                             }
@@ -385,6 +391,10 @@ public class ServicesUi extends AbstractServicesUi {
     private void initInvalidDataModal() {
         this.incompleteFieldsModal.setTitle(MSGS.warning());
         this.incompleteFieldsText.setText(MSGS.formWithErrorsOrIncomplete());
+    }
+
+    public void onApply(final Consumer<Optional<Throwable>> action) {
+        this.onApply = Optional.of(action);
     }
 
     public interface Listener {

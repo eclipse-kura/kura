@@ -1098,14 +1098,16 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        List<GwtModemPdpEntry> gwtModemPdpEntries = new ArrayList<>();
         ModemManagerService mms = ServiceLocator.getInstance().getService(ModemManagerService.class);
 
         try {
-            withCellularModem(interfaceName, mms, m -> {
+            return withCellularModem(interfaceName, mms, m -> {
+                List<GwtModemPdpEntry> gwtModemPdpEntries = new ArrayList<>();
+
                 if (!m.isPresent()) {
-                    return (Void) null;
+                    return gwtModemPdpEntries;
                 }
+
                 final CellularModem modem = m.get();
                 List<ModemPdpContext> pdpContextInfo = modem.getPdpContextInfo();
                 GwtModemPdpEntry gwtModemPdpEntry;
@@ -1131,13 +1133,11 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 gwtModemPdpEntry.setApn("Please provide APN for this new PDP context ...");
                 gwtModemPdpEntries.add(gwtModemPdpEntry);
 
-                return (Void) null;
+                return gwtModemPdpEntries;
             });
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.WARNING, e);
         }
-
-        return gwtModemPdpEntries;
     }
 
     @Override

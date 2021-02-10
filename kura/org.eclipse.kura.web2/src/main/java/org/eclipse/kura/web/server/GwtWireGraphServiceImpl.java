@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,7 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
@@ -58,6 +59,9 @@ import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
+import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireEmitter;
+import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentDefinition;
@@ -255,6 +259,19 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
     public void updateWireConfiguration(final GwtXSRFToken xsrfToken, GwtWireGraphConfiguration gwtConfigurations,
             List<GwtConfigComponent> additionalGwtConfigs) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
+
+        for (final GwtWireComponentConfiguration config : gwtConfigurations.getWireComponentConfigurations()) {
+            if (!GwtServerUtil.isFactoryOfAnyService(config.getConfiguration().getFactoryId(), WireComponent.class,
+                    WireEmitter.class, WireReceiver.class)) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            }
+        }
+
+        for (final GwtConfigComponent config : additionalGwtConfigs) {
+            if (!GwtServerUtil.isFactoryOfAnyService(config.getFactoryId(), Driver.class)) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            }
+        }
 
         final List<String> receivedConfigurationPids = Stream.concat(gwtConfigurations.getWireComponentConfigurations() //
                 .stream()//

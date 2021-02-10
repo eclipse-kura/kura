@@ -20,6 +20,8 @@ import static org.mockito.Mockito.verify;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
@@ -27,7 +29,6 @@ import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
-import org.eclipse.kura.security.IntrusionDetectionConfiguration;
 import org.junit.Test;
 
 public class LinuxFirewallTest extends FirewallTestUtils {
@@ -35,9 +36,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addLocalRuleTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100:10200");
         } catch (KuraIOException e) {
@@ -55,9 +54,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addLocalRulesTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<LocalRule> rules = new ArrayList<>();
         try {
             rules.add(new LocalRule(5400, "tcp",
@@ -81,14 +78,17 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
     public void addPortForwardTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
                     "32", "00:11:22:33:44:55:66", "10100:10200");
@@ -109,9 +109,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addPortForwardRulesTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<PortForwardRule> rules = new ArrayList<>();
         try {
             rules.add(new PortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100", 32,
@@ -136,14 +134,17 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
     public void addAutoNatRuleTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", true);
         } catch (KuraIOException e) {
@@ -159,9 +160,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addAutoNatRulesTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<NATRule> rules = new ArrayList<>();
         try {
             rules.add(new NATRule("eth0", "eth1", true));
@@ -181,14 +180,17 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
     public void addNatRuleTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true);
         } catch (KuraIOException e) {
@@ -205,9 +207,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void addNatRulesTest() throws KuraException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         List<NATRule> rules = new ArrayList<>();
         try {
             rules.add(new NATRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true));
@@ -228,14 +228,17 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
     public void deleteLocalRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100:10200");
         } catch (KuraIOException e) {
@@ -260,9 +263,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deletePortForwardRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
                     "32", "00:11:22:33:44:55:66", "10100:10200");
@@ -287,9 +288,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAutoNatRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", true);
         } catch (KuraIOException e) {
@@ -312,9 +311,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllLocalRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100:10200");
         } catch (KuraIOException e) {
@@ -333,9 +330,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllPortForwardRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
                     "32", "00:11:22:33:44:55:66", "10100:10200");
@@ -355,9 +350,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllAutoNatRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", true);
         } catch (KuraIOException e) {
@@ -376,9 +369,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     @Test
     public void deleteAllNatRuleTest() throws KuraException, UnknownHostException {
         setUpMock();
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration();
         LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
-        linuxFirewall.setFloodingProtectionConfiguration(config);
         try {
             linuxFirewall.addNatRule("eth0", "eth1", "tcp", "172.16.0.1/32", "172.16.0.2/32", true);
         } catch (KuraIOException e) {
@@ -392,6 +383,49 @@ public class LinuxFirewallTest extends FirewallTestUtils {
             // do nothing...
         }
         assertTrue(linuxFirewall.getNatRules().isEmpty());
+    }
+
+    @Test
+    public void setAdditionalRulesTest() throws KuraException {
+        setUpMock();
+
+        String[] mangleRulesArray = { "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
+                "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
+                "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
+                "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
+
+        LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        try {
+            linuxFirewall.setAdditionalRules(new HashSet<String>(), new HashSet<String>(),
+                    new HashSet<String>(Arrays.asList(mangleRulesArray)));
+        } catch (KuraIOException e) {
+            // do nothing...
+        }
+
+        verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardFilter);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
 }

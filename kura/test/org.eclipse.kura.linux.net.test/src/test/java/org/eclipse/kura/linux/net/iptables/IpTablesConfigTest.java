@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,7 +33,6 @@ import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
-import org.eclipse.kura.security.IntrusionDetectionConfiguration;
 import org.junit.Test;
 
 public class IpTablesConfigTest extends FirewallTestUtils {
@@ -188,10 +189,29 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     public void applyRulesTest() {
         setUpMock();
 
-        IntrusionDetectionConfiguration config = new IntrusionDetectionConfiguration(true, 111, 60, 20, 2, 2);
+        String[] mangleRulesArray = { "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
+                "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
+                "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
+                "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
+        Set<String> mangleRules = new HashSet<String>(Arrays.asList(mangleRulesArray));
+
         IptablesConfig iptablesConfig = new IptablesConfig(new LinkedHashSet<>(), new LinkedHashSet<>(),
                 new LinkedHashSet<>(), new LinkedHashSet<>(), false, executorServiceMock);
-        iptablesConfig.setFloodingProtectionConfiguration(config);
+        iptablesConfig.setAdditionalFilterRules(new HashSet<String>());
+        iptablesConfig.setAdditionalNatRules(new HashSet<String>());
+        iptablesConfig.setAdditionalMangleRules(mangleRules);
         iptablesConfig.applyRules();
 
         for (Command c : commandApplyList) {

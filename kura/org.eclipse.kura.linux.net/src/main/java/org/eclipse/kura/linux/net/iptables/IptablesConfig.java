@@ -439,15 +439,6 @@ public class IptablesConfig extends IptablesConfigConstants {
         }
     }
 
-    // private String replaceVariables(String floodProtection) {
-    // return floodProtection
-    // .replace("KURA_CONN_LIMIT", Integer.toString(floodingProtectionConfiguration.getConnLimit()))
-    // .replace("KURA_LIMIT", Integer.toString(floodingProtectionConfiguration.getLimit()))
-    // .replace("KURA_BURST_LIMIT", Integer.toString(floodingProtectionConfiguration.getBurstLimit()))
-    // .replace("KURA_RST_LIMIT", Integer.toString(floodingProtectionConfiguration.getRstLimit()))
-    // .replace("KURA_RST_BURST_LIMIT", Integer.toString(floodingProtectionConfiguration.getRstBurstLimit()));
-    // }
-
     private void saveNatTable(PrintWriter writer) {
         writePortForwardRulesToNatTable(writer);
         writeAutoNatRulesToNatTable(writer);

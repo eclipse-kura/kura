@@ -193,20 +193,6 @@ public class FirewallTestUtils {
                 "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP".split(" ")));
         commandApplyList.add(new Command("iptables -t mangle -A prerouting-kura -p icmp -j DROP".split(" ")));
         commandApplyList.add(new Command("iptables -t mangle -A prerouting-kura -f -j DROP".split(" ")));
-
-        commandApplyList.add(new Command(
-                "iptables -t filter -A input-kura -p tcp -m connlimit --connlimit-above 111 -j REJECT --reject-with tcp-reset"
-                        .split(" ")));
-        commandApplyList.add(new Command(
-                "iptables -t filter -A input-kura -p tcp --tcp-flags RST RST -m limit --limit 2/s --limit-burst 2 -j ACCEPT"
-                        .split(" ")));
-        commandApplyList
-                .add(new Command("iptables -t filter -A input-kura -p tcp --tcp-flags RST RST -j DROP".split(" ")));
-        commandApplyList.add(new Command(
-                "iptables -t filter -A input-kura -p tcp -m conntrack --ctstate NEW -m limit --limit 60/s --limit-burst 20 -j ACCEPT"
-                        .split(" ")));
-        commandApplyList.add(
-                new Command("iptables -t filter -A input-kura -p tcp -m conntrack --ctstate NEW -j DROP".split(" ")));
         commandApplyList.stream().forEach(c -> c.setExecuteInAShell(true));
         commandApplyList.stream().forEach(c -> when(executorServiceMock.execute(c)).thenReturn(successStatus));
 

@@ -383,7 +383,6 @@ public class LinuxFirewall {
                 || this.natRules != null && !this.natRules.isEmpty()) {
             this.allowForwarding = true;
         }
-        // Non posso usare direttamente this.iptables????
         IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
                 this.natRules, this.allowIcmp, this.executorService);
         newIptables.setAdditionalFilterRules(this.additionalFilterRules);
@@ -440,23 +439,6 @@ public class LinuxFirewall {
         this.additionalMangleRules.addAll(mangleRules);
         update();
     }
-    // public void setAdditionalFilterRules(Set<String> filterRules) {
-    // // For now we replace all the rules...
-    // this.additionalFilterRules.clear();
-    // this.additionalFilterRules.addAll(filterRules);
-    // }
-    //
-    // public void setAdditionalNatRules(Set<String> natRules) {
-    // // For now we replace all the rules...
-    // this.additionalNatRules.clear();
-    // this.additionalNatRules.addAll(natRules);
-    // }
-    //
-    // public void setAdditionalMangleRules(Set<String> filterRules) {
-    // // For now we replace all the rules...
-    // this.additionalMangleRules.clear();
-    // this.additionalMangleRules.addAll(filterRules);
-    // }
 
     private void update() throws KuraException {
         synchronized (lock) {

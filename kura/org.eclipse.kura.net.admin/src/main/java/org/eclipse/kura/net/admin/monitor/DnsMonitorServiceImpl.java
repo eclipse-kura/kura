@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.monitor;
 
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,6 @@ import org.eclipse.kura.net.dns.DnsServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,10 +57,6 @@ import org.slf4j.LoggerFactory;
 public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(DnsMonitorServiceImpl.class);
-
-    private static final String[] EVENT_TOPICS = new String[] {
-            NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC,
-            NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC };
 
     private static final long THREAD_INTERVAL = 60000;
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
@@ -77,7 +70,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private Set<NetworkPair<IP4Address>> allowedNetworks;
     private Set<IP4Address> forwarders;
 
-    private LinuxDns dnsUtil;
+    private LinuxDns dnsUtil = LinuxDns.getInstance();
     private DnsServerService dnsServer;
     private CommandExecutorService executorService;
 
@@ -110,17 +103,12 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     protected void activate(ComponentContext componentContext) {
         logger.debug("Activating DnsProxyMonitor Service...");
 
-        Dictionary<String, String[]> d = new Hashtable<>();
-        d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
-        componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
-
         try {
             this.networkConfiguration = this.netConfigService.getNetworkConfiguration();
         } catch (KuraException e) {
             logger.error("Could not get initial network configuration", e);
         }
 
-        this.dnsUtil = LinuxDns.getInstance();
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
 
         stopThread = new AtomicBoolean();

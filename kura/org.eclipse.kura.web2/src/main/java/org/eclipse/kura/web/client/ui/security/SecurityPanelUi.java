@@ -284,6 +284,10 @@ public class SecurityPanelUi extends Composite {
                 result.add(ValidationResult.error(MSGS.securityHttpsEnabledButKeystoreParametersMissing()));
             }
 
+            if (result.isEmpty()) {
+                result.add(ValidationResult.warning(MSGS.securityHttpServiceUiReloadWarning()));
+            }
+
             return result;
         };
     }

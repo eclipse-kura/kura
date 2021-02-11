@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -329,11 +331,9 @@ public class FileServlet extends HttpServlet {
                 .getServiceReference(PasswordCommandService.class);
 
         String workingDir = (String) commandServiceReference.getProperty("command.working.directory");
-        if (isNull(workingDir) || workingDir.isEmpty()) {
+        if (isNull(workingDir) || workingDir.isEmpty() || !Files.isDirectory(Paths.get(workingDir))) {
             workingDir = System.getProperty(JAVA_IO_TMPDIR, "/tmp");
         }
-
-        logger.info("Working dir : {}", workingDir);
 
         List<FileItem> fileItems = null;
         InputStream is = null;

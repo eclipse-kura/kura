@@ -57,8 +57,6 @@ public class LinuxFirewall {
     private final IptablesConfig iptables;
     private final CommandExecutorService executorService;
 
-    // make it singleton in some way...
-
     public LinuxFirewall(CommandExecutorService executorService) {
         this.executorService = executorService;
         this.iptables = new IptablesConfig(this.executorService);

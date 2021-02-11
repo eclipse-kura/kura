@@ -26,9 +26,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
-import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator;
-import org.eclipse.kura.internal.floodingprotection.FloodingProtectionOptions;
 import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,11 +67,6 @@ public class FloodingProtectionConfiguratorTest {
     @Test
     public void activateTest() throws KuraException, NoSuchFieldException {
         this.floodingProtectionConfigurator.activate(null, this.properties);
-        FloodingProtectionOptions floodingProtectionOptions = (FloodingProtectionOptions) TestUtil
-                .getFieldValue(this.floodingProtectionConfigurator, "floodingProtectionOptions");
-
-        assertNotNull(floodingProtectionOptions);
-        assertFalse(floodingProtectionOptions.getProperties().isEmpty());
         verify(this.eaMock, times(1)).postEvent(new FloodingProtectionConfigurationChangeEvent(this.properties));
     }
 

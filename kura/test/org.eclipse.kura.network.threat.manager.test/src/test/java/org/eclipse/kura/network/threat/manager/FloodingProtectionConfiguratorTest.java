@@ -88,7 +88,7 @@ public class FloodingProtectionConfiguratorTest {
     }
 
     @Test
-    public void getFloodingProtectionMatRulesTest() {
+    public void getFloodingProtectionNatRulesTest() {
         this.floodingProtectionConfigurator.updated(this.properties);
         assertNotNull(this.floodingProtectionConfigurator.getFloodingProtectionNatRules());
         assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionNatRules().isEmpty());

@@ -100,7 +100,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         this.executorService = null;
     }
 
-    protected void activate(ComponentContext componentContext) {
+    protected void activate() {
         logger.debug("Activating DnsProxyMonitor Service...");
 
         try {

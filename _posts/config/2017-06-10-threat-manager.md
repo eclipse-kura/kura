@@ -8,6 +8,8 @@ Kura provides a set of features to detect and prevent network attacks. The **Sec
 
 {% include alerts.html message='The Network Threat Manager tab is not available for the No Network version of Kura.' %}
 
+![]({{ site.baseurl }}/assets/images/config/threatManager.png)
+
 The following functions are supported:
 
 - Flooding protection

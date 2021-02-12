@@ -32,7 +32,8 @@ iptables -A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP
 iptables -A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP
 iptables -A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP
 iptables -A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP
-iptables -A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP
+iptables -A prerouting-kura -p icmp -j DROP
+iptables -A prerouting-kura -f -j DROP
 ```
 
 The following parameters are available:

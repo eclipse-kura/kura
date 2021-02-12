@@ -193,6 +193,8 @@ public class FirewallTestUtils {
                 "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP".split(" ")));
         commandApplyList.add(new Command("iptables -t mangle -A prerouting-kura -p icmp -j DROP".split(" ")));
         commandApplyList.add(new Command("iptables -t mangle -A prerouting-kura -f -j DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -t filter -A input-kura -p tcp -f -j DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -t nat -A prerouting-kura -p tcp -f -j DROP".split(" ")));
         commandApplyList.stream().forEach(c -> c.setExecuteInAShell(true));
         commandApplyList.stream().forEach(c -> when(executorServiceMock.execute(c)).thenReturn(successStatus));
 

@@ -207,10 +207,18 @@ public class IpTablesConfigTest extends FirewallTestUtils {
                 "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
         Set<String> mangleRules = new HashSet<String>(Arrays.asList(mangleRulesArray));
 
+        // These rules are fake...
+        String[] filterRulesArray = { "-A input-kura -p tcp -f -j DROP" };
+        Set<String> filterRules = new HashSet<String>(Arrays.asList(filterRulesArray));
+
+        // Also these ones...
+        String[] natRulesArray = { "-A prerouting-kura -p tcp -f -j DROP" };
+        Set<String> natRules = new HashSet<String>(Arrays.asList(natRulesArray));
+
         IptablesConfig iptablesConfig = new IptablesConfig(new LinkedHashSet<>(), new LinkedHashSet<>(),
                 new LinkedHashSet<>(), new LinkedHashSet<>(), false, executorServiceMock);
-        iptablesConfig.setAdditionalFilterRules(new HashSet<String>());
-        iptablesConfig.setAdditionalNatRules(new HashSet<String>());
+        iptablesConfig.setAdditionalFilterRules(filterRules);
+        iptablesConfig.setAdditionalNatRules(natRules);
         iptablesConfig.setAdditionalMangleRules(mangleRules);
         iptablesConfig.applyRules();
 

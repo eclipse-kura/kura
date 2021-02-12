@@ -511,7 +511,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     private void writeAdditionalRulesToNatTable(PrintWriter writer) {
         for (String natRule : this.additionalNatRules) {
             if (writer == null) {
-                CommandStatus status = execute((IPTABLES_COMMAND + " -t " + FILTER + " " + natRule).split(" "));
+                CommandStatus status = execute((IPTABLES_COMMAND + " -t " + NAT + " " + natRule).split(" "));
                 if (!status.getExitStatus().isSuccessful()) {
                     logger.error("Failed to apply additional rules to nat table");
                 }

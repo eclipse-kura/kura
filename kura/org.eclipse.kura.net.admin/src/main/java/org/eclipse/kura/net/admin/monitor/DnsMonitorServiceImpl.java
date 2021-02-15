@@ -48,7 +48,6 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dns.DnsMonitorService;
 import org.eclipse.kura.net.dns.DnsServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -163,7 +162,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         if (monitorTask != null && !monitorTask.isDone()) {
             stopThread.set(true);
             monitorNotity();

@@ -1,17 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
+
+import static java.util.Objects.isNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -24,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +53,7 @@ import org.apache.commons.io.FileCleaningTracker;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
@@ -322,9 +327,17 @@ public class FileServlet extends HttpServlet {
         }
         // END XSRF security check
 
+        final ServiceReference<PasswordCommandService> commandServiceReference = this.bundleContext
+                .getServiceReference(PasswordCommandService.class);
+
+        String workingDir = (String) commandServiceReference.getProperty("command.working.directory");
+        if (isNull(workingDir) || workingDir.isEmpty() || !Files.isDirectory(Paths.get(workingDir))) {
+            workingDir = System.getProperty(JAVA_IO_TMPDIR, "/tmp");
+        }
+
         List<FileItem> fileItems = null;
         InputStream is = null;
-        File localFolder = new File(System.getProperty(JAVA_IO_TMPDIR));
+        File localFolder = new File(workingDir);
         OutputStream os = null;
 
         try {

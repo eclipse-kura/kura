@@ -67,3 +67,25 @@ COMMIT
 -A output-kura -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A output-kura -j RETURN
 COMMIT
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+:input-kura - [0:0]
+:output-kura - [0:0]
+:forward-kura - [0:0]
+:postrouting-kura - [0:0]
+:prerouting-kura - [0:0]
+-I PREROUTING -j prerouting-kura
+-I INPUT -j input-kura
+-I OUTPUT -j output-kura
+-I FORWARD -j forward-kura
+-I POSTROUTING -j postrouting-kura
+-A prerouting-kura -j RETURN
+-A input-kura -j RETURN
+-A output-kura -j RETURN
+-A forward-kura -j RETURN
+-A postrouting-kura -j RETURN
+COMMIT

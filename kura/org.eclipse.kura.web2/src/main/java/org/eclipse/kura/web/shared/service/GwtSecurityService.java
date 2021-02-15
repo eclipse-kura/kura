@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,4 +33,6 @@ public interface GwtSecurityService extends RemoteService {
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public boolean isThreatManagerAvailable();
 }

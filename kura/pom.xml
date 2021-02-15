@@ -111,6 +111,8 @@
 
         <module>org.eclipse.kura.useradmin.store</module>
 
+        <module>org.eclipse.kura.network.threat.manager</module>
+
         <module>features</module>
         <module>emulator</module>
 

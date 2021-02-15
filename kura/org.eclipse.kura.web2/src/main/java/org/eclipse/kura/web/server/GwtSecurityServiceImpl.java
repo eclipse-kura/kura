@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.security.SecurityService;
+import org.eclipse.kura.security.ThreatManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -104,5 +105,20 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
         auditLogger.info(
                 "UI Security - Success - Successfully reloaded command line fingerprint for user: {}, session: {}",
                 session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+    }
+
+    @Override
+    public boolean isThreatManagerAvailable() {
+
+        try {
+            ThreatManagerService threatManagerService = ServiceLocator.getInstance()
+                    .getService(ThreatManagerService.class);
+            if (threatManagerService != null) {
+                return true;
+            }
+        } catch (GwtKuraException e) {
+            return false;
+        }
+        return false;
     }
 }

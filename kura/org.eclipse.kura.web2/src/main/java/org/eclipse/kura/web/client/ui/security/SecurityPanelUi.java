@@ -79,6 +79,8 @@ public class SecurityPanelUi extends Composite {
     @UiField
     TabPane consolePanel;
     @UiField
+    ThreatManagerTabUi threatManagerPanel;
+    @UiField
     SecurityTabUi securityPanel;
 
     @UiField
@@ -87,6 +89,8 @@ public class SecurityPanelUi extends Composite {
     TabListItem httpService;
     @UiField
     TabListItem console;
+    @UiField
+    TabListItem threatManager;
     @UiField
     TabListItem security;
 
@@ -111,7 +115,7 @@ public class SecurityPanelUi extends Composite {
         description.setText(MSGS.securityIntro());
         this.securityIntro.add(description);
 
-        AsyncCallback<Boolean> callback = new AsyncCallback<Boolean>() {
+        this.gwtSecurityService.isSecurityServiceAvailable(new AsyncCallback<Boolean>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -122,8 +126,20 @@ public class SecurityPanelUi extends Composite {
             public void onSuccess(Boolean result) {
                 SecurityPanelUi.this.security.setVisible(result);
             }
-        };
-        this.gwtSecurityService.isSecurityServiceAvailable(callback);
+        });
+
+        this.gwtSecurityService.isThreatManagerAvailable(new AsyncCallback<Boolean>() {
+
+            @Override
+            public void onSuccess(Boolean result) {
+                SecurityPanelUi.this.threatManager.setVisible(result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                SecurityPanelUi.this.threatManager.setVisible(false);
+            }
+        });
 
         this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
 
@@ -137,6 +153,7 @@ public class SecurityPanelUi extends Composite {
                         }))));
         this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
                 consolePanel, getConsoleOptionsValidator())));
+        this.threatManager.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.threatManagerPanel)));
         this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
@@ -172,10 +189,11 @@ public class SecurityPanelUi extends Composite {
     public boolean isDirty() {
         boolean certListDirty = this.certificateListPanel.isDirty();
         boolean securityDirty = this.securityPanel.isDirty();
+        boolean threatManagerDirty = this.threatManagerPanel.isDirty();
         boolean webConsoleDirty = isServicesUiDirty(this.consolePanel);
         boolean httpServiceDirty = isServicesUiDirty(this.httpServicePanel);
 
-        return certListDirty || httpServiceDirty || securityDirty || webConsoleDirty;
+        return certListDirty || httpServiceDirty || threatManagerDirty || securityDirty || webConsoleDirty;
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -198,6 +216,7 @@ public class SecurityPanelUi extends Composite {
     public void setDirty(boolean b) {
         this.certificateListPanel.setDirty(b);
         this.securityPanel.setDirty(b);
+        this.threatManagerPanel.setDirty(b);
         getServicesUi(this.httpServicePanel).ifPresent(u -> u.setDirty(b));
         getServicesUi(this.consolePanel).ifPresent(u -> u.setDirty(b));
     }

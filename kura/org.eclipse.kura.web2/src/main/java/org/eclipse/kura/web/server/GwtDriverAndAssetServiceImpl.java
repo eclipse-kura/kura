@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -46,9 +46,11 @@ import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
 import org.eclipse.kura.web.session.Attributes;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
 import org.eclipse.kura.web.shared.model.GwtChannelRecord;
@@ -359,9 +361,9 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     @Override
     public void createDriverOrAssetConfiguration(GwtXSRFToken token, String factoryPid, String pid)
             throws GwtKuraException {
-        // TODO restrict this to work only driver and asset configurations
-
         checkXSRFToken(token);
+
+        requireIsDriverOrAssetFactory(factoryPid);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -372,9 +374,9 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     @Override
     public void createDriverOrAssetConfiguration(GwtXSRFToken token, String factoryPid, String pid,
             GwtConfigComponent config) throws GwtKuraException {
-        // TODO restrict this to work only driver and asset configurations
-
         checkXSRFToken(token);
+
+        requireIsDriverOrAssetFactory(factoryPid);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -385,9 +387,10 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     @Override
     public void updateDriverOrAssetConfiguration(GwtXSRFToken token, GwtConfigComponent config)
             throws GwtKuraException {
-        // TODO restrict this to work only driver and asset configurations
 
         checkXSRFToken(token);
+
+        requireIsDriverOrAsset(config.getComponentId());
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
@@ -398,13 +401,28 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     @Override
     public void deleteDriverOrAssetConfiguration(GwtXSRFToken token, String pid, boolean takeSnapshot)
             throws GwtKuraException {
-        // TODO restrict this to work only driver and asset configurations
 
         checkXSRFToken(token);
+
+        requireIsDriverOrAsset(pid);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
         GwtComponentServiceInternal.deleteFactoryConfiguration(session, pid, takeSnapshot);
+    }
+
+    private static void requireIsDriverOrAssetFactory(String factoryPid) throws GwtKuraException {
+        if (!(GwtServerUtil.isFactoryOfAnyService(factoryPid, Driver.class)
+                || GwtServerUtil.isFactoryOfAnyService(factoryPid, Asset.class))) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        }
+    }
+
+    private static void requireIsDriverOrAsset(String kuraServicePid) throws GwtKuraException {
+        if (!(GwtServerUtil.providesService(kuraServicePid, Driver.class)
+                || GwtServerUtil.providesService(kuraServicePid, Asset.class))) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        }
     }
 }

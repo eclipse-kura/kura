@@ -16,6 +16,7 @@ package org.eclipse.kura.core.system;
 import static java.lang.Thread.currentThread;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,14 +40,18 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.SystemPackageInfo;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -1180,6 +1185,53 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return null;
         }
         return this.componentContext.getBundleContext().getBundles();
+    }
+
+    @Override
+    public List<SystemPackageInfo> getSystemPackages() {
+        List<SystemPackageInfo> packagesInfo = new ArrayList<>();
+        CommandStatus status = execute(new String[] { "dpkg-query", "-W" });
+        if (!status.getExitStatus().isSuccessful() || ((ByteArrayOutputStream) status.getOutputStream()).size() == 0) {
+            status = execute(new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+            if (!status.getExitStatus().isSuccessful()
+                    || ((ByteArrayOutputStream) status.getOutputStream()).size() == 0) {
+                logger.warn("Failed to retrieve system packages.");
+            } else {
+                parseSystemPackages(packagesInfo, status);
+            }
+        } else {
+            parseSystemPackages(packagesInfo, status);
+        }
+        return packagesInfo;
+    }
+
+    private void parseSystemPackages(List<SystemPackageInfo> packagesInfo, CommandStatus status) {
+        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
+                .split("\n");
+        Arrays.asList(packages).stream().forEach(p -> {
+            String[] fields = p.split("\\s+");
+            if (fields.length >= 2) {
+                packagesInfo.add(new SystemPackageInfo(fields[0], fields[1]));
+            } else {
+                packagesInfo.add(new SystemPackageInfo(fields[0], ""));
+            }
+        });
+    }
+
+    private CommandStatus execute(String[] commandLine) {
+        Command command = new Command(commandLine);
+        command.setExecuteInAShell(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        command.setErrorStream(err);
+        command.setOutputStream(out);
+        CommandStatus status = this.executorService.execute(command);
+        if (logger.isDebugEnabled()) {
+            logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
+            logger.debug("execute stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
+            logger.debug("execute stdout {}", new String(out.toByteArray(), Charsets.UTF_8));
+        }
+        return status;
     }
 
     @Override

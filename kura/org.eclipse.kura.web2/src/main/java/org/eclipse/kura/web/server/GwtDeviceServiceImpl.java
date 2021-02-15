@@ -30,6 +30,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
+import org.eclipse.kura.system.SystemPackageInfo;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
@@ -332,6 +333,24 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
             throw gwtKuraException;
         }
+    }
+
+    @Override
+    public ArrayList<GwtGroupedNVPair> findSystemPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
+
+        SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+        List<SystemPackageInfo> packages = systemService.getSystemPackages();
+        if (packages != null) {
+            packages.stream().forEach(p -> {
+                GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                pair.setName(p.getName());
+                pair.setVersion(p.getVersion());
+                pairs.add(pair);
+            });
+        }
+        return new ArrayList<>(pairs);
     }
 
     // ----------------------------------------------------------------

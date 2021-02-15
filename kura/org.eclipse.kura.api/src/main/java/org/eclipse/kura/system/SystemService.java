@@ -446,9 +446,16 @@ public interface SystemService {
     /**
      * Returns the OSGi bundles currently installed
      *
-     * @return
+     * @return the list of the installed bundles
      */
     public Bundle[] getBundles();
+
+    /**
+     * Returns the system packages currently installed
+     * 
+     * @return the list of the installed packages
+     */
+    public List<SystemPackageInfo> getSystemPackages();
 
     /**
      * Returns the number of processors visible to this Java platform.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,6 +36,8 @@ public interface GwtDeviceService extends RemoteService {
     public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
 
     public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    public ArrayList<GwtGroupedNVPair> findSystemPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @RequiredPermissions({})
     public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException;

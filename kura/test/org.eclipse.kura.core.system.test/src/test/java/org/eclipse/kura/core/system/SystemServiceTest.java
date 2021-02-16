@@ -14,13 +14,23 @@ package org.eclipse.kura.core.system;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.system.SystemPackageInfo;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
@@ -272,6 +282,81 @@ public class SystemServiceTest {
         assertEquals("DB_NIO_PROPNAME", props.getProperty(SystemService.DB_NIO_PROPNAME));
         assertEquals("DB_WRITE_DELAY_MILLIES_PROPNAME",
                 props.getProperty(SystemService.DB_WRITE_DELAY_MILLIES_PROPNAME));
+    }
+
+    @Test
+    public void testgGetSystemPackagesUsingDpkg() throws IOException {
+        CommandExecutorService cesMock = mock(CommandExecutorService.class);
+        Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
+        dpkgCommand.setExecuteInAShell(true);
+        CommandStatus successfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(0));
+        successfulStatus.setOutputStream(writeToOutputStream("package1 1.0.0\npackage2"));
+        when(cesMock.execute(dpkgCommand)).thenReturn(successfulStatus);
+
+        SystemServiceImpl systemService = new SystemServiceImpl();
+        systemService.setExecutorService(cesMock);
+
+        List<SystemPackageInfo> packages = systemService.getSystemPackages();
+        assertFalse(packages.isEmpty());
+        assertEquals(2, packages.size());
+        assertEquals("package1", packages.get(0).getName());
+        assertEquals("1.0.0", packages.get(0).getVersion());
+        assertEquals("package2", packages.get(1).getName());
+    }
+
+    @Test
+    public void testgGetSystemPackagesUsingRpm() throws IOException {
+        CommandExecutorService cesMock = mock(CommandExecutorService.class);
+        Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
+        dpkgCommand.setExecuteInAShell(true);
+        CommandStatus unSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(1));
+        when(cesMock.execute(dpkgCommand)).thenReturn(unSuccessfulStatus);
+        Command rpmCommand = new Command(
+                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        rpmCommand.setExecuteInAShell(true);
+        CommandStatus successfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(0));
+        successfulStatus.setOutputStream(writeToOutputStream("package1 1.0.0\npackage2"));
+        when(cesMock.execute(rpmCommand)).thenReturn(successfulStatus);
+
+        SystemServiceImpl systemService = new SystemServiceImpl();
+        systemService.setExecutorService(cesMock);
+
+        List<SystemPackageInfo> packages = systemService.getSystemPackages();
+        assertFalse(packages.isEmpty());
+        assertEquals(2, packages.size());
+        assertEquals("package1", packages.get(0).getName());
+        assertEquals("1.0.0", packages.get(0).getVersion());
+        assertEquals("package2", packages.get(1).getName());
+    }
+
+    @Test
+    public void testgGetSystemPackagesFailed() throws IOException {
+        CommandExecutorService cesMock = mock(CommandExecutorService.class);
+        Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
+        dpkgCommand.setExecuteInAShell(true);
+        CommandStatus unSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(1));
+        when(cesMock.execute(dpkgCommand)).thenReturn(unSuccessfulStatus);
+        Command rpmCommand = new Command(
+                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        rpmCommand.setExecuteInAShell(true);
+        when(cesMock.execute(rpmCommand)).thenReturn(unSuccessfulStatus);
+
+        SystemServiceImpl systemService = new SystemServiceImpl();
+        systemService.setExecutorService(cesMock);
+
+        List<SystemPackageInfo> packages = systemService.getSystemPackages();
+        assertTrue(packages.isEmpty());
+    }
+
+    private ByteArrayOutputStream writeToOutputStream(String data) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+        dataOutputStream.write(data.getBytes());
+        byteArrayOutputStream.flush();
+        byteArrayOutputStream.close();
+
+        return byteArrayOutputStream;
     }
 
     private File writeFile(String path, String content) throws IOException {

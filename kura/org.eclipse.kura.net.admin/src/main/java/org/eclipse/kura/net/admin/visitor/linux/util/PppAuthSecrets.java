@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -171,7 +173,7 @@ public class PppAuthSecrets {
      *             for file IO errors
      */
     @SuppressWarnings("checkstyle:fileTabCharacter")
-    private void writeToFile() throws Exception {
+    private void writeToFile() throws IOException {
         String authType = "";
         if (this.secretsFilename.indexOf("chap") >= 0) {
             authType = "CHAP";
@@ -179,12 +181,11 @@ public class PppAuthSecrets {
             authType = "PAP";
         }
 
-        PrintWriter pw = null;
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream(this.secretsFilename);
-            pw = new PrintWriter(fos);
+        final File tempFile = new File(this.secretsFilename + ".tmp");
+        final File secretsFile = new File(this.secretsFilename);
 
+        try (final FileOutputStream fos = new FileOutputStream(tempFile);
+                final PrintWriter pw = new PrintWriter(fos);) {
             pw.write("#Secrets for authentication using " + authType + "\n");
             pw.write("#client					server			secret			IP addresses	#Provider\n");
 
@@ -198,21 +199,13 @@ public class PppAuthSecrets {
 
             pw.flush();
             fos.getFD().sync();
-        } catch (IOException ioe) {
-            throw ioe;
-        } finally {
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException ex) {
-                    s_logger.error("I/O Exception while closing BufferedReader!");
-                }
-            }
-
-            if (pw != null) {
-                pw.close();
-            }
         }
+
+        if (!tempFile.setReadable(true, true) || !tempFile.setWritable(true, true)) {
+            s_logger.warn("failed to set permissions to {}", tempFile);
+        }
+
+        Files.move(tempFile.toPath(), secretsFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     /**

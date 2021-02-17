@@ -347,6 +347,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 GwtGroupedNVPair pair = new GwtGroupedNVPair();
                 pair.setName(p.getName());
                 pair.setVersion(p.getVersion());
+                pair.setType(p.getType());
                 pairs.add(pair);
             });
         }

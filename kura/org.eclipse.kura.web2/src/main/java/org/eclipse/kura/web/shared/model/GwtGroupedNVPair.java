@@ -89,4 +89,11 @@ public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Se
         return get("version");
     }
 
+    public void setType(String type) {
+        set("type", type);
+    }
+
+    public String getType() {
+        return get("type");
+    }
 }

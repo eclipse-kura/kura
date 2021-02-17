@@ -4,15 +4,17 @@ public class SystemPackageInfo {
 
     private String name;
     private String version;
+    private String type;
 
     public SystemPackageInfo(String name) {
         super();
         this.name = name;
     }
 
-    public SystemPackageInfo(String name, String version) {
+    public SystemPackageInfo(String name, String version, String type) {
         this(name);
         this.version = version;
+        this.type = type;
     }
 
     public String getName() {
@@ -29,5 +31,13 @@ public class SystemPackageInfo {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

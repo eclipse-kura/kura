@@ -80,7 +80,7 @@ public class SystemPackagesTabUi extends Composite implements Tab {
             }
         };
         col1.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        TextHeader name = new TextHeader(MSGS.deviceBndName());
+        TextHeader name = new TextHeader(MSGS.devicePkgName());
         name.setHeaderStyleNames(ROW_HEADER_STYLE);
         systemPackagesGrid2.addColumn(col1, name);
 
@@ -92,9 +92,21 @@ public class SystemPackagesTabUi extends Composite implements Tab {
             }
         };
         col2.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        TextHeader version = new TextHeader(MSGS.deviceBndVersion());
+        TextHeader version = new TextHeader(MSGS.devicePkgVersion());
         version.setHeaderStyleNames(ROW_HEADER_STYLE);
         systemPackagesGrid2.addColumn(col2, version);
+
+        TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getType();
+            }
+        };
+        col3.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader type = new TextHeader(MSGS.devicePkgType());
+        type.setHeaderStyleNames(ROW_HEADER_STYLE);
+        systemPackagesGrid2.addColumn(col3, type);
 
         dataProvider.addDataDisplay(systemPackagesGrid2);
     }

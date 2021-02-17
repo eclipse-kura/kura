@@ -301,7 +301,9 @@ public class SystemServiceTest {
         assertEquals(2, packages.size());
         assertEquals("package1", packages.get(0).getName());
         assertEquals("1.0.0", packages.get(0).getVersion());
+        assertEquals("DEB", packages.get(0).getType());
         assertEquals("package2", packages.get(1).getName());
+        assertEquals("DEB", packages.get(1).getType());
     }
 
     @Test
@@ -326,7 +328,9 @@ public class SystemServiceTest {
         assertEquals(2, packages.size());
         assertEquals("package1", packages.get(0).getName());
         assertEquals("1.0.0", packages.get(0).getVersion());
+        assertEquals("RPM", packages.get(0).getType());
         assertEquals("package2", packages.get(1).getName());
+        assertEquals("RPM", packages.get(1).getType());
     }
 
     @Test

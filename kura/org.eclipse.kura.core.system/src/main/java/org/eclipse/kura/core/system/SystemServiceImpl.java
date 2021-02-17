@@ -1197,23 +1197,23 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     || ((ByteArrayOutputStream) status.getOutputStream()).size() == 0) {
                 logger.warn("Failed to retrieve system packages.");
             } else {
-                parseSystemPackages(packagesInfo, status);
+                parseSystemPackages(packagesInfo, status, "RPM");
             }
         } else {
-            parseSystemPackages(packagesInfo, status);
+            parseSystemPackages(packagesInfo, status, "DEB");
         }
         return packagesInfo;
     }
 
-    private void parseSystemPackages(List<SystemPackageInfo> packagesInfo, CommandStatus status) {
+    private void parseSystemPackages(List<SystemPackageInfo> packagesInfo, CommandStatus status, String type) {
         String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
                 .split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
             String[] fields = p.split("\\s+");
             if (fields.length >= 2) {
-                packagesInfo.add(new SystemPackageInfo(fields[0], fields[1]));
+                packagesInfo.add(new SystemPackageInfo(fields[0], fields[1], type));
             } else {
-                packagesInfo.add(new SystemPackageInfo(fields[0], ""));
+                packagesInfo.add(new SystemPackageInfo(fields[0], "", type));
             }
         });
     }

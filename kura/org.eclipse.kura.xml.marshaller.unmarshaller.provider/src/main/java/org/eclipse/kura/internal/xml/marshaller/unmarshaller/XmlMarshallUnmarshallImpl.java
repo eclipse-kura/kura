@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
 import org.eclipse.kura.core.deployment.xml.XmlBundles;
 import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.deployment.xml.XmlSystemPackageInfos;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.slf4j.Logger;
@@ -116,12 +117,23 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
                 new XmlJavaBundlesMapper().marshal(doc, object);
 
+            } else if (object instanceof XmlSystemPackageInfos) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <systemPackages>
+                // <systemPackage>
+                // <name>rfkill</name>
+                // <version>2.33.1-0.1</version>
+                // </systemPackage>
+                // </systemPackages>
+
+                new XmlJavaSystemPackagesMapper().marshal(doc, object);
             }
 
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            
+
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");

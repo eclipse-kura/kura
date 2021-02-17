@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
@@ -433,19 +432,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     private void moveWpaSupplicantConf(String ifaceName, String configFile) throws KuraException {
         File outputFile = new File(configFile);
         File wpaConfigFile = new File(getFinalConfigFile(ifaceName));
-        try {
-            if (!FileUtils.contentEquals(outputFile, wpaConfigFile)) {
-                if (outputFile.renameTo(wpaConfigFile)) {
-                    logger.trace("Successfully wrote wpa_supplicant config file");
-                } else {
-                    logger.error("Failed to write wpa_supplicant config file");
-                    throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                            "error while building up new configuration file for wpa_supplicant config");
-                }
-            } else {
-                logger.info("Not rewriting wpa_supplicant.conf file because it is the same");
-            }
-        } catch (IOException e) {
+        if (outputFile.renameTo(wpaConfigFile)) {
+            logger.trace("Successfully wrote wpa_supplicant config file");
+        } else {
+            logger.error("Failed to write wpa_supplicant config file");
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                     "error while building up new configuration file for wpa_supplicant config");
         }

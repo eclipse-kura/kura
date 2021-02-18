@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,11 +25,10 @@ import javax.xml.stream.FactoryConfigurationError;
 import javax.xml.stream.XMLStreamException;
 
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -76,9 +75,9 @@ public class CoreTestXmlUtil {
             doc.getDocumentElement().normalize();
 
             // Select the correct unmarshal method
-            if (clazz.equals(XmlDeploymentPackages.class)) {
-                return unmarshalXmlDeploymentPackages(doc);
-            } else if (clazz.equals(XmlBundles.class)) {
+            if (clazz.equals(SystemDeploymentPackages.class)) {
+                return unmarshalSystemDeploymentPackages(doc);
+            } else if (clazz.equals(SystemBundles.class)) {
                 return unmarshalXmlBundles(doc);
             } else if (clazz.equals(XmlSnapshotIdResult.class)) {
                 return unmarshalXmlSnapshotIdResult(doc);
@@ -96,12 +95,12 @@ public class CoreTestXmlUtil {
         return null;
     }
 
-    // unmarshal XmlDeploymentPackages
+    // unmarshal SystemDeploymentPackages
     @SuppressWarnings("unchecked")
-    public static <T> T unmarshalXmlDeploymentPackages(Document doc) throws Exception {
+    public static <T> T unmarshalSystemDeploymentPackages(Document doc) throws Exception {
         // Java objects for unmarshal
-        XmlDeploymentPackages xmlDeploymentPackages = new XmlDeploymentPackages();
-        List<XmlDeploymentPackage> xmlDeploymentPackageList = new ArrayList<XmlDeploymentPackage>();
+        SystemDeploymentPackages systemDeploymentPackages = new SystemDeploymentPackages();
+        List<SystemDeploymentPackage> systemDeploymentPackageList = new ArrayList<SystemDeploymentPackage>();
 
         // XML elements
         Element packages = doc.getDocumentElement();
@@ -113,7 +112,7 @@ public class CoreTestXmlUtil {
             if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element el = (Element) currentNode;
                 if (el.getNodeName().equals("package")) {
-                    XmlDeploymentPackage xdp = new XmlDeploymentPackage();
+                    SystemDeploymentPackage xdp = new SystemDeploymentPackage("");
                     NodeList nodeList = el.getChildNodes();
                     for (int i = 0; i < nodeList.getLength(); i++) {
                         Node tmpNode = nodeList.item(i);
@@ -128,23 +127,23 @@ public class CoreTestXmlUtil {
                         }
 
                     }
-                    xmlDeploymentPackageList.add(xdp);
+                    systemDeploymentPackageList.add(xdp);
                 }
             }
         }
 
         // Add packages
-        xmlDeploymentPackages.setDeploymentPackages(
-                xmlDeploymentPackageList.toArray(new XmlDeploymentPackage[xmlDeploymentPackageList.size()]));
+        systemDeploymentPackages.setDeploymentPackages(
+                systemDeploymentPackageList.toArray(new SystemDeploymentPackage[systemDeploymentPackageList.size()]));
 
-        return (T) xmlDeploymentPackages;
+        return (T) systemDeploymentPackages;
     }
 
-    // unmarshal XmlBundles
+    // unmarshal SystemBundles
     @SuppressWarnings("unchecked")
     public static <T> T unmarshalXmlBundles(Document doc) throws Exception {
-        XmlBundles xmlBundles = new XmlBundles();
-        List<XmlBundle> xmlBundleList = new ArrayList<XmlBundle>();
+        SystemBundles systemBundles = new SystemBundles();
+        List<SystemBundle> systemBundleList = new ArrayList<SystemBundle>();
 
         // XML elements
         Element bundles = doc.getDocumentElement();
@@ -156,7 +155,7 @@ public class CoreTestXmlUtil {
             if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element el = (Element) currentNode;
                 if (el.getNodeName().equals("bundle")) {
-                    XmlBundle xb = new XmlBundle();
+                    SystemBundle xb = new SystemBundle("");
                     NodeList nodeList = el.getChildNodes();
                     for (int i = 0; i < nodeList.getLength(); i++) {
                         Node tmpNode = nodeList.item(i);
@@ -183,15 +182,15 @@ public class CoreTestXmlUtil {
                     }
 
                     // Add bundle to list
-                    xmlBundleList.add(xb);
+                    systemBundleList.add(xb);
                 }
             }
         }
 
         // Add bundles
-        xmlBundles.setBundles(xmlBundleList.toArray(new XmlBundle[xmlBundleList.size()]));
+        systemBundles.setBundles(systemBundleList.toArray(new SystemBundle[systemBundleList.size()]));
 
-        return (T) xmlBundles;
+        return (T) systemBundles;
     }
 
     // unmarshal XmlSnapshotIdResult
@@ -222,15 +221,15 @@ public class CoreTestXmlUtil {
         return (T) xmlSnapshotIdResult;
     }
 
-    private static XmlBundleInfo[] parseBundles(Node node) {
-        List<XmlBundleInfo> bundleInfos = new ArrayList<XmlBundleInfo>();
+    private static SystemBundle[] parseBundles(Node node) {
+        List<SystemBundle> bundleInfos = new ArrayList<SystemBundle>();
         NodeList nodeList = node.getChildNodes();
 
         // Get information for each bundle
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node bundleNode = nodeList.item(i);
             if (bundleNode.getNodeType() == Node.ELEMENT_NODE) {
-                XmlBundleInfo xbi = new XmlBundleInfo();
+                SystemBundle xbi = new SystemBundle("");
                 NodeList infoList = bundleNode.getChildNodes();
                 for (int j = 0; j < infoList.getLength(); j++) {
                     Node tmpNode = infoList.item(j);
@@ -248,6 +247,6 @@ public class CoreTestXmlUtil {
             }
         }
 
-        return bundleInfos.toArray(new XmlBundleInfo[bundleInfos.size()]);
+        return bundleInfos.toArray(new SystemBundle[bundleInfos.size()]);
     }
 }

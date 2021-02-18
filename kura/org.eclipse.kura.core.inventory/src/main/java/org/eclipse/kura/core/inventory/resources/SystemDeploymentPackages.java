@@ -10,17 +10,17 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.deployment.xml;
+package org.eclipse.kura.core.inventory.resources;
 
-public class XmlDeploymentPackages {
+public class SystemDeploymentPackages {
 
-    private XmlDeploymentPackage[] deploymentPackages;
+    private SystemDeploymentPackage[] deploymentPackages;
 
-    public XmlDeploymentPackage[] getDeploymentPackages() {
+    public SystemDeploymentPackage[] getDeploymentPackages() {
         return this.deploymentPackages;
     }
 
-    public void setDeploymentPackages(XmlDeploymentPackage[] deploymentPackages) {
+    public void setDeploymentPackages(SystemDeploymentPackage[] deploymentPackages) {
         this.deploymentPackages = deploymentPackages;
     }
 }

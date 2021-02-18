@@ -28,9 +28,10 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
-import org.eclipse.kura.system.SystemPackageInfo;
+import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.session.Attributes;
@@ -341,13 +342,18 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
-        List<SystemPackageInfo> packages = systemService.getSystemPackages();
+        List<SystemResourceInfo> packages = null;
+        try {
+            packages = systemService.getSystemPackages();
+        } catch (KuraProcessExecutionErrorException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE, e);
+        }
         if (packages != null) {
             packages.stream().forEach(p -> {
                 GwtGroupedNVPair pair = new GwtGroupedNVPair();
                 pair.setName(p.getName());
                 pair.setVersion(p.getVersion());
-                pair.setType(p.getType());
+                pair.setType(p.getTypeString());
                 pairs.add(pair);
             });
         }

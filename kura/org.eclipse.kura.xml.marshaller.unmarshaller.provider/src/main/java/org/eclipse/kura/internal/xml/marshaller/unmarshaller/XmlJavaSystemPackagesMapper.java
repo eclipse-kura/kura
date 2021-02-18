@@ -14,15 +14,15 @@ package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 
 import java.util.List;
 
-import org.eclipse.kura.core.deployment.xml.XmlSystemPackageInfos;
-import org.eclipse.kura.system.SystemPackageInfo;
+import org.eclipse.kura.core.inventory.resources.SystemPackage;
+import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class XmlJavaSystemPackagesMapper implements XmlJavaDataMapper {
 
     private static final String SYSTEM_PACKAGES = "systemPackages";
-    private static final String SYSTEM_PACKAGES_PACKAGE = "systemPackages";
+    private static final String SYSTEM_PACKAGES_PACKAGE = "systemPackage";
     private static final String SYSTEM_PACKAGES_PACKAGE_NAME = "name";
     private static final String SYSTEM_PACKAGES_PACKAGE_VERSION = "version";
     private static final String SYSTEM_PACKAGES_PACKAGE_TYPE = "type";
@@ -32,10 +32,10 @@ public class XmlJavaSystemPackagesMapper implements XmlJavaDataMapper {
         Element packages = doc.createElement(SYSTEM_PACKAGES);
         doc.appendChild(packages);
 
-        XmlSystemPackageInfos xmlPackages = (XmlSystemPackageInfos) object;
-        List<SystemPackageInfo> xmlPackageList = xmlPackages.getSystemPackages();
+        SystemPackages xmlPackages = (SystemPackages) object;
+        List<SystemPackage> xmlPackagesList = xmlPackages.getSystemPackages();
 
-        xmlPackageList.stream().forEach(xmlPackage -> {
+        xmlPackagesList.stream().forEach(xmlPackage -> {
             Element p = doc.createElement(SYSTEM_PACKAGES_PACKAGE);
             marshallPackage(doc, xmlPackage, p);
             packages.appendChild(p);
@@ -51,11 +51,11 @@ public class XmlJavaSystemPackagesMapper implements XmlJavaDataMapper {
     //
     // Marshaller's private methods
     //
-    private static void marshallPackage(Document doc, SystemPackageInfo systemPackageInfo, Element p) {
-        // Extract data from SystemPackageInfo
-        String packageName = systemPackageInfo.getName();
-        String packageVersion = systemPackageInfo.getVersion();
-        String packageType = systemPackageInfo.getType();
+    private static void marshallPackage(Document doc, SystemPackage systemPackage, Element p) {
+        // Extract data from XmlSystemPackage
+        String packageName = systemPackage.getName();
+        String packageVersion = systemPackage.getVersion();
+        String packageType = systemPackage.getTypeString();
 
         // Create xml elements
         if (packageName != null && !packageName.trim().isEmpty()) {

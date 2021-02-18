@@ -12,8 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -31,10 +31,10 @@ public class XmlJavaBundlesMapper implements XmlJavaDataMapper {
         Element bundles = doc.createElement(BUNDLES);
         doc.appendChild(bundles);
 
-        XmlBundles xmlBundles = (XmlBundles) object;
-        XmlBundle[] xmlBundleArray = xmlBundles.getBundles();
+        SystemBundles xmlBundles = (SystemBundles) object;
+        SystemBundle[] xmlBundleArray = xmlBundles.getBundles();
 
-        for (XmlBundle xmlBundle : xmlBundleArray) {
+        for (SystemBundle xmlBundle : xmlBundleArray) {
             Element bundle = doc.createElement(BUNDLES_BUNDLE);
             marshallBundle(doc, xmlBundle, bundle);
             bundles.appendChild(bundle);
@@ -50,7 +50,7 @@ public class XmlJavaBundlesMapper implements XmlJavaDataMapper {
     //
     // Marshaller's private methods
     //
-    private static void marshallBundle(Document doc, XmlBundle xmlBundle, Element bundle) {
+    private static void marshallBundle(Document doc, SystemBundle xmlBundle, Element bundle) {
         // Extract data from XmlBundle
         String bundleName = xmlBundle.getName();
         String bundleVersion = xmlBundle.getVersion();

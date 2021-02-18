@@ -30,11 +30,10 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -209,7 +208,7 @@ public class XmlEncoderDecoderTest {
         XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
         try {
 
-            XmlDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
+            SystemDeploymentPackages xmlDeploymentPackages = getSampleXmlDeploymentPackagesObject();
             String marshalledString = xmlMarshallerImpl.marshal(xmlDeploymentPackages);
             assertTrue(String.format(missingItemsMessage, xmlDeploymentPackages.getDeploymentPackages()[0].getName()),
                     marshalledString.contains(xmlDeploymentPackages.getDeploymentPackages()[0].getName()));
@@ -238,7 +237,7 @@ public class XmlEncoderDecoderTest {
         XmlMarshallUnmarshallImpl xmlMarshallerImpl = new XmlMarshallUnmarshallImpl();
         try {
 
-            XmlBundles xmlBundles = getSampleXmlBundlesObject();
+            SystemBundles xmlBundles = getSampleBundlesObject();
             String marshalledString = xmlMarshallerImpl.marshal(xmlBundles);
             assertTrue(String.format(missingItemsMessage, xmlBundles.getBundles()[0].getId()),
                     marshalledString.contains(Long.toString(xmlBundles.getBundles()[0].getId())));
@@ -255,33 +254,33 @@ public class XmlEncoderDecoderTest {
         }
     }
 
-    private static XmlBundles getSampleXmlBundlesObject() {
+    private static SystemBundles getSampleBundlesObject() {
 
-        XmlBundles xmlBundles = new XmlBundles();
+        SystemBundles xmlBundles = new SystemBundles();
 
-        XmlBundle inputXmlBundle = new XmlBundle();
+        SystemBundle inputXmlBundle = new SystemBundle("");
         inputXmlBundle.setId(1);
         inputXmlBundle.setName("raspberry");
         inputXmlBundle.setState("New York");
         inputXmlBundle.setVersion("3.0.1");
-        xmlBundles.setBundles(new XmlBundle[] { inputXmlBundle });
+        xmlBundles.setBundles(new SystemBundle[] { inputXmlBundle });
 
         return xmlBundles;
     }
 
-    private static XmlDeploymentPackages getSampleXmlDeploymentPackagesObject() {
+    private static SystemDeploymentPackages getSampleXmlDeploymentPackagesObject() {
 
-        XmlDeploymentPackages xmlDeploymentPackages = new XmlDeploymentPackages();
-        XmlBundleInfo inputXmlBundleInfo = new XmlBundleInfo();
+        SystemDeploymentPackages xmlDeploymentPackages = new SystemDeploymentPackages();
+        SystemBundle inputXmlBundleInfo = new SystemBundle("");
         inputXmlBundleInfo.setName("XmlBundleInfo");
         inputXmlBundleInfo.setVersion("3.0.1.201");
 
-        XmlDeploymentPackage inputXmlDeploymentPackage = new XmlDeploymentPackage();
+        SystemDeploymentPackage inputXmlDeploymentPackage = new SystemDeploymentPackage("");
         inputXmlDeploymentPackage.setName("raspberry");
         inputXmlDeploymentPackage.setVersion("3.0.1");
-        inputXmlDeploymentPackage.setBundleInfos(new XmlBundleInfo[] { inputXmlBundleInfo });
+        inputXmlDeploymentPackage.setBundleInfos(new SystemBundle[] { inputXmlBundleInfo });
 
-        xmlDeploymentPackages.setDeploymentPackages(new XmlDeploymentPackage[] { inputXmlDeploymentPackage });
+        xmlDeploymentPackages.setDeploymentPackages(new SystemDeploymentPackage[] { inputXmlDeploymentPackage });
 
         return xmlDeploymentPackages;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,12 +47,10 @@ import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.core.deployment.uninstall.DeploymentPackageUninstallOptions;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
-import org.eclipse.kura.core.deployment.xml.XmlSystemPackageInfos;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -60,7 +58,6 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.ssl.SslManagerService;
-import org.eclipse.kura.system.SystemPackageInfo;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.osgi.framework.Bundle;
@@ -114,7 +111,6 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
     public static final String RESOURCE_PACKAGES = "packages";
     public static final String RESOURCE_BUNDLES = "bundles";
-    public static final String RESOURCE_SYSTEM_PACKAGES = "system.packages";
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
@@ -359,8 +355,6 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             resPayload = doGetPackages();
         } else if (resources.get(0).equals(RESOURCE_BUNDLES)) {
             resPayload = doGetBundles();
-        } else if (resources.get(0).equals(RESOURCE_SYSTEM_PACKAGES)) {
-            resPayload = doGetSystemPackages();
         } else {
             logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
             logger.error(CANNOT_FIND_RESOURCE_MESSAGE, resources.get(0));
@@ -816,27 +810,25 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
     private KuraPayload doGetPackages() {
         DeploymentPackage[] dps = this.deploymentAdmin.listDeploymentPackages();
-        XmlDeploymentPackages xdps = new XmlDeploymentPackages();
-        XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
+        SystemDeploymentPackages xdps = new SystemDeploymentPackages();
+        SystemDeploymentPackage[] axdp = new SystemDeploymentPackage[dps.length];
 
         for (int i = 0; i < dps.length; i++) {
             DeploymentPackage dp = dps[i];
 
-            XmlDeploymentPackage xdp = new XmlDeploymentPackage();
-            xdp.setName(dp.getName());
+            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName());
             xdp.setVersion(dp.getVersion().toString());
 
             BundleInfo[] bis = dp.getBundleInfos();
-            XmlBundleInfo[] axbi = new XmlBundleInfo[bis.length];
+            SystemBundle[] axbi = new SystemBundle[bis.length];
 
             for (int j = 0; j < bis.length; j++) {
 
                 BundleInfo bi = bis[j];
-                XmlBundleInfo xbi = new XmlBundleInfo();
-                xbi.setName(bi.getSymbolicName());
-                xbi.setVersion(bi.getVersion().toString());
+                SystemBundle xb = new SystemBundle(bi.getSymbolicName());
+                xb.setVersion(bi.getVersion().toString());
 
-                axbi[j] = xbi;
+                axbi[j] = xb;
             }
 
             xdp.setBundleInfos(axbi);
@@ -859,15 +851,14 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
     private KuraPayload doGetBundles() {
         Bundle[] bundles = this.bundleContext.getBundles();
-        XmlBundles xmlBundles = new XmlBundles();
-        XmlBundle[] axb = new XmlBundle[bundles.length];
+        SystemBundles xmlBundles = new SystemBundles();
+        SystemBundle[] axb = new SystemBundle[bundles.length];
 
         for (int i = 0; i < bundles.length; i++) {
 
             Bundle bundle = bundles[i];
-            XmlBundle xmlBundle = new XmlBundle();
+            SystemBundle xmlBundle = new SystemBundle(bundle.getSymbolicName());
 
-            xmlBundle.setName(bundle.getSymbolicName());
             xmlBundle.setVersion(bundle.getVersion().toString());
             xmlBundle.setId(bundle.getBundleId());
 
@@ -914,22 +905,6 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {
             logger.error("Error getting resource {}", RESOURCE_BUNDLES, e);
-        }
-        return respPayload;
-    }
-
-    private KuraPayload doGetSystemPackages() {
-        List<SystemPackageInfo> packages = this.systemService.getSystemPackages();
-        XmlSystemPackageInfos xmlSystemPackageInfos = new XmlSystemPackageInfos(packages);
-
-        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
-        try {
-            String s = marshal(xmlSystemPackageInfos);
-            respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
-        } catch (Exception e) {
-            logger.error("Error getting resource {}", RESOURCE_SYSTEM_PACKAGES, e);
-            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
         }
         return respPayload;
     }

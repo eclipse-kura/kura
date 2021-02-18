@@ -43,6 +43,7 @@ import java.util.StringJoiner;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -51,7 +52,8 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.ExtendedProperties;
-import org.eclipse.kura.system.SystemPackageInfo;
+import org.eclipse.kura.system.SystemResourceInfo;
+import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -1188,32 +1190,37 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     @Override
-    public List<SystemPackageInfo> getSystemPackages() {
-        List<SystemPackageInfo> packagesInfo = new ArrayList<>();
-        CommandStatus status = execute(new String[] { "dpkg-query", "-W" });
-        if (!status.getExitStatus().isSuccessful() || ((ByteArrayOutputStream) status.getOutputStream()).size() == 0) {
-            status = execute(new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
-            if (!status.getExitStatus().isSuccessful()
-                    || ((ByteArrayOutputStream) status.getOutputStream()).size() == 0) {
-                logger.warn("Failed to retrieve system packages.");
-            } else {
-                parseSystemPackages(packagesInfo, status, "RPM");
-            }
-        } else {
-            parseSystemPackages(packagesInfo, status, "DEB");
+    public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException {
+        List<SystemResourceInfo> packagesInfo = new ArrayList<>();
+        CommandStatus debStatus = execute(new String[] { "dpkg-query", "-W" });
+        if (debStatus.getExitStatus().isSuccessful()
+                && ((ByteArrayOutputStream) debStatus.getOutputStream()).size() > 0) {
+            parseSystemPackages(packagesInfo, debStatus, SystemResourceType.DEB);
+        }
+
+        CommandStatus rpmStatus = execute(
+                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        if (rpmStatus.getExitStatus().isSuccessful()
+                && ((ByteArrayOutputStream) rpmStatus.getOutputStream()).size() > 0) {
+            parseSystemPackages(packagesInfo, rpmStatus, SystemResourceType.RPM);
+        }
+
+        if (!debStatus.getExitStatus().isSuccessful() && !rpmStatus.getExitStatus().isSuccessful()) {
+            throw new KuraProcessExecutionErrorException("Failed to retrieve system packages.");
         }
         return packagesInfo;
     }
 
-    private void parseSystemPackages(List<SystemPackageInfo> packagesInfo, CommandStatus status, String type) {
+    private void parseSystemPackages(List<SystemResourceInfo> packagesInfo, CommandStatus status,
+            SystemResourceType type) {
         String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
                 .split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
             String[] fields = p.split("\\s+");
             if (fields.length >= 2) {
-                packagesInfo.add(new SystemPackageInfo(fields[0], fields[1], type));
+                packagesInfo.add(new SystemResourceInfo(fields[0], fields[1], type));
             } else {
-                packagesInfo.add(new SystemPackageInfo(fields[0], "", type));
+                packagesInfo.add(new SystemResourceInfo(fields[0], "", type));
             }
         });
     }

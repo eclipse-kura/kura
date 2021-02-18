@@ -10,17 +10,17 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.deployment.xml;
+package org.eclipse.kura.core.inventory.resources;
 
-public class XmlBundles {
+public class SystemBundles {
 
-    private XmlBundle[] bundles;
+    private SystemBundle[] bundles;
 
-    public XmlBundle[] getBundles() {
+    public SystemBundle[] getBundles() {
         return this.bundles;
     }
 
-    public void setBundles(XmlBundle[] bundles) {
+    public void setBundles(SystemBundle[] bundles) {
         this.bundles = bundles;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,8 +14,8 @@ package org.eclipse.kura.core.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -25,20 +25,16 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.cloud.CloudCallService;
 import org.eclipse.kura.cloud.CloudletTopic;
 import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
-import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
-import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
-import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
+import org.eclipse.kura.core.inventory.InventoryHandlerV1;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.core.test.util.CoreTestXmlUtil;
-import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
@@ -49,9 +45,9 @@ import org.slf4j.LoggerFactory;
 
 import junit.framework.TestCase;
 
-public class CloudDeploymentHandlerTest extends TestCase {
+public class InventoryHandlerTest extends TestCase {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(CloudDeploymentHandlerTest.class);
+    private static final Logger s_logger = LoggerFactory.getLogger(InventoryHandlerTest.class);
 
     private static CountDownLatch s_dependencyLatch = new CountDownLatch(2);	// initialize with number of
     // dependencies
@@ -107,49 +103,49 @@ public class CloudDeploymentHandlerTest extends TestCase {
     }
 
     public void setCloudCallService(CloudCallService cloudCallService) {
-        CloudDeploymentHandlerTest.s_cloudCallService = cloudCallService;
+        InventoryHandlerTest.s_cloudCallService = cloudCallService;
         s_dependencyLatch.countDown();
     }
 
     public void unsetCloudCallService(CloudCallService cloudCallService) {
-        CloudDeploymentHandlerTest.s_cloudCallService = null;
+        InventoryHandlerTest.s_cloudCallService = null;
     }
 
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        CloudDeploymentHandlerTest.s_deploymentAdmin = deploymentAdmin;
+        InventoryHandlerTest.s_deploymentAdmin = deploymentAdmin;
         s_dependencyLatch.countDown();
     }
 
     public void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        CloudDeploymentHandlerTest.s_deploymentAdmin = null;
+        InventoryHandlerTest.s_deploymentAdmin = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testExecInstallDeploymentPackage() throws Exception {
-        assertTrue(s_cloudCallService.isConnected());
-        assertNull(s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
-
-        StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
-                .append(CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
-        s_logger.warn(sb.toString());
-
-        KuraPayload payload = new KuraPayload();
-        payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, DOWNLOAD_URI);
-        payload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, REMOTE_DP_NAME);
-        payload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, REMOTE_DP_VERSION);
-        payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, DOWNLOAD_PROTOCOL);
-        payload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, Long.parseLong("1111"));
-        payload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
-        payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL, true);
-
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
-                5000);
-
-        s_logger.warn("Response code: " + resp.getResponseCode());
-        s_logger.warn("Response message: " + resp.getExceptionMessage());
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
-    }
+    // @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    // @Test
+    // public void testExecInstallDeploymentPackage() throws Exception {
+    // assertTrue(s_cloudCallService.isConnected());
+    // assertNull(s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
+    //
+    // StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
+    // .append(CloudDeploymentHandlerV2.RESOURCE_DOWNLOAD);
+    // s_logger.warn(sb.toString());
+    //
+    // KuraPayload payload = new KuraPayload();
+    // payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_URI, DOWNLOAD_URI);
+    // payload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, REMOTE_DP_NAME);
+    // payload.addMetric(DeploymentPackageOptions.METRIC_DP_VERSION, REMOTE_DP_VERSION);
+    // payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_DOWNLOAD_PROTOCOL, DOWNLOAD_PROTOCOL);
+    // payload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, Long.parseLong("1111"));
+    // payload.addMetric(DeploymentPackageInstallOptions.METRIC_DP_INSTALL_SYSTEM_UPDATE, false);
+    // payload.addMetric(DeploymentPackageDownloadOptions.METRIC_DP_INSTALL, true);
+    //
+    // KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
+    // 5000);
+    //
+    // s_logger.warn("Response code: " + resp.getResponseCode());
+    // s_logger.warn("Response message: " + resp.getExceptionMessage());
+    // assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
+    // }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
@@ -209,15 +205,15 @@ public class CloudDeploymentHandlerTest extends TestCase {
         }
 
         StringBuilder sb = new StringBuilder(CloudletTopic.Method.GET.toString()).append("/")
-                .append(CloudDeploymentHandlerV2.RESOURCE_BUNDLES);
+                .append(InventoryHandlerV1.INVENTORY);
 
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
+        KuraResponsePayload resp = s_cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String s = new String(resp.getBody());
 
-        SystemBundles xmlBundles = CoreTestXmlUtil.unmarshal(s, SystemBundles.class);
+        SystemBundles xmlBundles = CoreTestXmlUtil.unmarshal(s, SystemBundles.class); // ??????
 
         SystemBundle[] bundles = xmlBundles.getBundles();
 
@@ -236,79 +232,4 @@ public class CloudDeploymentHandlerTest extends TestCase {
         assertEquals(LOCAL_BUNDLE_VERSION, bundle.getVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testExecStartStop() throws Exception {
-
-        assertTrue(s_cloudCallService.isConnected());
-
-        DeploymentPackage dp = s_deploymentAdmin.getDeploymentPackage(LOCAL_DP_NAME);
-        if (dp == null) {
-            InputStream is = getTestDpUrl().openStream();
-            dp = s_deploymentAdmin.installDeploymentPackage(is);
-        }
-
-        Bundle bundle = dp.getBundle(LOCAL_BUNDLE_NAME);
-
-        assertNotNull(bundle);
-
-        if (bundle.getState() == Bundle.RESOLVED) {
-            bundle.start();
-        }
-
-        assertEquals(Bundle.ACTIVE, bundle.getState());
-
-        StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
-                .append(CloudDeploymentHandlerV2.RESOURCE_STOP).append("/").append(bundle.getBundleId());
-
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
-
-        assertEquals(Bundle.RESOLVED, bundle.getState());
-
-        // Start
-        sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
-                .append(CloudDeploymentHandlerV2.RESOURCE_START).append("/").append(bundle.getBundleId());
-
-        resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), null, 5000);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
-
-        assertEquals(Bundle.ACTIVE, bundle.getState());
-    }
-
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
-    @Test
-    public void testExecUninstallDeploymentPackage() throws Exception {
-
-        assertTrue(s_cloudCallService.isConnected());
-        assertNull(s_deploymentAdmin.getDeploymentPackage(LOCAL_BUNDLE_NAME));
-
-        InputStream is = getTestDpUrl().openStream();
-        s_deploymentAdmin.installDeploymentPackage(is);
-
-        StringBuilder sb = new StringBuilder(CloudletTopic.Method.EXEC.toString()).append("/")
-                .append(CloudDeploymentHandlerV2.RESOURCE_UNINSTALL);
-
-        s_logger.warn("Uninstall topic: " + sb.toString());
-
-        KuraPayload payload = new KuraPayload();
-        // payload.setBody("org.eclipse.kura.test.helloworld".getBytes("UTF-8"));
-        payload.addMetric(DeploymentPackageOptions.METRIC_DP_NAME, LOCAL_BUNDLE_NAME);
-        payload.addMetric(DeploymentPackageOptions.METRIC_JOB_ID, Long.parseLong("1111"));
-
-        KuraResponsePayload resp = s_cloudCallService.call(CloudDeploymentHandlerV2.APP_ID, sb.toString(), payload,
-                5000);
-
-        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
-
-        int countdown = 10000;
-        while (countdown > 0) {
-            Thread.sleep(1000);
-            countdown -= 1000;
-        }
-
-        assertNull(s_deploymentAdmin.getDeploymentPackage(REMOTE_BUNDLE_NAME));
-    }
 }

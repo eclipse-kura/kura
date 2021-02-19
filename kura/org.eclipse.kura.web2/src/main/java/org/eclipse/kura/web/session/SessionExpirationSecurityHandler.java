@@ -45,7 +45,7 @@ public class SessionExpirationSecurityHandler implements SecurityHandler {
 
             final long delta = now - lastActivity;
             if (maxInactiveInterval > 0 && delta > maxInactiveInterval * 1000) {
-                auditLogger.warn("{} UI Session - Failure - Session expired", AuditContext.current());
+                auditLogger.warn("{} UI Session - Failure - Session expired", AuditContext.currentOrInternal());
                 session.invalidate();
                 return false;
             }

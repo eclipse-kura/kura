@@ -519,7 +519,7 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         this.pid = pid;
         this.xmlConfigurations = xmlConfigurations;
         this.configurationService = configurationService;
-        this.auditContext = AuditContext.current();
+        this.auditContext = AuditContext.currentOrInternal();
     }
 
     @Override
@@ -572,7 +572,7 @@ class RollbackCallable implements Callable<Void> {
         super();
         this.snapshotId = snapshotId;
         this.configurationService = configurationService;
-        this.auditContext = AuditContext.current();
+        this.auditContext = AuditContext.currentOrInternal();
     }
 
     @Override

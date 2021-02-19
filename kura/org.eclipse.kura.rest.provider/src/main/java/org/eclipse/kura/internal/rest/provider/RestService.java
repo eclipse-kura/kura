@@ -34,6 +34,7 @@ import javax.annotation.Priority;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -44,8 +45,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditConstants;
+import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.osgi.framework.BundleContext;
@@ -167,7 +169,7 @@ public class RestService
             }
 
         } catch (final Exception e) {
-            auditLogger.info("{} Rest - Failure - Received unauthorized REST request", auditContext);
+            auditLogger.warn("{} Rest - Failure - Received unauthorized REST request", auditContext);
             request.abortWith(UNAUTHORIZED_RESPONSE);
             return null;
         }
@@ -182,7 +184,7 @@ public class RestService
     private Optional<Principal> performBasicAuthentication(final ContainerRequestContext request)
             throws NoSuchAlgorithmException, UnsupportedEncodingException {
 
-        final AuditContext auditContext = AuditContext.current();
+        final AuditContext auditContext = AuditContext.currentOrInternal();
 
         String authHeader = request.getHeaderString("Authorization");
         if (authHeader == null) {
@@ -216,7 +218,7 @@ public class RestService
     }
 
     private Optional<Principal> performCertificateAuthentication(final ContainerRequestContext context) {
-        final AuditContext auditContext = AuditContext.current();
+        final AuditContext auditContext = AuditContext.currentOrInternal();
 
         try {
 
@@ -287,24 +289,33 @@ public class RestService
         int responseStatus = responseContext.getStatus();
         final SecurityContext context = requestContext.getSecurityContext();
 
-        final AuditContext auditContext = AuditContext.current();
+        final AuditContext auditContext = initAuditContext(requestContext);
 
-        if (context == null) {
-            auditLogger.warn("{} Rest - Warning - No security context", auditContext);
-            return;
-        }
+        try {
+            if (responseContext.getStatus() == 404) {
+                auditLogger.warn("{} Rest - Failure - Service not found", auditContext);
+                return;
+            }
 
-        final Principal principal = context.getUserPrincipal();
+            if (context == null) {
+                auditLogger.warn("{} Rest - Failure - No security context", auditContext);
+                return;
+            }
 
-        if (principal == null) {
-            auditLogger.warn("{} Rest - Warning - User not authenticated", auditContext);
-            return;
-        }
+            final Principal principal = context.getUserPrincipal();
 
-        if (responseStatus == Response.Status.OK.getStatusCode()) {
-            auditLogger.info("{} Rest - Success - Rest request succeeded", auditContext);
-        } else {
-            auditLogger.warn("{} Rest - Failure - Request failed", auditContext);
+            if (principal == null) {
+                auditLogger.warn("{} Rest - Failure - User not authenticated", auditContext);
+                return;
+            }
+
+            if (responseStatus == Response.Status.OK.getStatusCode()) {
+                auditLogger.info("{} Rest - Success - Rest request succeeded", auditContext);
+            } else {
+                auditLogger.warn("{} Rest - Failure - Request failed", auditContext);
+            }
+        } finally {
+            closeAuditContext(requestContext);
         }
 
     }
@@ -325,6 +336,13 @@ public class RestService
     }
 
     private AuditContext initAuditContext(ContainerRequestContext request) {
+
+        final Object rawContext = request.getProperty("org.eclipse.kura.rest.audit.context");
+
+        if (rawContext != null) {
+            return (AuditContext) rawContext;
+        }
+
         final Map<String, String> properties = new HashMap<>();
 
         String requestIp = request.getHeaderString("X-FORWARDED-FOR");
@@ -339,13 +357,24 @@ public class RestService
 
         final AuditContext result = new AuditContext(properties);
 
-        AuditContext.openScope(result);
+        final Scope scope = AuditContext.openScope(result);
+
+        request.setProperty("org.eclipse.kura.rest.audit.context", result);
+        request.setProperty("org.eclipse.kura.rest.audit.scope", scope);
 
         return result;
     }
 
+    private void closeAuditContext(ContainerRequestContext request) {
+        final Object rawScope = request.getProperty("org.eclipse.kura.rest.audit.scope");
+
+        if (rawScope instanceof Scope) {
+            ((Scope) rawScope).close();
+        }
+    }
+
     @Provider
-    @Priority(1)
+    @Priority(Priorities.AUTHENTICATION - 100)
     private class IncomingPortCheckFilter implements ContainerRequestFilter {
 
         @Context
@@ -353,6 +382,8 @@ public class RestService
 
         @Override
         public void filter(final ContainerRequestContext request) throws IOException {
+
+            initAuditContext(request);
 
             final Set<Integer> allowedPorts = options.getAllowedPorts();
 

@@ -166,9 +166,9 @@ public class MessageHandlerCallable implements Callable<Void> {
             final boolean isSuccessful = responseCode instanceof Integer && ((Integer) responseCode) / 200 == 1;
 
             if (isSuccessful) {
-                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call", AuditContext.current());
+                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call", AuditContext.currentOrInternal());
             } else {
-                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call", AuditContext.current());
+                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call", AuditContext.currentOrInternal());
             }
 
             buildResponseMessage(requestId, response);

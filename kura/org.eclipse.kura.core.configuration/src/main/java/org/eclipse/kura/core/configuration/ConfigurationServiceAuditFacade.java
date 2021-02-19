@@ -122,10 +122,10 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     private static <T, E extends Throwable> T audit(final FallibleSupplier<T, E> task, final String message) throws E {
         try {
             final T result = task.get();
-            auditLogger.info(CONFIGURATION_SERVICE_SUCCESS, AuditContext.current(), message);
+            auditLogger.info(CONFIGURATION_SERVICE_SUCCESS, AuditContext.currentOrInternal(), message);
             return result;
         } catch (final Exception e) {
-            auditLogger.warn(CONFIGURATION_SERVICE_FAILURE, AuditContext.current(), message);
+            auditLogger.warn(CONFIGURATION_SERVICE_FAILURE, AuditContext.currentOrInternal(), message);
             throw e;
         }
     }
@@ -133,9 +133,9 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     private static <E extends Throwable> void audit(final FallibleTask<E> task, final String message) throws E {
         try {
             task.run();
-            auditLogger.info(CONFIGURATION_SERVICE_SUCCESS, AuditContext.current(), message);
+            auditLogger.info(CONFIGURATION_SERVICE_SUCCESS, AuditContext.currentOrInternal(), message);
         } catch (final Exception e) {
-            auditLogger.warn(CONFIGURATION_SERVICE_FAILURE, AuditContext.current(), message);
+            auditLogger.warn(CONFIGURATION_SERVICE_FAILURE, AuditContext.currentOrInternal(), message);
             throw e;
         }
     }

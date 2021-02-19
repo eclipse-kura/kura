@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -75,9 +76,9 @@ public class AuditContext {
      * Returns the {@link AuditContext} associated with the current thread, if set, or a context with
      * {@link AuditConstants#KEY_ENTRY_POINT} set to {@link AuditConstants#ENTRY_POINT_INTERNAL} otherwise.
      * 
-     * @return
+     * @return the {@link AuditContext}
      */
-    public static AuditContext current() {
+    public static AuditContext currentOrInternal() {
         final AuditContext current = localContext.get();
 
         if (current != null) {
@@ -91,9 +92,19 @@ public class AuditContext {
     }
 
     /**
+     * Returns the {@link AuditContext} associated with the current thread, if any.
+     * 
+     * @return the {@link AuditContext} associated with this thread or empty if none is set
+     */
+    public static Optional<AuditContext> current() {
+        return Optional.ofNullable(localContext.get());
+    }
+
+    /**
      * Sets the provided context as the thread local instance and returns a {@link Scope} that can be used for removing
      * it.
-     * Subsequent calls to {@link AuditContext#current()} performed on the same thread will return the provided
+     * Subsequent calls to {@link AuditContext#currentOrInternal()} performed on the same thread will return the
+     * provided
      * {@link AuditContext} instance until the returned {@link Scope} is closed.
      * 
      * @param context

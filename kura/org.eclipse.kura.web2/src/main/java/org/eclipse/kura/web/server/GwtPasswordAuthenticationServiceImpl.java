@@ -44,7 +44,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
 
         final HttpSession session = Console.instance().createSession(getThreadLocalRequest());
 
-        final AuditContext context = AuditContext.current();
+        final AuditContext context = AuditContext.currentOrInternal();
         context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), username);
 
         try {

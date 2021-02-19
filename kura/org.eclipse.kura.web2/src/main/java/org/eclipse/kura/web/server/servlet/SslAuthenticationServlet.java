@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,8 @@ import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditConstants;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
 import org.slf4j.Logger;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class SslAuthenticationServlet extends HttpServlet {
 
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final Logger logger = LoggerFactory.getLogger(SslAuthenticationServlet.class);
 
     /**
@@ -58,6 +61,8 @@ public class SslAuthenticationServlet extends HttpServlet {
             sendRedirect(resp, redirectPath);
             return;
         }
+
+        final AuditContext auditContext = Console.initAuditContext(req);
 
         try {
             if (!Console.getConsoleOptions().isAuthenticationMethodEnabled("Certificate")) {
@@ -86,10 +91,15 @@ public class SslAuthenticationServlet extends HttpServlet {
                 throw new IllegalArgumentException("Common Name " + commonName + " is not associated with an user");
             }
 
-            console.setAuthenticated(session, commonName);
+            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), commonName);
+
+            console.setAuthenticated(session, commonName, auditContext);
+
+            auditLogger.info("{} UI Login - Success - Certificate login", auditContext);
             sendRedirect(resp, redirectPath);
 
         } catch (final Exception e) {
+            auditLogger.info("{} UI Login - Failure - Certificate login", auditContext);
             logger.warn("certificate authentication failed", e);
             sendUnauthorized(resp);
         }

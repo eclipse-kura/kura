@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,10 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.asset.provider.AssetConstants;
@@ -42,7 +40,6 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
@@ -54,14 +51,17 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WiresSnapshotServlet extends HttpServlet {
+public class WiresSnapshotServlet extends AuditServlet {
 
     private static final String WIRE_GRAPH_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
     private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
 
     private static final long serialVersionUID = -7483037360719617846L;
     private static final Logger logger = LoggerFactory.getLogger(WiresSnapshotServlet.class);
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+
+    public WiresSnapshotServlet() {
+        super("UI Wires Snapshots", "Get wires snapshot");
+    }
 
     private String toSnapshot(XmlComponentConfigurations configs) throws GwtKuraException {
         final BundleContext context = FrameworkUtil.getBundle(GwtWireGraphServiceImpl.class).getBundleContext();
@@ -112,8 +112,6 @@ public class WiresSnapshotServlet extends HttpServlet {
             throw new ServletException("Security error: please retry this operation correctly.", e);
         }
 
-        HttpSession session = request.getSession(false);
-
         try {
 
             final List<ComponentConfiguration> result = new ArrayList<>();
@@ -159,13 +157,8 @@ public class WiresSnapshotServlet extends HttpServlet {
                 writer.write(marshalled);
             }
 
-            auditLogger.info(
-                    "UI Wires Snapshots - Success - Successfully generated wire graph snapshot for user: {}, session: {}, generated file name: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), snapshotName);
         } catch (Exception e) {
             logger.warn("Failed to download snapshot", e);
-            auditLogger.warn("UI Wires Snapshots - Failure - Failed to get wires snapshot for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new ServletException("Failed to download snapshot");
         }
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,12 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.audit.AuditContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SessionExpirationSecurityHandler implements SecurityHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(SessionExpirationSecurityHandler.class);
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
@@ -44,8 +45,7 @@ public class SessionExpirationSecurityHandler implements SecurityHandler {
 
             final long delta = now - lastActivity;
             if (maxInactiveInterval > 0 && delta > maxInactiveInterval * 1000) {
-                logger.warn("UI Session Expired - user: {}, session {}, last activity: {} ms ago",
-                        session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), delta);
+                auditLogger.warn("{} UI Session - Failure - Session expired", AuditContext.current());
                 session.invalidate();
                 return false;
             }

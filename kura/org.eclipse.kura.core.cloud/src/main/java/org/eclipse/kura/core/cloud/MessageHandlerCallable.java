@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,9 @@ import java.util.regex.Pattern;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditConstants;
+import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudNotificationPublisher;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
@@ -42,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 public class MessageHandlerCallable implements Callable<Void> {
 
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final Logger logger = LoggerFactory.getLogger(MessageHandlerCallable.class);
 
     private static final Pattern RESOURCES_DELIM = Pattern.compile("/");
@@ -85,7 +89,7 @@ public class MessageHandlerCallable implements Callable<Void> {
         contextProperties.put(NOTIFICATION_PUBLISHER_PID.name(), notificationPublisherPid);
         contextProperties.put(TENANT_ID.name(), connectionProperties.get("Account"));
         contextProperties.put(DEVICE_ID.name(), connectionProperties.get("Client ID"));
-        
+
         this.requestHandlerContext = new RequestHandlerContext(notificationPublisher, contextProperties);
     }
 
@@ -103,61 +107,83 @@ public class MessageHandlerCallable implements Callable<Void> {
         KuraPayload reqPayload = this.kuraMessage;
         KuraMessage response;
 
-        try {
-            Iterator<String> resources = RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
+        final Map<String, String> auditProperties = new HashMap<>();
 
-            if (!resources.hasNext()) {
-                throw new IllegalArgumentException();
-            }
+        auditProperties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "DefaultCloudConnectionService");
+        auditProperties.put("cloud.app.id", appId);
+        auditProperties.put("cloud.app.topic", appTopic);
+        auditProperties.put("cloud.connection.pid", cloudService.getOwnPid());
 
-            String method = resources.next();
+        try (final Scope scope = AuditContext.openScope(new AuditContext(auditProperties))) {
+            try {
+                Iterator<String> resources = RESOURCES_DELIM.splitAsStream(this.appTopic).iterator();
 
-            Map<String, Object> reqResources = getMessageResources(resources);
+                if (!resources.hasNext()) {
+                    throw new IllegalArgumentException();
+                }
 
-            KuraMessage reqMessage = new KuraMessage(reqPayload, reqResources);
+                String method = resources.next();
 
-            switch (method) {
-            case "GET":
-                logger.debug("Handling GET request topic: {}", this.appTopic);
-                response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
-                break;
+                Map<String, Object> reqResources = getMessageResources(resources);
 
-            case "PUT":
-                logger.debug("Handling PUT request topic: {}", this.appTopic);
-                response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
-                break;
+                KuraMessage reqMessage = new KuraMessage(reqPayload, reqResources);
 
-            case "POST":
-                logger.debug("Handling POST request topic: {}", this.appTopic);
-                response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
-                break;
+                switch (method) {
+                case "GET":
+                    logger.debug("Handling GET request topic: {}", this.appTopic);
+                    response = this.cloudApp.doGet(this.requestHandlerContext, reqMessage);
+                    break;
 
-            case "DEL":
-                logger.debug("Handling DEL request topic: {}", this.appTopic);
-                response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
-                break;
+                case "PUT":
+                    logger.debug("Handling PUT request topic: {}", this.appTopic);
+                    response = this.cloudApp.doPut(this.requestHandlerContext, reqMessage);
+                    break;
 
-            case "EXEC":
-                logger.debug("Handling EXEC request topic: {}", this.appTopic);
-                response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
-                break;
+                case "POST":
+                    logger.debug("Handling POST request topic: {}", this.appTopic);
+                    response = this.cloudApp.doPost(this.requestHandlerContext, reqMessage);
+                    break;
 
-            default:
+                case "DEL":
+                    logger.debug("Handling DEL request topic: {}", this.appTopic);
+                    response = this.cloudApp.doDel(this.requestHandlerContext, reqMessage);
+                    break;
+
+                case "EXEC":
+                    logger.debug("Handling EXEC request topic: {}", this.appTopic);
+                    response = this.cloudApp.doExec(this.requestHandlerContext, reqMessage);
+                    break;
+
+                default:
+                    logger.error("Bad request topic: {}", this.appTopic);
+                    KuraPayload payload = new KuraPayload();
+                    response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
+                    break;
+                }
+            } catch (IllegalArgumentException e) {
                 logger.error("Bad request topic: {}", this.appTopic);
                 KuraPayload payload = new KuraPayload();
                 response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
-                break;
+            } catch (KuraException e) {
+                logger.error("Error handling request topic: {}", this.appTopic, e);
+                response = manageException(e);
+            } catch (Exception e) {
+                logger.error("Unexpected failure handling response", e);
+                KuraPayload payload = new KuraPayload();
+                response = setResponseCode(payload, RESPONSE_CODE_ERROR);
             }
-        } catch (IllegalArgumentException e) {
-            logger.error("Bad request topic: {}", this.appTopic);
-            KuraPayload payload = new KuraPayload();
-            response = setResponseCode(payload, RESPONSE_CODE_BAD_REQUEST);
-        } catch (KuraException e) {
-            logger.error("Error handling request topic: {}", this.appTopic, e);
-            response = manageException(e);
-        }
 
-        buildResponseMessage(requestId, requesterClientId, response);
+            final Object responseCode = response.getPayload().getMetric(METRIC_RESPONSE_CODE);
+            final boolean isSuccessful = responseCode instanceof Integer && ((Integer) responseCode) / 200 == 1;
+
+            if (isSuccessful) {
+                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call", AuditContext.current());
+            } else {
+                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call", AuditContext.current());
+            }
+
+            buildResponseMessage(requestId, requesterClientId, response);
+        }
 
         return null;
     }

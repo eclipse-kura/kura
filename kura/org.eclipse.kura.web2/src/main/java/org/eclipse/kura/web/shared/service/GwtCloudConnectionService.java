@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 
 import org.eclipse.kura.cloud.CloudService;
+import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
@@ -60,6 +61,7 @@ public interface GwtCloudConnectionService extends RemoteService {
      */
     public List<GwtCloudEntry> findCloudEntries() throws GwtKuraException;
 
+    @Audit(componentName = "UI CloudConnection", description = "Obtain stack configurations")
     public List<GwtConfigComponent> getStackConfigurationsByFactory(final String factoryPid,
             final String cloudServicePid) throws GwtKuraException;
 
@@ -73,6 +75,7 @@ public interface GwtCloudConnectionService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
+    @Audit(componentName = "UI CloudConnection", description = "List cloud service pid")
     public String findSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
 
     /**
@@ -85,6 +88,7 @@ public interface GwtCloudConnectionService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
+    @Audit(componentName = "UI CloudConnection", description = "List cloud service pid regex")
     public String findCloudServicePidRegex(String factoryPid) throws GwtKuraException;
 
     /**
@@ -102,6 +106,7 @@ public interface GwtCloudConnectionService extends RemoteService {
      * @throws GwtKuraException
      *             if the creation and initialization of a {@link CloudService} instance fails.
      */
+    @Audit(componentName = "UI CloudConnection", description = "Create cloud service from factory")
     public void createCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
             throws GwtKuraException;
 
@@ -119,18 +124,24 @@ public interface GwtCloudConnectionService extends RemoteService {
      * @throws GwtKuraException
      *             if the deletion of the specified {@link CloudService} instance fails.
      */
+    @Audit(componentName = "UI CloudConnection", description = "Delete cloud service from factory")
     public void deleteCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
             throws GwtKuraException;
 
+    @Audit(componentName = "UI CloudConnection", description = "List cloud component factories")
     public GwtCloudComponentFactories getCloudComponentFactories() throws GwtKuraException;
 
+    @Audit(componentName = "UI CloudConnection", description = "Create pub/sub instance")
     public void createPubSubInstance(GwtXSRFToken xsrfToken, String pid, String factoryPid, String cloudConnectionPid)
             throws GwtKuraException;
 
+    @Audit(componentName = "UI CloudConnection", description = "Delete pub/sub instance")
     public void deletePubSubInstance(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
 
+    @Audit(componentName = "UI CloudConnection", description = "Obtain pub/sub instance configuration")
     public GwtConfigComponent getPubSubConfiguration(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
 
+    @Audit(componentName = "UI CloudConnection", description = "Update stack component configuration")
     public void updateStackComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent component)
             throws GwtKuraException;
 
@@ -141,6 +152,7 @@ public interface GwtCloudConnectionService extends RemoteService {
      *            - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
      * @throws GwtKuraException
      */
+    @Audit(componentName = "UI CloudConnection", description = "Connect DataService")
     public void connectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 
     /**
@@ -150,6 +162,7 @@ public interface GwtCloudConnectionService extends RemoteService {
      *            - A GwtXSRFToken token necessary to prevent cross-site request forgery attacks.
      * @throws GwtKuraException
      */
+    @Audit(componentName = "UI CloudConnection", description = "Disconnect DataService")
     public void disconnectDataService(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;
 
     public boolean isConnected(GwtXSRFToken xsrfToken, String connectionId) throws GwtKuraException;

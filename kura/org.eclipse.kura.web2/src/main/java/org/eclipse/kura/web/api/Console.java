@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditContext;
 import org.osgi.service.http.NamespaceException;
 
 public interface Console {
@@ -42,7 +43,7 @@ public interface Console {
 
     public Optional<String> getUsername(final HttpSession session);
 
-    public String setAuthenticated(final HttpSession session, final String user);
+    public String setAuthenticated(final HttpSession session, final String user, final AuditContext context);
 
     public void checkXSRFToken(final HttpServletRequest req, final String token) throws KuraException;
 }

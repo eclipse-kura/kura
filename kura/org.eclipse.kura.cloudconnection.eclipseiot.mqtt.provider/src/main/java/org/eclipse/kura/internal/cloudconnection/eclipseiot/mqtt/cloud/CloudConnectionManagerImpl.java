@@ -114,6 +114,7 @@ public class CloudConnectionManagerImpl
     String modemFwVer;
 
     private boolean birthPublished;
+    private String ownPid;
 
     private final AtomicInteger messageId;
 
@@ -230,7 +231,9 @@ public class CloudConnectionManagerImpl
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.info("activate {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
+
+        logger.info("activate {}...", ownPid);
 
         //
         // save the bundle context and the properties
@@ -758,6 +761,10 @@ public class CloudConnectionManagerImpl
             return null;
         }
         return String.valueOf(id);
+    }
+
+    String getOwnPid() {
+        return ownPid;
     }
 
     @Override

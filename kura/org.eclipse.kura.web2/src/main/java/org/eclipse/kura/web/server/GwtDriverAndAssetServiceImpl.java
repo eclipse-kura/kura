@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.csv.CSVFormat;
@@ -49,7 +48,6 @@ import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.server.util.ServiceLocator.ServiceConsumer;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtChannelOperationResult;
@@ -61,12 +59,8 @@ import org.eclipse.kura.web.shared.service.GwtDriverAndAssetService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet implements GwtDriverAndAssetService {
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final long serialVersionUID = 8627173534436639487L;
 
@@ -78,9 +72,6 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
         try {
             List<GwtChannelRecord> result = new ArrayList<>();
 
@@ -90,13 +81,9 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
                     result.add(toGwt(channelRecord));
                 }
             });
-            auditLogger.info("UI Asset - Success - Successfully read all channels for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
             return new GwtChannelOperationResult(result);
         } catch (Exception e) {
-            auditLogger.warn("UI Asset - Failure - Failed to read all channels for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             return getFailureResult(e);
         }
     }
@@ -124,9 +111,6 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
     public GwtChannelOperationResult write(GwtXSRFToken xsrfToken, String assetPid,
             List<GwtChannelRecord> gwtChannelRecords) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
 
         try {
             final Map<String, GwtChannelRecord> groupedRecords = new HashMap<>(gwtChannelRecords.size());
@@ -163,13 +147,8 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
                 }
             }
 
-            auditLogger.info("UI Asset - Success - Successful write for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
-
             return new GwtChannelOperationResult(gwtChannelRecords);
         } catch (Exception e) {
-            auditLogger.warn("UI Asset - Failure - Write failure for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             return getFailureResult(e);
         }
     }
@@ -365,10 +344,7 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
 
         requireIsDriverOrAssetFactory(factoryPid);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.createFactoryComponent(session, factoryPid, pid);
+        GwtComponentServiceInternal.createFactoryComponent(factoryPid, pid);
     }
 
     @Override
@@ -378,10 +354,7 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
 
         requireIsDriverOrAssetFactory(factoryPid);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.createFactoryComponent(session, factoryPid, pid, config);
+        GwtComponentServiceInternal.createFactoryComponent(factoryPid, pid, config);
     }
 
     @Override
@@ -392,10 +365,7 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
 
         requireIsDriverOrAsset(config.getComponentId());
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.updateComponentConfiguration(session, config);
+        GwtComponentServiceInternal.updateComponentConfiguration(config);
     }
 
     @Override
@@ -406,10 +376,7 @@ public class GwtDriverAndAssetServiceImpl extends OsgiRemoteServiceServlet imple
 
         requireIsDriverOrAsset(pid);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.deleteFactoryConfiguration(session, pid, takeSnapshot);
+        GwtComponentServiceInternal.deleteFactoryConfiguration(pid, takeSnapshot);
     }
 
     private static void requireIsDriverOrAssetFactory(String factoryPid) throws GwtKuraException {

@@ -16,6 +16,7 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
@@ -46,6 +47,7 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the list of components registered in the framework cannot be extracted.
      */
+    @Audit(componentName = "UI Component", description = "Find tracked pids")
     public List<String> findTrackedPids(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     /**
@@ -64,6 +66,7 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configurations cannot be extracted.
      */
+    @Audit(componentName = "UI Component", description = "Find filtered component configurations")
     public List<GwtConfigComponent> findFilteredComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     /**
@@ -84,6 +87,7 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configuration for the specified component cannot be found.
      */
+    @Audit(componentName = "UI Component", description = "Find filtered component configuration")
     public List<GwtConfigComponent> findFilteredComponentConfiguration(GwtXSRFToken xsrfToken, String pid)
             throws GwtKuraException;
 
@@ -101,8 +105,10 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configurations cannot be extracted.
      */
+    @Audit(componentName = "UI Component", description = "List component configurations")
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "List component configurations")
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken, String osgiFilter)
             throws GwtKuraException;
 
@@ -122,6 +128,7 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configuration for the specified component cannot be found.
      */
+    @Audit(componentName = "UI Component", description = "List component configuration")
     public List<GwtConfigComponent> findComponentConfiguration(GwtXSRFToken xsrfToken, String pid)
             throws GwtKuraException;
 
@@ -142,6 +149,7 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configuration changes could not be applied.
      */
+    @Audit(componentName = "UI Component", description = "Update component configuration")
     public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent)
             throws GwtKuraException;
 
@@ -163,20 +171,26 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configuration changes could not be applied.
      */
+    @Audit(componentName = "UI Component", description = "Update component configurations")
     public void updateComponentConfigurations(GwtXSRFToken xsrfToken, List<GwtConfigComponent> configComponents)
             throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Create factory component")
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Create factory component")
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid,
             GwtConfigComponent properties) throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Delete factory configuration")
     public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid, boolean takeSnapshot)
             throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Find factory components")
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
+    @Audit(componentName = "UI Component", description = "Update component configuration")
+    public void updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
             throws GwtKuraException;
 
     /**
@@ -186,7 +200,9 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the search operation fails.
      */
+    @Audit(componentName = "UI Component", description = "Get driver factories list")
     public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Get pids from target")
     public List<String> getPidsFromTarget(GwtXSRFToken xsrfToken, String pid, String targetRef) throws GwtKuraException;
 }

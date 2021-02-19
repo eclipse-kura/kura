@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -116,63 +115,62 @@ public class denali implements EntryPoint {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                denali.this.gwtDeviceService.findSystemProperties(token,
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                denali.this.gwtDeviceService.findSystemProperties(token, new AsyncCallback<List<GwtGroupedNVPair>>() {
 
-                            @Override
-                            public void onSuccess(ArrayList<GwtGroupedNVPair> results) {
+                    @Override
+                    public void onSuccess(List<GwtGroupedNVPair> results) {
 
-                                final GwtSession gwtSession = new GwtSession();
+                        final GwtSession gwtSession = new GwtSession();
 
-                                if (results != null) {
-                                    List<GwtGroupedNVPair> pairs = results;
-                                    pairs.forEach(pair -> {
-                                        String name = pair.getName();
-                                        if ("kura.have.net.admin".equals(name)) {
-                                            Boolean value = Boolean.valueOf(pair.getValue());
-                                            gwtSession.setNetAdminAvailable(value);
-                                        }
-                                        if ("kura.version".equals(name)) {
-                                            gwtSession.setKuraVersion(pair.getValue());
-                                        }
-                                        if ("kura.os.version".equals(name)) {
-                                            gwtSession.setOsVersion(pair.getValue());
-                                        }
-                                    });
+                        if (results != null) {
+                            List<GwtGroupedNVPair> pairs = results;
+                            pairs.forEach(pair -> {
+                                String name = pair.getName();
+                                if ("kura.have.net.admin".equals(name)) {
+                                    Boolean value = Boolean.valueOf(pair.getValue());
+                                    gwtSession.setNetAdminAvailable(value);
                                 }
+                                if ("kura.version".equals(name)) {
+                                    gwtSession.setKuraVersion(pair.getValue());
+                                }
+                                if ("kura.os.version".equals(name)) {
+                                    gwtSession.setOsVersion(pair.getValue());
+                                }
+                            });
+                        }
 
-                                denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        FailureHandler.handle(caught, denali.class.getSimpleName());
-                                        entryClassUi.setFooter(gwtSession);
-                                        entryClassUi.initSystemPanel(gwtSession);
-                                        entryClassUi.setSession(gwtSession);
-                                        entryClassUi.init();
-                                    }
-
-                                    @Override
-                                    public void onSuccess(Boolean result) {
-                                        if (result) {
-                                            gwtSession.setDevelopMode(true);
-                                        }
-                                        entryClassUi.setFooter(gwtSession);
-                                        entryClassUi.initSystemPanel(gwtSession);
-                                        entryClassUi.setSession(gwtSession);
-                                        entryClassUi.init();
-                                    }
-                                });
-                            }
+                        denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
                                 FailureHandler.handle(caught, denali.class.getSimpleName());
-                                entryClassUi.setFooter(new GwtSession());
-                                entryClassUi.initSystemPanel(new GwtSession());
-                                entryClassUi.setSession(new GwtSession());
+                                entryClassUi.setFooter(gwtSession);
+                                entryClassUi.initSystemPanel(gwtSession);
+                                entryClassUi.setSession(gwtSession);
+                                entryClassUi.init();
+                            }
+
+                            @Override
+                            public void onSuccess(Boolean result) {
+                                if (result) {
+                                    gwtSession.setDevelopMode(true);
+                                }
+                                entryClassUi.setFooter(gwtSession);
+                                entryClassUi.initSystemPanel(gwtSession);
+                                entryClassUi.setSession(gwtSession);
+                                entryClassUi.init();
                             }
                         });
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        FailureHandler.handle(caught, denali.class.getSimpleName());
+                        entryClassUi.setFooter(new GwtSession());
+                        entryClassUi.initSystemPanel(new GwtSession());
+                        entryClassUi.setSession(new GwtSession());
+                    }
+                });
             }
         });
     }

@@ -40,7 +40,7 @@ public class AuditServlet extends HttpServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
-        final AuditContext context = Console.initAuditContext(req);
+        final AuditContext context = Console.instance().initAuditContext(req);
         try (final Scope scope = AuditContext.openScope(context)) {
             super.service(req, resp);
         } finally {

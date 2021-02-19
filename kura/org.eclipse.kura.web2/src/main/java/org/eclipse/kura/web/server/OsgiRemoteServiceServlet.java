@@ -86,7 +86,7 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
         ClassLoader oldContextClassLoader = currentThread.getContextClassLoader();
         currentThread.setContextClassLoader(this.getClass().getClassLoader());
 
-        final AuditContext auditContext = Console.initAuditContext(req);
+        final AuditContext auditContext = Console.instance().initAuditContext(req);
 
         try (final Scope scope = AuditContext.openScope(auditContext)) {
             super.service(req, resp);
@@ -194,7 +194,8 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
         final Method method = rpcRequest.getMethod();
 
-        AuditContext.currentOrInternal().getProperties().put("rpc.method", getClass().getSimpleName() + "." + method.getName());
+        AuditContext.currentOrInternal().getProperties().put("rpc.method",
+                getClass().getSimpleName() + "." + method.getName());
 
         checkPermissions(rpcRequest);
 
@@ -205,11 +206,11 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
             if (methodAudit.isPresent()) {
                 if (result == null || result.startsWith("//EX")) {
-                    auditLogger.warn("{} {} - Failure - {}", AuditContext.currentOrInternal(), methodAudit.get().componentName(),
-                            methodAudit.get().description());
+                    auditLogger.warn("{} {} - Failure - {}", AuditContext.currentOrInternal(),
+                            methodAudit.get().componentName(), methodAudit.get().description());
                 } else {
-                    auditLogger.info("{} {} - Success - {}", AuditContext.currentOrInternal(), methodAudit.get().componentName(),
-                            methodAudit.get().description());
+                    auditLogger.info("{} {} - Success - {}", AuditContext.currentOrInternal(),
+                            methodAudit.get().componentName(), methodAudit.get().description());
                 }
             }
 
@@ -217,8 +218,8 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
         } catch (final Exception e) {
             if (methodAudit.isPresent()) {
-                auditLogger.warn("{} {} - Failure - {}", AuditContext.currentOrInternal(), methodAudit.get().componentName(),
-                        methodAudit.get().description());
+                auditLogger.warn("{} {} - Failure - {}", AuditContext.currentOrInternal(),
+                        methodAudit.get().componentName(), methodAudit.get().description());
             }
 
             throw e;

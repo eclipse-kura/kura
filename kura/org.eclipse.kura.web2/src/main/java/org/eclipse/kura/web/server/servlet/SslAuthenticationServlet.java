@@ -62,7 +62,7 @@ public class SslAuthenticationServlet extends HttpServlet {
             return;
         }
 
-        final AuditContext auditContext = Console.initAuditContext(req);
+        final AuditContext auditContext = Console.instance().initAuditContext(req);
 
         try {
             if (!Console.getConsoleOptions().isAuthenticationMethodEnabled("Certificate")) {

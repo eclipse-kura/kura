@@ -32,7 +32,7 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
-        final AuditContext auditContext = Console.initAuditContext(request);
+        final AuditContext auditContext = Console.instance().initAuditContext(request);
 
         try (final Scope scope = AuditContext.openScope(auditContext)) {
             final HttpSession session = request.getSession(false);

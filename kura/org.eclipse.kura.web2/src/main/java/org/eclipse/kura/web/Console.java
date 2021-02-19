@@ -641,13 +641,15 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     public String setAuthenticated(final HttpSession session, final String user, final AuditContext context) {
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
 
+        context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), user);
         session.setAttribute(Attributes.AUDIT_CONTEXT.getValue(), context);
         session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), this.userManager.getCredentialsHash(user));
 
         return CONSOLE_PATH;
     }
 
-    public static AuditContext initAuditContext(final HttpServletRequest req) {
+    @Override
+    public AuditContext initAuditContext(final HttpServletRequest req) {
         final HttpSession session = req.getSession(false);
 
         String requestIp = req.getHeader("X-FORWARDED-FOR");

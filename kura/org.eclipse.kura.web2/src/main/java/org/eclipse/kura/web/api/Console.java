@@ -43,6 +43,8 @@ public interface Console {
 
     public Optional<String> getUsername(final HttpSession session);
 
+    public AuditContext initAuditContext(final HttpServletRequest req);
+
     public String setAuthenticated(final HttpSession session, final String user, final AuditContext context);
 
     public void checkXSRFToken(final HttpServletRequest req, final String token) throws KuraException;

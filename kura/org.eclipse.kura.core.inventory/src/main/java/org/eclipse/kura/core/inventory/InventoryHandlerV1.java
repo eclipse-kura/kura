@@ -232,56 +232,56 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private KuraPayload doGetBundles() {
         Bundle[] bundles = this.bundleContext.getBundles();
-        SystemBundles xmlBundles = new SystemBundles();
+        SystemBundles systemBundles = new SystemBundles();
         SystemBundle[] axb = new SystemBundle[bundles.length];
 
         for (int i = 0; i < bundles.length; i++) {
 
             Bundle bundle = bundles[i];
-            SystemBundle xmlBundle = new SystemBundle(bundle.getSymbolicName());
+            SystemBundle systemBundle = new SystemBundle(bundle.getSymbolicName());
 
-            xmlBundle.setVersion(bundle.getVersion().toString());
-            xmlBundle.setId(bundle.getBundleId());
+            systemBundle.setVersion(bundle.getVersion().toString());
+            systemBundle.setId(bundle.getBundleId());
 
             int state = bundle.getState();
 
             switch (state) {
             case Bundle.UNINSTALLED:
-                xmlBundle.setState("UNINSTALLED");
+                systemBundle.setState("UNINSTALLED");
                 break;
 
             case Bundle.INSTALLED:
-                xmlBundle.setState("INSTALLED");
+                systemBundle.setState("INSTALLED");
                 break;
 
             case Bundle.RESOLVED:
-                xmlBundle.setState("RESOLVED");
+                systemBundle.setState("RESOLVED");
                 break;
 
             case Bundle.STARTING:
-                xmlBundle.setState("STARTING");
+                systemBundle.setState("STARTING");
                 break;
 
             case Bundle.STOPPING:
-                xmlBundle.setState("STOPPING");
+                systemBundle.setState("STOPPING");
                 break;
 
             case Bundle.ACTIVE:
-                xmlBundle.setState("ACTIVE");
+                systemBundle.setState("ACTIVE");
                 break;
 
             default:
-                xmlBundle.setState(String.valueOf(state));
+                systemBundle.setState(String.valueOf(state));
             }
 
-            axb[i] = xmlBundle;
+            axb[i] = systemBundle;
         }
 
-        xmlBundles.setBundles(axb);
+        systemBundles.setBundles(axb);
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            String s = marshal(xmlBundles);
+            String s = marshal(systemBundles);
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {
@@ -314,11 +314,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         // to be defined...
 
         inventory.sort(Comparator.comparing(SystemResourceInfo::getName));
-        SystemResourcesInfo xmlSystemResourcesInfo = new SystemResourcesInfo(inventory);
+        SystemResourcesInfo systemResourcesInfo = new SystemResourcesInfo(inventory);
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            String s = marshal(xmlSystemResourcesInfo);
+            String s = marshal(systemResourcesInfo);
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e1) {
@@ -329,16 +329,16 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     }
 
     private KuraPayload doGetSystemPackages() {
-        List<SystemResourceInfo> packages;
+        List<SystemResourceInfo> systemResourceList;
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            packages = this.systemService.getSystemPackages();
-            List<SystemPackage> xmlPackages = new ArrayList<>();
-            packages.stream()
-                    .forEach(p -> xmlPackages.add(new SystemPackage(p.getName(), p.getVersion(), p.getType())));
-            SystemPackages xmlSystemPackages = new SystemPackages(xmlPackages);
+            systemResourceList = this.systemService.getSystemPackages();
+            List<SystemPackage> systemPackageList = new ArrayList<>();
+            systemResourceList.stream()
+                    .forEach(p -> systemPackageList.add(new SystemPackage(p.getName(), p.getVersion(), p.getType())));
+            SystemPackages systemPackages = new SystemPackages(systemPackageList);
 
-            String s = marshal(xmlSystemPackages);
+            String s = marshal(systemPackages);
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {

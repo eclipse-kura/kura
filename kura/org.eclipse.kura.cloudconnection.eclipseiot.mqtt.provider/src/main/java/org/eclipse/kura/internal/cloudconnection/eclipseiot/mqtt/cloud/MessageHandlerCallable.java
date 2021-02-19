@@ -103,7 +103,7 @@ public class MessageHandlerCallable implements Callable<Void> {
 
         final Map<String, String> auditProperties = new HashMap<>();
 
-        auditProperties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "DefaultCloudConnectionService");
+        auditProperties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "EclipseIoTCloudConnectionService");
         auditProperties.put("cloud.app.topic", appTopic);
         auditProperties.put("cloud.connection.pid", cloudConnectionManager.getOwnPid());
 

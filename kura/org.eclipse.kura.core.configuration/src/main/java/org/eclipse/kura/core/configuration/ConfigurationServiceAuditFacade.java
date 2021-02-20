@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -14,7 +14,6 @@ package org.eclipse.kura.core.configuration;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
@@ -30,11 +29,6 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
-    public Set<String> getFactoryComponentPids() {
-        return audit(super::getFactoryComponentPids, "Get factory component pids");
-    }
-
-    @Override
     public synchronized void createFactoryConfiguration(String factoryPid, String pid, Map<String, Object> properties,
             boolean takeSnapshot) throws KuraException {
         audit(() -> super.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot),
@@ -44,11 +38,6 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     @Override
     public synchronized void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException {
         audit(() -> super.deleteFactoryConfiguration(pid, takeSnapshot), "Delete factory configuration: " + pid);
-    }
-
-    @Override
-    public Set<String> getConfigurableComponentPids() {
-        return audit(super::getConfigurableComponentPids, "Get configurable component pids");
     }
 
     @Override
@@ -64,11 +53,6 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     @Override
     public ComponentConfiguration getComponentConfiguration(String pid) throws KuraException {
         return audit(() -> super.getComponentConfiguration(pid), "Get component configuration: " + pid);
-    }
-
-    @Override
-    public ComponentConfiguration getDefaultComponentConfiguration(String pid) throws KuraException {
-        return audit(() -> super.getDefaultComponentConfiguration(pid), "Get default component configuration: " + pid);
     }
 
     @Override
@@ -92,11 +76,6 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
             throws KuraException {
         audit(() -> super.updateConfigurations(configs, takeSnapshot),
                 "Update configurations: " + formatConfigurationPids(configs));
-    }
-
-    @Override
-    public Set<Long> getSnapshots() throws KuraException {
-        return audit(super::getSnapshots, "Get snapshots");
     }
 
     @Override

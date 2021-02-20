@@ -59,7 +59,6 @@ public interface GwtWireGraphService extends RemoteService {
      * @throws GwtKuraException
      *             if the associated instance is not retrieved
      */
-    @Audit(componentName = "UI Wires", description = "Obtain Wire Graph configuration")
     public GwtWireGraphConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Wires", description = "Update Wire Graph configuration")
@@ -68,6 +67,5 @@ public interface GwtWireGraphService extends RemoteService {
 
     public GwtWireComposerStaticInfo getWireComposerStaticInfo(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    @Audit(componentName = "UI Wires", description = "Obtain Wire Graph configuration")
     public GwtWireGraph getWireGraph(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

@@ -61,7 +61,6 @@ public interface GwtCloudConnectionService extends RemoteService {
      */
     public List<GwtCloudEntry> findCloudEntries() throws GwtKuraException;
 
-    @Audit(componentName = "UI CloudConnection", description = "Obtain stack configurations")
     public List<GwtConfigComponent> getStackConfigurationsByFactory(final String factoryPid,
             final String cloudServicePid) throws GwtKuraException;
 
@@ -75,7 +74,6 @@ public interface GwtCloudConnectionService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
-    @Audit(componentName = "UI CloudConnection", description = "List cloud service pid")
     public String findSuggestedCloudServicePid(String factoryPid) throws GwtKuraException;
 
     /**
@@ -88,7 +86,6 @@ public interface GwtCloudConnectionService extends RemoteService {
      * @throws GwtKuraException
      *             when service referencing fails
      */
-    @Audit(componentName = "UI CloudConnection", description = "List cloud service pid regex")
     public String findCloudServicePidRegex(String factoryPid) throws GwtKuraException;
 
     /**
@@ -128,7 +125,6 @@ public interface GwtCloudConnectionService extends RemoteService {
     public void deleteCloudServiceFromFactory(GwtXSRFToken xsrfToken, String factoryPid, String cloudServicePid)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI CloudConnection", description = "List cloud component factories")
     public GwtCloudComponentFactories getCloudComponentFactories() throws GwtKuraException;
 
     @Audit(componentName = "UI CloudConnection", description = "Create pub/sub instance")
@@ -138,7 +134,6 @@ public interface GwtCloudConnectionService extends RemoteService {
     @Audit(componentName = "UI CloudConnection", description = "Delete pub/sub instance")
     public void deletePubSubInstance(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
 
-    @Audit(componentName = "UI CloudConnection", description = "Obtain pub/sub instance configuration")
     public GwtConfigComponent getPubSubConfiguration(GwtXSRFToken xsrfToken, String pid) throws GwtKuraException;
 
     @Audit(componentName = "UI CloudConnection", description = "Update stack component configuration")

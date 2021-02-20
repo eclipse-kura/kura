@@ -40,7 +40,7 @@ public interface GwtDriverAndAssetService extends RemoteService {
     @Audit(componentName = "UI Asset", description = "Read all channels")
     public GwtChannelOperationResult readAllChannels(GwtXSRFToken xsrfToken, String assetPid) throws GwtKuraException;
 
-    @Audit(componentName = "UI Asset", description = "Write")
+    @Audit(componentName = "UI Asset", description = "Write channels")
     public GwtChannelOperationResult write(GwtXSRFToken xsrfToken, String assetPid,
             List<GwtChannelRecord> channelRecords) throws GwtKuraException;
 

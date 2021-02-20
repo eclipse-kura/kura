@@ -34,25 +34,21 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.NETWORK_ADMIN)
 public interface GwtNetworkService extends RemoteService {
 
-    @Audit(componentName = "UI Network", description = "List network interface configurations")
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Update network interface configurations")
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "List firewall open ports")
     public List<GwtFirewallOpenPortEntry> findDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Update firewall open ports")
     public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "List firewall forwarded ports")
     public List<GwtFirewallPortForwardEntry> findDeviceFirewallPortForwards(GwtXSRFToken xsrfToken)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "List firewall NAT configuration")
     public List<GwtFirewallNatEntry> findDeviceFirewallNATs(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Update firewall open ports")
@@ -74,7 +70,6 @@ public interface GwtNetworkService extends RemoteService {
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "Find PDP context info")
     public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException;
 }

@@ -28,7 +28,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.DEVICE)
 public interface GwtDeviceService extends RemoteService {
 
-    @Audit(componentName = "UI Device", description = "List device info")
     public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public List<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;

@@ -46,7 +46,6 @@ public interface GwtCertificatesService extends RemoteService {
     public Integer storeLoginPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicCert,
             String password, String alias) throws GwtKuraException;
 
-    @Audit(componentName = "UI Certificate", description = "List stored certificates")
     public List<GwtCertificate> listCertificates() throws GwtKuraException;
 
     @Audit(componentName = "UI Certificate", description = "Remove certificate")

@@ -100,7 +100,8 @@ public interface SystemService {
     public static final String KEY_FILE_SEP = "file.separator";
     public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
 
-    /*
+
+    /**
      * @since 2.2
      */
     public static final String KEY_CPU_VERSION = "cpu.version";

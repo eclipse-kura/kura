@@ -16,6 +16,9 @@ import java.util.Map;
 
 import org.osgi.service.event.Event;
 
+/**
+ * @since 2.2
+ */
 public class FloodingProtectionConfigurationChangeEvent extends Event {
 
     public static final String FP_EVENT_CONFIG_CHANGE_TOPIC = "org/eclipse/kura/floodingprotection/event/FP_EVENT_CONFIG_CHANGE_TOPIC";

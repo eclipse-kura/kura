@@ -38,7 +38,6 @@ public class SessionAutorizationSecurityHandler implements SecurityHandler {
             final HttpSession session = request.getSession(false);
 
             if (session == null) {
-                auditLogger.warn("{} UI Session - Failure - User is not authenticated", auditContext);
                 return false;
             }
 

@@ -28,7 +28,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.ADMIN)
 public interface GwtSnapshotService extends RemoteService {
 
-    @Audit(componentName = "UI Snapshots", description = "List device snapshots")
     public List<GwtSnapshot> findDeviceSnapshots(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Snapshots", description = "Rollback device snapshot")

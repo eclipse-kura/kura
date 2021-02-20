@@ -29,7 +29,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.PACKAGES_ADMIN)
 public interface GwtPackageService extends RemoteService {
 
-    @Audit(componentName = "UI Packages", description = "List deployment packages")
     public List<GwtDeploymentPackage> findDeviceDeploymentPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Packages", description = "Uninstall deployment package")

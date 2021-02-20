@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -100,7 +100,7 @@ public class CoreTestXmlUtil {
     public static <T> T unmarshalSystemDeploymentPackages(Document doc) throws Exception {
         // Java objects for unmarshal
         SystemDeploymentPackages systemDeploymentPackages = new SystemDeploymentPackages();
-        List<SystemDeploymentPackage> systemDeploymentPackageList = new ArrayList<SystemDeploymentPackage>();
+        List<SystemDeploymentPackage> systemDeploymentPackageList = new ArrayList<>();
 
         // XML elements
         Element packages = doc.getDocumentElement();
@@ -112,21 +112,26 @@ public class CoreTestXmlUtil {
             if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element el = (Element) currentNode;
                 if (el.getNodeName().equals("package")) {
-                    SystemDeploymentPackage xdp = new SystemDeploymentPackage("");
+                    String name = "";
+                    String version = "";
+                    SystemBundle[] bundleInfos = new SystemBundle[0];
+
                     NodeList nodeList = el.getChildNodes();
                     for (int i = 0; i < nodeList.getLength(); i++) {
                         Node tmpNode = nodeList.item(i);
 
                         // Set package name
                         if (tmpNode.getNodeName().equals("name")) {
-                            xdp.setName(tmpNode.getTextContent());
+                            name = tmpNode.getTextContent();
                         } else if (tmpNode.getNodeName().equals("version")) {
-                            xdp.setVersion(tmpNode.getTextContent());
+                            version = tmpNode.getTextContent();
                         } else if (tmpNode.getNodeName().equals("bundles")) {
-                            xdp.setBundleInfos(parseBundles(tmpNode));
+                            bundleInfos = parseBundles(tmpNode);
                         }
-
                     }
+                    SystemDeploymentPackage xdp = new SystemDeploymentPackage(name, version);
+                    xdp.setBundleInfos(bundleInfos);
+
                     systemDeploymentPackageList.add(xdp);
                 }
             }
@@ -143,7 +148,7 @@ public class CoreTestXmlUtil {
     @SuppressWarnings("unchecked")
     public static <T> T unmarshalXmlBundles(Document doc) throws Exception {
         SystemBundles systemBundles = new SystemBundles();
-        List<SystemBundle> systemBundleList = new ArrayList<SystemBundle>();
+        List<SystemBundle> systemBundleList = new ArrayList<>();
 
         // XML elements
         Element bundles = doc.getDocumentElement();
@@ -153,33 +158,40 @@ public class CoreTestXmlUtil {
         for (int propIndex = 0; propIndex < bundlesChildren.getLength(); propIndex++) {
             Node currentNode = bundlesChildren.item(propIndex);
             if (currentNode.getNodeType() == Node.ELEMENT_NODE) {
+                String name = "";
+                String version = "";
+                long id = -1;
+                String state = "";
+
                 Element el = (Element) currentNode;
                 if (el.getNodeName().equals("bundle")) {
-                    SystemBundle xb = new SystemBundle("");
                     NodeList nodeList = el.getChildNodes();
                     for (int i = 0; i < nodeList.getLength(); i++) {
                         Node tmpNode = nodeList.item(i);
 
                         // Set bundle name
                         if (tmpNode.getNodeName().equals("name")) {
-                            xb.setName(tmpNode.getTextContent());
+                            name = tmpNode.getTextContent();
                         }
 
                         // Set bundle version
                         if (tmpNode.getNodeName().equals("version")) {
-                            xb.setVersion(tmpNode.getTextContent());
+                            version = tmpNode.getTextContent();
                         }
 
                         // Set bundle ID
                         if (tmpNode.getNodeName().equals("id")) {
-                            xb.setId(Long.parseLong(tmpNode.getTextContent()));
+                            id = Long.parseLong(tmpNode.getTextContent());
                         }
 
                         // Set bundle state
                         if (tmpNode.getNodeName().equals("state")) {
-                            xb.setState(tmpNode.getTextContent());
+                            state = tmpNode.getTextContent();
                         }
                     }
+                    SystemBundle xb = new SystemBundle(name, version);
+                    xb.setId(id);
+                    xb.setState(state);
 
                     // Add bundle to list
                     systemBundleList.add(xb);
@@ -197,7 +209,7 @@ public class CoreTestXmlUtil {
     @SuppressWarnings("unchecked")
     public static <T> T unmarshalXmlSnapshotIdResult(Document doc) throws Exception {
         XmlSnapshotIdResult xmlSnapshotIdResult = new XmlSnapshotIdResult();
-        List<Long> idList = new ArrayList<Long>();
+        List<Long> idList = new ArrayList<>();
 
         // XML elements
         Element snapshotIds = doc.getDocumentElement();
@@ -222,26 +234,29 @@ public class CoreTestXmlUtil {
     }
 
     private static SystemBundle[] parseBundles(Node node) {
-        List<SystemBundle> bundleInfos = new ArrayList<SystemBundle>();
+        List<SystemBundle> bundleInfos = new ArrayList<>();
         NodeList nodeList = node.getChildNodes();
 
         // Get information for each bundle
         for (int i = 0; i < nodeList.getLength(); i++) {
             Node bundleNode = nodeList.item(i);
             if (bundleNode.getNodeType() == Node.ELEMENT_NODE) {
-                SystemBundle xbi = new SystemBundle("");
+                String name = "";
+                String version = "";
+
                 NodeList infoList = bundleNode.getChildNodes();
                 for (int j = 0; j < infoList.getLength(); j++) {
                     Node tmpNode = infoList.item(j);
 
                     // Set Bundle Name
                     if (tmpNode.getNodeName().equals("name")) {
-                        xbi.setName(tmpNode.getTextContent());
+                        name = tmpNode.getTextContent();
                     } else if (tmpNode.getNodeName().equals("version")) {
-                        xbi.setVersion(tmpNode.getTextContent());
+                        version = tmpNode.getTextContent();
                     }
                 }
 
+                SystemBundle xbi = new SystemBundle(name, version);
                 // Add bundle to array
                 bundleInfos.add(xbi);
             }

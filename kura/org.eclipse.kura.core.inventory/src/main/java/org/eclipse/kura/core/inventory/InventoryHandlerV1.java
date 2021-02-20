@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -197,8 +197,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         for (int i = 0; i < dps.length; i++) {
             DeploymentPackage dp = dps[i];
 
-            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName());
-            xdp.setVersion(dp.getVersion().toString());
+            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName(), dp.getVersion().toString());
 
             BundleInfo[] bis = dp.getBundleInfos();
             SystemBundle[] axbi = new SystemBundle[bis.length];
@@ -206,8 +205,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             for (int j = 0; j < bis.length; j++) {
 
                 BundleInfo bi = bis[j];
-                SystemBundle xb = new SystemBundle(bi.getSymbolicName());
-                xb.setVersion(bi.getVersion().toString());
+                SystemBundle xb = new SystemBundle(bi.getSymbolicName(), bi.getVersion().toString());
 
                 axbi[j] = xb;
             }
@@ -238,9 +236,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         for (int i = 0; i < bundles.length; i++) {
 
             Bundle bundle = bundles[i];
-            SystemBundle systemBundle = new SystemBundle(bundle.getSymbolicName());
+            SystemBundle systemBundle = new SystemBundle(bundle.getSymbolicName(), bundle.getVersion().toString());
 
-            systemBundle.setVersion(bundle.getVersion().toString());
             systemBundle.setId(bundle.getBundleId());
 
             int state = bundle.getState();

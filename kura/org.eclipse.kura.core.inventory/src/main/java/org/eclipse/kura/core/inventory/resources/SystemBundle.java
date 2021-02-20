@@ -20,10 +20,6 @@ public class SystemBundle extends SystemResourceInfo {
     private long id;
     private String state;
 
-    public SystemBundle(String name) {
-        super(name);
-    }
-
     public SystemBundle(String name, String version) {
         super(name, version, SystemResourceType.BUNDLE);
     }

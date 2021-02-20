@@ -19,10 +19,6 @@ public class SystemDeploymentPackage extends SystemResourceInfo {
 
     private SystemBundle[] bundleInfos;
 
-    public SystemDeploymentPackage(String name) {
-        super(name);
-    }
-
     public SystemDeploymentPackage(String name, String version) {
         super(name, version, SystemResourceType.DP);
     }

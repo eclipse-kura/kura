@@ -150,6 +150,8 @@ public class CloudServiceImpl
     private ServiceRegistration<?> notificationPublisherRegistration;
     private final CloudNotificationPublisher notificationPublisher;
 
+    private String ownPid;
+
     public CloudServiceImpl() {
         this.cloudClients = new CopyOnWriteArrayList<>();
         this.messageId = new AtomicInteger();
@@ -258,7 +260,8 @@ public class CloudServiceImpl
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.info("activate {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
+        logger.info("activate {}...", ownPid);
 
         //
         // save the bundle context and the properties
@@ -1107,5 +1110,9 @@ public class CloudServiceImpl
     @Override
     public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener) {
         this.registeredCloudDeliveryListeners.remove(cloudDeliveryListener);
+    }
+
+    String getOwnPid() {
+        return ownPid;
     }
 }

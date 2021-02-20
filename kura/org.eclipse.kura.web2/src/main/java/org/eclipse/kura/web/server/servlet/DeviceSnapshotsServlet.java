@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,10 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -30,19 +28,21 @@ import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeviceSnapshotsServlet extends HttpServlet {
+public class DeviceSnapshotsServlet extends AuditServlet {
 
     private static final long serialVersionUID = -2533869595709953567L;
 
     private static Logger logger = LoggerFactory.getLogger(DeviceSnapshotsServlet.class);
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+
+    public DeviceSnapshotsServlet() {
+        super("UI Snapshots", "Return device snapshot");
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -55,8 +55,6 @@ public class DeviceSnapshotsServlet extends HttpServlet {
             throw new ServletException("Security error: please retry this operation correctly.", e);
         }
         // END XSRF security check
-
-        HttpSession session = request.getSession(false);
 
         String snapshotId = request.getParameter("snapshotId");
 
@@ -88,14 +86,9 @@ public class DeviceSnapshotsServlet extends HttpServlet {
 
                 writer.write(result);
 
-                auditLogger.info(
-                        "UI Snapshots - Success - Successfully returned device snapshot for user: {}, session: {}, snapshot id: {}",
-                        session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), snapshotId);
             }
         } catch (Exception e) {
             logger.error("Error exporting snapshot");
-            auditLogger.warn("UI Snapshots - Failure - Failed to export device snapshot for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e);
             throw new ServletException(e);
         }
     }

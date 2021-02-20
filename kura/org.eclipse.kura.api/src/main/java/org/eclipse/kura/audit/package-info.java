@@ -8,23 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
- * Eurotech
+ *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.security;
-
-import java.util.Map;
-
-import org.osgi.service.event.Event;
-
 /**
- * @since 2.2
+ *
  */
-public class FloodingProtectionConfigurationChangeEvent extends Event {
-
-    public static final String FP_EVENT_CONFIG_CHANGE_TOPIC = "org/eclipse/kura/floodingprotection/event/FP_EVENT_CONFIG_CHANGE_TOPIC";
-
-    public FloodingProtectionConfigurationChangeEvent(Map<String, ?> properties) {
-        super(FP_EVENT_CONFIG_CHANGE_TOPIC, properties);
-    }
-
-}
+/**
+ * Provides functionalities to track entry point information for audit purposes.
+ *
+ */
+package org.eclipse.kura.audit;

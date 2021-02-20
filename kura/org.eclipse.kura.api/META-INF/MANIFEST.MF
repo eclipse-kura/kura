@@ -61,7 +61,8 @@ Export-Package: org.eclipse.kura;version="1.6.0",
  org.eclipse.kura.watchdog;version="1.0.2",
  org.eclipse.kura.wire;version="2.0.0",
  org.eclipse.kura.wire.graph;version="1.0.0",
- org.eclipse.kura.wire.multiport;version="1.0.0"
+ org.eclipse.kura.wire.multiport;version="1.0.0",
+ org.eclipse.kura.audit;version="1.0.0"
 Import-Package: javax.comm;version="1.2.0",
  javax.crypto,
  javax.microedition.io;resolution:=optional,

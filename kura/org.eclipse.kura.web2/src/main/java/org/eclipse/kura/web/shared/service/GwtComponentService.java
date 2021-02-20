@@ -16,6 +16,7 @@ package org.eclipse.kura.web.shared.service;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
@@ -142,6 +143,7 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configuration changes could not be applied.
      */
+    @Audit(componentName = "UI Component", description = "Update component configuration")
     public void updateComponentConfiguration(GwtXSRFToken xsrfToken, GwtConfigComponent configComponent)
             throws GwtKuraException;
 
@@ -163,20 +165,25 @@ public interface GwtComponentService extends RemoteService {
      * @throws GwtKuraException
      *             if the component configuration changes could not be applied.
      */
+    @Audit(componentName = "UI Component", description = "Update component configurations")
     public void updateComponentConfigurations(GwtXSRFToken xsrfToken, List<GwtConfigComponent> configComponents)
             throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Create factory component")
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Create factory component")
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid,
             GwtConfigComponent properties) throws GwtKuraException;
 
+    @Audit(componentName = "UI Component", description = "Delete factory configuration")
     public void deleteFactoryConfiguration(GwtXSRFToken xsrfToken, String pid, boolean takeSnapshot)
             throws GwtKuraException;
 
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
+    @Audit(componentName = "UI Component", description = "Update component configuration")
+    public void updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
             throws GwtKuraException;
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,8 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
@@ -27,18 +28,21 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.DEVICE)
 public interface GwtDeviceService extends RemoteService {
 
-    public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public ArrayList<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public List<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    @Audit(componentName = "UI Device", description = "Start bundle")
     public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
 
+    @Audit(componentName = "UI Device", description = "Stop bundle")
     public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
 
-    public ArrayList<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public List<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @RequiredPermissions({})
-    public ArrayList<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public List<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    @Audit(componentName = "UI Device", description = "Execute command")
     public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException;
 }

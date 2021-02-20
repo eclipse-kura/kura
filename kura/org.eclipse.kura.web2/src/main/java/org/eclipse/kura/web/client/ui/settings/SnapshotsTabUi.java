@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.settings;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -162,7 +162,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 SnapshotsTabUi.this.gwtSnapshotService.findDeviceSnapshots(token,
-                        new AsyncCallback<ArrayList<GwtSnapshot>>() {
+                        new AsyncCallback<List<GwtSnapshot>>() {
 
                             @Override
                             public void onFailure(Throwable ex) {
@@ -171,7 +171,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
                             }
 
                             @Override
-                            public void onSuccess(ArrayList<GwtSnapshot> result) {
+                            public void onSuccess(List<GwtSnapshot> result) {
                                 SnapshotsTabUi.this.snapshotsDataProvider.getList().clear();
                                 for (GwtSnapshot pair : result) {
                                     SnapshotsTabUi.this.snapshotsDataProvider.getList().add(pair);

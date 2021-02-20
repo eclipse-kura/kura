@@ -12,19 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.security.ThreatManagerService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements GwtSecurityService {
 
@@ -32,8 +26,6 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
      *
      */
     private static final long serialVersionUID = -7664408886756367054L;
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
     public Boolean isSecurityServiceAvailable() {
@@ -69,42 +61,25 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
         SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
         try {
             securityService.reloadSecurityPolicyFingerprint();
         } catch (KuraException e) {
-            auditLogger.warn(
-                    "UI Security - Failure - Failed to reload security policy fingerprint for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(e.getMessage());
         }
-        auditLogger.info(
-                "UI Security - Success - Successfully reloaded security policy fingerprint for user: {}, session: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
     }
 
     @Override
     public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
         SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
         try {
             securityService.reloadCommandLineFingerprint();
         } catch (KuraException e) {
-            auditLogger.warn(
-                    "UI Security - Failure - Failed to reload command line fingerprint for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(e.getMessage());
         }
-        auditLogger.info(
-                "UI Security - Success - Successfully reloaded command line fingerprint for user: {}, session: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
     }
 
     @Override

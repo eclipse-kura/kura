@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web;
 
+import static java.util.Objects.isNull;
 import static org.eclipse.kura.web.session.SecurityHandler.chain;
 
 import java.util.Arrays;
@@ -35,6 +36,8 @@ import javax.servlet.http.HttpSession;
 import org.apache.felix.useradmin.RoleRepositoryStore;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditConstants;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -635,12 +638,44 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
     }
 
     @Override
-    public String setAuthenticated(final HttpSession session, final String user) {
+    public String setAuthenticated(final HttpSession session, final String user, final AuditContext context) {
         session.setAttribute(Attributes.AUTORIZED_USER.getValue(), user);
 
+        context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), user);
+        session.setAttribute(Attributes.AUDIT_CONTEXT.getValue(), context);
         session.setAttribute(Attributes.CREDENTIALS_HASH.getValue(), this.userManager.getCredentialsHash(user));
 
         return CONSOLE_PATH;
+    }
+
+    @Override
+    public AuditContext initAuditContext(final HttpServletRequest req) {
+        final HttpSession session = req.getSession(false);
+
+        String requestIp = req.getHeader("X-FORWARDED-FOR");
+        if (isNull(requestIp)) {
+            requestIp = req.getRemoteAddr();
+        }
+
+        final Object rawAuditContext = session != null ? session.getAttribute(Attributes.AUDIT_CONTEXT.getValue())
+                : null;
+
+        final AuditContext auditContext;
+
+        if (rawAuditContext instanceof AuditContext) {
+            auditContext = ((AuditContext) rawAuditContext).copy();
+            auditContext.getProperties().remove("rpc.method");
+            auditContext.getProperties().put(AuditConstants.KEY_IP.getValue(), requestIp);
+        } else {
+            final Map<String, String> properties = new HashMap<>();
+            properties.put(AuditConstants.KEY_IP.getValue(), requestIp);
+            properties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "WebConsole");
+            auditContext = new AuditContext(properties);
+        }
+
+        auditContext.getProperties().put("web.path", req.getRequestURI());
+
+        return auditContext;
     }
 
     @Override

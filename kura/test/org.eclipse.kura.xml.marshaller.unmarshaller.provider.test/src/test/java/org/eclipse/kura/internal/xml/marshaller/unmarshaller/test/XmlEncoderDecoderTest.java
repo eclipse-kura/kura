@@ -258,11 +258,9 @@ public class XmlEncoderDecoderTest {
 
         SystemBundles xmlBundles = new SystemBundles();
 
-        SystemBundle inputXmlBundle = new SystemBundle("");
+        SystemBundle inputXmlBundle = new SystemBundle("raspberry", "3.0.1");
         inputXmlBundle.setId(1);
-        inputXmlBundle.setName("raspberry");
         inputXmlBundle.setState("New York");
-        inputXmlBundle.setVersion("3.0.1");
         xmlBundles.setBundles(new SystemBundle[] { inputXmlBundle });
 
         return xmlBundles;
@@ -271,13 +269,9 @@ public class XmlEncoderDecoderTest {
     private static SystemDeploymentPackages getSampleXmlDeploymentPackagesObject() {
 
         SystemDeploymentPackages xmlDeploymentPackages = new SystemDeploymentPackages();
-        SystemBundle inputXmlBundleInfo = new SystemBundle("");
-        inputXmlBundleInfo.setName("XmlBundleInfo");
-        inputXmlBundleInfo.setVersion("3.0.1.201");
+        SystemBundle inputXmlBundleInfo = new SystemBundle("XmlBundleInfo", "3.0.1.201");
 
-        SystemDeploymentPackage inputXmlDeploymentPackage = new SystemDeploymentPackage("");
-        inputXmlDeploymentPackage.setName("raspberry");
-        inputXmlDeploymentPackage.setVersion("3.0.1");
+        SystemDeploymentPackage inputXmlDeploymentPackage = new SystemDeploymentPackage("raspberry", "3.0.1");
         inputXmlDeploymentPackage.setBundleInfos(new SystemBundle[] { inputXmlBundleInfo });
 
         xmlDeploymentPackages.setDeploymentPackages(new SystemDeploymentPackage[] { inputXmlDeploymentPackage });

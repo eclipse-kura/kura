@@ -29,7 +29,6 @@ import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ConfigGenerato
 import org.eclipse.kura.net.admin.modem.sierra.usb598.SierraUsb598ModemFactory;
 import org.eclipse.kura.net.admin.modem.simtech.sim7000.SimTechSim7000ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.simtech.sim7000.SimTechSim7000ModemFactory;
-import org.eclipse.kura.net.admin.modem.telefonica.TelefonicaModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.telit.de910.TelitDe910ModemFactory;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910ConfigGenerator;
@@ -42,6 +41,7 @@ import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemConfigGenerator;
 import org.eclipse.kura.net.admin.modem.ublox.generic.UbloxModemFactory;
 import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ConfigGenerator;
 import org.eclipse.kura.net.admin.modem.zte.me3630.ZteMe3630ModemFactory;
+import org.eclipse.kura.net.admin.modem.telefonica.TelefonicaModemFactory;
 
 public class SupportedUsbModemsFactoryInfo {
 
@@ -90,9 +90,9 @@ public class SupportedUsbModemsFactoryInfo {
             return this.configClass;
         }
     }
-
+    
     private SupportedUsbModemsFactoryInfo() {
-
+        
     }
 
     public static UsbModemFactoryInfo getModem(SupportedUsbModemInfo modemInfo) {
@@ -119,7 +119,6 @@ public class SupportedUsbModemsFactoryInfo {
                 break;
             }
         }
-
         return modemFactoryInfo;
     }
 

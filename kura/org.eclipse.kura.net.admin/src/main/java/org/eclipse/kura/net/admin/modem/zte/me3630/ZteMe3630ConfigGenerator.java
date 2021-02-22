@@ -73,7 +73,6 @@ public class ZteMe3630ConfigGenerator implements ModemPppConfigGenerator {
 
     @Override
     public ModemXchangeScript getConnectScript(ModemConfig modemConfig) {
-        // PDP context is fixed to 1 for this modem
         int pdpPid = 1;
         String apn = "";
         String dialString = "";

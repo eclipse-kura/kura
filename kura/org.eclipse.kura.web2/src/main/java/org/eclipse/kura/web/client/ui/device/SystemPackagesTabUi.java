@@ -12,8 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
@@ -148,7 +148,7 @@ public class SystemPackagesTabUi extends Composite implements Tab {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 SystemPackagesTabUi.this.gwtDeviceService.findSystemPackages(token,
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -159,7 +159,7 @@ public class SystemPackagesTabUi extends Composite implements Tab {
                             }
 
                             @Override
-                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                            public void onSuccess(List<GwtGroupedNVPair> result) {
                                 EntryClassUi.hideWaitModal();
                                 SystemPackagesTabUi.this.isRequestRunning = false;
                                 for (GwtGroupedNVPair resultPair : result) {

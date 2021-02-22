@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,17 +10,17 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.deployment.xml;
+package org.eclipse.kura.core.inventory.resources;
 
-public class XmlDeploymentPackages {
+public class SystemDeploymentPackages {
 
-    private XmlDeploymentPackage[] deploymentPackages;
+    private SystemDeploymentPackage[] deploymentPackages;
 
-    public XmlDeploymentPackage[] getDeploymentPackages() {
+    public SystemDeploymentPackage[] getDeploymentPackages() {
         return this.deploymentPackages;
     }
 
-    public void setDeploymentPackages(XmlDeploymentPackage[] deploymentPackages) {
+    public void setDeploymentPackages(SystemDeploymentPackage[] deploymentPackages) {
         this.deploymentPackages = deploymentPackages;
     }
 }

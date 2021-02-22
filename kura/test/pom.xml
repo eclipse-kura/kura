@@ -712,6 +712,7 @@
         <module>org.eclipse.kura.core.crypto.test</module>
         <module>org.eclipse.kura.core.db.test</module>
         <module>org.eclipse.kura.core.deployment.test</module>
+        <module>org.eclipse.kura.core.inventory.test</module>
         <module>org.eclipse.kura.core.net.test</module>
         <module>org.eclipse.kura.core.ssl.test</module>
         <module>org.eclipse.kura.core.status.test</module>

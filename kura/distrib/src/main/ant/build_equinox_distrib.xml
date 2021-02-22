@@ -143,6 +143,7 @@
 		<antcall target="core.configuration-config" />
 		<antcall target="core.crypto-config" />
 		<antcall target="core.deployment-config" />
+		<antcall target="core.inventory-config" />
 		<antcall target="core.net-config" />
 		<antcall target="core.status-config" />
 		<antcall target="deployment.agent-config" />
@@ -648,6 +649,9 @@ fi]]>
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
@@ -1012,6 +1016,14 @@ fi]]>
 		</propertyfile>
 	</target>
 
+	<target name="core.inventory-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+			
 	<target name="core.net-config">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -36,8 +36,10 @@ import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemPackages;
+import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.slf4j.Logger;
@@ -84,7 +86,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
             } else if (object instanceof XmlComponentConfigurations) {
                 new XmlJavaComponentConfigurationsMapper().marshal(doc, object);
-            } else if (object instanceof XmlDeploymentPackages) {
+            } else if (object instanceof SystemDeploymentPackages) {
                 // Expected resulting xml:
                 // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                 // <packages>
@@ -102,7 +104,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
                 new XmlJavaPackagesMapper().marshal(doc, object);
 
-            } else if (object instanceof XmlBundles) {
+            } else if (object instanceof SystemBundles) {
                 // Expected resulting xml:
                 // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                 // <bundles>
@@ -116,12 +118,37 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
                 new XmlJavaBundlesMapper().marshal(doc, object);
 
+            } else if (object instanceof SystemPackages) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <systemPackages>
+                // <systemPackage>
+                // <name>rfkill</name>
+                // <version>2.33.1-0.1</version>
+                // <type>DEB</type>
+                // </systemPackage>
+                // </systemPackages>
+
+                new XmlJavaSystemPackagesMapper().marshal(doc, object);
+
+            } else if (object instanceof SystemResourcesInfo) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <inventory>
+                // <resource>
+                // <name>rfkill</name>
+                // <version>2.33.1-0.1</version>
+                // <type>DEB</type>
+                // </resource>
+                // </inventory>
+
+                new XmlJavaSystemResourcesMapper().marshal(doc, object);
             }
 
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            
+
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");

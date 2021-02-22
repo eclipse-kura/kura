@@ -40,6 +40,8 @@ public interface GwtDeviceService extends RemoteService {
 
     public List<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    public ArrayList<GwtGroupedNVPair> findSystemPackages(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
     @RequiredPermissions({})
     public List<GwtGroupedNVPair> findSystemProperties(GwtXSRFToken xsrfToken) throws GwtKuraException;
 

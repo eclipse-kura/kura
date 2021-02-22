@@ -16,6 +16,7 @@ package org.eclipse.kura.core.system;
 import static java.lang.Thread.currentThread;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -39,14 +40,20 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.SystemResourceInfo;
+import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
 import org.osgi.service.component.ComponentContext;
@@ -1180,6 +1187,58 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return null;
         }
         return this.componentContext.getBundleContext().getBundles();
+    }
+
+    @Override
+    public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException {
+        List<SystemResourceInfo> packagesInfo = new ArrayList<>();
+        CommandStatus debStatus = execute(new String[] { "dpkg-query", "-W" });
+        if (debStatus.getExitStatus().isSuccessful()
+                && ((ByteArrayOutputStream) debStatus.getOutputStream()).size() > 0) {
+            parseSystemPackages(packagesInfo, debStatus, SystemResourceType.DEB);
+        }
+
+        CommandStatus rpmStatus = execute(
+                new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
+        if (rpmStatus.getExitStatus().isSuccessful()
+                && ((ByteArrayOutputStream) rpmStatus.getOutputStream()).size() > 0) {
+            parseSystemPackages(packagesInfo, rpmStatus, SystemResourceType.RPM);
+        }
+
+        if (!debStatus.getExitStatus().isSuccessful() && !rpmStatus.getExitStatus().isSuccessful()) {
+            throw new KuraProcessExecutionErrorException("Failed to retrieve system packages.");
+        }
+        return packagesInfo;
+    }
+
+    private void parseSystemPackages(List<SystemResourceInfo> packagesInfo, CommandStatus status,
+            SystemResourceType type) {
+        String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
+                .split("\n");
+        Arrays.asList(packages).stream().forEach(p -> {
+            String[] fields = p.split("\\s+");
+            if (fields.length >= 2) {
+                packagesInfo.add(new SystemResourceInfo(fields[0], fields[1], type));
+            } else {
+                packagesInfo.add(new SystemResourceInfo(fields[0], "", type));
+            }
+        });
+    }
+
+    private CommandStatus execute(String[] commandLine) {
+        Command command = new Command(commandLine);
+        command.setExecuteInAShell(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        command.setErrorStream(err);
+        command.setOutputStream(out);
+        CommandStatus status = this.executorService.execute(command);
+        if (logger.isDebugEnabled()) {
+            logger.debug("execute command {} :: exited with code - {}", command, status.getExitStatus().getExitCode());
+            logger.debug("execute stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
+            logger.debug("execute stdout {}", new String(out.toByteArray(), Charsets.UTF_8));
+        }
+        return status;
     }
 
     @Override

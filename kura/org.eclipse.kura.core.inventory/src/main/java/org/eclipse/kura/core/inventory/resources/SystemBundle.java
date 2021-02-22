@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,32 +10,18 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.deployment.xml;
+package org.eclipse.kura.core.inventory.resources;
 
-public class XmlBundle {
+import org.eclipse.kura.system.SystemResourceInfo;
+import org.eclipse.kura.system.SystemResourceType;
 
-    private String name;
-
-    private String version;
+public class SystemBundle extends SystemResourceInfo {
 
     private long id;
-
     private String state;
 
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getVersion() {
-        return this.version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
+    public SystemBundle(String name, String version) {
+        super(name, version, SystemResourceType.BUNDLE);
     }
 
     public long getId() {

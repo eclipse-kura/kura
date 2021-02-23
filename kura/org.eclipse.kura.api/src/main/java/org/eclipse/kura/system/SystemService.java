@@ -457,6 +457,7 @@ public interface SystemService {
      * 
      * @return the list of the installed packages
      * @throws KuraProcessExecutionErrorException
+     * @since 2.2
      */
     public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException;
 

@@ -1008,3 +1008,244 @@ This operation stops a bundle identified by its ID.
         client ID
 *  Response Payload:
     *  Nothing application-specific beyond the response code
+
+### Remote Gateway Inventory via MQTT
+
+An application is installed in the gateway to allow for the remote query of the resources installed in the OSGi container and the underlying OS.
+
+The **app_id** for the remote inventory service of an MQTT application is “**INVENTORY-V1**”.  The service allows to retrieve all the different resources available/installed on the gateway. The service supports the following resources:
+
+- DEB : represents a Linux Debian package
+- RPM : represents a Linux RPM package
+- BUNDLES : represents a OSGi Bundle
+- DP : represents a OSGi Deployment Package
+
+The resources are represented in JSON format. The following message is an example of a service deployment:
+
+```json
+{
+    "inventory":[
+        {
+            "name":"adduser",
+            "version":"3.118",
+            "type":"DEB"
+        },
+        {
+            "name":"io.netty.transport-native-unix-common",
+            "version":"4.1.34.Final",
+            "type":"BUNDLE"
+        },
+    ]
+}
+```
+
+The inventory JSON message is comprised of the following package elements:
+
+* Name
+
+* Version
+
+* Type
+
+#### INVENTORY-V1
+
+The “INVENTORY-V1” application supports only the *read* resource operations as described in the following sections.
+
+##### Read All Bundles
+
+This operation provides all the bundles installed in the OSGi framework.
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/GET/bundles**
+  
+* Request Payload:
+  * Nothing application-specific beyond the request ID and requester client ID
+  
+* Response Payload:
+  * Installed bundles serialized in JSON format
+
+The following JSON message is an example of a bundle:
+
+```json
+{
+    "bundles":[
+        {
+            "name":"org.eclipse.osgi",
+            "version":"3.16.0.v20200828-0759",
+            "id":0,
+            "state":"ACTIVE"
+        },
+        {
+            "name":"org.eclipse.equinox.cm",
+            "version":"1.4.400.v20200422-1833",
+            "id":1,
+            "state":"ACTIVE"
+        }
+    ]
+}
+```
+
+The bundle JSON message is comprised of the following bundle elements:
+
+* Symbolic name
+
+* Version
+
+* ID
+
+* State
+
+##### Read All Deployment Packages
+
+This operation provides the deployment packages installed in the OSGi framework.
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/GET/packages**
+  
+* Request Payload:
+  * Nothing application-specific beyond the request ID and requester client ID
+  
+* Response Payload:
+  * Installed deployment packages serialized in JSON format
+
+The following JSON message is an example of a bundle:
+
+```json
+{
+    "packages":[
+        {
+            "name":"org.eclipse.kura.example.beacon",
+            "version":"1.0.500",
+            "bundles":[
+                {
+                    "name":"org.eclipse.kura.example.beacon",
+                    "version":"1.0.500"
+                }
+            ]
+        }
+    ]
+}
+```
+
+The deployment package JSON message is comprised of the following package elements:
+
+* Symbolic name
+
+* Version
+
+* Bundles that are managed by the deployment package along with their symbolic name and version
+
+##### Read All System Packages
+
+This operation provides the Linux packages installed in OS.
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/GET/system.packages**
+  
+* Request Payload:
+  * Nothing application-specific beyond the request ID and requester client ID
+  
+* Response Payload:
+  * Installed Linux Packages serialized in JSON format
+
+The following JSON message is an example of a bundle:
+
+```json
+{
+    "systemPackages":[
+        {
+            "name":"adduser",
+            "version":"3.118",
+            "type":"DEB"
+        },
+        {
+            "name":"alsa-utils",
+            "version":"1.1.8-2",
+            "type":"DEB"
+        },
+        {
+            "name":"ansible",
+            "version":"2.7.7+dfsg-1",
+            "type":"DEB"
+        },
+        {
+            "name":"apparmor",
+            "version":"2.13.2-10",
+            "type":"DEB"
+        },
+        {
+            "name":"apt",
+            "version":"1.8.2.1",
+            "type":"DEB"
+        },
+        {
+            "name":"apt-listchanges",
+            "version":"3.19",
+            "type":"DEB"
+        },
+        {
+            "name":"apt-transport-https",
+            "version":"1.8.2.2",
+            "type":"DEB"
+        },
+        {
+            "name":"apt-utils",
+            "version":"1.8.2.1",
+            "type":"DEB"
+        }
+    ]
+}
+```
+
+The bundle JSON message is comprised of the following bundle elements:
+
+* Name
+
+* Version
+
+* Type
+
+##### Read All Resources
+
+This operation provides a list of all the resources installed on the gateway
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/GET/inventory**
+  
+* Request Payload:
+  * Nothing application-specific beyond the request ID and requester client ID
+  
+* Response Payload:
+  * Installed Linux Packages serialized in JSON format
+
+The following JSON message is an example of a bundle:
+
+```json
+{
+    "inventory":[
+        {
+            "name":"adduser",
+            "version":"3.118",
+            "type":"DEB"
+        },
+        {
+            "name":"com.eclipsesource.jaxrs.provider.gson",
+            "version":"2.3.0.201602281253",
+            "type":"BUNDLE"
+        },
+              {
+            "name":"org.eclipse.kura.example.beacon",
+            "version":"1.0.500",
+            "type":"DP"
+        }
+    ]
+}
+```
+
+The bundle JSON message is comprised of the following bundle elements:
+
+* Name
+
+* Version
+
+* Type

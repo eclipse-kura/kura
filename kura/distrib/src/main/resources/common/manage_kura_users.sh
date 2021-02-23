@@ -19,8 +19,8 @@ function create_users {
     KURA_USER_ENTRY=`cat /etc/passwd | grep kura:`
     sed -i "s@${KURA_USER_ENTRY}@${KURA_USER_ENTRY%:*}:/sbin/nologin@" /etc/passwd
     
-    # create kurad system user
-    useradd -r kurad
+    # create kurad system user without home directory
+    useradd -M -r kurad
     # disable login for kurad user
     passwd -l kurad
     # add kurad to dialout group (for managing serial ports)

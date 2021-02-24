@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -187,7 +189,37 @@ public class IpTablesConfigTest extends FirewallTestUtils {
     public void applyRulesTest() {
         setUpMock();
 
-        IptablesConfig iptablesConfig = new IptablesConfig(executorServiceMock);
+        String[] mangleRulesArray = { "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
+                "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
+                "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
+                "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
+        Set<String> mangleRules = new HashSet<String>(Arrays.asList(mangleRulesArray));
+
+        // These rules are fake...
+        String[] filterRulesArray = { "-A input-kura -p tcp -f -j DROP" };
+        Set<String> filterRules = new HashSet<String>(Arrays.asList(filterRulesArray));
+
+        // Also these ones...
+        String[] natRulesArray = { "-A prerouting-kura -p tcp -f -j DROP" };
+        Set<String> natRules = new HashSet<String>(Arrays.asList(natRulesArray));
+
+        IptablesConfig iptablesConfig = new IptablesConfig(new LinkedHashSet<>(), new LinkedHashSet<>(),
+                new LinkedHashSet<>(), new LinkedHashSet<>(), false, executorServiceMock);
+        iptablesConfig.setAdditionalFilterRules(filterRules);
+        iptablesConfig.setAdditionalNatRules(natRules);
+        iptablesConfig.setAdditionalMangleRules(mangleRules);
         iptablesConfig.applyRules();
 
         for (Command c : commandApplyList) {

@@ -13,8 +13,10 @@
 package org.eclipse.kura.system;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.framework.Bundle;
 
@@ -98,6 +100,12 @@ public interface SystemService {
     public static final String KEY_JAVA_HOME = "java.home";
     public static final String KEY_FILE_SEP = "file.separator";
     public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
+
+
+    /**
+     * @since 2.2
+     */
+    public static final String KEY_CPU_VERSION = "cpu.version";
 
     /**
      * @deprecated
@@ -440,9 +448,18 @@ public interface SystemService {
     /**
      * Returns the OSGi bundles currently installed
      *
-     * @return
+     * @return the list of the installed bundles
      */
     public Bundle[] getBundles();
+
+    /**
+     * Returns the system packages currently installed
+     * 
+     * @return the list of the installed packages
+     * @throws KuraProcessExecutionErrorException
+     * @since 2.2
+     */
+    public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException;
 
     /**
      * Returns the number of processors visible to this Java platform.
@@ -502,4 +519,20 @@ public interface SystemService {
      */
     public String getNetVirtualDevicesConfig();
 
+    /**
+     * Gets the CPU version of the device.
+     *
+     * @since 2.2
+     * @return CPU version
+     */
+    public String getCpuVersion();
+
+    /**
+     * Returns a set of {@link ExtendedProperties}.
+     * 
+     * @since 2.2
+     * @return the extended properties, or empty if the SystemService implementation does not provide extended
+     *         properties.
+     */
+    public Optional<ExtendedProperties> getExtendedProperties();
 }

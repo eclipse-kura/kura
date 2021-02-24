@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2011, 2020 Red Hat Inc and others
+    Copyright (c) 2011, 2021 Red Hat Inc and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -716,17 +716,11 @@
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.http.server.manager.HttpService">
         <esf:properties>
-            <esf:property array="false" encrypted="false" name="https.port" type="Integer">
+            <esf:property array="true" encrypted="false" name="https.ports" type="Integer">
                 <esf:value>443</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="https.enabled" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="http.enabled" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="http.port" type="Integer">
-                <esf:value>80</esf:value>
+            <esf:property array="true" encrypted="false" name="https.client.auth.ports" type="Integer">
+                <esf:value>4443</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="https.keystore.path" type="String">
                 <esf:value>/opt/eclipse/kura/user/security/httpskeystore.ks</esf:value>

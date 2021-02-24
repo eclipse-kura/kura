@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,8 +31,6 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.SerializationException;
@@ -48,8 +46,6 @@ public class GwtSecurityTokenServiceImpl extends OsgiRemoteServiceServlet implem
     private static final long serialVersionUID = 5333012054583792499L;
 
     private static ThreadLocal<HttpServletRequest> threadRequest = new ThreadLocal<>();
-
-    private static Logger logger = LoggerFactory.getLogger(GwtSecurityTokenServiceImpl.class);
 
     static final String XSRF_TOKEN_KEY = "XSRF_TOKEN";
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,28 +19,47 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.web.Console;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SessionAutorizationSecurityHandler implements SecurityHandler {
 
+    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
+
     @Override
     public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final HttpSession session = request.getSession(false);
 
-        if (session == null) {
-            return false;
+        final AuditContext auditContext = Console.instance().initAuditContext(request);
+
+        try (final Scope scope = AuditContext.openScope(auditContext)) {
+            final HttpSession session = request.getSession(false);
+
+            if (session == null) {
+                return false;
+            }
+
+            final Object authorized = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+
+            if (!(authorized instanceof String)) {
+                auditLogger.warn("{} UI Session - Failure - User is not authenticated", auditContext);
+                return false;
+            }
+
+            final String userName = (String) authorized;
+
+            final boolean isPasswordSame = Objects.equals(session.getAttribute(Attributes.CREDENTIALS_HASH.getValue()),
+                    Console.instance().getUserManager().getCredentialsHash(userName));
+
+            if (!isPasswordSame) {
+                auditLogger.warn("{} UI Session - Failure - Ending session due to identity password change",
+                        auditContext);
+            }
+
+            return isPasswordSame;
         }
-
-        final Object authorized = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
-
-        if (!(authorized instanceof String)) {
-            return false;
-        }
-
-        final String userName = (String) authorized;
-
-        return Objects.equals(session.getAttribute(Attributes.CREDENTIALS_HASH.getValue()),
-                Console.instance().getUserManager().getCredentialsHash(userName));
     }
 
 }

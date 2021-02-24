@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,6 @@ import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
 import org.eclipse.kura.message.KuraPosition;
 import org.junit.Test;
 
-
 public class KuraBirthPayloadTest {
 
     @Test
@@ -35,6 +34,7 @@ public class KuraBirthPayloadTest {
         String identifiers = "kura-3.1.0";
         String processors = "4";
         String biosVersion = "1.1";
+        String cpuVersion = "cpuver";
         String connectionInterface = "eth0";
         String connectionIp = "10.10.10.15";
         String displayName = "displayname";
@@ -48,6 +48,7 @@ public class KuraBirthPayloadTest {
         String imei = "imei";
         String imsi = "imsi";
         String rssi = "rssi";
+        String modemFwVer = "modemFwVer";
         String os = "Linux";
         String arch = "arm";
         String osgiFramework = "Eclipse";
@@ -67,6 +68,7 @@ public class KuraBirthPayloadTest {
         builder.withApplicationIdentifiers(identifiers);
         builder.withAvailableProcessors(processors);
         builder.withBiosVersion(biosVersion);
+        builder.withCpuVersion(cpuVersion);
         builder.withConnectionInterface(connectionInterface);
         builder.withConnectionIp(connectionIp);
         builder.withDisplayName(displayName);
@@ -80,6 +82,7 @@ public class KuraBirthPayloadTest {
         builder.withModemImei(imei);
         builder.withModemImsi(imsi);
         builder.withModemRssi(rssi);
+        builder.withModemFirmwareVersion(modemFwVer);
         builder.withOs(os);
         builder.withOsArch(arch);
         builder.withOsgiFramework(osgiFramework);
@@ -104,6 +107,7 @@ public class KuraBirthPayloadTest {
         assertEquals(identifiers, payload.getApplicationIdentifiers());
         assertEquals(processors, payload.getAvailableProcessors());
         assertEquals(biosVersion, payload.getBiosVersion());
+        assertEquals(cpuVersion, payload.getCpuVersion());
         assertEquals(connectionInterface, payload.getConnectionInterface());
         assertEquals(connectionIp, payload.getConnectionIp());
         assertEquals(displayName, payload.getDisplayName());
@@ -117,6 +121,7 @@ public class KuraBirthPayloadTest {
         assertEquals(imei, payload.getModemImei());
         assertEquals(imsi, payload.getModemImsi());
         assertEquals(rssi, payload.getModemRssi());
+        assertEquals(modemFwVer, payload.getModemFirmwareVersion());
         assertEquals(os, payload.getOs());
         assertEquals(arch, payload.getOsArch());
         assertEquals(osgiFramework, payload.getOsgiFramework());
@@ -139,6 +144,7 @@ public class KuraBirthPayloadTest {
         assertTrue(str.contains("=" + identifiers));
         assertTrue(str.contains("=" + processors));
         assertTrue(str.contains("=" + biosVersion));
+        assertTrue(str.contains("=" + cpuVersion));
         assertTrue(str.contains("=" + connectionInterface));
         assertTrue(str.contains("=" + connectionIp));
         assertTrue(str.contains("=" + displayName));
@@ -152,6 +158,7 @@ public class KuraBirthPayloadTest {
         assertFalse(str.contains(imei));
         assertFalse(str.contains(imsi));
         assertFalse(str.contains(rssi));
+        assertFalse(str.contains(modemFwVer));
         assertTrue(str.contains("=" + os));
         assertTrue(str.contains("=" + arch));
         assertTrue(str.contains("=" + osgiFramework));

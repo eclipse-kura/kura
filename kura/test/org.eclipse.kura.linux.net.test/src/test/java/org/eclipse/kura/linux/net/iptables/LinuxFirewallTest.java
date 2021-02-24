@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,8 @@ import static org.mockito.Mockito.verify;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
@@ -76,6 +78,11 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
@@ -127,6 +134,11 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
@@ -168,6 +180,11 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
@@ -211,6 +228,11 @@ public class LinuxFirewallTest extends FirewallTestUtils {
         verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
         verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
     @Test
@@ -361,6 +383,49 @@ public class LinuxFirewallTest extends FirewallTestUtils {
             // do nothing...
         }
         assertTrue(linuxFirewall.getNatRules().isEmpty());
+    }
+
+    @Test
+    public void setAdditionalRulesTest() throws KuraException {
+        setUpMock();
+
+        String[] mangleRulesArray = { "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
+                "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
+                "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
+                "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
+
+        LinuxFirewall linuxFirewall = new LinuxFirewall(executorServiceMock);
+        try {
+            linuxFirewall.setAdditionalRules(new HashSet<String>(), new HashSet<String>(),
+                    new HashSet<String>(Arrays.asList(mangleRulesArray)));
+        } catch (KuraIOException e) {
+            // do nothing...
+        }
+
+        verify(executorServiceMock, times(1)).execute(commandFlushInputFilter);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputFilter);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardFilter);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingNat);
+        verify(executorServiceMock, times(1)).execute(commandFlushInputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushOutputMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushForwardMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPreroutingMangle);
+        verify(executorServiceMock, times(1)).execute(commandFlushPostroutingMangle);
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
@@ -510,12 +512,14 @@ class UpdateConfigurationsCallable implements Callable<Void> {
     private final String pid;
     private final XmlComponentConfigurations xmlConfigurations;
     private final ConfigurationService configurationService;
+    private final AuditContext auditContext;
 
     public UpdateConfigurationsCallable(String pid, XmlComponentConfigurations xmlConfigurations,
             ConfigurationService configurationService) {
         this.pid = pid;
         this.xmlConfigurations = xmlConfigurations;
         this.configurationService = configurationService;
+        this.auditContext = AuditContext.currentOrInternal();
     }
 
     @Override
@@ -525,7 +529,7 @@ class UpdateConfigurationsCallable implements Callable<Void> {
         Thread.currentThread().setName(getClass().getSimpleName());
         //
         // update the configuration
-        try {
+        try (final Scope scope = AuditContext.openScope(auditContext)) {
             List<ComponentConfiguration> configImpls = this.xmlConfigurations != null
                     ? this.xmlConfigurations.getConfigurations()
                     : null;
@@ -562,18 +566,20 @@ class RollbackCallable implements Callable<Void> {
 
     private final Long snapshotId;
     private final ConfigurationService configurationService;
+    private final AuditContext auditContext;
 
     public RollbackCallable(Long snapshotId, ConfigurationService configurationService) {
         super();
         this.snapshotId = snapshotId;
         this.configurationService = configurationService;
+        this.auditContext = AuditContext.currentOrInternal();
     }
 
     @Override
     public Void call() throws Exception {
         Thread.currentThread().setName(getClass().getSimpleName());
         // rollback to the specified snapshot if any
-        try {
+        try (final Scope scope = AuditContext.openScope(auditContext)) {
             if (this.snapshotId == null) {
                 this.configurationService.rollback();
             } else {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -183,6 +183,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.system</artifactId>
+                                    <version>${org.eclipse.kura.core.system.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.certificates</artifactId>
                                     <version>${org.eclipse.kura.core.certificates.version}</version>
                                 </artifactItem>
@@ -210,6 +215,11 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.deployment</artifactId>
                                     <version>${org.eclipse.kura.core.deployment.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.inventory</artifactId>
+                                    <version>${org.eclipse.kura.core.inventory.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -521,6 +531,11 @@
                                     <artifactId>org.eclipse.kura.useradmin.store</artifactId>
                                     <version>${org.eclipse.kura.useradmin.store.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.network.threat.manager</artifactId>
+                                    <version>${org.eclipse.kura.network.threat.manager.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -602,6 +617,8 @@
                                     tofile="target/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.jar"
                                     tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.system.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.certificates.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.cloud.jar"
@@ -614,6 +631,8 @@
                                     tofile="target/plugins/org.eclipse.kura.core.crypto_${org.eclipse.kura.core.crypto.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.deployment.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.inventory.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.net.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.deployment.agent.jar"
@@ -737,6 +756,8 @@
                                     tofile="target/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.useradmin.store.jar"
                                     tofile="target/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.network.threat.manager.jar"
+                                    tofile="target/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -1832,6 +1853,9 @@
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"

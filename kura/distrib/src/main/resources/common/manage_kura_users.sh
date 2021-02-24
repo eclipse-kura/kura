@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2020 Eurotech and/or its affiliates and others
+#  Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -19,12 +19,10 @@ function create_users {
     KURA_USER_ENTRY=`cat /etc/passwd | grep kura:`
     sed -i "s@${KURA_USER_ENTRY}@${KURA_USER_ENTRY%:*}:/sbin/nologin@" /etc/passwd
     
-    # create kurad system user
-    useradd -r kurad
+    # create kurad system user without home directory
+    useradd -M -r kurad
     # disable login for kurad user
     passwd -l kurad
-    # grant kurad root privileges
-    echo "kurad ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/kurad
     # add kurad to dialout group (for managing serial ports)
     gpasswd -a kurad dialout
     

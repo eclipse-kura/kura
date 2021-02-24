@@ -29,34 +29,33 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LogServlet extends HttpServlet {
+public class LogServlet extends AuditServlet {
 
     private static final long serialVersionUID = 3969980124054250070L;
 
     private static Logger logger = LoggerFactory.getLogger(LogServlet.class);
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
     private static final String KURA_JOURNAL_LOG_FILE = "/tmp/kura_journal.log";
     private static final String SYSTEM_JOURNAL_LOG_FILE = "/tmp/system_journal.log";
     private static final String JOURNALCTL_CMD = "journalctl";
 
+    public LogServlet() {
+        super("UI Log Download", "Download device logs");
+    }
+
     @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
-        HttpSession session = httpServletRequest.getSession(false);
 
         SystemService ss = null;
         ServiceLocator locator = ServiceLocator.getInstance();
@@ -64,8 +63,6 @@ public class LogServlet extends HttpServlet {
             ss = locator.getService(SystemService.class);
         } catch (GwtKuraException e1) {
             logger.warn("Unable to get service");
-            auditLogger.warn("UI Log Download - Failure - Failed to get System Service for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
             return;
         }
 
@@ -74,9 +71,6 @@ public class LogServlet extends HttpServlet {
             pes = locator.getService(PrivilegedExecutorService.class);
         } catch (GwtKuraException e1) {
             logger.warn("Unable to get service");
-            auditLogger.warn(
-                    "UI Log Download - Failure - Failed to get Privileged Executor Service for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), e1);
             return;
         }
 
@@ -104,9 +98,6 @@ public class LogServlet extends HttpServlet {
         }
         createReply(httpServletResponse, fileList);
         removeTmpFiles();
-
-        auditLogger.info("UI Log Download - Success - Successfully returned device logs for user: {}, session: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
     }
 
     private void createReply(HttpServletResponse httpServletResponse, List<File> fileList) {

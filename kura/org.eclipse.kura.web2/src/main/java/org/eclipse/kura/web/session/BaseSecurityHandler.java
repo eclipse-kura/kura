@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.kura.web.Console;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,11 @@ public class BaseSecurityHandler implements SecurityHandler {
     @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
+        if (!Console.getConsoleOptions().isPortAllowed(request.getLocalPort())) {
+            response.sendError(404);
+            return false;
+        }
+
         response.setHeader("X-FRAME-OPTIONS", "SAMEORIGIN");
         response.setHeader("X-XSS-protection", "1; mode=block");
         response.setHeader("X-Content-Type-Options", "nosniff");

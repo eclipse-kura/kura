@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -1212,7 +1212,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 TabWirelessUi.this.gwtDeviceService.findDeviceConfiguration(token,
-                        new AsyncCallback<ArrayList<GwtGroupedNVPair>>() {
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -1221,7 +1221,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                             }
 
                             @Override
-                            public void onSuccess(ArrayList<GwtGroupedNVPair> result) {
+                            public void onSuccess(List<GwtGroupedNVPair> result) {
                                 if (result != null) {
                                     TabWirelessUi.this.channelGrid.setVisible(false); // FT- False
                                     for (GwtGroupedNVPair pair : result) {

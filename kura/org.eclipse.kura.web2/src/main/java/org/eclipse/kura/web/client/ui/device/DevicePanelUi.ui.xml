@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -35,6 +35,8 @@
                         ui:field="bundles" />
                     <b:TabListItem dataTarget="#threadsPanel" text="Threads"
                         ui:field="threads" />
+                    <b:TabListItem dataTarget="#packagesPanel" text="System Packages"
+                        ui:field="packages" />
                     <b:TabListItem dataTarget="#systemPropertiesPanel" text="System Properties"
                         ui:field="systemProperties" />
                     <b:TabListItem dataTarget="#commandPanel" text="Command"
@@ -51,6 +53,9 @@
                     </b:TabPane>
                     <b:TabPane b:id="threadsPanel">
                         <device:ThreadsTabUi ui:field="threadsPanel"></device:ThreadsTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="packagesPanel">
+                        <device:SystemPackagesTabUi ui:field="packagesPanel"></device:SystemPackagesTabUi>
                     </b:TabPane>
                     <b:TabPane b:id="systemPropertiesPanel">
                         <device:SystemPropertiesTabUi ui:field="systemPropertiesPanel"></device:SystemPropertiesTabUi>

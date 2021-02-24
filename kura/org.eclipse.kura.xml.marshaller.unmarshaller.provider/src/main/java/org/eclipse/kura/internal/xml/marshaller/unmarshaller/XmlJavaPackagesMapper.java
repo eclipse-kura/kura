@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,9 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.xml.marshaller.unmarshaller;
 
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,10 +34,10 @@ public class XmlJavaPackagesMapper implements XmlJavaDataMapper {
         Element packages = doc.createElement(PACKAGES);
         doc.appendChild(packages);
 
-        XmlDeploymentPackages xdps = (XmlDeploymentPackages) object;
-        XmlDeploymentPackage[] xdpArray = xdps.getDeploymentPackages();
+        SystemDeploymentPackages xdps = (SystemDeploymentPackages) object;
+        SystemDeploymentPackage[] xdpArray = xdps.getDeploymentPackages();
 
-        for (XmlDeploymentPackage xdp : xdpArray) {
+        for (SystemDeploymentPackage xdp : xdpArray) {
             Element packageInstalled = doc.createElement(PACKAGES_PACKAGE);
             marshalDeploymentPackage(doc, xdp, packageInstalled);
             packages.appendChild(packageInstalled);
@@ -53,11 +53,11 @@ public class XmlJavaPackagesMapper implements XmlJavaDataMapper {
     //
     // Marshaller's private methods
     //
-    private static void marshalDeploymentPackage(Document doc, XmlDeploymentPackage xdp, Element packageInstalled) {
+    private static void marshalDeploymentPackage(Document doc, SystemDeploymentPackage xdp, Element packageInstalled) {
         // Extract data from XmlDeploymentPackage
         String packageName = xdp.getName();
         String packageVersion = xdp.getVersion();
-        XmlBundleInfo[] xbiArray = xdp.getBundleInfos();
+        SystemBundle[] xbiArray = xdp.getBundleInfos();
 
         // Create xml elements
         if (packageName != null && !packageName.trim().isEmpty()) {
@@ -76,7 +76,7 @@ public class XmlJavaPackagesMapper implements XmlJavaDataMapper {
         packageInstalled.appendChild(bundles);
 
         if (xbiArray != null) {
-            for (XmlBundleInfo xbi : xbiArray) {
+            for (SystemBundle xbi : xbiArray) {
                 Element bundle = doc.createElement(PACKAGES_PACKAGE_BUNDLES_BUNDLE);
                 marshalBundleInfo(doc, xbi, bundle);
                 bundles.appendChild(bundle);
@@ -84,7 +84,7 @@ public class XmlJavaPackagesMapper implements XmlJavaDataMapper {
         }
     }
 
-    private static void marshalBundleInfo(Document doc, XmlBundleInfo xbi, Element bundle) {
+    private static void marshalBundleInfo(Document doc, SystemBundle xbi, Element bundle) {
         // Extract data from XmlBundleInfo
         String bundleName = xbi.getName();
         String bundleVersion = xbi.getVersion();

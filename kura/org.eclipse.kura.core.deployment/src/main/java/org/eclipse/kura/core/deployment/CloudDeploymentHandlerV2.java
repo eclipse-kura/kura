@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -47,11 +47,10 @@ import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
 import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.core.deployment.uninstall.DeploymentPackageUninstallOptions;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -569,26 +568,22 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
             logger.info("Downloading package from URL: {}", options.getDeployUri());
 
-            this.downloaderFuture = executor.submit(new Runnable() {
+            this.downloaderFuture = executor.submit(() -> {
+                try {
 
-                @Override
-                public void run() {
+                    downloadImplementation.downloadDeploymentPackageInternal();
+                } catch (KuraException e) {
+                    logger.warn("deployment package download failed", e);
+
                     try {
-
-                        downloadImplementation.downloadDeploymentPackageInternal();
-                    } catch (KuraException e) {
-                        logger.warn("deployment package download failed", e);
-
-                        try {
-                            File dpFile = getDpDownloadFile(options);
-                            if (dpFile != null) {
-                                dpFile.delete();
-                            }
-                        } catch (IOException e1) {
+                        File dpFile = getDpDownloadFile(options);
+                        if (dpFile != null) {
+                            dpFile.delete();
                         }
-                    } finally {
-                        pendingPackageUrl = null;
+                    } catch (IOException e1) {
                     }
+                } finally {
+                    pendingPackageUrl = null;
                 }
             });
 
@@ -659,21 +654,17 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                 options.setNotificationPublisher(requestContext.getNotificationPublisher());
                 options.setNotificationPublisherPid(notificationPublisherPid);
 
-                this.installerFuture = executor.submit(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            installDownloadedFile(dpFile, CloudDeploymentHandlerV2.this.installOptions);
-                        } catch (KuraException e) {
-                            logger.error("Impossible to send an exception message to the cloud platform");
-                            if (dpFile != null) {
-                                dpFile.delete();
-                            }
-                        } finally {
-                            CloudDeploymentHandlerV2.this.installOptions = null;
-                            CloudDeploymentHandlerV2.this.isInstalling = false;
+                this.installerFuture = executor.submit(() -> {
+                    try {
+                        installDownloadedFile(dpFile, CloudDeploymentHandlerV2.this.installOptions);
+                    } catch (KuraException e) {
+                        logger.error("Impossible to send an exception message to the cloud platform");
+                        if (dpFile != null) {
+                            dpFile.delete();
                         }
+                    } finally {
+                        CloudDeploymentHandlerV2.this.installOptions = null;
+                        CloudDeploymentHandlerV2.this.isInstalling = false;
                     }
                 });
             } catch (Exception e) {
@@ -719,18 +710,14 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
                 options.setNotificationPublisherPid(notificationPublisherPid);
 
                 logger.info("Uninstalling package...");
-                this.installerFuture = executor.submit(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        try {
-                            uninstallImplementation.uninstaller(options, packageName);
-                        } catch (Exception e) {
-                            uninstallImplementation.uninstallFailedAsync(options, packageName, e);
-                        } finally {
-                            CloudDeploymentHandlerV2.this.installOptions = null;
-                            CloudDeploymentHandlerV2.this.isInstalling = false;
-                        }
+                this.installerFuture = executor.submit(() -> {
+                    try {
+                        uninstallImplementation.uninstaller(options, packageName);
+                    } catch (Exception e) {
+                        uninstallImplementation.uninstallFailedAsync(options, packageName, e);
+                    } finally {
+                        CloudDeploymentHandlerV2.this.installOptions = null;
+                        CloudDeploymentHandlerV2.this.isInstalling = false;
                     }
                 });
             } catch (Exception e) {
@@ -811,27 +798,23 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
     private KuraPayload doGetPackages() {
         DeploymentPackage[] dps = this.deploymentAdmin.listDeploymentPackages();
-        XmlDeploymentPackages xdps = new XmlDeploymentPackages();
-        XmlDeploymentPackage[] axdp = new XmlDeploymentPackage[dps.length];
+        SystemDeploymentPackages xdps = new SystemDeploymentPackages();
+        SystemDeploymentPackage[] axdp = new SystemDeploymentPackage[dps.length];
 
         for (int i = 0; i < dps.length; i++) {
             DeploymentPackage dp = dps[i];
 
-            XmlDeploymentPackage xdp = new XmlDeploymentPackage();
-            xdp.setName(dp.getName());
-            xdp.setVersion(dp.getVersion().toString());
+            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName(), dp.getVersion().toString());
 
             BundleInfo[] bis = dp.getBundleInfos();
-            XmlBundleInfo[] axbi = new XmlBundleInfo[bis.length];
+            SystemBundle[] axbi = new SystemBundle[bis.length];
 
             for (int j = 0; j < bis.length; j++) {
 
                 BundleInfo bi = bis[j];
-                XmlBundleInfo xbi = new XmlBundleInfo();
-                xbi.setName(bi.getSymbolicName());
-                xbi.setVersion(bi.getVersion().toString());
+                SystemBundle xb = new SystemBundle(bi.getSymbolicName(), bi.getVersion().toString());
 
-                axbi[j] = xbi;
+                axbi[j] = xb;
             }
 
             xdp.setBundleInfos(axbi);
@@ -854,16 +837,14 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
 
     private KuraPayload doGetBundles() {
         Bundle[] bundles = this.bundleContext.getBundles();
-        XmlBundles xmlBundles = new XmlBundles();
-        XmlBundle[] axb = new XmlBundle[bundles.length];
+        SystemBundles xmlBundles = new SystemBundles();
+        SystemBundle[] axb = new SystemBundle[bundles.length];
 
         for (int i = 0; i < bundles.length; i++) {
 
             Bundle bundle = bundles[i];
-            XmlBundle xmlBundle = new XmlBundle();
+            SystemBundle xmlBundle = new SystemBundle(bundle.getSymbolicName(), bundle.getVersion().toString());
 
-            xmlBundle.setName(bundle.getSymbolicName());
-            xmlBundle.setVersion(bundle.getVersion().toString());
             xmlBundle.setId(bundle.getBundleId());
 
             int state = bundle.getState();

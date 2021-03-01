@@ -47,11 +47,17 @@ public class CryptoServiceImpl implements CryptoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
 
+    private static final String PARAMETER_EXCEPTION_CAUSE = "parameter";
+    private static final String DECRYPT_EXCEPTION_CAUSE = "decrypt";
+    private static final String VALUE_EXCEPTION_CAUSE = "value";
+
     private static final String ALGORITHM = "AES";
     private static final String CIPHER = "AES/GCM/NoPadding";
     private static final int AUTH_TAG_LENGTH_BIT = 128;
+    private static final int IV_SIZE = 12;
     private static final byte[] SECRET_KEY = System
             .getProperty("org.eclipse.kura.core.crypto.secretKey", "rv;ipse329183!@#").getBytes();
+    private static final String ENCRYPTED_STRING_SEPARATOR = "-";
 
     private String keystorePasswordPath;
 
@@ -80,20 +86,20 @@ public class CryptoServiceImpl implements CryptoService {
         try {
             Key key = generateKey();
             Cipher c = Cipher.getInstance(CIPHER);
-            byte[] iv = new byte[12];
+            byte[] iv = new byte[IV_SIZE];
             this.random.nextBytes(iv);
             c.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
             byte[] encryptedBytes = c.doFinal(new String(value).getBytes());
 
-            String encryptedMessage = base64Encode(encryptedBytes);
             String ivString = base64Encode(iv);
-            return (ivString + "-" + encryptedMessage).toCharArray();
+            String encryptedMessage = base64Encode(encryptedBytes);
+            return (ivString + ENCRYPTED_STRING_SEPARATOR + encryptedMessage).toCharArray();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "encrypt");
         } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "value");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, VALUE_EXCEPTION_CAUSE);
         } catch (InvalidAlgorithmParameterException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "parameter");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, PARAMETER_EXCEPTION_CAUSE);
         }
 
     }
@@ -111,14 +117,13 @@ public class CryptoServiceImpl implements CryptoService {
         if (encryptedValue.length == 0) {
             return new char[0];
         }
-        Key key = generateKey();
-        Cipher c;
+
         try {
             String internalStringValue = new String(encryptedValue);
 
-            String[] internalStringValueArray = internalStringValue.split("-");
+            String[] internalStringValueArray = internalStringValue.split(ENCRYPTED_STRING_SEPARATOR);
             if (internalStringValueArray.length != 2) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_EXCEPTION_CAUSE);
             }
             String encodedIv = internalStringValueArray[0];
             String encodedValue = internalStringValueArray[1];
@@ -126,20 +131,20 @@ public class CryptoServiceImpl implements CryptoService {
             byte[] iv = base64Decode(encodedIv);
             byte[] decodedValue = base64Decode(encodedValue);
             if (encryptedValue.length > 0 && decodedValue.length == 0) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_EXCEPTION_CAUSE);
             }
 
-            c = Cipher.getInstance(CIPHER);
-            c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
+            Cipher c = Cipher.getInstance(CIPHER);
+            c.init(Cipher.DECRYPT_MODE, generateKey(), new GCMParameterSpec(AUTH_TAG_LENGTH_BIT, iv));
             byte[] decryptedBytes = c.doFinal(decodedValue);
             String decryptedValue = new String(decryptedBytes);
             return decryptedValue.toCharArray();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "decrypt");
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, DECRYPT_EXCEPTION_CAUSE);
         } catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException e) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value");
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_EXCEPTION_CAUSE);
         } catch (InvalidAlgorithmParameterException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "parameter");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, PARAMETER_EXCEPTION_CAUSE);
         }
     }
 

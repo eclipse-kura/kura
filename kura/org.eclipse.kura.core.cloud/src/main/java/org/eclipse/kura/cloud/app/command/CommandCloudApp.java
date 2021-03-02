@@ -142,8 +142,8 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     public void updated(Map<String, Object> properties) {
         logger.info("updated...: {}", properties);
 
-        this.currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
-        this.isPrivileged = (Boolean) properties.get(COMMAND_PRIVILEGED);
+        this.currentStatus = (Boolean) properties.getOrDefault(COMMAND_ENABLED_ID, false);
+        this.isPrivileged = (Boolean) properties.getOrDefault(COMMAND_PRIVILEGED, false);
 
         this.properties = new HashMap<>();
 

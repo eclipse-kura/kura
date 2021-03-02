@@ -101,6 +101,10 @@ public interface SystemService {
     public static final String KEY_FILE_SEP = "file.separator";
     public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
 
+    /**
+     * @since 2.2
+     */
+    public static final String KEY_COMMAND_USER = "kura.command.user";
 
     /**
      * @since 2.2
@@ -518,6 +522,14 @@ public interface SystemService {
      * @since 2.2
      */
     public String getNetVirtualDevicesConfig();
+
+    /**
+     * Gets the user to be used for running commands.
+     *
+     * @since 2.2
+     * @return command user
+     */
+    public String getCommandUser();
 
     /**
      * Gets the CPU version of the device.

@@ -16,12 +16,13 @@ function create_users {
     # create kura user without home directory
     useradd -M kura
     # disable login for kura user
-    KURA_USER_ENTRY=`cat /etc/passwd | grep kura:`
-    sed -i "s@${KURA_USER_ENTRY}@${KURA_USER_ENTRY%:*}:/sbin/nologin@" /etc/passwd
+    passwd -l kura
     
     # create kurad system user without home directory
-    useradd -M -r kurad
+    useradd -r -M kurad
     # disable login for kurad user
+    KURAD_USER_ENTRY=`cat /etc/passwd | grep kurad:`
+    sed -i "s@${KURAD_USER_ENTRY}@${KURAD_USER_ENTRY%:*}:/sbin/nologin@" /etc/passwd
     passwd -l kurad
     # add kurad to dialout group (for managing serial ports)
     gpasswd -a kurad dialout
@@ -63,6 +64,12 @@ ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.syst
 			fi
 	    fi
 	fi
+	
+	# modify pam policy
+	if [ -f /etc/pam.d/su ]; then
+		sed -i '/^auth       sufficient pam_rootok.so/a auth       [success=ignore default=1] pam_succeed_if.so user = kura\nauth       sufficient                 pam_succeed_if.so use_uid user = kurad' /etc/pam.d/su 
+	fi
+	
         
     # grant kurad user the privileges to manage ble via dbus
     grep -lR kurad /etc/dbus-1/system.d/bluetooth.conf
@@ -109,6 +116,12 @@ function delete_users {
 	fi
 	if [ -f /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla ]; then
 		rm -f /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla
+	fi
+	
+	# recover pam policy
+	if [ -f /etc/pam.d/su ]; then
+		sed -i '/^auth       sufficient pam_rootok.so/ {n;d}' /etc/pam.d/su
+		sed -i '/^auth       sufficient pam_rootok.so/ {n;d}' /etc/pam.d/su
 	fi
 	
 	# recover old dbus config

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -60,9 +60,6 @@ public class SettingsPanelUi extends Composite {
     SslTabUi sslConfigPanel;
 
     @UiField
-    CommandUserTabUi commandUserPanel;
-
-    @UiField
     TabListItem snapshots;
     @UiField
     TabListItem sslConfig;
@@ -70,8 +67,6 @@ public class SettingsPanelUi extends Composite {
     TabContent tabContent;
     @UiField
     NavTabs navTabs;
-    @UiField
-    TabListItem commandUser;
 
     @UiField
     HTMLPanel settingsIntro;
@@ -79,7 +74,6 @@ public class SettingsPanelUi extends Composite {
     private TabListItem currentlySelectedTab;
     private Tab.RefreshHandler snapshotsHandler;
     private Tab.RefreshHandler sslConfigHandler;
-    private Tab.RefreshHandler commandUserHandler;
 
     public SettingsPanelUi() {
         logger.log(Level.FINER, "Initiating SettingsPanelUI...");
@@ -95,8 +89,6 @@ public class SettingsPanelUi extends Composite {
         this.snapshots.addClickHandler(event -> handleEvent(event, this.snapshotsHandler));
         this.sslConfigHandler = new Tab.RefreshHandler(this.sslConfigPanel);
         this.sslConfig.addClickHandler(event -> handleEvent(event, this.sslConfigHandler));
-        this.commandUserHandler = new Tab.RefreshHandler(this.commandUserPanel);
-        this.commandUser.addClickHandler(event -> handleEvent(event, this.commandUserHandler));
 
         this.currentlySelectedTab = this.snapshots;
     }
@@ -114,9 +106,8 @@ public class SettingsPanelUi extends Composite {
     public boolean isDirty() {
         boolean snapshotsDirty = this.snapshotsPanel.isDirty();
         boolean sslConfigDirty = this.sslConfigPanel.isDirty();
-        boolean commandUserDirty = this.commandUserPanel.isDirty();
 
-        return snapshotsDirty || sslConfigDirty || commandUserDirty;
+        return snapshotsDirty || sslConfigDirty;
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -140,7 +131,6 @@ public class SettingsPanelUi extends Composite {
 
         this.snapshotsPanel.setDirty(b);
         this.sslConfigPanel.setDirty(b);
-        this.commandUserPanel.setDirty(b);
     }
 
     private void showDirtyModal(TabListItem newTabListItem, RefreshHandler newTabRefreshHandler) {
@@ -200,8 +190,6 @@ public class SettingsPanelUi extends Composite {
             return this.snapshotsPanel;
         } else if (item.getDataTarget().equals("#sslConfigPanel")) {
             return this.sslConfigPanel;
-        } else if (item.getDataTarget().equals("#commandUserPanel")) {
-            return this.commandUserPanel;
         } else {
             return this.snapshotsPanel;
         }

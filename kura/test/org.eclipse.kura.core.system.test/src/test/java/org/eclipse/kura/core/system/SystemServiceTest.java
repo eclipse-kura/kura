@@ -55,7 +55,7 @@ public class SystemServiceTest {
         systemService.activate(ctxMock);
 
         assertEquals("file:/opt/eclipse/kura/framework/kura.properties", System.getProperty(SystemService.KURA_CONFIG));
-        assertEquals("/opt/eclipse/kura/data/dpa.properties", System.getProperty("dpa.configuration"));
+        assertEquals("/opt/eclipse/kura/packages/dpa.properties", System.getProperty("dpa.configuration"));
         assertEquals("file:/opt/eclipse/kura/user/log4j.properties", System.getProperty("log4j.configuration"));
     }
 

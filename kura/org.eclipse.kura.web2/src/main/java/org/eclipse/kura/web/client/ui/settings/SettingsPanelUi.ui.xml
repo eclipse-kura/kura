@@ -2,7 +2,7 @@
 
 <!--
     
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -47,8 +47,6 @@
                         ui:field="snapshots" active="true"/>
                     <b:TabListItem dataTarget="#sslConfigPanel" text="SSL Configuration"
                         ui:field="sslConfig" />
-                    <b:TabListItem dataTarget="#commandUserPanel" text="Command User"
-                        ui:field="commandUser" />
                 </b:NavTabs>
                 <b:TabContent ui:field="tabContent">
                     <b:TabPane b:id="snapshotsPanel" active="true">
@@ -56,9 +54,6 @@
                     </b:TabPane>
                     <b:TabPane b:id="sslConfigPanel">
                         <settings:SslTabUi ui:field="sslConfigPanel"></settings:SslTabUi>
-                    </b:TabPane>
-                    <b:TabPane b:id="commandUserPanel">
-                        <settings:CommandUserTabUi ui:field="commandUserPanel"></settings:CommandUserTabUi>
                     </b:TabPane>
                 </b:TabContent>
             </b:Well>

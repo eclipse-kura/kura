@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Jens Reimann <jreimann@redhat.com>
@@ -17,10 +17,10 @@ import static org.eclipse.kura.web.server.util.GwtServerUtil.PASSWORD_PLACEHOLDE
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -58,6 +58,7 @@ import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemManagerService;
+import org.eclipse.kura.net.modem.ModemManagerService.ModemFunction;
 import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemPdpContextType;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
@@ -164,7 +165,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
         try {
 
-            GwtNetInterfaceConfig gwtNetConfig = null;
+            GwtNetInterfaceConfig gwtNetConfig;
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas
                     .getNetworkInterfaceConfigs()) {
                 logger.debug("Getting config for {} with type {}", netIfConfig.getName(), netIfConfig.getType());
@@ -504,21 +505,28 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     if (usbDevice != null) {
                                         modemServiceId = netIfConfig.getUsbDevice().getUsbPort();
                                     } else {
-                                        Collection<CellularModem> modemServices = modemManagerService
-                                                .getAllModemServices();
-                                        for (CellularModem modemService : modemServices) {
-                                            ModemDevice modemDevice = modemService.getModemDevice();
-                                            if (modemDevice instanceof SerialModemDevice) {
-                                                modemServiceId = modemDevice.getProductName();
-                                                break;
+                                        modemServiceId = modemManagerService.withAllModemServices(modemServices -> {
+                                            for (CellularModem modemService : modemServices) {
+                                                ModemDevice modemDevice = modemService.getModemDevice();
+                                                if (modemDevice instanceof SerialModemDevice) {
+                                                    return modemDevice.getProductName();
+                                                }
                                             }
-                                        }
+
+                                            return null;
+                                        });
+
                                     }
 
                                     if (modemServiceId != null) {
-                                        CellularModem cellModemService = modemManagerService
-                                                .getModemService(modemServiceId);
-                                        if (cellModemService != null) {
+                                        final GwtNetInterfaceConfig currentConfig = gwtNetConfig;
+
+                                        modemManagerService.withModemService(modemServiceId, m -> {
+                                            if (!m.isPresent()) {
+                                                return (Void) null;
+                                            }
+
+                                            final CellularModem cellModemService = m.get();
 
                                             try {
                                                 String imei = cellModemService.getSerialNumber();
@@ -537,7 +545,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                                             try {
                                                 String sModel = cellModemService.getModel();
-                                                ((GwtModemInterfaceConfig) gwtNetConfig).setModel(sModel);
+                                                ((GwtModemInterfaceConfig) currentConfig).setModel(sModel);
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get model information from modem", e);
                                             }
@@ -545,11 +553,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             try {
                                                 boolean gpsSupported = cellModemService.isGpsSupported();
                                                 logger.debug("Setting GPS supported to {}", gpsSupported);
-                                                ((GwtModemInterfaceConfig) gwtNetConfig).setGpsSupported(gpsSupported);
+                                                ((GwtModemInterfaceConfig) currentConfig).setGpsSupported(gpsSupported);
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get GPS supported from modem", e);
                                             }
-                                        }
+
+                                            return (Void) null;
+                                        });
                                     }
                                 }
 
@@ -1090,41 +1100,46 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        List<GwtModemPdpEntry> gwtModemPdpEntries = new ArrayList<>();
         ModemManagerService mms = ServiceLocator.getInstance().getService(ModemManagerService.class);
-        CellularModem modem = getModemService(interfaceName, mms);
-        if (modem == null) {
-            return gwtModemPdpEntries;
-        }
+
         try {
-            List<ModemPdpContext> pdpContextInfo = modem.getPdpContextInfo();
-            GwtModemPdpEntry gwtModemPdpEntry;
-            int contextInd = 1;
-            int firstAvailableContextNum = 0;
-            for (ModemPdpContext pdpContextEntry : pdpContextInfo) {
-                gwtModemPdpEntry = new GwtModemPdpEntry();
-                gwtModemPdpEntry.setContextNumber(pdpContextEntry.getNumber());
-                gwtModemPdpEntry.setPdpType(pdpContextEntry.getType().getValue());
-                gwtModemPdpEntry.setApn(pdpContextEntry.getApn());
-                gwtModemPdpEntries.add(gwtModemPdpEntry);
-                if (firstAvailableContextNum == 0 && contextInd < pdpContextEntry.getNumber()) {
+            return withCellularModem(interfaceName, mms, m -> {
+                List<GwtModemPdpEntry> gwtModemPdpEntries = new ArrayList<>();
+
+                if (!m.isPresent()) {
+                    return gwtModemPdpEntries;
+                }
+
+                final CellularModem modem = m.get();
+                List<ModemPdpContext> pdpContextInfo = modem.getPdpContextInfo();
+                GwtModemPdpEntry gwtModemPdpEntry;
+                int contextInd = 1;
+                int firstAvailableContextNum = 0;
+                for (ModemPdpContext pdpContextEntry : pdpContextInfo) {
+                    gwtModemPdpEntry = new GwtModemPdpEntry();
+                    gwtModemPdpEntry.setContextNumber(pdpContextEntry.getNumber());
+                    gwtModemPdpEntry.setPdpType(pdpContextEntry.getType().getValue());
+                    gwtModemPdpEntry.setApn(pdpContextEntry.getApn());
+                    gwtModemPdpEntries.add(gwtModemPdpEntry);
+                    if (firstAvailableContextNum == 0 && contextInd < pdpContextEntry.getNumber()) {
+                        firstAvailableContextNum = contextInd;
+                    }
+                    contextInd++;
+                }
+                if (firstAvailableContextNum == 0) {
                     firstAvailableContextNum = contextInd;
                 }
-                contextInd++;
-            }
-            if (firstAvailableContextNum == 0) {
-                firstAvailableContextNum = contextInd;
-            }
-            gwtModemPdpEntry = new GwtModemPdpEntry();
-            gwtModemPdpEntry.setContextNumber(firstAvailableContextNum);
-            gwtModemPdpEntry.setPdpType(ModemPdpContextType.IP.getValue());
-            gwtModemPdpEntry.setApn("Please provide APN for this new PDP context ...");
-            gwtModemPdpEntries.add(gwtModemPdpEntry);
+                gwtModemPdpEntry = new GwtModemPdpEntry();
+                gwtModemPdpEntry.setContextNumber(firstAvailableContextNum);
+                gwtModemPdpEntry.setPdpType(ModemPdpContextType.IP.getValue());
+                gwtModemPdpEntry.setApn("Please provide APN for this new PDP context ...");
+                gwtModemPdpEntries.add(gwtModemPdpEntry);
+
+                return gwtModemPdpEntries;
+            });
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.WARNING, e);
         }
-
-        return gwtModemPdpEntries;
     }
 
     @Override
@@ -1602,35 +1617,78 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return wifiMode;
     }
 
-    private CellularModem getModemService(String ifaceName, ModemManagerService mms) {
-        CellularModem cellularModem = mms.getModemService(ifaceName);
-        if (cellularModem != null) {
-            return cellularModem;
-        }
-        Collection<CellularModem> modemServices = mms.getAllModemServices();
-        for (CellularModem modem : modemServices) {
-            cellularModem = getModemService(ifaceName, modem);
-            if (cellularModem != null) {
-                break;
+    private <T> T withCellularModem(final String interfaceName, final ModemManagerService modemManagerService,
+            final ModemFunction<Optional<CellularModem>, T> function) throws KuraException {
+
+        final Optional<T> result = modemManagerService.withModemService(interfaceName, m -> {
+            if (m.isPresent()) {
+                return Optional.of(function.apply(m));
             }
+            return Optional.empty();
+        });
+
+        if (result.isPresent()) {
+            return result.get();
         }
-        return cellularModem;
+
+        return modemManagerService.withAllModemServices(m -> {
+            for (CellularModem modem : m) {
+                if (isModemForNetworkInterface(interfaceName, modem)) {
+                    return function.apply(Optional.of(modem));
+                }
+            }
+            return function.apply(Optional.empty());
+        });
     }
 
-    private CellularModem getModemService(String ifaceName, CellularModem modemService) {
-        CellularModem cellularModem = null;
+    private boolean isModemForNetworkInterface(String ifaceName, CellularModem modemService) {
         List<NetConfig> netConfigs = modemService.getConfiguration();
         for (NetConfig netConfig : netConfigs) {
             if (netConfig instanceof ModemConfig) {
                 ModemConfig modemConfig = (ModemConfig) netConfig;
                 String interfaceName = "ppp" + modemConfig.getPppNumber();
                 if (interfaceName.equals(ifaceName)) {
-                    cellularModem = modemService;
-                    break;
+                    return true;
                 }
             }
         }
-        return cellularModem;
+        return false;
+    }
+
+    @Override
+    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
+        logger.info("Find Frequency Network Service impl");
+        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+        List<GwtWifiHotspotEntry> channels = new ArrayList<GwtWifiHotspotEntry>();
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            List<WifiChannel> frequencies = nas.getWifiFrequencies(interfaceName);
+
+            for (WifiChannel freq : frequencies) {
+                logger.debug(freq.toString());
+                GwtWifiHotspotEntry channelFrequency = new GwtWifiHotspotEntry();
+                channelFrequency.setChannel(freq.getChannel());
+                channelFrequency.setFrequency((int)(freq.getFrequency() * 1000));
+                channels.add(channelFrequency);
+            }
+            return channels;
+        } catch (KuraException e) {
+            logger.error("Find Frequency exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        logger.info("Get Wifi Country Code impl");
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+        	return nas.getWifiCountryCode();
+        } catch (KuraException e) {
+            logger.error("Get Wifi Country Code exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
     }
 
     @Override

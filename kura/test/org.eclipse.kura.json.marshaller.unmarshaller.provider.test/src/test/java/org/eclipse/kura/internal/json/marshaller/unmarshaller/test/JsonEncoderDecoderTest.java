@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,11 +20,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemPackage;
+import org.eclipse.kura.core.inventory.resources.SystemPackages;
+import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.wiregraph.WireGraphJsonMarshallUnmarshallImpl;
+import org.eclipse.kura.system.SystemResourceInfo;
+import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.wire.WireConfiguration;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
@@ -471,6 +481,70 @@ public class JsonEncoderDecoderTest {
 
         String expected = "{\"components\":[{\"pid\":\"emitterPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}},{\"pid\":\"receiverPid\",\"inputPortCount\":0,\"outputPortCount\":5,\"renderingProperties\":{\"position\":{\"x\":10,\"y\":100},\"inputPortNames\":{\"0\":\"resetPort\"},\"outputPortNames\":{\"3\":\"then\"}}}],\"wires\":[{\"emitter\":\"emitterPid\",\"emitterPort\":0,\"receiver\":\"receiverPid\",\"receiverPort\":0}]}";
         assertEquals(expected, result.toString());
+    }
+
+    @Test
+    public void testSystemDeploymentPackages() throws KuraException {
+        SystemDeploymentPackages systemDeploymentPackages = new SystemDeploymentPackages();
+        SystemDeploymentPackage[] systemDeploymentPackageArray = new SystemDeploymentPackage[1];
+        SystemDeploymentPackage systemDeploymentPackage = new SystemDeploymentPackage("dp1", "1.0.0");
+        SystemBundle[] systemBundles = new SystemBundle[1];
+        systemBundles[0] = new SystemBundle("bundle1", "2.0.0");
+        systemBundles[0].setId(0);
+        systemBundles[0].setState("ACTIVE");
+        systemDeploymentPackage.setBundleInfos(systemBundles);
+        systemDeploymentPackageArray[0] = systemDeploymentPackage;
+        systemDeploymentPackages.setDeploymentPackages(systemDeploymentPackageArray);
+
+        String json = new JsonMarshallUnmarshallImpl().marshal(systemDeploymentPackages);
+
+        String expectedJson = "{\"packages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\"}]}]}";
+        assertEquals(expectedJson, json);
+    }
+
+    @Test
+    public void testSystemBundles() throws KuraException {
+        SystemBundles systemBundles = new SystemBundles();
+        SystemBundle[] systemBundlesArray = new SystemBundle[2];
+        systemBundlesArray[0] = new SystemBundle("bundle1", "1.0.0");
+        systemBundlesArray[0].setId(0);
+        systemBundlesArray[0].setState("ACTIVE");
+        systemBundlesArray[1] = new SystemBundle("bundle2", "2.0.0");
+        systemBundlesArray[1].setId(1);
+        systemBundlesArray[1].setState("RESOLVED");
+        systemBundles.setBundles(systemBundlesArray);
+
+        String json = new JsonMarshallUnmarshallImpl().marshal(systemBundles);
+
+        String expectedJson = "{\"bundles\":[{\"name\":\"bundle1\",\"version\":\"1.0.0\",\"id\":0,\"state\":\"ACTIVE\"},{\"name\":\"bundle2\",\"version\":\"2.0.0\",\"id\":1,\"state\":\"RESOLVED\"}]}";
+        assertEquals(expectedJson, json);
+    }
+
+    @Test
+    public void testSystemPackages() throws KuraException {
+        List<SystemPackage> systemPackageList = new ArrayList<>();
+        systemPackageList.add(new SystemPackage("package1", "1.0.0", SystemResourceType.DEB));
+        systemPackageList.add(new SystemPackage("package2", "2.0.0", SystemResourceType.RPM));
+        SystemPackages systemPackages = new SystemPackages(systemPackageList);
+
+        String json = new JsonMarshallUnmarshallImpl().marshal(systemPackages);
+
+        String expectedJson = "{\"systemPackages\":[{\"name\":\"package1\",\"version\":\"1.0.0\",\"type\":\"DEB\"},{\"name\":\"package2\",\"version\":\"2.0.0\",\"type\":\"RPM\"}]}";
+        assertEquals(expectedJson, json);
+    }
+
+    @Test
+    public void testSystemResourcesInfo() throws KuraException {
+        List<SystemResourceInfo> SystemResourcesInfoList = new ArrayList<>();
+        SystemResourcesInfoList.add(new SystemResourceInfo("package1", "1.0.0", SystemResourceType.DEB));
+        SystemResourcesInfoList.add(new SystemResourceInfo("bundle1", "2.0.0", SystemResourceType.BUNDLE));
+        SystemResourcesInfoList.add(new SystemResourceInfo("dp1", "3.0.0", SystemResourceType.DP));
+        SystemResourcesInfo systemResourceInfo = new SystemResourcesInfo(SystemResourcesInfoList);
+
+        String json = new JsonMarshallUnmarshallImpl().marshal(systemResourceInfo);
+
+        String expectedJson = "{\"inventory\":[{\"name\":\"package1\",\"version\":\"1.0.0\",\"type\":\"DEB\"},{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"type\":\"BUNDLE\"},{\"name\":\"dp1\",\"version\":\"3.0.0\",\"type\":\"DP\"}]}";
+        assertEquals(expectedJson, json);
     }
 
 }

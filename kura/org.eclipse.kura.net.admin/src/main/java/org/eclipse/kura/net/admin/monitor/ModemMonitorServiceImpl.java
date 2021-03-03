@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -61,6 +62,8 @@ import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
+import org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl.ModemResetTimer;
+import org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl.MonitoredModem;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
@@ -70,6 +73,7 @@ import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemManagerService;
+import org.eclipse.kura.net.modem.ModemManagerService.ModemFunction;
 import org.eclipse.kura.net.modem.ModemMonitorListener;
 import org.eclipse.kura.net.modem.ModemMonitorService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
@@ -315,7 +319,27 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         this.listeners.remove(listenerToUnregister);
     }
 
-    private void processNetworkConfigurationChangeEvent(NetworkConfiguration newNetworkConfig) {
+    @Override
+    public synchronized <T> T withModemService(final String ifaceName,
+            final ModemFunction<Optional<CellularModem>, T> func) throws KuraException {
+
+        final MonitoredModem modem = this.modems.get(ifaceName);
+
+        if (modem == null) {
+            return func.apply(Optional.empty());
+        }
+
+        return func.apply(Optional.of(modem.modem));
+    }
+
+    @Override
+    public synchronized <T> T withAllModemServices(final ModemFunction<Collection<CellularModem>, T> func)
+            throws KuraException {
+
+        return func.apply(getAllModemServices());
+    }
+
+    private synchronized void processNetworkConfigurationChangeEvent(NetworkConfiguration newNetworkConfig) {
         if (this.modems == null || this.modems.isEmpty()) {
             return;
         }
@@ -547,7 +571,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         return isDiversityEnabled;
     }
 
-    private void monitor() {
+    private synchronized void monitor() {
         try {
             monitorRequestPending.set(false);
 
@@ -613,7 +637,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }
     }
 
-    private void trackModem(ModemDevice modemDevice) {
+    private synchronized void trackModem(ModemDevice modemDevice) {
         try {
             final CellularModemFactory modemFactoryService = getCellularModemFactory(modemDevice);
 
@@ -623,11 +647,13 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             }
             CellularModem modem = modemFactoryService.obtainCellularModemService(modemDevice, platform);
             try {
-                HashMap<String, String> modemInfoMap = new HashMap<>();
+                HashMap<String, Object> modemInfoMap = new HashMap<>();
+                modemInfoMap.put(ModemReadyEvent.MODEM_DEVICE, modemDevice);
                 modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
                 modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity());
                 modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId());
                 modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
+                modemInfoMap.put(ModemReadyEvent.FW_VERSION, modem.getRevisionID());
                 logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
                 this.eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
             } catch (Exception e) {

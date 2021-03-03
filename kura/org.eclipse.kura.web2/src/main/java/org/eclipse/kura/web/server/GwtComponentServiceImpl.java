@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,6 @@ package org.eclipse.kura.web.server;
 
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -42,10 +39,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.findFilteredComponentConfigurations(session);
+        return GwtComponentServiceInternal.findFilteredComponentConfigurations();
     }
 
     @Override
@@ -53,10 +47,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.findComponentConfigurations(session, osgiFilter);
+        return GwtComponentServiceInternal.findComponentConfigurations(osgiFilter);
     }
 
     @Override
@@ -64,20 +55,14 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.findFilteredComponentConfiguration(session, componentPid);
+        return GwtComponentServiceInternal.findFilteredComponentConfiguration(componentPid);
     }
 
     @Override
     public List<GwtConfigComponent> findComponentConfigurations(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.findComponentConfigurations(session);
+        return GwtComponentServiceInternal.findComponentConfigurations();
     }
 
     @Override
@@ -85,10 +70,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.findComponentConfiguration(session, componentPid);
+        return GwtComponentServiceInternal.findComponentConfiguration(componentPid);
     }
 
     @Override
@@ -96,20 +78,25 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
+        updateComponentConfigurationInternal(gwtCompConfig);
+    }
 
-        GwtComponentServiceInternal.updateComponentConfiguration(session, gwtCompConfig);
+    @Override
+    public void updateComponentConfigurations(GwtXSRFToken xsrfToken, List<GwtConfigComponent> gwtCompConfigs)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        for (GwtConfigComponent gwtCompConfig : gwtCompConfigs) {
+            updateComponentConfigurationInternal(gwtCompConfig);
+        }
+
     }
 
     @Override
     public void createFactoryComponent(GwtXSRFToken xsrfToken, String factoryPid, String pid) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.createFactoryComponent(session, factoryPid, pid);
+        GwtComponentServiceInternal.createFactoryComponent(factoryPid, pid);
     }
 
     @Override
@@ -117,10 +104,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             GwtConfigComponent properties) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.createFactoryComponent(session, factoryPid, pid, properties);
+        GwtComponentServiceInternal.createFactoryComponent(factoryPid, pid, properties);
     }
 
     @Override
@@ -128,41 +112,29 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        GwtComponentServiceInternal.deleteFactoryConfiguration(session, pid, takeSnapshot);
+        GwtComponentServiceInternal.deleteFactoryConfiguration(pid, takeSnapshot);
     }
 
     @Override
     public List<String> findFactoryComponents(GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.findFactoryComponents(session);
+        return GwtComponentServiceInternal.findFactoryComponents();
     }
 
     @Override
-    public boolean updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
+    public void updateProperties(GwtXSRFToken xsrfToken, String pid, Map<String, Object> properties)
             throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.updateProperties(session, pid, properties);
+        GwtComponentServiceInternal.updateProperties(pid, properties);
     }
 
     @Override
     public List<String> getDriverFactoriesList(GwtXSRFToken xsrfToken) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
-        return GwtComponentServiceInternal.getDriverFactoriesList(session);
+        return GwtComponentServiceInternal.getDriverFactoriesList();
     }
 
     @Override
@@ -170,10 +142,11 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
+        return GwtComponentServiceInternal.getPidsFromTarget(pid, targetRef);
+    }
 
-        return GwtComponentServiceInternal.getPidsFromTarget(session, pid, targetRef);
+    private void updateComponentConfigurationInternal(GwtConfigComponent gwtCompConfig) throws GwtKuraException {
+        GwtComponentServiceInternal.updateComponentConfiguration(gwtCompConfig);
     }
 
 }

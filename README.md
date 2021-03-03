@@ -1,9 +1,7 @@
 Eclipse Kura™
 =============
-Travis-ci:
-[![Build Status](https://travis-ci.org/eclipse/kura.svg?branch=master)](https://travis-ci.org/eclipse/kura)
-Hudson:
-[![Hudson](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/kura-develop.svg)](https://ci.eclipse.org/kura/)
+Jenkins:
+[![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
 
 [![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 

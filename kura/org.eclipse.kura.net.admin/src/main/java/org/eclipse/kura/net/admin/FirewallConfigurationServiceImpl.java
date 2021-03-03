@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,8 @@ package org.eclipse.kura.net.admin;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -46,33 +48,58 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
+import org.eclipse.kura.security.FloodingProtectionConfigurationService;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallConfigurationServiceImpl implements FirewallConfigurationService, SelfConfiguringComponent {
+public class FirewallConfigurationServiceImpl
+        implements FirewallConfigurationService, SelfConfiguringComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
 
     private EventAdmin eventAdmin;
+    private ServiceRegistration<?> serviceRegistration;
     private LinuxFirewall firewall;
     private CommandExecutorService executorService;
+    private FloodingProtectionConfigurationService floodingConfiguration;
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+        if (this.eventAdmin == eventAdmin) {
+            this.eventAdmin = null;
+        }
     }
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
     }
 
-    public void unsetEventAdmin(CommandExecutorService executorService) {
-        this.executorService = null;
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        if (this.executorService == executorService) {
+            this.executorService = null;
+        }
+    }
+
+    public void setFloodingProtectionConfigurationService(
+            FloodingProtectionConfigurationService floodingConfiguration) {
+        this.floodingConfiguration = floodingConfiguration;
+    }
+
+    public void unsetFloodingProtectionConfigurationService(
+            FloodingProtectionConfigurationService floodingConfiguration) {
+        if (this.floodingConfiguration == floodingConfiguration) {
+            this.floodingConfiguration = null;
+        }
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
@@ -88,10 +115,17 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         }
 
         this.firewall = getLinuxFirewall();
+
+        Dictionary<String, Object> props = new Hashtable<>();
+        String[] eventTopics = { FloodingProtectionConfigurationChangeEvent.FP_EVENT_CONFIG_CHANGE_TOPIC };
+        props.put(EventConstants.EVENT_TOPIC, eventTopics);
+        this.serviceRegistration = componentContext.getBundleContext().registerService(EventHandler.class.getName(),
+                this, props);
     }
 
     protected void deactivate(ComponentContext componentContext) {
         logger.debug("deactivate()");
+        this.serviceRegistration.unregister();
     }
 
     public synchronized void updated(Map<String, Object> properties) {
@@ -116,6 +150,8 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         } catch (KuraException e) {
             logger.error("Failed to set Firewall NAT Configuration", e);
         }
+
+        setFloodingProtectionConfiguration();
 
         // raise the event because there was a change
         this.eventAdmin.postEvent(new FirewallConfigurationChangeEvent(properties));
@@ -296,6 +332,14 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         addNatRules(natRules);
     }
 
+    @Override
+    public void handleEvent(Event event) {
+        logger.debug("Received event: {}", event.getTopic());
+        if (event.getTopic().equals(FloodingProtectionConfigurationChangeEvent.FP_EVENT_CONFIG_CHANGE_TOPIC)) {
+            setFloodingProtectionConfiguration();
+        }
+    }
+
     protected void addLocalRules(ArrayList<LocalRule> localRules) throws KuraException {
         this.firewall.addLocalRules(localRules);
     }
@@ -388,5 +432,17 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
 
     private NetworkPair getNetworkPair00() throws UnknownHostException {
         return new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short) 0);
+    }
+
+    private void setFloodingProtectionConfiguration() {
+        if (this.floodingConfiguration != null) {
+            try {
+                this.firewall.setAdditionalRules(this.floodingConfiguration.getFloodingProtectionFilterRules(),
+                        this.floodingConfiguration.getFloodingProtectionNatRules(),
+                        this.floodingConfiguration.getFloodingProtectionMangleRules());
+            } catch (KuraException e) {
+                logger.error("Failed to set Firewall Flooding Protection Configuration", e);
+            }
+        }
     }
 }

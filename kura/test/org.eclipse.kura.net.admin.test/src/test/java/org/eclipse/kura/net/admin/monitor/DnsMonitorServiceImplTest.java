@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -27,7 +26,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,10 +58,7 @@ import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dns.DnsServerConfigIP4;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
 
 public class DnsMonitorServiceImplTest {
 
@@ -71,31 +66,10 @@ public class DnsMonitorServiceImplTest {
     public void testActivate() throws NoSuchFieldException {
         DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl();
 
-        ComponentContext ccMock = mock(ComponentContext.class);
-
-        BundleContext bcMock = mock(BundleContext.class);
-        when(ccMock.getBundleContext()).thenReturn(bcMock);
-
-        doAnswer(invocation -> {
-            Dictionary dict = invocation.getArgumentAt(2, Dictionary.class);
-            assertEquals(1, dict.size());
-            String[] topics = (String[]) dict.get("event.topics");
-
-            assertEquals(2, topics.length);
-            for (String topic : topics) {
-                assertTrue("org/eclipse/kura/net/admin/event/NETWORK_EVENT_STATUS_CHANGE_TOPIC".equals(topic)
-                        || "org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC".equals(topic));
-            }
-
-            return null;
-        }).when(bcMock).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
-
         NetworkConfigurationService ncsMock = mock(NetworkConfigurationService.class);
         svc.setNetworkConfigurationService(ncsMock);
 
-        svc.activate(ccMock);
-
-        verify(bcMock, times(1)).registerService(eq(EventHandler.class.getName()), eq(svc), anyObject());
+        svc.activate();
 
         ExecutorService executor = (ExecutorService) TestUtil.getFieldValue(svc, "executor");
         Future task = (Future) TestUtil.getFieldValue(svc, "monitorTask");
@@ -104,7 +78,7 @@ public class DnsMonitorServiceImplTest {
         assertNotNull(TestUtil.getFieldValue(svc, "stopThread"));
         assertNotNull(TestUtil.getFieldValue(svc, "dnsUtil"));
 
-        svc.deactivate(ccMock);
+        svc.deactivate();
 
         assertTrue(executor.isShutdown());
         assertTrue(task.isCancelled() || task.isDone());
@@ -596,6 +570,7 @@ public class DnsMonitorServiceImplTest {
 
         final int pppNum = 3;
         DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl() {
+
             @Override
             protected boolean pppHasAddress(int pppNo) throws KuraException {
                 assertEquals(pppNum, pppNo);

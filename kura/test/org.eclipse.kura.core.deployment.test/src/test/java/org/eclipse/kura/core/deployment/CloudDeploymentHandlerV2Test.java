@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,11 +51,10 @@ import org.eclipse.kura.core.deployment.install.InstallImpl;
 import org.eclipse.kura.core.deployment.install.KuraInstallPayload;
 import org.eclipse.kura.core.deployment.uninstall.UninstallImpl;
 import org.eclipse.kura.core.deployment.util.FileUtilities;
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.deployment.hook.DeploymentHook;
@@ -380,8 +379,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlDeploymentPackages packages = (XmlDeploymentPackages) object;
-                XmlDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+                SystemDeploymentPackages packages = (SystemDeploymentPackages) object;
+                SystemDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
 
                 assertEquals(0, packagesArray.length);
 
@@ -423,8 +422,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlDeploymentPackages packages = (XmlDeploymentPackages) object;
-                XmlDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+                SystemDeploymentPackages packages = (SystemDeploymentPackages) object;
+                SystemDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
 
                 assertEquals(1, packagesArray.length);
                 assertEquals(dp.getName(), packagesArray[0].getName());
@@ -474,14 +473,14 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlDeploymentPackages packages = (XmlDeploymentPackages) object;
-                XmlDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
+                SystemDeploymentPackages packages = (SystemDeploymentPackages) object;
+                SystemDeploymentPackage[] packagesArray = packages.getDeploymentPackages();
 
                 assertEquals(1, packagesArray.length);
                 assertEquals(dp.getName(), packagesArray[0].getName());
                 assertEquals(dp.getVersion().toString(), packagesArray[0].getVersion());
 
-                XmlBundleInfo[] bis = packagesArray[0].getBundleInfos();
+                SystemBundle[] bis = packagesArray[0].getBundleInfos();
                 assertEquals(1, bis.length);
                 assertEquals(bundleInfo.getSymbolicName(), bis[0].getName());
                 assertEquals(bundleInfo.getVersion().toString(), bis[0].getVersion());
@@ -523,8 +522,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(0, bundleArray.length);
 
                 return xml;
@@ -562,8 +561,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(1, bundleArray.length);
 
                 assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
@@ -610,8 +609,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(1, bundleArray.length);
 
                 assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
@@ -658,8 +657,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(1, bundleArray.length);
 
                 assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
@@ -706,8 +705,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(1, bundleArray.length);
 
                 assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
@@ -754,8 +753,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(1, bundleArray.length);
 
                 assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());
@@ -802,8 +801,8 @@ public class CloudDeploymentHandlerV2Test {
 
             @Override
             protected String marshal(Object object) {
-                XmlBundles bundles = (XmlBundles) object;
-                XmlBundle[] bundleArray = bundles.getBundles();
+                SystemBundles bundles = (SystemBundles) object;
+                SystemBundle[] bundleArray = bundles.getBundles();
                 assertEquals(1, bundleArray.length);
 
                 assertEquals(bundle.getSymbolicName(), bundleArray[0].getName());

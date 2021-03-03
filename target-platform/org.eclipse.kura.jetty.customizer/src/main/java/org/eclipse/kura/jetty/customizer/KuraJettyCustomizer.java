@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Red Hat Inc and others
+ * Copyright (c) 2018, 2021 Red Hat Inc and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.servlet.SessionCookieConfig;
 
@@ -69,12 +70,33 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         return context;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object customizeHttpConnector(final Object connector, final Dictionary<String, ?> settings) {
-        customizeConnector(connector);
-        return connector;
+        if (!(connector instanceof ServerConnector)) {
+            return connector;
+        }
+
+        final ServerConnector serverConnector = (ServerConnector) connector;
+
+        final Set<Integer> ports = (Set<Integer>) settings.get("org.eclipse.kura.http.ports");
+
+        if (ports == null) {
+            return null;
+        }
+
+        for (final int port : ports) {
+            final ServerConnector newConnector = new ServerConnector(serverConnector.getServer(),
+                    new HttpConnectionFactory(new HttpConfiguration()));
+
+            customizeConnector(newConnector, port);
+            serverConnector.getServer().addConnector(newConnector);
+        }
+
+        return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Object customizeHttpsConnector(final Object connector, final Dictionary<String, ?> settings) {
         if (!(connector instanceof ServerConnector)) {
@@ -83,81 +105,46 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServerConnector serverConnector = (ServerConnector) connector;
 
-        if (getOrDefault(settings, "kura.https.no.client.auth.disabled", false)) {
-            return createClientAuthSslConnector(serverConnector.getServer(), settings).orElse(null);
-        }
+        final Set<Integer> httpsPorts = (Set<Integer>) settings.get("org.eclipse.kura.https.ports");
+        final Set<Integer> httpsClientAuthPorts = (Set<Integer>) settings
+                .get("org.eclipse.kura.https.client.auth.ports");
 
-        customizeConnector(connector);
-
-        if (getOrDefault(settings, "kura.https.client.auth.enabled", false)) {
-
-            final Optional<ServerConnector> httpsClientAuthConnector = createClientAuthSslConnector(
-                    serverConnector.getServer(), settings);
-
-            if (httpsClientAuthConnector.isPresent()) {
-                serverConnector.getServer().addConnector(httpsClientAuthConnector.get());
+        if (httpsPorts != null) {
+            for (final int httpsPort : httpsPorts) {
+                final Optional<ServerConnector> newConnector = createSslConnector(serverConnector.getServer(), settings,
+                        httpsPort, false);
+                newConnector.ifPresent(c -> serverConnector.getServer().addConnector(c));
             }
         }
 
-        return connector;
+        if (httpsClientAuthPorts != null) {
+            for (final int clientAuthPort : httpsClientAuthPorts) {
+                final Optional<ServerConnector> newConnector = createSslConnector(serverConnector.getServer(), settings,
+                        clientAuthPort, true);
+                newConnector.ifPresent(c -> serverConnector.getServer().addConnector(c));
+            }
+        }
+
+        return null;
     }
 
-    private Optional<ServerConnector> createClientAuthSslConnector(final Server server,
-            final Dictionary<String, ?> settings) {
-
-        final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server() {
-
-            @Override
-            protected PKIXBuilderParameters newPKIXBuilderParameters(KeyStore trustStore,
-                    Collection<? extends java.security.cert.CRL> crls) throws Exception {
-                PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
-
-                pbParams.setMaxPathLength(getMaxCertPathLength());
-                pbParams.setRevocationEnabled(false);
-
-                if (isEnableOCSP()) {
-
-                    final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator
-                            .getInstance("PKIX").getRevocationChecker();
-
-                    final String responderURL = getOcspResponderURL();
-                    if (responderURL != null) {
-                        revocationChecker.setOcspResponder(new URI(responderURL));
-                    }
-                    final Object softFail = getOrDefault(settings, "org.eclipse.kura.revocation.soft.fail", false);
-                    if (softFail instanceof Boolean && (boolean) softFail) {
-                        revocationChecker.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL,
-                                PKIXRevocationChecker.Option.NO_FALLBACK));
-                    }
-
-                    pbParams.addCertPathChecker(revocationChecker);
-                }
-
-                if (getPkixCertPathChecker() != null) {
-                    pbParams.addCertPathChecker(getPkixCertPathChecker());
-                }
-
-                if (crls != null && !crls.isEmpty()) {
-                    pbParams.addCertStore(CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls)));
-                }
-
-                if (isEnableCRLDP()) {
-                    // Enable Certificate Revocation List Distribution Points (CRLDP) support
-                    System.setProperty("com.sun.security.enableCRLDP", "true");
-                }
-
-                return pbParams;
-            }
-        };
+    private Optional<ServerConnector> createSslConnector(final Server server, final Dictionary<String, ?> settings,
+            final int port, final boolean enableClientAuth) {
 
         final Optional<String> keyStorePath = getOptional(settings, JettyConstants.SSL_KEYSTORE, String.class);
         final Optional<String> keyStorePassword = getOptional(settings, JettyConstants.SSL_PASSWORD, String.class);
 
-        if (!(keyStorePath.isPresent() || !keyStorePassword.isPresent())) {
+        if (!(keyStorePath.isPresent() && keyStorePassword.isPresent())) {
             return Optional.empty();
         }
 
-        final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled", true);
+        final SslContextFactory.Server sslContextFactory;
+
+        if (enableClientAuth) {
+            sslContextFactory = new ClientAuthSslContextFactoryImpl(settings);
+        } else {
+            sslContextFactory = new SslContextFactory.Server();
+        }
 
         sslContextFactory.setKeyStorePath(keyStorePath.get());
         sslContextFactory.setKeyStorePassword(keyStorePassword.get());
@@ -165,38 +152,22 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         sslContextFactory.setProtocol("TLS");
         sslContextFactory.setTrustManagerFactoryAlgorithm("PKIX");
 
-        sslContextFactory.setWantClientAuth(true);
-        sslContextFactory.setNeedClientAuth(true);
-
-        sslContextFactory.setEnableOCSP(isRevocationEnabled);
-        sslContextFactory.setValidatePeerCerts(isRevocationEnabled);
-
-        if (isRevocationEnabled) {
-            getOptional(settings, "org.eclipse.kura.revocation.ocsp.uri", String.class)
-                    .ifPresent(sslContextFactory::setOcspResponderURL);
-            getOptional(settings, "org.eclipse.kura.revocation.crl.path", String.class)
-                    .ifPresent(sslContextFactory::setCrlPath);
-        }
+        sslContextFactory.setWantClientAuth(enableClientAuth);
+        sslContextFactory.setNeedClientAuth(enableClientAuth);
 
         final HttpConfiguration httpsConfig = new HttpConfiguration();
         httpsConfig.addCustomizer(new SecureRequestCustomizer());
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
-        connector.setPort(getOrDefault(settings, "kura.https.client.auth.port", 4443));
+        connector.setPort(port);
 
         return Optional.of(connector);
     }
 
-    private void customizeConnector(Object connector) {
-        if (!(connector instanceof ServerConnector)) {
-            return;
-        }
-
-        final ServerConnector serverConnector = (ServerConnector) connector;
-
+    private void customizeConnector(final ServerConnector serverConnector, final int port) {
+        serverConnector.setPort(port);
         addCustomizer(serverConnector, new ForwardedRequestCustomizer());
-
     }
 
     private void addCustomizer(final ServerConnector connector, final Customizer customizer) {
@@ -240,6 +211,69 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         }
 
         return Optional.empty();
+    }
+
+    private static final class ClientAuthSslContextFactoryImpl extends SslContextFactory.Server {
+
+        private final Dictionary<String, ?> settings;
+
+        private ClientAuthSslContextFactoryImpl(Dictionary<String, ?> settings) {
+            this.settings = settings;
+
+            final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled",
+                    true);
+
+            setEnableOCSP(isRevocationEnabled);
+            setValidatePeerCerts(isRevocationEnabled);
+
+            if (isRevocationEnabled) {
+                getOptional(settings, "org.eclipse.kura.revocation.ocsp.uri", String.class)
+                        .ifPresent(this::setOcspResponderURL);
+                getOptional(settings, "org.eclipse.kura.revocation.crl.path", String.class).ifPresent(this::setCrlPath);
+            }
+        }
+
+        @Override
+        protected PKIXBuilderParameters newPKIXBuilderParameters(KeyStore trustStore,
+                Collection<? extends java.security.cert.CRL> crls) throws Exception {
+            PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
+
+            pbParams.setMaxPathLength(getMaxCertPathLength());
+            pbParams.setRevocationEnabled(false);
+
+            if (isEnableOCSP()) {
+
+                final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator
+                        .getInstance("PKIX").getRevocationChecker();
+
+                final String responderURL = getOcspResponderURL();
+                if (responderURL != null) {
+                    revocationChecker.setOcspResponder(new URI(responderURL));
+                }
+                final Object softFail = getOrDefault(settings, "org.eclipse.kura.revocation.soft.fail", false);
+                if (softFail instanceof Boolean && (boolean) softFail) {
+                    revocationChecker.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL,
+                            PKIXRevocationChecker.Option.NO_FALLBACK));
+                }
+
+                pbParams.addCertPathChecker(revocationChecker);
+            }
+
+            if (getPkixCertPathChecker() != null) {
+                pbParams.addCertPathChecker(getPkixCertPathChecker());
+            }
+
+            if (crls != null && !crls.isEmpty()) {
+                pbParams.addCertStore(CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls)));
+            }
+
+            if (isEnableCRLDP()) {
+                // Enable Certificate Revocation List Distribution Points (CRLDP) support
+                System.setProperty("com.sun.security.enableCRLDP", "true");
+            }
+
+            return pbParams;
+        }
     }
 
 }

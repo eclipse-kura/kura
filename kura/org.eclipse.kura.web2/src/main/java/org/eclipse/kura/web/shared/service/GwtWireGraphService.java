@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.kura.web.shared.service;
 
 import java.util.List;
 
+import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
@@ -60,6 +61,7 @@ public interface GwtWireGraphService extends RemoteService {
      */
     public GwtWireGraphConfiguration getWiresConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
+    @Audit(componentName = "UI Wires", description = "Update Wire Graph configuration")
     public void updateWireConfiguration(GwtXSRFToken xsrfToken, GwtWireGraphConfiguration configurations,
             List<GwtConfigComponent> additionalConfigs) throws GwtKuraException;
 

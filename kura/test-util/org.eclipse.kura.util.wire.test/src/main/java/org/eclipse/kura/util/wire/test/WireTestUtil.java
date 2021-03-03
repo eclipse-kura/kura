@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
@@ -34,6 +35,7 @@ import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.wireadmin.Wire;
@@ -88,6 +90,39 @@ public final class WireTestUtil {
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
+            final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
+
+        final CompletableFuture<Void> result = new CompletableFuture<Void>();
+        final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+
+        final ServiceTracker<?, ?> tracker = new ServiceTracker<Object, Object>(context,
+                FrameworkUtil.createFilter("(kura.service.pid=" + pid + ")"),
+                new ServiceTrackerCustomizer<Object, Object>() {
+
+                    @Override
+                    public Object addingService(ServiceReference<Object> reference) {
+                        return context.getService(reference);
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<Object> reference, Object service) {
+                        result.complete(null);
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<Object> reference, Object service) {
+                        context.ungetService(reference);
+                    }
+                });
+
+        tracker.open();
+
+        configurationService.updateConfiguration(pid, properties);
+
+        return result.whenComplete((ok, ex) -> tracker.close());
     }
 
     public static <T> CompletableFuture<T> createFactoryConfiguration(final ConfigurationService configurationService,

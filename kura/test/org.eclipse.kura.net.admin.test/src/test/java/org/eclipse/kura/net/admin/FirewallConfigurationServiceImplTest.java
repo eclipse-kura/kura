@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -47,9 +48,9 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
-
 
 public class FirewallConfigurationServiceImplTest {
 
@@ -66,6 +67,8 @@ public class FirewallConfigurationServiceImplTest {
         };
 
         ComponentContext componentContext = mock(ComponentContext.class);
+        BundleContext bundleContext = mock(BundleContext.class);
+        when(componentContext.getBundleContext()).thenReturn(bundleContext);
 
         Map<String, Object> properties = null;
 
@@ -85,6 +88,8 @@ public class FirewallConfigurationServiceImplTest {
         };
 
         ComponentContext componentContext = mock(ComponentContext.class);
+        BundleContext bundleContext = mock(BundleContext.class);
+        when(componentContext.getBundleContext()).thenReturn(bundleContext);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("key", "value");

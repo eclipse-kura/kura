@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,9 +15,14 @@ package org.eclipse.kura.web.server.util;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
@@ -32,7 +37,11 @@ import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
 
 /**
  * The Class GwtServerUtil is an utility class required for Kura Server
@@ -455,4 +464,57 @@ public final class GwtServerUtil {
         return toGwtConfigComponent(descriptor.getPid(), channelDescriptor);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> Set<T> getArrayProperty(final Object raw, final Class<T> elementValue) {
+        if (!(raw instanceof Object[])) {
+            return Collections.emptySet();
+        }
+
+        final Object[] asArray = (Object[]) raw;
+
+        final Set<T> result = new HashSet<>();
+
+        for (final Object o : asArray) {
+            if (elementValue.isInstance(o)) {
+                result.add((T) o);
+            }
+        }
+
+        return result;
+    }
+
+    public static boolean isFactoryOfAnyService(final String factoryPid, final Class<?>... interfaces) {
+
+        try {
+            return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
+                    scr -> scr.getComponentDescriptionDTOs().stream().anyMatch(c -> {
+                        if (!Objects.equals(factoryPid, c.name) || c.serviceInterfaces == null) {
+                            return false;
+                        }
+
+                        for (final Class<?> intf : interfaces) {
+                            if (Arrays.stream(c.serviceInterfaces).anyMatch(i -> i.equals(intf.getName()))) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }));
+        } catch (final Exception e) {
+            return false;
+        }
+
+    }
+
+    public static boolean providesService(final String kuraServicePid, final Class<?> serviceInterface) {
+        final BundleContext context = FrameworkUtil.getBundle(GwtServerUtil.class).getBundleContext();
+
+        final String filter = "(kura.service.pid=" + kuraServicePid + ")";
+
+        try {
+            return !context.getServiceReferences(serviceInterface, filter).isEmpty();
+        } catch (InvalidSyntaxException e) {
+            return false;
+        }
+    }
 }

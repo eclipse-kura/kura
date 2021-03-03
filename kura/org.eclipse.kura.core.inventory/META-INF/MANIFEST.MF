@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.core.inventory
+Bundle-SymbolicName: org.eclipse.kura.core.inventory;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Service-Component: OSGI-INF/*.xml
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Import-Package: org.apache.commons.io;version="1.4.9999",
+ org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.request;version="[1.0,1.1)",
+ org.eclipse.kura.configuration;version="[1.1,2.0)",
+ org.eclipse.kura.marshalling;version="[1.0,2.0)",
+ org.eclipse.kura.message;version="[1.0,2.0)",
+ org.eclipse.kura.system;version="[1.5,2.0)",
+ org.eclipse.kura.util.service;version="[1.0,2.0)",
+ org.osgi.framework;version="1.5.0",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.service.deploymentadmin;version="1.0.0",
+ org.slf4j;version="1.6.4"
+Export-Package: org.eclipse.kura.core.inventory;version="1.0.0",
+ org.eclipse.kura.core.inventory.resources;version="1.0.0"

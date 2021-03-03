@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -50,6 +50,13 @@ public class FirewallTestUtils {
     protected static Command commandFlushOutputNat;
     protected static Command commandFlushPreroutingNat;
     protected static Command commandFlushPostroutingNat;
+    protected static Command commandFlushPreroutingMangle;
+    protected static Command commandFlushPostroutingMangle;
+    protected static Command commandFlushInputMangle;
+    protected static Command commandFlushOutputMangle;
+    protected static Command commandFlushForwardMangle;
+    protected static Command commandIcmpAccept1;
+    protected static Command commandIcmpAccept2;
     protected static List<Command> commandApplyList;
     protected static List<Command> testCommandList;
 
@@ -88,6 +95,33 @@ public class FirewallTestUtils {
         commandFlushPostroutingNat = new Command(new String[] { "iptables", "-F", "postrouting-kura", "-t", "nat" });
         commandFlushPostroutingNat.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandFlushPostroutingNat)).thenReturn(successStatus);
+        commandFlushPreroutingMangle = new Command(
+                new String[] { "iptables", "-F", "prerouting-kura", "-t", "mangle" });
+        commandFlushPreroutingMangle.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushPreroutingMangle)).thenReturn(successStatus);
+        commandFlushPostroutingMangle = new Command(
+                new String[] { "iptables", "-F", "postrouting-kura", "-t", "mangle" });
+        commandFlushPostroutingMangle.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushPostroutingMangle)).thenReturn(successStatus);
+        commandFlushInputMangle = new Command(new String[] { "iptables", "-F", "input-kura", "-t", "mangle" });
+        commandFlushInputMangle.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushInputMangle)).thenReturn(successStatus);
+        commandFlushOutputMangle = new Command(new String[] { "iptables", "-F", "output-kura", "-t", "mangle" });
+        commandFlushOutputMangle.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushOutputMangle)).thenReturn(successStatus);
+        commandFlushForwardMangle = new Command(new String[] { "iptables", "-F", "forward-kura", "-t", "mangle" });
+        commandFlushForwardMangle.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushForwardMangle)).thenReturn(successStatus);
+        commandIcmpAccept1 = new Command(
+                "iptables -A input-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT -t filter"
+                        .split(" "));
+        commandIcmpAccept1.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandIcmpAccept1)).thenReturn(successStatus);
+        commandIcmpAccept2 = new Command(
+                "iptables -A output-kura -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j ACCEPT -t filter"
+                        .split(" "));
+        commandIcmpAccept2.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandIcmpAccept2)).thenReturn(successStatus);
         commandApplyList = new ArrayList<>();
         commandApplyList.add(new Command("iptables -P INPUT DROP".split(" ")));
         commandApplyList.add(new Command("iptables -P FORWARD DROP".split(" ")));
@@ -112,6 +146,11 @@ public class FirewallTestUtils {
         commandApplyList.add(new Command("iptables -A output-kura -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A prerouting-kura -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A postrouting-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A input-kura -j RETURN -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -A output-kura -j RETURN -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -A forward-kura -j RETURN -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -A prerouting-kura -j RETURN -t mangle".split(" ")));
+        commandApplyList.add(new Command("iptables -A postrouting-kura -j RETURN -t mangle".split(" ")));
         commandApplyList.add(new Command("iptables -A input-kura -i lo -j ACCEPT -t filter".split(" ")));
         commandApplyList.add(new Command(
                 "iptables -A input-kura -m state --state RELATED,ESTABLISHED -j ACCEPT -t filter".split(" ")));
@@ -121,6 +160,41 @@ public class FirewallTestUtils {
         commandApplyList.add(new Command(
                 "iptables -A output-kura -p icmp -m icmp --icmp-type 0 -m state --state RELATED,ESTABLISHED -j DROP -t filter"
                         .split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -m conntrack --ctstate INVALID -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP"
+                        .split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP".split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP".split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP".split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP".split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP".split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP".split(" ")));
+        commandApplyList.add(
+                new Command("iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP".split(" ")));
+        commandApplyList.add(new Command(
+                "iptables -t mangle -A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -t mangle -A prerouting-kura -p icmp -j DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -t mangle -A prerouting-kura -f -j DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -t filter -A input-kura -p tcp -f -j DROP".split(" ")));
+        commandApplyList.add(new Command("iptables -t nat -A prerouting-kura -p tcp -f -j DROP".split(" ")));
         commandApplyList.stream().forEach(c -> c.setExecuteInAShell(true));
         commandApplyList.stream().forEach(c -> when(executorServiceMock.execute(c)).thenReturn(successStatus));
 

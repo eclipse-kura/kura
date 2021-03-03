@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.concurrent.CountDownLatch;
@@ -23,11 +29,10 @@ import org.eclipse.kura.core.deployment.CloudDeploymentHandlerV2;
 import org.eclipse.kura.core.deployment.DeploymentPackageOptions;
 import org.eclipse.kura.core.deployment.download.DeploymentPackageDownloadOptions;
 import org.eclipse.kura.core.deployment.install.DeploymentPackageInstallOptions;
-import org.eclipse.kura.core.deployment.xml.XmlBundle;
-import org.eclipse.kura.core.deployment.xml.XmlBundleInfo;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackage;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.core.test.util.CoreTestXmlUtil;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -170,14 +175,13 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
         String s = new String(resp.getBody());
 
-        // XmlDeploymentPackages xmlPackages = XmlUtil.unmarshal(s, XmlDeploymentPackages.class);
-        XmlDeploymentPackages xmlPackages = CoreTestXmlUtil.unmarshal(s, XmlDeploymentPackages.class);
+        SystemDeploymentPackages xmlPackages = CoreTestXmlUtil.unmarshal(s, SystemDeploymentPackages.class);
 
-        XmlDeploymentPackage[] packages = xmlPackages.getDeploymentPackages();
+        SystemDeploymentPackage[] packages = xmlPackages.getDeploymentPackages();
 
-        XmlDeploymentPackage xmlDp = null;
+        SystemDeploymentPackage xmlDp = null;
         if (packages != null) {
-            for (XmlDeploymentPackage package1 : packages) {
+            for (SystemDeploymentPackage package1 : packages) {
                 if (package1.getName().equals(LOCAL_DP_NAME)) {
                     xmlDp = package1;
                     break;
@@ -187,7 +191,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
         assertNotNull(xmlDp);
         assertEquals(LOCAL_DP_VERSION, xmlDp.getVersion());
-        XmlBundleInfo[] bundleInfos = xmlDp.getBundleInfos();
+        SystemBundle[] bundleInfos = xmlDp.getBundleInfos();
         assertEquals(1, bundleInfos.length);
         assertEquals(LOCAL_BUNDLE_NAME, bundleInfos[0].getName());
         assertEquals(LOCAL_BUNDLE_VERSION, bundleInfos[0].getVersion());
@@ -214,14 +218,13 @@ public class CloudDeploymentHandlerTest extends TestCase {
 
         String s = new String(resp.getBody());
 
-        // XmlBundles xmlBundles = XmlUtil.unmarshal(s, XmlBundles.class);
-        XmlBundles xmlBundles = CoreTestXmlUtil.unmarshal(s, XmlBundles.class);
+        SystemBundles xmlBundles = CoreTestXmlUtil.unmarshal(s, SystemBundles.class);
 
-        XmlBundle[] bundles = xmlBundles.getBundles();
+        SystemBundle[] bundles = xmlBundles.getBundles();
 
-        XmlBundle bundle = null;
+        SystemBundle bundle = null;
         if (bundles != null) {
-            for (XmlBundle bundle2 : bundles) {
+            for (SystemBundle bundle2 : bundles) {
                 s_logger.warn("Bundle name: " + bundle2.getName());
                 if (bundle2.getName().equals(LOCAL_BUNDLE_NAME)) {
                     bundle = bundle2;

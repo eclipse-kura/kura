@@ -10,7 +10,6 @@
  * Contributors:
  *  Sterwen-Technology
  ******************************************************************************/
-
 package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;

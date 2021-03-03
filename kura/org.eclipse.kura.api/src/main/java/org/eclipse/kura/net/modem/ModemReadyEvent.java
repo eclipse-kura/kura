@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,8 +30,16 @@ public class ModemReadyEvent extends Event {
     public static final String IMSI = "IMSI";
     public static final String ICCID = "ICCID";
     public static final String RSSI = "RSSI";
+    /**
+     * @since 2.2
+     */
+    public static final String FW_VERSION = "FW_VER";
+    /**
+     * @since 2.2
+     */
+    public static final String MODEM_DEVICE = "MODEM_DEVICE";
 
-    public ModemReadyEvent(Map<String, String> properties) {
+    public ModemReadyEvent(Map<String, Object> properties) {
         super(MODEM_EVENT_READY_TOPIC, properties);
     }
 }

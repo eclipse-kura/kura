@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
@@ -182,7 +181,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         } else {
             logger.error(
                     "Unsupported security type: {}. It must be WifiSecurity.NONE, WifiSecurity.SECURITY_NONE, "
-                    + "WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2",
+                            + "WifiSecurity.SECURITY_WEP, WifiSecurity.SECURITY_WPA, or WifiSecurity.SECURITY_WPA2",
                     wifiConfig.getSecurity());
             throw KuraException.internalError("unsupported security type: " + wifiConfig.getSecurity());
         }
@@ -399,19 +398,15 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         return new File(HOSTAPD_TMP_CONFIG_FILE);
     }
 
-    private void moveFile(String ifaceName) throws KuraException, IOException {
+    private void moveFile(String ifaceName) throws KuraException {
         File tmpFile = getTemporaryFile();
         File file = getFinalFile(ifaceName);
-        if (!FileUtils.contentEquals(tmpFile, file)) {
-            if (tmpFile.renameTo(file)) {
-                logger.trace("Successfully wrote hostapd.conf file");
-            } else {
-                logger.error("Failed to write hostapd.conf file");
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                        "error while building up new configuration file for hostapd");
-            }
+        if (tmpFile.renameTo(file)) {
+            logger.trace("Successfully wrote hostapd.conf file");
         } else {
-            logger.info("Not rewriting hostapd.conf file because it is the same");
+            logger.error("Failed to write hostapd.conf file");
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+                    "error while building up new configuration file for hostapd");
         }
     }
 

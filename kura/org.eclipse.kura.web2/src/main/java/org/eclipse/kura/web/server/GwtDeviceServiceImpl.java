@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,16 +23,14 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.system.SystemAdminService;
+import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -56,14 +54,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     private static final Logger logger = LoggerFactory.getLogger(GwtDeviceServiceImpl.class);
 
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
-
     private static final String UNKNOWN = "UNKNOWN";
 
     private static final long serialVersionUID = -4176701819112753800L;
 
     @Override
-    public ArrayList<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
@@ -114,10 +110,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             pairs.add(new GwtGroupedNVPair(DEV_JAVA, "devRamFree",
                     String.valueOf(systemService.getFreeMemory()) + " kB"));
         } catch (Exception e) {
-            final HttpServletRequest request = getThreadLocalRequest();
-            final HttpSession session = request.getSession(false);
-            auditLogger.warn("UI Device - Failure - Failed to list device info for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
         return new ArrayList<>(pairs);
@@ -235,8 +227,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     @Override
     public void startBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Bundle[] bundles = systemService.getBundles();
@@ -246,32 +236,21 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             if (b.getBundleId() == Long.parseLong(bundleId)) {
                 try {
                     b.start();
-                    auditLogger.info(
-                            "UI Device - Success - Successfully started bundle for user: {}, session: {}, bundle: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), bundleId);
                     return;
                 } catch (BundleException e) {
                     logger.error("Failed to start bundle {}", b.getBundleId(), e);
-                    auditLogger.warn(
-                            "UI Device - Failure - Failed to start bundle for user: {}, session: {}, bundle: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), bundleId);
                     throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                 }
             }
         }
         // Bundle was not found, throw error
         logger.error("Could not find bundle with ID: {}", bundleId);
-        auditLogger.warn("UI Device - Failure - Failed to start bundle for user: {}, session: {}, bundle: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), bundleId);
         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
     }
 
     @Override
     public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
 
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Bundle[] bundles = systemService.getBundles();
@@ -281,15 +260,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             if (b.getBundleId() == Long.parseLong(bundleId)) {
                 try {
                     b.stop();
-                    auditLogger.info(
-                            "UI Device - Success - Successfully stopped bundle for user: {}, session: {}, bundle: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), bundleId);
                     return;
                 } catch (BundleException e) {
                     logger.error("Failed to stop bundle {}", b.getBundleId(), e);
-                    auditLogger.warn(
-                            "UI Device - Failure - Failed to stop bundle for user: {}, session: {}, bundle: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), bundleId);
                     throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                 }
             }
@@ -297,8 +270,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         // Bundle was not found, throw error
         logger.error("Could not find bundle with ID: {}", bundleId);
-        auditLogger.warn("UI Device - Failure - Failed to stop bundle for user: {}, session: {}, bundle: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), bundleId);
         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
 
     }
@@ -307,16 +278,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public String executeCommand(GwtXSRFToken xsrfToken, String cmd, String pwd) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
         PasswordCommandService commandService = ServiceLocator.getInstance().getService(PasswordCommandService.class);
         try {
-            String result = commandService.execute(cmd, pwd);
-            auditLogger.info(
-                    "UI Device - Success - Successfully executed command for user: {}, session: {}, command: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), cmd);
-            return result;
+            return commandService.execute(cmd, pwd);
         } catch (KuraException e) {
             GwtKuraException gwtKuraException = null;
             if (e.getCode() == KuraErrorCode.OPERATION_NOT_SUPPORTED) {
@@ -327,11 +291,32 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
             }
 
-            auditLogger.warn("UI Device - Failure - Failed to execute command for user: {}, session: {}, command: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), cmd);
-
             throw gwtKuraException;
         }
+    }
+
+    @Override
+    public ArrayList<GwtGroupedNVPair> findSystemPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
+
+        SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+        List<SystemResourceInfo> packages = null;
+        try {
+            packages = systemService.getSystemPackages();
+        } catch (KuraProcessExecutionErrorException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE, e);
+        }
+        if (packages != null) {
+            packages.stream().forEach(p -> {
+                GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                pair.setName(p.getName());
+                pair.setVersion(p.getVersion());
+                pair.setType(p.getTypeString());
+                pairs.add(pair);
+            });
+        }
+        return new ArrayList<>(pairs);
     }
 
     // ----------------------------------------------------------------

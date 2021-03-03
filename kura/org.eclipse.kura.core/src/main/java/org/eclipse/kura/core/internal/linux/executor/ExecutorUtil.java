@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -19,6 +19,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -266,7 +268,10 @@ public class ExecutorUtil {
         executor.setStreamHandler(handler);
 
         String directory = command.getDirectory();
-        File workingDir = directory == null || directory.isEmpty() ? TEMP_DIR : new File(directory);
+
+        File workingDir = directory == null || directory.isEmpty() || !Files.isDirectory(Paths.get(directory))
+                ? TEMP_DIR
+                : new File(directory);
         executor.setWorkingDirectory(workingDir);
         return executor;
     }

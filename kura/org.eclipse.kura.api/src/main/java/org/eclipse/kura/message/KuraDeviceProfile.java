@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,6 +32,10 @@ public class KuraDeviceProfile {
     public static final String AVAILABLE_PROCESSORS_KEY = "available_processors";
     public static final String TOTAL_MEMORY_KEY = "total_memory";
     public static final String FIRMWARE_VERSION_KEY = "firmware_version";
+    /**
+     * @since 2.2
+     */
+    public static final String CPU_VERSION_KEY = "cpu_version";
     public static final String BIOS_VERSION_KEY = "bios_version";
     public static final String OS_KEY = "os";
     public static final String OS_VERSION_KEY = "os_version";
@@ -59,6 +63,7 @@ public class KuraDeviceProfile {
     private String totalMemory;
     private String firmwareVersion;
     private String biosVersion;
+    private String cpuVersion;
     private String os;
     private String osVersion;
     private String osArch;
@@ -152,6 +157,16 @@ public class KuraDeviceProfile {
      */
     public String getBiosVersion() {
         return this.biosVersion;
+    }
+
+    /**
+     * Returns the CPU version information.
+     * 
+     * @since 2.2
+     * @return A string representing the CPU version information.
+     */
+    public String getCpuVersion() {
+        return this.cpuVersion;
     }
 
     /**
@@ -351,6 +366,17 @@ public class KuraDeviceProfile {
      */
     public void setBiosVersion(String biosVersion) {
         this.biosVersion = biosVersion;
+    }
+
+    /**
+     * Sets the CPU version information
+     * 
+     * @since 2.2
+     * @param cpuVersion
+     *            the CPU version information
+     */
+    public void setCpuVersion(String cpuVersion) {
+        this.cpuVersion = cpuVersion;
     }
 
     /**

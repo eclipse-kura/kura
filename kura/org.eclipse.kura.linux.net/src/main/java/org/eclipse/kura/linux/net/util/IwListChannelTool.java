@@ -10,7 +10,6 @@
  * Contributors:
  *  Sterwen-Technology
  ******************************************************************************/
-
 package org.eclipse.kura.linux.net.util;
 
 import java.io.ByteArrayOutputStream;
@@ -70,7 +69,6 @@ public class IwListChannelTool {
 
     private static void getWifiChannelsParse(List<WifiChannel> channels, String commandOutput) {
         for (String line : commandOutput.split("\n")) {
-            // Remove all whitespace
             logger.debug(line);
             Matcher m = channelPattern.matcher(line);
             if (m.matches()) {
@@ -98,7 +96,6 @@ public class IwListChannelTool {
            logger.warn("error executing command --- iw reg get --- exit value = {}", exitValue);
            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
-
         String commandOutput = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());
         String[] line = commandOutput.split("\n");
         logger.info("Get Wifi Country Code Output = " + line[0]);

@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -126,7 +126,7 @@
         </b:Panel>
 
 
-        <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
+        <b:Modal closable="true" fade="true" dataBackdrop="STATIC"
              dataKeyboard="true" ui:field="uploadErrorModal" b:id="uploadErrorModal">
             <b:ModalBody>
                 <b:Panel>

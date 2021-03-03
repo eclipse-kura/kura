@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -46,6 +46,8 @@ public class DevicePanelUi extends Composite {
     @UiField
     TabListItem threads;
     @UiField
+    TabListItem packages;
+    @UiField
     TabListItem systemProperties;
 
     @UiField
@@ -54,6 +56,8 @@ public class DevicePanelUi extends Composite {
     BundlesTabUi bundlesPanel;
     @UiField
     ThreadsTabUi threadsPanel;
+    @UiField
+    SystemPackagesTabUi packagesPanel;
     @UiField
     SystemPropertiesTabUi systemPropertiesPanel;
     @UiField
@@ -68,6 +72,7 @@ public class DevicePanelUi extends Composite {
         this.profile.addClickHandler(new Tab.RefreshHandler(this.profilePanel));
         this.bundles.addClickHandler(new Tab.RefreshHandler(this.bundlesPanel));
         this.threads.addClickHandler(new Tab.RefreshHandler(this.threadsPanel));
+        this.packages.addClickHandler(new Tab.RefreshHandler(this.packagesPanel));
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
     }
 

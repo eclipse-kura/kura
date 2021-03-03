@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements GwtSessionService {
 
     private static final Logger logger = LoggerFactory.getLogger(GwtSessionServiceImpl.class);
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private final UserManager userManager;
 
@@ -60,7 +59,6 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             session.invalidate();
 
             logger.info("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
-            auditLogger.info("UI Logout - Success - Logout succeeded for user: {}, session {}", username, id);
 
             Cookie[] cookies = request.getCookies();
             for (Cookie cookie : cookies) {

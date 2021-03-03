@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,6 +44,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraConnectException;
@@ -81,6 +84,8 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.ServiceReference;
@@ -149,6 +154,9 @@ public class CloudServiceImpl
 
     private ServiceRegistration<?> notificationPublisherRegistration;
     private final CloudNotificationPublisher notificationPublisher;
+
+    private AtomicReference<Optional<TamperDetectionService>> tamperDetectionService = new AtomicReference<>(
+            Optional.empty());
 
     private String ownPid;
 
@@ -253,6 +261,20 @@ public class CloudServiceImpl
         this.jsonMarshaller = null;
     }
 
+    public void setTamperDetectionService(final TamperDetectionService tamperDetectionService) {
+        synchronized (this.tamperDetectionService) {
+            this.tamperDetectionService.set(Optional.of(tamperDetectionService));
+        }
+    }
+
+    public void unsetTamperDetectionService(final TamperDetectionService tamperDetectionService) {
+        synchronized (this.tamperDetectionService) {
+            if (this.tamperDetectionService.get().equals(Optional.of(tamperDetectionService))) {
+                this.tamperDetectionService.set(Optional.empty());
+            }
+        }
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -271,7 +293,7 @@ public class CloudServiceImpl
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
-                ModemReadyEvent.MODEM_EVENT_READY_TOPIC };
+                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
         this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
                 props);
@@ -383,6 +405,13 @@ public class CloudServiceImpl
                         logger.warn("Cannot publish birth certificate", e);
                     }
                 }
+            }
+        } else if (TamperEvent.TAMPER_EVENT_TOPIC.equals(event.getTopic()) && this.dataService.isConnected()
+                && this.options.getRepubBirthCertOnTamperEvent()) {
+            try {
+                publishBirthCertificate();
+            } catch (KuraException e) {
+                logger.warn("Cannot publish birth certificate", e);
             }
         }
     }
@@ -1115,4 +1144,11 @@ public class CloudServiceImpl
     String getOwnPid() {
         return ownPid;
     }
+
+    void withTamperDetectionService(final Consumer<TamperDetectionService> consumer) {
+        synchronized (this.tamperDetectionService) {
+            this.tamperDetectionService.get().ifPresent(consumer);
+        }
+    }
+
 }

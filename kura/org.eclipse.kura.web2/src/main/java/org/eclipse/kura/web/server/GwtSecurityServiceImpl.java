@@ -15,8 +15,11 @@ package org.eclipse.kura.web.server;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.security.SecurityService;
 import org.eclipse.kura.security.ThreatManagerService;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.eclipse.kura.security.tamper.detection.TamperStatus;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtTamperStatus;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 
@@ -95,5 +98,39 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
             return false;
         }
         return false;
+    }
+
+    @Override
+    public boolean isTamperDetectionAvailable() {
+        try {
+            return ServiceLocator.getInstance().getService(TamperDetectionService.class) != null;
+        } catch (GwtKuraException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public GwtTamperStatus getTamperStatus(final GwtXSRFToken token) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        try {
+            final TamperStatus tamperStatus = ServiceLocator.getInstance().getService(TamperDetectionService.class)
+                    .getTamperStatus();
+
+            return new GwtTamperStatus(tamperStatus.isDeviceTampered(), tamperStatus.getProperties());
+        } catch (KuraException e) {
+            throw new GwtKuraException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void resetTamperStatus(final GwtXSRFToken token) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        try {
+            ServiceLocator.getInstance().getService(TamperDetectionService.class).resetTamperStatus();
+        } catch (KuraException e) {
+            throw new GwtKuraException(e.getMessage());
+        }
     }
 }

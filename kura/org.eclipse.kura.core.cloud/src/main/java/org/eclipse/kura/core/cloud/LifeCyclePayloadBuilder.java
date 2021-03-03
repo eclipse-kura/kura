@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
+import org.eclipse.kura.message.KuraBirthPayload.TamperStatus;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.message.KuraDisconnectPayload;
 import org.eclipse.kura.message.KuraPosition;
@@ -90,6 +91,16 @@ public class LifeCyclePayloadBuilder {
                 .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
                 .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
+
+        this.cloudServiceImpl.withTamperDetectionService(t -> {
+            try {
+                birthPayloadBuilder.withTamperStatus(
+                        t.getTamperStatus().isDeviceTampered() ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
+            } catch (final Exception e) {
+                logger.warn("failed to obtain tamper status", e);
+            }
+
+        });
 
         if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
                 && !this.cloudServiceImpl.imei.equals(ERROR)) {

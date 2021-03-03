@@ -47,6 +47,28 @@ import static org.eclipse.kura.message.KuraDeviceProfile.UPTIME_KEY;
  */
 public class KuraBirthPayload extends KuraPayload {
 
+    /**
+     * Provides information on the device tampering status.
+     * 
+     * @since 2.2
+     */
+    public enum TamperStatus {
+
+        /**
+         * Tamper detection is not supported
+         */
+        UNSUPPORTED,
+        /**
+         * The device has been tampered
+         */
+        TAMPERED,
+        /**
+         * The device has not been tampered
+         */
+        NOT_TAMPERED;
+
+    }
+
     private static final String ACCEPT_ENCODING_KEY = "accept_encoding";
     private static final String APPLICATION_IDS_KEY = "application_ids";
     private static final String MODEM_IMEI_KEY = "modem_imei";
@@ -55,6 +77,10 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String MODEM_RSSI_KEY = "modem_rssi";
     private static final String MODEM_FIRMWARE_VERSION = "modem_firmware_version";
     private static final String PAYLOAD_ENCODING_KEY = "payload_encoding";
+    /**
+     * @since 2.2
+     */
+    private static final String TAMPER_STATUS = "tamper_status";
 
     public String getUptime() {
         return (String) getMetric(UPTIME_KEY);
@@ -113,6 +139,19 @@ public class KuraBirthPayload extends KuraPayload {
 
     public String getJvmProfile() {
         return (String) getMetric(JVM_PROFILE_KEY);
+    }
+
+    /**
+     * @since 2.2
+     */
+    public TamperStatus getTamperStatus() {
+        final String tamperStatus = (String) getMetric(TAMPER_STATUS);
+
+        if (tamperStatus == null) {
+            return TamperStatus.UNSUPPORTED;
+        }
+
+        return TamperStatus.valueOf(tamperStatus);
     }
 
     /**
@@ -233,6 +272,7 @@ public class KuraBirthPayload extends KuraPayload {
         sb.append("getAcceptEncoding()=").append(getAcceptEncoding()).append(", ");
         sb.append("getApplicationIdentifiers()=").append(getApplicationIdentifiers()).append(", ");
         sb.append("getPayloadEncoding()=").append(getPayloadEncoding());
+        sb.append("getTamperStatus()=").append(getTamperStatus());
 
         sb.append("]");
 
@@ -280,6 +320,7 @@ public class KuraBirthPayload extends KuraPayload {
         private String modemRssi;
         private String modemFirmwareVersion;
         private String payloadEncoding;
+        private TamperStatus tamperStatus;
 
         private KuraPosition position;
 
@@ -455,6 +496,11 @@ public class KuraBirthPayload extends KuraPayload {
             return this;
         }
 
+        public KuraBirthPayloadBuilder withTamperStatus(TamperStatus tamperStatus) {
+            this.tamperStatus = tamperStatus;
+            return this;
+        }
+
         public KuraBirthPayload build() {
             KuraBirthPayload birthPayload = new KuraBirthPayload();
 
@@ -496,6 +542,9 @@ public class KuraBirthPayload extends KuraPayload {
             birthPayload.addMetric(MODEM_RSSI_KEY, this.modemRssi);
             birthPayload.addMetric(MODEM_FIRMWARE_VERSION, this.modemFirmwareVersion);
             birthPayload.addMetric(PAYLOAD_ENCODING_KEY, this.payloadEncoding);
+            if (tamperStatus != null && tamperStatus != TamperStatus.UNSUPPORTED) {
+                birthPayload.addMetric(TAMPER_STATUS, tamperStatus.name());
+            }
             birthPayload.setPosition(this.position);
 
             return birthPayload;

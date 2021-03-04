@@ -92,15 +92,7 @@ public class LifeCyclePayloadBuilder {
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
                 .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
 
-        this.cloudServiceImpl.withTamperDetectionService(t -> {
-            try {
-                birthPayloadBuilder.withTamperStatus(
-                        t.getTamperStatus().isDeviceTampered() ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
-            } catch (final Exception e) {
-                logger.warn("failed to obtain tamper status", e);
-            }
-
-        });
+        tryAddTamperStatus(birthPayloadBuilder);
 
         if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
                 && !this.cloudServiceImpl.imei.equals(ERROR)) {
@@ -146,6 +138,17 @@ public class LifeCyclePayloadBuilder {
         }
 
         return result;
+    }
+
+    private void tryAddTamperStatus(KuraBirthPayloadBuilder birthPayloadBuilder) {
+        this.cloudServiceImpl.withTamperDetectionService(t -> {
+            try {
+                birthPayloadBuilder.withTamperStatus(
+                        t.getTamperStatus().isDeviceTampered() ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
+            } catch (final Exception e) {
+                logger.warn("failed to obtain tamper status", e);
+            }
+        });
     }
 
     public KuraDisconnectPayload buildDisconnectPayload() {

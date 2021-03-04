@@ -102,6 +102,8 @@ public class CloudServiceImpl
         implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
 
+    private static final String ERROR = "ERROR";
+
     private static final String NOTIFICATION_PUBLISHER_PID = "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
 
     private static final Logger logger = LoggerFactory.getLogger(CloudServiceImpl.class);
@@ -369,50 +371,58 @@ public class CloudServiceImpl
     @Override
     public void handleEvent(Event event) {
         if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
-            // if we get a position locked event,
-            // republish the birth certificate only if we are configured to
-            logger.info("Handling PositionLockedEvent");
-            if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
-                try {
-                    publishBirthCertificate();
-                } catch (KuraException e) {
-                    logger.warn("Cannot publish birth certificate", e);
-                }
-            }
+            handlePositionLockedEvent();
         } else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
-            logger.info("Handling ModemReadyEvent");
-            ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
-            // keep these identifiers around until we can publish the certificate
-            this.imei = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
-            this.imsi = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
-            this.iccid = (String) modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
-            this.rssi = (String) modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
-            this.modemFwVer = (String) modemReadyEvent.getProperty(ModemReadyEvent.FW_VERSION);
-            logger.trace("handleEvent() :: IMEI={}", this.imei);
-            logger.trace("handleEvent() :: IMSI={}", this.imsi);
-            logger.trace("handleEvent() :: ICCID={}", this.iccid);
-            logger.trace("handleEvent() :: RSSI={}", this.rssi);
-            logger.trace("handleEvent() :: FW_VERSION={}", this.modemFwVer);
-
-            if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection()) {
-                if (!((this.imei == null || this.imei.length() == 0 || this.imei.equals("ERROR"))
-                        && (this.imsi == null || this.imsi.length() == 0 || this.imsi.equals("ERROR"))
-                        && (this.iccid == null || this.iccid.length() == 0 || this.iccid.equals("ERROR")))) {
-                    logger.debug("handleEvent() :: publishing BIRTH certificate ...");
-                    try {
-                        publishBirthCertificate();
-                    } catch (KuraException e) {
-                        logger.warn("Cannot publish birth certificate", e);
-                    }
-                }
-            }
+            handleModemReadyEvent(event);
         } else if (TamperEvent.TAMPER_EVENT_TOPIC.equals(event.getTopic()) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
-            try {
-                publishBirthCertificate();
-            } catch (KuraException e) {
-                logger.warn("Cannot publish birth certificate", e);
-            }
+            tryPublishBirthCertificate();
+        }
+    }
+
+    private void tryPublishBirthCertificate() {
+        try {
+            publishBirthCertificate();
+        } catch (KuraException e) {
+            logger.warn("Cannot publish birth certificate", e);
+        }
+    }
+
+    private void handleModemReadyEvent(Event event) {
+        logger.info("Handling ModemReadyEvent");
+        ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
+        // keep these identifiers around until we can publish the certificate
+        this.imei = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
+        this.imsi = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
+        this.iccid = (String) modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
+        this.rssi = (String) modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
+        this.modemFwVer = (String) modemReadyEvent.getProperty(ModemReadyEvent.FW_VERSION);
+        logger.trace("handleEvent() :: IMEI={}", this.imei);
+        logger.trace("handleEvent() :: IMSI={}", this.imsi);
+        logger.trace("handleEvent() :: ICCID={}", this.iccid);
+        logger.trace("handleEvent() :: RSSI={}", this.rssi);
+        logger.trace("handleEvent() :: FW_VERSION={}", this.modemFwVer);
+
+        if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection() && isModemInfoValid()) {
+            logger.debug("handleEvent() :: publishing BIRTH certificate ...");
+            tryPublishBirthCertificate();
+        }
+    }
+
+    private boolean isModemInfoValid(final String modemInfo) {
+        return !(modemInfo == null || modemInfo.length() == 0 || modemInfo.equals(ERROR));
+    }
+
+    public boolean isModemInfoValid() {
+        return isModemInfoValid(this.imei) && isModemInfoValid(this.imsi) && isModemInfoValid(this.iccid);
+    }
+
+    private void handlePositionLockedEvent() {
+        // if we get a position locked event,
+        // republish the birth certificate only if we are configured to
+        logger.info("Handling PositionLockedEvent");
+        if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
+            tryPublishBirthCertificate();
         }
     }
 

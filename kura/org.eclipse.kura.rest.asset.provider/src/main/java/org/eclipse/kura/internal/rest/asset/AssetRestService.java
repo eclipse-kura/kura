@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- *
+ * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
+ * 
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -38,6 +38,8 @@ import org.eclipse.kura.asset.AssetService;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.type.TypedValue;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -63,6 +65,11 @@ public class AssetRestService {
     private Gson channelSerializer;
 
     private UserAdmin userAdmin;
+    private Thread userAdminUpdateThread = new Thread(() -> {
+        waitUserAdminReady();
+
+        userAdmin.createRole("kura.permission.rest.assets", Role.GROUP);
+    });
 
     protected void setUserAdmin(UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
@@ -73,7 +80,15 @@ public class AssetRestService {
     }
 
     public void activate() {
-        this.userAdmin.createRole("kura.permission.rest.assets", Role.GROUP);
+        this.userAdminUpdateThread.start();
+    }
+
+    public void deactivate() {
+        try {
+            this.userAdminUpdateThread.join(30000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @GET
@@ -131,7 +146,7 @@ public class AssetRestService {
     }
 
     private Asset getAsset(String assetPid) {
-        final Asset asset = this.assetService.getAsset(assetPid);
+        final Asset asset = assetService.getAsset(assetPid);
         if (asset == null) {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).type(MediaType.TEXT_PLAIN)
                     .entity("Asset not found: " + assetPid).build());
@@ -140,8 +155,8 @@ public class AssetRestService {
     }
 
     private Gson getChannelSerializer() {
-        if (this.channelSerializer == null) {
-            this.channelSerializer = new GsonBuilder().registerTypeAdapter(TypedValue.class,
+        if (channelSerializer == null) {
+            channelSerializer = new GsonBuilder().registerTypeAdapter(TypedValue.class,
                     (JsonSerializer<TypedValue<?>>) (typedValue, type, context) -> {
                         final Object value = typedValue.getValue();
                         if (value instanceof Number) {
@@ -156,6 +171,29 @@ public class AssetRestService {
                         return null;
                     }).create();
         }
-        return this.channelSerializer;
+        return channelSerializer;
+    }
+
+    private void waitUserAdminReady() {
+        final BundleContext context = FrameworkUtil.getBundle(AssetRestService.class).getBundleContext();
+
+        while (true) {
+
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
+            final ServiceReference<?> ref = context
+                    .getServiceReference("org.apache.felix.useradmin.RoleRepositoryStore");
+
+            final Bundle[] usingBundles = ref.getUsingBundles();
+
+            if (usingBundles != null && usingBundles.length > 0) {
+                break;
+            }
+
+        }
     }
 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Represents the device tamper status.
  * This includes a boolean flag that indicates if the device has been tampered or not and some properties.
  * The properties indicated in the {@link TamperDetectionProperties} enumeration are well known.
- * 
+ *
  * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -33,7 +33,7 @@ public class TamperStatus {
 
     /**
      * Creates a new {@link TamperStatus} instance.
-     * 
+     *
      * @param isDeviceTampered
      *            the current tamper status.
      * @param properties
@@ -46,20 +46,20 @@ public class TamperStatus {
 
     /**
      * Indicates if the device is tampered or not.
-     * 
+     *
      * @return a <code>boolean</code> indicating if the device is tampered or not
      */
     public boolean isDeviceTampered() {
-        return isDeviceTampered;
+        return this.isDeviceTampered;
     }
 
     /**
      * Returns additional properties describing the tamper status.
-     * 
+     *
      * @return the additional properties, the result is never <code>null</code> but can be empty.
      */
     public Map<String, Object> getProperties() {
-        return properties;
+        return this.properties;
     }
 
 }

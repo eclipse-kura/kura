@@ -496,6 +496,9 @@ public class KuraBirthPayload extends KuraPayload {
             return this;
         }
 
+        /**
+         * @since 2.2
+         */
         public KuraBirthPayloadBuilder withTamperStatus(TamperStatus tamperStatus) {
             this.tamperStatus = tamperStatus;
             return this;

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The tamper status can be reset by calling the {@link TamperDetectionService#resetTamperStatus()} method.
  * This service must also generate {@link TamperEvent} EventAdmin events in particular conditions, see the corresponding
  * Javadoc for more details.
- * 
+ *
  * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
@@ -32,7 +32,7 @@ public interface TamperDetectionService {
 
     /**
      * Returns the current {@link TamperStatus}.
-     * 
+     *
      * @return the current {@link TamperStatus}.
      * @throws KuraException
      *             in case of an implementation failure in determining the tamper status.
@@ -43,7 +43,7 @@ public interface TamperDetectionService {
      * Allows to reset the tamper state. After this method returns, the result of calling
      * {@link TamperDetectionService#getTamperStatus()} should have the tamper flag set to false, until the next tamper
      * event is detected.
-     * 
+     *
      * @throws KuraException
      *             in case of reset implementation failure.
      */

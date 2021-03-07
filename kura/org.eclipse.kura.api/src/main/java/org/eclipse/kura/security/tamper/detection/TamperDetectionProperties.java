@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -16,7 +16,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Defines some well known keys for the properties returned by {@link TamperStatus#getProperties()}.
- * 
+ *
  * @since 2.2
  */
 @ProviderType
@@ -35,6 +35,6 @@ public enum TamperDetectionProperties {
     }
 
     public String getValue() {
-        return value;
+        return this.value;
     }
 }

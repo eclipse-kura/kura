@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -19,6 +19,7 @@ import java.util.Optional;
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
+import org.eclipse.kura.message.KuraBirthPayload.TamperStatus;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.message.KuraDisconnectPayload;
 import org.eclipse.kura.message.KuraPosition;
@@ -91,6 +92,8 @@ public class LifeCyclePayloadBuilder {
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
                 .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
 
+        tryAddTamperStatus(birthPayloadBuilder);
+
         if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
                 && !this.cloudServiceImpl.imei.equals(ERROR)) {
             birthPayloadBuilder.withModemImei(this.cloudServiceImpl.imei);
@@ -135,6 +138,17 @@ public class LifeCyclePayloadBuilder {
         }
 
         return result;
+    }
+
+    private void tryAddTamperStatus(KuraBirthPayloadBuilder birthPayloadBuilder) {
+        this.cloudServiceImpl.withTamperDetectionService(t -> {
+            try {
+                birthPayloadBuilder.withTamperStatus(
+                        t.getTamperStatus().isDeviceTampered() ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
+            } catch (final Exception e) {
+                logger.warn("failed to obtain tamper status", e);
+            }
+        });
     }
 
     public KuraDisconnectPayload buildDisconnectPayload() {

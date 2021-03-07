@@ -643,8 +643,8 @@ public abstract class AbstractServicesUi extends Composite {
             case STRING:
                 TextBoxBase tb = (TextBoxBase) wg;
                 String value = tb.getText();
-                if (value != null) {
-                    return value;
+                if (value != null && !value.trim().isEmpty()) {
+                    return value.trim();
                 } else {
                     return null;
                 }

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,6 +17,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.logging.Logger;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -42,7 +43,6 @@ import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -51,6 +51,7 @@ import org.xml.sax.SAXException;
 public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallUnmarshallImpl.class);
+    private static final String VALUE_CONSTANT = "value";
 
     @Override
     public String marshal(Object object) throws KuraException {
@@ -58,7 +59,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             marshal(object, sw);
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "value");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, VALUE_CONSTANT);
         }
         return sw.toString();
     }
@@ -67,6 +68,8 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             // root elements
@@ -148,6 +151,8 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -177,6 +182,8 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             parser = factory.newDocumentBuilder();
         } catch (FactoryConfigurationError fce) {
             // The implementation is not available or cannot be instantiated
@@ -195,7 +202,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             doc = parser.parse(is);
             doc.getDocumentElement().normalize();
         } catch (SAXException | IOException | IllegalArgumentException se) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value", se);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_CONSTANT, se);
         }
 
         // identify the correct parser that has to execute
@@ -204,7 +211,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
                 // Snapshot parser
                 return new XmlJavaComponentConfigurationsMapper().unmarshal(doc);
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR, "value", e);
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_CONSTANT, e);
             }
         } else if (clazz.equals(MetaData.class) || clazz.equals(Tmetadata.class)) {
             // MetaData parser

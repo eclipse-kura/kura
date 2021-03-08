@@ -154,6 +154,8 @@ public class ServiceComponent implements ConfigurableComponent {
 
             final TransformerFactory factory = TransformerFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 
             final Transformer transformer = factory.newTransformer();
             final StringWriter sw = new StringWriter();

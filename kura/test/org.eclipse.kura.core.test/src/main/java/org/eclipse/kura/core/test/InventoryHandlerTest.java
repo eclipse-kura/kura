@@ -100,7 +100,7 @@ public class InventoryHandlerTest extends TestCase {
     @Test
     public void testGetPackages() throws Exception {
         StringBuilder sb = init();
-        sb.append(InventoryHandlerV1.RESOURCE_PACKAGES);
+        sb.append(InventoryHandlerV1.RESOURCE_DEPLOYMENT_PACKAGES);
 
         KuraResponsePayload resp = cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());

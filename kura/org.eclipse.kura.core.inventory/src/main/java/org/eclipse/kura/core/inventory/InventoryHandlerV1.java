@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
@@ -59,9 +60,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     private static final Logger logger = LoggerFactory.getLogger(InventoryHandlerV1.class);
     public static final String APP_ID = "INVENTORY-V1";
 
-    public static final String RESOURCE_PACKAGES = "packages";
+    public static final String RESOURCE_DEPLOYMENT_PACKAGES = "deploymentPackages";
     public static final String RESOURCE_BUNDLES = "bundles";
-    public static final String RESOURCE_SYSTEM_PACKAGES = "system.packages";
+    public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
     public static final String INVENTORY = "inventory";
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
@@ -158,7 +159,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         KuraPayload resPayload;
         if (resources.get(0).equals(INVENTORY)) {
             resPayload = doGetInventory();
-        } else if (resources.get(0).equals(RESOURCE_PACKAGES)) {
+        } else if (resources.get(0).equals(RESOURCE_DEPLOYMENT_PACKAGES)) {
             resPayload = doGetPackages();
         } else if (resources.get(0).equals(RESOURCE_BUNDLES)) {
             resPayload = doGetBundles();
@@ -207,6 +208,14 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 BundleInfo bi = bis[j];
                 SystemBundle xb = new SystemBundle(bi.getSymbolicName(), bi.getVersion().toString());
 
+                Bundle[] bundles = this.bundleContext.getBundles();
+                Optional<Bundle> bundle = Arrays.asList(bundles).stream()
+                        .filter(b -> b.getSymbolicName().equals(bi.getSymbolicName())).findFirst();
+                if (bundle.isPresent()) {
+                    xb.setId(bundle.get().getBundleId());
+                    xb.setState(bundleStateToString(bundle.get().getState()));
+                }
+
                 axbi[j] = xb;
             }
 
@@ -223,7 +232,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {
-            logger.error("Error getting resource {}: {}", RESOURCE_PACKAGES, e);
+            logger.error("Error getting resource {}: {}", RESOURCE_DEPLOYMENT_PACKAGES, e);
         }
         return respPayload;
     }
@@ -241,35 +250,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             systemBundle.setId(bundle.getBundleId());
 
             int state = bundle.getState();
-
-            switch (state) {
-            case Bundle.UNINSTALLED:
-                systemBundle.setState("UNINSTALLED");
-                break;
-
-            case Bundle.INSTALLED:
-                systemBundle.setState("INSTALLED");
-                break;
-
-            case Bundle.RESOLVED:
-                systemBundle.setState("RESOLVED");
-                break;
-
-            case Bundle.STARTING:
-                systemBundle.setState("STARTING");
-                break;
-
-            case Bundle.STOPPING:
-                systemBundle.setState("STOPPING");
-                break;
-
-            case Bundle.ACTIVE:
-                systemBundle.setState("ACTIVE");
-                break;
-
-            default:
-                systemBundle.setState(String.valueOf(state));
-            }
+            systemBundle.setState(bundleStateToString(state));
 
             axb[i] = systemBundle;
         }
@@ -373,5 +354,40 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             ungetServiceReferences(marshallerSRs);
         }
         return result;
+    }
+
+    private String bundleStateToString(int state) {
+        String stateString;
+
+        switch (state) {
+        case Bundle.UNINSTALLED:
+            stateString = "UNINSTALLED";
+            break;
+
+        case Bundle.INSTALLED:
+            stateString = "INSTALLED";
+            break;
+
+        case Bundle.RESOLVED:
+            stateString = "RESOLVED";
+            break;
+
+        case Bundle.STARTING:
+            stateString = "STARTING";
+            break;
+
+        case Bundle.STOPPING:
+            stateString = "STOPPING";
+            break;
+
+        case Bundle.ACTIVE:
+            stateString = "ACTIVE";
+            break;
+
+        default:
+            stateString = String.valueOf(state);
+        }
+
+        return stateString;
     }
 }

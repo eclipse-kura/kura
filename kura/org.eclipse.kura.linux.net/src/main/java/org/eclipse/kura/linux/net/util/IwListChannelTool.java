@@ -12,13 +12,16 @@
  ******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.Command;
@@ -28,52 +31,47 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.eclipse.kura.net.wifi.WifiChannel;
 
-public class IwListChannelTool {
+public class IwListChannelTool extends IwCapabilityTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwListChannelTool.class);
 
     private IwListChannelTool() {
     }
 
-    static Pattern channelPattern = Pattern.compile(".*Channel ([0-9]+) : (.*) GHz.*");
-    static Pattern countryPattern = Pattern.compile("country (..): .*");
+    private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
+    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(".*\\* ([0-9]+) MHz \\[([0-9]*)\\] \\((.*) dBm\\)$");
 
-    /*
-     * Returns an empty capabilities set if the interface is not found or on error
-     */
     public static List<WifiChannel> probeChannels(String ifaceName, CommandExecutorService executorService)
-        throws KuraException {
-        List<WifiChannel> channels = new ArrayList<>();
+            throws KuraException {
+        try {
+            List<WifiChannel> channels = new ArrayList<>();
 
-        // ignore logical interfaces like "1-1.2"
-        if (Character.isDigit(ifaceName.charAt(0))) {
-           return channels;
+            // ignore logical interfaces like "1-1.2"
+            if (Character.isDigit(ifaceName.charAt(0))) {
+               return channels;
+            }
+            
+            final int phy = parseWiphyIndex(exec(new String[] { "iw", ifaceName, "info" }, executorService))
+                    .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+                            "failed to get phy index for " + ifaceName));
+            parseWifiChannelFrequency(exec(new String[] { "iw", "phy" + String.valueOf(phy), "info" }, executorService), channels);
+            return channels;
+        } catch (final KuraException e) {
+            throw e;
+        } catch (final Exception e) {
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR, e);
         }
-
-        String[] cmd = { "iwlist", ifaceName, "channel" };
-        Command command = new Command(cmd);
-        command.setTimeout(60);
-        command.setOutputStream(new ByteArrayOutputStream());
-        CommandStatus status = executorService.execute(command);
-        int exitValue = status.getExitStatus().getExitCode();
-        if (!status.getExitStatus().isSuccessful()) {
-           logger.warn("error executing command --- iwlist --- exit value = {}", exitValue);
-           throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
-        }
-
-        // get the output
-        getWifiChannelsParse(channels,
-            new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8));
-        return channels;
     }
 
-    private static void getWifiChannelsParse(List<WifiChannel> channels, String commandOutput) {
-        for (String line : commandOutput.split("\n")) {
+    private static void parseWifiChannelFrequency(final InputStream in, List<WifiChannel> channels) {
+        String result = new BufferedReader(new InputStreamReader(in))
+               .lines().collect(Collectors.joining("\n"));
+        for (String line : result.split("\n")) {
             logger.debug(line);
-            Matcher m = channelPattern.matcher(line);
+            Matcher m = FREQUENCY_CHANNEL_PATTERN.matcher(line);
             if (m.matches()) {
-                Integer channel = Integer.valueOf(m.group(1));
-                Float frequency = Float.valueOf(m.group(2));
+                Integer frequency = Integer.valueOf(m.group(1));
+                Integer channel = Integer.valueOf(m.group(2));
                 WifiChannel wc = new WifiChannel(channel, frequency);
                 channels.add(wc);
                 logger.debug(wc.toString());
@@ -97,13 +95,14 @@ public class IwListChannelTool {
            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
         String commandOutput = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());
-        String[] line = commandOutput.split("\n");
-        logger.info("Get Wifi Country Code Output = " + line[0]);
-        Matcher m = countryPattern.matcher(line[0]);
-        if (m.matches()) {
-            String country = m.group(1);
-            logger.info("Country Code = " + country);
-            return country;
+        for (String line:commandOutput.split("\n")) {
+            logger.info("Get Wifi Country Code Output = " + line);
+            Matcher m = COUNTRY_PATTERN.matcher(line);
+            if (m.matches()) {
+                String country = m.group(1);
+                logger.info("Country Code = " + country);
+                return country;
+            }
         }
         return "Unknown";
     }

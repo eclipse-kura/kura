@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,7 +37,9 @@ public enum ForwardedEventTopic {
 
     ROLE_CREATED_SHORT("ROLE_CREATED"),
     ROLE_CHANGED_SHORT("ROLE_CHANGED"),
-    ROLE_REMOVED_SHORT("ROLE_REMOVED");
+    ROLE_REMOVED_SHORT("ROLE_REMOVED"),
+
+    TAMPER_EVENT("org/eclipse/kura/security/tamper/detection/TamperEvent/TAMPER_STATUS_CHANGED");
 
     private final String topic;
 

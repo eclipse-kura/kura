@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -117,12 +117,12 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         logger.info("activating...");
 
         final String kuraServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
-        final ThreadFactory defaultFactory = executorService.getThreadFactory();
+        final ThreadFactory defaultFactory = this.executorService.getThreadFactory();
         final AtomicInteger threadNumber = new AtomicInteger();
 
-        executorService.setThreadFactory(r -> {
+        this.executorService.setThreadFactory(r -> {
             final Thread result = defaultFactory.newThread(() -> {
-                isOnExecutor.set(true);
+                this.isOnExecutor.set(true);
                 r.run();
             });
             result.setName("H2DbService_" + kuraServicePid + "_" + threadNumber.getAndIncrement());
@@ -204,7 +204,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
             syncWithExecutor();
         }
 
-        if (isOnExecutor.get()) {
+        if (this.isOnExecutor.get()) {
             return withConnectionInternal(callable);
         }
 

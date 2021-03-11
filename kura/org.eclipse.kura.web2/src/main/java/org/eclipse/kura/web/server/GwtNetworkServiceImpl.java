@@ -1669,7 +1669,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 logger.debug(freq.toString());
                 GwtWifiHotspotEntry channelFrequency = new GwtWifiHotspotEntry();
                 channelFrequency.setChannel(freq.getChannel());
-                channelFrequency.setFrequency((int)(freq.getFrequency() * 1000));
+                channelFrequency.setFrequency(freq.getFrequency());
                 channels.add(channelFrequency);
             }
             return channels;

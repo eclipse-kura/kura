@@ -42,15 +42,22 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.data.DataTransportToken;
 import org.eclipse.kura.data.transport.listener.DataTransportListener;
+import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.eclipse.kura.security.tamper.detection.TamperEvent;
+import org.eclipse.kura.security.tamper.detection.TamperStatus;
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -293,6 +300,73 @@ public class CloudServiceTest {
 
     }
 
+    @Test
+    public void shouldNotPublishTamperStatusIfTamperDetectionIsNotAvailable()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+
+        final JsonObject metrics = publishBirthAndGetMetrics();
+
+        assertNull(metrics.get("tamper_status"));
+    }
+
+    @Test
+    public void shouldPublishTamperStatusIfTamperDetectionIsAvailable()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+
+        final TamperDetectionService tamperDetectionService = Mockito.mock(TamperDetectionService.class);
+        Mockito.when(tamperDetectionService.getTamperStatus())
+                .thenReturn(new TamperStatus(true, Collections.emptyMap()));
+
+        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class).getBundleContext()
+                .registerService(TamperDetectionService.class, tamperDetectionService, null);
+
+        try {
+            JsonObject metrics = publishBirthAndGetMetrics();
+
+            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get("tamper_status").asString());
+
+            Mockito.when(tamperDetectionService.getTamperStatus())
+                    .thenReturn(new TamperStatus(false, Collections.emptyMap()));
+
+            metrics = publishBirthAndGetMetrics();
+
+            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get("tamper_status").asString());
+        } finally {
+            reg.unregister();
+        }
+    }
+
+    @Test
+    public void shouldRepublishBirthOnTamperEvent()
+            throws InterruptedException, ExecutionException, TimeoutException, KuraException, InvalidSyntaxException {
+
+        final TamperDetectionService tamperDetectionService = Mockito.mock(TamperDetectionService.class);
+        Mockito.when(tamperDetectionService.getTamperStatus())
+                .thenReturn(new TamperStatus(true, Collections.emptyMap()));
+
+        final ServiceRegistration<?> reg = FrameworkUtil.getBundle(CloudServiceTest.class).getBundleContext()
+                .registerService(TamperDetectionService.class, tamperDetectionService, null);
+
+        try {
+            JsonObject metrics = publishBirthAndGetMetrics();
+
+            assertEquals(KuraBirthPayload.TamperStatus.TAMPERED.name(), metrics.get("tamper_status").asString());
+
+            final TamperStatus tamperStatus = new TamperStatus(false, Collections.emptyMap());
+
+            Mockito.when(tamperDetectionService.getTamperStatus()).thenReturn(tamperStatus);
+
+            final CompletableFuture<byte[]> message = observerInspector.nextMessage("$EDC/mqtt/underTest/MQTT/BIRTH");
+            eventAdmin.postEvent(new TamperEvent(tamperStatus));
+
+            metrics = getMetrics(message.get(30, TimeUnit.SECONDS));
+
+            assertEquals(KuraBirthPayload.TamperStatus.NOT_TAMPERED.name(), metrics.get("tamper_status").asString());
+        } finally {
+            reg.unregister();
+        }
+    }
+
     private JsonObject publishBirthAndGetMetrics() throws InterruptedException, ExecutionException, TimeoutException,
             KuraException, InvalidSyntaxException, KuraConnectException {
         final CompletableFuture<Void> disconnected = underTestInspector.disconnected();
@@ -304,20 +378,29 @@ public class CloudServiceTest {
         updateComponentConfiguration(cfgSvc, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
                 getConfigForLocalBroker("underTest")).get(1, TimeUnit.MINUTES);
 
-        final CompletableFuture<Void> connected = underTestInspector.connected();
         final CompletableFuture<byte[]> message = observerInspector.nextMessage("$EDC/mqtt/underTest/MQTT/BIRTH");
 
-        cloudServiceImpl.connect();
+        for (int i = 0; i < 3; i++) {
+            try {
+                final CompletableFuture<Void> connected = underTestInspector.connected();
 
-        connected.get(1, TimeUnit.MINUTES);
+                cloudServiceImpl.connect();
+
+                connected.get(30, TimeUnit.SECONDS);
+                break;
+            } catch (final Exception e) {
+                logger.warn("connection failed", e);
+            }
+        }
 
         assertEquals(true, cloudServiceImpl.isConnected());
 
-        final JsonObject messageObject = Json
-                .parse(new String(message.get(30, TimeUnit.SECONDS), StandardCharsets.UTF_8)).asObject();
-        final JsonObject metrics = messageObject.get("metrics").asObject();
+        return getMetrics(message.get(30, TimeUnit.SECONDS));
+    }
 
-        return metrics;
+    private static JsonObject getMetrics(final byte[] message) {
+        final JsonObject messageObject = Json.parse(new String(message, StandardCharsets.UTF_8)).asObject();
+        return messageObject.get("metrics").asObject();
     }
 
     private static Map<String, Object> getConfigForLocalBroker(final String clientId) throws KuraException {

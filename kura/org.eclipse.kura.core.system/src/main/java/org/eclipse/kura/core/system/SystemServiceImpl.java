@@ -146,7 +146,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             if (System.getProperty(DPA_CONFIGURATION) != null
                     && System.getProperty(DPA_CONFIGURATION).trim().equals("kura/dpa.properties")) {
-                System.setProperty(DPA_CONFIGURATION, "/opt/eclipse/kura/data/dpa.properties");
+                System.setProperty(DPA_CONFIGURATION, "/opt/eclipse/kura/packages/dpa.properties");
                 updateTriggered = true;
                 logger.warn("Overridding invalid dpa.properties location");
             }
@@ -443,6 +443,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             if (System.getProperty(KEY_CPU_VERSION) != null) {
                 this.kuraProperties.put(KEY_CPU_VERSION, System.getProperty(KEY_CPU_VERSION));
+            }
+            if (System.getProperty(KEY_COMMAND_USER) != null) {
+                this.kuraProperties.put(KEY_COMMAND_USER, System.getProperty(KEY_COMMAND_USER));
             }
 
             if (getKuraHome() == null) {
@@ -1400,5 +1403,15 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     @Override
     public Optional<ExtendedProperties> getExtendedProperties() {
         return Optional.empty();
+    }
+
+    @Override
+    public String getCommandUser() {
+        final Optional<String> override = getProperty(KEY_COMMAND_USER);
+        if (override.isPresent()) {
+            return override.get();
+        }
+
+        return "unknown";
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.apache.commons.io.Charsets;
-import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
@@ -27,37 +26,35 @@ import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.eclipse.kura.executor.UnprivilegedExecutorService;
-import org.osgi.service.component.ComponentContext;
+import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService, ConfigurableComponent {
+public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
+    private SystemService systemService;
 
-    @SuppressWarnings("unused")
-    private ComponentContext ctx;
-    private UnprivilegedExecutorServiceOptions options;
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
 
-    protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
+    public void unsetSystemService(SystemService systemService) {
+        if (this.systemService == systemService) {
+            this.systemService = null;
+        }
+    }
+
+    protected void activate() {
         logger.info("activate...");
 
-        this.ctx = componentContext;
-        this.options = new UnprivilegedExecutorServiceOptions(properties);
-        ExecutorUtil.setCommandUsername(this.options.getCommandUsername());
+        String user = this.systemService.getCommandUser();
+        ExecutorUtil.setCommandUsername(user.equals("unknown") ? "kura" : user);
     }
 
-    public void update(Map<String, Object> properties) {
-        logger.info("updated...");
-
-        this.options = new UnprivilegedExecutorServiceOptions(properties);
-        ExecutorUtil.setCommandUsername(this.options.getCommandUsername());
-    }
-
-    protected void deactivate(ComponentContext componentContext) {
+    protected void deactivate() {
         logger.info("deactivate...");
-        this.ctx = null;
     }
 
     @Override

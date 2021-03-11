@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -78,7 +78,12 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     public synchronized void update(final Map<String, Object> properties) {
 
         if (isSelfUpdate(properties)) {
-            logger.info("ignoring self update");
+            logger.info("Ignoring self update");
+            return;
+        }
+
+        if (storeTask.isPresent() || !updateIds.isEmpty()) {
+            logger.info("Ignoring update since there are uncommitted changes");
             return;
         }
 

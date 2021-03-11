@@ -17,8 +17,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -42,6 +47,7 @@ import org.mockito.Mock;
 
 import java.net.UnknownHostException;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.junit.Test;
 
@@ -83,78 +89,123 @@ class CommandExecutorServiceStub implements CommandExecutorService {
 };
 
 public class IwListChannelToolTest {
-	protected static CommandExecutorService executorServiceMock;
     protected static final CommandStatus successStatus = new CommandStatus(new Command(new String[] {}),
             new LinuxExitStatus(0));
 
     @Test
+    public void parsePhy() throws KuraException, java.io.IOException {
+        String commandOutput;
+        commandOutput = "Interface wlan0\n"
+                + "\tifindex 3\n"
+                + "\twdev 0x1\n"
+                + "\taddr b8:27:eb:86:d5:0e\n"
+                + "\tssid kura_gateway_B8:27:EB:D3:80:5B\n"
+                + "\ttype AP\n"
+                + "\twiphy 0\n"
+                + "\tchannel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n"
+                + "\ttxpower 31.00 dBm\n";
+        CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
+        executorServiceStub.writeOutput(commandOutput);
+        final int phy = IwListChannelTool.parseWiphyIndex(IwListChannelTool.exec(new String[] { "iw", "wlan0", "info" }, executorServiceStub))
+                .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
+                        "failed to get phy index for " + "wlan0"));
+        assertEquals(phy, 0);
+    }
+
+    @Test
     public void probeChannels_2G() throws KuraException {
         String commandOutput;
-        commandOutput = "wlan0     14 channels in total; available frequencies :\n"
-                + "          Channel 01 : 2.412 GHz\n"
-                + "          Channel 02 : 2.417 GHz\n"
-                + "          Channel 03 : 2.422 GHz\n"
-                + "          Channel 04 : 2.427 GHz\n"
-                + "          Channel 05 : 2.432 GHz\n"
-                + "          Channel 06 : 2.437 GHz\n"
-                + "          Channel 07 : 2.442 GHz\n"
-                + "          Channel 08 : 2.447 GHz\n"
-                + "          Channel 09 : 2.452 GHz\n"
-                + "          Channel 10 : 2.457 GHz\n"
-                + "          Channel 11 : 2.462 GHz\n"
-                + "          Channel 12 : 2.467 GHz\n"
-                + "          Channel 13 : 2.472 GHz\n"
-                + "          Channel 14 : 2.484 GHz\n";
-//        CommandStatus successStatus = new CommandStatus(new Command(new String[] {}),
-//                new LinuxExitStatus(0));
+        commandOutput = "                Frequencies:\n"
+                + "                        * 2412 MHz [1] (20.0 dBm)\n"
+                + "                        * 2417 MHz [2] (20.0 dBm)\n"
+                + "                        * 2422 MHz [3] (20.0 dBm)\n"
+                + "                        * 2427 MHz [4] (20.0 dBm)\n"
+                + "                        * 2432 MHz [5] (20.0 dBm)\n"
+                + "                        * 2437 MHz [6] (20.0 dBm)\n"
+                + "                        * 2442 MHz [7] (20.0 dBm)\n"
+                + "                        * 2447 MHz [8] (20.0 dBm)\n"
+                + "                        * 2452 MHz [9] (20.0 dBm)\n"
+                + "                        * 2457 MHz [10] (20.0 dBm)\n"
+                + "                        * 2462 MHz [11] (20.0 dBm)\n"
+                + "                        * 2467 MHz [12] (20.0 dBm)\n"
+                + "                        * 2472 MHz [13] (20.0 dBm)\n"
+                + "                        * 2484 MHz [14] (disabled)\n";
+        commandOutput += "Interface wlan0\n"
+                + "\tifindex 3\n"
+                + "\twdev 0x1\n"
+                + "\taddr b8:27:eb:86:d5:0e\n"
+                + "\tssid kura_gateway_B8:27:EB:D3:80:5B\n"
+                + "\ttype AP\n"
+                + "\twiphy 0\n"
+                + "\tchannel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n"
+                + "\ttxpower 31.00 dBm\n";
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         List<WifiChannel> channels = IwListChannelTool.probeChannels("wlan0", executorServiceStub);
-        assertEquals(channels.size(), 14);
+        assertEquals(channels.size(), 13);
     }
 
     @Test
     public void probeChannels_5G() throws KuraException {
         String commandOutput;
-        commandOutput = "wlan0     32 channels in total; available frequencies :\n"
-                + "          Channel 01 : 2.412 GHz\n"
-                + "          Channel 02 : 2.417 GHz\n"
-                + "          Channel 03 : 2.422 GHz\n"
-                + "          Channel 04 : 2.427 GHz\n"
-                + "          Channel 05 : 2.432 GHz\n"
-                + "          Channel 06 : 2.437 GHz\n"
-                + "          Channel 07 : 2.442 GHz\n"
-                + "          Channel 08 : 2.447 GHz\n"
-                + "          Channel 09 : 2.452 GHz\n"
-                + "          Channel 10 : 2.457 GHz\n"
-                + "          Channel 11 : 2.462 GHz\n"
-                + "          Channel 12 : 2.467 GHz\n"
-                + "          Channel 13 : 2.472 GHz\n"
-                + "          Channel 14 : 2.484 GHz\n"
-                + "          Channel 36 : 5.18 GHz\n"
-                + "          Channel 38 : 5.19 GHz\n"
-                + "          Channel 40 : 5.2 GHz\n"
-                + "          Channel 42 : 5.21 GHz\n"
-                + "          Channel 44 : 5.22 GHz\n"
-                + "          Channel 46 : 5.23 GHz\n"
-                + "          Channel 48 : 5.24 GHz\n"
-                + "          Channel 52 : 5.26 GHz\n"
-                + "          Channel 56 : 5.28 GHz\n"
-                + "          Channel 60 : 5.3 GHz\n"
-                + "          Channel 64 : 5.32 GHz\n"
-                + "          Channel 100 : 5.5 GHz\n"
-                + "          Channel 104 : 5.52 GHz\n"
-                + "          Channel 108 : 5.54 GHz\n"
-                + "          Channel 112 : 5.56 GHz\n"
-                + "          Channel 116 : 5.58 GHz\n"
-                + "          Channel 120 : 5.6 GHz\n"
-                + "          Channel 124 : 5.62 GHz\n";
-//        CommandStatus successStatus = new CommandStatus(new Command(new String[] {}),
-//                new LinuxExitStatus(0));
+        commandOutput = "                Frequencies:\n"
+                + "                        * 2412 MHz [1] (20.0 dBm)\n"
+                + "                        * 2417 MHz [2] (20.0 dBm)\n"
+                + "                        * 2422 MHz [3] (20.0 dBm)\n"
+                + "                        * 2427 MHz [4] (20.0 dBm)\n"
+                + "                        * 2432 MHz [5] (20.0 dBm)\n"
+                + "                        * 2437 MHz [6] (20.0 dBm)\n"
+                + "                        * 2442 MHz [7] (20.0 dBm)\n"
+                + "                        * 2447 MHz [8] (20.0 dBm)\n"
+                + "                        * 2452 MHz [9] (20.0 dBm)\n"
+                + "                        * 2457 MHz [10] (20.0 dBm)\n"
+                + "                        * 2462 MHz [11] (20.0 dBm)\n"
+                + "                        * 2467 MHz [12] (disabled)\n"
+                + "                        * 2472 MHz [13] (disabled)\n"
+                + "                        * 2484 MHz [14] (disabled)\n";
+        commandOutput += "                Frequencies:\n"
+                + "                        * 5170 MHz [34] (disabled)\n"
+                + "                        * 5180 MHz [36] (20.0 dBm)\n"
+                + "                        * 5190 MHz [38] (disabled)\n"
+                + "                        * 5200 MHz [40] (20.0 dBm)\n"
+                + "                        * 5210 MHz [42] (disabled)\n"
+                + "                        * 5220 MHz [44] (20.0 dBm)\n"
+                + "                        * 5230 MHz [46] (disabled)\n"
+                + "                        * 5240 MHz [48] (20.0 dBm)\n"
+                + "                        * 5260 MHz [52] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5280 MHz [56] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5300 MHz [60] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5320 MHz [64] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5500 MHz [100] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5520 MHz [104] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5540 MHz [108] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5560 MHz [112] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5580 MHz [116] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5600 MHz [120] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5620 MHz [124] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5640 MHz [128] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5660 MHz [132] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5680 MHz [136] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5700 MHz [140] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5720 MHz [144] (20.0 dBm) (no IR, radar detection)\n"
+                + "                        * 5745 MHz [149] (20.0 dBm)\n"
+                + "                        * 5765 MHz [153] (20.0 dBm)\n"
+                + "                        * 5785 MHz [157] (20.0 dBm)\n"
+                + "                        * 5805 MHz [161] (20.0 dBm)\n"
+                + "                        * 5825 MHz [165] (20.0 dBm)\n";
+        commandOutput += "Interface wlan0\n"
+                + "\tifindex 3\n"
+                + "\twdev 0x1\n"
+                + "\taddr b8:27:eb:86:d5:0e\n"
+                + "\tssid kura_gateway_B8:27:EB:D3:80:5B\n"
+                + "\ttype AP\n"
+                + "\twiphy 0\n"
+                + "\tchannel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n"
+                + "\ttxpower 31.00 dBm\n";
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         List<WifiChannel> channels = IwListChannelTool.probeChannels("wlan0", executorServiceStub);
-        assertEquals(channels.size(), 32);
+        assertEquals(channels.size(), 20);
     }
 
     @Test

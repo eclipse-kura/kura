@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import static java.util.Comparator.nullsFirst;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,9 @@ import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.data.DataService;
 import org.eclipse.kura.data.DataTransportService;
 import org.eclipse.kura.position.PositionService;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionProperties;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.eclipse.kura.security.tamper.detection.TamperStatus;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionInfo;
@@ -81,8 +85,40 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
             pairs.addAll(getNetworkStatus());
         }
         pairs.addAll(getPositionStatus());
+        pairs.addAll(getTamperDetectionStatus());
 
         return new ArrayList<>(pairs);
+    }
+
+    private List<GwtGroupedNVPair> getTamperDetectionStatus() {
+        final List<GwtGroupedNVPair> result = new ArrayList<>();
+
+        try {
+            ServiceLocator.applyToServiceOptionally(TamperDetectionService.class, t -> {
+                if (t == null) {
+                    return (Void) null;
+                }
+
+                final TamperStatus tamperStatus = t.getTamperStatus();
+
+                result.add(new GwtGroupedNVPair("tamperDetection", "Device Tamper Status",
+                        tamperStatus.isDeviceTampered() ? "Tampered" : "Not Tampered"));
+
+                final Object timestamp = tamperStatus.getProperties()
+                        .get(TamperDetectionProperties.TIMESTAMP_PROPERTY_KEY.getValue());
+
+                if (timestamp instanceof Long) {
+                    result.add(new GwtGroupedNVPair("tamperDetection", "Last Tamper Event Timestamp",
+                            new Date((Long) timestamp).toString()));
+                }
+
+                return (Void) null;
+            });
+        } catch (final GwtKuraException e) {
+            logger.warn("failed to get tamper status", e);
+        }
+
+        return result;
     }
 
     private List<GwtGroupedNVPair> getCloudStatus() throws GwtKuraException {

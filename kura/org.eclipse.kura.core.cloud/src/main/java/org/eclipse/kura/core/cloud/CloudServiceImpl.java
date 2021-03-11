@@ -36,6 +36,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,6 +44,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraConnectException;
@@ -81,6 +84,8 @@ import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
 import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.ServiceReference;
@@ -96,6 +101,8 @@ import org.slf4j.LoggerFactory;
 public class CloudServiceImpl
         implements CloudService, DataServiceListener, ConfigurableComponent, EventHandler, CloudPayloadProtoBufEncoder,
         CloudPayloadProtoBufDecoder, RequestHandlerRegistry, CloudConnectionManager, CloudEndpoint {
+
+    private static final String ERROR = "ERROR";
 
     private static final String NOTIFICATION_PUBLISHER_PID = "org.eclipse.kura.cloud.publisher.CloudNotificationPublisher";
 
@@ -149,6 +156,9 @@ public class CloudServiceImpl
 
     private ServiceRegistration<?> notificationPublisherRegistration;
     private final CloudNotificationPublisher notificationPublisher;
+
+    private AtomicReference<Optional<TamperDetectionService>> tamperDetectionService = new AtomicReference<>(
+            Optional.empty());
 
     private String ownPid;
 
@@ -253,6 +263,20 @@ public class CloudServiceImpl
         this.jsonMarshaller = null;
     }
 
+    public void setTamperDetectionService(final TamperDetectionService tamperDetectionService) {
+        synchronized (this.tamperDetectionService) {
+            this.tamperDetectionService.set(Optional.of(tamperDetectionService));
+        }
+    }
+
+    public void unsetTamperDetectionService(final TamperDetectionService tamperDetectionService) {
+        synchronized (this.tamperDetectionService) {
+            if (this.tamperDetectionService.get().equals(Optional.of(tamperDetectionService))) {
+                this.tamperDetectionService.set(Optional.empty());
+            }
+        }
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -271,7 +295,7 @@ public class CloudServiceImpl
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
-                ModemReadyEvent.MODEM_EVENT_READY_TOPIC };
+                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
         this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
                 props);
@@ -347,43 +371,58 @@ public class CloudServiceImpl
     @Override
     public void handleEvent(Event event) {
         if (PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC.contains(event.getTopic())) {
-            // if we get a position locked event,
-            // republish the birth certificate only if we are configured to
-            logger.info("Handling PositionLockedEvent");
-            if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
-                try {
-                    publishBirthCertificate();
-                } catch (KuraException e) {
-                    logger.warn("Cannot publish birth certificate", e);
-                }
-            }
+            handlePositionLockedEvent();
         } else if (ModemReadyEvent.MODEM_EVENT_READY_TOPIC.contains(event.getTopic())) {
-            logger.info("Handling ModemReadyEvent");
-            ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
-            // keep these identifiers around until we can publish the certificate
-            this.imei = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
-            this.imsi = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
-            this.iccid = (String) modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
-            this.rssi = (String) modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
-            this.modemFwVer = (String) modemReadyEvent.getProperty(ModemReadyEvent.FW_VERSION);
-            logger.trace("handleEvent() :: IMEI={}", this.imei);
-            logger.trace("handleEvent() :: IMSI={}", this.imsi);
-            logger.trace("handleEvent() :: ICCID={}", this.iccid);
-            logger.trace("handleEvent() :: RSSI={}", this.rssi);
-            logger.trace("handleEvent() :: FW_VERSION={}", this.modemFwVer);
+            handleModemReadyEvent(event);
+        } else if (TamperEvent.TAMPER_EVENT_TOPIC.equals(event.getTopic()) && this.dataService.isConnected()
+                && this.options.getRepubBirthCertOnTamperEvent()) {
+            tryPublishBirthCertificate();
+        }
+    }
 
-            if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection()) {
-                if (!((this.imei == null || this.imei.length() == 0 || this.imei.equals("ERROR"))
-                        && (this.imsi == null || this.imsi.length() == 0 || this.imsi.equals("ERROR"))
-                        && (this.iccid == null || this.iccid.length() == 0 || this.iccid.equals("ERROR")))) {
-                    logger.debug("handleEvent() :: publishing BIRTH certificate ...");
-                    try {
-                        publishBirthCertificate();
-                    } catch (KuraException e) {
-                        logger.warn("Cannot publish birth certificate", e);
-                    }
-                }
-            }
+    private void tryPublishBirthCertificate() {
+        try {
+            publishBirthCertificate();
+        } catch (KuraException e) {
+            logger.warn("Cannot publish birth certificate", e);
+        }
+    }
+
+    private void handleModemReadyEvent(Event event) {
+        logger.info("Handling ModemReadyEvent");
+        ModemReadyEvent modemReadyEvent = (ModemReadyEvent) event;
+        // keep these identifiers around until we can publish the certificate
+        this.imei = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMEI);
+        this.imsi = (String) modemReadyEvent.getProperty(ModemReadyEvent.IMSI);
+        this.iccid = (String) modemReadyEvent.getProperty(ModemReadyEvent.ICCID);
+        this.rssi = (String) modemReadyEvent.getProperty(ModemReadyEvent.RSSI);
+        this.modemFwVer = (String) modemReadyEvent.getProperty(ModemReadyEvent.FW_VERSION);
+        logger.trace("handleEvent() :: IMEI={}", this.imei);
+        logger.trace("handleEvent() :: IMSI={}", this.imsi);
+        logger.trace("handleEvent() :: ICCID={}", this.iccid);
+        logger.trace("handleEvent() :: RSSI={}", this.rssi);
+        logger.trace("handleEvent() :: FW_VERSION={}", this.modemFwVer);
+
+        if (this.dataService.isConnected() && this.options.getRepubBirthCertOnModemDetection() && isModemInfoValid()) {
+            logger.debug("handleEvent() :: publishing BIRTH certificate ...");
+            tryPublishBirthCertificate();
+        }
+    }
+
+    private boolean isModemInfoValid(final String modemInfo) {
+        return !(modemInfo == null || modemInfo.length() == 0 || modemInfo.equals(ERROR));
+    }
+
+    public boolean isModemInfoValid() {
+        return isModemInfoValid(this.imei) && isModemInfoValid(this.imsi) && isModemInfoValid(this.iccid);
+    }
+
+    private void handlePositionLockedEvent() {
+        // if we get a position locked event,
+        // republish the birth certificate only if we are configured to
+        logger.info("Handling PositionLockedEvent");
+        if (this.dataService.isConnected() && this.options.getRepubBirthCertOnGpsLock()) {
+            tryPublishBirthCertificate();
         }
     }
 
@@ -1115,4 +1154,11 @@ public class CloudServiceImpl
     String getOwnPid() {
         return ownPid;
     }
+
+    void withTamperDetectionService(final Consumer<TamperDetectionService> consumer) {
+        synchronized (this.tamperDetectionService) {
+            this.tamperDetectionService.get().ifPresent(consumer);
+        }
+    }
+
 }

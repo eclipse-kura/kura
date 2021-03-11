@@ -50,7 +50,7 @@ public class IwCapabilityTool {
 
     private static final EnumSet<ParseState> DONE = EnumSet.of(ParseState.HAS_RSN, ParseState.HAS_CHIPHERS);
     
-    private IwCapabilityTool() {
+    protected IwCapabilityTool() {
         
     }
 
@@ -69,7 +69,7 @@ public class IwCapabilityTool {
         return Optional.empty();
     }
 
-    private static Optional<Integer> parseWiphyIndex(final InputStream in) throws IOException {
+    protected static Optional<Integer> parseWiphyIndex(final InputStream in) throws IOException {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             return skipTo(reader, WIPHY_PATTERN).map(matcher -> Integer.parseInt(matcher.group(1)));
         }

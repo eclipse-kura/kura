@@ -76,33 +76,34 @@ public final class GwtServerUtil {
         if (gwtType == GwtConfigParameterType.STRING) {
             objValue = strValue;
         } else if (strValue != null && !strValue.trim().isEmpty()) {
+            final String trimmedValue = strValue.trim();
             switch (gwtType) {
             case LONG:
-                objValue = Long.parseLong(strValue);
+                objValue = Long.parseLong(trimmedValue);
                 break;
             case DOUBLE:
-                objValue = Double.parseDouble(strValue);
+                objValue = Double.parseDouble(trimmedValue);
                 break;
             case FLOAT:
-                objValue = Float.parseFloat(strValue);
+                objValue = Float.parseFloat(trimmedValue);
                 break;
             case INTEGER:
-                objValue = Integer.parseInt(strValue);
+                objValue = Integer.parseInt(trimmedValue);
                 break;
             case SHORT:
-                objValue = Short.parseShort(strValue);
+                objValue = Short.parseShort(trimmedValue);
                 break;
             case BYTE:
-                objValue = Byte.parseByte(strValue);
+                objValue = Byte.parseByte(trimmedValue);
                 break;
             case BOOLEAN:
-                objValue = Boolean.parseBoolean(strValue);
+                objValue = Boolean.parseBoolean(trimmedValue);
                 break;
             case PASSWORD:
-                objValue = new Password(strValue);
+                objValue = new Password(trimmedValue);
                 break;
             case CHAR:
-                objValue = Character.valueOf(strValue.charAt(0));
+                objValue = Character.valueOf(trimmedValue.charAt(0));
                 break;
             default:
                 break;

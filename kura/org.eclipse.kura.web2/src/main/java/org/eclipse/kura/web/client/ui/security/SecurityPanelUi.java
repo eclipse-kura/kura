@@ -81,6 +81,8 @@ public class SecurityPanelUi extends Composite {
     @UiField
     ThreatManagerTabUi threatManagerPanel;
     @UiField
+    TamperDetectionTabUi tamperDetectionPanel;
+    @UiField
     SecurityTabUi securityPanel;
 
     @UiField
@@ -91,6 +93,8 @@ public class SecurityPanelUi extends Composite {
     TabListItem console;
     @UiField
     TabListItem threatManager;
+    @UiField
+    TabListItem tamperDetection;
     @UiField
     TabListItem security;
 
@@ -115,31 +119,9 @@ public class SecurityPanelUi extends Composite {
         description.setText(MSGS.securityIntro());
         this.securityIntro.add(description);
 
-        this.gwtSecurityService.isSecurityServiceAvailable(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                SecurityPanelUi.this.security.setVisible(false);
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-                SecurityPanelUi.this.security.setVisible(result);
-            }
-        });
-
-        this.gwtSecurityService.isThreatManagerAvailable(new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onSuccess(Boolean result) {
-                SecurityPanelUi.this.threatManager.setVisible(result);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                SecurityPanelUi.this.threatManager.setVisible(false);
-            }
-        });
+        this.gwtSecurityService.isSecurityServiceAvailable(updateVisibility(this.security));
+        this.gwtSecurityService.isThreatManagerAvailable(updateVisibility(this.threatManager));
+        this.gwtSecurityService.isTamperDetectionAvailable(updateVisibility(this.tamperDetection));
 
         this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
 
@@ -154,6 +136,7 @@ public class SecurityPanelUi extends Composite {
         this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
                 consolePanel, getConsoleOptionsValidator())));
         this.threatManager.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.threatManagerPanel)));
+        this.tamperDetection.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.tamperDetectionPanel, true)));
         this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
     }
 
@@ -342,5 +325,20 @@ public class SecurityPanelUi extends Composite {
 
     public boolean isServicesUiDirty(final IndexedPanel parent) {
         return getServicesUi(parent).map(ServicesUi::isDirty).orElse(false);
+    }
+
+    private AsyncCallback<Boolean> updateVisibility(final Widget target) {
+        return new AsyncCallback<Boolean>() {
+
+            @Override
+            public void onSuccess(Boolean result) {
+                target.setVisible(result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                target.setVisible(false);
+            }
+        };
     }
 }

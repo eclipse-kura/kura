@@ -51,6 +51,8 @@
                         ui:field="console" />
                     <b:TabListItem dataTarget="#threatManagerPanel" text="Network Threat Manager"
                         ui:field="threatManager" visible="false"/>
+                    <b:TabListItem dataTarget="#tamperDetectionPanel" text="Tamper Detection"
+                        ui:field="tamperDetection" visible="false"/>
                     <b:TabListItem dataTarget="#securityPanel" text="Security Policies"
                         ui:field="security" visible="false"/>
                 </b:NavTabs>
@@ -64,6 +66,9 @@
                     </b:TabPane>
                     <b:TabPane b:id="threatManagerPanel">
                     	<security:ThreatManagerTabUi ui:field="threatManagerPanel"></security:ThreatManagerTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="tamperDetectionPanel">
+                        <security:TamperDetectionTabUi ui:field="tamperDetectionPanel"></security:TamperDetectionTabUi>
                     </b:TabPane>
                     <b:TabPane b:id="securityPanel">
                         <security:SecurityTabUi ui:field="securityPanel"></security:SecurityTabUi>

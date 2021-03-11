@@ -18,9 +18,9 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class WifiChannel {
     private Integer channel;
-    private Float frequency;
+    private Integer frequency;
 
-    public WifiChannel(int channel, float frequency) {
+    public WifiChannel(int channel, Integer frequency) {
         this.channel = channel;
         this.frequency = frequency;
     }
@@ -33,11 +33,11 @@ public class WifiChannel {
         this.channel = channel;
     }
 
-    public Float getFrequency() {
+    public Integer getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(Float frequency) {
+    public void setFrequency(Integer frequency) {
         this.frequency = frequency;
     }
 

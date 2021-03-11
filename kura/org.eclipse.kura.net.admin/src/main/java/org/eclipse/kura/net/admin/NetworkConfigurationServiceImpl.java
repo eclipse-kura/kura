@@ -391,8 +391,12 @@ public class NetworkConfigurationServiceImpl
             if (modemPort == null) {
                 modemPort = interfaceName;
             }
-            CellularModem modem = this.modemManagerService.getModemService(modemPort);
-            if (modem != null) {
+            this.modemManagerService.withModemService(modemPort, m -> {
+                if (!m.isPresent()) {
+                    return (Void) null;
+                }
+
+                final CellularModem modem = m.get();
 
                 // set modem properties
                 modemInterface.setSerialNumber(modem.getSerialNumber());
@@ -410,7 +414,9 @@ public class NetworkConfigurationServiceImpl
                         modemInterface.setDriver(driver.getName());
                     }
                 }
-            }
+
+                return (Void) null;
+            });
         }
     }
 

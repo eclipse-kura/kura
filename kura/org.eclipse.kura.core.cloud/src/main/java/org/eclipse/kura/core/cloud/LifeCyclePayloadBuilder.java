@@ -1,22 +1,25 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.cloud;
 
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.eclipse.kura.core.util.NetUtil;
 import org.eclipse.kura.message.KuraBirthPayload;
 import org.eclipse.kura.message.KuraBirthPayload.KuraBirthPayloadBuilder;
+import org.eclipse.kura.message.KuraBirthPayload.TamperStatus;
 import org.eclipse.kura.message.KuraDeviceProfile;
 import org.eclipse.kura.message.KuraDisconnectPayload;
 import org.eclipse.kura.message.KuraPosition;
@@ -25,15 +28,21 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionService;
+import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.eclipsesource.json.JsonObject;
+
 /**
  * Utility class to build lifecycle payload messages.
  */
 public class LifeCyclePayloadBuilder {
+
+    private static final String EXTENDED_PROPERTIES_KEY = "extended_properties";
 
     private static final String ERROR = "ERROR";
 
@@ -72,15 +81,18 @@ public class LifeCyclePayloadBuilder {
                 .withModelName(deviceProfile.getModelName()).withModelId(deviceProfile.getModelId())
                 .withPartNumber(deviceProfile.getPartNumber()).withSerialNumber(deviceProfile.getSerialNumber())
                 .withFirmwareVersion(deviceProfile.getFirmwareVersion()).withBiosVersion(deviceProfile.getBiosVersion())
-                .withOs(deviceProfile.getOs()).withOsVersion(deviceProfile.getOsVersion())
-                .withJvmName(deviceProfile.getJvmName()).withJvmVersion(deviceProfile.getJvmVersion())
-                .withJvmProfile(deviceProfile.getJvmProfile()).withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
+                .withCpuVersion(deviceProfile.getCpuVersion()).withOs(deviceProfile.getOs())
+                .withOsVersion(deviceProfile.getOsVersion()).withJvmName(deviceProfile.getJvmName())
+                .withJvmVersion(deviceProfile.getJvmVersion()).withJvmProfile(deviceProfile.getJvmProfile())
+                .withKuraVersion(deviceProfile.getApplicationFrameworkVersion())
                 .withConnectionInterface(deviceProfile.getConnectionInterface())
                 .withConnectionIp(deviceProfile.getConnectionIp()).withAcceptEncoding(acceptEncoding)
                 .withApplicationIdentifiers(appIds).withAvailableProcessors(deviceProfile.getAvailableProcessors())
                 .withTotalMemory(deviceProfile.getTotalMemory()).withOsArch(deviceProfile.getOsArch())
                 .withOsgiFramework(deviceProfile.getOsgiFramework())
                 .withOsgiFrameworkVersion(deviceProfile.getOsgiFrameworkVersion()).withPayloadEncoding(payloadEncoding);
+
+        tryAddTamperStatus(birthPayloadBuilder);
 
         if (this.cloudServiceImpl.imei != null && this.cloudServiceImpl.imei.length() > 0
                 && !this.cloudServiceImpl.imei.equals(ERROR)) {
@@ -100,6 +112,11 @@ public class LifeCyclePayloadBuilder {
             birthPayloadBuilder.withModemRssi(this.cloudServiceImpl.rssi);
         }
 
+        if (this.cloudServiceImpl.modemFwVer != null && this.cloudServiceImpl.modemFwVer.length() > 0
+                && !this.cloudServiceImpl.modemFwVer.equals(ERROR)) {
+            birthPayloadBuilder.withModemFirmwareVersion(this.cloudServiceImpl.modemFwVer);
+        }
+
         if (deviceProfile.getLatitude() != null && deviceProfile.getLongitude() != null) {
             KuraPosition kuraPosition = new KuraPosition();
             kuraPosition.setLatitude(deviceProfile.getLatitude());
@@ -108,7 +125,30 @@ public class LifeCyclePayloadBuilder {
             birthPayloadBuilder.withPosition(kuraPosition);
         }
 
-        return birthPayloadBuilder.build();
+        final KuraBirthPayload result = birthPayloadBuilder.build();
+
+        try {
+            final Optional<String> extendedProperties = serializeExtendedProperties();
+
+            if (extendedProperties.isPresent()) {
+                result.addMetric(EXTENDED_PROPERTIES_KEY, extendedProperties.get());
+            }
+        } catch (final Exception e) {
+            logger.warn("failed to get extended properties", e);
+        }
+
+        return result;
+    }
+
+    private void tryAddTamperStatus(KuraBirthPayloadBuilder birthPayloadBuilder) {
+        this.cloudServiceImpl.withTamperDetectionService(t -> {
+            try {
+                birthPayloadBuilder.withTamperStatus(
+                        t.getTamperStatus().isDeviceTampered() ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
+            } catch (final Exception e) {
+                logger.warn("failed to obtain tamper status", e);
+            }
+        });
     }
 
     public KuraDisconnectPayload buildDisconnectPayload() {
@@ -176,8 +216,8 @@ public class LifeCyclePayloadBuilder {
             }
         }
 
-        return buildKuraDeviceProfile(systemService, sysAdminService, connectionIp,
-                connectionInterface, latitude, longitude, altitude);
+        return buildKuraDeviceProfile(systemService, sysAdminService, connectionIp, connectionInterface, latitude,
+                longitude, altitude);
     }
 
     private KuraDeviceProfile buildKuraDeviceProfile(SystemService systemService, SystemAdminService sysAdminService,
@@ -190,6 +230,7 @@ public class LifeCyclePayloadBuilder {
         kuraDeviceProfile.setPartNumber(systemService.getPartNumber());
         kuraDeviceProfile.setSerialNumber(systemService.getSerialNumber());
         kuraDeviceProfile.setFirmwareVersion(systemService.getFirmwareVersion());
+        kuraDeviceProfile.setCpuVersion(systemService.getCpuVersion());
         kuraDeviceProfile.setBiosVersion(systemService.getBiosVersion());
         kuraDeviceProfile.setOs(systemService.getOsName());
         kuraDeviceProfile.setOsVersion(systemService.getOsVersion());
@@ -246,5 +287,43 @@ public class LifeCyclePayloadBuilder {
             acceptEncoding = "gzip";
         }
         return acceptEncoding;
+    }
+
+    private Optional<String> serializeExtendedProperties() {
+        final Optional<ExtendedProperties> extendedProperties = this.cloudServiceImpl.getSystemService()
+                .getExtendedProperties();
+
+        if (!extendedProperties.isPresent()) {
+            return Optional.empty();
+        }
+
+        final JsonObject result = new JsonObject();
+
+        result.add("version", extendedProperties.get().getVersion());
+
+        final JsonObject jsonProperties = new JsonObject();
+
+        final List<ExtendedPropertyGroup> groups = extendedProperties.get().getPropertyGroups();
+
+        for (final ExtendedPropertyGroup group : groups) {
+            final JsonObject properties = new JsonObject();
+
+            for (final Entry<String, String> entry : group.getProperties().entrySet()) {
+                final String value = entry.getValue();
+
+                if (value == null) {
+                    logger.warn("found null extended property: group {} property {}", group.getName(), entry.getKey());
+                    continue;
+                }
+
+                properties.add(entry.getKey(), value);
+            }
+
+            jsonProperties.add(group.getName(), properties);
+        }
+
+        result.add("properties", jsonProperties);
+
+        return Optional.of(result.toString());
     }
 }

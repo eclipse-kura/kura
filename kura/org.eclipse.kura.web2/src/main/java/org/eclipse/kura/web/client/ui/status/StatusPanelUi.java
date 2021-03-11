@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -78,7 +78,8 @@ public class StatusPanelUi extends Composite {
         this.statusGrid.setRowStyles((row, rowIndex) -> {
             if ("Cloud Services".equals(row.getName()) || "Connection Name".equals(row.getName())
                     || "Ethernet Settings".equals(row.getName()) || "Wireless Settings".equals(row.getName())
-                    || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())) {
+                    || "Cellular Settings".equals(row.getName()) || "Position Status".equals(row.getName())
+                    || "Tamper Detection Status".equals(row.getName())) {
                 return "rowHeader";
             } else {
                 return " ";
@@ -89,14 +90,15 @@ public class StatusPanelUi extends Composite {
 
         this.statusRefresh.addClickHandler(e -> loadStatusData());
 
-        EventService.Handler connectionStateChangeHandler = eventInfo -> {
+        EventService.Handler stateChangeHandler = eventInfo -> {
             if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached()) {
                 loadStatusData();
             }
         };
 
-        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, connectionStateChangeHandler);
-        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, connectionStateChangeHandler);
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_ESTABLISHED, stateChangeHandler);
+        EventService.subscribe(ForwardedEventTopic.CLOUD_CONNECTION_STATUS_LOST, stateChangeHandler);
+        EventService.subscribe(ForwardedEventTopic.TAMPER_EVENT, stateChangeHandler);
 
     }
 

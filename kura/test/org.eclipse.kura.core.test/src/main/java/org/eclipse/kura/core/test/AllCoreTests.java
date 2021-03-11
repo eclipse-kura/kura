@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import io.moquette.server.Server;
 
 @RunWith(Suite.class)
-@SuiteClasses({ DataServiceTest.class, CloudDeploymentHandlerTest.class, CloudServiceTest.class, CommURITest.class,
-        ComponentConfigurationImplTest.class, ConfigurationServiceTest.class, NetUtilTest.class,
-        NetworkServiceTest.class, SystemAdminServiceTest.class })
+@SuiteClasses({ InventoryHandlerTest.class, DataServiceTest.class, CloudDeploymentHandlerTest.class,
+        CloudServiceTest.class, CommURITest.class, ComponentConfigurationImplTest.class, ConfigurationServiceTest.class,
+        NetUtilTest.class, NetworkServiceTest.class, SystemAdminServiceTest.class })
 public class AllCoreTests {
 
     private static final Logger s_logger = LoggerFactory.getLogger(AllCoreTests.class);

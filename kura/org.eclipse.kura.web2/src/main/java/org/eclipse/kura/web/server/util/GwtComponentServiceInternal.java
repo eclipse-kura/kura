@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,7 +33,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -47,7 +46,6 @@ import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
@@ -67,8 +65,6 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ReferenceDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -76,20 +72,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class GwtComponentServiceInternal {
-
-    private static final String SUCCESSFULLY_LISTED_COMPONENT_CONFIGS_MESSAGE = "UI Component - Success - Successfully listed component configs for user: {}, session {}";
-
-    private static final String SUCCESSFULLY_LISTED_PIDS_FROM_TARGET_MESSAGE = "UI Component - Success - Successfully listed pids from target for user: {}, session: {}, pid: {}";
-
-    private static final String FAILED_TO_CREATE_COMPONENT_CONFIG_MESSAGE = "UI Component - Failure - Failed to create component config for user: {}, session {}";
-
-    private static final String FAILED_TO_LIST_COMPONENT_CONFIGS_MESSAGE = "UI Component - Failure - Failed to list component configs for user: {}, session {}";
-
-    private static final String SUCCESSFULLY_LISTED_COMPONENT_CONFIG_MESSAGE = "UI Component - Success - Successfully listed component config for user: {}, session {}";
-
-    private static final String FAILED_TO_LIST_COMPONENT_CONFIG_MESSAGE = "UI Component - Failure - Failed to list component config for user: {}, session {}";
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final String DRIVER_PID = "driver.pid";
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
@@ -108,53 +90,42 @@ public class GwtComponentServiceInternal {
         return new ArrayList<>(cs.getConfigurableComponentPids());
     }
 
-    public static List<GwtConfigComponent> findFilteredComponentConfigurations(HttpSession session)
-            throws GwtKuraException {
-        return findFilteredComponentConfigurationsInternal(session);
+    public static List<GwtConfigComponent> findFilteredComponentConfigurations() throws GwtKuraException {
+        return findFilteredComponentConfigurationsInternal();
     }
 
-    public static List<GwtConfigComponent> findComponentConfigurations(HttpSession session, String osgiFilter)
-            throws GwtKuraException {
+    public static List<GwtConfigComponent> findComponentConfigurations(String osgiFilter) throws GwtKuraException {
 
         try {
             final Filter filter = FrameworkUtil.createFilter(osgiFilter);
-            List<GwtConfigComponent> result = ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
+            return ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
                     configurationService -> configurationService.getComponentConfigurations(filter) //
                             .stream() //
                             .map(GwtComponentServiceInternal::createMetatypeOnlyGwtComponentConfigurationInternal) //
                             .filter(Objects::nonNull) //
                             .collect(Collectors.toList()));
 
-            auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIGS_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
-            return result;
         } catch (InvalidSyntaxException e) {
-            auditLogger.warn(FAILED_TO_LIST_COMPONENT_CONFIGS_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         } catch (Exception e) {
-            auditLogger.warn(FAILED_TO_LIST_COMPONENT_CONFIGS_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 
-    public static List<GwtConfigComponent> findFilteredComponentConfiguration(HttpSession session, String componentPid)
+    public static List<GwtConfigComponent> findFilteredComponentConfiguration(String componentPid)
             throws GwtKuraException {
-        return findFilteredComponentConfigurationInternal(session, componentPid);
+        return findFilteredComponentConfigurationInternal(componentPid);
     }
 
-    public static List<GwtConfigComponent> findComponentConfigurations(HttpSession session) throws GwtKuraException {
-        return findComponentConfigurationsInternal(session);
+    public static List<GwtConfigComponent> findComponentConfigurations() throws GwtKuraException {
+        return findComponentConfigurationsInternal();
     }
 
-    public static List<GwtConfigComponent> findComponentConfiguration(HttpSession session, String componentPid)
-            throws GwtKuraException {
-        return findComponentConfigurationInternal(session, componentPid);
+    public static List<GwtConfigComponent> findComponentConfiguration(String componentPid) throws GwtKuraException {
+        return findComponentConfigurationInternal(componentPid);
     }
 
-    public static void updateComponentConfiguration(HttpSession session, GwtConfigComponent gwtCompConfig)
-            throws GwtKuraException {
+    public static void updateComponentConfiguration(GwtConfigComponent gwtCompConfig) throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
@@ -184,32 +155,25 @@ public class GwtComponentServiceInternal {
             //
             // apply them
             cs.updateConfiguration(gwtCompConfig.getComponentId(), properties);
-            auditLogger.info(
-                    "UI Component - Success - Successfully updated component config for user: {}, session {}, component ID: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(),
-                    gwtCompConfig.getComponentId());
         } catch (KuraException e) {
-            auditLogger.warn("UI Component - Failure - Failed to update component config for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             KuraExceptionHandler.handle(e);
         }
     }
 
-    public static void createFactoryComponent(HttpSession session, String factoryPid, String pid)
-            throws GwtKuraException {
-        internalCreateFactoryComponent(session, factoryPid, pid, null);
+    public static void createFactoryComponent(String factoryPid, String pid) throws GwtKuraException {
+        internalCreateFactoryComponent(factoryPid, pid, null);
     }
 
-    public static void createFactoryComponent(HttpSession session, String factoryPid, String pid,
-            GwtConfigComponent properties) throws GwtKuraException {
+    public static void createFactoryComponent(String factoryPid, String pid, GwtConfigComponent properties)
+            throws GwtKuraException {
 
         Map<String, Object> propertiesMap = GwtServerUtil.fillPropertiesFromConfiguration(properties, null);
 
-        internalCreateFactoryComponent(session, factoryPid, pid, propertiesMap);
+        internalCreateFactoryComponent(factoryPid, pid, propertiesMap);
     }
 
-    private static void internalCreateFactoryComponent(HttpSession session, String factoryPid, String pid,
-            Map<String, Object> properties) throws GwtKuraException {
+    private static void internalCreateFactoryComponent(String factoryPid, String pid, Map<String, Object> properties)
+            throws GwtKuraException {
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
             cs.createFactoryConfiguration(factoryPid, pid, properties, true);
@@ -220,40 +184,28 @@ public class GwtComponentServiceInternal {
                 throw new GwtKuraException("Created component did not start in " + SERVICE_WAIT_TIMEOUT + " seconds");
             }
 
-            auditLogger.info("UI Component - Success - Successfully created component config for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         } catch (KuraException e) {
-            auditLogger.warn(FAILED_TO_CREATE_COMPONENT_CONFIG_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException("A component with the same name already exists!");
         } catch (InterruptedException e) {
-            auditLogger.warn(FAILED_TO_CREATE_COMPONENT_CONFIG_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+            Thread.currentThread().interrupt();
             throw new GwtKuraException("Interrupted while waiting for component creation");
         } catch (InvalidSyntaxException e) {
-            auditLogger.warn(FAILED_TO_CREATE_COMPONENT_CONFIG_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException("Invalid value for " + ConfigurationService.KURA_SERVICE_PID + ": " + pid);
         }
     }
 
-    public static void deleteFactoryConfiguration(HttpSession session, String pid, boolean takeSnapshot)
-            throws GwtKuraException {
+    public static void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
 
         try {
             cs.deleteFactoryConfiguration(pid, takeSnapshot);
-            auditLogger.info("UI Component - Success - Successfully deleted component config for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         } catch (KuraException e) {
-            auditLogger.warn("UI Component - Failure - Failed to delete component config for user: {}, session {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException("Could not delete component configuration!");
         }
     }
 
-    public static List<String> findFactoryComponents(HttpSession session) throws GwtKuraException {
+    public static List<String> findFactoryComponents() throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<String> result = new ArrayList<>();
@@ -279,9 +231,6 @@ public class GwtComponentServiceInternal {
         result.removeAll(allWireComponents);
         result.removeAll(servicesToBeHidden);
         result.removeAll(hiddenFactories);
-
-        auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIGS_MESSAGE,
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return result;
     }
 
@@ -357,8 +306,7 @@ public class GwtComponentServiceInternal {
         }
     }
 
-    private static List<GwtConfigComponent> findFilteredComponentConfigurationsInternal(HttpSession session)
-            throws GwtKuraException {
+    private static List<GwtConfigComponent> findFilteredComponentConfigurationsInternal() throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
@@ -374,17 +322,13 @@ public class GwtComponentServiceInternal {
                 }
             }
         } catch (Exception e) {
-            auditLogger.warn(FAILED_TO_LIST_COMPONENT_CONFIGS_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             KuraExceptionHandler.handle(e);
         }
 
-        auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIGS_MESSAGE,
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return gwtConfigs;
     }
 
-    private static List<GwtConfigComponent> findComponentConfigurationInternal(HttpSession session, String componentPid)
+    private static List<GwtConfigComponent> findComponentConfigurationInternal(String componentPid)
             throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
@@ -403,18 +347,14 @@ public class GwtComponentServiceInternal {
                 gwtConfigs.add(fullGwtConfigComponent);
             }
         } catch (Exception e) {
-            auditLogger.warn(FAILED_TO_LIST_COMPONENT_CONFIG_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             KuraExceptionHandler.handle(e);
         }
 
-        auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIG_MESSAGE,
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return gwtConfigs;
     }
 
-    private static List<GwtConfigComponent> findFilteredComponentConfigurationInternal(HttpSession session,
-            String componentPid) throws GwtKuraException {
+    private static List<GwtConfigComponent> findFilteredComponentConfigurationInternal(String componentPid)
+            throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
@@ -426,13 +366,9 @@ public class GwtComponentServiceInternal {
                 gwtConfigs.add(gwtConfigComponent);
             }
         } catch (Exception e) {
-            auditLogger.warn(FAILED_TO_LIST_COMPONENT_CONFIG_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             KuraExceptionHandler.handle(e);
         }
 
-        auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIG_MESSAGE,
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return gwtConfigs;
     }
 
@@ -464,8 +400,7 @@ public class GwtComponentServiceInternal {
         return gwtConfigComponent;
     }
 
-    private static List<GwtConfigComponent> findComponentConfigurationsInternal(HttpSession session)
-            throws GwtKuraException {
+    private static List<GwtConfigComponent> findComponentConfigurationsInternal() throws GwtKuraException {
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         List<GwtConfigComponent> gwtConfigs = new ArrayList<>();
@@ -479,13 +414,9 @@ public class GwtComponentServiceInternal {
                 gwtConfigs.add(gwtConfigComponent);
             }
         } catch (Exception e) {
-            auditLogger.warn(FAILED_TO_LIST_COMPONENT_CONFIG_MESSAGE,
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             KuraExceptionHandler.handle(e);
         }
 
-        auditLogger.info(SUCCESSFULLY_LISTED_COMPONENT_CONFIG_MESSAGE,
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
         return gwtConfigs;
     }
 
@@ -621,8 +552,7 @@ public class GwtComponentServiceInternal {
         return gwtParams;
     }
 
-    public static boolean updateProperties(HttpSession session, String pid, Map<String, Object> properties)
-            throws GwtKuraException {
+    public static void updateProperties(String pid, Map<String, Object> properties) throws GwtKuraException {
 
         final ConfigurationAdmin configAdmin = ServiceLocator.getInstance().getService(ConfigurationAdmin.class);
         final WireHelperService wireHelperService = ServiceLocator.getInstance().getService(WireHelperService.class);
@@ -648,20 +578,12 @@ public class GwtComponentServiceInternal {
                 conf.update(props);
             }
         } catch (IOException e) {
-            auditLogger.info(
-                    "UI Component - Failure - Failed to update component config for user: {}, session: {}, pid: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), pid);
-            return false;
+            KuraExceptionHandler.handle(e);
         }
 
-        auditLogger.info(
-                "UI Component - Success - Successfully updated component config for user: {}, session: {}, pid: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), pid);
-
-        return true;
     }
 
-    public static List<String> getDriverFactoriesList(HttpSession session) throws GwtKuraException {
+    public static List<String> getDriverFactoriesList() throws GwtKuraException {
 
         List<String> driverFactoriesPids = new ArrayList<>();
         final Bundle[] bundles = FrameworkUtil.getBundle(GwtWireGraphService.class).getBundleContext().getBundles();
@@ -684,17 +606,11 @@ public class GwtComponentServiceInternal {
                         driverFactoriesPids.addAll(manageRequiredConfigurableComponents(entry, contents));
                     }
                 } catch (final Exception ex) {
-                    auditLogger.info(
-                            "UI Component - Failure - Failed to list driver factories for user: {}, session: {}",
-                            session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
                     throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE);
                 }
             }
 
         }
-
-        auditLogger.info("UI Component - Success - Successfully listed driver factories for user: {}, session: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
 
         return driverFactoriesPids;
     }
@@ -734,7 +650,7 @@ public class GwtComponentServiceInternal {
         return driverFactoriesPids;
     }
 
-    public static List<String> getPidsFromTarget(HttpSession session, String pid, String targetRef) {
+    public static List<String> getPidsFromTarget(String pid, String targetRef) {
 
         List<String> result = new ArrayList<>();
 
@@ -782,8 +698,6 @@ public class GwtComponentServiceInternal {
             context.ungetService(scrServiceRef);
         }
 
-        auditLogger.info(SUCCESSFULLY_LISTED_PIDS_FROM_TARGET_MESSAGE,
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), pid);
         return result;
     }
 

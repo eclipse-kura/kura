@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,9 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.util.Set;
+
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.ConsoleOptions;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.shared.model.GwtLoginInfo;
 import org.eclipse.kura.web.shared.service.GwtLoginInfoService;
 import org.osgi.framework.BundleContext;
@@ -41,7 +44,7 @@ public class GwtLoginInfoServiceImpl extends OsgiRemoteServiceServlet implements
             bannerContent = null;
         }
 
-        Integer clientAuthPort;
+        Integer clientAuthPort = null;
 
         try {
 
@@ -51,12 +54,14 @@ public class GwtLoginInfoServiceImpl extends OsgiRemoteServiceServlet implements
             final ServiceReference<?> ref = bundleContext.getServiceReferences(ConfigurableComponent.class.getName(),
                     "(service.pid=org.eclipse.kura.http.server.manager.HttpService)")[0];
 
-            final boolean isClientAuthEnabled = (Boolean) ref.getProperty("https.client.auth.enabled");
+            final Set<Integer> clientAuthPorts = GwtServerUtil
+                    .getArrayProperty(ref.getProperty("https.client.auth.ports"), Integer.class);
 
-            if (isClientAuthEnabled) {
-                clientAuthPort = (Integer) ref.getProperty("https.client.auth.port");
-            } else {
-                clientAuthPort = null;
+            for (final Integer port : clientAuthPorts) {
+                if (Console.getConsoleOptions().isPortAllowed(port)) {
+                    clientAuthPort = port;
+                    break;
+                }
             }
 
         } catch (final Exception e) {

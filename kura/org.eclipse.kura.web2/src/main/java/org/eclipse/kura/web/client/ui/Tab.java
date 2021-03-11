@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,14 +31,20 @@ public interface Tab {
 
         private final Tab target;
         private boolean initialized = false;
+        private boolean alwaysRefresh = false;
 
         public RefreshHandler(Tab target) {
+            this(target, false);
+        }
+
+        public RefreshHandler(Tab target, final boolean alwaysRefresh) {
             this.target = target;
+            this.alwaysRefresh = alwaysRefresh;
         }
 
         @Override
         public void onClick(ClickEvent event) {
-            if (target.isDirty() || !initialized) {
+            if (target.isDirty() || !initialized || alwaysRefresh) {
                 target.refresh();
                 this.initialized = true;
             }

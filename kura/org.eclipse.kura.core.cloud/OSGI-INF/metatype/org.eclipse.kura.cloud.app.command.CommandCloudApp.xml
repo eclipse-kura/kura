@@ -64,6 +64,15 @@
         	default=""
         	description="Space separated list of environment variables in the form key=value.">
         </AD>
+        
+        <AD id="privileged.command.service.enable"
+            name="Privileged/Unprivileged Command Service Selection"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="If set to true, the Privileged Command Executor Service will be used to run the commands. If set to false, the Unprivileged Command Executor Service will be used.">
+        </AD>
                     
     </OCD>
     

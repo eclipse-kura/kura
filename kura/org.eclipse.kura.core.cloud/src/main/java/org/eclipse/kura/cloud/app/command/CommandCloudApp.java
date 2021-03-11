@@ -35,8 +35,9 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.executor.PrivilegedExecutorService;
+import org.eclipse.kura.executor.UnprivilegedExecutorService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.osgi.service.component.ComponentContext;
@@ -52,6 +53,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     private static final String COMMAND_WORKDIR_ID = "command.working.directory";
     private static final String COMMAND_TIMEOUT_ID = "command.timeout";
     private static final String COMMAND_ENVIRONMENT_ID = "command.environment";
+    private static final String COMMAND_PRIVILEGED = "privileged.command.service.enable";
 
     public static final String APP_ID = "CMD-V1";
 
@@ -60,8 +62,10 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     private CryptoService cryptoService;
 
     private boolean currentStatus;
+    private boolean isPrivileged;
 
-    private CommandExecutorService executorService;
+    private PrivilegedExecutorService privilegedExecutorService;
+    private UnprivilegedExecutorService unprivilegedExecutorService;
 
     /* EXEC */
     public static final String RESOURCE_COMMAND = "command";
@@ -101,12 +105,24 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         }
     }
 
-    public void setExecutorService(CommandExecutorService executorService) {
-        this.executorService = executorService;
+    public void setPrivilegedExecutorService(PrivilegedExecutorService executorService) {
+        this.privilegedExecutorService = executorService;
     }
 
-    public void unsetExecutorService(CommandExecutorService executorService) {
-        this.executorService = null;
+    public void unsetPrivilegedExecutorService(PrivilegedExecutorService executorService) {
+        if (this.privilegedExecutorService == executorService) {
+            this.privilegedExecutorService = null;
+        }
+    }
+
+    public void setUnprivilegedExecutorService(UnprivilegedExecutorService executorService) {
+        this.unprivilegedExecutorService = executorService;
+    }
+
+    public void unsetUnprivilegedExecutorService(UnprivilegedExecutorService executorService) {
+        if (this.unprivilegedExecutorService == executorService) {
+            this.unprivilegedExecutorService = null;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -126,7 +142,8 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     public void updated(Map<String, Object> properties) {
         logger.info("updated...: {}", properties);
 
-        this.currentStatus = (Boolean) properties.get(COMMAND_ENABLED_ID);
+        this.currentStatus = (Boolean) properties.getOrDefault(COMMAND_ENABLED_ID, false);
+        this.isPrivileged = (Boolean) properties.getOrDefault(COMMAND_PRIVILEGED, false);
 
         this.properties = new HashMap<>();
 
@@ -348,7 +365,11 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         command.setOutputStream(out);
         command.setErrorStream(err);
         command.setExecuteInAShell(true);
-        return this.executorService.execute(command);
+        if (this.isPrivileged) {
+            return this.privilegedExecutorService.execute(command);
+        } else {
+            return this.unprivilegedExecutorService.execute(command);
+        }
     }
 
     private void executeProcessAsync(String dir, String[] cmdarray, String[] envp, int timeout, OutputStream out,
@@ -363,7 +384,11 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
         command.setOutputStream(out);
         command.setErrorStream(err);
         command.setExecuteInAShell(true);
-        this.executorService.execute(command, callback);
+        if (this.isPrivileged) {
+            this.privilegedExecutorService.execute(command, callback);
+        } else {
+            this.unprivilegedExecutorService.execute(command, callback);
+        }
     }
 
     private Map<String, String> getEnvironmentMap(String[] envp) {
@@ -407,4 +432,5 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
             }
         }
     }
+
 }

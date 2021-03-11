@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,22 +27,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
 import org.eclipse.kura.driver.descriptor.DriverDescriptorService;
 import org.eclipse.kura.internal.wire.asset.WireAssetChannelDescriptor;
 import org.eclipse.kura.internal.wire.asset.WireAssetOCD;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.FilterUtil;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -58,6 +55,9 @@ import org.eclipse.kura.web.shared.model.GwtWireGraph;
 import org.eclipse.kura.web.shared.model.GwtWireGraphConfiguration;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
+import org.eclipse.kura.wire.WireComponent;
+import org.eclipse.kura.wire.WireEmitter;
+import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.graph.MultiportWireConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentConfiguration;
 import org.eclipse.kura.wire.graph.WireComponentDefinition;
@@ -69,15 +69,11 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The class GwtWireGraphServiceImpl implements {@link GwtWireGraphService}
  */
 public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet implements GwtWireGraphService {
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     private static final GwtConfigComponent WIRE_ASSET_OCD = GwtServerUtil.toGwtConfigComponent(
             new ComponentConfigurationImpl("org.eclipse.kura.wire.WireAsset", new WireAssetOCD(), new HashMap<>()));
@@ -256,6 +252,19 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
             List<GwtConfigComponent> additionalGwtConfigs) throws GwtKuraException {
         this.checkXSRFToken(xsrfToken);
 
+        for (final GwtWireComponentConfiguration config : gwtConfigurations.getWireComponentConfigurations()) {
+            if (!GwtServerUtil.isFactoryOfAnyService(config.getConfiguration().getFactoryId(), WireComponent.class,
+                    WireEmitter.class, WireReceiver.class)) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            }
+        }
+
+        for (final GwtConfigComponent config : additionalGwtConfigs) {
+            if (!GwtServerUtil.isFactoryOfAnyService(config.getFactoryId(), Driver.class)) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            }
+        }
+
         final List<String> receivedConfigurationPids = Stream.concat(gwtConfigurations.getWireComponentConfigurations() //
                 .stream()//
                 .map(config -> config.getConfiguration().getComponentId()),
@@ -321,13 +330,6 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
             wireGraphService.update(new WireGraphConfiguration(wireComponentConfigurations, wireConfigurations));
             return (Void) null;
         });
-
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-        String updatedPids = receivedConfigurationPids.stream().collect(Collectors.joining(","));
-        auditLogger.info(
-                "UI Wires - Success - Successfully updated wires configuration for user: {}, session: {}, received configuration pids: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId(), updatedPids);
     }
 
     @Deprecated

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -36,8 +36,10 @@ import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
-import org.eclipse.kura.core.deployment.xml.XmlBundles;
-import org.eclipse.kura.core.deployment.xml.XmlDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemBundles;
+import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
+import org.eclipse.kura.core.inventory.resources.SystemPackages;
+import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.slf4j.Logger;
@@ -49,6 +51,7 @@ import org.xml.sax.SAXException;
 public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
     private static final Logger logger = LoggerFactory.getLogger(XmlMarshallUnmarshallImpl.class);
+    private static final String VALUE_CONSTANT = "value";
 
     @Override
     public String marshal(Object object) throws KuraException {
@@ -56,7 +59,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             marshal(object, sw);
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR, "value");
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, VALUE_CONSTANT);
         }
         return sw.toString();
     }
@@ -65,6 +68,8 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             // root elements
@@ -84,7 +89,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
             } else if (object instanceof XmlComponentConfigurations) {
                 new XmlJavaComponentConfigurationsMapper().marshal(doc, object);
-            } else if (object instanceof XmlDeploymentPackages) {
+            } else if (object instanceof SystemDeploymentPackages) {
                 // Expected resulting xml:
                 // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                 // <packages>
@@ -102,7 +107,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
                 new XmlJavaPackagesMapper().marshal(doc, object);
 
-            } else if (object instanceof XmlBundles) {
+            } else if (object instanceof SystemBundles) {
                 // Expected resulting xml:
                 // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                 // <bundles>
@@ -116,12 +121,39 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
 
                 new XmlJavaBundlesMapper().marshal(doc, object);
 
+            } else if (object instanceof SystemPackages) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <systemPackages>
+                // <systemPackage>
+                // <name>rfkill</name>
+                // <version>2.33.1-0.1</version>
+                // <type>DEB</type>
+                // </systemPackage>
+                // </systemPackages>
+
+                new XmlJavaSystemPackagesMapper().marshal(doc, object);
+
+            } else if (object instanceof SystemResourcesInfo) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <inventory>
+                // <resource>
+                // <name>rfkill</name>
+                // <version>2.33.1-0.1</version>
+                // <type>DEB</type>
+                // </resource>
+                // </inventory>
+
+                new XmlJavaSystemResourcesMapper().marshal(doc, object);
             }
 
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
@@ -150,6 +182,8 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
         try {
             factory = DocumentBuilderFactory.newInstance();
             factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             parser = factory.newDocumentBuilder();
         } catch (FactoryConfigurationError fce) {
             // The implementation is not available or cannot be instantiated
@@ -168,7 +202,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             doc = parser.parse(is);
             doc.getDocumentElement().normalize();
         } catch (SAXException | IOException | IllegalArgumentException se) {
-            throw new KuraException(KuraErrorCode.DECODER_ERROR, "value", se);
+            throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_CONSTANT, se);
         }
 
         // identify the correct parser that has to execute
@@ -177,7 +211,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
                 // Snapshot parser
                 return new XmlJavaComponentConfigurationsMapper().unmarshal(doc);
             } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.DECODER_ERROR, "value", e);
+                throw new KuraException(KuraErrorCode.DECODER_ERROR, VALUE_CONSTANT, e);
             }
         } else if (clazz.equals(MetaData.class) || clazz.equals(Tmetadata.class)) {
             // MetaData parser

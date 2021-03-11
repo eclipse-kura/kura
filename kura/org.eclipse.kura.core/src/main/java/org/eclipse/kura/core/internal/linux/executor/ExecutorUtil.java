@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -19,9 +19,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
@@ -266,7 +270,10 @@ public class ExecutorUtil {
         executor.setStreamHandler(handler);
 
         String directory = command.getDirectory();
-        File workingDir = directory == null || directory.isEmpty() ? TEMP_DIR : new File(directory);
+
+        File workingDir = directory == null || directory.isEmpty() || !Files.isDirectory(Paths.get(directory))
+                ? TEMP_DIR
+                : new File(directory);
         executor.setWorkingDirectory(workingDir);
         return executor;
     }
@@ -308,30 +315,30 @@ public class ExecutorUtil {
 
     private static CommandLine buildUnprivilegedCommand(Command command) {
         // Build the command as follows:
-        // sudo -u <command_user> -s VARS... timeout -s <signal> <timeout> sh -c "<command>"
-        // or sudo -u <command_user> -s VARS... sh -c "<command>"
-        // The timeout command is added because the commons-exec fails to destroy a process started by sudo
-        CommandLine commandLine = new CommandLine("sudo");
-        commandLine.addArgument("-u");
+        // su <command_user> -c "VARS... timeout -s <signal> <timeout> <command>"
+        // or su <command_user> c "VARS... sh -c <command>"
+        // The timeout command is added because the commons-exec doesn't allow to set the signal to send for killing a
+        // process after a timeout
+        CommandLine commandLine = new CommandLine("su");
         commandLine.addArgument(ExecutorUtil.commandUsername);
-        commandLine.addArgument("-s");
+        commandLine.addArgument("-c");
 
+        List<String> c = new ArrayList<>();
         Map<String, String> env = command.getEnvironment();
         if (env != null && !env.isEmpty()) {
-            env.entrySet().stream().forEach(entry -> commandLine.addArgument(entry.getKey() + "=" + entry.getValue()));
+            env.entrySet().stream().forEach(entry -> c.add(entry.getKey() + "=" + entry.getValue()));
         }
 
         int timeout = command.getTimeout();
         if (timeout != -1) {
-            commandLine.addArgument("timeout");
-            commandLine.addArgument("-s");
-            commandLine.addArgument(((LinuxSignal) command.getSignal()).name());
-            commandLine.addArgument(Integer.toString(timeout));
+            c.add("timeout");
+            c.add("-s");
+            c.add(((LinuxSignal) command.getSignal()).name());
+            c.add(Integer.toString(timeout));
         }
 
-        commandLine.addArgument("sh");
-        commandLine.addArgument("-c");
-        commandLine.addArgument(String.join(" ", command.getCommandLine()), false);
+        Arrays.asList(command.getCommandLine()).stream().forEach(c::add);
+        commandLine.addArgument(String.join(" ", c), false);
 
         return commandLine;
     }
@@ -351,5 +358,4 @@ public class ExecutorUtil {
         }
         return commandLine;
     }
-
 }

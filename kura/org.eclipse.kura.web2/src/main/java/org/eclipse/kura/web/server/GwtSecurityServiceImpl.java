@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,18 +12,16 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.security.SecurityService;
+import org.eclipse.kura.security.ThreatManagerService;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
+import org.eclipse.kura.security.tamper.detection.TamperStatus;
 import org.eclipse.kura.web.server.util.ServiceLocator;
-import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtTamperStatus;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements GwtSecurityService {
 
@@ -31,8 +29,6 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
      *
      */
     private static final long serialVersionUID = -7664408886756367054L;
-
-    private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
     @Override
     public Boolean isSecurityServiceAvailable() {
@@ -68,41 +64,73 @@ public class GwtSecurityServiceImpl extends OsgiRemoteServiceServlet implements 
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
         SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
         try {
             securityService.reloadSecurityPolicyFingerprint();
         } catch (KuraException e) {
-            auditLogger.warn(
-                    "UI Security - Failure - Failed to reload security policy fingerprint for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(e.getMessage());
         }
-        auditLogger.info(
-                "UI Security - Success - Successfully reloaded security policy fingerprint for user: {}, session: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+
     }
 
     @Override
     public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        final HttpServletRequest request = getThreadLocalRequest();
-        final HttpSession session = request.getSession(false);
-
         SecurityService securityService = ServiceLocator.getInstance().getService(SecurityService.class);
         try {
             securityService.reloadCommandLineFingerprint();
         } catch (KuraException e) {
-            auditLogger.warn(
-                    "UI Security - Failure - Failed to reload command line fingerprint for user: {}, session: {}",
-                    session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
             throw new GwtKuraException(e.getMessage());
         }
-        auditLogger.info(
-                "UI Security - Success - Successfully reloaded command line fingerprint for user: {}, session: {}",
-                session.getAttribute(Attributes.AUTORIZED_USER.getValue()), session.getId());
+    }
+
+    @Override
+    public boolean isThreatManagerAvailable() {
+
+        try {
+            ThreatManagerService threatManagerService = ServiceLocator.getInstance()
+                    .getService(ThreatManagerService.class);
+            if (threatManagerService != null) {
+                return true;
+            }
+        } catch (GwtKuraException e) {
+            return false;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isTamperDetectionAvailable() {
+        try {
+            return ServiceLocator.getInstance().getService(TamperDetectionService.class) != null;
+        } catch (GwtKuraException e) {
+            return false;
+        }
+    }
+
+    @Override
+    public GwtTamperStatus getTamperStatus(final GwtXSRFToken token) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        try {
+            final TamperStatus tamperStatus = ServiceLocator.getInstance().getService(TamperDetectionService.class)
+                    .getTamperStatus();
+
+            return new GwtTamperStatus(tamperStatus.isDeviceTampered(), tamperStatus.getProperties());
+        } catch (KuraException e) {
+            throw new GwtKuraException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void resetTamperStatus(final GwtXSRFToken token) throws GwtKuraException {
+        checkXSRFToken(token);
+
+        try {
+            ServiceLocator.getInstance().getService(TamperDetectionService.class).resetTamperStatus();
+        } catch (KuraException e) {
+            throw new GwtKuraException(e.getMessage());
+        }
     }
 }

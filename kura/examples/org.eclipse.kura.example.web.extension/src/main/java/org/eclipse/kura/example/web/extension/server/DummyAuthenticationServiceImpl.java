@@ -21,6 +21,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+import org.eclipse.kura.audit.AuditContext;
+import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.example.web.extension.shared.service.DummyAuthenticationService;
 import org.eclipse.kura.web.api.Console;
 
@@ -42,7 +44,9 @@ public class DummyAuthenticationServiceImpl extends RemoteServiceServlet impleme
         final ClassLoader orig = Thread.currentThread().getContextClassLoader();
 
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
+        final AuditContext context = console.initAuditContext((HttpServletRequest) req);
+
+        try (final Scope scope = AuditContext.openScope(context)) {
             super.service(req, res);
         } finally {
             Thread.currentThread().setContextClassLoader(orig);
@@ -71,7 +75,8 @@ public class DummyAuthenticationServiceImpl extends RemoteServiceServlet impleme
 
     @Override
     public String login(final String user) {
-        return console.setAuthenticated(getThreadLocalRequest().getSession(false), user);
+        return console.setAuthenticated(getThreadLocalRequest().getSession(false), user,
+                AuditContext.currentOrInternal());
     }
 
 }

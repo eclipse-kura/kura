@@ -25,13 +25,41 @@ public interface FirewallConfigurationService {
 
     public static final String PID = "org.eclipse.kura.net.admin.FirewallConfigurationService";
 
+    /**
+     * Return the current firewall configuration.
+     * 
+     * @return the current {@link FirewallConfiguration}
+     * @throws KuraException
+     */
     public FirewallConfiguration getFirewallConfiguration() throws KuraException;
 
+    /**
+     * Set the firewall ports configuration.
+     * 
+     * @param the
+     *            list of {@link org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP} to be applied.
+     * @throws KuraException
+     */
     public void setFirewallOpenPortConfiguration(
             List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException;
 
+    /**
+     * Set the firewall ports forwarding configuration.
+     * 
+     * @param the
+     *            list of {@link org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP} to be applied.
+     * @throws KuraException
+     */
     public void setFirewallPortForwardingConfiguration(
             List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException;
 
+    /**
+     * Set the firewall nat configuration.
+     * 
+     * @param the
+     *            list of {@link org.eclipse.kura.net.firewall.FirewallNatConfig} to be applied.
+     * @throws KuraException
+     */
     public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException;
+
 }

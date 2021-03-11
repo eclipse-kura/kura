@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,21 +58,15 @@ public class LinuxDns {
     }
 
     public synchronized Set<IPAddress> getDnServers() {
-
         Set<IPAddress> servers = new HashSet<>();
-        File f = new File(DNS_FILE_NAME);
-        if (!f.exists()) {
-            try {
-                if (f.createNewFile()) {
-                    logger.debug("The {} doesn't exist, created new empty file ...", DNS_FILE_NAME);
-                }
-            } catch (Exception e) {
-                logger.error("Failed to create new empty {} file", DNS_FILE_NAME, e);
-            }
+        File f;
+        try {
+            f = getOrCreateDnsFile();
+        } catch (final KuraException e) {
             return servers;
         }
 
-        try (FileReader fr = new FileReader(new File(DNS_FILE_NAME)); BufferedReader br = new BufferedReader(fr)) {
+        try (FileReader fr = new FileReader(f); BufferedReader br = new BufferedReader(fr)) {
             String line = null;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
@@ -223,6 +217,10 @@ public class LinuxDns {
     }
 
     private void setDnsPppLink(String sPppDnsFileName, CommandExecutorService executorService) throws KuraException {
+        if (!new File(sPppDnsFileName).setReadable(true, false)) {
+            logger.debug("failed to set permissions to {}", sPppDnsFileName);
+        }
+
         Command command = new Command(new String[] { "ln", "-sf", sPppDnsFileName, DNS_FILE_NAME });
         command.setTimeout(COMMAND_TIMEOUT);
         CommandStatus status = executorService.execute(command);
@@ -256,7 +254,7 @@ public class LinuxDns {
         if (file.exists()) {
             restoreDnsFileFromBackup(executorService);
         } else {
-            createEmptyDnsFile(executorService);
+            createEmptyDnsFile();
         }
     }
 
@@ -273,16 +271,8 @@ public class LinuxDns {
         }
     }
 
-    private void createEmptyDnsFile(CommandExecutorService executorService) throws KuraException {
-        Command command = new Command(new String[] { "touch", DNS_FILE_NAME });
-        command.setTimeout(COMMAND_TIMEOUT);
-        CommandStatus status = executorService.execute(command);
-        if (!status.getExitStatus().isSuccessful()) {
-            logger.error("failed to create empty {}", DNS_FILE_NAME);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "failed to create empty " + DNS_FILE_NAME);
-        } else {
-            logger.info("successfully created empty {}", DNS_FILE_NAME);
-        }
+    private void createEmptyDnsFile() throws KuraException {
+        getOrCreateDnsFile();
     }
 
     private synchronized boolean isSymlink(File file) throws KuraException {
@@ -343,7 +333,8 @@ public class LinuxDns {
             logger.error("Cannot read symlink", e);
         }
 
-        try (FileOutputStream fos = new FileOutputStream(DNS_FILE_NAME); PrintWriter pw = new PrintWriter(fos);) {
+        try (FileOutputStream fos = new FileOutputStream(getOrCreateDnsFile());
+                PrintWriter pw = new PrintWriter(fos);) {
             String[] existingFile = getModifiedFile();
             for (String element : existingFile) {
                 pw.write(element + "\n");
@@ -360,15 +351,10 @@ public class LinuxDns {
     }
 
     private synchronized String[] getModifiedFile() {
-        File dnsFile = new File(DNS_FILE_NAME);
-        if (!dnsFile.exists()) {
-            try {
-                if (dnsFile.createNewFile()) {
-                    logger.debug("The {} file doesn't exist. Creating new empty ", DNS_FILE_NAME);
-                }
-            } catch (Exception e) {
-                logger.error("getModifiedFile() :: failed to create empty {} file ", DNS_FILE_NAME, e);
-            }
+        File dnsFile;
+        try {
+            dnsFile = getOrCreateDnsFile();
+        } catch (final Exception e) {
             return new String[0];
         }
 
@@ -390,6 +376,24 @@ public class LinuxDns {
             lines[i] = linesWithoutServers.get(i);
         }
         return lines;
+    }
+
+    private File getOrCreateDnsFile() throws KuraException {
+        File f = new File(DNS_FILE_NAME);
+        if (!f.exists()) {
+            try {
+                if (f.createNewFile()) {
+                    logger.debug("The {} doesn't exist, created new empty file ...", DNS_FILE_NAME);
+                }
+            } catch (Exception e) {
+                logger.error("Failed to create new empty {} file", DNS_FILE_NAME, e);
+                throw new KuraException(KuraErrorCode.IO_ERROR);
+            }
+        }
+        if (!f.setReadable(true, false)) {
+            logger.debug("failed to set permissions to {}", DNS_FILE_NAME);
+        }
+        return f;
     }
 
     private String getPppDnsFileName() {

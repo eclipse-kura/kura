@@ -107,7 +107,7 @@ public class InventoryHandlerTest extends TestCase {
 
         String body = new String(resp.getBody());
         assertTrue(body.contains(
-                "{\"packages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\"}]}]}"));
+                "{\"deploymentPackages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

@@ -99,7 +99,7 @@ public class InventoryHandlerV1Test {
         };
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("packages");
+        resourcesList.add("deploymentPackages");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -144,7 +144,7 @@ public class InventoryHandlerV1Test {
         };
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("packages");
+        resourcesList.add("deploymentPackages");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -177,6 +177,10 @@ public class InventoryHandlerV1Test {
         BundleInfo bundleInfo = mock(BundleInfo.class);
         bundleInfos[0] = bundleInfo;
 
+        Bundle[] bundles = new Bundle[1];
+        Bundle bundle = mock(Bundle.class);
+        bundles[0] = bundle;
+
         InventoryHandlerV1 inventory = new InventoryHandlerV1() {
 
             @Override
@@ -198,7 +202,7 @@ public class InventoryHandlerV1Test {
         };
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("packages");
+        resourcesList.add("deploymentPackages");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -213,6 +217,15 @@ public class InventoryHandlerV1Test {
         when(dp.getBundleInfos()).thenReturn(bundleInfos);
         when(bundleInfo.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
         when(bundleInfo.getVersion()).thenReturn(new Version("1.0.0"));
+
+        BundleContext context = mock(BundleContext.class);
+        TestUtil.setFieldValue(inventory, "bundleContext", context);
+
+        when(context.getBundles()).thenReturn(bundles);
+        when(bundle.getSymbolicName()).thenReturn("org.eclipse.kura.demo.heater");
+        when(bundle.getVersion()).thenReturn(new Version("1.0.0"));
+        when(bundle.getBundleId()).thenReturn(1L);
+        when(bundle.getState()).thenReturn(Bundle.UNINSTALLED);
 
         KuraMessage resMessage = inventory.doGet(null, message);
 
@@ -562,7 +575,7 @@ public class InventoryHandlerV1Test {
         };
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("system.packages");
+        resourcesList.add("systemPackages");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -587,7 +600,7 @@ public class InventoryHandlerV1Test {
         InventoryHandlerV1 inventory = new InventoryHandlerV1();
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("system.packages");
+        resourcesList.add("systemPackages");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -623,7 +636,7 @@ public class InventoryHandlerV1Test {
         };
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("system.packages");
+        resourcesList.add("systemPackages");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 

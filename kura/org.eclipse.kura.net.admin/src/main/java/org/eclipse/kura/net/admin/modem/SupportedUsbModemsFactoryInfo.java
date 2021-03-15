@@ -92,6 +92,7 @@ public class SupportedUsbModemsFactoryInfo {
     }
 
     private SupportedUsbModemsFactoryInfo() {
+
     }
 
     public static UsbModemFactoryInfo getModem(SupportedUsbModemInfo modemInfo) {

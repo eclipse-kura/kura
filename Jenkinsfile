@@ -15,7 +15,7 @@ node {
                         sh """
                             touch /tmp/isJenkins.txt
                             mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin
-                            mvn -f kura/pom.xml clean install -Pcheck-exists-plugin -Dmaven.test.failure.ignore=true sonar:sonar -Dsonar.organization=eclipse -Dsonar.host.url=\${SONAR_HOST_URL} -Dsonar.login=\${SONARCLOUD_TOKEN} -Dsonar.branch.name=\${env.BRANCH_NAME} -Dsonar.junit.reportPaths=target/surefire-reports -Dsonar.jacoco.reportPaths=target/jacoco/ -Dsonar.java.binaries=target/ -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java
+                            mvn -f kura/pom.xml clean install -Pcheck-exists-plugin -Dmaven.test.failure.ignore=true sonar:sonar -Dsonar.organization=eclipse -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONARCLOUD_TOKEN} -Dsonar.branch.name=${env.BRANCH_NAME} -Dsonar.junit.reportPaths=target/surefire-reports -Dsonar.jacoco.reportPaths=target/jacoco/ -Dsonar.java.binaries=target/ -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.exclusions=test/**/*.java,test-util/**/*.java,org.eclipse.kura.web2/**/*.java
                             mvn -f kura/distrib/pom.xml clean install
                             mvn -f kura/examples/pom.xml clean install -Pcheck-exists-plugin
                         """

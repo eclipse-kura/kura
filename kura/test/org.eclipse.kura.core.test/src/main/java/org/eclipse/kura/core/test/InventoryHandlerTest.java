@@ -100,14 +100,14 @@ public class InventoryHandlerTest extends TestCase {
     @Test
     public void testGetPackages() throws Exception {
         StringBuilder sb = init();
-        sb.append(InventoryHandlerV1.RESOURCE_PACKAGES);
+        sb.append(InventoryHandlerV1.RESOURCE_DEPLOYMENT_PACKAGES);
 
         KuraResponsePayload resp = cloudCallService.call(InventoryHandlerV1.APP_ID, sb.toString(), null, 5000);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
 
         String body = new String(resp.getBody());
         assertTrue(body.contains(
-                "{\"packages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\"}]}]}"));
+                "{\"deploymentPackages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
     }
 
     @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })

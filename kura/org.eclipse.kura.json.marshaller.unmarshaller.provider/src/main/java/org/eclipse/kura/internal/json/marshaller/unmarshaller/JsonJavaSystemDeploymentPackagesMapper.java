@@ -33,16 +33,20 @@ public class JsonJavaSystemDeploymentPackagesMapper {
     // {
     // "name" : "org.eclipse.kura.demo.heater",
     // "version" : "1.0.1"
+    // "id" : "1",
+    // "state" : "ACTIVE"
     // }
     // ]
     // }
     // ]
     // }
 
-    private static final String DEPLOYMENT_PACKAGES = "packages";
+    private static final String DEPLOYMENT_PACKAGES = "deploymentPackages";
     private static final String DP_NAME = "name";
     private static final String DP_VERSION = "version";
     private static final String DP_BUNDLES = "bundles";
+    private static final String DP_ID = "id";
+    private static final String DP_STATE = "state";
 
     private JsonJavaSystemDeploymentPackagesMapper() {
         // empty constructor
@@ -63,6 +67,8 @@ public class JsonJavaSystemDeploymentPackagesMapper {
             JsonObject jsonBundle = new JsonObject();
             jsonBundle.add(DP_NAME, b.getName());
             jsonBundle.add(DP_VERSION, b.getVersion());
+            jsonBundle.add(DP_ID, b.getId());
+            jsonBundle.add(DP_STATE, b.getState());
             bundles.add(jsonBundle);
         });
         JsonObject jsonObject = new JsonObject();

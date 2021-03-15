@@ -498,7 +498,7 @@ public class JsonEncoderDecoderTest {
 
         String json = new JsonMarshallUnmarshallImpl().marshal(systemDeploymentPackages);
 
-        String expectedJson = "{\"packages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\"}]}]}";
+        String expectedJson = "{\"deploymentPackages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"id\":0,\"state\":\"ACTIVE\"}]}]}";
         assertEquals(expectedJson, json);
     }
 

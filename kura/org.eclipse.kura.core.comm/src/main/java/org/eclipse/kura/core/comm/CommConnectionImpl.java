@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.StringJoiner;
 
@@ -293,7 +294,8 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             buffer.put((byte) c);
         }
 
-        buffer.flip();
+        // The buffer is casted to Buffer for Java8 compatibility
+        ((Buffer) buffer).flip();
 
         return buffer.limit() > 0 ? buffer : null;
     }
@@ -319,7 +321,8 @@ public class CommConnectionImpl implements CommConnection, Closeable {
             }
         } while (System.currentTimeMillis() - start < demark);
 
-        buffer.flip();
+        // The buffer is casted to Buffer for Java8 compatibility
+        ((Buffer) buffer).flip();
 
         return buffer.limit() > 0 ? buffer : null;
     }

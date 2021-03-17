@@ -381,12 +381,7 @@ public class LinuxFirewall {
                 || this.natRules != null && !this.natRules.isEmpty()) {
             this.allowForwarding = true;
         }
-        IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
-                this.natRules, this.allowIcmp, this.executorService);
-        newIptables.setAdditionalFilterRules(this.additionalFilterRules);
-        newIptables.setAdditionalNatRules(this.additionalNatRules);
-        newIptables.setAdditionalMangleRules(this.additionalMangleRules);
-        newIptables.applyRules();
+        this.iptables.applyRules();
         logger.debug("Managing port forwarding...");
         enableForwarding(this.allowForwarding);
     }
@@ -440,12 +435,21 @@ public class LinuxFirewall {
 
     private void update() throws KuraException {
         synchronized (lock) {
-            this.iptables.setAdditionalFilterRules(this.additionalFilterRules);
-            this.iptables.setAdditionalNatRules(this.additionalNatRules);
-            this.iptables.setAdditionalMangleRules(this.additionalMangleRules);
+            updateIptablesConfig();
             this.iptables.clearAllKuraChains();
             applyRules();
             this.iptables.saveKuraChains();
         }
+    }
+
+    private void updateIptablesConfig() {
+        this.iptables.setLocalRules(this.localRules);
+        this.iptables.setPortForwardRules(this.portForwardRules);
+        this.iptables.setNatRules(this.natRules);
+        this.iptables.setAutoNatRules(this.autoNatRules);
+        this.iptables.setAdditionalFilterRules(this.additionalFilterRules);
+        this.iptables.setAdditionalNatRules(this.additionalNatRules);
+        this.iptables.setAdditionalMangleRules(this.additionalMangleRules);
+        this.iptables.setAllowIcmp(this.allowIcmp);
     }
 }

@@ -41,10 +41,10 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     private static final Logger logger = LoggerFactory.getLogger(IptablesConfig.class);
 
-    private final Set<LocalRule> localRules;
-    private final Set<PortForwardRule> portForwardRules;
-    private final Set<NATRule> autoNatRules;
-    private final Set<NATRule> natRules;
+    private Set<LocalRule> localRules;
+    private Set<PortForwardRule> portForwardRules;
+    private Set<NATRule> autoNatRules;
+    private Set<NATRule> natRules;
     private boolean allowIcmp;
     private Set<String> additionalFilterRules;
     private Set<String> additionalNatRules;
@@ -78,6 +78,46 @@ public class IptablesConfig extends IptablesConfigConstants {
         this.additionalNatRules = new LinkedHashSet<>();
         this.additionalMangleRules = new LinkedHashSet<>();
         this.executorService = executorService;
+    }
+
+    public Set<LocalRule> getLocalRules() {
+        return this.localRules;
+    }
+
+    public void setLocalRules(Set<LocalRule> localRules) {
+        this.localRules = localRules;
+    }
+
+    public Set<PortForwardRule> getPortForwardRules() {
+        return this.portForwardRules;
+    }
+
+    public void setPortForwardRules(Set<PortForwardRule> portForwardRules) {
+        this.portForwardRules = portForwardRules;
+    }
+
+    public Set<NATRule> getAutoNatRules() {
+        return this.autoNatRules;
+    }
+
+    public void setAutoNatRules(Set<NATRule> autoNatRules) {
+        this.autoNatRules = autoNatRules;
+    }
+
+    public Set<NATRule> getNatRules() {
+        return this.natRules;
+    }
+
+    public void setNatRules(Set<NATRule> natRules) {
+        this.natRules = natRules;
+    }
+
+    public void setAllowIcmp(boolean allowIcmp) {
+        this.allowIcmp = allowIcmp;
+    }
+
+    public boolean allowIcmp() {
+        return this.allowIcmp;
     }
 
     public Set<String> getAdditionalFilterRules() {
@@ -728,26 +768,6 @@ public class IptablesConfig extends IptablesConfigConstants {
             logger.debug("Adding port forward rule: {}", portForwardRule);
             this.portForwardRules.add(portForwardRule);
         }
-    }
-
-    public Set<LocalRule> getLocalRules() {
-        return this.localRules;
-    }
-
-    public Set<PortForwardRule> getPortForwardRules() {
-        return this.portForwardRules;
-    }
-
-    public Set<NATRule> getAutoNatRules() {
-        return this.autoNatRules;
-    }
-
-    public Set<NATRule> getNatRules() {
-        return this.natRules;
-    }
-
-    public boolean allowIcmp() {
-        return this.allowIcmp;
     }
 
     /*

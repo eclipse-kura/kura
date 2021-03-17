@@ -129,7 +129,6 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
     protected void applyNatConfig(NetworkConfiguration networkConfig) throws KuraException {
         LinuxFirewall firewall = new LinuxFirewall(this.executorService);
         firewall.replaceAllNatRules(getNatConfigs(networkConfig));
-        firewall.enable();
     }
 
     protected Properties getKuranetProperties() {

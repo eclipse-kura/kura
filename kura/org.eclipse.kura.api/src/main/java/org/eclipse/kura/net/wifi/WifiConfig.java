@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,10 +9,12 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Sterwen-Technology
  ******************************************************************************/
 package org.eclipse.kura.net.wifi;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.net.NetConfig;
@@ -68,6 +70,12 @@ public class WifiConfig implements NetConfig {
     /** The driver of the wifi interface **/
     private String driver;
 
+    /** Channels Frequencies **/
+    List<WifiChannel> channelFrequencies;
+
+    /** Wifi Country Code **/
+    private String wifiCountryCode;
+
     public WifiConfig() {
         super();
     }
@@ -85,6 +93,8 @@ public class WifiConfig implements NetConfig {
         this.hwMode = hwMode;
         this.broadcast = broadcast;
         this.bgscan = bgscan;
+        this.channelFrequencies = null;
+        this.wifiCountryCode = null;
     }
 
     public WifiMode getMode() {
@@ -200,6 +210,41 @@ public class WifiConfig implements NetConfig {
         this.ignoreSSID = ignoreSSID;
     }
 
+    /**
+     * Get the Wifi Country Code
+     * @return wifi country code
+     * @since 2.2
+     */
+    public String getWifiCountryCode() {
+        return wifiCountryCode;
+    }
+
+    /**
+     * Set the Wifi Country Code
+     * @param wifiCountryCode
+     * @since 2.2
+     */
+    public void setWifiCountryCode(String wifiCountryCode) {
+        this.wifiCountryCode = wifiCountryCode;
+    }
+
+    /**
+     * Get the list of Wifi channels and frequencies
+     * @return List of wifi channels and frequencies
+     * @since 2.2
+     */
+    public List<WifiChannel> getChannelFrequencies() {
+        return channelFrequencies;
+    }
+
+    /**
+     * Set the list of channel frequencies
+     * @since 2.2
+     */
+    public void setChannelFrequencies(List<WifiChannel> channelFrequencies) {
+        this.channelFrequencies = channelFrequencies;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 29;
@@ -208,10 +253,19 @@ public class WifiConfig implements NetConfig {
         result = prime * result + (this.mode == null ? 0 : this.mode.hashCode());
         result = prime * result + (this.ssid == null ? 0 : this.ssid.hashCode());
         result = prime * result + (this.driver == null ? 0 : this.driver.hashCode());
+        result = prime * result + (this.wifiCountryCode == null ? 0 : this.wifiCountryCode.hashCode());
 
         if (this.channels != null) {
             for (int channel : this.channels) {
                 result = prime * result + channel;
+            }
+        } else {
+            result = prime * result;
+        }
+
+        if (this.channelFrequencies != null) {
+            for (WifiChannel wc:this.channelFrequencies) {
+                result = prime * result + wc.hashCode();
             }
         } else {
             result = prime * result;
@@ -266,6 +320,9 @@ public class WifiConfig implements NetConfig {
             return false;
         }
         if (!Arrays.equals(this.channels, other.channels)) {
+            return false;
+        }
+        if (!compare(this.wifiCountryCode, other.wifiCountryCode)) {
             return false;
         }
         if (!compare(this.security, other.security)) {
@@ -355,9 +412,21 @@ public class WifiConfig implements NetConfig {
         }
         sb.append("broadcast: ").append(this.broadcast).append(" :: ");
         if (this.bgscan != null) {
-            sb.append("bgscan: ").append(this.bgscan);
+            sb.append("bgscan: ").append(this.bgscan).append(" :: ");
         }
-
+        if (this.wifiCountryCode != null) {
+            sb.append("countryCode: ").append(this.wifiCountryCode).append(" :: ");
+        }
+        if (this.channelFrequencies != null) {
+            sb.append("channelFrequencies: ");
+            int i = 0;
+            for (WifiChannel wc:this.channelFrequencies) {
+                sb.append(wc);
+                if (i++ != this.channelFrequencies.size() - 1) {
+                   sb.append(",");
+                }
+            }
+        }
         sb.append("]");
         return sb.toString();
     }

@@ -70,6 +70,7 @@ import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -93,6 +94,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
@@ -1652,4 +1654,41 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
         return false;
     }
+
+    @Override
+    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
+        logger.info("Find Frequency Network Service impl");
+        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+        List<GwtWifiHotspotEntry> channels = new ArrayList<GwtWifiHotspotEntry>();
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            List<WifiChannel> frequencies = nas.getWifiFrequencies(interfaceName);
+
+            for (WifiChannel freq : frequencies) {
+                logger.debug(freq.toString());
+                GwtWifiHotspotEntry channelFrequency = new GwtWifiHotspotEntry();
+                channelFrequency.setChannel(freq.getChannel());
+                channelFrequency.setFrequency(freq.getFrequency());
+                channels.add(channelFrequency);
+            }
+            return channels;
+        } catch (KuraException e) {
+            logger.error("Find Frequency exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        logger.info("Get Wifi Country Code impl");
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            return nas.getWifiCountryCode();
+        } catch (KuraException e) {
+            logger.error("Get Wifi Country Code exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
 }
+

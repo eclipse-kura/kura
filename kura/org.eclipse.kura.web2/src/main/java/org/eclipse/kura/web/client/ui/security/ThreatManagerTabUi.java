@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  * Eurotech
  ******************************************************************************/
@@ -15,11 +15,14 @@ package org.eclipse.kura.web.client.ui.security;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AbstractServicesUi;
+import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
@@ -50,6 +53,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
     interface IdsTabUiUiBinder extends UiBinder<Widget, ThreatManagerTabUi> {
     }
 
+    private static final Logger logger = Logger.getLogger(CloudConnectionsUi.class.getSimpleName());
     private static final Messages MSGS = GWT.create(Messages.class);
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -61,7 +65,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
     private boolean dirty;
     private boolean initialized;
     private GwtConfigComponent originalConfig;
-    private List<GwtConfigComponent> configurations = new ArrayList<>();
+    private final List<GwtConfigComponent> configurations = new ArrayList<>();
 
     @UiField
     Button apply;
@@ -84,6 +88,9 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
     @UiField
     Button applyButton;
 
+    @UiField
+    AlertDialog alertDialog;
+
     public ThreatManagerTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         this.initialized = false;
@@ -92,11 +99,14 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
         this.apply.addClickHandler(event -> apply());
 
         this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(event -> reset());
+        this.reset.addClickHandler(event -> this.alertDialog.show(MSGS.deviceConfigDirty(), this::refresh));
 
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
+        
+        logger.info("ready to init modal");
 
+        initNotificationModal();
     }
 
     @Override
@@ -124,48 +134,46 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
     }
 
     private void apply() {
-
         if (isDirty()) {
-            this.notificationModalHeader.setTitle(MSGS.confirm());
-
             this.notificationModalBody.clear();
             this.notificationModalBody
-                    .add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
-
-            this.cancelButton.setText(MSGS.noButton());
-            this.cancelButton.addClickHandler(event -> this.notificationModal.hide());
-
-            this.applyButton.setText(MSGS.yesButton());
-            this.applyButton.addClickHandler(event -> {
-                EntryClassUi.showWaitModal();
-                try {
-                    getUpdatedConfiguration();
-                } catch (Exception ex) {
-                    EntryClassUi.hideWaitModal();
-                    FailureHandler.handle(ex);
-                    return;
-                }
-                // Update the configuration to all the components
-                for (GwtConfigComponent config : ThreatManagerTabUi.this.configurations) {
-                    config.setParameters(ThreatManagerTabUi.this.configurableComponent.getParameters());
-                }
-                RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
-                        context.callback(token -> ThreatManagerTabUi.this.gwtComponentService.updateComponentConfigurations(token,
-                                ThreatManagerTabUi.this.configurations, context.callback(data -> {
-                                    ThreatManagerTabUi.this.notificationModal.hide();
-                                    logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
-                                    ThreatManagerTabUi.this.apply.setEnabled(false);
-                                    ThreatManagerTabUi.this.reset.setEnabled(false);
-                                    setDirty(false);
-                                    ThreatManagerTabUi.this.originalConfig = ThreatManagerTabUi.this.configurableComponent;
-                                    EntryClassUi.hideWaitModal();
-                                })))));
-            });
-
+            .add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
             this.notificationModal.show();
             this.cancelButton.setFocus(true);
         }
+    }
 
+    private void initNotificationModal() {
+        this.notificationModalHeader.setTitle(MSGS.confirm());
+
+        this.cancelButton.setText(MSGS.noButton());
+        this.cancelButton.addClickHandler(event -> this.notificationModal.hide());
+
+        this.applyButton.setText(MSGS.yesButton());
+        this.applyButton.addClickHandler(event -> {
+            EntryClassUi.showWaitModal();
+            try {
+                getUpdatedConfiguration();
+            } catch (Exception ex) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+                return;
+            }
+            for (GwtConfigComponent config : ThreatManagerTabUi.this.configurations) {
+                config.setParameters(ThreatManagerTabUi.this.configurableComponent.getParameters());
+            }
+            RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(context
+                    .callback(token -> ThreatManagerTabUi.this.gwtComponentService.updateComponentConfigurations(token,
+                            ThreatManagerTabUi.this.configurations, context.callback(data -> {
+                                ThreatManagerTabUi.this.notificationModal.hide();
+                                logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
+                                ThreatManagerTabUi.this.apply.setEnabled(false);
+                                ThreatManagerTabUi.this.reset.setEnabled(false);
+                                setDirty(false);
+                                ThreatManagerTabUi.this.originalConfig = ThreatManagerTabUi.this.configurableComponent;
+                                EntryClassUi.hideWaitModal();
+                            })))));
+        });
     }
 
     private GwtConfigComponent getUpdatedConfiguration() {
@@ -182,26 +190,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
 
     @Override
     protected void reset() {
-        if (isDirty()) {
-            this.notificationModalHeader.setTitle(MSGS.confirm());
-
-            this.notificationModalBody.clear();
-            this.notificationModalBody.add(new Span(MSGS.deviceConfigDirty()));
-
-            this.cancelButton.setText(MSGS.noButton());
-            this.cancelButton.addClickHandler(event -> this.notificationModal.hide());
-            this.applyButton.setText(MSGS.yesButton());
-            this.applyButton.addClickHandler(event -> {
-                this.notificationModal.hide();
-                restoreConfiguration(this.originalConfig);
-                renderForm();
-                this.apply.setEnabled(false);
-                this.reset.setEnabled(false);
-                setDirty(false);
-            });
-            this.notificationModal.show();
-            this.cancelButton.setFocus(true);
-        }
+        refresh();
     }
 
     @Override
@@ -239,7 +228,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
                             if (!data.isEmpty()) {
                                 GwtConfigComponent firstConfig = data.get(0);
                                 // Save the configuration of all registered services
-                                configurations.addAll(data);
+                                this.configurations.addAll(data);
                                 for (int index = 1; index < data.size(); index++) {
                                     firstConfig.getParameters().addAll(data.get(index).getParameters());
                                 }

@@ -57,5 +57,6 @@
                 <b:Button addStyleNames="fa fa-check" dataDismiss="MODAL" ui:field="applyButton" />
             </b:ModalFooter>
         </b:Modal>
+        <kura:AlertDialog ui:field="alertDialog" />
     </b:Container>
 </ui:UiBinder>

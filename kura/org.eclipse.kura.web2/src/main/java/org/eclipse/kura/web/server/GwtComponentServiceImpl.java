@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -78,7 +78,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        updateComponentConfigurationInternal(gwtCompConfig);
+        GwtComponentServiceInternal.updateComponentConfiguration(gwtCompConfig);
     }
 
     @Override
@@ -86,10 +86,7 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        for (GwtConfigComponent gwtCompConfig : gwtCompConfigs) {
-            updateComponentConfigurationInternal(gwtCompConfig);
-        }
-
+        GwtComponentServiceInternal.updateComponentConfigurations(gwtCompConfigs);
     }
 
     @Override
@@ -144,9 +141,4 @@ public class GwtComponentServiceImpl extends OsgiRemoteServiceServlet implements
 
         return GwtComponentServiceInternal.getPidsFromTarget(pid, targetRef);
     }
-
-    private void updateComponentConfigurationInternal(GwtConfigComponent gwtCompConfig) throws GwtKuraException {
-        GwtComponentServiceInternal.updateComponentConfiguration(gwtCompConfig);
-    }
-
 }

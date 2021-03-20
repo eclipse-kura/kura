@@ -12,12 +12,7 @@ node {
               withMaven(jdk: 'adoptopenjdk-hotspot-jdk11-latest', maven: 'apache-maven-3.6.3') {
                   withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONARCLOUD_TOKEN')]) {
                       withSonarQubeEnv {
-                        sonar_extra_options = ''
-                        if ("${env.BRANCH_NAME}".startsWith('PR-')) {
-                            sonar_extra_options = "-Dsonar.branch.name=${env.CHANGE_BRANCH} -Dsonar.branch.target=${env.CHANGE_TARGET}"
-                        } else {
-                            sonar_extra_options = "-Dsonar.branch.name=${env.BRANCH_NAME}"
-                        }
+                        sonar_extra_options = "-Dsonar.branch.name=${env.BRANCH_NAME}"
                         sh "echo ${sonar_extra_options}"
                         sh "touch /tmp/isJenkins.txt"
                         sh "mvn -f target-platform/pom.xml clean install -Pno-mirror -Pcheck-exists-plugin" 

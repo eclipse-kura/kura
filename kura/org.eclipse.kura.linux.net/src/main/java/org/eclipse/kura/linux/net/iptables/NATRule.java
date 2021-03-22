@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.linux.net.iptables;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ public class NATRule {
     private String source; // source network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
     private String destination; // destination network/host (i.e. 192.168.1.0/24 or 192.168.1.1/32)
     private boolean masquerade;
+    private RuleType type;
 
     /**
      * Constructor of <code>NATRule</code> object.
@@ -43,15 +45,16 @@ public class NATRule {
      * @param masquerade
      *            add masquerade entry
      */
-    public NATRule(String sourceInterface, String destinationInterface, boolean masquerade) {
+    public NATRule(String sourceInterface, String destinationInterface, boolean masquerade, RuleType type) {
         this.sourceInterface = sourceInterface;
         this.destinationInterface = destinationInterface;
         this.masquerade = masquerade;
+        this.type = type;
     }
 
     public NATRule(String sourceInterface, String destinationInterface, String protocol, String source,
-            String destination, boolean masquerade) {
-        this(sourceInterface, destinationInterface, masquerade);
+            String destination, boolean masquerade, RuleType type) {
+        this(sourceInterface, destinationInterface, masquerade, type);
         this.source = source;
         this.destination = destination;
         this.protocol = protocol;
@@ -71,10 +74,7 @@ public class NATRule {
      * @return A boolean representing whether all parameters have been set.
      */
     public boolean isComplete() {
-        if (this.sourceInterface != null && this.destinationInterface != null) {
-            return true;
-        }
-        return false;
+        return this.sourceInterface != null && this.destinationInterface != null;
     }
 
     /**
@@ -169,14 +169,23 @@ public class NATRule {
         return this.masquerade;
     }
 
+    /**
+     * Getter for the rule type.
+     *
+     * @return the rule type
+     */
+    public RuleType getRuleType() {
+        return this.type;
+    }
+
     public NatPostroutingChainRule getNatPostroutingChainRule() {
         NatPostroutingChainRule ret;
         if (this.protocol == null) {
-            ret = new NatPostroutingChainRule(this.destinationInterface, this.masquerade);
+            ret = new NatPostroutingChainRule(this.destinationInterface, this.masquerade, this.type);
         } else {
             try {
                 ret = new NatPostroutingChainRule(this.destinationInterface, this.protocol, this.destination,
-                        this.source, this.masquerade);
+                        this.source, this.masquerade, this.type);
             } catch (KuraException e) {
                 ret = null;
                 logger.error("failed to obtain NatPostroutingChainRule", e);
@@ -198,25 +207,21 @@ public class NATRule {
             dstNetwork = this.destination.split("/")[0];
             dstMask = Short.parseShort(this.destination.split("/")[1]);
         }
-        return new FilterForwardChainRule(this.sourceInterface, this.destinationInterface, srcNetwork, srcMask,
-                dstNetwork, dstMask, this.protocol, null, 0, 0);
+        return new FilterForwardChainRule().inputInterface(this.sourceInterface)
+                .outputInterface(this.destinationInterface).srcNetwork(srcNetwork).srcMask(srcMask)
+                .dstNetwork(dstNetwork).dstMask(dstMask).protocol(this.protocol).srcPortFirst(0).srcPortLast(0)
+                .type(this.type);
     }
 
     @Override
     public int hashCode() {
         final int prime = 71;
         int result = 1;
-
         result = prime * result + (this.sourceInterface == null ? 0 : this.sourceInterface.hashCode());
-
         result = prime * result + (this.destinationInterface == null ? 0 : this.destinationInterface.hashCode());
-
         result = prime * result + (this.source == null ? 0 : this.source.hashCode());
-
         result = prime * result + (this.destination == null ? 0 : this.destination.hashCode());
-
         result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
-
         result = prime * result + (this.masquerade ? 1277 : 1279);
 
         return result;

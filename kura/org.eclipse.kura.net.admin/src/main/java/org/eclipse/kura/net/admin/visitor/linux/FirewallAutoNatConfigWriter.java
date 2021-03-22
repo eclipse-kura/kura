@@ -34,6 +34,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +128,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
     }
 
     protected void applyNatConfig(NetworkConfiguration networkConfig) throws KuraException {
-        LinuxFirewall firewall = new LinuxFirewall(this.executorService);
+        LinuxFirewall firewall = LinuxFirewall.getInstance(this.executorService);
         firewall.replaceAllNatRules(getNatConfigs(networkConfig));
     }
 
@@ -186,7 +187,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             for (String sourceInterface : natList) {
                 for (String destinationInterface : wanList) {
                     logger.debug("Got NAT rule for source: {}, destination: {}", sourceInterface, destinationInterface);
-                    natConfigs.add(new NATRule(sourceInterface, destinationInterface, true));
+                    natConfigs.add(new NATRule(sourceInterface, destinationInterface, true, RuleType.GENERIC));
                 }
             }
         }

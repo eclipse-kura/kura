@@ -213,7 +213,7 @@ public class FirewallConfigurationServiceImpl
             logger.debug("getFirewallConfiguration() :: Adding NAT rules {}", natRule.getSourceInterface());
             firewallConfiguration.addConfig(new FirewallNatConfig(natRule.getSourceInterface(),
                     natRule.getDestinationInterface(), natRule.getProtocol(), natRule.getSource(),
-                    natRule.getDestination(), natRule.isMasquerade()));
+                    natRule.getDestination(), natRule.isMasquerade(), natRule.getRuleType()));
         }
 
         return firewallConfiguration;
@@ -303,13 +303,15 @@ public class FirewallConfigurationServiceImpl
                 }
             }
 
-            PortForwardRule portForwardRule = new PortForwardRule(portForwardEntry.getInboundInterface(),
-                    portForwardEntry.getOutboundInterface(), portForwardEntry.getAddress().getHostAddress(),
-                    portForwardEntry.getProtocol().name(), portForwardEntry.getInPort(), portForwardEntry.getOutPort(),
-                    portForwardEntry.isMasquerade(),
-                    portForwardEntry.getPermittedNetwork().getIpAddress().getHostAddress(),
-                    portForwardEntry.getPermittedNetwork().getPrefix(), portForwardEntry.getPermittedMac(),
-                    portForwardEntry.getSourcePortRange());
+            PortForwardRule portForwardRule = new PortForwardRule().inboundIface(portForwardEntry.getInboundInterface())
+                    .outboundIface(portForwardEntry.getOutboundInterface())
+                    .address(portForwardEntry.getAddress().getHostAddress())
+                    .protocol(portForwardEntry.getProtocol().name()).inPort(portForwardEntry.getInPort())
+                    .outPort(portForwardEntry.getOutPort()).masquerade(portForwardEntry.isMasquerade())
+                    .permittedNetwork(portForwardEntry.getPermittedNetwork().getIpAddress().getHostAddress())
+                    .permittedNetworkMask(portForwardEntry.getPermittedNetwork().getPrefix())
+                    .permittedMAC(portForwardEntry.getPermittedMac())
+                    .sourcePortRange(portForwardEntry.getSourcePortRange());
             portForwardRules.add(portForwardRule);
         }
 
@@ -325,7 +327,7 @@ public class FirewallConfigurationServiceImpl
         for (FirewallNatConfig natConfig : natConfigs) {
             NATRule natRule = new NATRule(natConfig.getSourceInterface(), natConfig.getDestinationInterface(),
                     natConfig.getProtocol(), natConfig.getSource(), natConfig.getDestination(),
-                    natConfig.isMasquerade());
+                    natConfig.isMasquerade(), natConfig.getRuleType());
             natRules.add(natRule);
         }
 
@@ -368,14 +370,6 @@ public class FirewallConfigurationServiceImpl
         return this.firewall.getAutoNatRules();
     }
 
-    protected LinuxFirewall getLinuxFirewall() {
-        if (this.firewall == null) {
-            this.firewall = new LinuxFirewall(this.executorService);
-        }
-
-        return this.firewall;
-    }
-
     protected Set<LocalRule> getLocalRules() throws KuraException {
         return this.firewall.getLocalRules();
     }
@@ -386,6 +380,14 @@ public class FirewallConfigurationServiceImpl
 
     protected Set<PortForwardRule> getPortForwardRules() throws KuraException {
         return this.firewall.getPortForwardRules();
+    }
+
+    protected LinuxFirewall getLinuxFirewall() {
+        if (this.firewall == null) {
+            this.firewall = LinuxFirewall.getInstance(this.executorService);
+        }
+
+        return this.firewall;
     }
 
     private Tocd getDefinition() throws KuraException {

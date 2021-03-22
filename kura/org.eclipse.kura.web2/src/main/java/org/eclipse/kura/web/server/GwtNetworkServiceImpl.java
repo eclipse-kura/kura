@@ -49,6 +49,7 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
@@ -1439,12 +1440,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 dstNetwork = "0.0.0.0/0";
             }
 
-            boolean masquerade = entry.getMasquerade().equals("yes") ? true : false;
+            boolean masquerade = entry.getMasquerade().equals("yes");
 
             FirewallNatConfig firewallNatConfig = new FirewallNatConfig(
                     GwtSafeHtmlUtils.htmlEscape(entry.getInInterface()),
                     GwtSafeHtmlUtils.htmlEscape(entry.getOutInterface()),
-                    GwtSafeHtmlUtils.htmlEscape(entry.getProtocol()), srcNetwork, dstNetwork, masquerade);
+                    GwtSafeHtmlUtils.htmlEscape(entry.getProtocol()), srcNetwork, dstNetwork, masquerade,
+                    RuleType.IP_FORWARDING);
 
             firewallNatConfigs.add(firewallNatConfig);
         }

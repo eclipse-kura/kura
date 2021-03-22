@@ -47,6 +47,7 @@ import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
@@ -131,8 +132,9 @@ public class FirewallConfigurationServiceImplTest {
             protected Set<PortForwardRule> getPortForwardRules() throws KuraException {
                 Set<PortForwardRule> result = new HashSet<>();
 
-                PortForwardRule rule = new PortForwardRule("wlan0", "eth0", "10.10.1.15", "tcp", 1234, 2345, true,
-                        "10.10.1.0", 24, null, null);
+                PortForwardRule rule = new PortForwardRule().inboundIface("wlan0").outboundIface("eth0")
+                        .address("10.10.1.15").protocol("tcp").inPort(1234).outPort(2345).masquerade(true)
+                        .permittedNetwork("10.10.1.0").permittedNetworkMask(24);
                 result.add(rule);
 
                 return result;
@@ -148,7 +150,7 @@ public class FirewallConfigurationServiceImplTest {
             protected Set<NATRule> getNatRules() throws KuraException {
                 Set<NATRule> result = new HashSet<>();
 
-                NATRule rule = new NATRule("wlan0", "eth0", "tcp", null, "10.10.1.0/24", true);
+                NATRule rule = new NATRule("wlan0", "eth0", "tcp", null, "10.10.1.0/24", true, RuleType.IP_FORWARDING);
                 result.add(rule);
 
                 return result;
@@ -213,8 +215,9 @@ public class FirewallConfigurationServiceImplTest {
             protected Set<PortForwardRule> getPortForwardRules() throws KuraException {
                 Set<PortForwardRule> result = new HashSet<>();
 
-                PortForwardRule rule = new PortForwardRule("wlan0", "eth0", "10.10.1.15", "tcp", 1234, 2345, true,
-                        "10.10.1.0", 24, null, null);
+                PortForwardRule rule = new PortForwardRule().inboundIface("wlan0").outboundIface("eth0")
+                        .address("10.10.1.15").protocol("tcp").inPort(1234).outPort(2345).masquerade(true)
+                        .permittedNetwork("10.10.1.0").permittedNetworkMask(24);
                 result.add(rule);
 
                 return result;
@@ -224,7 +227,7 @@ public class FirewallConfigurationServiceImplTest {
             protected Set<NATRule> getAutoNatRules() throws KuraException {
                 Set<NATRule> result = new HashSet<>();
 
-                NATRule rule = new NATRule("wlan0", "eth0", "tcp", null, "10.10.1.0/24", true);
+                NATRule rule = new NATRule("wlan0", "eth0", "tcp", null, "10.10.1.0/24", true, RuleType.GENERIC);
                 result.add(rule);
 
                 return result;
@@ -234,7 +237,7 @@ public class FirewallConfigurationServiceImplTest {
             protected Set<NATRule> getNatRules() throws KuraException {
                 Set<NATRule> result = new HashSet<>();
 
-                NATRule rule = new NATRule("wlan0", "eth0", "tcp", null, "10.10.1.0/24", true);
+                NATRule rule = new NATRule("wlan0", "eth0", "tcp", null, "10.10.1.0/24", true, RuleType.IP_FORWARDING);
                 result.add(rule);
 
                 return result;

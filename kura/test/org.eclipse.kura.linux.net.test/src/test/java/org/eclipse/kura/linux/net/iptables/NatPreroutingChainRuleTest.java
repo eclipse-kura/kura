@@ -40,8 +40,9 @@ public class NatPreroutingChainRuleTest {
 
     @Test
     public void natPreroutingRuleToStringTest() throws NumberFormatException, UnknownHostException {
-        NatPreroutingChainRule preroutingRule = new NatPreroutingChainRule("eth1", "udp", 123, 321, 10200, 10400,
-                "1.2.3.4", "9.8.7.6", 32, "00:11:22:33:44:55:66");
+        NatPreroutingChainRule preroutingRule = new NatPreroutingChainRule().inputInterface("eth1").protocol("udp")
+                .externalPort(123).internalPort(321).srcPortFirst(10200).srcPortLast(10400).dstIpAddress("1.2.3.4")
+                .permittedNetwork("9.8.7.6").permittedNetworkMask(32).permittedMacAddress("00:11:22:33:44:55:66");
 
         assertEquals(
                 "-A prerouting-kura -s 9.8.7.6/32 -i eth1 -p udp -m mac --mac-source 00:11:22:33:44:55:66 -m udp --sport 10200:10400 --dport 123 -j DNAT --to-destination 1.2.3.4:321",

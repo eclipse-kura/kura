@@ -33,6 +33,7 @@ import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.junit.Test;
 
 public class IpTablesConfigTest extends FirewallTestUtils {
@@ -106,14 +107,18 @@ public class IpTablesConfigTest extends FirewallTestUtils {
                 "00:11:22:33:44:55:66", "10100:10200"));
 
         Set<PortForwardRule> portForwardRules = new LinkedHashSet<>();
-        portForwardRules.add(new PortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
-                32, "00:11:22:33:44:55:66", "10100:10200"));
+        PortForwardRule portForwardRule = new PortForwardRule().inboundIface("eth0").outboundIface("eth1")
+                .address("172.16.0.1").protocol("tcp").inPort(3040).outPort(4050).masquerade(true)
+                .permittedNetwork("172.16.0.100").permittedNetworkMask(32).permittedMAC("00:11:22:33:44:55:66")
+                .sourcePortRange("10100:10200");
+        portForwardRules.add(portForwardRule);
 
         Set<NATRule> autoNatRules = new LinkedHashSet<>();
-        autoNatRules.add(new NATRule("eth2", "eth3", true));
+        autoNatRules.add(new NATRule("eth2", "eth3", true, RuleType.GENERIC));
 
         Set<NATRule> natRules = new LinkedHashSet<>();
-        natRules.add(new NATRule("eth4", "eth5", "tcp", "172.16.0.1/24", "172.16.0.2/24", true));
+        natRules.add(
+                new NATRule("eth4", "eth5", "tcp", "172.16.0.1/24", "172.16.0.2/24", true, RuleType.IP_FORWARDING));
 
         IptablesConfig iptablesConfig = new IptablesConfig(localRules, portForwardRules, autoNatRules, natRules, true,
                 executorServiceMock);
@@ -138,16 +143,16 @@ public class IpTablesConfigTest extends FirewallTestUtils {
                 case "-A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 --dport 5400 -j ACCEPT":
                     isLocalRulePresent.set(true);
                     break;
-                case "-A forward-kura -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT":
+                case "-A forward-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT":
                     isPortForwardRulePresent[0].set(true);
                     break;
-                case "-A forward-kura -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
+                case "-A forward-kura-pf -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
                     isPortForwardRulePresent[1].set(true);
                     break;
-                case "-A prerouting-kura -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050":
+                case "-A prerouting-kura-pf -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050":
                     isPortForwardRulePresent[2].set(true);
                     break;
-                case "-A postrouting-kura -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE":
+                case "-A postrouting-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE":
                     isPortForwardRulePresent[3].set(true);
                     break;
                 case "-A forward-kura -i eth2 -o eth3 -j ACCEPT":
@@ -159,13 +164,13 @@ public class IpTablesConfigTest extends FirewallTestUtils {
                 case "-A postrouting-kura -o eth3 -j MASQUERADE":
                     isAutoNatRulePresent[2].set(true);
                     break;
-                case "-A postrouting-kura -s 172.16.0.1/24 -d 172.16.0.2/24 -o eth5 -p tcp -j MASQUERADE":
+                case "-A postrouting-kura-ipf -s 172.16.0.1/24 -d 172.16.0.2/24 -o eth5 -p tcp -j MASQUERADE":
                     isNatRulePresent[0].set(true);
                     break;
-                case "-A forward-kura -s 172.16.0.1/24 -d 172.16.0.2/24 -i eth4 -o eth5 -p tcp -m tcp -j ACCEPT":
+                case "-A forward-kura-ipf -s 172.16.0.1/24 -d 172.16.0.2/24 -i eth4 -o eth5 -p tcp -m tcp -j ACCEPT":
                     isNatRulePresent[1].set(true);
                     break;
-                case "-A forward-kura -s 172.16.0.2/24 -i eth5 -o eth4 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
+                case "-A forward-kura-ipf -s 172.16.0.2/24 -i eth5 -o eth4 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT":
                     isNatRulePresent[2].set(true);
                     break;
                 }

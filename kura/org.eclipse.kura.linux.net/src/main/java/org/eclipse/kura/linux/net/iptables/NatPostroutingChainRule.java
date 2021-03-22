@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.linux.net.iptables;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,22 +31,59 @@ public class NatPostroutingChainRule {
     private String dstInterface;
     private String protocol;
     private boolean masquerade;
+    private RuleType type;
 
-    public NatPostroutingChainRule(String dstNetwork, short dstMask, String srcNetwork, short srcMask,
-            String dstInterface, String protocol, boolean masquerade) {
-        this.dstNetwork = dstNetwork;
-        this.dstMask = dstMask;
-        this.srcNetwork = srcNetwork;
-        this.srcMask = srcMask;
-        this.dstInterface = dstInterface;
-        this.protocol = protocol;
-        this.masquerade = masquerade;
+    public NatPostroutingChainRule() {
+        this.type = RuleType.GENERIC;
     }
 
-    public NatPostroutingChainRule(String dstInterface, boolean masquerade) {
+    public NatPostroutingChainRule dstNetwork(String dstNetwork) {
+        this.dstNetwork = dstNetwork;
+        return this;
+    }
+
+    public NatPostroutingChainRule dstMask(short dstMask) {
+        this.dstMask = dstMask;
+        return this;
+    }
+
+    public NatPostroutingChainRule srcNetwork(String srcNetwork) {
+        this.srcNetwork = srcNetwork;
+        return this;
+    }
+
+    public NatPostroutingChainRule srcMask(short srcMask) {
+        this.srcMask = srcMask;
+        return this;
+    }
+
+    public NatPostroutingChainRule dstInterface(String dstInterface) {
+        this.dstInterface = dstInterface;
+        return this;
+    }
+
+    public NatPostroutingChainRule protocol(String protocol) {
+        this.protocol = protocol;
+        return this;
+    }
+
+    public NatPostroutingChainRule masquerade(boolean masquerade) {
+        this.masquerade = masquerade;
+        return this;
+    }
+
+    public NatPostroutingChainRule type(RuleType type) {
+        this.type = type;
+        return this;
+    }
+
+    public NatPostroutingChainRule(String dstInterface, boolean masquerade, RuleType type) {
         this.dstInterface = dstInterface;
         this.masquerade = masquerade;
-        StringBuilder sbRule = new StringBuilder("iptables -t nat -o ");
+        this.type = type;
+        StringBuilder sbRule = new StringBuilder("iptables -t nat -A ");
+        sbRule.append(getRuleTypeString(type));
+        sbRule.append(" -o ");
         sbRule.append(this.dstInterface);
         if (this.masquerade) {
             sbRule.append(" -j MASQUERADE");
@@ -54,11 +92,12 @@ public class NatPostroutingChainRule {
     }
 
     public NatPostroutingChainRule(String dstInterface, String protocol, String dstNetwork, String srcNetwork,
-            boolean masquerade) throws KuraException {
+            boolean masquerade, RuleType type) throws KuraException {
         try {
             this.dstInterface = dstInterface;
             this.protocol = protocol;
             this.masquerade = masquerade;
+            this.type = type;
             if (dstNetwork != null) {
                 this.dstNetwork = dstNetwork.split("/")[0];
                 this.dstMask = Short.parseShort(dstNetwork.split("/")[1]);
@@ -67,33 +106,36 @@ public class NatPostroutingChainRule {
                 this.srcNetwork = srcNetwork.split("/")[0];
                 this.srcMask = Short.parseShort(srcNetwork.split("/")[1]);
             }
-            StringBuilder sbRule = new StringBuilder("iptables -t nat ");
+            StringBuilder sbRule = new StringBuilder("iptables -t nat -A ");
+            sbRule.append(getRuleTypeString(this.type));
+            sbRule.append(" ");
             if (this.dstNetwork != null) {
-                sbRule.append("-d ");
+                sbRule.append(" -d ");
                 sbRule.append(this.dstNetwork);
                 sbRule.append('/');
                 sbRule.append(this.dstMask);
             }
             if (this.srcNetwork != null) {
-                sbRule.append("-s ");
+                sbRule.append(" -s ");
                 sbRule.append(this.srcNetwork);
                 sbRule.append('/');
                 sbRule.append(this.srcMask);
             }
-            sbRule.append("-o ");
+            sbRule.append(" -o ");
             sbRule.append(this.dstInterface);
-            sbRule.append("-p ");
+            sbRule.append(" -p ");
             sbRule.append(this.protocol);
             if (this.masquerade) {
                 sbRule.append(" -j MASQUERADE");
             }
             this.rule = sbRule.toString();
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
     }
 
     public NatPostroutingChainRule(String rule) throws KuraException {
+        this.type = RuleType.GENERIC;
         try {
             String[] aRuleTokens = rule.split(" ");
             for (int i = 0; i < aRuleTokens.length; i++) {
@@ -111,20 +153,25 @@ public class NatPostroutingChainRule {
                     if ("MASQUERADE".equals(aRuleTokens[++i])) {
                         this.masquerade = true;
                     }
+                } else if ("postrouting-kura-pf".equals(aRuleTokens[i])) {
+                    this.type = RuleType.PORT_FORWARDING;
+                } else if ("postrouting-kura-ipf".equals(aRuleTokens[i])) {
+                    this.type = RuleType.IP_FORWARDING;
                 }
             }
             this.rule = new StringBuilder("iptables -t nat ").append(rule).toString();
         } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder("-A ");
         if (this.masquerade) {
-            sb.append("-A postrouting-kura");
-            if (this.srcNetwork != null && !this.srcNetwork.equals("0.0.0.0")) {
+            sb.append(getRuleTypeString(this.type));
+            if (this.srcNetwork != null
+                    && (this.type == RuleType.IP_FORWARDING || !this.srcNetwork.equals("0.0.0.0"))) {
                 sb.append(" -s ").append(this.srcNetwork).append('/').append(this.srcMask);
             }
             if (this.dstNetwork != null) {
@@ -152,6 +199,7 @@ public class NatPostroutingChainRule {
         result = prime * result + (this.dstInterface == null ? 0 : this.dstInterface.hashCode());
         result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
         result = prime * result + (this.masquerade ? 1277 : 1279);
+        result = prime * result + (this.type == null ? 0 : this.type.hashCode());
         return result;
     }
 
@@ -174,7 +222,8 @@ public class NatPostroutingChainRule {
         return compareObjects(this.rule, other.rule) && compareObjects(this.dstNetwork, other.dstNetwork)
                 && this.dstMask == other.dstMask && compareObjects(this.srcNetwork, other.srcNetwork)
                 && this.srcMask == other.srcMask && compareObjects(this.dstInterface, other.dstInterface)
-                && compareObjects(this.protocol, other.protocol) && this.masquerade == other.masquerade;
+                && compareObjects(this.protocol, other.protocol) && this.masquerade == other.masquerade
+                && compareObjects(this.type, other.type);
 
     }
 
@@ -228,6 +277,9 @@ public class NatPostroutingChainRule {
         if (this.dstMask != forwardChainRule.getDstMask()) {
             return false;
         }
+        if (this.type != forwardChainRule.getType()) {
+            return false;
+        }
         return true;
     }
 
@@ -257,5 +309,19 @@ public class NatPostroutingChainRule {
 
     public boolean isMasquerade() {
         return this.masquerade;
+    }
+
+    public RuleType getType() {
+        return this.type;
+    }
+
+    private String getRuleTypeString(RuleType type) {
+        if (type == RuleType.IP_FORWARDING) {
+            return "postrouting-kura-ipf";
+        } else if (type == RuleType.PORT_FORWARDING) {
+            return "postrouting-kura-pf";
+        } else {
+            return "postrouting-kura";
+        }
     }
 }

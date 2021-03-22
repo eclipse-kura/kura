@@ -33,23 +33,43 @@ public class IptablesConfigConstants {
     protected static final String INPUT_KURA_CHAIN = "input-kura";
     protected static final String OUTPUT_KURA_CHAIN = "output-kura";
     protected static final String FORWARD_KURA_CHAIN = "forward-kura";
+    protected static final String FORWARD_KURA_PF_CHAIN = "forward-kura-pf";
+    protected static final String FORWARD_KURA_IPF_CHAIN = "forward-kura-ipf";
     protected static final String PREROUTING_KURA_CHAIN = "prerouting-kura";
+    protected static final String PREROUTING_KURA_PF_CHAIN = "prerouting-kura-pf";
     protected static final String POSTROUTING_KURA_CHAIN = "postrouting-kura";
+    protected static final String POSTROUTING_KURA_PF_CHAIN = "postrouting-kura-pf";
+    protected static final String POSTROUTING_KURA_IPF_CHAIN = "postrouting-kura-ipf";
     protected static final String ADD_INPUT_KURA_CHAIN = "-I INPUT -j input-kura";
     protected static final String ADD_OUTPUT_KURA_CHAIN = "-I OUTPUT -j output-kura";
     protected static final String ADD_FORWARD_KURA_CHAIN = "-I FORWARD -j forward-kura";
+    protected static final String ADD_FORWARD_KURA_PF_CHAIN = "-I forward-kura -j forward-kura-pf";
+    protected static final String ADD_FORWARD_KURA_IPF_CHAIN = "-I forward-kura -j forward-kura-ipf";
     protected static final String ADD_PREROUTING_KURA_CHAIN = "-I PREROUTING -j prerouting-kura";
+    protected static final String ADD_PREROUTING_KURA_PF_CHAIN = "-I prerouting-kura -j prerouting-kura-pf";
     protected static final String ADD_POSTROUTING_KURA_CHAIN = "-I POSTROUTING -j postrouting-kura";
+    protected static final String ADD_POSTROUTING_KURA_PF_CHAIN = "-I postrouting-kura -j postrouting-kura-pf";
+    protected static final String ADD_POSTROUTING_KURA_IPF_CHAIN = "-I postrouting-kura -j postrouting-kura-ipf";
     protected static final String RETURN_PREROUTING_KURA_CHAIN = "-A prerouting-kura -j RETURN";
+    protected static final String RETURN_PREROUTING_KURA_PF_CHAIN = "-A prerouting-kura-pf -j RETURN";
     protected static final String RETURN_POSTROUTING_KURA_CHAIN = "-A postrouting-kura -j RETURN";
+    protected static final String RETURN_POSTROUTING_KURA_PF_CHAIN = "-A postrouting-kura-pf -j RETURN";
+    protected static final String RETURN_POSTROUTING_KURA_IPF_CHAIN = "-A postrouting-kura-ipf -j RETURN";
     protected static final String RETURN_INPUT_KURA_CHAIN = "-A input-kura -j RETURN";
     protected static final String RETURN_OUTPUT_KURA_CHAIN = "-A output-kura -j RETURN";
     protected static final String RETURN_FORWARD_KURA_CHAIN = "-A forward-kura -j RETURN";
+    protected static final String RETURN_FORWARD_KURA_PF_CHAIN = "-A forward-kura-pf -j RETURN";
+    protected static final String RETURN_FORWARD_KURA_IPF_CHAIN = "-A forward-kura-ipf -j RETURN";
     protected static final String ALLOW_ALL_TRAFFIC_TO_LOOPBACK = "-A input-kura -i lo -j ACCEPT";
     protected static final String ALLOW_ONLY_INCOMING_TO_OUTGOING = "-A input-kura -m state --state RELATED,ESTABLISHED -j ACCEPT";
     protected static final String POSTROUTING_KURA_POLICY = ":postrouting-kura - [0:0]";
+    protected static final String POSTROUTING_KURA_PF_POLICY = ":postrouting-kura-pf - [0:0]";
+    protected static final String POSTROUTING_KURA_IPF_POLICY = ":postrouting-kura-ipf - [0:0]";
     protected static final String PREROUTING_KURA_POLICY = ":prerouting-kura - [0:0]";
+    protected static final String PREROUTING_KURA_PF_POLICY = ":prerouting-kura-pf - [0:0]";
     protected static final String FORWARD_KURA_POLICY = ":forward-kura - [0:0]";
+    protected static final String FORWARD_KURA_PF_POLICY = ":forward-kura-pf - [0:0]";
+    protected static final String FORWARD_KURA_IPF_POLICY = ":forward-kura-ipf - [0:0]";
     protected static final String OUTPUT_KURA_POLICY = ":output-kura - [0:0]";
     protected static final String INPUT_KURA_POLICY = ":input-kura - [0:0]";
     protected static final String POSTROUTING_ACCEPT_POLICY = ":POSTROUTING ACCEPT [0:0]";
@@ -63,6 +83,10 @@ public class IptablesConfigConstants {
             FILTER };
     protected static final String[] IPTABLES_CREATE_FORWARD_KURA_CHAIN = { IPTABLES_COMMAND, "-N", FORWARD_KURA_CHAIN,
             "-t", FILTER };
+    protected static final String[] IPTABLES_CREATE_FORWARD_KURA_PF_CHAIN = { IPTABLES_COMMAND, "-N",
+            FORWARD_KURA_PF_CHAIN, "-t", FILTER };
+    protected static final String[] IPTABLES_CREATE_FORWARD_KURA_IPF_CHAIN = { IPTABLES_COMMAND, "-N",
+            FORWARD_KURA_IPF_CHAIN, "-t", FILTER };
     protected static final String[] IPTABLES_CREATE_OUTPUT_KURA_CHAIN = { IPTABLES_COMMAND, "-N", OUTPUT_KURA_CHAIN,
             "-t", FILTER };
     protected static final String[] IPTABLES_INPUT_DROP_POLICY = { IPTABLES_COMMAND, "-P", INPUT, "DROP" };
@@ -73,22 +97,38 @@ public class IptablesConfigConstants {
             OUTPUT_KURA_CHAIN, "-t", FILTER };
     protected static final String[] IPTABLES_CHECK_FORWARD_KURA_CHAIN = { IPTABLES_COMMAND, "-C", FORWARD, "-j",
             FORWARD_KURA_CHAIN, "-t", FILTER };
+    protected static final String[] IPTABLES_CHECK_FORWARD_KURA_PF_CHAIN = { IPTABLES_COMMAND, "-C", FORWARD_KURA_CHAIN,
+            "-j", FORWARD_KURA_PF_CHAIN, "-t", FILTER };
+    protected static final String[] IPTABLES_CHECK_FORWARD_KURA_IPF_CHAIN = { IPTABLES_COMMAND, "-C",
+            FORWARD_KURA_CHAIN, "-j", FORWARD_KURA_IPF_CHAIN, "-t", FILTER };
     protected static final String[] IPTABLES_CREATE_INPUT_KURA_CHAIN_NAT = { IPTABLES_COMMAND, "-N", INPUT_KURA_CHAIN,
             "-t", NAT };
     protected static final String[] IPTABLES_CREATE_OUTPUT_KURA_CHAIN_NAT = { IPTABLES_COMMAND, "-N", OUTPUT_KURA_CHAIN,
             "-t", NAT };
     protected static final String[] IPTABLES_CREATE_PREROUTING_KURA_CHAIN = { IPTABLES_COMMAND, "-N",
             PREROUTING_KURA_CHAIN, "-t", NAT };
+    protected static final String[] IPTABLES_CREATE_PREROUTING_KURA_PF_CHAIN = { IPTABLES_COMMAND, "-N",
+            PREROUTING_KURA_PF_CHAIN, "-t", NAT };
     protected static final String[] IPTABLES_CREATE_POSTROUTING_KURA_CHAIN = { IPTABLES_COMMAND, "-N",
             POSTROUTING_KURA_CHAIN, "-t", NAT };
+    protected static final String[] IPTABLES_CREATE_POSTROUTING_KURA_PF_CHAIN = { IPTABLES_COMMAND, "-N",
+            POSTROUTING_KURA_PF_CHAIN, "-t", NAT };
+    protected static final String[] IPTABLES_CREATE_POSTROUTING_KURA_IPF_CHAIN = { IPTABLES_COMMAND, "-N",
+            POSTROUTING_KURA_IPF_CHAIN, "-t", NAT };
     protected static final String[] IPTABLES_CHECK_INPUT_KURA_CHAIN_NAT = { IPTABLES_COMMAND, "-C", INPUT, "-j",
             INPUT_KURA_CHAIN, "-t", NAT };
     protected static final String[] IPTABLES_CHECK_OUTPUT_KURA_CHAIN_NAT = { IPTABLES_COMMAND, "-C", OUTPUT, "-j",
             OUTPUT_KURA_CHAIN, "-t", NAT };
     protected static final String[] IPTABLES_CHECK_PREROUTING_KURA_CHAIN = { IPTABLES_COMMAND, "-C", PREROUTING, "-j",
             PREROUTING_KURA_CHAIN, "-t", NAT };
+    protected static final String[] IPTABLES_CHECK_PREROUTING_KURA_PF_CHAIN = { IPTABLES_COMMAND, "-C",
+            PREROUTING_KURA_CHAIN, "-j", PREROUTING_KURA_PF_CHAIN, "-t", NAT };
     protected static final String[] IPTABLES_CHECK_POSTROUTING_KURA_CHAIN = { IPTABLES_COMMAND, "-C", POSTROUTING, "-j",
             POSTROUTING_KURA_CHAIN, "-t", NAT };
+    protected static final String[] IPTABLES_CHECK_POSTROUTING_KURA_PF_CHAIN = { IPTABLES_COMMAND, "-C",
+            POSTROUTING_KURA_CHAIN, "-j", POSTROUTING_KURA_PF_CHAIN, "-t", NAT };
+    protected static final String[] IPTABLES_CHECK_POSTROUTING_KURA_IPF_CHAIN = { IPTABLES_COMMAND, "-C",
+            POSTROUTING_KURA_CHAIN, "-j", POSTROUTING_KURA_IPF_CHAIN, "-t", NAT };
 
     protected static final String COMMAND_EXECUTOR_SERVICE_MESSAGE = "CommandExecutorService not set.";
     protected static final String CHAIN_CREATION_FAILED_MESSAGE = "Failed to create chain";

@@ -38,8 +38,9 @@ public class NatPostroutingChainRuleTest {
 
     @Test
     public void natPostroutingRuleToStringTest() throws NumberFormatException, UnknownHostException {
-        NatPostroutingChainRule postroutingRule = new NatPostroutingChainRule("192.168.0.0", (short) 24, "172.16.0.0",
-                (short) 32, "eth6", "udp", true);
+        NatPostroutingChainRule postroutingRule = new NatPostroutingChainRule().dstNetwork("192.168.0.0")
+                .dstMask((short) 24).srcNetwork("172.16.0.0").srcMask((short) 32).dstInterface("eth6").protocol("udp")
+                .masquerade(true);
 
         assertEquals("-A postrouting-kura -s 172.16.0.0/32 -d 192.168.0.0/24 -o eth6 -p udp -j MASQUERADE",
                 postroutingRule.toString());

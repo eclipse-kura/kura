@@ -638,22 +638,32 @@ public class IptablesConfig extends IptablesConfigConstants {
                 readingNatTable = true;
             } else if (STAR_FILTER.equals(line)) {
                 readingFilterTable = true;
-            } else if (COMMIT.equals(line)) {
-                if (readingNatTable) {
-                    readingNatTable = false;
-                }
-                if (readingFilterTable) {
-                    readingFilterTable = false;
-                }
-            } else if (readingNatTable && line.startsWith("-A prerouting-kura")) {
-                natPreroutingChain.add(new NatPreroutingChainRule(line));
-            } else if (readingNatTable && line.startsWith("-A postrouting-kura")) {
-                natPostroutingChain.add(new NatPostroutingChainRule(line));
-            } else if (readingFilterTable && line.startsWith("-A forward-kura")) {
-                filterForwardChain.add(new FilterForwardChainRule(line));
-            } else if (readingFilterTable && line.startsWith("-A input-kura")) {
-                readInputChain(line);
+            } else if (COMMIT.equals(line) && readingNatTable) {
+                readingNatTable = false;
+            } else if (COMMIT.equals(line) && readingFilterTable) {
+                readingFilterTable = false;
+            } else if (readingNatTable) {
+                parseNatTable(line, natPreroutingChain, natPostroutingChain);
+            } else if (readingFilterTable) {
+                parseFilterTable(line, filterForwardChain);
             }
+        }
+    }
+
+    private void parseNatTable(String line, List<NatPreroutingChainRule> natPreroutingChain,
+            List<NatPostroutingChainRule> natPostroutingChain) throws KuraException {
+        if (line.startsWith("-A prerouting-kura")) {
+            natPreroutingChain.add(new NatPreroutingChainRule(line));
+        } else if (line.startsWith("-A postrouting-kura")) {
+            natPostroutingChain.add(new NatPostroutingChainRule(line));
+        }
+    }
+
+    private void parseFilterTable(String line, List<FilterForwardChainRule> filterForwardChain) throws KuraException {
+        if (line.startsWith("-A forward-kura")) {
+            filterForwardChain.add(new FilterForwardChainRule(line));
+        } else if (line.startsWith("-A input-kura")) {
+            readInputChain(line);
         }
     }
 

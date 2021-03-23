@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,9 +14,11 @@ package org.eclipse.kura.linux.net.iptables;
 
 import java.util.List;
 
+import org.eclipse.kura.net.firewall.RuleType;
+
 /**
  * Creates an iptables command for a Port Forward Rule, allowing an incoming port to be forwarded to destinationIP/port.
- *
+ * 
  */
 public class PortForwardRule {
 
@@ -61,27 +63,6 @@ public class PortForwardRule {
      * @param sourcePortRange
      *            range of source ports allowed on IP connection (sourcePort1:sourcePort2)
      */
-    @SuppressWarnings("checkstyle:parameterNumber")
-    public PortForwardRule(String inboundIface, String outboundIface, String address, String protocol, int inPort,
-            int outPort, boolean masquerade, String permittedNetwork, int permittedNetworkMask, String permittedMAC,
-            String sourcePortRange) {
-        this.inboundIface = inboundIface;
-        this.outboundIface = outboundIface;
-        this.inPort = inPort;
-        this.protocol = protocol;
-        this.address = address;
-        this.outPort = outPort;
-        this.masquerade = masquerade;
-
-        this.permittedNetwork = permittedNetwork;
-        this.permittedNetworkMask = permittedNetworkMask;
-        this.permittedMAC = permittedMAC;
-        this.sourcePortRange = sourcePortRange;
-    }
-
-    /**
-     * Constructor of <code>PortForwardRule</code> object.
-     */
     public PortForwardRule() {
         this.inboundIface = null;
         this.outboundIface = null;
@@ -96,17 +77,69 @@ public class PortForwardRule {
         this.sourcePortRange = null;
     }
 
+    public PortForwardRule inboundIface(String inboundIface) {
+        this.inboundIface = inboundIface;
+        return this;
+    }
+
+    public PortForwardRule outboundIface(String outboundIface) {
+        this.outboundIface = outboundIface;
+        return this;
+    }
+
+    public PortForwardRule address(String address) {
+        this.address = address;
+        return this;
+    }
+
+    public PortForwardRule protocol(String protocol) {
+        this.protocol = protocol;
+        return this;
+    }
+
+    public PortForwardRule inPort(int inPort) {
+        this.inPort = inPort;
+        return this;
+    }
+
+    public PortForwardRule outPort(int outPort) {
+        this.outPort = outPort;
+        return this;
+    }
+
+    public PortForwardRule masquerade(boolean masquerade) {
+        this.masquerade = masquerade;
+        return this;
+    }
+
+    public PortForwardRule permittedNetwork(String permittedNetwork) {
+        this.permittedNetwork = permittedNetwork;
+        return this;
+    }
+
+    public PortForwardRule permittedNetworkMask(int permittedNetworkMask) {
+        this.permittedNetworkMask = permittedNetworkMask;
+        return this;
+    }
+
+    public PortForwardRule permittedMAC(String permittedMAC) {
+        this.permittedMAC = permittedMAC;
+        return this;
+    }
+
+    public PortForwardRule sourcePortRange(String sourcePortRange) {
+        this.sourcePortRange = sourcePortRange;
+        return this;
+    }
+
     /**
      * Returns true if the required <code>LocalRule</code> parameters have all been set. Returns false otherwise.
      *
      * @return A boolean representing whether all parameters have been set.
      */
     public boolean isComplete() {
-        if (this.protocol != null && this.inboundIface != null && this.outboundIface != null && this.address != null
-                && this.inPort != 0 && this.outPort != 0) {
-            return true;
-        }
-        return false;
+        return this.protocol != null && this.inboundIface != null && this.outboundIface != null && this.address != null
+                && this.inPort != 0 && this.outPort != 0;
     }
 
     public NatPreroutingChainRule getNatPreroutingChainRule() {
@@ -116,13 +149,18 @@ public class PortForwardRule {
             srcPortFirst = Integer.parseInt(this.sourcePortRange.split(":")[0]);
             srcPortLast = Integer.parseInt(this.sourcePortRange.split(":")[1]);
         }
-        return new NatPreroutingChainRule(this.inboundIface, this.protocol, this.inPort, this.outPort, srcPortFirst,
-                srcPortLast, this.address, this.permittedNetwork, this.permittedNetworkMask, this.permittedMAC);
+        return new NatPreroutingChainRule().inputInterface(this.inboundIface).protocol(this.protocol)
+                .externalPort(this.inPort).internalPort(this.outPort).srcPortFirst(srcPortFirst)
+                .srcPortLast(srcPortLast).dstIpAddress(this.address).permittedNetwork(this.permittedNetwork)
+                .permittedNetworkMask(this.permittedNetworkMask).permittedMacAddress(this.permittedMAC)
+                .type(RuleType.PORT_FORWARDING);
     }
 
     public NatPostroutingChainRule getNatPostroutingChainRule() {
-        return new NatPostroutingChainRule(this.address, (short) 32, this.permittedNetwork,
-                (short) this.permittedNetworkMask, this.outboundIface, this.protocol, this.masquerade);
+        return new NatPostroutingChainRule().dstNetwork(this.address).dstMask((short) 32)
+                .srcNetwork(this.permittedNetwork).srcMask((short) this.permittedNetworkMask)
+                .dstInterface(this.outboundIface).protocol(this.protocol).masquerade(this.masquerade)
+                .type(RuleType.PORT_FORWARDING);
     }
 
     public FilterForwardChainRule getFilterForwardChainRule() {
@@ -132,9 +170,10 @@ public class PortForwardRule {
             srcPortFirst = Integer.parseInt(this.sourcePortRange.split(":")[0]);
             srcPortLast = Integer.parseInt(this.sourcePortRange.split(":")[1]);
         }
-        return new FilterForwardChainRule(this.inboundIface, this.outboundIface, this.permittedNetwork,
-                (short) this.permittedNetworkMask, this.address, (short) 32, this.protocol, this.permittedMAC,
-                srcPortFirst, srcPortLast);
+        return new FilterForwardChainRule().inputInterface(this.inboundIface).outputInterface(this.outboundIface)
+                .srcNetwork(this.permittedNetwork).srcMask((short) this.permittedNetworkMask).dstNetwork(this.address)
+                .dstMask((short) 32).protocol(this.protocol).permittedMacAddress(this.permittedMAC)
+                .srcPortFirst(srcPortFirst).srcPortLast(srcPortLast).type(RuleType.PORT_FORWARDING);
     }
 
     @Override

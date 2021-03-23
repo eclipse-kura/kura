@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -41,6 +41,19 @@ public class FirewallNatConfig implements NetConfig {
     /** Whether or not MASQUERADE should be enabled **/
     private final boolean masquerade;
 
+    /**
+     * Represent the type of the rule
+     * 
+     * @since 2.2
+     */
+    private final RuleType type;
+
+    /**
+     * 
+     * @deprecated since version 2.2. It will be removed in the next major release. Use instead
+     *             {@link #FirewallNatConfig(String, String, String, String, String, boolean, RuleType)}
+     */
+    @Deprecated
     public FirewallNatConfig(String srcIface, String dstIface, String protocol, String src, String dst,
             boolean masquerade) {
         this.sourceInterface = srcIface;
@@ -49,6 +62,39 @@ public class FirewallNatConfig implements NetConfig {
         this.source = src;
         this.destination = dst;
         this.masquerade = masquerade;
+        this.type = RuleType.GENERIC;
+    }
+
+    /**
+     * 
+     * Create a configuration for a NAT rule
+     * 
+     * @param srcIface
+     *            the source network interface (WAN interface)
+     * @param dstIface
+     *            the destination network interface (LAN interface)
+     * @param protocol
+     *            the network protocol (i.e. tcp, udp)
+     * @param src
+     *            the source network/host address in CIDR notation
+     * @param dst
+     *            the destination network/host address in CIDR notation
+     * @param masquerade
+     *            whether or not MASQUERADE should be enabled
+     * @param type
+     *            the type of the rule (IP forwarding, Port forwarding or generic)
+     * 
+     * @since 2.2
+     */
+    public FirewallNatConfig(String srcIface, String dstIface, String protocol, String src, String dst,
+            boolean masquerade, RuleType type) {
+        this.sourceInterface = srcIface;
+        this.destinationInterface = dstIface;
+        this.protocol = protocol;
+        this.source = src;
+        this.destination = dst;
+        this.masquerade = masquerade;
+        this.type = type;
     }
 
     public String getSourceInterface() {
@@ -75,6 +121,14 @@ public class FirewallNatConfig implements NetConfig {
         return this.masquerade;
     }
 
+    /**
+     * 
+     * @since 2.2
+     */
+    public RuleType getRuleType() {
+        return this.type;
+    }
+
     @Override
     public boolean isValid() {
         boolean result = false;
@@ -91,16 +145,12 @@ public class FirewallNatConfig implements NetConfig {
         final int prime = 31;
         int result = 1;
         result = prime * result + (this.destinationInterface == null ? 0 : this.destinationInterface.hashCode());
-
         result = prime * result + (this.sourceInterface == null ? 0 : this.sourceInterface.hashCode());
-
         result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
-
         result = prime * result + (this.source == null ? 0 : this.source.hashCode());
-
         result = prime * result + (this.destination == null ? 0 : this.destination.hashCode());
-
         result = prime * result + (this.masquerade ? 1231 : 1237);
+        result = prime * result + (this.type == null ? 0 : this.type.hashCode());
 
         return result;
     }
@@ -156,6 +206,14 @@ public class FirewallNatConfig implements NetConfig {
             return false;
         }
 
+        if (this.type == null) {
+            if (other.type != null) {
+                return false;
+            }
+        } else if (!this.type.equals(other.type)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -164,12 +222,14 @@ public class FirewallNatConfig implements NetConfig {
         StringBuilder builder = new StringBuilder();
         builder.append("FirewallNatConfig [m_sourceInterface=");
         builder.append(this.sourceInterface);
-        builder.append(", m_destinationInterface=");
+        builder.append(", destinationInterface=");
         builder.append(this.destinationInterface);
-        builder.append(", m_source=");
+        builder.append(", source=");
         builder.append(this.source);
-        builder.append(", m_destination=");
+        builder.append(", destination=");
         builder.append(this.destination);
+        builder.append(", type=");
+        builder.append(this.type);
         builder.append("]");
         return builder.toString();
     }

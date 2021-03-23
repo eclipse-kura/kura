@@ -34,6 +34,7 @@ import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,10 +42,10 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     private static final Logger logger = LoggerFactory.getLogger(IptablesConfig.class);
 
-    private final Set<LocalRule> localRules;
-    private final Set<PortForwardRule> portForwardRules;
-    private final Set<NATRule> autoNatRules;
-    private final Set<NATRule> natRules;
+    private Set<LocalRule> localRules;
+    private Set<PortForwardRule> portForwardRules;
+    private Set<NATRule> autoNatRules;
+    private Set<NATRule> natRules;
     private boolean allowIcmp;
     private Set<String> additionalFilterRules;
     private Set<String> additionalNatRules;
@@ -78,6 +79,46 @@ public class IptablesConfig extends IptablesConfigConstants {
         this.additionalNatRules = new LinkedHashSet<>();
         this.additionalMangleRules = new LinkedHashSet<>();
         this.executorService = executorService;
+    }
+
+    public Set<LocalRule> getLocalRules() {
+        return this.localRules;
+    }
+
+    public void setLocalRules(Set<LocalRule> localRules) {
+        this.localRules = localRules;
+    }
+
+    public Set<PortForwardRule> getPortForwardRules() {
+        return this.portForwardRules;
+    }
+
+    public void setPortForwardRules(Set<PortForwardRule> portForwardRules) {
+        this.portForwardRules = portForwardRules;
+    }
+
+    public Set<NATRule> getAutoNatRules() {
+        return this.autoNatRules;
+    }
+
+    public void setAutoNatRules(Set<NATRule> autoNatRules) {
+        this.autoNatRules = autoNatRules;
+    }
+
+    public Set<NATRule> getNatRules() {
+        return this.natRules;
+    }
+
+    public void setNatRules(Set<NATRule> natRules) {
+        this.natRules = natRules;
+    }
+
+    public void setAllowIcmp(boolean allowIcmp) {
+        this.allowIcmp = allowIcmp;
+    }
+
+    public boolean allowIcmp() {
+        return this.allowIcmp;
     }
 
     public Set<String> getAdditionalFilterRules() {
@@ -157,10 +198,15 @@ public class IptablesConfig extends IptablesConfigConstants {
         internalFlush(INPUT_KURA_CHAIN, FILTER);
         internalFlush(OUTPUT_KURA_CHAIN, FILTER);
         internalFlush(FORWARD_KURA_CHAIN, FILTER);
+        internalFlush(FORWARD_KURA_PF_CHAIN, FILTER);
+        internalFlush(FORWARD_KURA_IPF_CHAIN, FILTER);
         internalFlush(INPUT_KURA_CHAIN, NAT);
         internalFlush(OUTPUT_KURA_CHAIN, NAT);
         internalFlush(PREROUTING_KURA_CHAIN, NAT);
+        internalFlush(PREROUTING_KURA_PF_CHAIN, NAT);
         internalFlush(POSTROUTING_KURA_CHAIN, NAT);
+        internalFlush(POSTROUTING_KURA_PF_CHAIN, NAT);
+        internalFlush(POSTROUTING_KURA_IPF_CHAIN, NAT);
         internalFlush(INPUT_KURA_CHAIN, MANGLE);
         internalFlush(OUTPUT_KURA_CHAIN, MANGLE);
         internalFlush(FORWARD_KURA_CHAIN, MANGLE);
@@ -199,9 +245,13 @@ public class IptablesConfig extends IptablesConfigConstants {
             writer.println(INPUT_KURA_POLICY);
             writer.println(OUTPUT_KURA_POLICY);
             writer.println(FORWARD_KURA_POLICY);
+            writer.println(FORWARD_KURA_PF_POLICY);
+            writer.println(FORWARD_KURA_IPF_POLICY);
             writer.println(ADD_INPUT_KURA_CHAIN);
             writer.println(ADD_OUTPUT_KURA_CHAIN);
             writer.println(ADD_FORWARD_KURA_CHAIN);
+            writer.println(ADD_FORWARD_KURA_PF_CHAIN);
+            writer.println(ADD_FORWARD_KURA_IPF_CHAIN);
             saveFilterTable(writer);
             writer.println(COMMIT);
             writer.println(STAR_NAT);
@@ -210,11 +260,17 @@ public class IptablesConfig extends IptablesConfigConstants {
             writer.println(PREROUTING_ACCEPT_POLICY);
             writer.println(POSTROUTING_ACCEPT_POLICY);
             writer.println(PREROUTING_KURA_POLICY);
+            writer.println(PREROUTING_KURA_PF_POLICY);
             writer.println(POSTROUTING_KURA_POLICY);
+            writer.println(POSTROUTING_KURA_PF_POLICY);
+            writer.println(POSTROUTING_KURA_IPF_POLICY);
             writer.println(INPUT_KURA_POLICY);
             writer.println(OUTPUT_KURA_POLICY);
             writer.println(ADD_PREROUTING_KURA_CHAIN);
+            writer.println(ADD_PREROUTING_KURA_PF_CHAIN);
             writer.println(ADD_POSTROUTING_KURA_CHAIN);
+            writer.println(ADD_POSTROUTING_KURA_PF_CHAIN);
+            writer.println(ADD_POSTROUTING_KURA_IPF_CHAIN);
             writer.println(ADD_INPUT_KURA_CHAIN);
             writer.println(ADD_OUTPUT_KURA_CHAIN);
             saveNatTable(writer);
@@ -340,6 +396,8 @@ public class IptablesConfig extends IptablesConfigConstants {
         writer.println(RETURN_INPUT_KURA_CHAIN);
         writer.println(RETURN_OUTPUT_KURA_CHAIN);
         writer.println(RETURN_FORWARD_KURA_CHAIN);
+        writer.println(RETURN_FORWARD_KURA_PF_CHAIN);
+        writer.println(RETURN_FORWARD_KURA_IPF_CHAIN);
     }
 
     private void writeNatRulesToFilterTable(PrintWriter writer) {
@@ -445,14 +503,17 @@ public class IptablesConfig extends IptablesConfigConstants {
         writeNatRulesToNatTable(writer);
         writeAdditionalRulesToNatTable(writer);
         writer.println(RETURN_POSTROUTING_KURA_CHAIN);
+        writer.println(RETURN_POSTROUTING_KURA_PF_CHAIN);
+        writer.println(RETURN_POSTROUTING_KURA_IPF_CHAIN);
         writer.println(RETURN_PREROUTING_KURA_CHAIN);
+        writer.println(RETURN_PREROUTING_KURA_PF_CHAIN);
         writer.println(RETURN_INPUT_KURA_CHAIN);
         writer.println(RETURN_OUTPUT_KURA_CHAIN);
     }
 
     private void writeNatRulesToNatTable(PrintWriter writer) {
         if (this.natRules != null && !this.natRules.isEmpty()) {
-            this.natRules.stream().forEach(natRule -> writePostroutingNatRulesInternal1(writer, natRule));
+            this.natRules.stream().forEach(natRule -> writePostroutingNatRulesInternal(writer, natRule));
         }
     }
 
@@ -468,14 +529,14 @@ public class IptablesConfig extends IptablesConfigConstants {
                                 .equals(natPostroutingChainRule))
                         .count() > 0;
                 if (!found) {
-                    writePostroutingNatRulesInternal1(writer, autoNatRule);
+                    writePostroutingNatRulesInternal(writer, autoNatRule);
                     appliedNatPostroutingChainRules.add(natPostroutingChainRule);
                 }
             }
         }
     }
 
-    private void writePostroutingNatRulesInternal1(PrintWriter writer, NATRule autoNatRule) {
+    private void writePostroutingNatRulesInternal(PrintWriter writer, NATRule autoNatRule) {
         if (writer == null) {
             CommandStatus status = execute(
                     (IPTABLES_COMMAND + " -t " + NAT + " " + autoNatRule.getNatPostroutingChainRule()).split(" "));
@@ -548,136 +609,172 @@ public class IptablesConfig extends IptablesConfigConstants {
      * the iptables configuration file. Only Kura chains are used.
      */
     public void restore() throws KuraException {
+        List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<>();
+        List<NatPostroutingChainRule> natPostroutingChain = new ArrayList<>();
+        List<FilterForwardChainRule> filterForwardChain = new ArrayList<>();
         try (FileReader fr = new FileReader(FIREWALL_CONFIG_FILE_NAME); BufferedReader br = new BufferedReader(fr)) {
-            List<NatPreroutingChainRule> natPreroutingChain = new ArrayList<>();
-            List<NatPostroutingChainRule> natPostroutingChain = new ArrayList<>();
-            List<FilterForwardChainRule> filterForwardChain = new ArrayList<>();
-
-            String line = null;
-            boolean readingNatTable = false;
-            boolean readingFilterTable = false;
-            while ((line = br.readLine()) != null) {
-                line = line.trim();
-                // skip any predefined lines or comment linesx
-                if ("".equals(line) || line.startsWith("#") || line.startsWith(":") || line.contains(RETURN)) {
-                    continue;
-                }
-                if (STAR_NAT.equals(line)) {
-                    readingNatTable = true;
-                } else if (STAR_FILTER.equals(line)) {
-                    readingFilterTable = true;
-                } else if (COMMIT.equals(line)) {
-                    if (readingNatTable) {
-                        readingNatTable = false;
-                    }
-                    if (readingFilterTable) {
-                        readingFilterTable = false;
-                    }
-                } else if (readingNatTable && line.startsWith("-A prerouting-kura")) {
-                    natPreroutingChain.add(new NatPreroutingChainRule(line));
-                } else if (readingNatTable && line.startsWith("-A postrouting-kura")) {
-                    natPostroutingChain.add(new NatPostroutingChainRule(line));
-                } else if (readingFilterTable && line.startsWith("-A forward-kura")) {
-                    filterForwardChain.add(new FilterForwardChainRule(line));
-                } else if (readingFilterTable && line.startsWith("-A input-kura")) {
-                    if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.equals(line)) {
-                        continue;
-                    }
-                    if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
-                        continue;
-                    }
-                    final String lineFinal = line;
-                    String match = Arrays.stream(ALLOW_ICMP).filter(s -> s.equals(lineFinal)).findFirst().orElse("");
-                    if (match != null && !match.isEmpty()) {
-                        this.allowIcmp = true;
-                        continue;
-                    }
-                    match = Arrays.stream(DO_NOT_ALLOW_ICMP).filter(s -> s.equals(lineFinal)).findFirst().orElse("");
-                    if (match != null && !match.isEmpty()) {
-                        this.allowIcmp = false;
-                        continue;
-                    }
-                    readLocalRule(line);
-                }
-            }
-
+            parseIptablesRules(natPreroutingChain, natPostroutingChain, filterForwardChain, br);
             // ! done parsing !
             parsePortForwardingRules(natPreroutingChain, natPostroutingChain);
-
-            for (NatPostroutingChainRule natPostroutingChainRule : natPostroutingChain) {
-                String destinationInterface = natPostroutingChainRule.getDstInterface();
-                boolean masquerade = natPostroutingChainRule.isMasquerade();
-                String protocol = natPostroutingChainRule.getProtocol();
-                if (protocol != null) {
-                    // found NAT rule, ... maybe
-                    boolean isNATrule = false;
-                    String source = natPostroutingChainRule.getSrcNetwork();
-                    String destination = natPostroutingChainRule.getDstNetwork();
-                    if (destination != null) {
-                        StringBuilder sbDestination = new StringBuilder().append(destination).append('/')
-                                .append(natPostroutingChainRule.getDstMask());
-                        destination = sbDestination.toString();
-                    } else {
-                        isNATrule = true;
-                    }
-
-                    if (source != null) {
-                        StringBuilder sbSource = new StringBuilder().append(source).append('/')
-                                .append(natPostroutingChainRule.getSrcMask());
-                        source = sbSource.toString();
-                    }
-                    if (!isNATrule) {
-                        boolean matchFound = false;
-                        for (NatPreroutingChainRule natPreroutingChainRule : natPreroutingChain) {
-                            if (natPreroutingChainRule.getDstIpAddress()
-                                    .equals(natPostroutingChainRule.getDstNetwork())) {
-                                matchFound = true;
-                                break;
-                            }
-                        }
-                        if (!matchFound) {
-                            isNATrule = true;
-                        }
-                    }
-                    if (isNATrule) {
-                        // match FORWARD rule to find out source interface ...
-                        for (FilterForwardChainRule filterForwardChainRule : filterForwardChain) {
-                            if (natPostroutingChainRule.isMatchingForwardChainRule(filterForwardChainRule)) {
-                                String sourceInterface = filterForwardChainRule.getInputInterface();
-                                logger.debug(
-                                        "parseFirewallConfigurationFile() :: Parsed NAT rule with"
-                                                + "   sourceInterface: {}   destinationInterface: {}   masquerade: {}"
-                                                + "protocol: {}  source network/host: {} destination network/host {}",
-                                        sourceInterface, destinationInterface, masquerade, protocol, source,
-                                        destination);
-                                NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source,
-                                        destination, masquerade);
-                                logger.debug("parseFirewallConfigurationFile() :: Adding NAT rule {}", natRule);
-                                this.natRules.add(natRule);
-                            }
-                        }
-                    }
-                } else {
-                    // found Auto NAT rule ...
-                    // match FORWARD rule to find out source interface ...
-                    for (FilterForwardChainRule filterForwardChainRule : filterForwardChain) {
-                        if (natPostroutingChainRule.isMatchingForwardChainRule(filterForwardChainRule)) {
-                            String sourceInterface = filterForwardChainRule.getInputInterface();
-                            logger.debug(
-                                    "parseFirewallConfigurationFile() :: Parsed auto NAT rule with"
-                                            + " sourceInterface: {}    destinationInterface: {}   masquerade: {}",
-                                    sourceInterface, destinationInterface, masquerade);
-
-                            NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade);
-                            logger.debug("parseFirewallConfigurationFile() :: Adding auto NAT rule {}", natRule);
-                            this.autoNatRules.add(natRule);
-                        }
-                    }
-                }
-            }
+            parseIpForwardingRules(natPreroutingChain, natPostroutingChain, filterForwardChain);
         } catch (IOException e) {
             throw new KuraIOException(e, "restore() :: failed to read configuration file");
         }
+    }
+
+    private void parseIptablesRules(List<NatPreroutingChainRule> natPreroutingChain,
+            List<NatPostroutingChainRule> natPostroutingChain, List<FilterForwardChainRule> filterForwardChain,
+            BufferedReader br) throws IOException, KuraException {
+        String line = null;
+        boolean readingNatTable = false;
+        boolean readingFilterTable = false;
+        while ((line = br.readLine()) != null) {
+            line = line.trim();
+            // skip any predefined lines or comment lines
+            if ("".equals(line) || line.startsWith("#") || line.startsWith(":") || line.contains(RETURN)) {
+                continue;
+            }
+            if (STAR_NAT.equals(line)) {
+                readingNatTable = true;
+            } else if (STAR_FILTER.equals(line)) {
+                readingFilterTable = true;
+            } else if (COMMIT.equals(line) && readingNatTable) {
+                readingNatTable = false;
+            } else if (COMMIT.equals(line) && readingFilterTable) {
+                readingFilterTable = false;
+            } else if (readingNatTable) {
+                parseNatTable(line, natPreroutingChain, natPostroutingChain);
+            } else if (readingFilterTable) {
+                parseFilterTable(line, filterForwardChain);
+            }
+        }
+    }
+
+    private void parseNatTable(String line, List<NatPreroutingChainRule> natPreroutingChain,
+            List<NatPostroutingChainRule> natPostroutingChain) throws KuraException {
+        if (line.startsWith("-A prerouting-kura")) {
+            natPreroutingChain.add(new NatPreroutingChainRule(line));
+        } else if (line.startsWith("-A postrouting-kura")) {
+            natPostroutingChain.add(new NatPostroutingChainRule(line));
+        }
+    }
+
+    private void parseFilterTable(String line, List<FilterForwardChainRule> filterForwardChain) throws KuraException {
+        if (line.startsWith("-A forward-kura")) {
+            filterForwardChain.add(new FilterForwardChainRule(line));
+        } else if (line.startsWith("-A input-kura")) {
+            readInputChain(line);
+        }
+    }
+
+    private void readInputChain(String line) {
+        if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.equals(line)) {
+            return;
+        }
+        if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
+            return;
+        }
+        final String lineFinal = line;
+        String match = Arrays.stream(ALLOW_ICMP).filter(s -> s.equals(lineFinal)).findFirst().orElse("");
+        if (match != null && !match.isEmpty()) {
+            this.allowIcmp = true;
+            return;
+        }
+        match = Arrays.stream(DO_NOT_ALLOW_ICMP).filter(s -> s.equals(lineFinal)).findFirst().orElse("");
+        if (match != null && !match.isEmpty()) {
+            this.allowIcmp = false;
+            return;
+        }
+        readLocalRule(line);
+    }
+
+    private void parseIpForwardingRules(List<NatPreroutingChainRule> natPreroutingChain,
+            List<NatPostroutingChainRule> natPostroutingChain, List<FilterForwardChainRule> filterForwardChain) {
+        natPostroutingChain.stream()
+                .filter(natPostroutingChainRule -> natPostroutingChainRule.getType() != RuleType.PORT_FORWARDING)
+                .forEach(natPostroutingChainRule -> {
+                    String destinationInterface = natPostroutingChainRule.getDstInterface();
+                    boolean masquerade = natPostroutingChainRule.isMasquerade();
+                    String protocol = natPostroutingChainRule.getProtocol();
+                    if (protocol != null) {
+                        // found NAT rule, ... maybe
+                        parseNatRule(natPreroutingChain, filterForwardChain, natPostroutingChainRule,
+                                destinationInterface, masquerade, protocol);
+                    } else {
+                        // found Auto NAT rule ...
+                        // match FORWARD rule to find out source interface ...
+                        parseAutoNatRule(filterForwardChain, natPostroutingChainRule, destinationInterface, masquerade);
+                    }
+                });
+    }
+
+    private void parseAutoNatRule(List<FilterForwardChainRule> filterForwardChain,
+            NatPostroutingChainRule natPostroutingChainRule, String destinationInterface, boolean masquerade) {
+        filterForwardChain.stream()
+                .filter(filterForwardChainRule -> natPostroutingChainRule.isMatchingForwardChainRule(
+                        filterForwardChainRule) && filterForwardChainRule.getType() == RuleType.GENERIC)
+                .forEach(filterForwardChainRule -> {
+                    String sourceInterface = filterForwardChainRule.getInputInterface();
+                    logger.debug(
+                            "parseFirewallConfigurationFile() :: Parsed auto NAT rule with"
+                                    + " sourceInterface: {}    destinationInterface: {}   masquerade: {}",
+                            sourceInterface, destinationInterface, masquerade);
+
+                    NATRule natRule = new NATRule(sourceInterface, destinationInterface, masquerade, RuleType.GENERIC);
+                    logger.debug("parseFirewallConfigurationFile() :: Adding auto NAT rule {}", natRule);
+                    this.autoNatRules.add(natRule);
+                });
+    }
+
+    private void parseNatRule(List<NatPreroutingChainRule> natPreroutingChain,
+            List<FilterForwardChainRule> filterForwardChain, NatPostroutingChainRule natPostroutingChainRule,
+            String destinationInterface, boolean masquerade, String protocol) {
+        boolean isNATrule = false;
+        String source = formatIpAddress(natPostroutingChainRule.getSrcNetwork(), natPostroutingChainRule.getSrcMask());
+        String destination = formatIpAddress(natPostroutingChainRule.getDstNetwork(),
+                natPostroutingChainRule.getDstMask());
+        if (destination == null) {
+            isNATrule = true;
+        }
+
+        if (!isNATrule) {
+            boolean matchFound = false;
+            for (NatPreroutingChainRule natPreroutingChainRule : natPreroutingChain) {
+                if (natPreroutingChainRule.getDstIpAddress().equals(natPostroutingChainRule.getDstNetwork())) {
+                    matchFound = true;
+                    break;
+                }
+            }
+            if (!matchFound) {
+                isNATrule = true;
+            }
+        }
+        if (isNATrule) {
+            // match FORWARD rule to find out source interface ...
+            filterForwardChain.stream()
+                    .filter(filterForwardChainRule -> natPostroutingChainRule.isMatchingForwardChainRule(
+                            filterForwardChainRule) && filterForwardChainRule.getType() == RuleType.IP_FORWARDING)
+                    .forEach(filterForwardChainRule -> {
+                        String sourceInterface = filterForwardChainRule.getInputInterface();
+                        logger.debug(
+                                "parseFirewallConfigurationFile() :: Parsed NAT rule with"
+                                        + "   sourceInterface: {}   destinationInterface: {}   masquerade: {}"
+                                        + "protocol: {}  source network/host: {} destination network/host {}",
+                                sourceInterface, destinationInterface, masquerade, protocol, source, destination);
+                        NATRule natRule = new NATRule(sourceInterface, destinationInterface, protocol, source,
+                                destination, masquerade, RuleType.IP_FORWARDING);
+                        logger.debug("parseFirewallConfigurationFile() :: Adding NAT rule {}", natRule);
+                        this.natRules.add(natRule);
+                    });
+        }
+    }
+
+    private String formatIpAddress(String address, Short mask) {
+        String formatted = null;
+        if (address != null) {
+            formatted = new StringBuilder().append(address).append('/').append(mask).toString();
+        }
+        return formatted;
     }
 
     private void readLocalRule(String line) {
@@ -692,62 +789,48 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     private void parsePortForwardingRules(List<NatPreroutingChainRule> natPreroutingChain,
             List<NatPostroutingChainRule> natPostroutingChain) {
-        for (NatPreroutingChainRule natPreroutingChainRule : natPreroutingChain) {
-            // found port forwarding rule ...
-            String inboundIfaceName = natPreroutingChainRule.getInputInterface();
-            String outboundIfaceName = null;
-            String protocol = natPreroutingChainRule.getProtocol();
-            int inPort = natPreroutingChainRule.getExternalPort();
-            int outPort = natPreroutingChainRule.getInternalPort();
-            boolean masquerade = false;
-            String sport = null;
-            if (natPreroutingChainRule.getSrcPortFirst() > 0
-                    && natPreroutingChainRule.getSrcPortFirst() <= natPreroutingChainRule.getSrcPortLast()) {
-                StringBuilder sbSport = new StringBuilder().append(natPreroutingChainRule.getSrcPortFirst()).append(':')
-                        .append(natPreroutingChainRule.getSrcPortLast());
-                sport = sbSport.toString();
-            }
-            String permittedMac = natPreroutingChainRule.getPermittedMacAddress();
-            String permittedNetwork = natPreroutingChainRule.getPermittedNetwork();
-            int permittedNetworkMask = natPreroutingChainRule.getPermittedNetworkMask();
-            String address = natPreroutingChainRule.getDstIpAddress();
-
-            for (NatPostroutingChainRule natPostroutingChainRule : natPostroutingChain) {
-                if (natPreroutingChainRule.getDstIpAddress().equals(natPostroutingChainRule.getDstNetwork())) {
-                    outboundIfaceName = natPostroutingChainRule.getDstInterface();
-                    if (natPostroutingChainRule.isMasquerade()) {
-                        masquerade = true;
+        natPreroutingChain.stream()
+                .filter(natPreroutingChainRule -> natPreroutingChainRule.getType() == RuleType.PORT_FORWARDING)
+                .forEach(natPreroutingChainRule -> {
+                    // found port forwarding rule ...
+                    String inboundIfaceName = natPreroutingChainRule.getInputInterface();
+                    String outboundIfaceName = null;
+                    String protocol = natPreroutingChainRule.getProtocol();
+                    int inPort = natPreroutingChainRule.getExternalPort();
+                    int outPort = natPreroutingChainRule.getInternalPort();
+                    boolean masquerade = false;
+                    String sport = null;
+                    if (natPreroutingChainRule.getSrcPortFirst() > 0
+                            && natPreroutingChainRule.getSrcPortFirst() <= natPreroutingChainRule.getSrcPortLast()) {
+                        StringBuilder sbSport = new StringBuilder().append(natPreroutingChainRule.getSrcPortFirst())
+                                .append(':').append(natPreroutingChainRule.getSrcPortLast());
+                        sport = sbSport.toString();
                     }
-                }
-            }
-            if (permittedNetwork == null) {
-                permittedNetwork = "0.0.0.0";
-            }
-            PortForwardRule portForwardRule = new PortForwardRule(inboundIfaceName, outboundIfaceName, address,
-                    protocol, inPort, outPort, masquerade, permittedNetwork, permittedNetworkMask, permittedMac, sport);
-            logger.debug("Adding port forward rule: {}", portForwardRule);
-            this.portForwardRules.add(portForwardRule);
-        }
-    }
+                    String permittedMac = natPreroutingChainRule.getPermittedMacAddress();
+                    String permittedNetwork = natPreroutingChainRule.getPermittedNetwork();
+                    int permittedNetworkMask = natPreroutingChainRule.getPermittedNetworkMask();
+                    String address = natPreroutingChainRule.getDstIpAddress();
 
-    public Set<LocalRule> getLocalRules() {
-        return this.localRules;
-    }
-
-    public Set<PortForwardRule> getPortForwardRules() {
-        return this.portForwardRules;
-    }
-
-    public Set<NATRule> getAutoNatRules() {
-        return this.autoNatRules;
-    }
-
-    public Set<NATRule> getNatRules() {
-        return this.natRules;
-    }
-
-    public boolean allowIcmp() {
-        return this.allowIcmp;
+                    for (NatPostroutingChainRule natPostroutingChainRule : natPostroutingChain) {
+                        if (natPreroutingChainRule.getDstIpAddress().equals(natPostroutingChainRule.getDstNetwork())
+                                && natPostroutingChainRule.getType() == RuleType.PORT_FORWARDING) {
+                            outboundIfaceName = natPostroutingChainRule.getDstInterface();
+                            if (natPostroutingChainRule.isMasquerade()) {
+                                masquerade = true;
+                            }
+                        }
+                    }
+                    if (permittedNetwork == null) {
+                        permittedNetwork = "0.0.0.0";
+                    }
+                    PortForwardRule portForwardRule = new PortForwardRule().inboundIface(inboundIfaceName)
+                            .outboundIface(outboundIfaceName).address(address).protocol(protocol).inPort(inPort)
+                            .outPort(outPort).masquerade(masquerade).permittedNetwork(permittedNetwork)
+                            .permittedNetworkMask(permittedNetworkMask).permittedMAC(permittedMac)
+                            .sourcePortRange(sport);
+                    logger.debug("Adding port forward rule: {}", portForwardRule);
+                    this.portForwardRules.add(portForwardRule);
+                });
     }
 
     /*
@@ -783,27 +866,12 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     private void createKuraChains() {
-        execute(IPTABLES_CREATE_INPUT_KURA_CHAIN);
-        String rule = IPTABLES_COMMAND + " " + ADD_INPUT_KURA_CHAIN + " -t " + FILTER;
-        if (!execute(IPTABLES_CHECK_INPUT_KURA_CHAIN).getExitStatus().isSuccessful()
-                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
-        }
+        createKuraFilterChains();
+        createKuraNatChains();
+    }
 
-        execute(IPTABLES_CREATE_OUTPUT_KURA_CHAIN);
-        rule = IPTABLES_COMMAND + " " + ADD_OUTPUT_KURA_CHAIN + " -t " + FILTER;
-        if (!execute(IPTABLES_CHECK_OUTPUT_KURA_CHAIN).getExitStatus().isSuccessful()
-                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
-        }
-
-        execute(IPTABLES_CREATE_FORWARD_KURA_CHAIN);
-        rule = IPTABLES_COMMAND + " " + ADD_FORWARD_KURA_CHAIN + " -t " + FILTER;
-        if (!execute(IPTABLES_CHECK_FORWARD_KURA_CHAIN).getExitStatus().isSuccessful()
-                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
-        }
-
+    private void createKuraNatChains() {
+        String rule;
         execute(IPTABLES_CREATE_INPUT_KURA_CHAIN_NAT);
         rule = IPTABLES_COMMAND + " " + ADD_INPUT_KURA_CHAIN + " -t " + NAT;
         if (!execute(IPTABLES_CHECK_INPUT_KURA_CHAIN_NAT).getExitStatus().isSuccessful()
@@ -825,9 +893,67 @@ public class IptablesConfig extends IptablesConfigConstants {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
 
+        execute(IPTABLES_CREATE_PREROUTING_KURA_PF_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_PREROUTING_KURA_PF_CHAIN + " -t " + NAT;
+        if (!execute(IPTABLES_CHECK_PREROUTING_KURA_PF_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
         execute(IPTABLES_CREATE_POSTROUTING_KURA_CHAIN);
         rule = IPTABLES_COMMAND + " " + ADD_POSTROUTING_KURA_CHAIN + " -t " + NAT;
         if (!execute(IPTABLES_CHECK_POSTROUTING_KURA_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
+        execute(IPTABLES_CREATE_POSTROUTING_KURA_PF_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_POSTROUTING_KURA_PF_CHAIN + " -t " + NAT;
+        if (!execute(IPTABLES_CHECK_POSTROUTING_KURA_PF_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
+        execute(IPTABLES_CREATE_POSTROUTING_KURA_IPF_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_POSTROUTING_KURA_IPF_CHAIN + " -t " + NAT;
+        if (!execute(IPTABLES_CHECK_POSTROUTING_KURA_IPF_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+    }
+
+    private void createKuraFilterChains() {
+        execute(IPTABLES_CREATE_INPUT_KURA_CHAIN);
+        String rule = IPTABLES_COMMAND + " " + ADD_INPUT_KURA_CHAIN + " -t " + FILTER;
+        if (!execute(IPTABLES_CHECK_INPUT_KURA_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
+        execute(IPTABLES_CREATE_OUTPUT_KURA_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_OUTPUT_KURA_CHAIN + " -t " + FILTER;
+        if (!execute(IPTABLES_CHECK_OUTPUT_KURA_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
+        execute(IPTABLES_CREATE_FORWARD_KURA_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_FORWARD_KURA_CHAIN + " -t " + FILTER;
+        if (!execute(IPTABLES_CHECK_FORWARD_KURA_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
+        execute(IPTABLES_CREATE_FORWARD_KURA_PF_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_FORWARD_KURA_PF_CHAIN + " -t " + FILTER;
+        if (!execute(IPTABLES_CHECK_FORWARD_KURA_PF_CHAIN).getExitStatus().isSuccessful()
+                && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_CREATION_FAILED_MESSAGE);
+        }
+
+        execute(IPTABLES_CREATE_FORWARD_KURA_IPF_CHAIN);
+        rule = IPTABLES_COMMAND + " " + ADD_FORWARD_KURA_IPF_CHAIN + " -t " + FILTER;
+        if (!execute(IPTABLES_CHECK_FORWARD_KURA_IPF_CHAIN).getExitStatus().isSuccessful()
                 && !execute(rule.split(" ")).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_CREATION_FAILED_MESSAGE);
         }
@@ -866,31 +992,13 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     private void createKuraChainsReturnRules() {
-        if (!execute((IPTABLES_COMMAND + " " + RETURN_INPUT_KURA_CHAIN).split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
-        if (!execute((IPTABLES_COMMAND + " " + RETURN_OUTPUT_KURA_CHAIN).split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
-        if (!execute((IPTABLES_COMMAND + " " + RETURN_FORWARD_KURA_CHAIN).split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
-        String rule = IPTABLES_COMMAND + " " + RETURN_INPUT_KURA_CHAIN + " -t " + NAT;
-        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
-        rule = IPTABLES_COMMAND + " " + RETURN_OUTPUT_KURA_CHAIN + " -t " + NAT;
-        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
-        rule = IPTABLES_COMMAND + " " + RETURN_PREROUTING_KURA_CHAIN + " -t " + NAT;
-        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
-        rule = IPTABLES_COMMAND + " " + RETURN_POSTROUTING_KURA_CHAIN + " -t " + NAT;
-        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
-            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
-        }
+        createKuraChainsReturnFilterRules();
+        createKuraChainsReturnNatRules();
+        createKuraChainsReturnMangleRules();
+    }
+
+    private void createKuraChainsReturnMangleRules() {
+        String rule;
         rule = IPTABLES_COMMAND + " " + RETURN_INPUT_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
             logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
@@ -909,6 +1017,57 @@ public class IptablesConfig extends IptablesConfigConstants {
         }
         rule = IPTABLES_COMMAND + " " + RETURN_FORWARD_KURA_CHAIN + " -t " + MANGLE;
         if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+    }
+
+    private void createKuraChainsReturnNatRules() {
+        String rule = IPTABLES_COMMAND + " " + RETURN_INPUT_KURA_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_OUTPUT_KURA_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_PREROUTING_KURA_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_PREROUTING_KURA_PF_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_POSTROUTING_KURA_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_POSTROUTING_KURA_PF_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        rule = IPTABLES_COMMAND + " " + RETURN_POSTROUTING_KURA_IPF_CHAIN + " -t " + NAT;
+        if (!execute(rule.split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+    }
+
+    private void createKuraChainsReturnFilterRules() {
+        if (!execute((IPTABLES_COMMAND + " " + RETURN_INPUT_KURA_CHAIN).split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        if (!execute((IPTABLES_COMMAND + " " + RETURN_OUTPUT_KURA_CHAIN).split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        if (!execute((IPTABLES_COMMAND + " " + RETURN_FORWARD_KURA_CHAIN).split(" ")).getExitStatus().isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        if (!execute((IPTABLES_COMMAND + " " + RETURN_FORWARD_KURA_PF_CHAIN).split(" ")).getExitStatus()
+                .isSuccessful()) {
+            logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
+        }
+        if (!execute((IPTABLES_COMMAND + " " + RETURN_FORWARD_KURA_IPF_CHAIN).split(" ")).getExitStatus()
+                .isSuccessful()) {
             logger.error(CHAIN_RETURN_RULE_FAILED_MESSAGE);
         }
     }

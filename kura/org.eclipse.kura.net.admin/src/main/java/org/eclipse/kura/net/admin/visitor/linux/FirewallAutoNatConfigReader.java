@@ -75,7 +75,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
     }
 
     protected Set<NATRule> getAutoNatRules() throws KuraException {
-        LinuxFirewall firewall = new LinuxFirewall(this.executorService);
+        LinuxFirewall firewall = LinuxFirewall.getInstance(this.executorService);
         return firewall.getAutoNatRules();
     }
 

@@ -46,10 +46,15 @@ public class FirewallTestUtils {
     protected static Command commandFlushInputFilter;
     protected static Command commandFlushOutputFilter;
     protected static Command commandFlushForwardFilter;
+    protected static Command commandFlushForwardPfFilter;
+    protected static Command commandFlushForwardIpfFilter;
     protected static Command commandFlushInputNat;
     protected static Command commandFlushOutputNat;
     protected static Command commandFlushPreroutingNat;
+    protected static Command commandFlushPreroutingPfNat;
     protected static Command commandFlushPostroutingNat;
+    protected static Command commandFlushPostroutingPfNat;
+    protected static Command commandFlushPostroutingIpfNat;
     protected static Command commandFlushPreroutingMangle;
     protected static Command commandFlushPostroutingMangle;
     protected static Command commandFlushInputMangle;
@@ -83,6 +88,13 @@ public class FirewallTestUtils {
         commandFlushForwardFilter = new Command(new String[] { "iptables", "-F", "forward-kura", "-t", "filter" });
         commandFlushForwardFilter.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandFlushForwardFilter)).thenReturn(successStatus);
+        commandFlushForwardPfFilter = new Command(new String[] { "iptables", "-F", "forward-kura-pf", "-t", "filter" });
+        commandFlushForwardPfFilter.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushForwardPfFilter)).thenReturn(successStatus);
+        commandFlushForwardIpfFilter = new Command(
+                new String[] { "iptables", "-F", "forward-kura-ipf", "-t", "filter" });
+        commandFlushForwardIpfFilter.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushForwardIpfFilter)).thenReturn(successStatus);
         commandFlushInputNat = new Command(new String[] { "iptables", "-F", "input-kura", "-t", "nat" });
         commandFlushInputNat.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandFlushInputNat)).thenReturn(successStatus);
@@ -92,9 +104,20 @@ public class FirewallTestUtils {
         commandFlushPreroutingNat = new Command(new String[] { "iptables", "-F", "prerouting-kura", "-t", "nat" });
         commandFlushPreroutingNat.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandFlushPreroutingNat)).thenReturn(successStatus);
+        commandFlushPreroutingPfNat = new Command(new String[] { "iptables", "-F", "prerouting-kura-pf", "-t", "nat" });
+        commandFlushPreroutingPfNat.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushPreroutingPfNat)).thenReturn(successStatus);
         commandFlushPostroutingNat = new Command(new String[] { "iptables", "-F", "postrouting-kura", "-t", "nat" });
         commandFlushPostroutingNat.setExecuteInAShell(true);
         when(executorServiceMock.execute(commandFlushPostroutingNat)).thenReturn(successStatus);
+        commandFlushPostroutingPfNat = new Command(
+                new String[] { "iptables", "-F", "postrouting-kura-pf", "-t", "nat" });
+        commandFlushPostroutingPfNat.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushPostroutingPfNat)).thenReturn(successStatus);
+        commandFlushPostroutingIpfNat = new Command(
+                new String[] { "iptables", "-F", "postrouting-kura-ipf", "-t", "nat" });
+        commandFlushPostroutingIpfNat.setExecuteInAShell(true);
+        when(executorServiceMock.execute(commandFlushPostroutingIpfNat)).thenReturn(successStatus);
         commandFlushPreroutingMangle = new Command(
                 new String[] { "iptables", "-F", "prerouting-kura", "-t", "mangle" });
         commandFlushPreroutingMangle.setExecuteInAShell(true);
@@ -128,24 +151,39 @@ public class FirewallTestUtils {
         commandApplyList.add(new Command("iptables -N input-kura -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -N output-kura -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -N forward-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -N forward-kura-pf -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -N forward-kura-ipf -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -N input-kura -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -N output-kura -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -N prerouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N prerouting-kura-pf -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -N postrouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N postrouting-kura-pf -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -N postrouting-kura-ipf -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -C INPUT -j input-kura -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -C OUTPUT -j output-kura -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -C FORWARD -j forward-kura -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -C forward-kura -j forward-kura-pf -t filter".split(" ")));
+        commandApplyList.add(new Command("iptables -C forward-kura -j forward-kura-ipf -t filter".split(" ")));
         commandApplyList.add(new Command("iptables -C INPUT -j input-kura -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -C OUTPUT -j output-kura -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -C PREROUTING -j prerouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C prerouting-kura -j prerouting-kura-pf -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -C POSTROUTING -j postrouting-kura -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C postrouting-kura -j postrouting-kura-pf -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -C postrouting-kura -j postrouting-kura-ipf -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A input-kura -j RETURN".split(" ")));
         commandApplyList.add(new Command("iptables -A output-kura -j RETURN".split(" ")));
         commandApplyList.add(new Command("iptables -A forward-kura -j RETURN".split(" ")));
+        commandApplyList.add(new Command("iptables -A forward-kura-pf -j RETURN".split(" ")));
+        commandApplyList.add(new Command("iptables -A forward-kura-ipf -j RETURN".split(" ")));
         commandApplyList.add(new Command("iptables -A input-kura -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A output-kura -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A prerouting-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A prerouting-kura-pf -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A postrouting-kura -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A postrouting-kura-pf -j RETURN -t nat".split(" ")));
+        commandApplyList.add(new Command("iptables -A postrouting-kura-ipf -j RETURN -t nat".split(" ")));
         commandApplyList.add(new Command("iptables -A input-kura -j RETURN -t mangle".split(" ")));
         commandApplyList.add(new Command("iptables -A output-kura -j RETURN -t mangle".split(" ")));
         commandApplyList.add(new Command("iptables -A forward-kura -j RETURN -t mangle".split(" ")));
@@ -207,25 +245,31 @@ public class FirewallTestUtils {
                 "iptables -A forward-kura -i eth1 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT".split(" ")));
         testCommandList.add(new Command("iptables -A forward-kura -i eth0 -o eth1 -j ACCEPT".split(" ")));
         testCommandList.add(new Command(
-                "iptables -A forward-kura -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT"
+                "iptables -A forward-kura-ipf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
-                "iptables -A forward-kura -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT"
+                "iptables -A forward-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
-                "iptables -t nat -A prerouting-kura -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050"
+                "iptables -A forward-kura-pf -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
-                "iptables -t nat -A postrouting-kura -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE"
+                "iptables -A forward-kura-ipf -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
-                "iptables -A forward-kura -s 172.16.0.1/32 -d 172.16.0.2/32 -i eth0 -o eth1 -p tcp -m tcp -j ACCEPT"
+                "iptables -t nat -A prerouting-kura-pf -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050"
                         .split(" ")));
         testCommandList.add(new Command(
-                "iptables -A forward-kura -s 172.16.0.2/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT"
+                "iptables -t nat -A postrouting-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE"
                         .split(" ")));
         testCommandList.add(new Command(
-                "iptables -t nat -A postrouting-kura -s 172.16.0.1/32 -d 172.16.0.2/32 -o eth1 -p tcp -j MASQUERADE"
+                "iptables -A forward-kura-ipf -s 172.16.0.1/32 -d 172.16.0.2/32 -i eth0 -o eth1 -p tcp -m tcp -j ACCEPT"
+                        .split(" ")));
+        testCommandList.add(new Command(
+                "iptables -A forward-kura-ipf -s 172.16.0.2/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT"
+                        .split(" ")));
+        testCommandList.add(new Command(
+                "iptables -t nat -A postrouting-kura-ipf -s 172.16.0.1/32 -d 172.16.0.2/32 -o eth1 -p tcp -j MASQUERADE"
                         .split(" ")));
         testCommandList.add(new Command(
                 "iptables -A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 --dport 5400 -j ACCEPT"

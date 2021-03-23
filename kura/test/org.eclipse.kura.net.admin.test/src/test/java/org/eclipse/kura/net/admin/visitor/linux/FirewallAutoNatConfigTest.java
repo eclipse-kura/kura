@@ -48,6 +48,7 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.junit.Test;
 
@@ -326,7 +327,7 @@ public class FirewallAutoNatConfigTest {
             protected Set<NATRule> getAutoNatRules() throws KuraException {
                 HashSet<NATRule> natRules = new HashSet<>();
 
-                NATRule rule = new NATRule(intfName, destinationInterface, true);
+                NATRule rule = new NATRule(intfName, destinationInterface, true, RuleType.GENERIC);
                 natRules.add(rule);
 
                 return natRules;
@@ -362,7 +363,7 @@ public class FirewallAutoNatConfigTest {
             protected Set<NATRule> getAutoNatRules() throws KuraException {
                 HashSet<NATRule> natRules = new HashSet<>();
 
-                NATRule rule = new NATRule(intfName, destinationInterface, true);
+                NATRule rule = new NATRule(intfName, destinationInterface, true, RuleType.GENERIC);
                 natRules.add(rule);
 
                 return natRules;
@@ -398,7 +399,7 @@ public class FirewallAutoNatConfigTest {
             protected Set<NATRule> getAutoNatRules() throws KuraException {
                 HashSet<NATRule> natRules = new HashSet<>();
 
-                NATRule rule = new NATRule(intfName, destinationInterface, true);
+                NATRule rule = new NATRule(intfName, destinationInterface, true, RuleType.GENERIC);
                 natRules.add(rule);
 
                 return natRules;

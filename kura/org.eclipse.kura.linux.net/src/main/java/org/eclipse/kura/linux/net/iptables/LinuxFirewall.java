@@ -29,6 +29,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,7 @@ public class LinuxFirewall {
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxFirewall.class);
 
+    private static LinuxFirewall linuxFirewall;
     private static Object lock = new Object();
 
     private static final String IP_FORWARD_FILE_NAME = "/proc/sys/net/ipv4/ip_forward";
@@ -55,9 +57,23 @@ public class LinuxFirewall {
     private final Set<String> additionalNatRules = new HashSet<>();
     private final Set<String> additionalMangleRules = new HashSet<>();
     private final IptablesConfig iptables;
-    private final CommandExecutorService executorService;
+    private CommandExecutorService executorService;
 
-    public LinuxFirewall(CommandExecutorService executorService) {
+    // The LinuxFirewall is a singleton, since at the creation of the object
+    // it reads the iptables configuration from the filesystem once, instead of
+    // reading it at every call of the constructor.
+    // However, it is dangerous in a multi-thread system because the CommandExecutorService
+    // is passed as an argument.
+    public static LinuxFirewall getInstance(CommandExecutorService executorService) {
+        if (linuxFirewall == null) {
+            linuxFirewall = new LinuxFirewall(executorService);
+        } else {
+            linuxFirewall.setExecutorService(executorService);
+        }
+        return linuxFirewall;
+    }
+
+    private LinuxFirewall(CommandExecutorService executorService) {
         this.executorService = executorService;
         this.iptables = new IptablesConfig(this.executorService);
         try {
@@ -83,6 +99,10 @@ public class LinuxFirewall {
         this.allowIcmp = true;
         this.allowForwarding = false;
         logger.debug("initialize() :: Parsing current firewall configuration");
+    }
+
+    private void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
     }
 
     @SuppressWarnings("checkstyle:parameterNumber")
@@ -141,15 +161,12 @@ public class LinuxFirewall {
     public void addPortForwardRule(String inboundIface, String outboundIface, String address, String protocol,
             int inPort, int outPort, boolean masquerade, String permittedNetwork, String permittedNetworkPrefix,
             String permittedMAC, String sourcePortRange) throws KuraException {
-        PortForwardRule newPortForwardRule;
-        if (permittedNetworkPrefix != null) {
-            newPortForwardRule = new PortForwardRule(inboundIface, outboundIface, address, protocol, inPort, outPort,
-                    masquerade, permittedNetwork, Short.parseShort(permittedNetworkPrefix), permittedMAC,
-                    sourcePortRange);
-        } else {
-            newPortForwardRule = new PortForwardRule(inboundIface, outboundIface, address, protocol, inPort, outPort,
-                    masquerade, permittedNetwork, -1, permittedMAC, sourcePortRange);
-        }
+
+        short mask = permittedNetworkPrefix == null ? (short) -1 : Short.parseShort(permittedNetworkPrefix);
+        PortForwardRule newPortForwardRule = new PortForwardRule().inboundIface(inboundIface)
+                .outboundIface(outboundIface).address(address).protocol(protocol).inPort(inPort).outPort(outPort)
+                .masquerade(masquerade).permittedNetwork(permittedNetwork).permittedNetworkMask(mask)
+                .permittedMAC(permittedMAC).sourcePortRange(sourcePortRange);
 
         ArrayList<PortForwardRule> portFwdRules = new ArrayList<>();
         portFwdRules.add(newPortForwardRule);
@@ -187,9 +204,10 @@ public class LinuxFirewall {
      * @param sourceInterface
      * @param destinationInterface
      * @param masquerade
-     * @throws EsfException
+     * @param type
+     * @throws KuraException
      */
-    public void addNatRule(String sourceInterface, String destinationInterface, boolean masquerade)
+    public void addNatRule(String sourceInterface, String destinationInterface, boolean masquerade, RuleType type)
             throws KuraException {
         if (sourceInterface == null || sourceInterface.isEmpty()) {
             logger.warn("Can't add auto NAT rule - source interface not specified");
@@ -199,7 +217,7 @@ public class LinuxFirewall {
             return;
         }
 
-        NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, masquerade);
+        NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, masquerade, type);
         ArrayList<NATRule> natRuleList = new ArrayList<>();
         natRuleList.add(newNatRule);
         addAutoNatRules(natRuleList);
@@ -214,10 +232,11 @@ public class LinuxFirewall {
      * @param source
      * @param destination
      * @param masquerade
-     * @throws EsfException
+     * @param type
+     * @throws KuraException
      */
     public void addNatRule(String sourceInterface, String destinationInterface, String protocol, String source,
-            String destination, boolean masquerade) throws KuraException {
+            String destination, boolean masquerade, RuleType type) throws KuraException {
 
         if (sourceInterface == null || sourceInterface.isEmpty()) {
             logger.warn("Can't add NAT rule - source interface not specified");
@@ -228,7 +247,7 @@ public class LinuxFirewall {
         }
 
         NATRule newNatRule = new NATRule(sourceInterface, destinationInterface, protocol, source, destination,
-                masquerade);
+                masquerade, type);
 
         ArrayList<NATRule> natRuleList = new ArrayList<>();
         natRuleList.add(newNatRule);
@@ -362,13 +381,14 @@ public class LinuxFirewall {
     }
 
     public void blockAllPorts() throws KuraException {
-        deleteAllLocalRules();
-        deleteAllPortForwardRules();
-        deleteAllAutoNatRules();
-        update();
+        deleteAllRules();
     }
 
     public void unblockAllPorts() throws KuraException {
+        deleteAllRules();
+    }
+
+    private void deleteAllRules() throws KuraException {
         deleteAllLocalRules();
         deleteAllPortForwardRules();
         deleteAllAutoNatRules();
@@ -381,12 +401,7 @@ public class LinuxFirewall {
                 || this.natRules != null && !this.natRules.isEmpty()) {
             this.allowForwarding = true;
         }
-        IptablesConfig newIptables = new IptablesConfig(this.localRules, this.portForwardRules, this.autoNatRules,
-                this.natRules, this.allowIcmp, this.executorService);
-        newIptables.setAdditionalFilterRules(this.additionalFilterRules);
-        newIptables.setAdditionalNatRules(this.additionalNatRules);
-        newIptables.setAdditionalMangleRules(this.additionalMangleRules);
-        newIptables.applyRules();
+        this.iptables.applyRules();
         logger.debug("Managing port forwarding...");
         enableForwarding(this.allowForwarding);
     }
@@ -440,12 +455,21 @@ public class LinuxFirewall {
 
     private void update() throws KuraException {
         synchronized (lock) {
-            this.iptables.setAdditionalFilterRules(this.additionalFilterRules);
-            this.iptables.setAdditionalNatRules(this.additionalNatRules);
-            this.iptables.setAdditionalMangleRules(this.additionalMangleRules);
+            updateIptablesConfig();
             this.iptables.clearAllKuraChains();
             applyRules();
             this.iptables.saveKuraChains();
         }
+    }
+
+    private void updateIptablesConfig() {
+        this.iptables.setLocalRules(this.localRules);
+        this.iptables.setPortForwardRules(this.portForwardRules);
+        this.iptables.setNatRules(this.natRules);
+        this.iptables.setAutoNatRules(this.autoNatRules);
+        this.iptables.setAdditionalFilterRules(this.additionalFilterRules);
+        this.iptables.setAdditionalNatRules(this.additionalNatRules);
+        this.iptables.setAdditionalMangleRules(this.additionalMangleRules);
+        this.iptables.setAllowIcmp(this.allowIcmp);
     }
 }

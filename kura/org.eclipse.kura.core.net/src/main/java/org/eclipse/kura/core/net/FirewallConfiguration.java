@@ -28,6 +28,7 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class FirewallConfiguration {
             + "1450,tcp,,eth1,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;"
             + "53,udp,,eth1,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,eth1,,,,#;67,udp,,wlan0,,,,#;"
             + "8000,tcp,,eth0,,,,#;8000,tcp,,eth1,,,,#;8000,tcp,,wlan0,,,,#";
-    
+
     public static final String DFLT_PORT_FORWARDING_VALUE = "";
     public static final String DFLT_NAT_VALUE = "";
 
@@ -101,15 +102,13 @@ public class FirewallConfiguration {
                             if (sa[0].indexOf(':') > 0) {
                                 portRange = sa[0];
                                 openPortEntry = new FirewallOpenPortConfigIP4(portRange, protocol,
-                                        new NetworkPair<>(
-                                                (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                                 permittedNetworkMask),
                                         permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
                             } else {
                                 port = Integer.parseInt(sa[0]);
                                 openPortEntry = new FirewallOpenPortConfigIP4(port, protocol,
-                                        new NetworkPair<>(
-                                                (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                                        new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                                 permittedNetworkMask),
                                         permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
                             }
@@ -158,8 +157,7 @@ public class FirewallConfiguration {
                             }
                             FirewallPortForwardConfigIP<? extends IPAddress> portForwardEntry = new FirewallPortForwardConfigIP4(
                                     inboundIface, outboundIface, address, protocol, inPort, outPort, masquerade,
-                                    new NetworkPair<>(
-                                            (IP4Address) IPAddress.parseHostAddress(permittedNetwork),
+                                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
                                             permittedNetworkMask),
                                     permittedMAC, sourcePortRange);
                             this.portForwardConfigs.add(portForwardEntry);
@@ -199,7 +197,7 @@ public class FirewallConfiguration {
                         }
                         boolean masquerade = Boolean.parseBoolean(sa[5]);
                         FirewallNatConfig natEntry = new FirewallNatConfig(srcIface, dstIface, protocol, src, dst,
-                                masquerade);
+                                masquerade, RuleType.IP_FORWARDING);
                         this.natConfigs.add(natEntry);
                     }
                 }

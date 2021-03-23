@@ -64,6 +64,7 @@ import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
+import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -1136,7 +1137,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                                         if (desiredNatRules == null) {
                                             desiredNatRules = new LinkedHashSet<>();
                                         }
-                                        desiredNatRules.add(new NATRule(ifaceName, gatewayIface, true));
+                                        desiredNatRules
+                                                .add(new NATRule(ifaceName, gatewayIface, true, RuleType.GENERIC));
                                     }
                                 }
                             }
@@ -1148,7 +1150,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             }
         }
 
-        LinuxFirewall firewall = new LinuxFirewall(this.executorService);
+        LinuxFirewall firewall = LinuxFirewall.getInstance(this.executorService);
         if (desiredNatRules != null) {
             firewall.replaceAllNatRules(desiredNatRules);
         } else {

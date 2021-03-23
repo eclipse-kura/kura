@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.BluetoothAdapter;
@@ -37,6 +36,7 @@ import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListener, TiSensorTagNotificationListener {

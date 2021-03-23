@@ -67,6 +67,8 @@ public class FirewallNatConfig implements NetConfig {
 
     /**
      * 
+     * Create a configuration for a NAT rule
+     * 
      * @param srcIface
      *            the source network interface (WAN interface)
      * @param dstIface
@@ -81,6 +83,8 @@ public class FirewallNatConfig implements NetConfig {
      *            whether or not MASQUERADE should be enabled
      * @param type
      *            the type of the rule (IP forwarding, Port forwarding or generic)
+     * 
+     * @since 2.2
      */
     public FirewallNatConfig(String srcIface, String dstIface, String protocol, String src, String dst,
             boolean masquerade, RuleType type) {
@@ -117,6 +121,10 @@ public class FirewallNatConfig implements NetConfig {
         return this.masquerade;
     }
 
+    /**
+     * 
+     * @since 2.2
+     */
     public RuleType getRuleType() {
         return this.type;
     }

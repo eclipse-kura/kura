@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraBluetoothBeaconAdvertiserNotAvailable;
 import org.eclipse.kura.KuraBluetoothCommandException;
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
@@ -308,12 +308,8 @@ public class BluetoothLeBeaconManagerImpl
 
     public void startBeaconScan(BluetoothLeAdapter adapter) throws KuraBluetoothCommandException {
         if (checkStartScanCondition(adapter.getInterfaceName())) {
-<<<<<<< HEAD
             logger.info("Starting bluetooth beacon scan on {}", adapter.getInterfaceName());
             try {
-=======
-             try {
->>>>>>> 23f7ce8f6 (Replace TinyB library with bluez-dbus)
                 // Start scanning
                 if (!adapter.isDiscovering()) {
                     logger.info("Starting bluetooth beacon scan on {}", adapter.getInterfaceName());

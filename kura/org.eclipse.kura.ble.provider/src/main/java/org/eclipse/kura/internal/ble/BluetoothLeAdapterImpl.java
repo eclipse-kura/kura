@@ -23,9 +23,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;

@@ -26,8 +26,7 @@ import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
-import org.eclipse.kura.bluetooth.le.Blue
-import java.util.logging.Logger;toothLeGattCharacteristic;
+import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 import org.eclipse.kura.driver.Driver.ConnectionException;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class TiSensorTag {
 
-    private s = LoggerFactory.getLogger(TiSensorTag.class);
+    private Logger logger = LoggerFactory.getLogger(TiSensorTag.class);
 
     private static final String DEVINFO = "devinfo";
     private static final String TEMPERATURE = "temperature";

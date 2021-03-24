@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -323,15 +323,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         if (isFirstBoot()) {
             changeDefaultKeystorePassword();
-        } else {
-            char[] oldPassword = getOldKeystorePassword(keystorePath);
+            return;
+        }
 
-            char[] newPassword = null;
-            try {
-                newPassword = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
-            } catch (KuraException e) {
-                logger.warn("Failed to decrypt keystore password");
-            }
+        char[] oldPassword = getOldKeystorePassword(keystorePath);
+        char[] newPassword = null;
+
+        try {
+            newPassword = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
+        } catch (KuraException e) {
+            logger.warn("Failed to decrypt keystore password");
+        }
+
+        if (newPassword != null && !Arrays.equals(oldPassword, newPassword)) {
             updateKeystorePassword(oldPassword, newPassword);
         }
     }

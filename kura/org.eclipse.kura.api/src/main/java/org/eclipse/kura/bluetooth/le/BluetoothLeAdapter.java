@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -204,6 +204,9 @@ public interface BluetoothLeAdapter {
     /**
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
+     * 
+     * @deprecated use instead {@link setDiscoverableTimeout}
+     * @since 2.2
      */
     @Deprecated
     public void setDiscoverableTimout(long value);
@@ -292,6 +295,7 @@ public interface BluetoothLeAdapter {
      * @param trasportType
      *            the trasportType (LE or BREDR)
      *
+     * @deprecated use instead {@link setDiscoveryFilter(List<UUID>, int, int, BluetoothTransportType, boolean)}
      * @since 2.0
      */
     @Deprecated
@@ -329,7 +333,8 @@ public interface BluetoothLeAdapter {
      *
      * @since 2.0
      */
-    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType, boolean duplicateData);
+    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType,
+            boolean duplicateData);
 
     /**
      * Set a device discovery filter based on RSSI value. Only devices with rssi greater than the provided value will be

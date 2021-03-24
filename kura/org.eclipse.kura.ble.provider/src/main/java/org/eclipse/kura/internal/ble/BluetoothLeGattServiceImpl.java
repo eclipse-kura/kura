@@ -80,7 +80,10 @@ public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
     @Override
     public boolean isPrimary() {
         Boolean primary = this.service.isPrimary();
-        return primary == null ? false : primary;
+        if (primary != null) {
+            return primary;
+        }
+        return false;
     }
 
 }

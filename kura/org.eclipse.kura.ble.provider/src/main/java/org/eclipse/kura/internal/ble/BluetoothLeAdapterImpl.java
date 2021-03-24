@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,8 @@ import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     private static final Logger logger = LogManager.getLogger(BluetoothLeAdapterImpl.class);
+    private static final String STOP_DISCOVERY_FAILED = "Stop discovery failed";
+    private static final String START_DISCOVERY_FAILED = "Start discovery failed";
 
     private final BluetoothAdapter adapter;
 
@@ -100,7 +102,10 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
     @Override
     public boolean isDiscoverable() {
         Boolean discoverable = this.adapter.isDiscoverable();
-        return discoverable == null ? false : discoverable;
+        if (discoverable != null) {
+            return discoverable;
+        }
+        return false;
     }
 
     @Override
@@ -127,7 +132,10 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
     @Override
     public boolean isPairable() {
         Boolean pairable = this.adapter.isPairable();
-        return pairable == null ? false : pairable;
+        if (pairable != null) {
+            return pairable;
+        }
+        return false;
     }
 
     @Override
@@ -168,10 +176,10 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
     public void startDiscovery() throws KuraBluetoothDiscoveryException {
         try {
             if (!this.adapter.startDiscovery()) {
-                throw new KuraBluetoothDiscoveryException("Start discovery failed");
+                throw new KuraBluetoothDiscoveryException(START_DISCOVERY_FAILED);
             }
         } catch (DBusExecutionException ex) {
-            throw new KuraBluetoothDiscoveryException("Start discovery failed");
+            throw new KuraBluetoothDiscoveryException(START_DISCOVERY_FAILED);
         }
     }
 
@@ -179,10 +187,10 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
     public void stopDiscovery() throws KuraBluetoothDiscoveryException {
         try {
             if (!this.adapter.stopDiscovery()) {
-                throw new KuraBluetoothDiscoveryException("Stop discovery failed");
+                throw new KuraBluetoothDiscoveryException(STOP_DISCOVERY_FAILED);
             }
         } catch (DBusExecutionException ex) {
-            throw new KuraBluetoothDiscoveryException("Stop discovery failed");
+            throw new KuraBluetoothDiscoveryException(STOP_DISCOVERY_FAILED);
         }
     }
 
@@ -254,11 +262,11 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         public boolean cancel(boolean mayInterruptIfRunning) {
             try {
                 if (!BluetoothLeAdapterImpl.this.adapter.stopDiscovery()) {
-                    logger.error("Stop discovery failed");
+                    logger.error(STOP_DISCOVERY_FAILED);
                     return false;
                 }
             } catch (DBusExecutionException ex) {
-                logger.error("Stop discovery failed", ex);
+                logger.error(STOP_DISCOVERY_FAILED, ex);
                 return false;
             }
 
@@ -268,15 +276,15 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         @SuppressWarnings("unchecked")
         @Override
         public void run() {
-            if (BluetoothLeAdapterImpl.this.adapter.isDiscovering()) {
+            if (BluetoothLeAdapterImpl.this.isDiscovering()) {
                 completeExceptionally(new KuraBluetoothDiscoveryException("The BLE adapter is already discovering..."));
             }
             try {
                 if (!BluetoothLeAdapterImpl.this.adapter.startDiscovery()) {
-                    logger.error("Start discovery failed");
+                    logger.error(START_DISCOVERY_FAILED);
                 }
             } catch (DBusExecutionException ex) {
-                logger.error("Start discovery failed", ex);
+                logger.error(START_DISCOVERY_FAILED, ex);
             }
             waitForStop();
             List<BluetoothDevice> devices = DeviceManager.getInstance()
@@ -285,29 +293,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
                 complete((T) null);
             }
             if (this.name != null || this.address != null) {
-                BluetoothDevice leDevice = null;
-                for (BluetoothDevice device : devices) {
-                    if (this.address != null) {
-                        if (device.getAddress().equals(this.address)) {
-                            leDevice = device;
-                            break;
-                        }
-                    }
-                    if (this.name != null) {
-                        if (device.getName().equals(this.name)) {
-                            leDevice = device;
-                            break;
-                        }
-                    }
-                }
-                if (leDevice == null) {
-                    complete((T) null);
-                } else {
-                    complete((T) new BluetoothLeDeviceImpl(leDevice));
-                }
-                if (leDevice != null && this.consumer != null) {
-                    this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
-                }
+                getDevice(devices);
             } else {
                 List<BluetoothLeDevice> leDevices = new ArrayList<>();
                 for (BluetoothDevice device : devices) {
@@ -320,10 +306,30 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
             }
             try {
                 if (!BluetoothLeAdapterImpl.this.adapter.stopDiscovery()) {
-                    logger.error("Stop discovery failed");
+                    logger.error(STOP_DISCOVERY_FAILED);
                 }
             } catch (DBusExecutionException ex) {
-                logger.error("Stop discovery failed", ex);
+                logger.error(STOP_DISCOVERY_FAILED, ex);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private void getDevice(List<BluetoothDevice> devices) {
+            BluetoothDevice leDevice = null;
+            for (BluetoothDevice device : devices) {
+                if (this.address != null && device.getAddress().equals(this.address)
+                        || this.name != null && device.getName().equals(this.name)) {
+                    leDevice = device;
+                    break;
+                }
+            }
+            if (leDevice == null) {
+                complete((T) null);
+            } else {
+                complete((T) new BluetoothLeDeviceImpl(leDevice));
+            }
+            if (leDevice != null && this.consumer != null) {
+                this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
             }
         }
 
@@ -377,7 +383,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
         // RSSI & Pathloss
         if (rssi != 0) {
-            filter.put("RSSI", new Variant<>((Short) Integer.valueOf(rssi).shortValue()));
+            filter.put("RSSI", new Variant<>((short) rssi));
         } else if (pathloss != 0) {
             filter.put("Pathloss", new Variant<>(new UInt16(pathloss)));
         }

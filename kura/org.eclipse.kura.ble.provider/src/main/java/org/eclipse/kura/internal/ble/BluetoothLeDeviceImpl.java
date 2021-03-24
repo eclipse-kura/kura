@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -151,13 +151,19 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     @Override
     public boolean isPaired() {
         Boolean paired = this.device.isPaired();
-        return paired == null ? false : paired;
+        if (paired != null) {
+            return paired;
+        }
+        return false;
     }
 
     @Override
     public boolean isTrusted() {
         Boolean trusted = this.device.isTrusted();
-        return trusted == null ? false : trusted;
+        if (trusted != null) {
+            return trusted;
+        }
+        return false;
     }
 
     @Override
@@ -168,7 +174,10 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     @Override
     public boolean isBlocked() {
         Boolean blocked = this.device.isBlocked();
-        return blocked == null ? false : blocked;
+        if (blocked != null) {
+            return blocked;
+        }
+        return false;
     }
 
     @Override
@@ -179,7 +188,10 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     @Override
     public boolean isLegacyPairing() {
         Boolean legacyPairing = this.device.isLegacyPairing();
-        return legacyPairing == null ? false : legacyPairing;
+        if (legacyPairing != null) {
+            return legacyPairing;
+        }
+        return false;
     }
 
     @Override
@@ -191,7 +203,10 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     @Override
     public boolean isConnected() {
         Boolean connected = this.device.isConnected();
-        return connected == null ? false : connected;
+        if (connected != null) {
+            return connected;
+        }
+        return false;
     }
 
     @Override
@@ -250,7 +265,10 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     @Override
     public boolean isServicesResolved() {
         Boolean servicesResolved = this.device.isServicesResolved();
-        return servicesResolved == null ? false : servicesResolved;
+        if (servicesResolved != null) {
+            return servicesResolved;
+        }
+        return false;
     }
 
     @Override

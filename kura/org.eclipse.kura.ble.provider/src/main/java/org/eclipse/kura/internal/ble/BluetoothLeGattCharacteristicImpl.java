@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,15 +25,14 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristicProperties;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattDescriptor;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
-
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.handlers.AbstractPropertiesChangedHandler;
 import org.freedesktop.dbus.interfaces.Properties.PropertiesChanged;
 import org.freedesktop.dbus.types.Variant;
 
+import com.github.hypfvieh.bluetooth.DeviceManager;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattCharacteristic;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattDescriptor;
-import com.github.hypfvieh.bluetooth.DeviceManager;
 
 public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharacteristic {
 
@@ -89,27 +88,33 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     public void enableValueNotifications(Consumer<byte[]> callback) throws KuraBluetoothNotificationException {
         try {
             DeviceManager.getInstance().registerPropertyHandler(new AbstractPropertiesChangedHandler() {
+
                 @Override
                 public void handle(PropertiesChanged props) {
-                    if (props != null) {
-                        if (!props.getPath().contains(BluetoothLeGattCharacteristicImpl.this.characteristic.getDbusPath())) {
-                            return;
-                        }
-
-                        for (Map.Entry<String, Variant<?>> entry : props.getPropertiesChanged().entrySet()) {
-                            if (entry.getKey().equals("Value")) {
-                                byte[] value = (byte[]) props.getPropertiesChanged().get("Value").getValue();
-                                if (value != null) {
-                                    callback.accept(value);
-                                }
-                            }
-                        }
-                    }
+                    handleValueNotification(callback, props);
                 }
+
             });
             this.characteristic.startNotify();
         } catch (DBusException e) {
             throw new KuraBluetoothNotificationException(e, "Notification can't be enabled");
+        }
+    }
+
+    private void handleValueNotification(Consumer<byte[]> callback, PropertiesChanged props) {
+        if (props != null) {
+            if (!props.getPath().contains(BluetoothLeGattCharacteristicImpl.this.characteristic.getDbusPath())) {
+                return;
+            }
+
+            for (Map.Entry<String, Variant<?>> entry : props.getPropertiesChanged().entrySet()) {
+                if (entry.getKey().equals("Value")) {
+                    byte[] value = (byte[]) props.getPropertiesChanged().get("Value").getValue();
+                    if (value != null) {
+                        callback.accept(value);
+                    }
+                }
+            }
         }
     }
 
@@ -153,7 +158,10 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     @Override
     public boolean isNotifying() {
         Boolean notifying = this.characteristic.isNotifying();
-        return notifying == null ? false : notifying;
+        if (notifying != null) {
+            return notifying;
+        }
+        return false;
     }
 
     @Override

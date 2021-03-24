@@ -74,7 +74,9 @@ public class BluetoothLeBeaconManagerImpl
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        this.executorService = null;
+        if (this.executorService == executorService) {
+            this.executorService = null;
+        }
     }
 
     protected void activate(ComponentContext context) {

@@ -21,9 +21,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -114,17 +112,17 @@ public class BluetoothProcess {
                 status.getExitStatus().getExitCode());
 
         // Build command
-        List<String> commandLine = new ArrayList<>();
-        commandLine.add("{");
-        commandLine.add("exec");
-        for (int i = 0; i < cmdArray.length; i++) {
-            commandLine.add(cmdArray[i]);
-        }
-        commandLine.add(">/dev/null;");
-        commandLine.add("}");
-        commandLine.add("3>&1");
+        StringBuilder commandLine = new StringBuilder();
+        commandLine.append("{ exec");
+        Arrays.asList(cmdArray).stream().forEach(s -> {
+            commandLine.append(" ");
+            commandLine.append(s);
+        });
+        commandLine.append(" >/dev/null;");
+        commandLine.append(" }");
+        commandLine.append(" 3>&1");
 
-        Command command = new Command(commandLine.toArray(new String[commandLine.size()]));
+        Command command = new Command(commandLine.toString().split("\\s+"));
         command.setOutputStream(this.outputStream);
         command.setErrorStream(this.errorStream);
         command.setExecuteInAShell(true);

@@ -287,7 +287,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
                 logger.error(START_DISCOVERY_FAILED, ex);
             }
             waitForStop();
-            List<BluetoothDevice> devices = DeviceManager.getInstance()
+            List<BluetoothDevice> devices = getDeviceManager()
                     .getDevices(BluetoothLeAdapterImpl.this.adapter.getAddress(), true);
             if (devices.isEmpty()) {
                 complete((T) null);
@@ -351,7 +351,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
     public int removeDevices() throws KuraBluetoothRemoveException {
         int removedDevices = 0;
         try {
-            List<BluetoothDevice> devices = DeviceManager.getInstance().getDevices(this.adapter.getAddress(), true);
+            List<BluetoothDevice> devices = getDeviceManager().getDevices(this.adapter.getAddress(), true);
             for (BluetoothDevice device : devices) {
                 this.adapter.removeDevice(device.getRawDevice());
                 removedDevices++;
@@ -417,5 +417,9 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         default:
             return DiscoveryTransport.AUTO;
         }
+    }
+
+    public DeviceManager getDeviceManager() {
+        return DeviceManager.getInstance();
     }
 }

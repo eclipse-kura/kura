@@ -419,6 +419,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         }
     }
 
+    // For test only
     public DeviceManager getDeviceManager() {
         return DeviceManager.getInstance();
     }

@@ -87,7 +87,7 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     @Override
     public void enableValueNotifications(Consumer<byte[]> callback) throws KuraBluetoothNotificationException {
         try {
-            DeviceManager.getInstance().registerPropertyHandler(new AbstractPropertiesChangedHandler() {
+            getDeviceManager().registerPropertyHandler(new AbstractPropertiesChangedHandler() {
 
                 @Override
                 public void handle(PropertiesChanged props) {
@@ -173,4 +173,8 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
         return properties;
     }
 
+    // For test only
+    public DeviceManager getDeviceManager() {
+        return DeviceManager.getInstance();
+    }
 }

@@ -349,7 +349,7 @@ public class BluetoothLeBeaconManagerImpl
             boolean isHcitoolStopped = BluetoothLeUtil.stopHcitool(adapter.getInterfaceName(), this.executorService,
                     "lescan-passive", "--duplicates");
             boolean isBtdumpStopped = BluetoothLeUtil.stopBtdump(adapter.getInterfaceName(), this.executorService);
-            if (!!isHcitoolStopped || !isBtdumpStopped) {
+            if (!isHcitoolStopped || !isBtdumpStopped) {
                 logger.warn("Failed to stop bluetooth beacon scan");
             }
         }

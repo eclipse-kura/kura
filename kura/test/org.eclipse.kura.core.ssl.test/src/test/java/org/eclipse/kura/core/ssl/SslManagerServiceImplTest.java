@@ -704,7 +704,7 @@ public class SslManagerServiceImplTest {
 
         assertTrue(visited.get());
 
-        verify(csMock, times(1)).setKeyStorePassword(anyString(), (char[]) anyObject());
+        verify(csMock, times(0)).setKeyStorePassword(anyString(), (char[]) anyObject());
     }
 
     @Test

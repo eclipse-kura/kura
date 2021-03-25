@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,9 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.ble;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +19,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
-import org.osgi.service.component.ComponentContext;
-
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.freedesktop.dbus.exceptions.DBusException;
+import org.osgi.service.component.ComponentContext;
 
 import com.github.hypfvieh.bluetooth.DeviceManager;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter;
@@ -34,6 +32,17 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     private static final Logger logger = LogManager.getLogger(BluetoothLeServiceImpl.class);
 
     private DeviceManager deviceManager;
+    private CommandExecutorService executorService;
+
+    public void setExecutorService(CommandExecutorService executorService) {
+        this.executorService = executorService;
+    }
+
+    public void unsetExecutorService(CommandExecutorService executorService) {
+        if (this.executorService == executorService) {
+            this.executorService = null;
+        }
+    }
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
@@ -41,7 +50,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
             startBluetoothDaemon();
         }
         try {
-            this.deviceManager = DeviceManager.createInstance(false);
+            this.deviceManager = getDeviceManager();
         } catch (DBusException e) {
             logger.error("Failed to start bluetooth service", e);
         }
@@ -79,46 +88,15 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     }
 
     private boolean startBluetoothSystemd() {
-        String systemdCommand = "systemctl start bluetooth";
-        boolean started = false;
-        Process process;
-        try {
-            process = Runtime.getRuntime().exec(systemdCommand);
-            started = process.waitFor() == 0 ? true : false;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            logger.error("Failed to start linux systemd bluetooth", e);
-        } catch (IOException e) {
-            logger.error("Failed to start linux systemd bluetooth", e);
-        }
-        return started;
+        return execute("systemctl start bluetooth");
     }
 
     private boolean startBluetoothInitd() {
-        String initdCommand = "/etc/init.d/bluetooth start";
-        boolean started = false;
-        Process process;
-        try {
-            process = Runtime.getRuntime().exec(initdCommand);
-            BufferedReader stdin = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String s = stdin.readLine();
-            if (s != null && s.toLowerCase().contains("starting bluetooth")) {
-                s = stdin.readLine();
-                started = s != null && s.toLowerCase().contains("bluetoothd");
-            }
-        } catch (IOException e) {
-            logger.error("Failed to start linux init.d bluetooth", e);
-        }
-        return started;
+        return execute("/etc/init.d/bluetooth start");
     }
 
     private void startBluetoothDaemon() {
-        String daemonCommand = "bluetoothd -E";
-        try {
-            Runtime.getRuntime().exec(daemonCommand);
-        } catch (IOException e) {
-            logger.error("Failed to start linux bluetooth service", e);
-        }
+        execute("bluetoothd -E");
     }
 
     private boolean startBluetoothUbuntuSnap() {
@@ -130,5 +108,19 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         } else {
             return false;
         }
+    }
+
+    private boolean execute(String commandLine) {
+        Command command = new Command(commandLine.split(" "));
+        boolean started = this.executorService.execute(command).getExitStatus().isSuccessful();
+        if (!started) {
+            logger.error("Failed to start linux bluetooth service");
+        }
+        return started;
+    }
+
+    // For test only
+    public DeviceManager getDeviceManager() throws DBusException {
+        return DeviceManager.createInstance(false);
     }
 }

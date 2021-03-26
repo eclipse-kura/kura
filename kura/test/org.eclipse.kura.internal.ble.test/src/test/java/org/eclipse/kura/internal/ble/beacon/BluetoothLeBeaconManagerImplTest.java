@@ -41,6 +41,7 @@ import org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.internal.ble.util.BluetoothProcess;
+import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -474,7 +475,7 @@ public class BluetoothLeBeaconManagerImplTest {
     }
 
     @Test(expected = KuraBluetoothCommandException.class)
-    public void testStartBeaconScanFail() throws KuraBluetoothCommandException, NoSuchFieldException {
+    public void testStartBeaconScanLegacyFail() throws KuraBluetoothCommandException, NoSuchFieldException {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
@@ -482,6 +483,35 @@ public class BluetoothLeBeaconManagerImplTest {
                 throw new IOException("test");
             }
         };
+
+        SystemService ssMock = mock(SystemService.class);
+        when(ssMock.isLegacyBluetoothBeaconScan()).thenReturn(true);
+        svc.setSystemService(ssMock);
+
+        BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
+        BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = null;
+
+        String interfaceName = "devName";
+        when(adapter.getInterfaceName()).thenReturn(interfaceName);
+
+        svc.newBeaconScanner(adapter, decoder);
+
+        svc.startBeaconScan(adapter);
+    }
+
+    @Test(expected = KuraBluetoothCommandException.class)
+    public void testStartBeaconScanFail() throws KuraBluetoothCommandException, NoSuchFieldException {
+        BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
+
+            @Override
+            protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
+                throw new IOException("test");
+            }
+        };
+
+        SystemService ssMock = mock(SystemService.class);
+        when(ssMock.isLegacyBluetoothBeaconScan()).thenReturn(false);
+        svc.setSystemService(ssMock);
 
         BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
         BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = null;
@@ -495,7 +525,7 @@ public class BluetoothLeBeaconManagerImplTest {
     }
 
     @Test
-    public void testStartStopBeaconScan() throws KuraBluetoothCommandException, NoSuchFieldException {
+    public void testStartStopBeaconScanLegacy() throws KuraBluetoothCommandException, NoSuchFieldException {
         BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
 
             @Override
@@ -519,6 +549,10 @@ public class BluetoothLeBeaconManagerImplTest {
         when(esMock.kill(anyObject(), anyObject())).thenReturn(true);
         svc.setExecutorService(esMock);
 
+        SystemService ssMock = mock(SystemService.class);
+        when(ssMock.isLegacyBluetoothBeaconScan()).thenReturn(true);
+        svc.setSystemService(ssMock);
+
         BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
         BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = null;
 
@@ -536,6 +570,45 @@ public class BluetoothLeBeaconManagerImplTest {
         assertEquals(interfaceName, dProc.toString());
 
         verify(hProc, times(1)).destroy();
+        verify(dProc, times(1)).destroyBTSnoop();
+
+    }
+
+    @Test
+    public void testStartStopBeaconScan() throws KuraBluetoothCommandException, NoSuchFieldException {
+        BluetoothLeBeaconManagerImpl svc = new BluetoothLeBeaconManagerImpl() {
+
+            @Override
+            protected BluetoothProcess execBtDump(String interfaceName) throws IOException {
+                BluetoothProcess proc = mock(BluetoothProcess.class);
+                when(proc.toString()).thenReturn(interfaceName);
+
+                return proc;
+            }
+        };
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.kill(anyObject(), anyObject())).thenReturn(true);
+        svc.setExecutorService(esMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        when(ssMock.isLegacyBluetoothBeaconScan()).thenReturn(false);
+        svc.setSystemService(ssMock);
+
+        BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
+        BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = null;
+
+        String interfaceName = "devName";
+        when(adapter.getInterfaceName()).thenReturn(interfaceName);
+
+        BluetoothLeBeaconScanner<BluetoothLeBeacon> scanner = svc.newBeaconScanner(adapter, decoder);
+
+        scanner.startBeaconScan(1);
+
+        BluetoothProcess dProc = (BluetoothProcess) TestUtil.getFieldValue(svc, "dumpProc");
+
+        assertEquals(interfaceName, dProc.toString());
+
         verify(dProc, times(1)).destroyBTSnoop();
 
     }
@@ -572,6 +645,10 @@ public class BluetoothLeBeaconManagerImplTest {
 
         BluetoothLeAdapter adapter = mock(BluetoothLeAdapter.class);
         BluetoothLeBeaconDecoder<BluetoothLeBeacon> decoder = mock(BluetoothLeBeaconDecoder.class);
+
+        SystemService ssMock = mock(SystemService.class);
+        when(ssMock.isLegacyBluetoothBeaconScan()).thenReturn(true);
+        svc.setSystemService(ssMock);
 
         BluetoothLeBeacon beacon = new BluetoothLeBeacon() {
         };

@@ -23,6 +23,7 @@ import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
 import org.eclipse.kura.web.shared.model.GwtModemPdpEntry;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -64,6 +65,14 @@ public interface GwtNetworkService extends RemoteService {
 
     @Audit(componentName = "UI Network", description = "WiFi scan")
     public List<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName, String wirelessSsid)
+            throws GwtKuraException;
+
+    @Audit(componentName = "UI Network", description = "Get Wifi channels and frequencies")
+    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
+            throws GwtKuraException;
+
+    @Audit(componentName = "UI Network", description = "Get Wifi Country Code")
+    public String getWifiCountryCode(GwtXSRFToken xsrfToken)
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Verify Wifi credentials")

@@ -36,6 +36,8 @@ public class GwtWifiConfig extends GwtBaseModel implements Serializable {
     private static final String DRIVER = "driver";
     private static final String WIRELESS_SSID = "wirelessSsid";
     private static final String WIRELESS_MODE = "wirelessMode";
+    private static final String CHANNELS_FREQUENCY = "ChannelsFrequency";
+    private static final String COUNTRY_CODE = "CountryCode";
 
     public GwtWifiConfig() {
         setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
@@ -218,5 +220,21 @@ public class GwtWifiConfig extends GwtBaseModel implements Serializable {
 
     public void setIgnoreSSID(boolean ignoreSSID) {
         set(IGNORE_SSID, ignoreSSID);
+    }
+
+    public List<GwtWifiHotspotEntry> getChannelsFrequency() {
+        return get(CHANNELS_FREQUENCY);
+    }
+
+    public void setChannelsFrequency(List<GwtWifiHotspotEntry> list) {
+        set(CHANNELS_FREQUENCY, list);
+    }
+
+    public String getCountryCode() {
+        return get(COUNTRY_CODE);
+    }
+
+    public void setCountryCode(String countryCode) {
+        set(COUNTRY_CODE, countryCode);
     }
 }

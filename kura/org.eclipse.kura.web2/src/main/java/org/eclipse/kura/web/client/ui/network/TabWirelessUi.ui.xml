@@ -103,7 +103,6 @@
                                 </g:FlowPanel>
                             </b:FormGroup>
 
-
                             <b:FormGroup ui:field="groupPassword">
                                 <b:FormLabel for="password"
                                     ui:field="labelPassword" />
@@ -205,6 +204,26 @@
                                         formValue="true" ui:field="radio3" />
                                     <b:InlineRadio name="radio2"
                                         formValue="false" ui:field="radio4" />
+                                </g:FlowPanel>
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="channelList"
+                                    ui:field="labelChannelList" />
+                                <util:HelpButton ui:field="channelListHelp"/>
+                                <g:FlowPanel>
+                                    <b:ListBox b:id="channelList"
+                                        ui:field="channelList" />
+                                </g:FlowPanel>
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="countryCode"
+                                    ui:field="labelCountryCode" />
+                                <util:HelpButton ui:field="countryCodeHelp"/>
+                                <g:FlowPanel>
+	                                <b:TextBox b:id="countryCode"
+	                                    ui:field="countryCode" />
                                 </g:FlowPanel>
                             </b:FormGroup>
 

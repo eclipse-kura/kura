@@ -44,11 +44,11 @@
             <b:Well size="SMALL">
                 <b:NavTabs ui:field="navTabs">
                 	<b:TabListItem dataTarget="#certificateListPanel" text="Certificates List"
-                        ui:field="certificateList" active="true"/>
+                        ui:field="certificateList" visible="false"/>
                     <b:TabListItem dataTarget="#httpServicePanel" text="Http Service"
-                        ui:field="httpService" />
+                        ui:field="httpService" visible="false"/>
                     <b:TabListItem dataTarget="#consolePanel" text="Web Console"
-                        ui:field="console" />
+                        ui:field="console" visible="false"/>
                     <b:TabListItem dataTarget="#threatManagerPanel" text="Network Threat Manager"
                         ui:field="threatManager" visible="false"/>
                     <b:TabListItem dataTarget="#tamperDetectionPanel" text="Tamper Detection"
@@ -57,7 +57,7 @@
                         ui:field="security" visible="false"/>
                 </b:NavTabs>
                 <b:TabContent ui:field="tabContent">
-                	<b:TabPane b:id="certificateListPanel" active="true">
+                	<b:TabPane b:id="certificateListPanel">
                         <security:CertificateListTabUi ui:field="certificateListPanel"></security:CertificateListTabUi>
                     </b:TabPane>
                     <b:TabPane b:id="httpServicePanel" ui:field="httpServicePanel">

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+   Copyright (c) 2021 Eurotech and/or its affiliates and others
+  
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="true" name="org.eclipse.kura.core.tamper.detection.TamperDetectionRequestHandler">
+   <implementation class="org.eclipse.kura.core.tamper.detection.TamperDetectionRequestHandler"/>
+      <reference bind="setTamperDetectionService" cardinality="0..n" interface="org.eclipse.kura.security.tamper.detection.TamperDetectionService" name="TamperDetectionService" policy="dynamic" unbind="unsetTamperDetectionService"/>
+      <reference bind="setRequestHandlerRegistry" cardinality="0..n" interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry" name="RequestHandlerRegistry" policy="dynamic" unbind="unsetRequestHandlerRegistry"/>
+</scr:component>

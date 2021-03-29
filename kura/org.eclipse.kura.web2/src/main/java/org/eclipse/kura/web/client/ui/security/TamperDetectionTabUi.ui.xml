@@ -43,20 +43,8 @@
                 <g:HTMLPanel>
                    <b.html:Paragraph text="{msgs.securityTamperDetectionDescription}"></b.html:Paragraph>
                 </g:HTMLPanel>
-                <b:Form>
-                        <b:FieldSet>
-                            <b:FormGroup>
-                                <b:FormLabel for="state" text="{msgs.securityTamperDetectionTamperState}" />
-                                <b:FormControlStatic
-                                    b:id="state" ui:field="state" />
-                            </b:FormGroup>
-
-                            <b:FormGroup ui:field="timestampGroup">
-                                <b:FormLabel for="timestamp" text="{msgs.securityTamperDetectionTamperTimestamp}"/>
-                                <b:FormControlStatic
-                                    b:id="timestamp" ui:field="timestamp" />
-                            </b:FormGroup>
-                            
+                <b:Form ui:field="tamperDetectionForm">
+                        <b:FieldSet> 
                             <b:FormGroup>
                             	<b:Button text="{msgs.securityTamperDetectionReset}" ui:field="resetButton" />
                         	</b:FormGroup>

@@ -12,29 +12,24 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
-import java.io.Serializable;
 import java.util.Map;
-import java.util.Optional;
 
-public class GwtTamperStatus implements Serializable {
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -9128344445984113675L;
-
-    private static final String TIMESTAMP = "timestamp";
+public class GwtTamperStatus implements IsSerializable {
 
     private boolean isTampered;
-    private Long tamperInstant = null;
+    private String displayName;
+    private Map<String, String> properties;
 
     public GwtTamperStatus() {
         super();
     }
 
-    public GwtTamperStatus(final boolean isTampered, final Map<String, Object> properties) {
+    public GwtTamperStatus(final String displayName, final boolean isTampered, final Map<String, String> properties) {
+        this.displayName = displayName;
         this.isTampered = isTampered;
-        this.tamperInstant = (Long) properties.get(TIMESTAMP);
+        this.properties = properties;
 
     }
 
@@ -42,7 +37,11 @@ public class GwtTamperStatus implements Serializable {
         return isTampered;
     }
 
-    public Optional<Long> getTimestamp() {
-        return Optional.ofNullable(tamperInstant);
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 }

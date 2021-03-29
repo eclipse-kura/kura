@@ -31,6 +31,13 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface TamperDetectionService {
 
     /**
+     * Returns an user friendly name describing this service.
+     * 
+     * @return an user friendly name describing this service.
+     */
+    public String getDisplayName();
+
+    /**
      * Returns the current {@link TamperStatus}.
      *
      * @return the current {@link TamperStatus}.

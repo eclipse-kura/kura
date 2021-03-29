@@ -25,6 +25,8 @@ import org.eclipse.kura.security.tamper.detection.TamperDetectionProperties;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
+import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.util.configuration.Property;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -33,7 +35,9 @@ import org.slf4j.LoggerFactory;
 public class TamperDetectionServiceImpl implements TamperDetectionService, ConfigurableComponent {
 
     private static final String TAMPERED_KEY = "tampered";
+
     private static final Property<Boolean> TAMPERED = new Property<>(TAMPERED_KEY, false);
+
     private static final Logger logger = LoggerFactory.getLogger(TamperDetectionServiceImpl.class);
 
     private EventAdmin eventAdmin;
@@ -63,11 +67,17 @@ public class TamperDetectionServiceImpl implements TamperDetectionService, Confi
     }
 
     @Override
+    public String getDisplayName() {
+        return "Simulated tamper detection";
+    }
+
+    @Override
     public TamperStatus getTamperStatus() {
-        final Map<String, Object> properties = new HashMap<>();
+        final Map<String, TypedValue<?>> properties = new HashMap<>();
 
         if (tamperInstant.isPresent()) {
-            properties.put(TamperDetectionProperties.TIMESTAMP_PROPERTY_KEY.getValue(), tamperInstant.get().getTime());
+            properties.put(TamperDetectionProperties.TIMESTAMP_PROPERTY_KEY.getValue(),
+                    TypedValues.newLongValue(tamperInstant.get().getTime()));
         }
 
         return new TamperStatus(isDeviceTampered, properties);

@@ -75,5 +75,5 @@
               target="(kura.service.pid=org.eclipse.kura.json.marshaller.unmarshaller.provider)"
               unbind="unsetJsonMarshaller"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
-   <reference bind="setTamperDetectionService" cardinality="0..1" interface="org.eclipse.kura.security.tamper.detection.TamperDetectionService" name="TamperDetectionService" policy="dynamic" unbind="unsetTamperDetectionService"/>
+   <reference bind="setTamperDetectionService" cardinality="0..n" interface="org.eclipse.kura.security.tamper.detection.TamperDetectionService" name="TamperDetectionService" policy="dynamic" unbind="unsetTamperDetectionService"/>
 </scr:component>

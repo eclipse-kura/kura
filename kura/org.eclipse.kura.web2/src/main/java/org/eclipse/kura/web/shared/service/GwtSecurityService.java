@@ -12,10 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.service;
 
+import java.util.List;
+
 import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
+import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtTamperStatus;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
@@ -26,24 +30,19 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.ADMIN)
 public interface GwtSecurityService extends RemoteService {
 
-    @RequiredPermissions({})
-    public Boolean isSecurityServiceAvailable();
-
-    @RequiredPermissions({})
-    public Boolean isDebugMode();
-
     @Audit(componentName = "UI Security", description = "Reload security policy fingerprint")
     public void reloadSecurityPolicyFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Security", description = "Reload command line fingerprint")
     public void reloadCommandLineFingerprint(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public boolean isThreatManagerAvailable();
-
-    public boolean isTamperDetectionAvailable();
-
-    public GwtTamperStatus getTamperStatus(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    @RequiredPermissions(value = { KuraPermission.ADMIN, KuraPermission.MAINTENANCE }, mode = Mode.ANY)
+    public List<GwtTamperStatus> getTamperStatus(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Security", description = "Reset tamper status")
+    @RequiredPermissions(value = { KuraPermission.ADMIN, KuraPermission.MAINTENANCE }, mode = Mode.ANY)
     public void resetTamperStatus(GwtXSRFToken xsrfToken) throws GwtKuraException;
+
+    @RequiredPermissions({})
+    public GwtSecurityCapabilities getCababilities();
 }

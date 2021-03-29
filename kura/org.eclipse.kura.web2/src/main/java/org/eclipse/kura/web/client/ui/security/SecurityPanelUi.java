@@ -29,13 +29,14 @@ import org.eclipse.kura.web.client.ui.ServicesUi.ValidationResult;
 import org.eclipse.kura.web.client.ui.ServicesUi.Validator;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSecurityService;
-import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web2.ext.WidgetFactory;
@@ -51,7 +52,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IndexedPanel;
@@ -63,7 +63,6 @@ public class SecurityPanelUi extends Composite {
     private static final Logger logger = Logger.getLogger(SecurityPanelUi.class.getSimpleName());
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
@@ -111,7 +110,7 @@ public class SecurityPanelUi extends Composite {
 
     private TabListItem selected = certificateList;
 
-    public SecurityPanelUi() {
+    public SecurityPanelUi(final GwtUserData userData, final GwtSecurityCapabilities capabilities) {
         logger.log(Level.FINER, "Initiating SecurityPanelUI...");
 
         initWidget(uiBinder.createAndBindUi(this));
@@ -119,25 +118,47 @@ public class SecurityPanelUi extends Composite {
         description.setText(MSGS.securityIntro());
         this.securityIntro.add(description);
 
-        this.gwtSecurityService.isSecurityServiceAvailable(updateVisibility(this.security));
-        this.gwtSecurityService.isThreatManagerAvailable(updateVisibility(this.threatManager));
-        this.gwtSecurityService.isTamperDetectionAvailable(updateVisibility(this.tamperDetection));
+        final boolean hasAdminPermission = userData.checkPermission(KuraPermission.ADMIN);
+        final boolean hasMaintenancePermission = userData.checkPermission(KuraPermission.MAINTENANCE);
 
-        this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
+        if (hasAdminPermission) {
 
-        this.httpService.addClickHandler(
-                addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", //
-                        httpServicePanel, //
-                        getHttpServiceOptionsValidator(), //
-                        ui -> ui.onApply(err -> {
-                            ui.setDirty(false);
-                            Window.Location.reload();
-                        }))));
-        this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
-                consolePanel, getConsoleOptionsValidator())));
-        this.threatManager.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.threatManagerPanel)));
-        this.tamperDetection.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.tamperDetectionPanel, true)));
-        this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
+            this.certificateList.setVisible(true);
+            this.httpService.setVisible(true);
+            this.console.setVisible(true);
+            this.security.setVisible(capabilities.isSecurityServiceAvailable());
+            this.threatManager.setVisible(capabilities.isThreatManagerAvailable());
+
+            this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
+
+            this.httpService.addClickHandler(
+                    addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", //
+                            httpServicePanel, //
+                            getHttpServiceOptionsValidator(), //
+                            ui -> ui.onApply(err -> {
+                                ui.setDirty(false);
+                                Window.Location.reload();
+                            }))));
+            this.console.addClickHandler(addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.web.Console",
+                    consolePanel, getConsoleOptionsValidator())));
+            this.threatManager.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.threatManagerPanel)));
+            this.tamperDetection
+                    .addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.tamperDetectionPanel, true)));
+            this.security.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.securityPanel)));
+        }
+
+        if (hasAdminPermission || hasMaintenancePermission) {
+            this.tamperDetection.setVisible(capabilities.isTamperDetectionAvailable());
+        }
+
+        if (hasAdminPermission) {
+            this.certificateList.setActive(true);
+            ((TabPane) this.certificateListPanel.getParent()).setActive(true);
+        } else {
+            this.tamperDetection.setActive(true);
+            ((TabPane) this.tamperDetectionPanel.getParent()).setActive(true);
+        }
+
     }
 
     public void loadServiceConfig(final String pid, final TabPane panel, final ServicesUi.Validator validator) {
@@ -162,7 +183,11 @@ public class SecurityPanelUi extends Composite {
     }
 
     public void load() {
-        this.certificateListPanel.refresh();
+        if (this.certificateList.isActive()) {
+            this.certificateListPanel.refresh();
+        } else if (this.tamperDetection.isActive()) {
+            this.tamperDetectionPanel.refresh();
+        }
     }
 
     public void setSession(GwtSession currentSession) {
@@ -325,20 +350,5 @@ public class SecurityPanelUi extends Composite {
 
     public boolean isServicesUiDirty(final IndexedPanel parent) {
         return getServicesUi(parent).map(ServicesUi::isDirty).orElse(false);
-    }
-
-    private AsyncCallback<Boolean> updateVisibility(final Widget target) {
-        return new AsyncCallback<Boolean>() {
-
-            @Override
-            public void onSuccess(Boolean result) {
-                target.setVisible(result);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                target.setVisible(false);
-            }
-        };
     }
 }

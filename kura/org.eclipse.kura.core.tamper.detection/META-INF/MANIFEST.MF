@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.core.tamper.detection
+Bundle-SymbolicName: org.eclipse.kura.core.tamper.detection;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: .
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/*.xml
+Import-Package: com.google.gson;version="2.7.0",
+ javax.annotation.security;version="1.2.0",
+ javax.ws.rs;version="2.0.1",
+ javax.ws.rs.core;version="2.0.1",
+ org.eclipse.kura;version="[1.6,2.0)",
+ org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
+ org.eclipse.kura.cloudconnection.request;version="[1.0,2.0)",
+ org.eclipse.kura.message;version="[1.4,2.0)",
+ org.eclipse.kura.security.tamper.detection;version="[1.0,2.0)",
+ org.eclipse.kura.type;version="[1.1,2.0)",
+ org.slf4j;version="1.7.25"

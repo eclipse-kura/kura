@@ -19,6 +19,7 @@ import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtClientExtensionBundle;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -61,9 +62,7 @@ public class denali implements EntryPoint {
 
                     @Override
                     public void onSuccess(final GwtUserConfig result) {
-                        final EntryClassUi entryClassUi = new EntryClassUi(result);
-                        RootPanel.get().add(entryClassUi);
-                        init(entryClassUi);
+                        init(result);
                     }
 
                     @Override
@@ -87,24 +86,7 @@ public class denali implements EntryPoint {
      * any unexpected exceptions.
      */
 
-    public void init(final EntryClassUi entryClassUi) {
-        RootPanel.get().add(entryClassUi);
-
-        this.gwtExtensionService.getConsoleExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(List<GwtClientExtensionBundle> result) {
-
-                for (final GwtClientExtensionBundle extension : result) {
-                    ScriptInjector.fromUrl(extension.getEntryPointUrl()).inject();
-                }
-            }
-        });
+    public void init(final GwtUserConfig userConfig) {
 
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -139,26 +121,36 @@ public class denali implements EntryPoint {
                             });
                         }
 
-                        denali.this.gwtSecurityService.isDebugMode(new AsyncCallback<Boolean>() {
+                        denali.this.gwtSecurityService.getCababilities(new AsyncCallback<GwtSecurityCapabilities>() {
 
                             @Override
-                            public void onFailure(Throwable caught) {
+                            public void onFailure(final Throwable caught) {
                                 FailureHandler.handle(caught, denali.class.getSimpleName());
-                                entryClassUi.setFooter(gwtSession);
-                                entryClassUi.initSystemPanel(gwtSession);
-                                entryClassUi.setSession(gwtSession);
-                                entryClassUi.init();
                             }
 
                             @Override
-                            public void onSuccess(Boolean result) {
-                                if (result) {
+                            public void onSuccess(final GwtSecurityCapabilities result) {
+                                if (result.isDebugMode()) {
                                     gwtSession.setDevelopMode(true);
                                 }
-                                entryClassUi.setFooter(gwtSession);
-                                entryClassUi.initSystemPanel(gwtSession);
-                                entryClassUi.setSession(gwtSession);
-                                entryClassUi.init();
+                                RootPanel.get().add(new EntryClassUi(userConfig, result, gwtSession));
+
+                                gwtExtensionService
+                                        .getConsoleExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                FailureHandler.handle(caught);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(List<GwtClientExtensionBundle> result) {
+
+                                                for (final GwtClientExtensionBundle extension : result) {
+                                                    ScriptInjector.fromUrl(extension.getEntryPointUrl()).inject();
+                                                }
+                                            }
+                                        });
                             }
                         });
                     }
@@ -166,9 +158,6 @@ public class denali implements EntryPoint {
                     @Override
                     public void onFailure(Throwable caught) {
                         FailureHandler.handle(caught, denali.class.getSimpleName());
-                        entryClassUi.setFooter(new GwtSession());
-                        entryClassUi.initSystemPanel(new GwtSession());
-                        entryClassUi.setSession(new GwtSession());
                     }
                 });
             }

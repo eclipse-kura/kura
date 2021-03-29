@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,20 @@ public class GwtUserData extends GwtBaseModel implements Serializable {
 
     public boolean isAdmin() {
         return getPermissions().contains(KuraPermission.ADMIN);
+    }
+
+    public boolean checkPermissions(final Set<String> permissions) {
+        if (isAdmin()) {
+            return true;
+        }
+        return getPermissions().containsAll(permissions);
+    }
+
+    public boolean checkPermission(String permission) {
+        if (isAdmin()) {
+            return true;
+        }
+        return getPermissions().contains(permission);
     }
 
     @Override

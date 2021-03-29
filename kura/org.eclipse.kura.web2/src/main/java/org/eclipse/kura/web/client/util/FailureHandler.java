@@ -15,23 +15,17 @@ package org.eclipse.kura.web.client.util;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.Panel;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.StatusCodeException;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class FailureHandler {
 
     private static final Messages MSGS = GWT.create(Messages.class);
-    private static Modal popup;
-    private static Label errorMessageLabel;
-    private static VerticalPanel errorStackTrace;
-    private static Panel stackTraceContainer;
+
+    private static Backend backend = (title, message, stackTrace) -> Window.alert(title + " - " + message);
 
     private FailureHandler() {
     }
@@ -71,23 +65,7 @@ public class FailureHandler {
 
     public static void showErrorMessage(final String title, final String message,
             final StackTraceElement[] stackTrace) {
-        popup.setTitle(title);
-
-        errorMessageLabel.setText(message);
-
-        if (stackTrace == null) {
-            stackTraceContainer.setVisible(false);
-        } else {
-            errorStackTrace.clear();
-
-            for (StackTraceElement element : stackTrace) {
-                Label tempLabel = new Label();
-                tempLabel.setText(element.toString());
-                errorStackTrace.add(tempLabel);
-            }
-            stackTraceContainer.setVisible(true);
-        }
-        popup.show();
+        backend.showFailureMessage(title, message, stackTrace);
     }
 
     private static void printMessage(Throwable caught, String name) {
@@ -132,11 +110,12 @@ public class FailureHandler {
         showErrorMessage(errorMessageBuilder.toString(), caught.getStackTrace());
     }
 
-    public static void setPopup(Modal uiElement, Label errorMessage, VerticalPanel errorStackTraceArea,
-            Panel stackTraceContainerArea) {
-        popup = uiElement;
-        errorMessageLabel = errorMessage;
-        errorStackTrace = errorStackTraceArea;
-        stackTraceContainer = stackTraceContainerArea;
+    public static void setBackend(final Backend backend) {
+        FailureHandler.backend = backend;
+    }
+
+    public interface Backend {
+
+        public void showFailureMessage(final String title, final String message, final StackTraceElement[] stackTrace);
     }
 }

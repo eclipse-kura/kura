@@ -36,6 +36,7 @@ import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionProperties;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionInfo;
@@ -94,26 +95,23 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         final List<GwtGroupedNVPair> result = new ArrayList<>();
 
         try {
-            ServiceLocator.applyToServiceOptionally(TamperDetectionService.class, t -> {
-                if (t == null) {
-                    return (Void) null;
-                }
+            ServiceLocator.applyToAllServices(TamperDetectionService.class, t -> {
 
                 final TamperStatus tamperStatus = t.getTamperStatus();
 
-                result.add(new GwtGroupedNVPair("tamperDetection", "Device Tamper Status",
+                result.add(new GwtGroupedNVPair("tamperDetection", t.getDisplayName(),
                         tamperStatus.isDeviceTampered() ? "Tampered" : "Not Tampered"));
 
-                final Object timestamp = tamperStatus.getProperties()
+                final TypedValue<?> timestamp = tamperStatus.getProperties()
                         .get(TamperDetectionProperties.TIMESTAMP_PROPERTY_KEY.getValue());
 
-                if (timestamp instanceof Long) {
+                if (timestamp != null && timestamp.getValue() instanceof Number) {
                     result.add(new GwtGroupedNVPair("tamperDetection", "Last Tamper Event Timestamp",
-                            new Date((Long) timestamp).toString()));
+                            new Date(((Number) timestamp.getValue()).longValue()).toString()));
                 }
 
-                return (Void) null;
             });
+
         } catch (final GwtKuraException e) {
             logger.warn("failed to get tamper status", e);
         }

@@ -28,9 +28,15 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.tamper.detection.model.TamperDetectionServiceInfo;
 import org.eclipse.kura.core.tamper.detection.model.TamperStatusInfo;
 import org.eclipse.kura.core.tamper.detection.util.TamperDetectionRemoteService;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 
 @Path("/tamper")
 public class TamperDetectionRestService extends TamperDetectionRemoteService {
+
+    public void setUserAdmin(final UserAdmin userAdmin) {
+        userAdmin.createRole("kura.permission.rest.tamper.detection", Role.GROUP);
+    }
 
     @GET
     @Path("/list")

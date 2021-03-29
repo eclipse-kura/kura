@@ -144,6 +144,7 @@
 		<antcall target="core.crypto-config" />
 		<antcall target="core.deployment-config" />
 		<antcall target="core.inventory-config" />
+		<antcall target="core.tamper-config" />
 		<antcall target="core.net-config" />
 		<antcall target="core.status-config" />
 		<antcall target="deployment.agent-config" />
@@ -181,7 +182,7 @@
 
 		<!-- Threat Management bundles config -->
 		<antcall target="threat-management-config" />
-		
+
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
 			target -->
 		<available
@@ -652,6 +653,9 @@ fi]]>
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.core.tamper.detection_${org.eclipse.kura.core.tamper.detection.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
@@ -712,7 +716,7 @@ fi]]>
 		<antcall target="wires-jar" />
 
 		<antcall target="misc-jar" />
-		
+
 		<antcall target="threat-management-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
@@ -1023,7 +1027,15 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-			
+
+	<target name="core.tamper-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.tamper.detection_${org.eclipse.kura.core.tamper.detection.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+
 	<target name="core.net-config">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1720,7 +1732,7 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="threat-management-config" unless="is.nn">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">

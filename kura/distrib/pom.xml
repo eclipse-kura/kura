@@ -223,6 +223,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.tamper.detection</artifactId>
+                                    <version>${org.eclipse.kura.core.tamper.detection.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.net</artifactId>
                                     <version>${org.eclipse.kura.core.net.version}</version>
                                 </artifactItem>
@@ -633,6 +638,8 @@
                                     tofile="target/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.inventory.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.tamper.detection.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.tamper.detection_${org.eclipse.kura.core.tamper.detection.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.net.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.deployment.agent.jar"

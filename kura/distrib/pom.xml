@@ -541,6 +541,11 @@
                                     <artifactId>org.eclipse.kura.network.threat.manager</artifactId>
                                     <version>${org.eclipse.kura.network.threat.manager.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.keystore</artifactId>
+                                    <version>${org.eclipse.kura.core.keystore.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -765,6 +770,8 @@
                                     tofile="target/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.network.threat.manager.jar"
                                     tofile="target/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.keystore.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

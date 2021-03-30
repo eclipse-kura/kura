@@ -19,21 +19,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyManagementException;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -54,6 +60,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.eclipse.kura.system.SystemService;
@@ -62,7 +69,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent {
+public class SslManagerServiceImpl implements SslManagerService, KeystoreService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 
@@ -271,14 +278,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     @Override
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException {
-        String keyStore = this.options.getSslKeyStore();
-        char[] keyStorePassword = getKeyStorePassword();
-
-        KeyStore ks = loadKeystore(keyStore, keyStorePassword);
-
-        ks.deleteEntry(alias);
-
-        saveKeystore(keyStore, keyStorePassword, ks);
+        deleteEntry(alias);
     }
 
     @Override
@@ -594,6 +594,77 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                 PasswordProtection newPP = new PasswordProtection(newPassword);
                 keystore.setEntry(alias, entry, newPP);
             }
+        }
+    }
+
+    @Override
+    public KeyStore getKeyStore() throws GeneralSecurityException, IOException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        try (InputStream tsReadStream = new FileInputStream(this.options.getSslKeyStore());) {
+            ks.load(tsReadStream, getKeyStorePassword());
+        }
+
+        return ks;
+    }
+
+    @Override
+    public KeyPair getKeyPair(String id) throws GeneralSecurityException, IOException {
+        KeyStore ks = getKeyStore();
+        final Key key = ks.getKey(id, getKeyStorePassword());
+
+        final Certificate cert = ks.getCertificate(id);
+        final PublicKey publicKey = cert.getPublicKey();
+
+        return new KeyPair(publicKey, (PrivateKey) key);
+    }
+
+    @Override
+    public List<KeyPair> getKeyPairs() throws GeneralSecurityException, IOException {
+        List<KeyPair> result = new ArrayList<>();
+
+        KeyStore ks = getKeyStore();
+        List<String> aliases = Collections.list(ks.aliases());
+
+        for (String alias : aliases) {
+            KeyPair tempKeyPair = getKeyPair(alias);
+            result.add(tempKeyPair);
+        }
+        return result;
+    }
+
+    @Override
+    public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException {
+        KeyStore ks = getKeyStore();
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(ks, getKeyStorePassword());
+
+        return Arrays.asList(kmf.getKeyManagers());
+    }
+
+    @Override
+    public KeyPair createKeyPair(String id) throws KuraException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void deleteEntry(String id) throws GeneralSecurityException, IOException {
+        KeyStore ks = getKeyStore();
+        ks.deleteEntry(id);
+        saveKeystore(ks);
+    }
+
+    @Override
+    public String getCSR(String id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private void saveKeystore(KeyStore ks)
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+        try (FileOutputStream tsOutStream = new FileOutputStream(this.options.getSslKeyStore());) {
+            ks.store(tsOutStream, getKeyStorePassword());
         }
     }
 

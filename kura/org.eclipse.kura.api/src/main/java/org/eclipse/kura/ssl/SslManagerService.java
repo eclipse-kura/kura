@@ -188,7 +188,9 @@ public interface SslManagerService {
      * Otherwise the default Java VM trust store will be listed.
      *
      * @return the X509Certificates
+     * @deprecated
      */
+    @Deprecated
     public X509Certificate[] getTrustCertificates() throws GeneralSecurityException, IOException;
 
     /**
@@ -199,7 +201,9 @@ public interface SslManagerService {
      *
      * @param x509crt
      *            certificate to be installed
+     * @deprecated
      */
+    @Deprecated
     public void installTrustCertificate(String alias, X509Certificate x509crt)
             throws GeneralSecurityException, IOException;
 
@@ -210,7 +214,9 @@ public interface SslManagerService {
      * Otherwise the certificate will be deleted from the default Java VM trust store.
      *
      * @param alias
+     * @deprecated
      */
+    @Deprecated
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
 
     /**
@@ -225,8 +231,9 @@ public interface SslManagerService {
      *            that represents the password used to encode the keys in the key store
      * @param publicCerts
      *            that represents an array of Certificate objects that contain the public certificate chain
-     *
+     * @deprecated
      */
+    @Deprecated
     public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
             throws GeneralSecurityException, IOException;
 }

@@ -13,7 +13,6 @@
 package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -272,7 +271,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     private final Map<String, Role> decode(final RoleRepositoryStoreOptions options, final RoleBuilder roleBuilder)
             throws DeserializationException {
         try {
-            final Map<String, Role> result = new HashMap<>();
+            final Map<String, Role> result = new TreeMap<>();
 
             decode(Json.parse(options.getRolesConfig()).asArray(), Role.class, result, roleBuilder);
             decode(Json.parse(options.getUsersConfig()).asArray(), User.class, result, roleBuilder);

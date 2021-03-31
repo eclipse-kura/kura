@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -1064,10 +1064,9 @@ public class SslManagerServiceImplTest {
 
         assertFalse(store.isCertificateEntry(alias));
     }
-    
+
     @Test
-    public void testGetKeystore()
-            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testGetKeystore() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1099,20 +1098,20 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "pass");
 
         svc.activate(ccMock, properties);
-        
+
         KeyStore ks = svc.getKeyStore();
-        
+
         assertNotNull(ks);
-        
+
         Enumeration<String> aliases = ks.aliases();
-        
+
         List<String> aliasList = new ArrayList<>(); // only for size
         while (aliases.hasMoreElements()) {
             aliasList.add(aliases.nextElement());
         }
         assertTrue(aliasList.isEmpty());
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testGetEntryNullId() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
@@ -1146,10 +1145,10 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "pass");
 
         svc.activate(ccMock, properties);
-        
+
         svc.getEntry(null);
     }
-    
+
     @Test
     public void testGetEntryEmptyId() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
@@ -1183,12 +1182,12 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "pass");
 
         svc.activate(ccMock, properties);
-        
+
         Entry entry = svc.getEntry("");
-        
+
         assertNull(entry);
     }
-    
+
     @Test
     public void testGetEntry() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
@@ -1222,7 +1221,7 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "pass");
 
         svc.activate(ccMock, properties);
-        
+
         KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
         gen.initialize(1024);
         KeyPair pair = gen.generateKeyPair();
@@ -1236,17 +1235,17 @@ public class SslManagerServiceImplTest {
 
         String alias = "kuraTestAlias";
         svc.installPrivateKey(alias, (PrivateKey) key, KEY_STORE_PASS, chain);
-        
+
         Entry entry = svc.getEntry(alias);
-        
+
         assertNotNull(entry);
         assertTrue(entry instanceof PrivateKeyEntry);
-        
+
         PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) entry;
         assertNotNull(privateKeyEntry.getPrivateKey());
         assertNotNull(privateKeyEntry.getCertificateChain());
     }
-    
+
     @Test
     public void testGetEntriesEmptyKeystore() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
@@ -1280,15 +1279,364 @@ public class SslManagerServiceImplTest {
         properties.put("ssl.keystore.password", "pass");
 
         svc.activate(ccMock, properties);
-        
+
         List<Entry> entries = svc.getEntries();
-        
+
         assertNotNull(entries);
         assertTrue(entries.isEmpty());
     }
-    
+
     @Test
     public void testGetEntriesOneKey() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+        gen.initialize(1024);
+        KeyPair pair = gen.generateKeyPair();
+        Key key = pair.getPrivate();
+
+        InputStream is = new FileInputStream(CERT_FILE_PATH);
+        Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
+        is.close();
+
+        Certificate[] chain = { certificate };
+
+        String alias = "kuraTestAlias";
+        svc.installPrivateKey(alias, (PrivateKey) key, KEY_STORE_PASS, chain);
+
+        List<Entry> entries = svc.getEntries();
+
+        assertNotNull(entries);
+        assertFalse(entries.isEmpty());
+        assertEquals(1, entries.size());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetKeyManagersNullAlgorithm() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        svc.getKeyManagers(null);
+    }
+
+    @Test(expected = GeneralSecurityException.class)
+    public void testGetKeyManagersNotExistingAlgorithm() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        svc.getKeyManagers("notExisting");
+    }
+
+    @Test
+    public void testGetKeyManagers() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        List<KeyManager> keyManagers = svc.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm());
+
+        assertNotNull(keyManagers);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetEntryNull() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        svc.setEntry(null, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetEntryEmptyAlias() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+        gen.initialize(1024);
+        KeyPair pair = gen.generateKeyPair();
+        PrivateKey key = pair.getPrivate();
+
+        InputStream is = new FileInputStream(CERT_FILE_PATH);
+        Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
+        is.close();
+
+        Certificate[] chain = { certificate };
+
+        PrivateKeyEntry entry = new PrivateKeyEntry(key, chain);
+
+        svc.setEntry("", entry);
+    }
+    
+    @Test
+    public void testSetEntry() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+        gen.initialize(1024);
+        KeyPair pair = gen.generateKeyPair();
+        PrivateKey key = pair.getPrivate();
+
+        InputStream is = new FileInputStream(CERT_FILE_PATH);
+        Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
+        is.close();
+
+        Certificate[] chain = { certificate };
+
+        String alias = "kuraTestAlias";
+        PrivateKeyEntry entry = new PrivateKeyEntry(key, chain);
+
+        svc.setEntry(alias, entry);
+
+        List<Entry> entries = svc.getEntries();
+
+        assertNotNull(entries);
+        assertFalse(entries.isEmpty());
+        assertEquals(1, entries.size());
+    }
+    
+    @Test
+    public void testGetAliasesEmptyKeyStore() throws IOException, KuraException, GeneralSecurityException {
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        CryptoService csMock = mock(CryptoService.class);
+        svc.setCryptoService(csMock);
+
+        SystemService ssMock = mock(SystemService.class);
+        svc.setSystemService(ssMock);
+
+        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
+
+        char[] enc = "pass".toCharArray();
+        char[] dec = "pass".toCharArray();
+        when(csMock.decryptAes(enc)).thenReturn(dec);
+
+        char[] origPass = "pass".toCharArray();
+        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
+        properties.put("ssl.hostname.verification", "true");
+        properties.put("ssl.keystore.password", "pass");
+
+        svc.activate(ccMock, properties);
+        
+        assertTrue(svc.getAliases().isEmpty());
+    }
+    
+    @Test
+    public void testGetAliases() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1324,7 +1672,7 @@ public class SslManagerServiceImplTest {
         KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
         gen.initialize(1024);
         KeyPair pair = gen.generateKeyPair();
-        Key key = pair.getPrivate();
+        PrivateKey key = pair.getPrivate();
 
         InputStream is = new FileInputStream(CERT_FILE_PATH);
         Certificate certificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
@@ -1332,126 +1680,15 @@ public class SslManagerServiceImplTest {
 
         Certificate[] chain = { certificate };
 
-        String alias = "kuraTestAlias";
-        svc.installPrivateKey(alias, (PrivateKey) key, KEY_STORE_PASS, chain);
+        String alias = "kuratestalias";
+        PrivateKeyEntry entry = new PrivateKeyEntry(key, chain);
+
+        svc.setEntry(alias, entry);
         
-        List<Entry> entries = svc.getEntries();
+        List<String> aliases = svc.getAliases();
         
-        assertNotNull(entries);
-        assertFalse(entries.isEmpty());
-        assertEquals(1, entries.size());
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testGetKeyManagersNullAlgorithm() throws IOException, KuraException, GeneralSecurityException {
-        setupDefaultKeystore();
-
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
-        CryptoService csMock = mock(CryptoService.class);
-        svc.setCryptoService(csMock);
-
-        SystemService ssMock = mock(SystemService.class);
-        svc.setSystemService(ssMock);
-
-        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
-
-        char[] enc = "pass".toCharArray();
-        char[] dec = "pass".toCharArray();
-        when(csMock.decryptAes(enc)).thenReturn(dec);
-
-        char[] origPass = "pass".toCharArray();
-        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
-
-        ComponentContext ccMock = mock(ComponentContext.class);
-
-        BundleContext bcMock = mock(BundleContext.class);
-        when(ccMock.getBundleContext()).thenReturn(bcMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("ssl.default.protocol", "TLSv1");
-        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
-        properties.put("ssl.hostname.verification", "true");
-        properties.put("ssl.keystore.password", "pass");
-
-        svc.activate(ccMock, properties);
-        
-        svc.getKeyManagers(null);
-    }
-    
-    @Test(expected = GeneralSecurityException.class)
-    public void testGetKeyManagersNotExistingAlgorithm() throws IOException, KuraException, GeneralSecurityException {
-        setupDefaultKeystore();
-
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
-        CryptoService csMock = mock(CryptoService.class);
-        svc.setCryptoService(csMock);
-
-        SystemService ssMock = mock(SystemService.class);
-        svc.setSystemService(ssMock);
-
-        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
-
-        char[] enc = "pass".toCharArray();
-        char[] dec = "pass".toCharArray();
-        when(csMock.decryptAes(enc)).thenReturn(dec);
-
-        char[] origPass = "pass".toCharArray();
-        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
-
-        ComponentContext ccMock = mock(ComponentContext.class);
-
-        BundleContext bcMock = mock(BundleContext.class);
-        when(ccMock.getBundleContext()).thenReturn(bcMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("ssl.default.protocol", "TLSv1");
-        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
-        properties.put("ssl.hostname.verification", "true");
-        properties.put("ssl.keystore.password", "pass");
-
-        svc.activate(ccMock, properties);
-        
-        svc.getKeyManagers("notExisting");
-    }
-    
-    @Test
-    public void testGetKeyManagers() throws IOException, KuraException, GeneralSecurityException {
-        setupDefaultKeystore();
-
-        SslManagerServiceImpl svc = new SslManagerServiceImpl();
-
-        CryptoService csMock = mock(CryptoService.class);
-        svc.setCryptoService(csMock);
-
-        SystemService ssMock = mock(SystemService.class);
-        svc.setSystemService(ssMock);
-
-        when(ssMock.getJavaKeyStorePassword()).thenReturn(new char[0]);
-
-        char[] enc = "pass".toCharArray();
-        char[] dec = "pass".toCharArray();
-        when(csMock.decryptAes(enc)).thenReturn(dec);
-
-        char[] origPass = "pass".toCharArray();
-        when(csMock.getKeyStorePassword(KEY_STORE_PATH)).thenReturn(origPass);
-
-        ComponentContext ccMock = mock(ComponentContext.class);
-
-        BundleContext bcMock = mock(BundleContext.class);
-        when(ccMock.getBundleContext()).thenReturn(bcMock);
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("ssl.default.protocol", "TLSv1");
-        properties.put("ssl.default.trustStore", KEY_STORE_PATH);
-        properties.put("ssl.hostname.verification", "true");
-        properties.put("ssl.keystore.password", "pass");
-
-        svc.activate(ccMock, properties);
-        
-        List<KeyManager> keyManagers = svc.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm());
-        
-        assertNotNull(keyManagers);
+        assertNotNull(aliases);
+        assertEquals(1, aliases.size());
+        assertEquals(alias, aliases.get(0));
     }
 }

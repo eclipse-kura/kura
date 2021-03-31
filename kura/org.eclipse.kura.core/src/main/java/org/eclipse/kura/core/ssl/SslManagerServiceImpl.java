@@ -653,6 +653,9 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
 
     @Override
     public void deleteEntry(String alias) throws GeneralSecurityException, IOException {
+        if (isNull(alias)) {
+            throw new IllegalArgumentException("Alias cannot be null!");
+        }
         KeyStore ks = getKeyStore();
         ks.deleteEntry(alias);
         saveKeystore(ks);
@@ -673,6 +676,9 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
 
     @Override
     public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException {
+        if (isNull(alias) || alias.trim().isEmpty() || isNull(entry)) {
+            throw new IllegalArgumentException("Input cannot be null or empty!");
+        }
         KeyStore ks = getKeyStore();
         ks.setEntry(alias, entry, new PasswordProtection(getKeyStorePassword()));
         saveKeystore(ks);
@@ -680,8 +686,8 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
 
     @Override
     public List<String> getAliases() throws GeneralSecurityException, IOException {
-        // TODO Auto-generated method stub
-        return null;
+        KeyStore ks = getKeyStore();
+        return Collections.list(ks.aliases());
     }
 
 }

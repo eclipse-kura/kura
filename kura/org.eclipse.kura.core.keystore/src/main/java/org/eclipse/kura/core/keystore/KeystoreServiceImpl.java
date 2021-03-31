@@ -134,6 +134,9 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     @Override
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException {
+        if (isNull(algorithm)) {
+            throw new IllegalArgumentException("Algorithm cannot be null!");
+        }
         KeyStore ks = getKeyStore();
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
         kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword());
@@ -143,6 +146,9 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     @Override
     public void deleteEntry(String alias) throws GeneralSecurityException, IOException {
+        if (isNull(alias)) {
+            throw new IllegalArgumentException("Alias cannot be null!");
+        }
         KeyStore ks = getKeyStore();
         ks.deleteEntry(alias);
         saveKeystore(ks);
@@ -158,6 +164,9 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     @Override
     public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException {
+        if (isNull(alias) || alias.trim().isEmpty() || isNull(entry)) {
+            throw new IllegalArgumentException("Input cannot be null or empty!");
+        }
         KeyStore ks = getKeyStore();
         ks.setEntry(alias, entry, new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword()));
         saveKeystore(ks);
@@ -165,8 +174,8 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     @Override
     public List<String> getAliases() throws GeneralSecurityException, IOException {
-        // TODO Auto-generated method stub
-        return null;
+        KeyStore ks = getKeyStore();
+        return Collections.list(ks.aliases());
     }
 
 }

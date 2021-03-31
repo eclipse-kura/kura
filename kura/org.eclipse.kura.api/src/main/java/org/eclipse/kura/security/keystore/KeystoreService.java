@@ -38,7 +38,8 @@ public interface KeystoreService {
     /**
      * Returns the key pair specified by the provided id
      * @param id
-     * @return
+     * @return the kay pair specified by the provided argument
+     * @throws IllegalArgumentException if the id is null
      */
     public KeyPair getKeyPair(String id) throws GeneralSecurityException, IOException;
     
@@ -48,6 +49,14 @@ public interface KeystoreService {
      */
     public List<KeyPair> getKeyPairs() throws GeneralSecurityException, IOException;
     
+    /**
+     * Returns one key manager for each type of key material.
+     * @param algorithm
+     * @return a list of key manager
+     * @throws GeneralSecurityException if the provided algorithm is not supported or does not exist
+     * @throws IOException if the associated keystore cannot be accessed
+     * @throws IllegalArgumentException if the algorithm is null
+     */
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
     
     public KeyPair createKeyPair(String id) throws KuraException;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.ssl;
 
+import static java.util.Objects.isNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -610,11 +611,18 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
 
     @Override
     public KeyPair getKeyPair(String id) throws GeneralSecurityException, IOException {
+        if (isNull(id)) {
+            throw new IllegalArgumentException("Key Pair Id cannot be null!");
+        }
+        
         KeyStore ks = getKeyStore();
         final Key key = ks.getKey(id, getKeyStorePassword());
 
         final Certificate cert = ks.getCertificate(id);
-        final PublicKey publicKey = cert.getPublicKey();
+        PublicKey publicKey = null;
+        if (!isNull(cert)) {
+            publicKey = cert.getPublicKey();
+        }
 
         return new KeyPair(publicKey, (PrivateKey) key);
     }
@@ -635,8 +643,11 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
 
     @Override
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException {
+        if (isNull(algorithm)) {
+            throw new IllegalArgumentException("Algorithm cannot be null!");
+        }
         KeyStore ks = getKeyStore();
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
         kmf.init(ks, getKeyStorePassword());
 
         return Arrays.asList(kmf.getKeyManagers());

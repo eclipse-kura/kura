@@ -136,7 +136,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     @Override
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException {
         KeyStore ks = getKeyStore();
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
         kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword());
 
         return Arrays.asList(kmf.getKeyManagers());

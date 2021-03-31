@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.KeyStore.Entry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -69,7 +70,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     //
     // ----------------------------------------------------------------
 
-    protected void activate(Map<String, Object> properties) {
+    public void activate(Map<String, Object> properties) {
         logger.info("Bundle {} has started!", APP_ID);
 
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
@@ -155,5 +156,11 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
                 this.keystoreServiceOptions.getKeystorePath().toFile());) {
             ks.store(tsOutStream, this.keystoreServiceOptions.getKeystorePassword());
         }
+    }
+
+    @Override
+    public void setEntry(String alias, Entry entry) {
+        // TODO Auto-generated method stub
+        
     }
 }

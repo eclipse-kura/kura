@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyStore;
+import java.security.KeyStore.Entry;
 import java.util.List;
 
 import javax.net.ssl.KeyManager;
@@ -37,11 +38,11 @@ public interface KeystoreService {
     
     /**
      * Returns the key pair specified by the provided id
-     * @param id
-     * @return the kay pair specified by the provided argument
+     * @param alias
+     * @return the key pair specified by the provided argument
      * @throws IllegalArgumentException if the id is null
      */
-    public KeyPair getKeyPair(String id) throws GeneralSecurityException, IOException;
+    public KeyPair getKeyPair(String alias) throws GeneralSecurityException, IOException;
     
     /**
      * Returns the list of all the managed keyPairs
@@ -59,11 +60,13 @@ public interface KeystoreService {
      */
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
     
-    public KeyPair createKeyPair(String id) throws KuraException;
+    public KeyPair createKeyPair(String alias) throws KuraException;
     
-    public void deleteEntry(String id) throws GeneralSecurityException, IOException;
+    public void deleteEntry(String alias) throws GeneralSecurityException, IOException;
     
-    public String getCSR(String id);
+    public String getCSR(String alias);
+    
+    public void setEntry(String alias, Entry entry);
     
 
 }

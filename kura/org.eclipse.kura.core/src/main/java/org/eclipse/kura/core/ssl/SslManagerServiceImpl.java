@@ -679,4 +679,10 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
         }
     }
 
+    @Override
+    public void setEntry(String alias, Entry entry) {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

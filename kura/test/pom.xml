@@ -837,6 +837,7 @@
         <module>org.eclipse.kura.network.threat.manager.test</module>
         <module>org.eclipse.kura.core.tamper.detection.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
+        <module>org.eclipse.kura.core.keystore.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

@@ -16,6 +16,7 @@ import static java.util.Objects.isNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
@@ -32,19 +33,19 @@ public class KeystoreServiceOptions {
 
     private final Path keystorePath;
     private final Password keystorePassword;
-    
-    private CryptoService cryptoService;
+
+    private final CryptoService cryptoService;
 
     public KeystoreServiceOptions(Map<String, Object> properties, CryptoService cryptoService) {
-        if (isNull(properties)) {
-            throw new IllegalArgumentException("Properties cannot be null!");
+        if (isNull(properties) || isNull(cryptoService)) {
+            throw new IllegalArgumentException("Input parameters cannot be null!");
         }
         String keystoreLocation = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
         this.keystorePath = Paths.get(keystoreLocation);
 
         this.keystorePassword = new Password(
                 (String) properties.getOrDefault(KEY_KEYSTORE_PASSWORD, DEFAULT_KEYSTORE_PASSWORD));
-        
+
         this.cryptoService = cryptoService;
 
     }
@@ -54,7 +55,7 @@ public class KeystoreServiceOptions {
     }
 
     public char[] getKeystorePassword() {
-        char[] snapshotPassword = keystorePassword.getPassword();
+        char[] snapshotPassword = this.keystorePassword.getPassword();
         try {
             snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
         } catch (KuraException e) {
@@ -88,7 +89,7 @@ public class KeystoreServiceOptions {
             if (other.keystorePassword != null) {
                 return false;
             }
-        } else if (!this.keystorePassword.equals(other.keystorePassword)) {
+        } else if (!Arrays.equals(this.keystorePassword.getPassword(), other.keystorePassword.getPassword())) {
             return false;
         }
         if (this.keystorePath == null) {

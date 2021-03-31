@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -29,44 +29,53 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public interface KeystoreService {
-    
+
     /**
      * Returns the managed {@link KeyStore}
+     *
      * @return
      */
     public KeyStore getKeyStore() throws GeneralSecurityException, IOException;
-    
+
+    public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException;
+
     /**
-     * Returns the key pair specified by the provided id
+     * Returns the entry object specified by the provided alias
+     *
      * @param alias
-     * @return the key pair specified by the provided argument
-     * @throws IllegalArgumentException if the id is null
+     * @return the entry specified by the provided argument
+     * @throws IllegalArgumentException
+     *             if the alias is null
      */
-    public KeyPair getKeyPair(String alias) throws GeneralSecurityException, IOException;
-    
+    public Entry getEntry(String alias) throws GeneralSecurityException, IOException;
+
     /**
-     * Returns the list of all the managed keyPairs
+     * Returns the list of all the managed entries
+     *
      * @return
      */
-    public List<KeyPair> getKeyPairs() throws GeneralSecurityException, IOException;
-    
+    public List<Entry> getEntries() throws GeneralSecurityException, IOException;
+
+    public void deleteEntry(String alias) throws GeneralSecurityException, IOException;
+
     /**
      * Returns one key manager for each type of key material.
+     *
      * @param algorithm
      * @return a list of key manager
-     * @throws GeneralSecurityException if the provided algorithm is not supported or does not exist
-     * @throws IOException if the associated keystore cannot be accessed
-     * @throws IllegalArgumentException if the algorithm is null
+     * @throws GeneralSecurityException
+     *             if the provided algorithm is not supported or does not exist
+     * @throws IOException
+     *             if the associated keystore cannot be accessed
+     * @throws IllegalArgumentException
+     *             if the algorithm is null
      */
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
-    
+
     public KeyPair createKeyPair(String alias) throws KuraException;
-    
-    public void deleteEntry(String alias) throws GeneralSecurityException, IOException;
-    
+
     public String getCSR(String alias);
     
-    public void setEntry(String alias, Entry entry);
-    
+    public List<String> getAliases() throws GeneralSecurityException, IOException;
 
 }

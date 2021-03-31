@@ -12,20 +12,19 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore;
 
+import static java.util.Objects.isNull;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.GeneralSecurityException;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
+import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,13 +72,13 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     public void activate(Map<String, Object> properties) {
         logger.info("Bundle {} has started!", APP_ID);
 
-        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
+        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
 
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is deactivating!", APP_ID);
-        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
+        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
     }
 
     protected void deactivate() {
@@ -98,38 +97,37 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public KeyPair getKeyPair(String id) throws GeneralSecurityException, IOException {
+    public Entry getEntry(String alias) throws GeneralSecurityException, IOException {
+        if (isNull(alias)) {
+            throw new IllegalArgumentException("Key Pair alias cannot be null!");
+        }
         KeyStore ks = getKeyStore();
-        final Key key = ks.getKey(id, this.keystoreServiceOptions.getKeystorePassword());
 
-        final Certificate cert = ks.getCertificate(id);
-        final PublicKey publicKey = cert.getPublicKey();
-
-        return new KeyPair(publicKey, (PrivateKey) key);
+        return ks.getEntry(alias, new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword()));
     }
 
     @Override
-    public List<KeyPair> getKeyPairs() throws GeneralSecurityException, IOException {
-        List<KeyPair> result = new ArrayList<>();
+    public List<Entry> getEntries() throws GeneralSecurityException, IOException {
+        List<Entry> result = new ArrayList<>();
 
         KeyStore ks = getKeyStore();
         List<String> aliases = Collections.list(ks.aliases());
 
         for (String alias : aliases) {
-            KeyPair tempKeyPair = getKeyPair(alias);
-            result.add(tempKeyPair);
+            Entry tempEntry = getEntry(alias);
+            result.add(tempEntry);
         }
         return result;
     }
 
     @Override
-    public KeyPair createKeyPair(String id) {
+    public KeyPair createKeyPair(String alias) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String getCSR(String id) {
+    public String getCSR(String alias) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -144,9 +142,9 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public void deleteEntry(String id) throws GeneralSecurityException, IOException {
+    public void deleteEntry(String alias) throws GeneralSecurityException, IOException {
         KeyStore ks = getKeyStore();
-        ks.deleteEntry(id);
+        ks.deleteEntry(alias);
         saveKeystore(ks);
     }
 
@@ -159,8 +157,16 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public void setEntry(String alias, Entry entry) {
-        // TODO Auto-generated method stub
-        
+    public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException {
+        KeyStore ks = getKeyStore();
+        ks.setEntry(alias, entry, new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword()));
+        saveKeystore(ks);
     }
+
+    @Override
+    public List<String> getAliases() throws GeneralSecurityException, IOException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

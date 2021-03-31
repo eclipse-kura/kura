@@ -39,6 +39,8 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStore.Entry;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -1112,7 +1114,7 @@ public class SslManagerServiceImplTest {
     }
     
     @Test(expected = IllegalArgumentException.class)
-    public void testGetKeyPairNullId() throws IOException, KuraException, GeneralSecurityException {
+    public void testGetEntryNullId() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1145,11 +1147,11 @@ public class SslManagerServiceImplTest {
 
         svc.activate(ccMock, properties);
         
-        KeyPair keyPair = svc.getKeyPair(null);
+        svc.getEntry(null);
     }
     
     @Test
-    public void testGetKeyPairEmptyId() throws IOException, KuraException, GeneralSecurityException {
+    public void testGetEntryEmptyId() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1182,15 +1184,13 @@ public class SslManagerServiceImplTest {
 
         svc.activate(ccMock, properties);
         
-        KeyPair keyPair = svc.getKeyPair("");
+        Entry entry = svc.getEntry("");
         
-        assertNotNull(keyPair);
-        assertNull(keyPair.getPrivate());
-        assertNull(keyPair.getPublic());
+        assertNull(entry);
     }
     
     @Test
-    public void testGetKeyPair() throws IOException, KuraException, GeneralSecurityException {
+    public void testGetEntry() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1237,15 +1237,18 @@ public class SslManagerServiceImplTest {
         String alias = "kuraTestAlias";
         svc.installPrivateKey(alias, (PrivateKey) key, KEY_STORE_PASS, chain);
         
-        KeyPair keyPair = svc.getKeyPair(alias);
+        Entry entry = svc.getEntry(alias);
         
-        assertNotNull(keyPair);
-        assertNotNull(keyPair.getPrivate());
-        assertNotNull(keyPair.getPublic());
+        assertNotNull(entry);
+        assertTrue(entry instanceof PrivateKeyEntry);
+        
+        PrivateKeyEntry privateKeyEntry = (PrivateKeyEntry) entry;
+        assertNotNull(privateKeyEntry.getPrivateKey());
+        assertNotNull(privateKeyEntry.getCertificateChain());
     }
     
     @Test
-    public void testGetKeyPairsEmptyKeystore() throws IOException, KuraException, GeneralSecurityException {
+    public void testGetEntriesEmptyKeystore() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1278,14 +1281,14 @@ public class SslManagerServiceImplTest {
 
         svc.activate(ccMock, properties);
         
-        List<KeyPair> keyPairs = svc.getKeyPairs();
+        List<Entry> entries = svc.getEntries();
         
-        assertNotNull(keyPairs);
-        assertTrue(keyPairs.isEmpty());
+        assertNotNull(entries);
+        assertTrue(entries.isEmpty());
     }
     
     @Test
-    public void testGetKeyPairsOneKey() throws IOException, KuraException, GeneralSecurityException {
+    public void testGetEntriesOneKey() throws IOException, KuraException, GeneralSecurityException {
         setupDefaultKeystore();
 
         SslManagerServiceImpl svc = new SslManagerServiceImpl();
@@ -1332,11 +1335,11 @@ public class SslManagerServiceImplTest {
         String alias = "kuraTestAlias";
         svc.installPrivateKey(alias, (PrivateKey) key, KEY_STORE_PASS, chain);
         
-        List<KeyPair> keyPairs = svc.getKeyPairs();
+        List<Entry> entries = svc.getEntries();
         
-        assertNotNull(keyPairs);
-        assertFalse(keyPairs.isEmpty());
-        assertEquals(1, keyPairs.size());
+        assertNotNull(entries);
+        assertFalse(entries.isEmpty());
+        assertEquals(1, entries.size());
     }
     
     @Test(expected = IllegalArgumentException.class)

@@ -18,6 +18,7 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.KeyManager;
 
@@ -50,11 +51,11 @@ public interface KeystoreService {
     public Entry getEntry(String alias) throws GeneralSecurityException, IOException;
 
     /**
-     * Returns the list of all the managed entries
+     * Returns the map representing the entries associated with the corresponding aliases in the keystore
      *
      * @return
      */
-    public List<Entry> getEntries() throws GeneralSecurityException, IOException;
+    public Map<String, Entry> getEntries() throws GeneralSecurityException, IOException;
 
     public void deleteEntry(String alias) throws GeneralSecurityException, IOException;
 
@@ -75,7 +76,7 @@ public interface KeystoreService {
     public KeyPair createKeyPair(String alias) throws KuraException;
 
     public String getCSR(String alias);
-    
+
     public List<String> getAliases() throws GeneralSecurityException, IOException;
 
 }

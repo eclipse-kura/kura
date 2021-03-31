@@ -174,7 +174,7 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(properties);
 
-        List<Entry> entries = keystoreService.getEntries();
+        Map<String,Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertFalse(entries.isEmpty());
     }
@@ -210,7 +210,7 @@ public class KeystoreServiceImplTest {
 
         keystoreService.deleteEntry("");
         
-        List<Entry> entries = keystoreService.getEntries();
+        Map<String,Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertFalse(entries.isEmpty());
     }
@@ -230,7 +230,7 @@ public class KeystoreServiceImplTest {
 
         keystoreService.deleteEntry(DEFAULT_KEY_ALIAS);
         
-        List<Entry> entries = keystoreService.getEntries();
+        Map<String,Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertTrue(entries.isEmpty());
     }

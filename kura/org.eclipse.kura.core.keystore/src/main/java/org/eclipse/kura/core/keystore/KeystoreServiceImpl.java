@@ -29,6 +29,7 @@ import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,15 +108,15 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public List<Entry> getEntries() throws GeneralSecurityException, IOException {
-        List<Entry> result = new ArrayList<>();
+    public Map<String,Entry> getEntries() throws GeneralSecurityException, IOException {
+        Map<String, Entry> result = new HashMap<>();
 
         KeyStore ks = getKeyStore();
         List<String> aliases = Collections.list(ks.aliases());
 
         for (String alias : aliases) {
             Entry tempEntry = getEntry(alias);
-            result.add(tempEntry);
+            result.put(alias, tempEntry);
         }
         return result;
     }

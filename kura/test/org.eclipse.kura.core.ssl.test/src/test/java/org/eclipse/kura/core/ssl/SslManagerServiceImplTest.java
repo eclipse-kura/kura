@@ -1280,7 +1280,7 @@ public class SslManagerServiceImplTest {
 
         svc.activate(ccMock, properties);
 
-        List<Entry> entries = svc.getEntries();
+        Map<String,Entry> entries = svc.getEntries();
 
         assertNotNull(entries);
         assertTrue(entries.isEmpty());
@@ -1334,7 +1334,7 @@ public class SslManagerServiceImplTest {
         String alias = "kuraTestAlias";
         svc.installPrivateKey(alias, (PrivateKey) key, KEY_STORE_PASS, chain);
 
-        List<Entry> entries = svc.getEntries();
+        Map<String,Entry> entries = svc.getEntries();
 
         assertNotNull(entries);
         assertFalse(entries.isEmpty());
@@ -1591,7 +1591,7 @@ public class SslManagerServiceImplTest {
 
         svc.setEntry(alias, entry);
 
-        List<Entry> entries = svc.getEntries();
+        Map<String,Entry> entries = svc.getEntries();
 
         assertNotNull(entries);
         assertFalse(entries.isEmpty());

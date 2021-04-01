@@ -932,6 +932,10 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcpkix_${org.bouncycastle.jar.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcprov_${org.bouncycastle.jar.version}.jar@3" />
 		</propertyfile>
 	</target>
 

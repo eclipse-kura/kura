@@ -16,6 +16,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -95,12 +96,20 @@ public final class WireTestUtil {
     public static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
             final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
 
+        final CompletableFuture<Void> result = modified("(kura.service.pid=" + pid + ")");
+
+        configurationService.updateConfiguration(pid, properties);
+
+        return result;
+    }
+
+    public static CompletableFuture<Void> modified(final String filter) throws KuraException, InvalidSyntaxException {
+
         final CompletableFuture<Void> result = new CompletableFuture<Void>();
         final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
         final ServiceTracker<?, ?> tracker = new ServiceTracker<Object, Object>(context,
-                FrameworkUtil.createFilter("(kura.service.pid=" + pid + ")"),
-                new ServiceTrackerCustomizer<Object, Object>() {
+                FrameworkUtil.createFilter(filter), new ServiceTrackerCustomizer<Object, Object>() {
 
                     @Override
                     public Object addingService(ServiceReference<Object> reference) {
@@ -120,7 +129,47 @@ public final class WireTestUtil {
 
         tracker.open();
 
-        configurationService.updateConfiguration(pid, properties);
+        return result.whenComplete((ok, ex) -> tracker.close());
+    }
+
+    public static <T> CompletableFuture<T> trackService(final Class<T> classz, final Optional<String> filterString)
+            throws KuraException, InvalidSyntaxException {
+
+        final Filter filter;
+
+        if (filterString.isPresent()) {
+            filter = FrameworkUtil.createFilter("(&" + filterString.get() + "(objectClass=" + classz.getName() + "))");
+        } else {
+            filter = FrameworkUtil.createFilter("(objectClass=" + classz.getName() + ")");
+        }
+
+        final CompletableFuture<T> result = new CompletableFuture<>();
+        final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
+
+        final ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, filter,
+                new ServiceTrackerCustomizer<T, T>() {
+
+                    @Override
+                    public T addingService(ServiceReference<T> reference) {
+                        final T service = context.getService(reference);
+
+                        result.complete(service);
+
+                        return service;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<T> reference, T service) {
+                        // do nothing
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<T> reference, T service) {
+                        context.ungetService(reference);
+                    }
+                });
+
+        tracker.open();
 
         return result.whenComplete((ok, ex) -> tracker.close());
     }

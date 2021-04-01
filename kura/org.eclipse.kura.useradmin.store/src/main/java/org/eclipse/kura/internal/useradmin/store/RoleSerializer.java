@@ -103,7 +103,7 @@ class RoleSerializer {
             final String key = e.getKey();
             final Object value = e.getValue();
 
-            if (key instanceof String) {
+            if (value instanceof String) {
                 result.add(key, (String) value);
             } else if (value instanceof byte[]) {
                 result.add(key, serializeByteArray((byte[]) value));
@@ -139,7 +139,7 @@ class RoleSerializer {
                 result.add(GROUP_REQUIRED_MEMBERS, serializeRoleNames(asGroup.getRequiredMembers()));
             }
         }
-        
+
         if (!role.getProperties().isEmpty()) {
             result.add(ROLE_PROPERTIES, serializeProperties(role.getProperties()));
         }

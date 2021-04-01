@@ -50,7 +50,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
      */
     private static final long serialVersionUID = 7402961266449489433L;
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
-    private static final String LOGIN_KEYSTORE_SERVICE_PID = "org.eclipse.kura.http.server.manager.HttpService";
+    private static final String LOGIN_KEYSTORE_SERVICE_PID = "HttpsKeystore";
     private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
 
     @Override

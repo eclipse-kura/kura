@@ -12,8 +12,18 @@
  *******************************************************************************/
 package org.eclipse.kura.core.certificates;
 
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Enumeration;
+
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.testutil.TestUtil;
 
 public class ExtendedCertificatesManager extends CertificatesManager {
 
@@ -30,48 +40,48 @@ public class ExtendedCertificatesManager extends CertificatesManager {
         this.fakeAliases = fakeAliases;
     }
 
-    // @Override
-    // protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
-    // throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-    //
-    // if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
-    // throw new IOException(new UnrecoverableKeyException("Invalid password"));
-    // }
-    //
-    // if (alias != fakeCertificateAlias) {
-    // return null;
-    // }
-    //
-    // return this.fakeCertificate;
-    // }
-    //
-    // @Override
-    // protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
-    // throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-    //
-    // if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
-    // throw new IOException(new UnrecoverableKeyException("Invalid password"));
-    // }
-    //
-    // return this.fakeAliases;
-    // }
-    //
-    // @Override
-    // protected Enumeration<String> getAliasesFromKeyStore(String path, char[] keyStorePassword)
-    // throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-    // if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
-    // throw new IOException(new UnrecoverableKeyException("Invalid password"));
-    // }
-    //
-    // return this.fakeAliases;
-    // }
-    //
-    // @Override
-    // protected String getSslKeystorePath() throws KuraException {
-    // try {
-    // return (String) TestUtil.getFieldValue(this, "DEFAULT_KEYSTORE");
-    // } catch (NoSuchFieldException e) {
-    // throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, e);
-    // }
-    // }
+    @Override
+    protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+
+        if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
+            throw new IOException(new UnrecoverableKeyException("Invalid password"));
+        }
+
+        if (alias != fakeCertificateAlias) {
+            return null;
+        }
+
+        return this.fakeCertificate;
+    }
+
+    @Override
+    protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+
+        if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
+            throw new IOException(new UnrecoverableKeyException("Invalid password"));
+        }
+
+        return this.fakeAliases;
+    }
+
+    @Override
+    protected Enumeration<String> getAliasesFromKeyStore(String path, char[] keyStorePassword)
+            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
+        if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
+            throw new IOException(new UnrecoverableKeyException("Invalid password"));
+        }
+
+        return this.fakeAliases;
+    }
+
+    @Override
+    protected String getSslKeystorePath() throws KuraException {
+        try {
+            return (String) TestUtil.getFieldValue(this, "DEFAULT_KEYSTORE");
+        } catch (NoSuchFieldException e) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION, e);
+        }
+    }
 }

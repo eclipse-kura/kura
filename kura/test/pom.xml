@@ -103,7 +103,7 @@
                         -Dkura.home=${project.basedir}/target/kura
                         -Dkura.plugins=${project.basedir}/target/kura/plugins
                         -Dkura.packages=${project.basedir}/target/kura/data/packages
-                        -Dkura.data=${project.basedir}/target/kura/data
+                        -Dkura.data=${project.basedir}/target/kura
                         -Dkura.tmp=${project.basedir}/target/kura/tmp
                         -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties

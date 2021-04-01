@@ -14,8 +14,6 @@ package org.eclipse.kura.core.keystore;
 
 import static java.util.Objects.isNull;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -31,7 +29,7 @@ public class KeystoreServiceOptions {
     private static final String DEFAULT_KEYSTORE_PATH = "/tmp";
     private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
 
-    private final Path keystorePath;
+    private final String keystorePath;
     private final Password keystorePassword;
 
     private final CryptoService cryptoService;
@@ -40,8 +38,7 @@ public class KeystoreServiceOptions {
         if (isNull(properties) || isNull(cryptoService)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
-        String keystoreLocation = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
-        this.keystorePath = Paths.get(keystoreLocation);
+        this.keystorePath = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
 
         this.keystorePassword = new Password(
                 (String) properties.getOrDefault(KEY_KEYSTORE_PASSWORD, DEFAULT_KEYSTORE_PASSWORD));
@@ -50,7 +47,7 @@ public class KeystoreServiceOptions {
 
     }
 
-    public Path getKeystorePath() {
+    public String getKeystorePath() {
         return this.keystorePath;
     }
 

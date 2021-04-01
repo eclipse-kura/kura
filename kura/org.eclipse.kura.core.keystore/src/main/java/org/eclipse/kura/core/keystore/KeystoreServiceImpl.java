@@ -14,6 +14,7 @@ package org.eclipse.kura.core.keystore;
 
 import static java.util.Objects.isNull;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,10 +26,12 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,7 @@ import java.util.Map;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreService;
@@ -74,23 +78,108 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         logger.info("Bundle {} has started!", APP_ID);
 
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
+        accessKeystore();
 
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is deactivating!", APP_ID);
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
+        accessKeystore();
     }
 
     protected void deactivate() {
         logger.info("Bundle {} is deactivating!", APP_ID);
     }
 
+    private void accessKeystore() {
+        String keystorePath = this.keystoreServiceOptions.getKeystorePath();
+        File fKeyStore = new File(keystorePath);
+        if (!fKeyStore.exists()) {
+            return;
+        }
+
+        char[] oldPassword = getOldKeystorePassword(keystorePath);
+        char[] newPassword = null;
+
+        try {
+            newPassword = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());
+        } catch (KuraException e) {
+            logger.warn("Failed to decrypt keystore password");
+        }
+
+        if (newPassword != null && !Arrays.equals(oldPassword, newPassword)) {
+            updateKeystorePassword(oldPassword, newPassword);
+        }
+    }
+
+    private void updateKeystorePassword(char[] oldPassword, char[] newPassword) {
+        try {
+            changeKeyStorePassword(oldPassword, newPassword);
+
+            this.cryptoService.setKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), newPassword);
+        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | UnrecoverableEntryException
+                | IOException e) {
+            logger.warn("Failed to change keystore password");
+        } catch (KuraException e) {
+            logger.warn("Failed to persist keystore password");
+        } catch (GeneralSecurityException e) {
+            logger.warn("Failed to load keystore");
+        }
+    }
+
+    private void changeKeyStorePassword(char[] oldPassword, char[] newPassword)
+            throws IOException, GeneralSecurityException {
+
+        KeyStore keystore = getKeyStore();
+
+        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
+        saveKeystore(keystore, newPassword);
+    }
+
+    private char[] getOldKeystorePassword(String keystorePath) {
+        char[] password = this.cryptoService.getKeyStorePassword(keystorePath);
+        if (password != null && isKeyStoreAccessible()) {
+            return password;
+        }
+
+        try {
+            password = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());
+        } catch (KuraException e) {
+            password = new char[0];
+        }
+
+        return password;
+    }
+
+    private boolean isKeyStoreAccessible() {
+        try {
+            getKeyStore();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void updateKeyEntiesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
+            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
+        Enumeration<String> aliases = keystore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (keystore.isKeyEntry(alias)) {
+                PasswordProtection oldPP = new PasswordProtection(oldPassword);
+                Entry entry = keystore.getEntry(alias, oldPP);
+                PasswordProtection newPP = new PasswordProtection(newPassword);
+                keystore.setEntry(alias, entry, newPP);
+            }
+        }
+    }
+
     @Override
     public KeyStore getKeyStore() throws GeneralSecurityException, IOException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 
-        try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath().toFile());) {
+        try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath());) {
             ks.load(tsReadStream, this.keystoreServiceOptions.getKeystorePassword());
         }
 
@@ -108,7 +197,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public Map<String,Entry> getEntries() throws GeneralSecurityException, IOException {
+    public Map<String, Entry> getEntries() throws GeneralSecurityException, IOException {
         Map<String, Entry> result = new HashMap<>();
 
         KeyStore ks = getKeyStore();
@@ -119,12 +208,6 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             result.put(alias, tempEntry);
         }
         return result;
-    }
-
-    @Override
-    public KeyPair createKeyPair(String alias) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -157,9 +240,13 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     private void saveKeystore(KeyStore ks)
             throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-        try (FileOutputStream tsOutStream = new FileOutputStream(
-                this.keystoreServiceOptions.getKeystorePath().toFile());) {
-            ks.store(tsOutStream, this.keystoreServiceOptions.getKeystorePassword());
+        saveKeystore(ks, this.keystoreServiceOptions.getKeystorePassword());
+    }
+
+    private void saveKeystore(KeyStore ks, char[] password)
+            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+        try (FileOutputStream tsOutStream = new FileOutputStream(this.keystoreServiceOptions.getKeystorePath());) {
+            ks.store(tsOutStream, password);
         }
     }
 
@@ -177,6 +264,20 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     public List<String> getAliases() throws GeneralSecurityException, IOException {
         KeyStore ks = getKeyStore();
         return Collections.list(ks.aliases());
+    }
+
+    @Override
+    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
+            String sigAlgName) throws KuraException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
+            String sigAlgName, SecureRandom secureRandom) throws KuraException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

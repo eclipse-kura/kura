@@ -54,7 +54,7 @@ public class KeystoreServiceOptionsTest {
         
         KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
         
-        assertEquals("tmp", keystoreServiceOptions.getKeystorePath().getFileName().toString());
+        assertEquals("/tmp", keystoreServiceOptions.getKeystorePath());
         assertArrayEquals(CHANGEIT_PASSWORD.toCharArray(), keystoreServiceOptions.getKeystorePassword());
     }
     
@@ -68,7 +68,7 @@ public class KeystoreServiceOptionsTest {
         
         KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
         
-        assertEquals("abc", keystoreServiceOptions.getKeystorePath().getFileName().toString());
+        assertEquals("/abc", keystoreServiceOptions.getKeystorePath());
         assertArrayEquals("testPassword".toCharArray(), keystoreServiceOptions.getKeystorePassword());
     }
     

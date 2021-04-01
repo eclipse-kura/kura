@@ -17,6 +17,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +74,11 @@ public interface KeystoreService {
      */
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
 
-    public KeyPair createKeyPair(String alias) throws KuraException;
+    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
+            String sigAlgName) throws KuraException;
+
+    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
+            String sigAlgName, SecureRandom secureRandom) throws KuraException;
 
     public String getCSR(String alias);
 

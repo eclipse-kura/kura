@@ -34,7 +34,6 @@ import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -620,7 +619,7 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
     }
 
     @Override
-    public Map<String,Entry> getEntries() throws GeneralSecurityException, IOException {
+    public Map<String, Entry> getEntries() throws GeneralSecurityException, IOException {
         Map<String, Entry> result = new HashMap<>();
 
         KeyStore ks = getKeyStore();
@@ -643,12 +642,6 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
         kmf.init(ks, getKeyStorePassword());
 
         return Arrays.asList(kmf.getKeyManagers());
-    }
-
-    @Override
-    public KeyPair createKeyPair(String alias) throws KuraException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -688,6 +681,19 @@ public class SslManagerServiceImpl implements SslManagerService, KeystoreService
     public List<String> getAliases() throws GeneralSecurityException, IOException {
         KeyStore ks = getKeyStore();
         return Collections.list(ks.aliases());
+    }
+
+    @Override
+    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
+            String sigAlgName) throws KuraException {
+        return null;
+    }
+
+    @Override
+    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
+            String sigAlgName, SecureRandom secureRandom) throws KuraException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

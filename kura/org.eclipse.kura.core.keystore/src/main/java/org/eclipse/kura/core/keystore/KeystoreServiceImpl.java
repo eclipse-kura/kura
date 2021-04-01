@@ -19,8 +19,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PasswordProtection;
@@ -38,7 +40,17 @@ import java.util.Map;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
+import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
@@ -50,6 +62,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class KeystoreServiceImpl implements KeystoreService, ConfigurableComponent {
+
+    private static final String PEM_CERTIFICATE_REQUEST_TYPE = "CERTIFICATE REQUEST";
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceImpl.class);
 
@@ -211,9 +225,29 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public String getCSR(String alias) {
-        // TODO Auto-generated method stub
-        return null;
+    public String getCSR(X500Principal principal, KeyPair keypair, String signerAlg) throws KuraException {
+        if (isNull(principal) || isNull(keypair) || isNull(signerAlg) || signerAlg.trim().isEmpty()) {
+            throw new IllegalArgumentException("Input parameters cannot be null!");
+        }
+        PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(principal,
+                keypair.getPublic());
+        JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder(signerAlg);
+        ContentSigner signer = null;
+        try {
+            signer = csBuilder.build(keypair.getPrivate());
+        } catch (OperatorCreationException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+        PKCS10CertificationRequest csr = p10Builder.build(signer);
+        try (StringWriter str = new StringWriter(); JcaPEMWriter pemWriter = new JcaPEMWriter(str);) {
+            PemObject pemCSR = new PemObject(PEM_CERTIFICATE_REQUEST_TYPE, csr.getEncoded());
+
+            pemWriter.writeObject(pemCSR);
+            pemWriter.flush();
+            return str.toString();
+        } catch (IOException e) {
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+        }
     }
 
     @Override
@@ -267,17 +301,22 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
-            String sigAlgName) throws KuraException {
-        // TODO Auto-generated method stub
-        return null;
+    public KeyPair createKeyPair(String algorithm, int keySize) throws KuraException {
+        return createKeyPair(algorithm, keySize, new SecureRandom());
     }
 
     @Override
-    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
-            String sigAlgName, SecureRandom secureRandom) throws KuraException {
-        // TODO Auto-generated method stub
-        return null;
+    public KeyPair createKeyPair(String algorithm, int keySize, SecureRandom secureRandom) throws KuraException {
+        if (isNull(algorithm) || algorithm.trim().isEmpty() || isNull(secureRandom)) {
+            throw new IllegalArgumentException("Algorithm or random cannot be null or empty!");
+        }
+        try {
+            KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
+            keyGen.initialize(keySize, secureRandom);
+            return keyGen.generateKeyPair();
+        } catch (NoSuchAlgorithmException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
     }
 
 }

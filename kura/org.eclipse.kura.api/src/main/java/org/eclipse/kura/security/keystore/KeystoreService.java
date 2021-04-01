@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.KeyManager;
+import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
@@ -39,8 +40,6 @@ public interface KeystoreService {
      */
     public KeyStore getKeyStore() throws GeneralSecurityException, IOException;
 
-    public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException;
-
     /**
      * Returns the entry object specified by the provided alias
      *
@@ -50,6 +49,8 @@ public interface KeystoreService {
      *             if the alias is null
      */
     public Entry getEntry(String alias) throws GeneralSecurityException, IOException;
+
+    public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException;
 
     /**
      * Returns the map representing the entries associated with the corresponding aliases in the keystore
@@ -74,13 +75,11 @@ public interface KeystoreService {
      */
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
 
-    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
-            String sigAlgName) throws KuraException;
+    public KeyPair createKeyPair(String algorithm, int keySize) throws KuraException;
 
-    public KeyPair createKeyPair(String alias, String algorithm, int keySize, String dn, int validity,
-            String sigAlgName, SecureRandom secureRandom) throws KuraException;
+    public KeyPair createKeyPair(String algorithm, int keySize, SecureRandom secureRandom) throws KuraException;
 
-    public String getCSR(String alias);
+    public String getCSR(X500Principal principal, KeyPair keyPair, String signerAlg) throws KuraException;
 
     public List<String> getAliases() throws GeneralSecurityException, IOException;
 

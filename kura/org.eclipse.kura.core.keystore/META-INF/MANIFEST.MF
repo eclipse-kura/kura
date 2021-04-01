@@ -5,7 +5,15 @@ Bundle-SymbolicName: org.eclipse.kura.core.keystore;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: org.eclipse.kura;version="[1.6,2.0)",
+Import-Package: org.bouncycastle.asn1.x500;version="1.65.0",
+ org.bouncycastle.openssl;version="1.65.0",
+ org.bouncycastle.openssl.jcajce;version="1.65.0",
+ org.bouncycastle.operator;version="1.65.0",
+ org.bouncycastle.operator.jcajce;version="1.65.0",
+ org.bouncycastle.pkcs;version="1.65.0",
+ org.bouncycastle.pkcs.jcajce;version="1.65.0",
+ org.bouncycastle.util.io.pem;version="1.65.0",
+ org.eclipse.kura;version="[1.6,2.0)",
  org.eclipse.kura.configuration;version="[1.2,2.0)",
  org.eclipse.kura.crypto;version="[1.1,2.0)",
  org.eclipse.kura.security.keystore;version="[1.0,2.0)",

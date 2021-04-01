@@ -12,12 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.net.wifi;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
@@ -58,7 +60,15 @@ public class HostapdManager {
             // start hostapd
             String[] launchHostapdCommand = formHostapdStartCommand(ifaceName);
             logger.info("starting hostapd for the {} interface --> {}", ifaceName, launchHostapdCommand);
-            CommandStatus status = this.executorService.execute(new Command(launchHostapdCommand));
+            // CommandStatus status = this.executorService.execute(new Command(launchHostapdCommand));
+            Command command = new Command(launchHostapdCommand);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream err = new ByteArrayOutputStream();
+            command.setOutputStream(out);
+            command.setErrorStream(err);
+            CommandStatus status = this.executorService.execute(command);
+            logger.info("HOSTAPD stderr {}", new String(err.toByteArray(), Charsets.UTF_8));
+            logger.info("HOSTAPD stdout {}", new String(out.toByteArray(), Charsets.UTF_8));
             if (!status.getExitStatus().isSuccessful()) {
                 logger.error("failed to start hostapd for the {} interface for unknown reason - errorCode={}",
                         ifaceName, status.getExitStatus().getExitCode());
@@ -97,7 +107,7 @@ public class HostapdManager {
 
     private static String[] formHostapdStartCommand(String ifaceName) {
         File configFile = new File(getHostapdConfigFileName(ifaceName));
-        return new String[] { HOSTAPD, "-B", configFile.getAbsolutePath() };
+        return new String[] { HOSTAPD, "-B", configFile.getAbsolutePath(), "-dd" };
     }
 
     public static String getHostapdConfigFileName(String ifaceName) {

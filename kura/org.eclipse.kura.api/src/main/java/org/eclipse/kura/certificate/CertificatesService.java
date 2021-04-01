@@ -12,9 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.certificate;
 
-import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.kura.KuraException;
@@ -40,8 +40,9 @@ public interface CertificatesService {
      *            A string that will be used to identify the certificate in a key store
      * @throws KuraException
      *             raised if the certificate storage operation failed
-     *
+     * @deprecated
      */
+    @Deprecated
     public void storeCertificate(Certificate cert, String alias) throws KuraException;
 
     /**
@@ -50,7 +51,9 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the CA aliases stored in a key store.
      *
+     * @deprecated
      */
+    @Deprecated
     public Enumeration<String> listCACertificatesAliases();
 
     /**
@@ -59,7 +62,9 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the aliases stored in a key store.
      *
+     * @deprecated
      */
+    @Deprecated
     public Enumeration<String> listSSLCertificatesAliases();
 
     /**
@@ -69,7 +74,9 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the aliases stored in a key store.
      *
+     * @deprecated
      */
+    @Deprecated
     public Enumeration<String> listDMCertificatesAliases();
 
     /**
@@ -79,7 +86,9 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the aliases stored in a key store.
      *
+     * @deprecated
      */
+    @Deprecated
     public Enumeration<String> listBundleCertificatesAliases();
 
     /**
@@ -89,7 +98,9 @@ public interface CertificatesService {
      *            The string used to identify the certificate in a key store
      * @return A Certificate object retrieved from a key store.
      *
+     * @deprecated
      */
+    @Deprecated
     public Certificate returnCertificate(String alias) throws KuraException;
 
     /**
@@ -101,7 +112,9 @@ public interface CertificatesService {
      * @throws KuraException
      *             raised if the certificate removal operation failed
      *
+     * @deprecated
      */
+    @Deprecated
     public void removeCertificate(String alias) throws KuraException;
 
     /**
@@ -138,7 +151,63 @@ public interface CertificatesService {
      * 
      * @since 2.2
      */
-    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
-            throws KuraException;
+    public void addPrivateKey(KuraPrivateKey privateKey) throws KuraException;
+
+    /**
+     * Return the list of the installed {@KuraCertificate}
+     * 
+     * @return a list of {@KuraCertificate}
+     * @throws KuraException
+     * 
+     * @since 2.2
+     */
+    public List<KuraCertificate> getCertificates() throws KuraException;
+
+    /**
+     * Return the {@KuraCertificate} identified by its id
+     * 
+     * @param id
+     *            the id of the certificate
+     * @return the {@KuraCertificate}
+     * @throws KuraException
+     * 
+     * @since 2.2
+     */
+    public KuraCertificate getCertificate(String id) throws KuraException;
+
+    /**
+     * Update the {@KuraCertificate} in a keystore
+     * 
+     * @param id
+     *            the id of the certificate
+     * @param certificate
+     *            the new certificate
+     * @throws KuraException
+     * 
+     * @since 2.2
+     */
+    public void updateCertificate(KuraCertificate certificate) throws KuraException;
+
+    /**
+     * Add a {@KuraCertificate} in a keystore
+     * 
+     * @param certificate
+     *            the new certificate
+     * @throws KuraException
+     * 
+     * @since 2.2
+     */
+    public void addCertificate(KuraCertificate certificate) throws KuraException;
+
+    /**
+     * Delete the certificate identified by its id
+     * 
+     * @param id
+     *            the id of the certificate
+     * @throws KuraException
+     * 
+     * @since 2.2
+     */
+    public void deleteCertificate(String id) throws KuraException;
 
 }

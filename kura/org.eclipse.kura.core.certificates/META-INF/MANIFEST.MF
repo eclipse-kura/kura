@@ -10,7 +10,11 @@ Import-Package: org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.2,2.0)",
  org.eclipse.kura.crypto;version="[1.1,2.0)",
  org.eclipse.kura.message;version="[1.0,2.0)",
+ org.eclipse.kura.security.keystore;version="[1.0,2.0)",
+ org.eclipse.osgi.util;version="1.1.0",
+ org.osgi.framework;version="1.10.0",
  org.osgi.service.component;version="1.2.0",
+ org.osgi.util.tracker;version="1.5.2",
  org.slf4j;version="1.6.4"
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

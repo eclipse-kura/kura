@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,15 +27,15 @@ public class GwtCertificate extends GwtBaseModel implements IsSerializable, Seri
         return get("alias");
     }
 
-    public GwtCertificateType getType() {
-        return GwtCertificateType.getCertificateType(get("type"));
+    public String getKeystoreName() {
+        return get("keystoreName");
     }
 
     public void setAlias(String alias) {
         set("alias", alias);
     }
 
-    public void setType(String type) {
-        set("type", type);
+    public void setKeystoreName(String keystoreName) {
+        set("keystoreName", keystoreName);
     }
 }

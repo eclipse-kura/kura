@@ -34,7 +34,8 @@ import java.util.Set;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificateInfo;
 import org.eclipse.kura.certificate.CertificatesService;
-import org.eclipse.kura.ssl.SslManagerService;
+import org.eclipse.kura.certificate.KuraCertificate;
+import org.eclipse.kura.certificate.KuraPrivateKey;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -49,6 +50,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
      */
     private static final long serialVersionUID = 7402961266449489433L;
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
+    private static final String LOGIN_KEYSTORE_SERVICE_PID = "org.eclipse.kura.http.server.manager.HttpService";
+    private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
 
     @Override
     public Integer storeSSLPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey,
@@ -73,16 +76,14 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             if (privKey == null) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
             } else {
-                char[] privateKeyPassword = new char[0];
-                if (password != null) {
-                    privateKeyPassword = password.toCharArray();
-                }
-                SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
-                sslService.installPrivateKey(alias, privKey, privateKeyPassword, certs);
+                CertificatesService certificateService = ServiceLocator.getInstance()
+                        .getService(CertificatesService.class);
+                KuraPrivateKey kuraPrivateKey = new KuraPrivateKey(SSL_KEYSTORE_SERVICE_PID, alias, privKey, certs);
+                certificateService.addPrivateKey(kuraPrivateKey);
             }
 
             return 1;
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GeneralSecurityException | IOException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
@@ -98,23 +99,26 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             if (certs.length == 0) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
             } else {
-                SslManagerService sslService = ServiceLocator.getInstance().getService(SslManagerService.class);
+                CertificatesService certificateService = ServiceLocator.getInstance()
+                        .getService(CertificatesService.class);
 
                 boolean leafAssigned = false;
                 for (X509Certificate cert : certs) {
                     if (!leafAssigned && (cert.getBasicConstraints() == -1
                             || cert.getKeyUsage() != null && !cert.getKeyUsage()[5])) { // certificate is leaf
-                        sslService.installTrustCertificate("ssl-" + alias, cert);
+                        certificateService
+                                .addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, "ssl-" + alias, cert));
                         leafAssigned = true;
                     } else { // Certificate is CA.
                         // http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
                         String certificateAlias = "ca-" + cert.getSerialNumber().toString();
-                        sslService.installTrustCertificate(certificateAlias, cert);
+                        certificateService
+                                .addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, certificateAlias, cert));
                     }
                 }
             }
             return certs.length;
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GeneralSecurityException | IOException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
@@ -137,12 +141,13 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 for (X509Certificate cert : certs) {
                     if (!leafAssigned && (cert.getBasicConstraints() == -1
                             || cert.getKeyUsage() != null && !cert.getKeyUsage()[5])) { // certificate is leaf
-                        certificateService.storeCertificate(cert, "bundle-" + alias);
+                        certificateService.addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, alias, cert));
                         leafAssigned = true;
                     } else { // Certificate is CA.
                         // http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
                         String certificateAlias = "bundle-" + cert.getSerialNumber().toString();
-                        certificateService.storeCertificate(cert, certificateAlias);
+                        certificateService
+                                .addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, certificateAlias, cert));
                     }
                 }
             }
@@ -194,7 +199,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 
                 for (X509Certificate cert : certs) {
                     String certificateAlias = "login-" + cert.getSerialNumber().toString();
-                    certificateService.storeCertificate(cert, certificateAlias);
+                    certificateService
+                            .addCertificate(new KuraCertificate(LOGIN_KEYSTORE_SERVICE_PID, certificateAlias, cert));
                 }
             }
 
@@ -218,7 +224,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             certInfos.forEach(certInfo -> {
                 GwtCertificate gwtCertificate = new GwtCertificate();
                 gwtCertificate.setAlias(certInfo.getAlias());
-                gwtCertificate.setType(certInfo.getType().name());
+                gwtCertificate.setKeystoreName(certInfo.getKeystoreName());
                 certificates.add(gwtCertificate);
             });
 
@@ -238,9 +244,10 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         }
 
         String alias = certificate.getAlias();
+        String keystoreName = certificate.getKeystoreName();
 
         try {
-            certificateService.removeCertificate(alias);
+            certificateService.deleteCertificate(keystoreName + ":" + alias);
         } catch (KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
@@ -270,13 +277,11 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             if (privKey == null) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
             } else {
-                char[] privateKeyPassword = new char[0];
-                if (password != null) {
-                    privateKeyPassword = password.toCharArray();
-                }
                 CertificatesService certificateService = ServiceLocator.getInstance()
                         .getService(CertificatesService.class);
-                certificateService.installPrivateKey("login-" + alias, privKey, privateKeyPassword, certs);
+                KuraPrivateKey kuraPrivateKey = new KuraPrivateKey("org.eclipse.kura.htto.server.manager.HttpService",
+                        "login-" + alias, privKey, certs);
+                certificateService.addPrivateKey(kuraPrivateKey);
             }
 
             return 1;

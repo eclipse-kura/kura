@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,26 +14,26 @@
 package org.eclipse.kura.certificate;
 
 /**
- * Identifies a certificate alias with the corresponding {@link CertificateType}
+ * Identifies a certificate alias with the corresponding keystore name
  *
  * @since 2.2
  */
 public class CertificateInfo {
 
     private final String alias;
-    private final CertificateType type;
+    private final String keystoreName;
 
-    public CertificateInfo(String alias, CertificateType type) {
+    public CertificateInfo(String alias, String keystoreName) {
         this.alias = alias;
-        this.type = type;
+        this.keystoreName = keystoreName;
     }
 
     public String getAlias() {
         return this.alias;
     }
 
-    public CertificateType getType() {
-        return this.type;
+    public String getKeystoreName() {
+        return this.keystoreName;
     }
 
 }

@@ -37,7 +37,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -136,31 +135,31 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
             @Override
             public String getValue(GwtCertificate object) {
-                return String.valueOf(object.getType().toString());
+                return String.valueOf(object.getKeystoreName());
             }
         };
         col2.setSortable(true);
-        this.certificatesGrid.addColumn(col2, MSGS.certificateType());
+        this.certificatesGrid.addColumn(col2, MSGS.certificateKeystoreName());
 
-        ListHandler<GwtCertificate> columnSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
-        columnSortHandler.setComparator(col2, (o1, o2) -> {
-            if (o1 == o2) {
-                return 0;
-            }
-
-            // Compare the name columns.
-            if (o1 != null) {
-                return o2 != null ? o1.getType().name().compareTo(o2.getType().name()) : 1;
-            }
-            return -1;
-        });
+        // ListHandler<GwtCertificate> columnSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
+        // columnSortHandler.setComparator(col2, (o1, o2) -> {
+        // if (o1 == o2) {
+        // return 0;
+        // }
+        //
+        // // Compare the name columns.
+        // if (o1 != null) {
+        // return o2 != null ? o1.getType().name().compareTo(o2.getType().name()) : 1;
+        // }
+        // return -1;
+        // });
 
         this.selectionModel.addSelectionChangeHandler(e -> {
             this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null);
         });
 
         this.certificatesGrid.getColumnSortList().push(col2);
-        this.certificatesGrid.addColumnSortHandler(columnSortHandler);
+        // this.certificatesGrid.addColumnSortHandler(columnSortHandler);
 
         this.certificatesDataProvider.addDataDisplay(this.certificatesGrid);
         this.certificatesGrid.setSelectionModel(this.selectionModel);

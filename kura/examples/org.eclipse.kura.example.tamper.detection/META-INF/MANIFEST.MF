@@ -8,10 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
-Import-Package: org.eclipse.kura;version="[1.0,2.0]",
- org.eclipse.kura.configuration;version="[1.0,2.0]",
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.configuration;version="[1.0,2.0)",
  org.eclipse.kura.security.tamper.detection;version="[1.0,1.1)",
- org.eclipse.kura.type;version="1.1.0",
+ org.eclipse.kura.type;version="[1.1,2.0)",
  org.eclipse.kura.util.configuration;version="[1.0,2.0)",
  org.osgi.service.event;version="1.4.0",
  org.slf4j;version="1.7.25"

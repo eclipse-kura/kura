@@ -309,7 +309,7 @@ public class RestService
                 return;
             }
 
-            if (responseStatus == Response.Status.OK.getStatusCode()) {
+            if (responseStatus >= 200 && responseStatus < 400) {
                 auditLogger.info("{} Rest - Success - Rest request succeeded", auditContext);
             } else {
                 auditLogger.warn("{} Rest - Failure - Request failed", auditContext);

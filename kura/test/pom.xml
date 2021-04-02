@@ -103,7 +103,7 @@
                         -Dkura.home=${project.basedir}/target/kura
                         -Dkura.plugins=${project.basedir}/target/kura/plugins
                         -Dkura.packages=${project.basedir}/target/kura/data/packages
-                        -Dkura.data=${project.basedir}/target/kura/data
+                        -Dkura.data=${project.basedir}/target/kura
                         -Dkura.tmp=${project.basedir}/target/kura/tmp
                         -Dkura.snapshots=${project.basedir}/target/kura/user/snapshots
                         -Dkura.configuration=file:${kura.basedir}/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties
@@ -488,6 +488,41 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
+                            <bundle>
+                                <id>com.eclipsesource.jaxrs.jersey-min</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>com.eclipsesource.jaxrs.provider.gson</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>com.eclipsesource.jaxrs.provider.security</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>com.eclipsesource.jaxrs.publisher</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.apache.felix.useradmin</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.useradmin.store</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
+                                <id>org.eclipse.kura.rest.provider</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
                         </bundleStartLevel>
                     </configuration>
                 </plugin>
@@ -670,6 +705,46 @@
                                     <id>org.eclipse.equinox.http.jetty</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>com.eclipsesource.jaxrs.jersey-min</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>com.eclipsesource.jaxrs.provider.gson</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>com.eclipsesource.jaxrs.provider.security</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>com.eclipsesource.jaxrs.publisher</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.rest.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.apache.felix.useradmin</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.useradmin.store</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.rest.provider</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
                             </extraRequirements>
                         </dependency-resolution>
                     </configuration>
@@ -755,6 +830,7 @@
         <module>org.eclipse.kura.xml.marshaller.unmarshaller.provider.test</module>
         <module>org.eclipse.kura.http.server.manager.test</module>
         <module>org.eclipse.kura.network.threat.manager.test</module>
+        <module>org.eclipse.kura.core.tamper.detection.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -49,6 +48,7 @@ import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -222,7 +222,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     private final DevicePanelUi deviceBinder = GWT.create(DevicePanelUi.class);
     private final PackagesPanelUi packagesBinder = GWT.create(PackagesPanelUi.class);
     private final SettingsPanelUi settingsBinder = GWT.create(SettingsPanelUi.class);
-    private final SecurityPanelUi securityBinder = GWT.create(SecurityPanelUi.class);
+    private final SecurityPanelUi securityBinder;
     private final UsersPanelUi usersBinder = GWT.create(UsersPanelUi.class);
     private final FirewallPanelUi firewallBinder = GWT.create(FirewallPanelUi.class);
     private final NetworkPanelUi networkBinder = GWT.create(NetworkPanelUi.class);
@@ -244,6 +244,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private final EntryClassUi ui;
     private GwtUserData userData;
+    private GwtSecurityCapabilities securityCapabilities;
 
     private GwtSession currentSession;
     private GwtConfigComponent selected = null;
@@ -274,11 +275,18 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private static GwtConsoleUserOptions userOptions;
 
-    public EntryClassUi(final GwtUserData gwtUserData) {
+    public EntryClassUi(final GwtUserData gwtUserData, final GwtSecurityCapabilities securityCapabilities,
+            final GwtSession session) {
+        initWidget(uiBinder.createAndBindUi(this));
+
         this.ui = this;
         this.userData = gwtUserData;
+        this.securityCapabilities = securityCapabilities;
+        this.securityBinder = new SecurityPanelUi(gwtUserData, securityCapabilities);
 
-        initWidget(uiBinder.createAndBindUi(this));
+        setFooter(session);
+        initSystemPanel(session);
+        setSession(session);
 
         initWaitModal();
         initNewComponentErrorModal();
@@ -304,6 +312,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         initLogoutButtons();
         initServicesTree();
         initExtensions();
+        init();
     }
 
     private void initExtensions() {
@@ -317,8 +326,25 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     private void initExceptionReportModal() {
         this.errorPopup.setTitle(MSGS.warning());
         this.errorStackTraceAreaOneAnchor.setText(MSGS.showStackTrace());
-        FailureHandler.setPopup(this.errorPopup, this.errorMessage, this.errorStackTraceAreaOne,
-                this.stackTraceContainer);
+        FailureHandler.setBackend((title, message, stackTrace) -> {
+            this.errorPopup.setTitle(title);
+
+            this.errorMessage.setText(message);
+
+            if (stackTrace == null) {
+                stackTraceContainer.setVisible(false);
+            } else {
+                this.errorStackTraceAreaOne.clear();
+
+                for (StackTraceElement element : stackTrace) {
+                    Label tempLabel = new Label();
+                    tempLabel.setText(element.toString());
+                    this.errorStackTraceAreaOne.add(tempLabel);
+                }
+                stackTraceContainer.setVisible(true);
+            }
+            this.errorPopup.show();
+        });
     }
 
     public void setSelectedAnchorListItem(AnchorListItem selected) {
@@ -361,7 +387,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     public void initSystemPanel(GwtSession gwtSession) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()
-                || !checkPermissions(Collections.singleton(KuraPermission.NETWORK_ADMIN))) {
+                || !userData.checkPermissions(Collections.singleton(KuraPermission.NETWORK_ADMIN))) {
             this.network.setVisible(false);
             this.firewall.setVisible(false);
         }
@@ -391,7 +417,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initDriversAndAssetsPanel() {
-        if (!checkPermission(KuraPermission.WIRES_ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.WIRES_ADMIN)) {
             this.driversAndAssetsServices.setVisible(false);
             return;
         }
@@ -412,7 +438,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initWiresPanel() {
-        if (!checkPermission(KuraPermission.WIRES_ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.WIRES_ADMIN)) {
             this.wires.setVisible(false);
             return;
         }
@@ -433,7 +459,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initCloudServicesPanel() {
-        if (!checkPermission(KuraPermission.CLOUD_CONNECTION_ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.CLOUD_CONNECTION_ADMIN)) {
             this.cloudServices.setVisible(false);
             return;
         }
@@ -455,7 +481,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initSettingsPanel() {
-        if (!checkPermission(KuraPermission.ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.ADMIN)) {
             this.settings.setVisible(false);
             return;
         }
@@ -477,7 +503,11 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initSecurityPanel() {
-        if (!checkPermission(KuraPermission.ADMIN)) {
+        final boolean isVisible = userData.checkPermission(KuraPermission.ADMIN)
+                || (userData.checkPermission(KuraPermission.MAINTENANCE)
+                        && this.securityCapabilities.isTamperDetectionAvailable());
+
+        if (!isVisible) {
             this.security.setVisible(false);
             return;
         }
@@ -499,7 +529,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initUsersPanel() {
-        if (!checkPermission(KuraPermission.ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.ADMIN)) {
             this.users.setVisible(false);
             return;
         }
@@ -520,7 +550,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initPackagesPanel() {
-        if (!checkPermission(KuraPermission.PACKAGES_ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.PACKAGES_ADMIN)) {
             this.packages.setVisible(false);
             return;
         }
@@ -580,7 +610,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initDevicePanel() {
-        if (!checkPermission(KuraPermission.DEVICE)) {
+        if (!userData.checkPermission(KuraPermission.DEVICE)) {
             this.device.setVisible(false);
             return;
         }
@@ -602,7 +632,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initStatusPanel(final EntryClassUi instanceReference) {
-        if (!checkPermission(KuraPermission.DEVICE)) {
+        if (!userData.checkPermission(KuraPermission.DEVICE)) {
             this.status.setVisible(false);
             return;
         }
@@ -685,7 +715,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     public void fetchAvailableServices() {
-        if (!checkPermission(KuraPermission.ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.ADMIN)) {
             return;
         }
 
@@ -722,7 +752,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initServicesTree() {
-        if (!checkPermission(KuraPermission.ADMIN)) {
+        if (!userData.checkPermission(KuraPermission.ADMIN)) {
             servicesContainer.setVisible(false);
             return;
         }
@@ -999,10 +1029,10 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             return;
         }
 
-        if (checkPermission(KuraPermission.ADMIN)) {
+        if (userData.checkPermission(KuraPermission.ADMIN)) {
             fetchAvailableServices();
         }
-        if (checkPermission(KuraPermission.DEVICE)) {
+        if (userData.checkPermission(KuraPermission.DEVICE)) {
             showStatusPanel();
         }
         fetchUserOptions();
@@ -1124,19 +1154,5 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @Override
     public void onConfigurationChanged() {
         fetchAvailableServices();
-    }
-
-    public boolean checkPermissions(final Set<String> permissions) {
-        if (userData.isAdmin()) {
-            return true;
-        }
-        return userData.getPermissions().containsAll(permissions);
-    }
-
-    public boolean checkPermission(String permission) {
-        if (userData.isAdmin()) {
-            return true;
-        }
-        return userData.getPermissions().contains(permission);
     }
 }

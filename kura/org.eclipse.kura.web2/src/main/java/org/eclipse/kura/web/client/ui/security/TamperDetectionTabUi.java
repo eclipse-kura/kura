@@ -12,9 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
-import java.util.Date;
-import java.util.Optional;
-
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.Tab;
@@ -22,13 +19,13 @@ import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
+import org.eclipse.kura.web.shared.model.GwtTamperStatus;
 import org.eclipse.kura.web.shared.service.GwtSecurityService;
 import org.eclipse.kura.web.shared.service.GwtSecurityServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.FormControlStatic;
-import org.gwtbootstrap3.client.ui.FormGroup;
+import org.gwtbootstrap3.client.ui.Form;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -49,11 +46,7 @@ public class TamperDetectionTabUi extends Composite implements Tab {
     private final GwtSecurityServiceAsync gwtSecurityService = GWT.create(GwtSecurityService.class);
 
     @UiField
-    FormControlStatic state;
-    @UiField
-    FormGroup timestampGroup;
-    @UiField
-    FormControlStatic timestamp;
+    Form tamperDetectionForm;
     @UiField
     Button resetButton;
     @UiField
@@ -91,22 +84,21 @@ public class TamperDetectionTabUi extends Composite implements Tab {
     private void refreshInternal(final RequestContext context) {
         clear();
         gwtXSRFService.generateSecurityToken(
-                context.callback(token -> gwtSecurityService.getTamperStatus(token, context.callback(status -> {
-                    this.state.setText(status.isTampered() ? MSGS.securityTamperStateTampered()
-                            : MSGS.securityTamperStateNotTampered());
-                    this.resetButton.setEnabled(status.isTampered());
-                    final Optional<Long> eventTimestamp = status.getTimestamp();
-                    if (eventTimestamp.isPresent()) {
-                        this.timestamp.setText(new Date(eventTimestamp.get()).toString());
-                        this.timestampGroup.setVisible(true);
+                context.callback(token -> gwtSecurityService.getTamperStatus(token, context.callback(states -> {
+                    boolean isTampered = false;
+                    for (final GwtTamperStatus status : states) {
+                        isTampered |= status.isTampered();
+                        tamperDetectionForm.add(new TamperDetectionEntry(status));
                     }
+                    this.resetButton.setEnabled(isTampered);
                 }))));
     }
 
     @Override
     public void clear() {
-        this.timestampGroup.setVisible(false);
-        this.state.setText(MSGS.securityTamperStateUnknown());
+        while (this.tamperDetectionForm.getWidgetCount() > 1) {
+            this.tamperDetectionForm.remove(this.tamperDetectionForm.getWidgetCount() - 1);
+        }
         this.resetButton.setEnabled(false);
     }
 }

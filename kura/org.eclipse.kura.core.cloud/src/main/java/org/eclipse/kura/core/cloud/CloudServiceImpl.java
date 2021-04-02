@@ -32,11 +32,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -44,7 +44,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -157,8 +156,7 @@ public class CloudServiceImpl
     private ServiceRegistration<?> notificationPublisherRegistration;
     private final CloudNotificationPublisher notificationPublisher;
 
-    private AtomicReference<Optional<TamperDetectionService>> tamperDetectionService = new AtomicReference<>(
-            Optional.empty());
+    private Set<TamperDetectionService> tamperDetectionServices = new HashSet<>();
 
     private String ownPid;
 
@@ -264,16 +262,14 @@ public class CloudServiceImpl
     }
 
     public void setTamperDetectionService(final TamperDetectionService tamperDetectionService) {
-        synchronized (this.tamperDetectionService) {
-            this.tamperDetectionService.set(Optional.of(tamperDetectionService));
+        synchronized (this.tamperDetectionServices) {
+            this.tamperDetectionServices.add(tamperDetectionService);
         }
     }
 
     public void unsetTamperDetectionService(final TamperDetectionService tamperDetectionService) {
-        synchronized (this.tamperDetectionService) {
-            if (this.tamperDetectionService.get().equals(Optional.of(tamperDetectionService))) {
-                this.tamperDetectionService.set(Optional.empty());
-            }
+        synchronized (this.tamperDetectionServices) {
+            this.tamperDetectionServices.remove(tamperDetectionService);
         }
     }
 
@@ -1155,9 +1151,9 @@ public class CloudServiceImpl
         return ownPid;
     }
 
-    void withTamperDetectionService(final Consumer<TamperDetectionService> consumer) {
-        synchronized (this.tamperDetectionService) {
-            this.tamperDetectionService.get().ifPresent(consumer);
+    void withTamperDetectionServices(final Consumer<Set<TamperDetectionService>> consumer) {
+        synchronized (this.tamperDetectionServices) {
+            consumer.accept(this.tamperDetectionServices);
         }
     }
 

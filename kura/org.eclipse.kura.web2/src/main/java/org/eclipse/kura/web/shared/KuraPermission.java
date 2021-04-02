@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,9 +25,10 @@ public final class KuraPermission {
     public static final String DEVICE = "kura.device";
     public static final String CLOUD_CONNECTION_ADMIN = "kura.cloud.connection.admin";
     public static final String WIRES_ADMIN = "kura.wires.admin";
+    public static final String MAINTENANCE = "kura.maintenance";
 
-    public static final Set<String> DEFAULT_PERMISSIONS = Collections.unmodifiableSet(new HashSet<>(
-            Arrays.asList(ADMIN, NETWORK_ADMIN, PACKAGES_ADMIN, DEVICE, CLOUD_CONNECTION_ADMIN, WIRES_ADMIN)));
+    public static final Set<String> DEFAULT_PERMISSIONS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ADMIN,
+            NETWORK_ADMIN, PACKAGES_ADMIN, DEVICE, CLOUD_CONNECTION_ADMIN, WIRES_ADMIN, MAINTENANCE)));
 
     private KuraPermission() {
     }

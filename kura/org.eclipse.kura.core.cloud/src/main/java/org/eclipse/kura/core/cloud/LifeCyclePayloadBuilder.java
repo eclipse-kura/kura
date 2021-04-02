@@ -28,6 +28,7 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionService;
+import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.system.ExtendedProperties;
 import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemAdminService;
@@ -141,13 +142,26 @@ public class LifeCyclePayloadBuilder {
     }
 
     private void tryAddTamperStatus(KuraBirthPayloadBuilder birthPayloadBuilder) {
-        this.cloudServiceImpl.withTamperDetectionService(t -> {
-            try {
-                birthPayloadBuilder.withTamperStatus(
-                        t.getTamperStatus().isDeviceTampered() ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
-            } catch (final Exception e) {
-                logger.warn("failed to obtain tamper status", e);
+        this.cloudServiceImpl.withTamperDetectionServices(t -> {
+            if (t.isEmpty()) {
+                return;
             }
+
+            boolean isDeviceTampered = false;
+
+            for (final TamperDetectionService tamperDetectionService : t) {
+                if (isDeviceTampered) {
+                    break;
+                }
+
+                try {
+                    isDeviceTampered = tamperDetectionService.getTamperStatus().isDeviceTampered();
+                } catch (final Exception e) {
+                    logger.warn("failed to obtain tamper status", e);
+                }
+            }
+
+            birthPayloadBuilder.withTamperStatus(isDeviceTampered ? TamperStatus.TAMPERED : TamperStatus.NOT_TAMPERED);
         });
     }
 

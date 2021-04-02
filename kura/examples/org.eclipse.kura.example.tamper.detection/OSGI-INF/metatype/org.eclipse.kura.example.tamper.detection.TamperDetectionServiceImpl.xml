@@ -18,6 +18,15 @@
          name="Tamper Detection"
          description="This service emulates a TamperDetectionService.">
 
+		<AD id="is.enabled"
+            name="Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Specifies if the tamper detection service is enabled or not.">
+        </AD>
+
         <AD id="tampered"
             name="Device Tamper Status"
             type="Boolean"
@@ -29,7 +38,7 @@
         
     </OCD>
 
-    <Designate pid="org.eclipse.kura.example.tamper.detection.TamperDetectionServiceImpl">
+    <Designate factoryPid="org.eclipse.kura.example.tamper.detection.TamperDetectionServiceImpl">
         <Object ocdref="org.eclipse.kura.example.tamper.detection.TamperDetectionServiceImpl"/>
     </Designate>
 </MetaData>

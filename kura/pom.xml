@@ -113,6 +113,7 @@
         <module>org.eclipse.kura.useradmin.store</module>
 
         <module>org.eclipse.kura.network.threat.manager</module>
+        <module>org.eclipse.kura.core.tamper.detection</module>
 
         <module>features</module>
         <module>emulator</module>

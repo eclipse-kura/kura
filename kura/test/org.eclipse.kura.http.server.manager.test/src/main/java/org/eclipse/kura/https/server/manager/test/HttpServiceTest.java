@@ -58,9 +58,12 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpServiceTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpServiceTest.class);
     private static final String HTTP_SERVER_MANAGER_PID = "org.eclipse.kura.http.server.manager.HttpService";
 
     private static CompletableFuture<ConfigurationService> configurationService = new CompletableFuture<>();
@@ -343,6 +346,8 @@ public class HttpServiceTest {
         try {
             final HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
 
+            logger.info("trying {}", url);
+
             if (connection instanceof HttpsURLConnection) {
                 final HttpsURLConnection httpsConnection = (HttpsURLConnection) connection;
 
@@ -389,6 +394,8 @@ public class HttpServiceTest {
     static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
             final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
 
+        final CompletableFuture<Void> tracked = new CompletableFuture<Void>();
+
         final CompletableFuture<Void> result = new CompletableFuture<Void>();
         final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
@@ -398,6 +405,7 @@ public class HttpServiceTest {
 
                     @Override
                     public Object addingService(ServiceReference<Object> reference) {
+                        tracked.complete(null);
                         return context.getService(reference);
                     }
 
@@ -414,9 +422,15 @@ public class HttpServiceTest {
 
         tracker.open();
 
-        configurationService.updateConfiguration(pid, properties);
+        return tracked.thenCompose(ok -> {
+            try {
+                configurationService.updateConfiguration(pid, properties);
+            } catch (KuraException e) {
+                throw new RuntimeException(e);
+            }
 
-        return result.whenComplete((ok, ex) -> tracker.close());
+            return result;
+        }).whenComplete((ok, ex) -> tracker.close());
     }
 
     private static File deployResource(final String resourcePath) throws IOException {

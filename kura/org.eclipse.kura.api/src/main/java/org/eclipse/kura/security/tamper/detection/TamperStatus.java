@@ -15,6 +15,7 @@ package org.eclipse.kura.security.tamper.detection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.eclipse.kura.type.TypedValue;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -29,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class TamperStatus {
 
     private final boolean isDeviceTampered;
-    private final Map<String, Object> properties;
+    private final Map<String, TypedValue<?>> properties;
 
     /**
      * Creates a new {@link TamperStatus} instance.
@@ -39,7 +40,7 @@ public class TamperStatus {
      * @param properties
      *            the additional properties, can be <code>null</code>.
      */
-    public TamperStatus(boolean isDeviceTampered, Map<String, Object> properties) {
+    public TamperStatus(boolean isDeviceTampered, Map<String, TypedValue<?>> properties) {
         this.isDeviceTampered = isDeviceTampered;
         this.properties = properties != null ? Collections.unmodifiableMap(properties) : Collections.emptyMap();
     }
@@ -58,7 +59,7 @@ public class TamperStatus {
      *
      * @return the additional properties, the result is never <code>null</code> but can be empty.
      */
-    public Map<String, Object> getProperties() {
+    public Map<String, TypedValue<?>> getProperties() {
         return this.properties;
     }
 

@@ -18,9 +18,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +32,7 @@ import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.slf4j.Logger;
@@ -48,23 +47,25 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
 
     private final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
-    private final Set<String> servicePermissionRequirements = new HashSet<>();
-    private final Map<Method, Set<String>> methodPermissionRequirements = new HashMap<>();
+    private final Optional<RequiredPermissions> servicePermissionRequirements;
+    private final Map<Method, RequiredPermissions> methodPermissionRequirements = new HashMap<>();
     private final Map<Method, Audit> methodAuditSettings = new HashMap<>();
 
     public OsgiRemoteServiceServlet() {
+        Optional<RequiredPermissions> servicePermissions = Optional.empty();
+
         for (final Class<?> intf : getClass().getInterfaces()) {
             final RequiredPermissions permissions = intf.getAnnotation(RequiredPermissions.class);
 
             if (permissions != null) {
-                servicePermissionRequirements.addAll(Arrays.asList(permissions.value()));
+                servicePermissions = Optional.of(permissions);
             }
 
             for (final Method method : intf.getMethods()) {
                 final RequiredPermissions methodPermissions = method.getAnnotation(RequiredPermissions.class);
 
                 if (methodPermissions != null) {
-                    methodPermissionRequirements.put(method, new HashSet<>(Arrays.asList(methodPermissions.value())));
+                    methodPermissionRequirements.put(method, methodPermissions);
                 }
 
                 final Audit methodAudit = method.getAnnotation(Audit.class);
@@ -74,6 +75,8 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
                 }
             }
         }
+
+        this.servicePermissionRequirements = servicePermissions;
     }
 
     private static final long serialVersionUID = -8826193840033103296L;
@@ -229,15 +232,15 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
     private void checkPermissions(final RPCRequest request) {
         final Method method = request.getMethod();
 
-        final Set<String> requiredPermissions;
+        final Optional<RequiredPermissions> requiredPermissions;
 
         if (methodPermissionRequirements.containsKey(method)) {
-            requiredPermissions = methodPermissionRequirements.get(method);
+            requiredPermissions = Optional.of(methodPermissionRequirements.get(method));
         } else {
             requiredPermissions = servicePermissionRequirements;
         }
 
-        if (requiredPermissions.isEmpty()) {
+        if (!requiredPermissions.isPresent()) {
             return;
         }
 
@@ -263,9 +266,36 @@ public class OsgiRemoteServiceServlet extends KuraRemoteServiceServlet {
             return;
         }
 
-        if (!config.get().getPermissions().containsAll(requiredPermissions)) {
-            throw new KuraPermissionException();
+        if (requiredPermissions.get().mode() == Mode.ALL) {
+            if (!containsAll(requiredPermissions.get().value(), config.get().getPermissions())) {
+                throw new KuraPermissionException();
+            }
+        } else {
+            if (!containsAny(requiredPermissions.get().value(), config.get().getPermissions())) {
+                throw new KuraPermissionException();
+            }
         }
+
+    }
+
+    private static boolean containsAll(final String[] required, final Set<String> actual) {
+        for (final String req : required) {
+            if (!actual.contains(req)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean containsAny(final String[] required, final Set<String> actual) {
+        for (final String req : required) {
+            if (actual.contains(req)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

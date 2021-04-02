@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.util.configuration.Property;
 
@@ -73,5 +74,26 @@ public class RoleRepositoryStoreOptions {
         result.put(WRITE_DELAY_MS_ID, this.writeDelayMs);
 
         return result;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupsConfig, rolesConfig, usersConfig, writeDelayMs);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        RoleRepositoryStoreOptions other = (RoleRepositoryStoreOptions) obj;
+        return Objects.equals(groupsConfig, other.groupsConfig) && Objects.equals(rolesConfig, other.rolesConfig)
+                && Objects.equals(usersConfig, other.usersConfig) && writeDelayMs == other.writeDelayMs;
     }
 }

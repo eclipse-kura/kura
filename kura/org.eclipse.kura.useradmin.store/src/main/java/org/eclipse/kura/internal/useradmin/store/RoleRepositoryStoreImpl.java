@@ -13,12 +13,12 @@
 package org.eclipse.kura.internal.useradmin.store;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -52,7 +52,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
 
     private static final Logger logger = LoggerFactory.getLogger(RoleRepositoryStoreImpl.class);
 
-    private Map<String, Role> roles = new HashMap<>();
+    private Map<String, Role> roles = new TreeMap<>();
     private RoleRepositoryStoreOptions options;
 
     long nextUpdateId = 0;
@@ -244,11 +244,18 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
                 }
             }
 
-            final Map<String, Object> properties = new RoleRepositoryStoreOptions(rolesArray.toString(), //
+            final RoleRepositoryStoreOptions newOptions = new RoleRepositoryStoreOptions(rolesArray.toString(), //
                     usersArray.toString(), //
                     groupsArray.toString(), //
                     this.options.getWriteDelayMs() //
-            ).toProperties();
+            );
+
+            if (newOptions.equals(this.options)) {
+                logger.info("update would not change current configuration, skipping");
+                return;
+            }
+
+            final Map<String, Object> properties = newOptions.toProperties();
 
             properties.put(INTERNAL_UPDATE_ID_PROP_NAME, getNextUpdateId());
 
@@ -264,7 +271,7 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
     private final Map<String, Role> decode(final RoleRepositoryStoreOptions options, final RoleBuilder roleBuilder)
             throws DeserializationException {
         try {
-            final Map<String, Role> result = new HashMap<>();
+            final Map<String, Role> result = new TreeMap<>();
 
             decode(Json.parse(options.getRolesConfig()).asArray(), Role.class, result, roleBuilder);
             decode(Json.parse(options.getUsersConfig()).asArray(), User.class, result, roleBuilder);

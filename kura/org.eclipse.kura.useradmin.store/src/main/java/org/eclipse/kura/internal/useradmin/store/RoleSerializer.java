@@ -12,9 +12,15 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.useradmin.store;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import org.osgi.service.useradmin.Group;
@@ -61,7 +67,10 @@ class RoleSerializer {
             return result;
         }
 
-        for (final Role r : roles) {
+        final Set<Role> sorted = new TreeSet<>(Comparator.comparing(Role::getName));
+        sorted.addAll(Arrays.asList(roles));
+
+        for (final Role r : sorted) {
             result.add(r.getName());
         }
 
@@ -71,6 +80,8 @@ class RoleSerializer {
     @SuppressWarnings("rawtypes")
     static JsonObject serializeProperties(final Dictionary properties) {
         final JsonObject result = new JsonObject();
+
+        final Map<String, Object> sorted = new TreeMap<>();
 
         final Enumeration<?> keys = properties.keys();
 
@@ -84,7 +95,13 @@ class RoleSerializer {
 
             final String key = (String) next;
 
-            final Object value = properties.get(key);
+            sorted.put(key, properties.get(key));
+        }
+
+        for (final Entry<String, Object> e : sorted.entrySet()) {
+
+            final String key = e.getKey();
+            final Object value = e.getValue();
 
             if (value instanceof String) {
                 result.add(key, (String) value);
@@ -102,10 +119,6 @@ class RoleSerializer {
         final JsonObject result = new JsonObject();
 
         result.add(NAME, role.getName());
-
-        if (!role.getProperties().isEmpty()) {
-            result.add(ROLE_PROPERTIES, serializeProperties(role.getProperties()));
-        }
 
         if (role instanceof User) {
             final User asUser = (User) role;
@@ -125,6 +138,10 @@ class RoleSerializer {
             if (asGroup.getRequiredMembers() != null) {
                 result.add(GROUP_REQUIRED_MEMBERS, serializeRoleNames(asGroup.getRequiredMembers()));
             }
+        }
+
+        if (!role.getProperties().isEmpty()) {
+            result.add(ROLE_PROPERTIES, serializeProperties(role.getProperties()));
         }
 
         return result;

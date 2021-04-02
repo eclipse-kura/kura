@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,9 @@
 package org.eclipse.kura.web.client.ui.network;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
+import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
@@ -133,6 +136,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     HelpButton maxHelp;
     @UiField
     HelpButton passHelp;
+
+    @UiField
+    AlertDialog alertDialog;
 
     public TabDhcpNatUi(GwtSession currentSession, TabTcpIpUi tcp, TabWirelessUi wireless, NetworkTabsUi netTabs) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -370,6 +376,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             } else {
                 TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.NONE);
                 TabDhcpNatUi.this.helpRouter.setText("");
+            }
+            if (router.getSelectedIndex() == 0 || router.getSelectedIndex() == 2) {
+                alertDialog.show(MSGS.netRouterDhcpNATWarning(), Severity.ALERT, (ConfirmListener) null);
             }
             refreshForm();
         });

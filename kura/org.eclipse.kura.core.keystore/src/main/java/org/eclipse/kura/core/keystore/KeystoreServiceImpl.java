@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -37,6 +38,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -53,8 +58,12 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreService;
+import org.eclipse.kura.system.SystemService;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,13 +73,20 @@ import org.slf4j.LoggerFactory;
 public class KeystoreServiceImpl implements KeystoreService, ConfigurableComponent {
 
     private static final String PEM_CERTIFICATE_REQUEST_TYPE = "CERTIFICATE REQUEST";
+    private static final String KURA_HTTPS_KEY_STORE_PASSWORD_KEY = "kura.https.keyStorePassword";
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceImpl.class);
 
-    public static final String APP_ID = "KeystoreService";
+    private ComponentContext componentContext;
 
     private CryptoService cryptoService;
+    private SystemService systemService;
+    private ConfigurationService configurationService;
+
     private KeystoreServiceOptions keystoreServiceOptions;
+
+    private ScheduledExecutorService selfUpdaterExecutor;
+    private ScheduledFuture<?> selfUpdaterFuture;
 
     // ----------------------------------------------------------------
     //
@@ -82,34 +98,72 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         this.cryptoService = cryptoService;
     }
 
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void setConfigurationService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
     //
     // ----------------------------------------------------------------
 
-    public void activate(Map<String, Object> properties) {
-        logger.info("Bundle {} has started!", APP_ID);
+    public synchronized void activate(ComponentContext context, Map<String, Object> properties) {
+        logger.info("Bundle {} is starting!", this.getClass().getSimpleName());
+        this.componentContext = context;
 
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
-        accessKeystore();
+        this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
+        if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())
+                && this.keystoreServiceOptions.needsRandomPassword()) {
+            changeDefaultKeystorePassword();
+        }
+
+        logger.info("Bundle {} has started!", this.getClass().getSimpleName());
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Bundle {} is updating!", APP_ID);
-        this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
-        accessKeystore();
+        logger.info("Bundle {} is updating!", this.getClass().getSimpleName());
+        KeystoreServiceOptions newOptions = new KeystoreServiceOptions(properties);
+
+        if (!this.keystoreServiceOptions.equals(newOptions)) {
+            logger.info("Perform update...");
+            this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
+            if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())) {
+                accessKeystore();
+            }
+        }
+        logger.info("Bundle {} has updated!", this.getClass().getSimpleName());
     }
 
     protected void deactivate() {
-        logger.info("Bundle {} is deactivating!", APP_ID);
+        logger.info("Bundle {} is deactivating!", this.getClass().getSimpleName());
+
+        if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
+
+            logger.info("Self updater task running. Stopping it");
+
+            this.selfUpdaterFuture.cancel(true);
+        }
+    }
+
+    private boolean keystoreExists(String keystorePath) {
+        boolean result = false;
+        File fKeyStore = new File(keystorePath);
+        if (fKeyStore.exists()) {
+            result = true;
+        }
+        return result;
     }
 
     private void accessKeystore() {
         String keystorePath = this.keystoreServiceOptions.getKeystorePath();
-        File fKeyStore = new File(keystorePath);
-        if (!fKeyStore.exists()) {
+        if (!keystoreExists(keystorePath)) {
             return;
         }
 
@@ -125,6 +179,132 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         if (newPassword != null && !Arrays.equals(oldPassword, newPassword)) {
             updateKeystorePassword(oldPassword, newPassword);
         }
+    }
+
+    private void changeDefaultKeystorePassword() {
+
+        char[] oldPassword = this.systemService.getProperties().getProperty(KURA_HTTPS_KEY_STORE_PASSWORD_KEY)
+                .toCharArray();
+
+        if (isDefaultFromCrypto()) {
+            oldPassword = this.cryptoService.getKeyStorePassword(this.keystoreServiceOptions.getKeystorePath());
+        }
+
+        char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
+
+        try {
+            changeKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), oldPassword, newPassword);
+
+            this.cryptoService.setKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), newPassword);
+
+            updatePasswordInConfigService(newPassword);
+        } catch (Exception e) {
+            logger.warn("Keystore password change failed", e);
+        }
+    }
+
+    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,
+            NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
+
+        KeyStore keystore = loadKeystore(location, oldPassword);
+
+        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
+        saveKeystore(location, newPassword, keystore);
+    }
+
+    private void saveKeystore(String keyStoreFileName, char[] keyStorePassword, KeyStore ks)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        try (FileOutputStream tsOutStream = new FileOutputStream(keyStoreFileName);) {
+            ks.store(tsOutStream, keyStorePassword);
+        }
+    }
+
+    private void updatePasswordInConfigService(char[] newPassword) {
+        // update our configuration with the newly generated password
+        final String pid = this.keystoreServiceOptions.getPid();
+
+        Map<String, Object> props = new HashMap<>();
+        props.putAll(this.keystoreServiceOptions.getProperties());
+        props.put(KeystoreServiceOptions.KEY_KEYSTORE_PATH, this.keystoreServiceOptions.getKeystorePath());
+        props.put(KeystoreServiceOptions.KEY_KEYSTORE_PASSWORD, new Password(newPassword));
+        props.put(KeystoreServiceOptions.KEY_RANDOMIZE_PASSWORD, false);
+
+        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
+            try {
+                if (this.componentContext.getServiceReference() != null
+                        && this.configurationService.getComponentConfiguration(pid) != null) {
+                    this.configurationService.updateConfiguration(pid, props);
+                    throw new RuntimeException("Updated. The task will be terminated.");
+                } else {
+                    logger.info("No service or configuration available yet.");
+                }
+            } catch (KuraException e) {
+                logger.warn("Cannot get/update configuration for pid: {}", pid, e);
+            }
+        }, 1000, 1000, TimeUnit.MILLISECONDS);
+    }
+
+    private boolean isFirstBoot() {
+        boolean result = false;
+        if (isSnapshotPasswordDefault() && (isDefaultFromUser() || isDefaultFromCrypto())) {
+            result = true;
+        }
+        return result;
+    }
+
+    private boolean isSnapshotPasswordDefault() {
+        boolean result = false;
+
+        char[] snapshotPassword = getUnencryptedSslKeystorePassword();
+        if (Arrays.equals(KeystoreServiceOptions.DEFAULT_KEYSTORE_PASSWORD.toCharArray(), snapshotPassword)) {
+            result = true;
+        }
+
+        return result;
+    }
+
+    private char[] getUnencryptedSslKeystorePassword() {
+        char[] snapshotPassword = this.keystoreServiceOptions.getKeystorePassword();
+        try {
+            snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
+        } catch (KuraException e) {
+            // Nothing to do
+        }
+        return snapshotPassword;
+    }
+
+    private boolean isDefaultFromCrypto() {
+        char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.keystoreServiceOptions.getKeystorePath());
+
+        if (cryptoPassword == null) {
+            return false;
+        }
+        return isKeyStoreAccessible(this.keystoreServiceOptions.getKeystorePath(), cryptoPassword);
+    }
+
+    private boolean isDefaultFromUser() {
+        return isKeyStoreAccessible(this.keystoreServiceOptions.getKeystorePath(),
+                (char[]) this.systemService.getProperties().get(KURA_HTTPS_KEY_STORE_PASSWORD_KEY));
+    }
+
+    private boolean isKeyStoreAccessible(String location, char[] password) {
+        try {
+            loadKeystore(location, password);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private KeyStore loadKeystore(String keyStore, char[] keyStorePassword)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        try (InputStream tsReadStream = new FileInputStream(keyStore);) {
+            ks.load(tsReadStream, keyStorePassword);
+        }
+
+        return ks;
     }
 
     private void updateKeystorePassword(char[] oldPassword, char[] newPassword) {
@@ -192,7 +372,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     @Override
     public KeyStore getKeyStore() throws GeneralSecurityException, IOException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        
+
         char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword();
         try {
             keystorePassword = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());

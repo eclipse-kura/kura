@@ -648,6 +648,9 @@
             <esf:property array="false" encrypted="true" name="keystore.password" type="Password">
                 <esf:value>Y2hhbmdlaXQ=</esf:value>
             </esf:property>
+            <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.KeystoreServiceImpl</esf:value>
             </esf:property>

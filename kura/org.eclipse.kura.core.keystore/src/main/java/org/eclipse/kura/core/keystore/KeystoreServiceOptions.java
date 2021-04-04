@@ -21,23 +21,44 @@ import org.eclipse.kura.configuration.Password;
 
 public class KeystoreServiceOptions {
 
-    private static final String KEY_KEYSTORE_PATH = "keystore.path";
-    private static final String KEY_KEYSTORE_PASSWORD = "keystore.password";
+    private static final String KEY_SERVICE_PID = "kura.service.pid";
+    static final String KEY_KEYSTORE_PATH = "keystore.path";
+    static final String KEY_KEYSTORE_PASSWORD = "keystore.password";
+    static final String KEY_RANDOMIZE_PASSWORD = "randomize.password";
 
     private static final String DEFAULT_KEYSTORE_PATH = "/tmp";
-    private static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
+    private static final boolean DEFAULT_RANDOMIZE_PASSWORD = false;
+    static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
 
+    private final Map<String, Object> properties;
+    private final String pid;
     private final String keystorePath;
     private final Password keystorePassword;
+    private final boolean randomPassword;
 
     public KeystoreServiceOptions(Map<String, Object> properties) {
         if (isNull(properties)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
+
+        this.properties = properties;
+
+        this.pid = (String) properties.get(KEY_SERVICE_PID);
+
         this.keystorePath = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
 
         this.keystorePassword = new Password(
                 (String) properties.getOrDefault(KEY_KEYSTORE_PASSWORD, DEFAULT_KEYSTORE_PASSWORD));
+
+        this.randomPassword = (boolean) properties.getOrDefault(KEY_RANDOMIZE_PASSWORD, DEFAULT_RANDOMIZE_PASSWORD);
+    }
+
+    public Map<String, Object> getProperties() {
+        return this.properties;
+    }
+
+    public String getPid() {
+        return this.pid;
     }
 
     public String getKeystorePath() {
@@ -48,12 +69,19 @@ public class KeystoreServiceOptions {
         return this.keystorePassword.getPassword();
     }
 
+    public boolean needsRandomPassword() {
+        return this.randomPassword;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (this.keystorePassword == null ? 0 : this.keystorePassword.hashCode());
         result = prime * result + (this.keystorePath == null ? 0 : this.keystorePath.hashCode());
+        result = prime * result + (this.pid == null ? 0 : this.pid.hashCode());
+        result = prime * result + (this.properties == null ? 0 : this.properties.hashCode());
+        result = prime * result + (this.randomPassword ? 1231 : 1237);
         return result;
     }
 
@@ -83,6 +111,24 @@ public class KeystoreServiceOptions {
         } else if (!this.keystorePath.equals(other.keystorePath)) {
             return false;
         }
-        return true;
+        if (this.pid == null) {
+            if (other.pid != null) {
+                return false;
+            }
+        } else if (!this.pid.equals(other.pid)) {
+            return false;
+        }
+        if (this.properties == null) {
+            if (other.properties != null) {
+                return false;
+            }
+        } else if (!this.properties.equals(other.properties)) {
+            return false;
+        }
+        boolean result = true;
+        if (this.randomPassword != other.randomPassword) {
+            result = false;
+        }
+        return result;
     }
 }

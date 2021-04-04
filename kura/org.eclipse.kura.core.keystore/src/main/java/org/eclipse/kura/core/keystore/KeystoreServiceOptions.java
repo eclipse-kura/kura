@@ -17,9 +17,7 @@ import static java.util.Objects.isNull;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.crypto.CryptoService;
 
 public class KeystoreServiceOptions {
 
@@ -32,19 +30,14 @@ public class KeystoreServiceOptions {
     private final String keystorePath;
     private final Password keystorePassword;
 
-    private final CryptoService cryptoService;
-
-    public KeystoreServiceOptions(Map<String, Object> properties, CryptoService cryptoService) {
-        if (isNull(properties) || isNull(cryptoService)) {
+    public KeystoreServiceOptions(Map<String, Object> properties) {
+        if (isNull(properties)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
         this.keystorePath = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
 
         this.keystorePassword = new Password(
                 (String) properties.getOrDefault(KEY_KEYSTORE_PASSWORD, DEFAULT_KEYSTORE_PASSWORD));
-
-        this.cryptoService = cryptoService;
-
     }
 
     public String getKeystorePath() {
@@ -52,13 +45,7 @@ public class KeystoreServiceOptions {
     }
 
     public char[] getKeystorePassword() {
-        char[] snapshotPassword = this.keystorePassword.getPassword();
-        try {
-            snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
-        } catch (KuraException e) {
-            // Nothing to do
-        }
-        return snapshotPassword;
+        return this.keystorePassword.getPassword();
     }
 
     @Override

@@ -91,14 +91,14 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     public void activate(Map<String, Object> properties) {
         logger.info("Bundle {} has started!", APP_ID);
 
-        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
+        this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
         accessKeystore();
 
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Bundle {} is deactivating!", APP_ID);
-        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
+        logger.info("Bundle {} is updating!", APP_ID);
+        this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
         accessKeystore();
     }
 
@@ -192,9 +192,16 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     @Override
     public KeyStore getKeyStore() throws GeneralSecurityException, IOException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        
+        char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword();
+        try {
+            keystorePassword = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());
+        } catch (KuraException e) {
+            logger.warn("Failed to decrypt keystore password");
+        }
 
         try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath());) {
-            ks.load(tsReadStream, this.keystoreServiceOptions.getKeystorePassword());
+            ks.load(tsReadStream, keystorePassword);
         }
 
         return ks;

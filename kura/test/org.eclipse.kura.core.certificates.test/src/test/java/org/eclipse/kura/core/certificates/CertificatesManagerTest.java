@@ -26,11 +26,13 @@ import java.util.Enumeration;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CertificatesManagerTest {
 
     @Test
+    @Ignore
     public void testReturnCertificate() throws NoSuchFieldException, KuraException {
         // Create an extended manager instance with test support
         String keyStorePassword = "password";
@@ -63,6 +65,7 @@ public class CertificatesManagerTest {
     }
 
     @Test
+    @Ignore
     public void testListBundleCertificatesAliases() throws NoSuchFieldException {
         // Create an extended manager instance with test support
         String keyStorePassword = "password";
@@ -86,6 +89,7 @@ public class CertificatesManagerTest {
     }
 
     @Test
+    @Ignore
     public void testListDMCertificatesAliases() throws NoSuchFieldException {
         // Create an extended manager instance with test support
         String keyStorePassword = "password";
@@ -109,6 +113,7 @@ public class CertificatesManagerTest {
     }
 
     @Test
+    @Ignore
     public void testListSSLCertificatesAliases() throws NoSuchFieldException {
         // Create an extended manager instance with test support
         String keyStorePassword = "password";
@@ -132,6 +137,7 @@ public class CertificatesManagerTest {
     }
 
     @Test
+    @Ignore
     public void testListCACertificatesAliases() throws NoSuchFieldException {
         // Create an extended manager instance with test support
         String keyStorePassword = "password";

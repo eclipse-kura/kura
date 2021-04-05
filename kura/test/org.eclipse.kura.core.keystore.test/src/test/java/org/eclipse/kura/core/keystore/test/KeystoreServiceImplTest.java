@@ -53,6 +53,7 @@ import org.eclipse.kura.core.keystore.KeystoreServiceImpl;
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.service.component.ComponentContext;
 
 public class KeystoreServiceImplTest {
 
@@ -85,9 +86,9 @@ public class KeystoreServiceImplTest {
         is.close();
 
         Certificate[] chain = { certificate };
-        
-        store.setKeyEntry(DEFAULT_KEY_ALIAS, key, STORE_PASS.toCharArray(), chain);
-        
+
+        this.store.setKeyEntry(DEFAULT_KEY_ALIAS, key, STORE_PASS.toCharArray(), chain);
+
         try (OutputStream os = new FileOutputStream(STORE_PATH)) {
             this.store.store(os, STORE_PASS.toCharArray());
         }
@@ -100,10 +101,11 @@ public class KeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
 
         CryptoService cryptoService = mock(CryptoService.class);
+        ComponentContext componentContext = mock(ComponentContext.class);
 
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         KeyStore keystore = keystoreService.getKeyStore();
 
@@ -118,14 +120,15 @@ public class KeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
 
         CryptoService cryptoService = mock(CryptoService.class);
+        ComponentContext componentContext = mock(ComponentContext.class);
 
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         keystoreService.getEntry(null);
     }
-    
+
     @Test
     public void testGetEntryEmptyAlias() throws GeneralSecurityException, IOException {
         Map<String, Object> properties = new HashMap<>();
@@ -133,15 +136,16 @@ public class KeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
 
         CryptoService cryptoService = mock(CryptoService.class);
+        ComponentContext componentContext = mock(ComponentContext.class);
 
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         Entry entry = keystoreService.getEntry("");
         assertNull(entry);
     }
-    
+
     @Test
     public void testGetEntry() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -150,10 +154,11 @@ public class KeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        ComponentContext componentContext = mock(ComponentContext.class);
 
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         Entry entry = keystoreService.getEntry(DEFAULT_KEY_ALIAS);
         assertNotNull(entry);
@@ -162,7 +167,7 @@ public class KeystoreServiceImplTest {
         assertNotNull(privateKeyEntry.getCertificateChain());
         assertNotNull(privateKeyEntry.getPrivateKey());
     }
-    
+
     @Test
     public void testGetEntries() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -171,16 +176,17 @@ public class KeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        ComponentContext componentContext = mock(ComponentContext.class);
 
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
-        Map<String,Entry> entries = keystoreService.getEntries();
+        Map<String, Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertFalse(entries.isEmpty());
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testDeleteEntryNullAlias() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -190,13 +196,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         keystoreService.deleteEntry(null);
     }
-    
+
     @Test
     public void testDeleteEntryEmptyAlias() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -205,18 +213,19 @@ public class KeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        ComponentContext componentContext = mock(ComponentContext.class);
 
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         keystoreService.deleteEntry("");
-        
-        Map<String,Entry> entries = keystoreService.getEntries();
+
+        Map<String, Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertFalse(entries.isEmpty());
     }
-    
+
     @Test
     public void testDeleteEntry() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -226,17 +235,19 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
+        keystoreService.activate(componentContext, properties);
 
         keystoreService.deleteEntry(DEFAULT_KEY_ALIAS);
-        
-        Map<String,Entry> entries = keystoreService.getEntries();
+
+        Map<String, Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertTrue(entries.isEmpty());
     }
-    
+
     @Test
     public void testGetAliases() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -246,16 +257,18 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         List<String> aliases = keystoreService.getAliases();
         assertNotNull(aliases);
         assertFalse(aliases.isEmpty());
         assertEquals(DEFAULT_KEY_ALIAS, aliases.get(0));
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testSetEntryNullAliasEntry() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -265,13 +278,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.setEntry(null, null);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testSetEntryNullEntry() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -281,13 +296,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
-        keystoreService.setEntry(DEFAULT_KEY_ALIAS+"1", null);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.setEntry(DEFAULT_KEY_ALIAS + "1", null);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testSetEntryNullAlias() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -297,13 +314,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
-        keystoreService.setEntry(DEFAULT_KEY_ALIAS+"1", null);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.setEntry(DEFAULT_KEY_ALIAS + "1", null);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testSetEntryEmptyAlias() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -313,13 +332,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.setEntry("", null);
     }
-    
+
     @Test
     public void testSetEntry() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -329,10 +350,12 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
         gen.initialize(2048);
         KeyPair pair = gen.generateKeyPair();
@@ -343,17 +366,17 @@ public class KeystoreServiceImplTest {
         is.close();
 
         Certificate[] chain = { certificate };
-        
+
         PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(key, chain);
-        
-        keystoreService.setEntry(DEFAULT_KEY_ALIAS+"1", privateKeyEntry);
-        
+
+        keystoreService.setEntry(DEFAULT_KEY_ALIAS + "1", privateKeyEntry);
+
         List<String> aliases = keystoreService.getAliases();
         assertNotNull(aliases);
         assertFalse(aliases.isEmpty());
         assertEquals(2, aliases.size());
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testGetKeyManagersNullAlg() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -363,13 +386,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.getKeyManagers(null);
     }
-    
+
     @Test
     public void testGetKeyManagersEmptyAlg() throws GeneralSecurityException, IOException, KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -379,14 +404,16 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         List<KeyManager> keyManagers = keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm());
         assertNotNull(keyManagers);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testCreateKeyPairNullAlg() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -396,13 +423,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.createKeyPair(null, 0);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testCreateKeyPairEmptyAlg() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -412,13 +441,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.createKeyPair("", 0);
     }
-    
+
     @Test(expected = InvalidParameterException.class)
     public void testCreateKeyPairZeroKeyLength() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -428,13 +459,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.createKeyPair("DSA", 0);
     }
-    
+
     @Test(expected = KuraException.class)
     public void testCreateKeyPairWrongAlg() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -444,13 +477,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         keystoreService.createKeyPair("KSA", 0);
     }
-    
+
     @Test
     public void testCreateKeyPair() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -460,17 +495,19 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         KeyPair keyPair = keystoreService.createKeyPair("DSA", 1024);
         assertNotNull(keyPair);
         assertNotNull(keyPair.getPrivate());
         assertNotNull(keyPair.getPublic());
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateCSRNullPrincipal() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -479,14 +516,16 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
-        keystoreService.getCSR(null, null,null);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.getCSR(null, null, null);
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateCSRNullKeypair() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -495,16 +534,18 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        
+
         keystoreService.getCSR(principal, null, null);
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateCSRNullSignerAlg() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -513,17 +554,19 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
         KeyPair keyPair = keystoreService.createKeyPair("RSA", 2048);
-        
+
         keystoreService.getCSR(principal, keyPair, null);
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateCSREmptyAlg() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -532,16 +575,18 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
         KeyPair keyPair = keystoreService.createKeyPair("RSA", 2048);
-        
+
         keystoreService.getCSR(principal, keyPair, "");
     }
-    
+
     @Test
     public void testCreateCSR() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
@@ -551,13 +596,15 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
+        ComponentContext componentContext = mock(ComponentContext.class);
+
         KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(properties);
-        
+        keystoreService.activate(componentContext, properties);
+
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
         KeyPair keyPair = keystoreService.createKeyPair("RSA", 2048);
-        
+
         String csr = keystoreService.getCSR(principal, keyPair, "SHA256withRSA");
         assertNotNull(csr);
         assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));

@@ -40,7 +40,6 @@ public class ExtendedCertificatesManager extends CertificatesManager {
         this.fakeAliases = fakeAliases;
     }
 
-    @Override
     protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
             throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
 
@@ -55,7 +54,6 @@ public class ExtendedCertificatesManager extends CertificatesManager {
         return this.fakeCertificate;
     }
 
-    @Override
     protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
             throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
 
@@ -66,7 +64,6 @@ public class ExtendedCertificatesManager extends CertificatesManager {
         return this.fakeAliases;
     }
 
-    @Override
     protected Enumeration<String> getAliasesFromKeyStore(String path, char[] keyStorePassword)
             throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
         if (!Arrays.equals(keyStorePassword, this.keyStorePassword.toCharArray())) {
@@ -75,8 +72,7 @@ public class ExtendedCertificatesManager extends CertificatesManager {
 
         return this.fakeAliases;
     }
-
-    @Override
+    
     protected String getSslKeystorePath() throws KuraException {
         try {
             return (String) TestUtil.getFieldValue(this, "DEFAULT_KEYSTORE");

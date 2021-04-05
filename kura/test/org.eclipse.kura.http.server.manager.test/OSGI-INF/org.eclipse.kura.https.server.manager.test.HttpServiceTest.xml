@@ -27,4 +27,9 @@
     	interface="org.eclipse.kura.crypto.CryptoService"
     	name="CryptoService" 
     	policy="static"/>
+    <reference name="KeystoreService"
+           policy="dynamic"
+           bind="setKeystoreService"
+           cardinality="0..1"
+           interface="org.eclipse.kura.security.keystore.KeystoreService"/>
 </scr:component>

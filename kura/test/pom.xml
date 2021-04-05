@@ -112,6 +112,7 @@
                         -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                           -Dosgi.console=5002</argLine>
+                        <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -220,6 +221,10 @@
                             <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.apache.activemq.artemis-mqtt-protocol</artifactId>
+                            </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.kura.core.keystore</artifactId>
                             </dependency>
                         </dependencies>
                         <bundleStartLevel>
@@ -748,6 +753,11 @@
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.apache.felix.useradmin</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.core.keystore</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                             </extraRequirements>

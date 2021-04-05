@@ -12,18 +12,16 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.test;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.KeystoreServiceOptions;
-import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Test;
-
 
 public class KeystoreServiceOptionsTest {
 
@@ -31,79 +29,59 @@ public class KeystoreServiceOptionsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullPropertiesCrypto() {
-        new KeystoreServiceOptions(null, null);
+        new KeystoreServiceOptions(null);
     }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullProperties() {
-        CryptoService cryptoService = mock(CryptoService.class);
-        new KeystoreServiceOptions(null, cryptoService);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullCrypto() {
-        Map<String,Object> properties = new HashMap<>();
-        new KeystoreServiceOptions(properties, null);
-    }
-    
+
     @Test
     public void testConstructorMissingProps() throws KuraException {
-        CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.decryptAes(CHANGEIT_PASSWORD.toCharArray())).thenReturn(CHANGEIT_PASSWORD.toCharArray());
-        Map<String,Object> properties = new HashMap<>();
-        
-        KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
-        
+        Map<String, Object> properties = new HashMap<>();
+
+        KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties);
+
         assertEquals("/tmp", keystoreServiceOptions.getKeystorePath());
         assertArrayEquals(CHANGEIT_PASSWORD.toCharArray(), keystoreServiceOptions.getKeystorePassword());
     }
-    
+
     @Test
     public void testConstructor() throws KuraException {
-        CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.decryptAes("testPassword".toCharArray())).thenReturn("testPassword".toCharArray());
-        Map<String,Object> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("keystore.path", "/abc");
         properties.put("keystore.password", "testPassword");
-        
-        KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
-        
+
+        KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties);
+
         assertEquals("/abc", keystoreServiceOptions.getKeystorePath());
         assertArrayEquals("testPassword".toCharArray(), keystoreServiceOptions.getKeystorePassword());
     }
-    
+
     @Test
     public void testCompareSame() throws KuraException {
-        CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.decryptAes("testPassword".toCharArray())).thenReturn("testPassword".toCharArray());
-        Map<String,Object> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("keystore.path", "/abc");
         properties.put("keystore.password", "testPassword");
-        
-        KeystoreServiceOptions keystoreServiceOptions1 = new KeystoreServiceOptions(properties, cryptoService);
-        
-        KeystoreServiceOptions keystoreServiceOptions2 = new KeystoreServiceOptions(properties, cryptoService);
-        
-        assertEquals(keystoreServiceOptions1,keystoreServiceOptions2);
+
+        KeystoreServiceOptions keystoreServiceOptions1 = new KeystoreServiceOptions(properties);
+
+        KeystoreServiceOptions keystoreServiceOptions2 = new KeystoreServiceOptions(properties);
+
+        assertEquals(keystoreServiceOptions1, keystoreServiceOptions2);
     }
-    
+
     @Test
     public void testCompareDifferent() throws KuraException {
-        CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.decryptAes("testPassword".toCharArray())).thenReturn("testPassword".toCharArray());
-        Map<String,Object> properties = new HashMap<>();
+        Map<String, Object> properties = new HashMap<>();
         properties.put("keystore.path", "/abc");
         properties.put("keystore.password", "testPassword");
-        
-        KeystoreServiceOptions keystoreServiceOptions1 = new KeystoreServiceOptions(properties, cryptoService);
-        
-        Map<String,Object> properties2 = new HashMap<>();
+
+        KeystoreServiceOptions keystoreServiceOptions1 = new KeystoreServiceOptions(properties);
+
+        Map<String, Object> properties2 = new HashMap<>();
         properties2.put("keystore.path", "/abc1");
         properties2.put("keystore.password", "testPassword1");
-        KeystoreServiceOptions keystoreServiceOptions2 = new KeystoreServiceOptions(properties2, cryptoService);
-        
-        assertNotEquals(keystoreServiceOptions1,keystoreServiceOptions2);
-        
+        KeystoreServiceOptions keystoreServiceOptions2 = new KeystoreServiceOptions(properties2);
+
+        assertNotEquals(keystoreServiceOptions1, keystoreServiceOptions2);
+
     }
 
 }

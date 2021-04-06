@@ -57,6 +57,7 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
@@ -234,7 +235,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
                 if (this.componentContext.getServiceReference() != null
                         && this.configurationService.getComponentConfiguration(pid) != null) {
                     this.configurationService.updateConfiguration(pid, props);
-                    throw new RuntimeException("Updated. The task will be terminated.");
+                    throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING, "Updated. The task will be terminated.");
                 } else {
                     logger.info("No service or configuration available yet.");
                 }
@@ -244,35 +245,6 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         }, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
-    private boolean isFirstBoot() {
-        boolean result = false;
-        if (isSnapshotPasswordDefault() && (isDefaultFromUser() || isDefaultFromCrypto())) {
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean isSnapshotPasswordDefault() {
-        boolean result = false;
-
-        char[] snapshotPassword = getUnencryptedSslKeystorePassword();
-        if (Arrays.equals(KeystoreServiceOptions.DEFAULT_KEYSTORE_PASSWORD.toCharArray(), snapshotPassword)) {
-            result = true;
-        }
-
-        return result;
-    }
-
-    private char[] getUnencryptedSslKeystorePassword() {
-        char[] snapshotPassword = this.keystoreServiceOptions.getKeystorePassword();
-        try {
-            snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
-        } catch (KuraException e) {
-            // Nothing to do
-        }
-        return snapshotPassword;
-    }
-
     private boolean isDefaultFromCrypto() {
         char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.keystoreServiceOptions.getKeystorePath());
 
@@ -280,11 +252,6 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             return false;
         }
         return isKeyStoreAccessible(this.keystoreServiceOptions.getKeystorePath(), cryptoPassword);
-    }
-
-    private boolean isDefaultFromUser() {
-        return isKeyStoreAccessible(this.keystoreServiceOptions.getKeystorePath(),
-                (char[]) this.systemService.getProperties().get(KURA_HTTPS_KEY_STORE_PASSWORD_KEY));
     }
 
     private boolean isKeyStoreAccessible(String location, char[] password) {

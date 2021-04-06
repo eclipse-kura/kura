@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -51,6 +52,7 @@ import javax.security.auth.x500.X500Principal;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.KeystoreServiceImpl;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
@@ -61,6 +63,7 @@ public class KeystoreServiceImplTest {
     private static final String CERT_FILE_PATH = "target/test-classes/cert";
     private static final String KEY_KEYSTORE_PATH = "keystore.path";
     private static final String KEY_KEYSTORE_PASSWORD = "keystore.password";
+    private static final String KEY_RANDOMIZE_PASSWORD = "randomize.password";
 
     private static final String STORE_PATH = "target/key.store";
     private static final String STORE_PASS = "pass";
@@ -608,6 +611,37 @@ public class KeystoreServiceImplTest {
         String csr = keystoreService.getCSR(principal, keyPair, "SHA256withRSA");
         assertNotNull(csr);
         assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
+    }
+    
+    @Test(expected = IOException.class)
+    public void testPasswordChange() throws KuraException, GeneralSecurityException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+        properties.put(KEY_RANDOMIZE_PASSWORD, true);
+
+        Map<String, Object> systemServiceMap = new HashMap<>();
+        systemServiceMap.put("kura.https.keyStorePassword", STORE_PASS);
+        Properties systemServiceProperties = new Properties();
+        systemServiceProperties.putAll(systemServiceMap);
+        
+        SystemService systemService = mock(SystemService.class);
+        when(systemService.getProperties()).thenReturn(systemServiceProperties);
+        
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.setSystemService(systemService);
+        keystoreService.activate(componentContext, properties);
+        
+        try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {
+            this.store.load(tsReadStream, STORE_PASS.toCharArray());
+        }
+        
     }
 
 }

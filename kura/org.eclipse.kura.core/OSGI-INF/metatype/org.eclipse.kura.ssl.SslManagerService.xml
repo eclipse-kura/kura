@@ -36,21 +36,14 @@
         	default="true"
         	description="Enable or disable hostname verification." />
 
-        <AD id="ssl.default.trustStore"
-            name="ssl.default.trustStore"
+        <AD id="KeystoreService.target"
+            name="KeystoreService Target Filter"
             type="String"
             cardinality="0"
-            required="false"
-            default="/opt/eclipse/security/cacerts"
-            description="Location of the Java keystore file containing the collection of CA certificates trusted by this application process (trust store). Key store type is expected to be JKS. If not specified or the specified file does not exist, the default Java VM trust store will be used."/>
-
-        <AD id="ssl.keystore.password"
-            name="ssl.keystore.password"
-            type="Password"
-            cardinality="0"
             required="true"
-            default="changeit"
-            description="Keystore access password."/>
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the HTTPS Keystore.">
+        </AD>
 
         <AD id="ssl.default.cipherSuites"
             name="ssl.default.cipherSuites"

@@ -606,8 +606,8 @@
             <esf:property name="ssl.hostname.verification" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
-                <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
+            <esf:property array="false" encrypted="false" name="KeystoreService.target" type="String">
+                <esf:value>(kura.service.pid=org.eclipse.kura.core.keystore.SSLKeystore)</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
@@ -656,6 +656,25 @@
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
                 <esf:value>org.eclipse.kura.core.keystore.HttpsKeystore</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="org.eclipse.kura.core.keystore.SSLKeystore">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="keystore.path" type="String">
+                <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="true" name="keystore.password" type="Password">
+                <esf:value>Y2hhbmdlaXQ=</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.core.keystore.KeystoreServiceImpl</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>org.eclipse.kura.core.keystore.SSLKeystore</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

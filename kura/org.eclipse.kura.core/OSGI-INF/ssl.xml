@@ -18,21 +18,12 @@
    <service>
       <provide interface="org.eclipse.kura.ssl.SslManagerService"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.security.keystore.KeystoreService"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.ssl.SslManagerService"/>
-   <reference name="ConfigurationService" 
-              bind="setConfigurationService"
-              unbind="unsetConfigurationService"
-              interface="org.eclipse.kura.configuration.ConfigurationService"/> 
-   <reference name="CryptoService"
-   			  bind="setCryptoService"
-   			  unbind="unsetCryptoService"
-   			  interface="org.eclipse.kura.crypto.CryptoService"/>
-   <reference name="SystemService"
-              bind="setSystemService"
-              unbind="unsetSystemService"
-              cardinality="1..1"
-              policy="static"
-              interface="org.eclipse.kura.system.SystemService"/>
+   <property name="service.pid" value="org.eclipse.kura.ssl.SslManagerService"/> 
+   <reference name="KeystoreService"
+           policy="dynamic"
+           bind="setKeystoreService"
+           unbind="unsetKeystoreService"
+           cardinality="0..1"
+           interface="org.eclipse.kura.security.keystore.KeystoreService"/>
 </scr:component>

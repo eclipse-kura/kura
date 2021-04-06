@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,163 +13,304 @@
 package org.eclipse.kura.core.certificates;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.security.cert.Certificate;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.certificate.CertificateInfo;
+import org.eclipse.kura.certificate.KuraCertificate;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
-import org.junit.Ignore;
+import org.eclipse.kura.security.keystore.KeystoreService;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class CertificatesManagerTest {
 
-    @Test
-    @Ignore
-    public void testReturnCertificate() throws NoSuchFieldException, KuraException {
-        // Create an extended manager instance with test support
-        String keyStorePassword = "password";
-        String certificateAlias = "alias";
-        String invalidCertificateAlias = "invalid";
-        Certificate mockCertificate = mock(Certificate.class);
-        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, certificateAlias,
-                mockCertificate, null);
+    private static String defaultKeystore;
+    private static String httpsKeystore;
+    private static String sslKeystore;
+    private static CertificatesManager certificatesManager;
 
-        String keyStorePath = getDefaultKeyStore(manager);
-        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
-
-        manager.setCryptoService(mockCryptoService);
-
-        // Try to get a certificate with a valid alias
-        Certificate certificate = manager.returnCertificate(certificateAlias);
-        assertEquals(mockCertificate, certificate);
-
-        // Try to get a certificate with an invalid alias
-        certificate = manager.returnCertificate(invalidCertificateAlias);
-        assertNull(certificate);
-    }
-
-    public void testStoreCertificate() throws KuraException {
-        // Not implemented, always throws an exception
-        CertificatesManager manager = new CertificatesManager();
-
-        Certificate mockCertificate = mock(Certificate.class);
-        manager.storeCertificate(mockCertificate, "alias");
+    @BeforeClass
+    public static void setup() throws NoSuchFieldException {
+        certificatesManager = new CertificatesManager();
+        defaultKeystore = (String) TestUtil.getFieldValue(certificatesManager, "DEFAULT_KEYSTORE_SERVICE_PID");
+        httpsKeystore = (String) TestUtil.getFieldValue(certificatesManager, "LOGIN_KEYSTORE_SERVICE_PID");
+        sslKeystore = (String) TestUtil.getFieldValue(certificatesManager, "SSL_KEYSTORE_SERVICE_PID");
     }
 
     @Test
-    @Ignore
-    public void testListBundleCertificatesAliases() throws NoSuchFieldException {
-        // Create an extended manager instance with test support
-        String keyStorePassword = "password";
-        ArrayList<String> aliases = new ArrayList<>();
-        aliases.add("alias1");
-        aliases.add("alias2");
-        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-                Collections.enumeration(aliases));
+    public void returnCertificateTest()
+            throws NoSuchFieldException, KuraException, GeneralSecurityException, IOException {
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getEntry("certTest")).thenReturn(new TrustedCertificateEntry(certMock));
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
-        String keyStorePath = getDefaultKeyStore(manager);
-        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
-
-        manager.setCryptoService(mockCryptoService);
-
-        // Read aliases
-        Enumeration<String> readAliases = manager.listBundleCertificatesAliases();
-        ArrayList<String> readAliasesList = Collections.list(readAliases);
-
-        assertEquals(aliases.size(), readAliasesList.size());
-        assertTrue(readAliasesList.containsAll(aliases));
+        String id = "keystoreTest:certTest";
+        KuraCertificate kuraCertificate = certificatesManager.getCertificate(id);
+        assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
+        assertEquals("certTest", kuraCertificate.getAlias());
+        assertTrue(kuraCertificate.getCertificate().isPresent());
     }
 
     @Test
-    @Ignore
-    public void testListDMCertificatesAliases() throws NoSuchFieldException {
-        // Create an extended manager instance with test support
-        String keyStorePassword = "password";
-        ArrayList<String> aliases = new ArrayList<>();
-        aliases.add("alias1");
-        aliases.add("alias2");
-        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-                Collections.enumeration(aliases));
+    public void storeCertificateInDefaultKeystoreTest()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        String alias = "dm_certTest";
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getEntry(alias)).thenReturn(new TrustedCertificateEntry(certMock));
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put(defaultKeystore, ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
-        String keyStorePath = getDefaultKeyStore(manager);
-        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
-
-        manager.setCryptoService(mockCryptoService);
-
-        // Read aliases
-        Enumeration<String> readAliases = manager.listDMCertificatesAliases();
-        ArrayList<String> readAliasesList = Collections.list(readAliases);
-
-        assertEquals(aliases.size(), readAliasesList.size());
-        assertTrue(readAliasesList.containsAll(aliases));
+        KuraCertificate kuraCertificate = new KuraCertificate(defaultKeystore, alias, certMock);
+        certificatesManager.storeCertificate(certMock, alias);
+        kuraCertificate = certificatesManager.getCertificate(defaultKeystore + ":" + alias);
+        assertEquals(defaultKeystore, kuraCertificate.getKeystoreId());
+        assertEquals(alias, kuraCertificate.getAlias());
+        verify(ksMock).setEntry(eq(alias), anyObject());
     }
 
     @Test
-    @Ignore
-    public void testListSSLCertificatesAliases() throws NoSuchFieldException {
-        // Create an extended manager instance with test support
-        String keyStorePassword = "password";
-        ArrayList<String> aliases = new ArrayList<>();
-        aliases.add("alias1");
-        aliases.add("alias2");
-        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-                Collections.enumeration(aliases));
+    public void storeCertificateInHttpsKeystoreTest()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        String alias = "login_certTest";
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getEntry(alias)).thenReturn(new TrustedCertificateEntry(certMock));
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put(httpsKeystore, ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
-        String keyStorePath = getDefaultKeyStore(manager);
-        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
-
-        manager.setCryptoService(mockCryptoService);
-
-        // Read aliases
-        Enumeration<String> readAliases = manager.listSSLCertificatesAliases();
-        ArrayList<String> readAliasesList = Collections.list(readAliases);
-
-        assertEquals(aliases.size(), readAliasesList.size());
-        assertTrue(readAliasesList.containsAll(aliases));
+        certificatesManager.storeCertificate(certMock, alias);
+        KuraCertificate kuraCertificate = certificatesManager.getCertificate(httpsKeystore + ":" + alias);
+        assertEquals(httpsKeystore, kuraCertificate.getKeystoreId());
+        assertEquals(alias, kuraCertificate.getAlias());
+        verify(ksMock).setEntry(eq(alias), anyObject());
     }
 
     @Test
-    @Ignore
-    public void testListCACertificatesAliases() throws NoSuchFieldException {
-        // Create an extended manager instance with test support
-        String keyStorePassword = "password";
-        ArrayList<String> aliases = new ArrayList<>();
-        aliases.add("alias1");
-        aliases.add("alias2");
-        CertificatesManager manager = new ExtendedCertificatesManager(keyStorePassword, null, null,
-                Collections.enumeration(aliases));
+    public void listBundleCertificatesAliasesTest()
+            throws NoSuchFieldException, GeneralSecurityException, IOException, KuraException {
+        List<String> aliases = new ArrayList<>();
+        aliases.add("bundle_certTest1");
+        aliases.add("bundle_certTest2");
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getAliases()).thenReturn(aliases);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put(defaultKeystore, ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
-        String keyStorePath = getDefaultKeyStore(manager);
-        CryptoService mockCryptoService = createMockCryptoService(keyStorePath, keyStorePassword);
+        aliases.stream().forEach(alias -> {
+            try {
+                certificatesManager.storeCertificate(certMock, alias);
+            } catch (KuraException e) {
+            }
+        });
 
-        manager.setCryptoService(mockCryptoService);
-
-        // Read aliases
-        Enumeration<String> readAliases = manager.listCACertificatesAliases();
-        ArrayList<String> readAliasesList = Collections.list(readAliases);
-
-        assertEquals(aliases.size(), readAliasesList.size());
-        assertTrue(readAliasesList.containsAll(aliases));
-    }
-
-    public void testRemoveCertificate() throws KuraException {
-        CertificatesManager manager = new CertificatesManager();
-        manager.removeCertificate("alias");
+        List<String> aliasList = Collections.list(certificatesManager.listBundleCertificatesAliases());
+        assertEquals(aliases.size(), aliasList.size());
+        aliasList.stream().forEach(alias -> assertTrue(alias.startsWith("bundle_")));
     }
 
     @Test
-    public void testVerifySignature() {
+    public void listDMCertificatesAliasesTest()
+            throws NoSuchFieldException, GeneralSecurityException, IOException, KuraException {
+        List<String> aliases = new ArrayList<>();
+        aliases.add("dm_certTest1");
+        aliases.add("dm_certTest2");
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getAliases()).thenReturn(aliases);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put(defaultKeystore, ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        aliases.stream().forEach(alias -> {
+            try {
+                certificatesManager.storeCertificate(certMock, alias);
+            } catch (KuraException e) {
+            }
+        });
+
+        List<String> aliasList = Collections.list(certificatesManager.listDMCertificatesAliases());
+        assertEquals(aliases.size(), aliasList.size());
+        aliasList.stream().forEach(alias -> assertTrue(alias.startsWith("dm_")));
+    }
+
+    @Test
+    public void listStoredCertificatesAliasesTest()
+            throws NoSuchFieldException, GeneralSecurityException, IOException, KuraException {
+        List<String> aliases = new ArrayList<>();
+        aliases.add("dm_certTest1");
+        aliases.add("dm_certTest2");
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getAliases()).thenReturn(aliases);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put(defaultKeystore, ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        aliases.stream().forEach(alias -> {
+            try {
+                certificatesManager.storeCertificate(certMock, alias);
+            } catch (KuraException e) {
+            }
+        });
+
+        Set<CertificateInfo> certificates = certificatesManager.listStoredCertificates();
+        assertEquals(aliases.size(), certificates.size());
+        certificates.stream().forEach(cert -> assertTrue(cert.getAlias().startsWith("dm_")));
+    }
+
+    @Test
+    public void listSSLCertificatesAliasesTest()
+            throws NoSuchFieldException, GeneralSecurityException, IOException, KuraException {
+        List<String> aliases = new ArrayList<>();
+        aliases.add("certTest1");
+        aliases.add("certTest2");
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getAliases()).thenReturn(aliases);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put(sslKeystore, ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        aliases.stream().forEach(alias -> {
+            try {
+                certificatesManager.storeCertificate(certMock, alias);
+            } catch (KuraException e) {
+            }
+        });
+
+        List<String> aliasList = Collections.list(certificatesManager.listSSLCertificatesAliases());
+        assertEquals(aliases.size(), aliasList.size());
+        aliasList.stream().forEach(alias -> assertTrue(alias.startsWith("certTest")));
+    }
+
+    @Test
+    public void removeCertificateTest()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        String id = "keystoreTest:certTest";
+        certificatesManager.removeCertificate("certTest");
+        verify(ksMock).deleteEntry("certTest");
+    }
+
+    @Test
+    public void verifySignatureTest() {
         // Not implemented, always returns true
         CertificatesManager manager = new CertificatesManager();
         assertTrue(manager.verifySignature(null, null));
+    }
+
+    @Test
+    public void getCertificatesTest()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        Map<String, java.security.KeyStore.Entry> entries = new HashMap<>();
+        entries.put("certTest1", new TrustedCertificateEntry(certMock));
+        entries.put("certTest2", new TrustedCertificateEntry(certMock));
+        when(ksMock.getEntries()).thenReturn(entries);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        List<KuraCertificate> kuraCertificates = certificatesManager.getCertificates();
+        assertEquals(2, kuraCertificates.size());
+        assertEquals("keystoreTest", kuraCertificates.get(0).getKeystoreId());
+        assertEquals("certTest2", kuraCertificates.get(0).getAlias());
+    }
+
+    @Test
+    public void getCertificateTest() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getEntry("certTest")).thenReturn(new TrustedCertificateEntry(certMock));
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        String id = "keystoreTest:certTest";
+        KuraCertificate kuraCertificate = certificatesManager.getCertificate(id);
+        assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
+        assertEquals("certTest", kuraCertificate.getAlias());
+    }
+
+    @Test
+    public void addCertificateTest() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getEntry("certTest")).thenReturn(new TrustedCertificateEntry(certMock));
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        String id = "keystoreTest:certTest";
+        KuraCertificate kuraCertificate = new KuraCertificate("keystoreTest", "certTest", certMock);
+        certificatesManager.addCertificate(kuraCertificate);
+        kuraCertificate = certificatesManager.getCertificate(id);
+        assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
+        assertEquals("certTest", kuraCertificate.getAlias());
+        verify(ksMock).setEntry(eq("certTest"), anyObject());
+    }
+
+    @Test
+    public void updateCertificateTest()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        X509Certificate certMock = mock(X509Certificate.class);
+        KeystoreService ksMock = mock(KeystoreService.class);
+        when(ksMock.getEntry("certTest")).thenReturn(new TrustedCertificateEntry(certMock));
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        String id = "keystoreTest:certTest";
+        KuraCertificate kuraCertificate = new KuraCertificate("keystoreTest", "certTest", certMock);
+        certificatesManager.updateCertificate(kuraCertificate);
+        kuraCertificate = certificatesManager.getCertificate(id);
+        assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
+        assertEquals("certTest", kuraCertificate.getAlias());
+        verify(ksMock).setEntry(eq("certTest"), anyObject());
+    }
+
+    @Test
+    public void deleteCertificateTest()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        Map<String, KeystoreService> keystoreServices = new HashMap<>();
+        keystoreServices.put("keystoreTest", ksMock);
+        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
+
+        String id = "keystoreTest:certTest";
+        certificatesManager.deleteCertificate(id);
+        verify(ksMock).deleteEntry("certTest");
     }
 
     String getDefaultKeyStore(CertificatesManager manager) throws NoSuchFieldException {
@@ -182,4 +323,5 @@ public class CertificatesManagerTest {
 
         return mockService;
     }
+
 }

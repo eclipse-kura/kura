@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,10 +23,9 @@ import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
-import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Input;
+import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
@@ -41,11 +40,16 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class ApplicationCertsTabUi extends Composite implements Tab {
+public class KeyPairTabUi extends Composite implements Tab {
 
-    private static ApplicationCertsTabUiUiBinder uiBinder = GWT.create(ApplicationCertsTabUiUiBinder.class);
+    public enum Type {
+        KEY_PAIR,
+        CERTIFICATE
+    }
 
-    interface ApplicationCertsTabUiUiBinder extends UiBinder<Widget, ApplicationCertsTabUi> {
+    private static KeyPairTabUiUiBinder uiBinder = GWT.create(KeyPairTabUiUiBinder.class);
+
+    interface KeyPairTabUiUiBinder extends UiBinder<Widget, KeyPairTabUi> {
     }
 
     private static final Messages MSGS = GWT.create(Messages.class);
@@ -57,42 +61,35 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
 
     private boolean dirty;
 
-    @UiField
-    Form appCertsForm;
-    @UiField
-    FormGroup groupStorageAlias;
-    @UiField
-    FormGroup groupFormCert;
+    private final Type type;
+
     @UiField
     HTMLPanel description;
     @UiField
-    FormLabel storageAliasLabel;
+    FormGroup privateKeyInputForm;
     @UiField
-    FormLabel certificateLabel;
+    ListBox pidListBox;
     @UiField
-    TextArea formCert;
+    Input storageAliasInput;
     @UiField
-    Input formStorageAlias;
+    TextArea privateKeyInput;
+    @UiField
+    TextArea certificateInput;
     @UiField
     Button reset;
     @UiField
     Button apply;
 
-    public ApplicationCertsTabUi(final CertificateModalListener listener) {
+    public KeyPairTabUi(final Type type, final List<String> keyStorePids, final CertificateModalListener listener) {
         this.listener = listener;
+        this.type = type;
+
         initWidget(uiBinder.createAndBindUi(this));
-        initForm();
+        initForm(keyStorePids);
 
         setDirty(false);
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
-    }
-
-    @Override
-    public boolean isValid() {
-        boolean validAlias = this.formStorageAlias.validate();
-        boolean validAppCert = this.formCert.validate();
-        return validAlias && validAppCert;
     }
 
     @Override
@@ -108,6 +105,14 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
     }
 
     @Override
+    public boolean isValid() {
+        boolean validAlias = this.storageAliasInput.validate();
+        boolean validPrivateKey = this.privateKeyInput.validate();
+        boolean validDeviceCert = this.certificateInput.validate();
+        return validAlias && validPrivateKey && validDeviceCert;
+    }
+
+    @Override
     public void refresh() {
         if (isDirty()) {
             setDirty(false);
@@ -115,8 +120,15 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         }
     }
 
-    private void initForm() {
-        this.description.add(new Span("<p>" + MSGS.settingsAddBundleCertsDescription() + "</p>"));
+    private void initForm(final List<String> keyStorePids) {
+        StringBuilder title = new StringBuilder();
+        title.append("<p>");
+        title.append(type == Type.KEY_PAIR ? MSGS.securityKeyPairDescription() : MSGS.securityCertificateDescription());
+        title.append(" ");
+        title.append(MSGS.securityCertificateFormat() + " "
+                + (type == Type.KEY_PAIR ? MSGS.securityPrivateKeyFormat() : ""));
+        title.append("</p>");
+        this.description.add(new Span(title.toString()));
 
         final Validator<String> validator = new Validator<String>() {
 
@@ -137,21 +149,25 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
             }
         };
 
-        this.formCert.addValidator(validator);
-        this.formStorageAlias.addValidator(validator);
+        for (final String pid : keyStorePids) {
+            this.pidListBox.addItem(pid);
+        }
 
-        this.formCert.addKeyUpHandler(e -> {
-            this.formCert.validate();
+        this.storageAliasInput.addValidator(validator);
+
+        this.certificateInput.addValidator(validator);
+
+        this.storageAliasInput.addKeyUpHandler(e -> {
+            this.storageAliasInput.validate();
             setDirty(true);
         });
-        this.formStorageAlias.addKeyUpHandler(e -> {
-            this.formStorageAlias.validate();
+
+        this.certificateInput.addKeyUpHandler(e -> {
+            this.certificateInput.validate();
             setDirty(true);
         });
 
-        this.storageAliasLabel.setText(MSGS.settingsStorageAliasLabel());
-        this.certificateLabel.setText(MSGS.settingsPublicCertLabel());
-        this.formCert.setVisibleLines(20);
+        this.certificateInput.setVisibleLines(20);
 
         this.reset.setText(MSGS.reset());
         this.reset.addClickHandler(event -> {
@@ -160,25 +176,55 @@ public class ApplicationCertsTabUi extends Composite implements Tab {
         });
 
         this.apply.setText(MSGS.apply());
+
+        this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
+        if (this.type == Type.KEY_PAIR) {
+            this.privateKeyInput.addValidator(validator);
+            this.privateKeyInput.addKeyUpHandler(e -> {
+                this.privateKeyInput.validate();
+                setDirty(true);
+            });
+            this.privateKeyInput.setVisibleLines(20);
+        }
+
         this.apply.addClickHandler(event -> {
             final boolean isValid = isValid();
             this.listener.onApply(isValid);
-            if (isValid()) {
-                RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
-                        c.callback(token -> this.gwtCertificatesService.storeApplicationPublicChain(token,
-                                this.formCert.getValue(), this.formStorageAlias.getValue(), c.callback(ok -> {
-                                    reset();
-                                    setDirty(false);
-                                    listener.onKeystoreChanged();
-                                })))));
-
+            if (isValid) {
+                if (this.type == Type.KEY_PAIR) {
+                    storeKeyPair();
+                } else {
+                    storeCertificate();
+                }
             }
         });
     }
 
+    private void storeKeyPair() {
+        RequestQueue.submit(c -> this.gwtXSRFService
+                .generateSecurityToken(c.callback(token -> this.gwtCertificatesService.storeKeyPair(token,
+                        this.pidListBox.getSelectedValue(), this.privateKeyInput.getValue(),
+                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
+                            reset();
+                            setDirty(false);
+                            listener.onKeystoreChanged();
+                        })))));
+    }
+
+    private void storeCertificate() {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(
+                token -> this.gwtCertificatesService.storeCertificate(token, this.pidListBox.getSelectedValue(),
+                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
+                            reset();
+                            setDirty(false);
+                            listener.onKeystoreChanged();
+                        })))));
+    }
+
     private void reset() {
-        this.formStorageAlias.reset();
-        this.formCert.reset();
+        this.storageAliasInput.reset();
+        this.privateKeyInput.reset();
+        this.certificateInput.reset();
     }
 
     @Override

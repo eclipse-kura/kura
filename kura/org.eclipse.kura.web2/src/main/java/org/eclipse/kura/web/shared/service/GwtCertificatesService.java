@@ -28,6 +28,14 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("certificate")
 public interface GwtCertificatesService extends RemoteService {
 
+    @Audit(componentName = "UI Certificate", description = "Store Key Pair")
+    public void storeKeyPair(GwtXSRFToken xsrfToken, String keyStorePid, String privateKey, String publicCert,
+            String alias) throws GwtKuraException;
+
+    @Audit(componentName = "UI Certificate", description = "Store Certificate")
+    public void storeCertificate(GwtXSRFToken xsrfToken, String keyStorePid, String certificate, String alias)
+            throws GwtKuraException;
+
     @Audit(componentName = "UI Certificate", description = "Store SSL key")
     public Integer storeSSLPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateCert, String publicCert,
             String password, String alias) throws GwtKuraException;
@@ -47,6 +55,8 @@ public interface GwtCertificatesService extends RemoteService {
             String password, String alias) throws GwtKuraException;
 
     public List<GwtCertificate> listCertificates() throws GwtKuraException;
+
+    public List<String> listKeystoreServicePids() throws GwtKuraException;
 
     @Audit(componentName = "UI Certificate", description = "Remove certificate")
     public void removeCertificate(GwtXSRFToken xsrfToken, GwtCertificate certificate) throws GwtKuraException;

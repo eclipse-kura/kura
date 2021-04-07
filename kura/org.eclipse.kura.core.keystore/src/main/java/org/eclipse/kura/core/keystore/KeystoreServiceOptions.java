@@ -18,8 +18,13 @@ import java.util.Arrays;
 import java.util.Map;
 
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.crypto.CryptoService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeystoreServiceOptions {
+
+    private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceOptions.class);
 
     private static final String KEY_SERVICE_PID = "kura.service.pid";
     static final String KEY_KEYSTORE_PATH = "keystore.path";
@@ -36,7 +41,7 @@ public class KeystoreServiceOptions {
     private final Password keystorePassword;
     private final boolean randomPassword;
 
-    public KeystoreServiceOptions(Map<String, Object> properties) {
+    public KeystoreServiceOptions(Map<String, Object> properties, final CryptoService cryptoService) {
         if (isNull(properties)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
@@ -47,10 +52,24 @@ public class KeystoreServiceOptions {
 
         this.keystorePath = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
 
-        this.keystorePassword = new Password(
-                (String) properties.getOrDefault(KEY_KEYSTORE_PASSWORD, DEFAULT_KEYSTORE_PASSWORD));
+        this.keystorePassword = extractPassword(properties, cryptoService);
 
         this.randomPassword = (boolean) properties.getOrDefault(KEY_RANDOMIZE_PASSWORD, DEFAULT_RANDOMIZE_PASSWORD);
+    }
+
+    private static Password extractPassword(final Map<String, Object> properties, final CryptoService cryptoService) {
+        final Object optionsPassword = properties.get(KEY_KEYSTORE_PASSWORD);
+
+        if (optionsPassword instanceof String) {
+            return new Password((String) optionsPassword);
+        }
+
+        try {
+            return new Password(cryptoService.encryptAes(DEFAULT_KEYSTORE_PASSWORD.toCharArray()));
+        } catch (final Exception e) {
+            logger.warn("failed to encrypt default keystore password", e);
+            return new Password(DEFAULT_KEYSTORE_PASSWORD);
+        }
     }
 
     public Map<String, Object> getProperties() {
@@ -65,8 +84,12 @@ public class KeystoreServiceOptions {
         return this.keystorePath;
     }
 
-    public char[] getKeystorePassword() {
-        return this.keystorePassword.getPassword();
+    public char[] getKeystorePassword(final CryptoService cryptoService) {
+        try {
+            return cryptoService.decryptAes(this.keystorePassword.getPassword());
+        } catch (final Exception e) {
+            return this.keystorePassword.getPassword();
+        }
     }
 
     public boolean needsRandomPassword() {

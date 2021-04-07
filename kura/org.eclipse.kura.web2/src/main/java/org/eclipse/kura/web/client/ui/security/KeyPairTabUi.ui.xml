@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2020 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -19,6 +19,9 @@
     xmlns:b="urn:import:org.gwtbootstrap3.client.ui" xmlns:b.html="urn:import:org.gwtbootstrap3.client.ui.html"
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
 
+	<ui:with field="msgs"
+		type="org.eclipse.kura.web.client.messages.Messages" />
+
     <ui:style>
     .important {
     	font-weight: bold;
@@ -32,7 +35,6 @@
     	font-size: 0.90em;
     }
     </ui:style>
-
 
     <b:Container fluid="true">
         <b:Column size="MD_12">
@@ -52,22 +54,37 @@
                 <g:HTMLPanel ui:field="description">
                 </g:HTMLPanel>
 
-                <b:Form ui:field="appCertsForm">
+                <b:Form ui:field="httpsServerCertsForm">
                     <b:FieldSet>
-                        <b:FormGroup ui:field="groupStorageAlias">
-                            <b:FormLabel for="formStorageAlias"
-                                ui:field="storageAliasLabel" />
+                    	<b:FormGroup>
+                            <b:FormLabel for="pidListBox"
+                                text="msgs.settingsKeyStorePidLabel}" />
+                            <b:ListBox b:id="pidListBox" ui:field="pidListBox" />
+                        </b:FormGroup>
+                    
+                        <b:FormGroup>
+                            <b:FormLabel for="storageAliasInput"
+                                text="{msgs.settingsStorageAliasLabel}" />
                             <b:Input type="TEXT" b:id="storageAlias"
-                                ui:field="formStorageAlias" />
-                             <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                                ui:field="storageAliasInput" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
 
-                        <b:FormGroup ui:field="groupFormCert">
-                            <b:FormLabel for="formCert"
-                                ui:field="certificateLabel" />
-                            <b:TextArea b:id="formCert"
+                        <b:FormGroup ui:field="privateKeyInputForm">
+                            <b:FormLabel for="privateKeyInput"
+                                text="{msgs.settingsPrivateCertLabel}"/>
+                            <b:TextArea b:id="privateKeyInput"
                                 addStyleNames="{style.center-panel}"
-                                ui:field="formCert" />
+                                ui:field="privateKeyInput" />
+                            <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
+                        </b:FormGroup>
+
+                        <b:FormGroup>
+                            <b:FormLabel for="certificateInput"
+                                text="{msgs.settingsPublicCertLabel}" />
+                            <b:TextArea b:id="certificateInput"
+                                addStyleNames="{style.center-panel}"
+                                ui:field="certificateInput" />
                             <b:HelpBlock iconType="EXCLAMATION_TRIANGLE"/>
                         </b:FormGroup>
                     </b:FieldSet>

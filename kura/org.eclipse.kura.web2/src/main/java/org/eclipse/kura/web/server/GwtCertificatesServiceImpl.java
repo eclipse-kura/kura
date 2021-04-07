@@ -36,6 +36,7 @@ import org.eclipse.kura.certificate.CertificateInfo;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.certificate.KuraCertificate;
 import org.eclipse.kura.certificate.KuraPrivateKey;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
@@ -52,6 +53,79 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
     private static final String LOGIN_KEYSTORE_SERVICE_PID = "HttpsKeystore";
     private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
+
+    @Override
+    public void storeKeyPair(GwtXSRFToken xsrfToken, String keyStorePid, String privateKey, String publicCert,
+            String alias) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        try {
+            // Remove header if exists
+            String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
+            key = key.replace("-----END PRIVATE KEY-----", "");
+
+            byte[] conversion = base64Decode(key);
+            // Parse Base64 - after PKCS8
+            PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
+
+            // Create RSA key
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            PrivateKey privKey = kf.generatePrivate(specPriv);
+
+            Certificate[] certs = parsePublicCertificates(publicCert);
+
+            if (privKey == null) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            } else {
+                CertificatesService certificateService = ServiceLocator.getInstance()
+                        .getService(CertificatesService.class);
+                KuraPrivateKey kuraPrivateKey = new KuraPrivateKey(keyStorePid, alias, privKey, certs);
+                certificateService.addPrivateKey(kuraPrivateKey);
+            }
+
+        } catch (GeneralSecurityException | IOException | KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        }
+    }
+
+    @Override
+    public void storeCertificate(GwtXSRFToken xsrfToken, String keyStorePid, String certificate, String alias)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        try {
+            X509Certificate[] certs = parsePublicCertificates(certificate);
+
+            if (certs.length == 0) {
+                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+            } else {
+                CertificatesService certificateService = ServiceLocator.getInstance()
+                        .getService(CertificatesService.class);
+
+                for (X509Certificate cert : certs) {
+                    certificateService.addCertificate(new KuraCertificate(keyStorePid, alias, cert));
+                }
+            }
+
+        } catch (CertificateException | UnsupportedEncodingException | KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+        }
+    }
+
+    @Override
+    public List<String> listKeystoreServicePids() throws GwtKuraException {
+        final List<String> pids = new ArrayList<>();
+
+        ServiceLocator.withAllServiceReferences(null, (r, c) -> {
+            final Object pid = r.getProperties().get("kura.service.pid");
+
+            if (pid instanceof String) {
+                pids.add((String) pid);
+            }
+        }, KeystoreService.class);
+
+        return pids;
+    }
 
     @Override
     public Integer storeSSLPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey,

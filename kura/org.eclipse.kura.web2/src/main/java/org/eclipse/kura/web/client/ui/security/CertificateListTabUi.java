@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,6 +83,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     private final ListDataProvider<GwtCertificate> certificatesDataProvider = new ListDataProvider<>();
 
+    private List<String> pids;
+
     public CertificateListTabUi() {
         logger.log(Level.FINER, "Initiating CertificatesTabUI...");
         initWidget(uiBinder.createAndBindUi(this));
@@ -106,18 +109,21 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     @Override
     public void refresh() {
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
-                c.callback(token -> this.gwtCertificatesService.listCertificates(c.callback(result -> {
-                    CertificateListTabUi.this.certificatesDataProvider.getList().clear();
-                    for (GwtCertificate pair : result) {
-                        if (pair != null) {
-                            this.certificatesDataProvider.getList().add(pair);
-                        }
+        RequestQueue.submit(c -> this.gwtCertificatesService.listKeystoreServicePids(c.callback(resultPids -> {
+            this.pids = resultPids;
+            this.gwtCertificatesService.listCertificates(c.callback(result -> {
+
+                CertificateListTabUi.this.certificatesDataProvider.getList().clear();
+                for (GwtCertificate pair : result) {
+                    if (pair != null) {
+                        this.certificatesDataProvider.getList().add(pair);
                     }
-                    this.certificatesGrid.setVisible(!this.certificatesDataProvider.getList().isEmpty());
-                    this.selectionModel.clear();
-                    ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
-                })))));
+                }
+                this.certificatesGrid.setVisible(!this.certificatesDataProvider.getList().isEmpty());
+                this.selectionModel.clear();
+                ColumnSortEvent.fire(this.certificatesGrid, this.certificatesGrid.getColumnSortList());
+            }));
+        })));
     }
 
     private void initTable() {
@@ -199,7 +205,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     }
 
     private void initCertificateTypeSelection() {
-        this.certAddModal.setTitle(MSGS.securityCertificateTypeLabel());
+        this.certAddModal.setTitle(MSGS.securityAddKeystoreEntry());
         ListBox certType = new ListBox();
         for (CertType c : CertType.values()) {
             certType.addItem(c.value());
@@ -223,25 +229,10 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certAddModal.setTitle("Add Certificate");
         this.certAddModalBody.clear();
 
-        if (selectedCertType == CertType.APPLICATION_CERT) {
-            ApplicationCertsTabUi appCertPanel = new ApplicationCertsTabUi(this);
-            this.certAddModalBody.add(appCertPanel);
-        } else if (selectedCertType == CertType.DEVICE_SSL_CERT) {
-            DeviceCertsTabUi deviceCertsTabUi = new DeviceCertsTabUi(this);
-            this.certAddModalBody.add(deviceCertsTabUi);
-        } else if (selectedCertType == CertType.SERVER_SSL_CERT) {
-            ServerCertsTabUi serverCertsTabUi = new ServerCertsTabUi(this);
-            this.certAddModalBody.add(serverCertsTabUi);
-        } else if (selectedCertType == CertType.HTTPS_CLIENT_CERT) {
-            HttpsUserCertsTabUi httpsUserCertsTabUi = new HttpsUserCertsTabUi(this);
-            this.certAddModalBody.add(httpsUserCertsTabUi);
-        } else if (selectedCertType == CertType.HTTPS_SERVER_CERT) {
-            HttpsServerCertsTabUi httpsServerCertsTabUi = new HttpsServerCertsTabUi(this);
-            this.certAddModalBody.add(httpsServerCertsTabUi);
-        }
+        final KeyPairTabUi widget = new KeyPairTabUi(selectedCertType.getType(), this.pids, this);
+        this.certAddModalBody.add(widget);
 
         this.nextStepButton.setVisible(false);
-
     }
 
     private void uninstall(final GwtCertificate selected) {
@@ -253,20 +244,23 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     private enum CertType {
 
-        SERVER_SSL_CERT(MSGS.settingsAddCertificates()),
-        DEVICE_SSL_CERT(MSGS.settingsAddMAuthCertificates()),
-        APPLICATION_CERT(MSGS.settingsAddBundleCerts()),
-        HTTPS_SERVER_CERT(MSGS.securityHttpsServerLabel()),
-        HTTPS_CLIENT_CERT(MSGS.securityHttpsClientLabel());
+        KEY_PAIR(MSGS.securityAddKeyPair(), KeyPairTabUi.Type.KEY_PAIR),
+        CERTIFICATE(MSGS.securityAddCertificate(), KeyPairTabUi.Type.CERTIFICATE);
 
         private String value;
+        private KeyPairTabUi.Type type;
 
-        private CertType(String v) {
+        private CertType(String v, KeyPairTabUi.Type type) {
             this.value = v;
+            this.type = type;
         }
 
         public String value() {
             return this.value;
+        }
+
+        public KeyPairTabUi.Type getType() {
+            return this.type;
         }
 
         public static CertType fromValue(String v) {

@@ -27,6 +27,8 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PasswordProtection;
+import java.security.KeyStore.ProtectionParameter;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -117,7 +119,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         logger.info("Bundle {} is starting!", this.getClass().getSimpleName());
         this.componentContext = context;
 
-        this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
+        this.keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
         if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())
@@ -130,11 +132,11 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is updating!", this.getClass().getSimpleName());
-        KeystoreServiceOptions newOptions = new KeystoreServiceOptions(properties);
+        KeystoreServiceOptions newOptions = new KeystoreServiceOptions(properties, cryptoService);
 
         if (!this.keystoreServiceOptions.equals(newOptions)) {
             logger.info("Perform update...");
-            this.keystoreServiceOptions = new KeystoreServiceOptions(properties);
+            this.keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
             if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())) {
                 accessKeystore();
             }
@@ -169,15 +171,9 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         }
 
         char[] oldPassword = getOldKeystorePassword(keystorePath);
-        char[] newPassword = null;
+        char[] newPassword = this.keystoreServiceOptions.getKeystorePassword(cryptoService);
 
-        try {
-            newPassword = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());
-        } catch (KuraException e) {
-            logger.warn("Failed to decrypt keystore password");
-        }
-
-        if (newPassword != null && !Arrays.equals(oldPassword, newPassword)) {
+        if (!Arrays.equals(oldPassword, newPassword)) {
             updateKeystorePassword(oldPassword, newPassword);
         }
     }
@@ -235,7 +231,8 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
                 if (this.componentContext.getServiceReference() != null
                         && this.configurationService.getComponentConfiguration(pid) != null) {
                     this.configurationService.updateConfiguration(pid, props);
-                    throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING, "Updated. The task will be terminated.");
+                    throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING,
+                            "Updated. The task will be terminated.");
                 } else {
                     logger.info("No service or configuration available yet.");
                 }
@@ -304,13 +301,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             return password;
         }
 
-        try {
-            password = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());
-        } catch (KuraException e) {
-            password = new char[0];
-        }
-
-        return password;
+        return this.keystoreServiceOptions.getKeystorePassword(cryptoService);
     }
 
     private boolean isKeyStoreAccessible() {
@@ -340,12 +331,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     public KeyStore getKeyStore() throws GeneralSecurityException, IOException {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
 
-        char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword();
-        try {
-            keystorePassword = this.cryptoService.decryptAes(this.keystoreServiceOptions.getKeystorePassword());
-        } catch (KuraException e) {
-            logger.warn("Failed to decrypt keystore password");
-        }
+        char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword(cryptoService);
 
         try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath());) {
             ks.load(tsReadStream, keystorePassword);
@@ -361,7 +347,9 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         }
         KeyStore ks = getKeyStore();
 
-        return ks.getEntry(alias, new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword()));
+        return ks.getEntry(alias,
+                new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword(cryptoService)));
+
     }
 
     @Override
@@ -411,7 +399,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         }
         KeyStore ks = getKeyStore();
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-        kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword());
+        kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword(cryptoService));
 
         return Arrays.asList(kmf.getKeyManagers());
     }
@@ -428,7 +416,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
     private void saveKeystore(KeyStore ks)
             throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-        saveKeystore(ks, this.keystoreServiceOptions.getKeystorePassword());
+        saveKeystore(ks, this.keystoreServiceOptions.getKeystorePassword(cryptoService));
     }
 
     private void saveKeystore(KeyStore ks, char[] password)
@@ -444,7 +432,17 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             throw new IllegalArgumentException("Input cannot be null or empty!");
         }
         KeyStore ks = getKeyStore();
-        ks.setEntry(alias, entry, new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword()));
+
+        final ProtectionParameter protectionParameter;
+
+        if (entry instanceof TrustedCertificateEntry) {
+            protectionParameter = null;
+        } else {
+            protectionParameter = new PasswordProtection(
+                    this.keystoreServiceOptions.getKeystorePassword(cryptoService));
+        }
+
+        ks.setEntry(alias, entry, protectionParameter);
         saveKeystore(ks);
     }
 

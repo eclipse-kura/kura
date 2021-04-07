@@ -58,7 +58,7 @@
                     <b:FieldSet>
                     	<b:FormGroup>
                             <b:FormLabel for="pidListBox"
-                                text="msgs.settingsKeyStorePidLabel}" />
+                                text="{msgs.settingsKeyStorePidLabel}" />
                             <b:ListBox b:id="pidListBox" ui:field="pidListBox" />
                         </b:FormGroup>
                     

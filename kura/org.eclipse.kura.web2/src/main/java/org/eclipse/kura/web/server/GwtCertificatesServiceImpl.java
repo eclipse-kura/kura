@@ -51,8 +51,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
      */
     private static final long serialVersionUID = 7402961266449489433L;
     private static final Decoder BASE64_DECODER = Base64.getDecoder();
-    private static final String LOGIN_KEYSTORE_SERVICE_PID = "HttpsKeystore";
-    private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
 
     @Override
     public void storeKeyPair(GwtXSRFToken xsrfToken, String keyStorePid, String privateKey, String publicCert,
@@ -127,111 +125,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         return pids;
     }
 
-    @Override
-    public Integer storeSSLPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey,
-            String password, String alias) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        try {
-            // Remove header if exists
-            String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
-            key = key.replace("-----END PRIVATE KEY-----", "");
-
-            byte[] conversion = base64Decode(key);
-            // Parse Base64 - after PKCS8
-            PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
-
-            // Create RSA key
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            PrivateKey privKey = kf.generatePrivate(specPriv);
-
-            Certificate[] certs = parsePublicCertificates(publicKey);
-
-            if (privKey == null) {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-            } else {
-                CertificatesService certificateService = ServiceLocator.getInstance()
-                        .getService(CertificatesService.class);
-                KuraPrivateKey kuraPrivateKey = new KuraPrivateKey(SSL_KEYSTORE_SERVICE_PID, alias, privKey, certs);
-                certificateService.addPrivateKey(kuraPrivateKey);
-            }
-
-            return 1;
-        } catch (GeneralSecurityException | IOException | KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-        }
-    }
-
-    @Override
-    public Integer storeSSLPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        try {
-            X509Certificate[] certs = parsePublicCertificates(publicKeys);
-
-            if (certs.length == 0) {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-            } else {
-                CertificatesService certificateService = ServiceLocator.getInstance()
-                        .getService(CertificatesService.class);
-
-                boolean leafAssigned = false;
-                for (X509Certificate cert : certs) {
-                    if (!leafAssigned && (cert.getBasicConstraints() == -1
-                            || cert.getKeyUsage() != null && !cert.getKeyUsage()[5])) { // certificate is leaf
-                        certificateService
-                                .addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, "ssl-" + alias, cert));
-                        leafAssigned = true;
-                    } else { // Certificate is CA.
-                        // http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
-                        String certificateAlias = "ca-" + cert.getSerialNumber().toString();
-                        certificateService
-                                .addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, certificateAlias, cert));
-                    }
-                }
-            }
-            return certs.length;
-        } catch (GeneralSecurityException | IOException | KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-        }
-    }
-
-    @Override
-    public Integer storeApplicationPublicChain(GwtXSRFToken xsrfToken, String publicKeys, String alias)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        try {
-            X509Certificate[] certs = parsePublicCertificates(publicKeys);
-
-            if (certs.length == 0) {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-            } else {
-                CertificatesService certificateService = ServiceLocator.getInstance()
-                        .getService(CertificatesService.class);
-
-                boolean leafAssigned = false;
-                for (X509Certificate cert : certs) {
-                    if (!leafAssigned && (cert.getBasicConstraints() == -1
-                            || cert.getKeyUsage() != null && !cert.getKeyUsage()[5])) { // certificate is leaf
-                        certificateService.addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, alias, cert));
-                        leafAssigned = true;
-                    } else { // Certificate is CA.
-                        // http://stackoverflow.com/questions/12092457/how-to-check-if-x509certificate-is-ca-certificate
-                        String certificateAlias = "bundle-" + cert.getSerialNumber().toString();
-                        certificateService
-                                .addCertificate(new KuraCertificate(SSL_KEYSTORE_SERVICE_PID, certificateAlias, cert));
-                    }
-                }
-            }
-
-            return certs.length;
-        } catch (CertificateException | UnsupportedEncodingException | KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-        }
-    }
-
     private X509Certificate[] parsePublicCertificates(String publicKey)
             throws CertificateException, UnsupportedEncodingException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
@@ -255,32 +148,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             return BASE64_DECODER.decode(key);
         } catch (final Exception e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    public Integer storeLoginPublicChain(GwtXSRFToken xsrfToken, String publicCert) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        try {
-            X509Certificate[] certs = parsePublicCertificates(publicCert);
-
-            if (certs.length == 0) {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-            } else {
-                CertificatesService certificateService = ServiceLocator.getInstance()
-                        .getService(CertificatesService.class);
-
-                for (X509Certificate cert : certs) {
-                    String certificateAlias = "login-" + cert.getSerialNumber().toString();
-                    certificateService
-                            .addCertificate(new KuraCertificate(LOGIN_KEYSTORE_SERVICE_PID, certificateAlias, cert));
-                }
-            }
-
-            return certs.length;
-        } catch (CertificateException | UnsupportedEncodingException | KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
 
@@ -326,41 +193,5 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
         }
 
-    }
-
-    @Override
-    public Integer storeLoginPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicKey,
-            String password, String alias) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        try {
-            // Remove header if exists
-            String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
-            key = key.replace("-----END PRIVATE KEY-----", "");
-
-            byte[] conversion = base64Decode(key);
-            // Parse Base64 - after PKCS8
-            PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
-
-            // Create RSA key
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            PrivateKey privKey = kf.generatePrivate(specPriv);
-
-            Certificate[] certs = parsePublicCertificates(publicKey);
-
-            if (privKey == null) {
-                throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
-            } else {
-                CertificatesService certificateService = ServiceLocator.getInstance()
-                        .getService(CertificatesService.class);
-                KuraPrivateKey kuraPrivateKey = new KuraPrivateKey("org.eclipse.kura.htto.server.manager.HttpService",
-                        "login-" + alias, privKey, certs);
-                certificateService.addPrivateKey(kuraPrivateKey);
-            }
-
-            return 1;
-        } catch (GeneralSecurityException | IOException | KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
-        }
     }
 }

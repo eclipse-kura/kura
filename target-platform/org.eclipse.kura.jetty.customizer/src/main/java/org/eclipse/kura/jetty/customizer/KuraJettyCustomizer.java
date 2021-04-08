@@ -152,7 +152,10 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         if (keystoreProvider instanceof Callable && keyManagerProvider instanceof Function) {
 
             try {
-                sslContextFactory.setKeyStore(((Callable<KeyStore>) keystoreProvider).call());
+                final KeyStore keystore = ((Callable<KeyStore>) keystoreProvider).call();
+
+                sslContextFactory.setKeyStore(keystore);
+                sslContextFactory.setTrustStore(keystore);
             } catch (final Exception e) {
                 return Optional.empty();
             }

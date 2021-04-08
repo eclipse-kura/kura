@@ -28,7 +28,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
 
+import javax.net.ssl.KeyManager;
 import javax.servlet.SessionCookieConfig;
 
 import org.eclipse.equinox.http.jetty.JettyConstants;
@@ -128,27 +131,43 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<ServerConnector> createSslConnector(final Server server, final Dictionary<String, ?> settings,
             final int port, final boolean enableClientAuth) {
 
-        final Optional<String> keyStorePath = getOptional(settings, JettyConstants.SSL_KEYSTORE, String.class);
-        final Optional<String> keyStorePassword = getOptional(settings, JettyConstants.SSL_PASSWORD, String.class);
-
-        if (!(keyStorePath.isPresent() && keyStorePassword.isPresent())) {
-            return Optional.empty();
-        }
-
-        final SslContextFactory.Server sslContextFactory;
+        final BaseSslContextFactory sslContextFactory;
 
         if (enableClientAuth) {
             sslContextFactory = new ClientAuthSslContextFactoryImpl(settings);
         } else {
-            sslContextFactory = new SslContextFactory.Server();
+            sslContextFactory = new BaseSslContextFactory();
         }
 
-        sslContextFactory.setKeyStorePath(keyStorePath.get());
-        sslContextFactory.setKeyStorePassword(keyStorePassword.get());
-        sslContextFactory.setKeyStoreType("JKS");
+        final Object keystoreProvider = settings.get("org.eclipse.kura.keystore.provider");
+        final Object keyManagerProvider = settings.get("org.eclipse.kura.keymanager.provider");
+
+        final Optional<String> keyStorePath = getOptional(settings, JettyConstants.SSL_KEYSTORE, String.class);
+        final Optional<String> keyStorePassword = getOptional(settings, JettyConstants.SSL_PASSWORD, String.class);
+
+        if (keystoreProvider instanceof Callable && keyManagerProvider instanceof Function) {
+
+            try {
+                sslContextFactory.setKeyStore(((Callable<KeyStore>) keystoreProvider).call());
+            } catch (final Exception e) {
+                return Optional.empty();
+            }
+
+            sslContextFactory.setKeyManagersProvider((Function<String, List<KeyManager>>) keyManagerProvider);
+
+        } else if (keyStorePath.isPresent() && keyStorePassword.isPresent()) {
+            sslContextFactory.setKeyStorePath(keyStorePath.get());
+            sslContextFactory.setKeyStorePassword(keyStorePassword.get());
+            sslContextFactory.setKeyStoreType("JKS");
+
+        } else {
+            return Optional.empty();
+        }
+
         sslContextFactory.setProtocol("TLS");
         sslContextFactory.setTrustManagerFactoryAlgorithm("PKIX");
 
@@ -213,7 +232,26 @@ public class KuraJettyCustomizer extends JettyCustomizer {
         return Optional.empty();
     }
 
-    private static final class ClientAuthSslContextFactoryImpl extends SslContextFactory.Server {
+    private static class BaseSslContextFactory extends SslContextFactory.Server {
+
+        private Optional<Function<String, List<KeyManager>>> keyManagersProvider = Optional.empty();
+
+        public void setKeyManagersProvider(Function<String, List<KeyManager>> keyManagersProvider) {
+            this.keyManagersProvider = Optional.of(keyManagersProvider);
+        }
+
+        @Override
+        protected KeyManager[] getKeyManagers(KeyStore keyStore) throws Exception {
+            if (keyManagersProvider.isPresent()) {
+                return keyManagersProvider.get().apply(getKeyManagerFactoryAlgorithm()).toArray(new KeyManager[0]);
+            }
+
+            return super.getKeyManagers(keyStore);
+        }
+
+    }
+
+    private static final class ClientAuthSslContextFactoryImpl extends BaseSslContextFactory {
 
         private final Dictionary<String, ?> settings;
 

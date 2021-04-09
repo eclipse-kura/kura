@@ -57,12 +57,7 @@ public class SettingsPanelUi extends Composite {
     SnapshotsTabUi snapshotsPanel;
 
     @UiField
-    SslTabUi sslConfigPanel;
-
-    @UiField
     TabListItem snapshots;
-    @UiField
-    TabListItem sslConfig;
     @UiField
     TabContent tabContent;
     @UiField
@@ -73,7 +68,6 @@ public class SettingsPanelUi extends Composite {
 
     private TabListItem currentlySelectedTab;
     private Tab.RefreshHandler snapshotsHandler;
-    private Tab.RefreshHandler sslConfigHandler;
 
     public SettingsPanelUi() {
         logger.log(Level.FINER, "Initiating SettingsPanelUI...");
@@ -87,8 +81,6 @@ public class SettingsPanelUi extends Composite {
 
         this.snapshotsHandler = new Tab.RefreshHandler(this.snapshotsPanel);
         this.snapshots.addClickHandler(event -> handleEvent(event, this.snapshotsHandler));
-        this.sslConfigHandler = new Tab.RefreshHandler(this.sslConfigPanel);
-        this.sslConfig.addClickHandler(event -> handleEvent(event, this.sslConfigHandler));
 
         this.currentlySelectedTab = this.snapshots;
     }
@@ -104,10 +96,8 @@ public class SettingsPanelUi extends Composite {
     }
 
     public boolean isDirty() {
-        boolean snapshotsDirty = this.snapshotsPanel.isDirty();
-        boolean sslConfigDirty = this.sslConfigPanel.isDirty();
 
-        return snapshotsDirty || sslConfigDirty;
+        return this.snapshotsPanel.isDirty();
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -130,7 +120,6 @@ public class SettingsPanelUi extends Composite {
     public void setDirty(boolean b) {
 
         this.snapshotsPanel.setDirty(b);
-        this.sslConfigPanel.setDirty(b);
     }
 
     private void showDirtyModal(TabListItem newTabListItem, RefreshHandler newTabRefreshHandler) {
@@ -186,13 +175,7 @@ public class SettingsPanelUi extends Composite {
 
     // This is not very clean...
     private Tab getTab(TabListItem item) {
-        if (item.getDataTarget().equals("#snapshotsPanel")) {
-            return this.snapshotsPanel;
-        } else if (item.getDataTarget().equals("#sslConfigPanel")) {
-            return this.sslConfigPanel;
-        } else {
-            return this.snapshotsPanel;
-        }
+        return this.snapshotsPanel;
     }
 
 }

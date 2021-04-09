@@ -74,6 +74,8 @@ public class SecurityPanelUi extends Composite {
     @UiField
     CertificateListTabUi certificateListPanel;
     @UiField
+    SslManagerServicesUi sslPanel;
+    @UiField
     TabPane httpServicePanel;
     @UiField
     TabPane consolePanel;
@@ -86,6 +88,8 @@ public class SecurityPanelUi extends Composite {
 
     @UiField
     TabListItem certificateList;
+    @UiField
+    TabListItem ssl;
     @UiField
     TabListItem httpService;
     @UiField
@@ -124,13 +128,14 @@ public class SecurityPanelUi extends Composite {
         if (hasAdminPermission) {
 
             this.certificateList.setVisible(true);
+            this.ssl.setVisible(true);
             this.httpService.setVisible(true);
             this.console.setVisible(true);
             this.security.setVisible(capabilities.isSecurityServiceAvailable());
             this.threatManager.setVisible(capabilities.isThreatManagerAvailable());
 
             this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
-
+            this.ssl.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.sslPanel)));
             this.httpService.addClickHandler(
                     addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", //
                             httpServicePanel, //
@@ -196,12 +201,14 @@ public class SecurityPanelUi extends Composite {
 
     public boolean isDirty() {
         boolean certListDirty = this.certificateListPanel.isDirty();
+        boolean sslConfigDirty = this.sslPanel.isDirty();
         boolean securityDirty = this.securityPanel.isDirty();
         boolean threatManagerDirty = this.threatManagerPanel.isDirty();
         boolean webConsoleDirty = isServicesUiDirty(this.consolePanel);
         boolean httpServiceDirty = isServicesUiDirty(this.httpServicePanel);
 
-        return certListDirty || httpServiceDirty || threatManagerDirty || securityDirty || webConsoleDirty;
+        return certListDirty || sslConfigDirty || threatManagerDirty || securityDirty || webConsoleDirty
+                || httpServiceDirty;
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -223,6 +230,7 @@ public class SecurityPanelUi extends Composite {
 
     public void setDirty(boolean b) {
         this.certificateListPanel.setDirty(b);
+        this.sslPanel.setDirty(b);
         this.securityPanel.setDirty(b);
         this.threatManagerPanel.setDirty(b);
         getServicesUi(this.httpServicePanel).ifPresent(u -> u.setDirty(b));

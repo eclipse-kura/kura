@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -37,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
@@ -72,7 +73,7 @@ import org.slf4j.LoggerFactory;
  *         We DO NOT support this yet. We assume that for every installed deployment package
  *         there is a single deployment package file (.dp) that needs to be reinstalled.
  */
-public class DeploymentAgent implements DeploymentAgentService {
+public class DeploymentAgent implements DeploymentAgentService, ConfigurableComponent {
 
     private static Logger logger = LoggerFactory.getLogger(DeploymentAgent.class);
 
@@ -111,7 +112,9 @@ public class DeploymentAgent implements DeploymentAgentService {
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        this.sslManagerService = null;
+        if (sslManagerService == this.sslManagerService) {
+            this.sslManagerService = null;
+        }
     }
 
     protected void activate(ComponentContext componentContext) {

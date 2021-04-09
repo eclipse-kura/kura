@@ -18,22 +18,25 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStore.Entry;
-import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -41,6 +44,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -340,22 +344,23 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         if (isNull(this.keystoreService)) {
             throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR); // TO DO:review
         }
-        return this.keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm()).toArray(new KeyManager[0]); // TO DO:
-                                                                                                                      // it
-                                                                                                                      // was
-                                                                                                                      // possible
-                                                                                                                      // to
-                                                                                                                      // load
-                                                                                                                      // a
-                                                                                                                      // keystore
-                                                                                                                      // based
-                                                                                                                      // on
-                                                                                                                      // Alias.
-                                                                                                                      // Now
-                                                                                                                      // it
-                                                                                                                      // is
-                                                                                                                   // not
-                                                                                                                      // possible.
+        return this.keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm()).toArray(new KeyManager[0]); // TO
+                                                                                                                        // DO:
+                                                                                                                        // it
+                                                                                                                        // was
+                                                                                                                        // possible
+                                                                                                                        // to
+                                                                                                                        // load
+                                                                                                                        // a
+                                                                                                                        // keystore
+                                                                                                                        // based
+                                                                                                                        // on
+                                                                                                                        // Alias.
+                                                                                                                        // Now
+                                                                                                                        // it
+                                                                                                                        // is
+        // not
+        // possible.
     }
 
     private KeyManager[] getKeyManagers(String keyStore, char[] keyStorePassword, String keyAlias)
@@ -366,11 +371,15 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, keyStorePassword);
 
-        return kmf.getKeyManagers();
+        final List<KeyManager> matching = Arrays.stream(kmf.getKeyManagers())
+                .filter(m -> m instanceof X509KeyManager && ((X509KeyManager) m).getCertificateChain(keyAlias) != null)
+                .map(k -> new SingleAliasX509KeyManager(keyAlias, (X509KeyManager) k)).collect(Collectors.toList());
+
+        return matching.toArray(new KeyManager[matching.size()]);
     }
 
-    private KeyStore getKeyStore(String keyStore, char[] keyStorePassword, String keyAlias) throws KeyStoreException,
-            IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
+    private KeyStore getKeyStore(String keyStore, char[] keyStorePassword, String keyAlias)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
 
         // Load the configured the Key Store
         File fKeyStore = new File(keyStore);
@@ -385,11 +394,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             // if we have an alias, then build KeyStore with such key
             if (ks.containsAlias(keyAlias) && ks.isKeyEntry(keyAlias)) {
-                PasswordProtection pp = new PasswordProtection(keyStorePassword);
-                Entry entry = ks.getEntry(keyAlias, pp);
-                ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                ks.load(null, null);
-                ks.setEntry(keyAlias, entry, pp);
+                return ks;
             }
 
             return ks;
@@ -402,6 +407,53 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    private class SingleAliasX509KeyManager implements X509KeyManager {
+
+        private final String alias;
+        private final X509KeyManager wrapped;
+
+        public SingleAliasX509KeyManager(final String alias, final X509KeyManager wrapped) {
+            this.alias = alias;
+            this.wrapped = wrapped;
+        }
+
+        @Override
+        public String[] getClientAliases(String keyType, Principal[] issuers) {
+            return new String[] { alias };
+        }
+
+        @Override
+        public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
+            return alias;
+        }
+
+        @Override
+        public String[] getServerAliases(String keyType, Principal[] issuers) {
+            return new String[] { alias };
+        }
+
+        @Override
+        public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
+            return alias;
+        }
+
+        @Override
+        public X509Certificate[] getCertificateChain(String alias) {
+            if (this.alias.equals(alias)) {
+                return wrapped.getCertificateChain(alias);
+            }
+            return null;
+        }
+
+        @Override
+        public PrivateKey getPrivateKey(String alias) {
+            if (this.alias.equals(alias)) {
+                return wrapped.getPrivateKey(alias);
+            }
+            return null;
         }
     }
 

@@ -55,7 +55,7 @@
 
     </OCD>
 
-    <Designate pid="org.eclipse.kura.ssl.SslManagerService">
+    <Designate factoryPid="org.eclipse.kura.ssl.SslManagerService">
         <Object ocdref="org.eclipse.kura.ssl.SslManagerService"/>
     </Designate>
 </MetaData>

@@ -42,7 +42,7 @@ public class KeystoreServiceOptions {
     private final boolean randomPassword;
 
     public KeystoreServiceOptions(Map<String, Object> properties, final CryptoService cryptoService) {
-        if (isNull(properties)) {
+        if (isNull(properties) || isNull(cryptoService)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
 

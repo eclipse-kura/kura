@@ -27,11 +27,8 @@ import javax.net.ssl.KeyManager;
 import org.eclipse.equinox.http.jetty.JettyConfigurator;
 import org.eclipse.equinox.http.jetty.JettyConstants;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.system.SystemService;
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,23 +40,11 @@ public class HttpService implements ConfigurableComponent {
 
     private HttpServiceOptions options;
 
-    private CryptoService cryptoService;
     private SystemService systemService;
-    private ConfigurationService configurationService;
-
-    private ComponentContext componentContext;
 
     private Hashtable<String, Object> jettyConfig;
 
     private KeystoreService keystoreService;
-
-    public void setCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
-    }
-
-    public void unsetCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
-    }
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
@@ -67,14 +52,6 @@ public class HttpService implements ConfigurableComponent {
 
     public void unsetSystemService(SystemService systemService) {
         this.systemService = null;
-    }
-
-    public void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
     }
 
     public void setKeystoreService(KeystoreService keystoreService) {
@@ -97,10 +74,8 @@ public class HttpService implements ConfigurableComponent {
         }
     }
 
-    public void activate(ComponentContext context, Map<String, Object> properties) {
+    public void activate(Map<String, Object> properties) {
         logger.info("Activating {}", this.getClass().getSimpleName());
-
-        this.componentContext = componentContext;
 
         this.options = new HttpServiceOptions(properties, this.systemService.getKuraHome());
 

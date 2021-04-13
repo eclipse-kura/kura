@@ -30,7 +30,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
-import org.eclipse.kura.core.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
@@ -99,12 +98,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
     private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
-
-    private static final String SSL_PROTOCOL = SslManagerServiceOptions.PROP_PROTOCOL;
-    private static final String SSL_CIPHERS = SslManagerServiceOptions.PROP_CIPHERS;
-    private static final String SSL_HN_VERIFY = SslManagerServiceOptions.PROP_HN_VERIFY;
-    private static final String SSL_CERT_ALIAS = "ssl.certificate.alias";
-    private static final String SSL_DEFAULT_HN_VERIFY = "use-ssl-service-config";
 
     private SystemService systemService;
     private SslManagerService sslManagerService;
@@ -819,22 +812,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // SSL
         if (brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss")) {
             try {
-                String alias = (String) this.properties.get(SSL_CERT_ALIAS);
-                if (alias == null || "".equals(alias.trim())) {
-                    alias = this.topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
-                }
-
-                String protocol = (String) this.properties.get(SSL_PROTOCOL);
-                String ciphers = (String) this.properties.get(SSL_CIPHERS);
-                String hnVerification = (String) this.properties.get(SSL_HN_VERIFY);
-
-                SSLSocketFactory ssf;
-                if (SSL_DEFAULT_HN_VERIFY.equals(hnVerification)) {
-                    ssf = this.sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias);
-                } else {
-                    ssf = this.sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias,
-                            Boolean.valueOf(hnVerification));
-                }
+                SSLSocketFactory ssf = this.sslManagerService.getSSLSocketFactory();
 
                 conOpt.setSocketFactory(ssf);
             } catch (Exception e) {

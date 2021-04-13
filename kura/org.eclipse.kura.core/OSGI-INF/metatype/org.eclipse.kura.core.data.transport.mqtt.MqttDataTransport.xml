@@ -151,42 +151,6 @@
             default="(kura.service.pid=org.eclipse.kura.ssl.SslManagerService)"
             description="Specifies, as an OSGi target filter, the pid of the SslManagerService used to create SSL connections."/>
         
-        <AD id="ssl.default.protocol"
-            name="SSL Default Protocol"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="The protocol to use to initialize the SSLContext. If not specified, the protocol specified in the SslManagerService will be used."/>
-                        
-        <AD id="ssl.hostname.verification"
-            name="SSL Hostname Verification"
-            type="String"
-            cardinality="0"
-            required="true"
-            default="use-ssl-service-config"
-            description="Enable or disable hostname verification.">
-        	<Option label="Rely on SSL Manager Service configuration" value="use-ssl-service-config" />
-        	<Option label="True" value="true" />
-        	<Option label="False" value="false" />
-        </AD>
-        
-        <AD id="ssl.default.cipherSuites"
-            name="SSL Default Cipher Suites"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="Comma-separated list of allosed ciphers. If not specified, the SslManagerService configuration will be used."/>
-            
-        <AD id="ssl.certificate.alias"
-            name="SSL Certificate Alias"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="The alias to use. If not specified, the value in topic.context.account-name will be used."/>
-        
         </OCD>
     <Designate pid = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport" factoryPid = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
         <Object ocdref="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport"/>

@@ -26,10 +26,10 @@
         <b:Column size="MD12">
             <b:Row>
                 <g:HTMLPanel>
-                    <b.html:Paragraph text="{msgs.securitySslManagerServicesIntro}" />
+                    <b.html:Paragraph ui:field="introParagraph" />
                 </g:HTMLPanel>
             </b:Row>
-            <b:Row b:id="driversAndAssetsIntro">
+            <b:Row>
                 <b:ButtonGroup size="SMALL">
                     <b:Button icon="PLUS" ui:field="newServiceButton" text="{msgs.newButton}" enabled="true" />
                     <b:Button icon="TRASH" ui:field="deleteButton" text="{msgs.delete}" enabled="false" />
@@ -37,33 +37,33 @@
             </b:Row>
            
 			<b:Panel>
-		        <b:Row b:id="sslManagerServicesTable">
-		            <g:Label ui:field="emptyListLabel" text="{msgs.securityNoSslManagerServices}"/>
+		        <b:Row>
+		            <g:Label ui:field="emptyListLabel"/>
 		            <gwt:CellTable bordered="true" condensed="true" striped="true" hover="true" height="100%" width="100%"
-		                ui:field="sslManagerServicesListTable" />
+		                ui:field="table" />
 		        </b:Row>
 		        <b:Panel ui:field="configurationArea">
 		            <b:PanelHeader ui:field="contentPanelHeader"/>
-		            <b:Panel ui:field="sslManagerServicesMgmtPanel" />
+		            <b:Panel ui:field="mgmtPanel" />
 		        </b:Panel>
 		    </b:Panel>
 
 
             <b:Modal closable="false" fade="true" dataBackdrop="STATIC"
-             dataKeyboard="true" ui:field="newServiceModal" title="{msgs.securityNewSslManagerService}" b:id="newServiceModal">
+             dataKeyboard="true" ui:field="newServiceModal">
                 <b:ModalBody>
-                    <b.html:Paragraph text="{msgs.securityNewSslManagerServiceIntro}" />
+                    <b.html:Paragraph ui:field="newServiceModalIntro" />
                     <b:Form type="HORIZONTAL">
                         <b:FieldSet>
                             <b:FormGroup>
-                                <b:FormLabel for="sslManagerServiceFactoriesList" text="{msgs.securitySslManagerServiceFactory}" />
+                                <b:FormLabel ui:field="factoriesListLabel" text="{msgs.factoryPidLabel}" />
                                 <b:InlineHelpBlock iconType="EXCLAMATION_TRIANGLE" />
-                                <b:ListBox b:id="sslManagerServiceFactoriesList" ui:field="sslManagerServiceFactoriesList" />
+                                <b:ListBox ui:field="factoriesList" />
                             </b:FormGroup>
                             <b:FormGroup>
-                                <b:FormLabel for="serviceName" text="{msgs.securitySslManagerServiceName}" />
+                                <b:FormLabel ui:field="serviceNameLabel" text="{msgs.servicePidLabel}" />
                                 <b:HelpBlock iconType="EXCLAMATION_TRIANGLE" />
-                                <kura.util:PidTextBox b:id="serviceName" ui:field="serviceName"
+                                <kura.util:PidTextBox ui:field="serviceName"
                                     autoComplete="false" validateOnBlur="true" />
                             </b:FormGroup>
                         </b:FieldSet>
@@ -77,7 +77,7 @@
                 </b:ModalFooter>
             </b:Modal>
 
-            <kura:AlertDialog ui:field="confirmDialog" b:id="drivers-assets-confirm-dialog" />
+            <kura:AlertDialog ui:field="confirmDialog" />
         </b:Column>
     </b:Container>
 </ui:UiBinder>

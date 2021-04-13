@@ -24,21 +24,29 @@ import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
+import org.eclipse.kura.web.client.ui.RestrictedComponentServiceUi;
 import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.ui.ServicesUi.ValidationResult;
 import org.eclipse.kura.web.client.ui.ServicesUi.Validator;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.KuraPermission;
+import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtUserData;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtKeystoreService;
+import org.eclipse.kura.web.shared.service.GwtKeystoreServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSslManagerService;
+import org.eclipse.kura.web.shared.service.GwtSslManagerServiceAsync;
 import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.NavTabs;
@@ -52,6 +60,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.IndexedPanel;
@@ -74,7 +83,9 @@ public class SecurityPanelUi extends Composite {
     @UiField
     CertificateListTabUi certificateListPanel;
     @UiField
-    SslManagerServicesUi sslPanel;
+    RestrictedComponentServiceUi sslPanel;
+    @UiField
+    RestrictedComponentServiceUi keystorePanel;
     @UiField
     TabPane httpServicePanel;
     @UiField
@@ -90,6 +101,8 @@ public class SecurityPanelUi extends Composite {
     TabListItem certificateList;
     @UiField
     TabListItem ssl;
+    @UiField
+    TabListItem keystore;
     @UiField
     TabListItem httpService;
     @UiField
@@ -128,7 +141,13 @@ public class SecurityPanelUi extends Composite {
         if (hasAdminPermission) {
 
             this.certificateList.setVisible(true);
+
             this.ssl.setVisible(true);
+            this.sslPanel.setBackend(new SslManagerServiceWrapper());
+
+            this.keystore.setVisible(true);
+            this.keystorePanel.setBackend(new KeystoreWrapper());
+
             this.httpService.setVisible(true);
             this.console.setVisible(true);
             this.security.setVisible(capabilities.isSecurityServiceAvailable());
@@ -136,6 +155,7 @@ public class SecurityPanelUi extends Composite {
 
             this.certificateList.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.certificateListPanel)));
             this.ssl.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.sslPanel)));
+            this.keystore.addClickHandler(addDirtyCheck(new Tab.RefreshHandler(this.keystorePanel)));
             this.httpService.addClickHandler(
                     addDirtyCheck(e -> this.loadServiceConfig("org.eclipse.kura.http.server.manager.HttpService", //
                             httpServicePanel, //
@@ -202,13 +222,14 @@ public class SecurityPanelUi extends Composite {
     public boolean isDirty() {
         boolean certListDirty = this.certificateListPanel.isDirty();
         boolean sslConfigDirty = this.sslPanel.isDirty();
+        boolean keystoreConfigDirty = this.keystorePanel.isDirty();
         boolean securityDirty = this.securityPanel.isDirty();
         boolean threatManagerDirty = this.threatManagerPanel.isDirty();
         boolean webConsoleDirty = isServicesUiDirty(this.consolePanel);
         boolean httpServiceDirty = isServicesUiDirty(this.httpServicePanel);
 
-        return certListDirty || sslConfigDirty || threatManagerDirty || securityDirty || webConsoleDirty
-                || httpServiceDirty;
+        return certListDirty || sslConfigDirty || keystoreConfigDirty || threatManagerDirty || securityDirty
+                || webConsoleDirty || httpServiceDirty;
     }
 
     public void addTab(final String name, final WidgetFactory widgetFactory) {
@@ -231,6 +252,7 @@ public class SecurityPanelUi extends Composite {
     public void setDirty(boolean b) {
         this.certificateListPanel.setDirty(b);
         this.sslPanel.setDirty(b);
+        this.keystorePanel.setDirty(b);
         this.securityPanel.setDirty(b);
         this.threatManagerPanel.setDirty(b);
         getServicesUi(this.httpServicePanel).ifPresent(u -> u.setDirty(b));
@@ -358,5 +380,79 @@ public class SecurityPanelUi extends Composite {
 
     public boolean isServicesUiDirty(final IndexedPanel parent) {
         return getServicesUi(parent).map(ServicesUi::isDirty).orElse(false);
+    }
+
+    private static class SslManagerServiceWrapper implements GwtRestrictedComponentServiceAsync {
+
+        private static GwtSslManagerServiceAsync wrapped = GWT.create(GwtSslManagerService.class);
+
+        @Override
+        public void listFactoryPids(AsyncCallback<Set<String>> callback) {
+            wrapped.listFactoryPids(callback);
+        }
+
+        @Override
+        public void listServiceInstances(AsyncCallback<List<GwtComponentInstanceInfo>> callback) {
+            wrapped.listServiceInstances(callback);
+        }
+
+        @Override
+        public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid,
+                AsyncCallback<Void> callback) {
+            wrapped.createFactoryConfiguration(token, pid, factoryPid, callback);
+        }
+
+        @Override
+        public void getConfiguration(GwtXSRFToken token, String pid, AsyncCallback<GwtConfigComponent> callback) {
+            wrapped.getConfiguration(token, pid, callback);
+        }
+
+        @Override
+        public void updateConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                AsyncCallback<Void> callback) {
+            wrapped.updateConfiguration(token, component, callback);
+        }
+
+        @Override
+        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
+            wrapped.deleteFactoryConfiguration(token, pid, callback);
+        }
+    }
+
+    private static class KeystoreWrapper implements GwtRestrictedComponentServiceAsync {
+
+        private static GwtKeystoreServiceAsync wrapped = GWT.create(GwtKeystoreService.class);
+
+        @Override
+        public void listFactoryPids(AsyncCallback<Set<String>> callback) {
+            wrapped.listFactoryPids(callback);
+        }
+
+        @Override
+        public void listServiceInstances(AsyncCallback<List<GwtComponentInstanceInfo>> callback) {
+            wrapped.listServiceInstances(callback);
+        }
+
+        @Override
+        public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid,
+                AsyncCallback<Void> callback) {
+            wrapped.createFactoryConfiguration(token, pid, factoryPid, callback);
+        }
+
+        @Override
+        public void getConfiguration(GwtXSRFToken token, String pid, AsyncCallback<GwtConfigComponent> callback) {
+            wrapped.getConfiguration(token, pid, callback);
+        }
+
+        @Override
+        public void updateConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                AsyncCallback<Void> callback) {
+            wrapped.updateConfiguration(token, component, callback);
+        }
+
+        @Override
+        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
+            wrapped.deleteFactoryConfiguration(token, pid, callback);
+        }
     }
 }

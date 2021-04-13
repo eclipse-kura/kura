@@ -25,4 +25,6 @@
            unbind="unsetKeystoreService"
            cardinality="0..1"
            interface="org.eclipse.kura.security.keystore.KeystoreService"/>
+   <property name="kura.ui.factory.hide" type="String" value="true"/>
+   <property name="kura.ui.service.hide" type="String" value="true"/>
 </scr:component>

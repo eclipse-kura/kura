@@ -47,6 +47,7 @@ import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
 import org.eclipse.kura.web.server.GwtDriverAndAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
 import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
+import org.eclipse.kura.web.server.GwtKeystoreServiceImpl;
 import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
@@ -307,6 +308,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.unregister(DENALI_MODULE_PATH + "/assetservices");
         this.httpService.unregister(DENALI_MODULE_PATH + "/extension");
         this.httpService.unregister(DENALI_MODULE_PATH + "/ssl");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/keystore");
         this.httpService.unregister(LOGIN_MODULE_PATH + "/extension");
         this.wiresBlinkService.stop();
         this.httpService.unregister(ADMIN_ROOT + "/sse");
@@ -414,6 +416,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 new GwtPasswordAuthenticationServiceImpl(this.userManager, CONSOLE_PATH), null, this.sessionContext);
         this.httpService.registerServlet(CERT_AUTH_PATH, new SslAuthenticationServlet(CONSOLE_PATH, this.userManager),
                 null, this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/keystore", new GwtKeystoreServiceImpl(), null,
+                this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/ssl", new GwtSslManagerServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,

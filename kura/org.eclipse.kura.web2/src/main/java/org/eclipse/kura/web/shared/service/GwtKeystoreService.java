@@ -22,18 +22,18 @@ import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RequiredPermissions(KuraPermission.ADMIN)
-@RemoteServiceRelativePath("ssl")
-public interface GwtSslManagerService extends GwtRestrictedComponentService {
+@RemoteServiceRelativePath("keystore")
+public interface GwtKeystoreService extends GwtRestrictedComponentService {
 
-    @Audit(componentName = "UI SslManagerService", description = "Create configuration")
+    @Audit(componentName = "UI KeystoreService", description = "Create configuration")
     public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid) throws GwtKuraException;
 
-    @Audit(componentName = "UI SslManagerService", description = "Get configuration")
+    @Audit(componentName = "UI KeystoreService", description = "Get configuration")
     public GwtConfigComponent getConfiguration(GwtXSRFToken token, String pid) throws GwtKuraException;
 
-    @Audit(componentName = "UI SslManagerService", description = "Update configuration")
+    @Audit(componentName = "UI KeystoreService", description = "Update configuration")
     public void updateConfiguration(GwtXSRFToken token, GwtConfigComponent component) throws GwtKuraException;
 
-    @Audit(componentName = "UI SslManagerService", description = "Remove configuration")
+    @Audit(componentName = "UI KeystoreService", description = "Remove configuration")
     public void deleteFactoryConfiguration(GwtXSRFToken token, String pid) throws GwtKuraException;
 }

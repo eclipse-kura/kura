@@ -10,55 +10,57 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.security;
+package org.eclipse.kura.web.client.ui;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
-import org.eclipse.kura.web.client.ui.ServicesUi;
-import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtSslManagerService;
-import org.eclipse.kura.web.shared.service.GwtSslManagerServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.html.Paragraph;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
-public class SslManagerServicesUi extends Composite implements Tab {
+public class RestrictedComponentServiceUi extends Composite implements Tab {
 
-    private static SslManagerServicesUiUiBinder uiBinder = GWT.create(SslManagerServicesUiUiBinder.class);
+    private static RestrictedComponentServiceUiUiBinder uiBinder = GWT
+            .create(RestrictedComponentServiceUiUiBinder.class);
 
-    interface SslManagerServicesUiUiBinder extends UiBinder<Widget, SslManagerServicesUi> {
+    interface RestrictedComponentServiceUiUiBinder extends UiBinder<Widget, RestrictedComponentServiceUi> {
     }
 
     private final GwtSecurityTokenServiceAsync gwtSecurityTokenService = GWT.create(GwtSecurityTokenService.class);
-    private final GwtSslManagerServiceAsync gwtSslServiceAsync = GWT.create(GwtSslManagerService.class);
     private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
     private static final Messages MSGS = GWT.create(Messages.class);
+    private GwtRestrictedComponentServiceAsync backend;
 
     @UiField
     Button newServiceButton;
@@ -68,7 +70,7 @@ public class SslManagerServicesUi extends Composite implements Tab {
     @UiField
     Modal newServiceModal;
     @UiField
-    ListBox sslManagerServiceFactoriesList;
+    ListBox factoriesList;
     @UiField
     PidTextBox serviceName;
     @UiField
@@ -81,7 +83,7 @@ public class SslManagerServicesUi extends Composite implements Tab {
     @UiField
     PanelHeader contentPanelHeader;
     @UiField
-    Panel sslManagerServicesMgmtPanel;
+    Panel mgmtPanel;
 
     @UiField
     AlertDialog confirmDialog;
@@ -89,7 +91,17 @@ public class SslManagerServicesUi extends Composite implements Tab {
     @UiField
     Label emptyListLabel;
     @UiField
-    CellTable<GwtComponentInstanceInfo> sslManagerServicesListTable;
+    CellTable<GwtComponentInstanceInfo> table;
+
+    @UiField
+    Paragraph introParagraph;
+    @UiField
+    Paragraph newServiceModalIntro;
+
+    @UiField
+    FormLabel factoriesListLabel;
+    @UiField
+    FormLabel serviceNameLabel;
 
     private Optional<GwtComponentInstanceInfo> lastSelectedObject = Optional.empty();
 
@@ -98,7 +110,7 @@ public class SslManagerServicesUi extends Composite implements Tab {
 
     private Set<String> allTrackedPids;
 
-    public SslManagerServicesUi() {
+    public RestrictedComponentServiceUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
         initTable();
@@ -106,15 +118,45 @@ public class SslManagerServicesUi extends Composite implements Tab {
         initNewServiceModal();
     }
 
+    public void setBackend(final GwtRestrictedComponentServiceAsync backend) {
+        this.backend = backend;
+    }
+
+    public void setIntro(final String intro) {
+        introParagraph.setText(intro);
+    }
+
+    public void setEmptyLabelText(final String text) {
+        this.emptyListLabel.setText(text);
+    }
+
+    public void setNewServiceModalTitle(final String title) {
+        this.newServiceModal.setTitle(title);
+    }
+
+    public void setNewServiceModalIntro(final String intro) {
+        this.newServiceModalIntro.setText(intro);
+    }
+
+    public void setIds(final String id) {
+        this.factoriesListLabel.setFor(id + "FactoriesList");
+        this.factoriesList.setId(id + "FactoriesList");
+
+        this.serviceNameLabel.setFor(id + "ServiceName");
+        this.serviceName.setId(id + "ServiceName");
+
+        this.confirmDialog.setId(id + "ConfirmDialog");
+    }
+
     @Override
     public void refresh() {
         clear();
 
-        RequestQueue.submit(c -> this.gwtSslServiceAsync.listSslManagerServiceInstances(c.callback(result -> {
+        RequestQueue.submit(c -> this.backend.listServiceInstances(c.callback(result -> {
 
             this.dataProvider.getList().addAll(result);
             this.emptyListLabel.setVisible(result.isEmpty());
-            this.sslManagerServicesListTable.setVisible(!result.isEmpty());
+            this.table.setVisible(!result.isEmpty());
 
         })));
 
@@ -122,11 +164,11 @@ public class SslManagerServicesUi extends Composite implements Tab {
                 c -> this.gwtSecurityTokenService.generateSecurityToken(c.callback(token -> this.gwtComponentService
                         .findTrackedPids(token, c.callback(pids -> this.allTrackedPids = new HashSet<>(pids))))));
 
-        RequestQueue.submit(c -> this.gwtSslServiceAsync.listSslManagerServiceFactoryPids(c.callback(result -> {
-            this.sslManagerServiceFactoriesList.clear();
+        RequestQueue.submit(c -> this.backend.listFactoryPids(c.callback(result -> {
+            this.factoriesList.clear();
 
             for (final String factoryPid : result) {
-                this.sslManagerServiceFactoriesList.addItem(factoryPid);
+                this.factoriesList.addItem(factoryPid);
             }
         })));
     }
@@ -139,7 +181,7 @@ public class SslManagerServicesUi extends Composite implements Tab {
                 return object.getPid();
             }
         };
-        this.sslManagerServicesListTable.addColumn(col1, MSGS.servicePidLabel());
+        this.table.addColumn(col1, MSGS.servicePidLabel());
 
         TextColumn<GwtComponentInstanceInfo> col2 = new TextColumn<GwtComponentInstanceInfo>() {
 
@@ -148,7 +190,7 @@ public class SslManagerServicesUi extends Composite implements Tab {
                 return object.getFactoryPid().orElse("Singleton Component");
             }
         };
-        this.sslManagerServicesListTable.addColumn(col2, MSGS.factoryPidLabel());
+        this.table.addColumn(col2, MSGS.factoryPidLabel());
 
         this.selectionModel.addSelectionChangeHandler(e -> {
 
@@ -177,8 +219,8 @@ public class SslManagerServicesUi extends Composite implements Tab {
             updateSelection();
         });
 
-        this.dataProvider.addDataDisplay(this.sslManagerServicesListTable);
-        this.sslManagerServicesListTable.setSelectionModel(this.selectionModel);
+        this.dataProvider.addDataDisplay(this.table);
+        this.table.setSelectionModel(this.selectionModel);
     }
 
     private void updateSelection() {
@@ -186,21 +228,39 @@ public class SslManagerServicesUi extends Composite implements Tab {
 
         this.deleteButton.setEnabled(selected != null && selected.getFactoryPid().isPresent());
 
-        this.sslManagerServicesMgmtPanel.clear();
+        this.mgmtPanel.clear();
+        this.configurationArea.setVisible(selected != null);
 
         if (selected != null) {
-            RequestQueue.submit(
-                    c -> this.gwtSecurityTokenService.generateSecurityToken(c.callback(token -> this.gwtSslServiceAsync
-                            .getSslManagerServiceConfiguration(token, selected.getPid(), c.callback(result -> {
-                                this.contentPanelHeader.setText(
-                                        selected.getPid() + selected.getFactoryPid().map(p -> " - " + p).orElse(""));
+            RequestQueue.submit(c -> this.gwtSecurityTokenService.generateSecurityToken(
+                    c.callback(token -> this.backend.getConfiguration(token, selected.getPid(), c.callback(result -> {
+                        this.contentPanelHeader
+                                .setText(selected.getPid() + selected.getFactoryPid().map(p -> " - " + p).orElse(""));
 
-                                final ServicesUi servicesUi = new ServicesUi(result);
+                        final ServicesUi servicesUi = new ServicesUi(result);
+                        servicesUi.setBackend(new ServicesUi.Backend() {
 
-                                servicesUi.setDeleteButtonVisible(false);
+                            @Override
+                            public void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                                    AsyncCallback<Void> callback) {
+                                RestrictedComponentServiceUi.this.backend.updateConfiguration(token, component,
+                                        callback);
 
-                                this.sslManagerServicesMgmtPanel.add(servicesUi);
-                            })))));
+                            }
+
+                            @Override
+                            public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
+                                    AsyncCallback<Void> callback) {
+                                RestrictedComponentServiceUi.this.backend.deleteFactoryConfiguration(token, pid,
+                                        callback);
+                            }
+                        });
+
+                        servicesUi.setDeleteButtonVisible(false);
+
+                        this.mgmtPanel.add(servicesUi);
+                        this.configurationArea.setVisible(true);
+                    })))));
         }
 
         this.deleteButton.setEnabled(selected != null);
@@ -236,17 +296,16 @@ public class SslManagerServicesUi extends Composite implements Tab {
     }
 
     private void deleteService(final String pid) {
-        RequestQueue.submit(
-                c -> this.gwtSecurityTokenService.generateSecurityToken(c.callback(token -> this.gwtSslServiceAsync
-                        .deleteSslManagerService(token, pid, c.callback(ok -> this.refresh())))));
+        RequestQueue.submit(c -> this.gwtSecurityTokenService.generateSecurityToken(c.callback(
+                token -> this.backend.deleteFactoryConfiguration(token, pid, c.callback(ok -> this.refresh())))));
     }
 
     private Optional<ServicesUi> getConfigurationUi() {
-        if (this.sslManagerServicesMgmtPanel.getWidgetCount() == 0) {
+        if (this.mgmtPanel.getWidgetCount() == 0) {
             return Optional.empty();
         }
 
-        return Optional.of((ServicesUi) this.sslManagerServicesMgmtPanel.getWidget(0));
+        return Optional.of((ServicesUi) this.mgmtPanel.getWidget(0));
     }
 
     private void initNewServiceModal() {
@@ -259,7 +318,7 @@ public class SslManagerServicesUi extends Composite implements Tab {
                 return;
             }
 
-            final String factoryPid = this.sslManagerServiceFactoriesList.getSelectedValue();
+            final String factoryPid = this.factoriesList.getSelectedValue();
 
             if (factoryPid == null) {
                 return;
@@ -273,9 +332,8 @@ public class SslManagerServicesUi extends Composite implements Tab {
 
             this.newServiceModal.hide();
 
-            RequestQueue.submit(c -> this.gwtSecurityTokenService.generateSecurityToken(
-                    c.callback(token -> this.gwtSslServiceAsync.createSslManagerServiceFactoryConfiguration(token, pid,
-                            factoryPid, c.callback(ok -> this.refresh())))));
+            RequestQueue.submit(c -> this.gwtSecurityTokenService.generateSecurityToken(c.callback(token -> this.backend
+                    .createFactoryConfiguration(token, pid, factoryPid, c.callback(ok -> this.refresh())))));
         });
     }
 
@@ -295,9 +353,10 @@ public class SslManagerServicesUi extends Composite implements Tab {
         this.dataProvider.getList().clear();
         this.selectionModel.clear();
         this.lastSelectedObject = Optional.empty();
-        this.sslManagerServicesMgmtPanel.clear();
+        this.mgmtPanel.clear();
+        this.configurationArea.setVisible(false);
         this.emptyListLabel.setVisible(true);
-        this.sslManagerServicesListTable.setVisible(false);
+        this.table.setVisible(false);
         this.contentPanelHeader.setText("");
         this.deleteButton.setEnabled(false);
     }

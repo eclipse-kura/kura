@@ -148,15 +148,13 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return getSSLContext(protocol, ciphers, null, null, null, keyAlias, hostnameVerifcation);
     }
 
-    @Override
-    public SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
+    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
             char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException {
         return getSSLContext(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias,
                 this.options.isSslHostnameVerification());
     }
 
-    @Override
-    public SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
+    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
             char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
             throws GeneralSecurityException, IOException {
         ConnectionSslOptions connSslOpts = new ConnectionSslOptions(this.options);

@@ -34,7 +34,7 @@ public class KeystoreServiceOptionsTest {
     public void testNullPropertiesCrypto() {
         new KeystoreServiceOptions(null, null);
     }
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testNullCrypto() {
         Map<String, Object> properties = new HashMap<>();
@@ -44,7 +44,7 @@ public class KeystoreServiceOptionsTest {
     @Test
     public void testConstructorMissingProps() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
-        
+
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes(CHANGEIT_PASSWORD.toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn(CHANGEIT_PASSWORD.toCharArray());
@@ -60,7 +60,7 @@ public class KeystoreServiceOptionsTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("keystore.path", "/abc");
         properties.put("keystore.password", "testPassword");
-        
+
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes("testPassword".toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn("testPassword".toCharArray());
@@ -77,7 +77,7 @@ public class KeystoreServiceOptionsTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("keystore.path", "/abc");
         properties.put("keystore.password", "testPassword");
-        
+
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes("testPassword".toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn("testPassword".toCharArray());
@@ -94,7 +94,7 @@ public class KeystoreServiceOptionsTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("keystore.path", "/abc");
         properties.put("keystore.password", "testPassword");
-        
+
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes("testPassword".toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.encryptAes("testPassword1".toCharArray())).thenReturn("encrypted1".toCharArray());

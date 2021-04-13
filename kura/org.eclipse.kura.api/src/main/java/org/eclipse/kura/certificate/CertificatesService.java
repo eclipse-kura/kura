@@ -15,7 +15,6 @@ package org.eclipse.kura.certificate;
 import java.security.cert.Certificate;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.message.KuraApplicationTopic;
@@ -133,27 +132,6 @@ public interface CertificatesService {
     public boolean verifySignature(KuraApplicationTopic kuraAppTopic, KuraPayload kuraPayload);
 
     /**
-     * 
-     * @return
-     * @throws KuraException
-     * 
-     * @since 2.2
-     */
-    public Set<CertificateInfo> listStoredCertificates() throws KuraException;
-
-    /**
-     * 
-     * @param alias
-     * @param privateKey
-     * @param password
-     * @param publicCerts
-     * @throws KuraException
-     * 
-     * @since 2.2
-     */
-    public void addPrivateKey(KuraPrivateKey privateKey) throws KuraException;
-
-    /**
      * Return the list of the installed {@KuraCertificate}
      * 
      * @return a list of {@KuraCertificate}
@@ -161,7 +139,7 @@ public interface CertificatesService {
      * 
      * @since 2.2
      */
-    public List<KuraCertificate> getCertificates() throws KuraException;
+    public List<KuraCertificateEntry> getCertificates() throws KuraException;
 
     /**
      * Return the {@KuraCertificate} identified by its id
@@ -173,7 +151,7 @@ public interface CertificatesService {
      * 
      * @since 2.2
      */
-    public KuraCertificate getCertificate(String id) throws KuraException;
+    public KuraCertificateEntry getCertificateEntry(String id) throws KuraException;
 
     /**
      * Update the {@KuraCertificate} in a keystore
@@ -186,7 +164,7 @@ public interface CertificatesService {
      * 
      * @since 2.2
      */
-    public void updateCertificate(KuraCertificate certificate) throws KuraException;
+    public void updateCertificate(KuraCertificateEntry certificate) throws KuraException;
 
     /**
      * Add a {@KuraCertificate} in a keystore
@@ -197,7 +175,7 @@ public interface CertificatesService {
      * 
      * @since 2.2
      */
-    public void addCertificate(KuraCertificate certificate) throws KuraException;
+    public void addCertificate(KuraCertificateEntry certificate) throws KuraException;
 
     /**
      * Delete the certificate identified by its id

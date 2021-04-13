@@ -27,7 +27,9 @@ import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PasswordProtection;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.ProtectionParameter;
+import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -205,7 +207,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
         KeyStore keystore = loadKeystore(location, oldPassword);
 
-        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
+        updateKeyEntriesPasswords(keystore, oldPassword, newPassword);
         saveKeystore(location, newPassword, keystore);
     }
 
@@ -291,7 +293,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
 
         KeyStore keystore = getKeyStore();
 
-        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
+        updateKeyEntriesPasswords(keystore, oldPassword, newPassword);
         saveKeystore(keystore, newPassword);
     }
 
@@ -313,7 +315,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         }
     }
 
-    private static void updateKeyEntiesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
+    private static void updateKeyEntriesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
         Enumeration<String> aliases = keystore.aliases();
         while (aliases.hasMoreElements()) {
@@ -347,9 +349,12 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         }
         KeyStore ks = getKeyStore();
 
-        return ks.getEntry(alias,
-                new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword(cryptoService)));
-
+        if (ks.entryInstanceOf(alias, PrivateKeyEntry.class) || ks.entryInstanceOf(alias, SecretKeyEntry.class)) {
+            return ks.getEntry(alias,
+                    new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword(cryptoService)));
+        } else {
+            return ks.getEntry(alias, null);
+        }
     }
 
     @Override

@@ -12,28 +12,36 @@
  ******************************************************************************/
 package org.eclipse.kura.certificate;
 
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.Certificate;
-import java.util.Optional;
 
 /**
  * 
- * The KuraCertificate represents a {@java.security.cert.Certificate} stored in a keystore.
- * The certificate is identified by an id made with the id of the keystore and the alias.
+ * The KuraCertificateEntry represents a {@java.security.KeyStore.TrustedCertificateEntry} stored in a keystore.
+ * The entry is identified by an id made with the id of the keystore and the alias.
  *
  * @since 2.2
  */
-public class KuraCertificate {
+public class KuraCertificateEntry {
 
     private String certificateId;
     private String keystoreId;
     private String alias;
-    private Optional<Certificate> certificate;
+    private TrustedCertificateEntry certificateEntry;
 
-    public KuraCertificate(String keystoreId, String alias, Certificate certificate) {
+    public KuraCertificateEntry(String keystoreId, String alias, Certificate certificate) {
         super();
         this.keystoreId = keystoreId;
         this.alias = alias;
-        this.certificate = Optional.of(certificate);
+        this.certificateEntry = new TrustedCertificateEntry(certificate);
+        this.certificateId = keystoreId + ":" + alias;
+    }
+
+    public KuraCertificateEntry(String keystoreId, String alias, TrustedCertificateEntry entry) {
+        super();
+        this.keystoreId = keystoreId;
+        this.alias = alias;
+        this.certificateEntry = entry;
         this.certificateId = keystoreId + ":" + alias;
     }
 
@@ -49,8 +57,8 @@ public class KuraCertificate {
         return this.alias;
     }
 
-    public Optional<Certificate> getCertificate() {
-        return this.certificate;
+    public TrustedCertificateEntry getCertificateEntry() {
+        return this.certificateEntry;
     }
 
     public static String getKeystoreId(String id) {

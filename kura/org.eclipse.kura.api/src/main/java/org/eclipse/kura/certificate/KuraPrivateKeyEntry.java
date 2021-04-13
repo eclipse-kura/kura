@@ -12,32 +12,39 @@
  ******************************************************************************/
 package org.eclipse.kura.certificate;
 
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.Optional;
 
 /**
  *
- * The KuraPrivateKey represents a {@java.security.PrivateKey} stored in a keystore
+ * The KuraPrivateKeyEntry represents a {@java.security.KeyStore.PrivateKeyEntry} stored in a keystore
  * along with the its certificate chain.
- * The private key is identified by an id made with the id of the keystore and the alias.
+ * The private key entry is identified by an id made with the id of the keystore and the alias.
  *
  * @since 2.2
  */
-public class KuraPrivateKey {
+public class KuraPrivateKeyEntry {
 
     private final String privateKeyId;
     private final String keystoreId;
     private final String alias;
-    private final Optional<PrivateKey> privateKey;
-    private final Optional<Certificate[]> certificateChain;
+    private final Optional<PrivateKeyEntry> privateKeyEntry;
 
-    public KuraPrivateKey(String keystoreId, String alias, PrivateKey privateKey, Certificate[] certificateChain) {
+    public KuraPrivateKeyEntry(String keystoreId, String alias, PrivateKeyEntry privateKeyEntry) {
         super();
         this.keystoreId = keystoreId;
         this.alias = alias;
-        this.privateKey = Optional.of(privateKey);
-        this.certificateChain = Optional.of(certificateChain);
+        this.privateKeyEntry = Optional.ofNullable(privateKeyEntry);
+        this.privateKeyId = keystoreId + ":" + alias;
+    }
+
+    public KuraPrivateKeyEntry(String keystoreId, String alias, PrivateKey privateKey, Certificate[] certificateChain) {
+        super();
+        this.keystoreId = keystoreId;
+        this.alias = alias;
+        this.privateKeyEntry = Optional.ofNullable(new PrivateKeyEntry(privateKey, certificateChain));
         this.privateKeyId = keystoreId + ":" + alias;
     }
 
@@ -53,12 +60,8 @@ public class KuraPrivateKey {
         return this.alias;
     }
 
-    public Optional<PrivateKey> getPrivateKey() {
-        return this.privateKey;
-    }
-
-    public Optional<Certificate[]> getCertificateChain() {
-        return this.certificateChain;
+    public Optional<PrivateKeyEntry> getPrivateKey() {
+        return this.privateKeyEntry;
     }
 
 }

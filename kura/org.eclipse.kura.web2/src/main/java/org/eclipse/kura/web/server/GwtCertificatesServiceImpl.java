@@ -12,11 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static java.lang.String.format;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -29,13 +32,10 @@ import java.util.Base64.Decoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.certificate.CertificateInfo;
 import org.eclipse.kura.certificate.CertificatesService;
-import org.eclipse.kura.certificate.KuraCertificate;
-import org.eclipse.kura.certificate.KuraPrivateKey;
+import org.eclipse.kura.certificate.KuraCertificateEntry;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -43,6 +43,7 @@ import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtCertificate;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
+import org.osgi.framework.ServiceReference;
 
 public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet implements GwtCertificatesService {
 
@@ -75,13 +76,19 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             if (privKey == null) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
             } else {
-                CertificatesService certificateService = ServiceLocator.getInstance()
-                        .getService(CertificatesService.class);
-                KuraPrivateKey kuraPrivateKey = new KuraPrivateKey(keyStorePid, alias, privKey, certs);
-                certificateService.addPrivateKey(kuraPrivateKey);
+                PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(privKey, certs);
+                final String filter = format("(%s=%s)", "kura.service.pid", keyStorePid);
+                final Collection<ServiceReference<KeystoreService>> keystoreServiceReferences = ServiceLocator
+                        .getInstance().getServiceReferences(KeystoreService.class, filter);
+                for (ServiceReference<KeystoreService> reference : keystoreServiceReferences) {
+                    KeystoreService keystoreService = ServiceLocator.getInstance().getService(reference);
+                    keystoreService.setEntry(alias, privateKeyEntry);
+                }
             }
 
-        } catch (GeneralSecurityException | IOException | KuraException e) {
+        } catch (GeneralSecurityException |
+
+                IOException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
@@ -101,7 +108,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         .getService(CertificatesService.class);
 
                 for (X509Certificate cert : certs) {
-                    certificateService.addCertificate(new KuraCertificate(keyStorePid, alias, cert));
+                    certificateService.addCertificate(new KuraCertificateEntry(keyStorePid, alias, cert));
                 }
             }
 
@@ -160,12 +167,12 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         }
 
         try {
-            Set<CertificateInfo> certInfos = certificateService.listStoredCertificates();
+            List<KuraCertificateEntry> certs = certificateService.getCertificates();
             List<GwtCertificate> certificates = new ArrayList<>();
-            certInfos.forEach(certInfo -> {
+            certs.forEach(certInfo -> {
                 GwtCertificate gwtCertificate = new GwtCertificate();
                 gwtCertificate.setAlias(certInfo.getAlias());
-                gwtCertificate.setKeystoreName(certInfo.getKeystoreName());
+                gwtCertificate.setKeystoreName(certInfo.getKeystoreId());
                 certificates.add(gwtCertificate);
             });
 

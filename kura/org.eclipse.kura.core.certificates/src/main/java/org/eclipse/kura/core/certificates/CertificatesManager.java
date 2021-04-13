@@ -14,27 +14,21 @@ package org.eclipse.kura.core.certificates;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.certificate.CertificateInfo;
 import org.eclipse.kura.certificate.CertificatesService;
-import org.eclipse.kura.certificate.KuraCertificate;
-import org.eclipse.kura.certificate.KuraPrivateKey;
+import org.eclipse.kura.certificate.KuraCertificateEntry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraApplicationTopic;
@@ -123,11 +117,13 @@ public class CertificatesManager implements CertificatesService {
 
     @Override
     public Certificate returnCertificate(String alias) throws KuraException {
-        Optional<Certificate> cert = getCertificate(DEFAULT_KEYSTORE_SERVICE_PID + ":" + alias).getCertificate();
-        if (cert.isPresent()) {
-            return cert.get();
+        TrustedCertificateEntry cert;
+        try {
+            cert = getCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID + ":" + alias).getCertificateEntry();
+        } catch (KuraException e) {
+            return null;
         }
-        return null;
+        return cert.getTrustedCertificate();
     }
 
     @Override
@@ -140,12 +136,12 @@ public class CertificatesManager implements CertificatesService {
     }
 
     private void storeLoginCertificate(Certificate cert, String alias) throws KuraException {
-        KuraCertificate kuraCertificate = new KuraCertificate(LOGIN_KEYSTORE_SERVICE_PID, alias, cert);
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(LOGIN_KEYSTORE_SERVICE_PID, alias, cert);
         addCertificate(kuraCertificate);
     }
 
     private void storeTrustRepoCertificate(Certificate cert, String alias) throws KuraException {
-        KuraCertificate kuraCertificate = new KuraCertificate(DEFAULT_KEYSTORE_SERVICE_PID, alias, cert);
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID, alias, cert);
         addCertificate(kuraCertificate);
     }
 
@@ -194,45 +190,19 @@ public class CertificatesManager implements CertificatesService {
     }
 
     @Override
-    public Set<CertificateInfo> listStoredCertificates() throws KuraException {
-        Set<CertificateInfo> certsInfo = new HashSet<>();
-        for (Entry<String, KeystoreService> keystoreServiceEntry : this.keystoreServices.entrySet()) {
-            try {
-                keystoreServiceEntry.getValue().getAliases().stream()
-                        .forEach(alias -> certsInfo.add(new CertificateInfo(alias, keystoreServiceEntry.getKey())));
-            } catch (GeneralSecurityException | IOException e) {
-                throw new KuraIOException(e, "Failed to get certificates info from " + keystoreServiceEntry.getKey());
-            }
-        }
-        return certsInfo;
-    }
-
-    @Override
-    public void addPrivateKey(KuraPrivateKey privateKey) throws KuraException {
-        KeystoreService service = getKeystore(privateKey.getKeystoreId());
-        if (privateKey.getPrivateKey().isPresent() && privateKey.getCertificateChain().isPresent()) {
-            PrivateKeyEntry entry = new PrivateKeyEntry(privateKey.getPrivateKey().get(),
-                    privateKey.getCertificateChain().get());
-            try {
-                service.setEntry(privateKey.getAlias(), entry);
-            } catch (GeneralSecurityException | IOException e) {
-                throw new KuraIOException(e, "Error adding a key pair to the keystore " + privateKey.getKeystoreId());
-            }
-        }
-    }
-
-    @Override
-    public List<KuraCertificate> getCertificates() throws KuraException {
-        List<KuraCertificate> certificates = new ArrayList<>();
+    public List<KuraCertificateEntry> getCertificates() throws KuraException {
+        List<KuraCertificateEntry> certificates = new ArrayList<>();
         for (Entry<String, KeystoreService> keystoreServiceEntry : this.keystoreServices.entrySet()) {
             String keystoreId = keystoreServiceEntry.getKey();
             try {
                 Map<String, java.security.KeyStore.Entry> keystoreEntries = keystoreServiceEntry.getValue()
                         .getEntries();
-                keystoreEntries.entrySet().stream().forEach(entry -> {
-                    String alias = entry.getKey();
-                    certificates.add(new KuraCertificate(keystoreId, alias, getCertificateFromEntry(entry.getValue())));
-                });
+                keystoreEntries.entrySet().stream().filter(entry -> entry.getValue() instanceof TrustedCertificateEntry)
+                        .forEach(entry -> {
+                            String alias = entry.getKey();
+                            certificates.add(new KuraCertificateEntry(keystoreId, alias,
+                                    (TrustedCertificateEntry) entry.getValue()));
+                        });
             } catch (GeneralSecurityException | IOException e) {
                 throw new KuraIOException(e, "Failed to get certificates from " + keystoreId);
             }
@@ -241,40 +211,41 @@ public class CertificatesManager implements CertificatesService {
     }
 
     @Override
-    public KuraCertificate getCertificate(String id) throws KuraException {
-        String keystoreId = KuraCertificate.getKeystoreId(id);
-        String alias = KuraCertificate.getAlias(id);
+    public KuraCertificateEntry getCertificateEntry(String id) throws KuraException {
+        String keystoreId = KuraCertificateEntry.getKeystoreId(id);
+        String alias = KuraCertificateEntry.getAlias(id);
         java.security.KeyStore.Entry keystoreEntry = null;
         try {
             keystoreEntry = getKeystore(keystoreId).getEntry(alias);
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraIOException(e, "Failed to get certificates from " + keystoreId);
         }
-        Certificate cert = getCertificateFromEntry(keystoreEntry);
-        return new KuraCertificate(keystoreId, alias, cert);
+        if (keystoreEntry instanceof TrustedCertificateEntry) {
+            return new KuraCertificateEntry(keystoreId, alias, (TrustedCertificateEntry) keystoreEntry);
+        } else {
+            throw new KuraIOException("Failed to retrieve certificate " + id);
+        }
     }
 
     @Override
-    public void updateCertificate(KuraCertificate certificate) throws KuraException {
+    public void updateCertificate(KuraCertificateEntry certificate) throws KuraException {
         addCertificate(certificate);
     }
 
     @Override
-    public void addCertificate(KuraCertificate certificate) throws KuraException {
-        if (certificate.getCertificate().isPresent()) {
-            try {
-                getKeystore(certificate.getKeystoreId()).setEntry(certificate.getAlias(),
-                        new TrustedCertificateEntry(certificate.getCertificate().get()));
-            } catch (GeneralSecurityException | IOException e) {
-                throw new KuraIOException(e, "Failed to add certificate " + certificate.getCertificateId());
-            }
+    public void addCertificate(KuraCertificateEntry certificate) throws KuraException {
+        try {
+            getKeystore(certificate.getKeystoreId()).setEntry(certificate.getAlias(),
+                    certificate.getCertificateEntry());
+        } catch (GeneralSecurityException | IOException e) {
+            throw new KuraIOException(e, "Failed to add certificate " + certificate.getCertificateId());
         }
     }
 
     @Override
     public void deleteCertificate(String id) throws KuraException {
-        String keystoreId = KuraCertificate.getKeystoreId(id);
-        String alias = KuraCertificate.getAlias(id);
+        String keystoreId = KuraCertificateEntry.getKeystoreId(id);
+        String alias = KuraCertificateEntry.getAlias(id);
         try {
             getKeystore(keystoreId).deleteEntry(alias);
         } catch (GeneralSecurityException | IOException e) {
@@ -293,18 +264,6 @@ public class CertificatesManager implements CertificatesService {
         this.keystoreServiceTracker = new ServiceTracker<>(this.bundleContext, filter,
                 this.keystoreServiceTrackerCustomizer);
         this.keystoreServiceTracker.open();
-    }
-
-    private Certificate getCertificateFromEntry(java.security.KeyStore.Entry keystoreEntry) {
-        Certificate cert = null;
-        if (keystoreEntry != null) {
-            if (keystoreEntry instanceof PrivateKeyEntry) {
-                cert = ((PrivateKeyEntry) keystoreEntry).getCertificate();
-            } else if (keystoreEntry instanceof TrustedCertificateEntry) {
-                cert = ((TrustedCertificateEntry) keystoreEntry).getTrustedCertificate();
-            }
-        }
-        return cert;
     }
 
     private KeystoreService getKeystore(String keystoreId) throws KuraException {

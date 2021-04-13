@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.certificates;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -29,11 +30,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.certificate.CertificateInfo;
-import org.eclipse.kura.certificate.KuraCertificate;
+import org.eclipse.kura.certificate.KuraCertificateEntry;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreService;
@@ -66,10 +65,10 @@ public class CertificatesManagerTest {
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
         String id = "keystoreTest:certTest";
-        KuraCertificate kuraCertificate = certificatesManager.getCertificate(id);
+        KuraCertificateEntry kuraCertificate = certificatesManager.getCertificateEntry(id);
         assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
         assertEquals("certTest", kuraCertificate.getAlias());
-        assertTrue(kuraCertificate.getCertificate().isPresent());
+        assertNotNull(kuraCertificate.getCertificateEntry());
     }
 
     @Test
@@ -83,9 +82,9 @@ public class CertificatesManagerTest {
         keystoreServices.put(defaultKeystore, ksMock);
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
-        KuraCertificate kuraCertificate = new KuraCertificate(defaultKeystore, alias, certMock);
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(defaultKeystore, alias, certMock);
         certificatesManager.storeCertificate(certMock, alias);
-        kuraCertificate = certificatesManager.getCertificate(defaultKeystore + ":" + alias);
+        kuraCertificate = certificatesManager.getCertificateEntry(defaultKeystore + ":" + alias);
         assertEquals(defaultKeystore, kuraCertificate.getKeystoreId());
         assertEquals(alias, kuraCertificate.getAlias());
         verify(ksMock).setEntry(eq(alias), anyObject());
@@ -103,7 +102,7 @@ public class CertificatesManagerTest {
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
         certificatesManager.storeCertificate(certMock, alias);
-        KuraCertificate kuraCertificate = certificatesManager.getCertificate(httpsKeystore + ":" + alias);
+        KuraCertificateEntry kuraCertificate = certificatesManager.getCertificateEntry(httpsKeystore + ":" + alias);
         assertEquals(httpsKeystore, kuraCertificate.getKeystoreId());
         assertEquals(alias, kuraCertificate.getAlias());
         verify(ksMock).setEntry(eq(alias), anyObject());
@@ -157,31 +156,6 @@ public class CertificatesManagerTest {
         List<String> aliasList = Collections.list(certificatesManager.listDMCertificatesAliases());
         assertEquals(aliases.size(), aliasList.size());
         aliasList.stream().forEach(alias -> assertTrue(alias.startsWith("dm_")));
-    }
-
-    @Test
-    public void listStoredCertificatesAliasesTest()
-            throws NoSuchFieldException, GeneralSecurityException, IOException, KuraException {
-        List<String> aliases = new ArrayList<>();
-        aliases.add("dm_certTest1");
-        aliases.add("dm_certTest2");
-        X509Certificate certMock = mock(X509Certificate.class);
-        KeystoreService ksMock = mock(KeystoreService.class);
-        when(ksMock.getAliases()).thenReturn(aliases);
-        Map<String, KeystoreService> keystoreServices = new HashMap<>();
-        keystoreServices.put(defaultKeystore, ksMock);
-        TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
-
-        aliases.stream().forEach(alias -> {
-            try {
-                certificatesManager.storeCertificate(certMock, alias);
-            } catch (KuraException e) {
-            }
-        });
-
-        Set<CertificateInfo> certificates = certificatesManager.listStoredCertificates();
-        assertEquals(aliases.size(), certificates.size());
-        certificates.stream().forEach(cert -> assertTrue(cert.getAlias().startsWith("dm_")));
     }
 
     @Test
@@ -242,7 +216,7 @@ public class CertificatesManagerTest {
         keystoreServices.put("keystoreTest", ksMock);
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
-        List<KuraCertificate> kuraCertificates = certificatesManager.getCertificates();
+        List<KuraCertificateEntry> kuraCertificates = certificatesManager.getCertificates();
         assertEquals(2, kuraCertificates.size());
         assertEquals("keystoreTest", kuraCertificates.get(0).getKeystoreId());
         assertEquals("certTest2", kuraCertificates.get(0).getAlias());
@@ -258,7 +232,7 @@ public class CertificatesManagerTest {
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
         String id = "keystoreTest:certTest";
-        KuraCertificate kuraCertificate = certificatesManager.getCertificate(id);
+        KuraCertificateEntry kuraCertificate = certificatesManager.getCertificateEntry(id);
         assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
         assertEquals("certTest", kuraCertificate.getAlias());
     }
@@ -273,9 +247,9 @@ public class CertificatesManagerTest {
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
         String id = "keystoreTest:certTest";
-        KuraCertificate kuraCertificate = new KuraCertificate("keystoreTest", "certTest", certMock);
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry("keystoreTest", "certTest", certMock);
         certificatesManager.addCertificate(kuraCertificate);
-        kuraCertificate = certificatesManager.getCertificate(id);
+        kuraCertificate = certificatesManager.getCertificateEntry(id);
         assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
         assertEquals("certTest", kuraCertificate.getAlias());
         verify(ksMock).setEntry(eq("certTest"), anyObject());
@@ -292,9 +266,9 @@ public class CertificatesManagerTest {
         TestUtil.setFieldValue(certificatesManager, "keystoreServices", keystoreServices);
 
         String id = "keystoreTest:certTest";
-        KuraCertificate kuraCertificate = new KuraCertificate("keystoreTest", "certTest", certMock);
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry("keystoreTest", "certTest", certMock);
         certificatesManager.updateCertificate(kuraCertificate);
-        kuraCertificate = certificatesManager.getCertificate(id);
+        kuraCertificate = certificatesManager.getCertificateEntry(id);
         assertEquals("keystoreTest", kuraCertificate.getKeystoreId());
         assertEquals("certTest", kuraCertificate.getAlias());
         verify(ksMock).setEntry(eq("certTest"), anyObject());

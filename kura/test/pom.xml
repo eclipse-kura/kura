@@ -115,6 +115,10 @@
                         <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
+	                            <type>p2-installable-unit</type>
+	                            <artifactId>moquette-broker</artifactId>
+	                        </dependency>
+                            <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.equinox.ds</artifactId>
                             </dependency>
@@ -226,8 +230,21 @@
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.kura.core.keystore</artifactId>
                             </dependency>
+                            <dependency>
+	                            <type>p2-installable-unit</type>
+	                            <artifactId>org.apache.felix.dependencymanager</artifactId>
+	                        </dependency>
+                            <dependency>
+	                            <type>p2-installable-unit</type>
+	                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
+	                        </dependency>
                         </dependencies>
                         <bundleStartLevel>
+	                        <bundle>
+	                            <id>moquette-broker</id>
+	                            <level>3</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
                             <bundle>
                                 <id>org.eclipse.equinox.ds</id>
                                 <level>4</level>
@@ -474,6 +491,11 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>org.eclipse.kura.broker.artemis.xml</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>org.apache.activemq.artemis-mqtt-protocol</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -528,6 +550,16 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
+                            <bundle>
+	                            <id>org.apache.felix.dependencymanager</id>
+	                            <level>4</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
+	                        <bundle>
+	                            <id>org.apache.felix.deploymentadmin</id>
+	                            <level>4</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
                         </bundleStartLevel>
                     </configuration>
                 </plugin>

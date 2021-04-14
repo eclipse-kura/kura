@@ -138,11 +138,14 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void setSslManagerService(SslManagerService sslManagerService) {
+        final boolean update;
+
         synchronized (updateLock) {
             this.sslManagerService = sslManagerService;
+            update = this.clientConf != null;
         }
 
-        if (!this.properties.isEmpty()) {
+        if (update) {
             update();
         }
     }

@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.json.marshaller.unmarshaller;
+package org.eclipse.kura.internal.json.marshaller.unmarshaller.system;
 
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.system.SystemResourceInfo;

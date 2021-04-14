@@ -2,13 +2,13 @@
 <!--
 
     Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
 	 Eurotech
 
@@ -30,7 +30,7 @@
 	<artifactId>org.eclipse.kura.rest.provider</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
-	
+
 	<build>
         <plugins>
             <plugin>
@@ -39,6 +39,7 @@
                 <version>${tycho-version}</version>
                 <configuration>
                     <compilerArgument>-err:-forbidden</compilerArgument>
+                    <useProjectSettings>false</useProjectSettings>
                 </configuration>
             </plugin>
         </plugins>

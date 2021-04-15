@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteService implements RequestHandler {
 
@@ -88,6 +89,8 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
             return jsonResponse(getKeysInternal());
         } else if (resourcePath.size() == 2 && resourcePath.get(0).equals(KEYS)) {
             return jsonResponse(getKeysInternal(resourcePath.get(1)));
+        } else if (resourcePath.size() == 3 && resourcePath.get(0).equals(KEYS)) {
+            return jsonResponse(getKeyInternal(resourcePath.get(1), resourcePath.get(2)));
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -152,7 +155,7 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
 
     private static final KuraMessage jsonResponse(final Object response) {
         final KuraResponsePayload responsePayload = new KuraResponsePayload(200);
-        final Gson gson = new Gson();
+        final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         responsePayload.setBody(gson.toJson(response).getBytes(StandardCharsets.UTF_8));
         return new KuraMessage(responsePayload);
     }
@@ -167,7 +170,7 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
         ServiceUtil.ungetServiceReferences(this.bundleContext, refs);
     }
 
-    private <T> T unmarshal(String jsonString, Class<T> clazz) {
+    protected <T> T unmarshal(String jsonString, Class<T> clazz) {
         T result = null;
         ServiceReference<Unmarshaller>[] unmarshallerSRs = getJsonUnmarshallers();
         try {

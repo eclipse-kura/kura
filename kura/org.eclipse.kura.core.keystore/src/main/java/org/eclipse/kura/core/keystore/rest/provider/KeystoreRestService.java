@@ -37,9 +37,7 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
 
     private static final String BAD_WRITE_REQUEST_ERROR_MESSAGE = "Bad request, "
             + "expected request format: {\"keystoreName\": \"MyKeystoreName\", \"alias\": "
-            + "\"MyAlias\", \"type\": \"TrustedCertificate\", \"certificate\": \"...\"}"
-            + " or {\"keystoreName\": \"MyKeystoreName\", \"alias\": \"MyAlias\", \"type\": "
-            + "\"PrivateKey\", \"privateKey\": \"...\", \"certificateChain\": [\"...\"]}";
+            + "\"MyAlias\", \"type\": \"TrustedCertificate\", \"certificate\": \"...\"}";
     private static final String BAD_DELETE_REQUEST_ERROR_MESSAGE = "Bad request, "
             + "expected request format: {\"keystoreName\": \"MyKeystoreName\", \"alias\": " + "\"MyAlias\"}";
 
@@ -68,6 +66,14 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     @Produces(MediaType.APPLICATION_JSON)
     public List<EntryInfo> getKeys(@PathParam("id") final String id) {
         return getKeysInternal(id);
+    }
+
+    @GET
+    @Path("/id/{id}/keys/{alias}")
+    @RolesAllowed("keystores")
+    @Produces(MediaType.APPLICATION_JSON)
+    public EntryInfo getKey(@PathParam("id") final String id, @PathParam("alias") final String alias) {
+        return getKeyInternal(id, alias);
     }
 
     @POST

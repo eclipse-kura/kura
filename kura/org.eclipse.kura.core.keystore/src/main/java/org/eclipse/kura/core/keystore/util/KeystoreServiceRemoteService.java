@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
@@ -67,7 +68,7 @@ public class KeystoreServiceRemoteService {
     private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
     protected CertificateFactory certFactory;
 
-    protected void activate(ComponentContext componentContext) {
+    public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
         this.keystoreServiceTrackerCustomizer = new KeystoreServiceTrackerCustomizer();
         initKeystoreServiceTracking();
@@ -78,7 +79,7 @@ public class KeystoreServiceRemoteService {
         }
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    public void deactivate(ComponentContext componentContext) {
         if (this.keystoreServiceTracker != null) {
             this.keystoreServiceTracker.close();
         }
@@ -142,15 +143,32 @@ public class KeystoreServiceRemoteService {
         return keys;
     }
 
+    protected EntryInfo getKeyInternal(final String id, final String alias) {
+        Entry entry;
+        try {
+            entry = keystoreServices.get(id).getEntry(alias);
+            if (entry instanceof PrivateKeyEntry) {
+                return buildPrivateKeyInfo(id, alias, (PrivateKeyEntry) entry, true);
+            } else if (entry instanceof TrustedCertificateEntry) {
+                return buildCertificateInfo(id, alias, (TrustedCertificateEntry) entry, true);
+            } else {
+                throw new WebApplicationException("404");
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            throw new WebApplicationException(e);
+        }
+    }
+
     protected String storeKeyEntryInternal(EntryInfo request) {
         try {
             if (request.getType() == EntryType.TRUSTED_CERTIFICATE) {
                 CertificateInfo info = (CertificateInfo) request;
                 storeCertificateInternal(info.getKeystoreName(), info.getAlias(), info.getCertificate());
-            } else if (request.getType() == EntryType.PRIVATE_KEY) {
-                PrivateKeyInfo info = (PrivateKeyInfo) request;
-                storePrivateKeyInternal(info.getKeystoreName(), info.getAlias(), info.getPrivateKey(),
-                        info.getCertificateChain());
+                // Don't store private keys
+                // } else if (request.getType() == EntryType.PRIVATE_KEY) {
+                // PrivateKeyInfo info = (PrivateKeyInfo) request;
+                // storePrivateKeyInternal(info.getKeystoreName(), info.getAlias(), info.getPrivateKey(),
+                // info.getCertificateChain());
             } else {
                 throw new WebApplicationException("Invalid entry type");
             }
@@ -165,9 +183,12 @@ public class KeystoreServiceRemoteService {
             if (EntryType.valueOfType(writeRequest.getType()) == EntryType.TRUSTED_CERTIFICATE) {
                 storeCertificateInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
                         writeRequest.getCertificate());
-            } else if (EntryType.valueOfType(writeRequest.getType()) == EntryType.PRIVATE_KEY) {
-                storePrivateKeyInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
-                        writeRequest.getPrivateKey(), writeRequest.getCertificateChain());
+                // Don't store private keys
+                // } else if (EntryType.valueOfType(writeRequest.getType()) == EntryType.PRIVATE_KEY) {
+                // storePrivateKeyInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
+                // writeRequest.getPrivateKey(), writeRequest.getCertificateChain());
+            } else {
+                throw new WebApplicationException("Invalid entry type");
             }
         } catch (GeneralSecurityException | IOException e) {
             throw new WebApplicationException(e);

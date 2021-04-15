@@ -33,7 +33,7 @@ public class KeystoreInfo {
         return this.id;
     }
 
-    public String getAlgorithm() {
+    public String getType() {
         return this.type;
     }
 

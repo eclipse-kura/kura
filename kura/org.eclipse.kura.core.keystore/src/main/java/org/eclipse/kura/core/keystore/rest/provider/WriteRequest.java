@@ -59,13 +59,10 @@ public class WriteRequest implements Validable {
         if (this.keystoreName == null || this.alias == null || this.type == null) {
             return false;
         }
-        if (EntryType.valueOfType(this.type) != EntryType.TRUSTED_CERTIFICATE
-                && EntryType.valueOfType(this.type) != EntryType.PRIVATE_KEY) {
+        if (EntryType.valueOfType(this.type) != EntryType.TRUSTED_CERTIFICATE) {
             return false;
         }
-        return !((EntryType.valueOfType(this.type) == EntryType.TRUSTED_CERTIFICATE && certificate == null)
-                || (EntryType.valueOfType(this.type) == EntryType.PRIVATE_KEY && (privateKey == null
-                        || certificateChain == null || !(certificateChain instanceof String[]))));
+        return !(EntryType.valueOfType(this.type) == EntryType.TRUSTED_CERTIFICATE && certificate == null);
     }
 
 }

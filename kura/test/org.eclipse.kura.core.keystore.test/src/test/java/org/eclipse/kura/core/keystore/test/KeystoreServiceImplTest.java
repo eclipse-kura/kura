@@ -612,7 +612,7 @@ public class KeystoreServiceImplTest {
         assertNotNull(csr);
         assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
     }
-    
+
     @Test(expected = IOException.class)
     public void testPasswordChange() throws KuraException, GeneralSecurityException, IOException {
         Map<String, Object> properties = new HashMap<>();
@@ -624,10 +624,10 @@ public class KeystoreServiceImplTest {
         systemServiceMap.put("kura.https.keyStorePassword", STORE_PASS);
         Properties systemServiceProperties = new Properties();
         systemServiceProperties.putAll(systemServiceMap);
-        
+
         SystemService systemService = mock(SystemService.class);
         when(systemService.getProperties()).thenReturn(systemServiceProperties);
-        
+
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
 
@@ -637,11 +637,11 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.setSystemService(systemService);
         keystoreService.activate(componentContext, properties);
-        
+
         try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {
             this.store.load(tsReadStream, STORE_PASS.toCharArray());
         }
-        
+
     }
 
 }

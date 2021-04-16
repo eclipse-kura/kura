@@ -15,6 +15,7 @@ package org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
+import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.core.keystore.util.PrivateKeyInfo;
 
 import com.google.gson.Gson;
@@ -37,6 +38,16 @@ public class KeystoreEntryInfoMapper {
     // "alias" : "alias",
     // "type" : "TRUSTED_CERTIFICATE",
     // "certificate" : "..."
+    // }
+    //
+    // or
+    //
+    // {
+    // "keystoreName" : "name",
+    // "alias" : "alias",
+    // "type" : "L",
+    // "privateKey" : "..."
+    // "certificateChain" : "..."
     // }
     //
     // or
@@ -67,6 +78,10 @@ public class KeystoreEntryInfoMapper {
             if (EntryType.valueOfType(type) == EntryType.TRUSTED_CERTIFICATE) {
                 CertificateInfo entry = gson.fromJson(json, CertificateInfo.class);
                 entry.setType(EntryType.TRUSTED_CERTIFICATE);
+                return entry;
+            } else if (EntryType.valueOfType(type) == EntryType.KEY_PAIR) {
+                KeyPairInfo entry = gson.fromJson(json, KeyPairInfo.class);
+                entry.setType(EntryType.KEY_PAIR);
                 return entry;
             } else if (EntryType.valueOfType(type) == EntryType.PRIVATE_KEY) {
                 PrivateKeyInfo entry = gson.fromJson(json, PrivateKeyInfo.class);

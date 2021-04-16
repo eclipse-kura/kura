@@ -75,11 +75,15 @@ public interface KeystoreService {
      */
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
 
-    public KeyPair createKeyPair(String algorithm, int keySize) throws KuraException;
+    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes)
+            throws KuraException;
 
-    public KeyPair createKeyPair(String algorithm, int keySize, SecureRandom secureRandom) throws KuraException;
+    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes,
+            SecureRandom secureRandom) throws KuraException;
 
     public String getCSR(X500Principal principal, KeyPair keyPair, String signerAlg) throws KuraException;
+
+    public String getCSR(X500Principal principal, String alias, String signerAlg) throws KuraException;
 
     public List<String> getAliases() throws GeneralSecurityException, IOException;
 

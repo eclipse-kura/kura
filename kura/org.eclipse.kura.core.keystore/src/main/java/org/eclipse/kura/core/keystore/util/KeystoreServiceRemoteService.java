@@ -35,11 +35,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.keystore.rest.provider.ReadRequest;
 import org.eclipse.kura.core.keystore.rest.provider.WriteRequest;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.eclipse.kura.security.keystore.KeystoreService;
@@ -58,6 +61,7 @@ public class KeystoreServiceRemoteService {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRemoteService.class);
 
+    private static final String INVALID_ENTRY_TYPE = "Invalid entry type";
     public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERT = "-----END CERTIFICATE-----";
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -159,38 +163,73 @@ public class KeystoreServiceRemoteService {
         }
     }
 
-    protected String storeKeyEntryInternal(EntryInfo request) {
+    protected String getCSRInternal(final EntryInfo request) {
+        try {
+            if (request.getType() == EntryType.KEY_PAIR) {
+                KeyPairInfo info = (KeyPairInfo) request;
+
+                X500Principal principal = new X500Principal(info.getAttributes());
+                return this.keystoreServices.get(info.getKeystoreName()).getCSR(principal, info.getAlias(),
+                        info.getSignatureAlgorithm());
+
+            } else {
+                throw new WebApplicationException(INVALID_ENTRY_TYPE);
+            }
+        } catch (KuraException e) {
+            throw new WebApplicationException(e);
+        }
+    }
+
+    protected String getCSRInternal(final ReadRequest request) {
+        try {
+            X500Principal principal = new X500Principal(request.getAttributes());
+            return this.keystoreServices.get(request.getKeystoreName()).getCSR(principal, request.getAlias(),
+                    request.getSignatureAlgorithm());
+        } catch (KuraException e) {
+            throw new WebApplicationException(e);
+        }
+    }
+
+    protected String storeKeyEntryInternal(final EntryInfo request) {
         try {
             if (request.getType() == EntryType.TRUSTED_CERTIFICATE) {
                 CertificateInfo info = (CertificateInfo) request;
                 storeCertificateInternal(info.getKeystoreName(), info.getAlias(), info.getCertificate());
+            } else if (request.getType() == EntryType.KEY_PAIR) {
+                KeyPairInfo info = (KeyPairInfo) request;
+                storeKeyPairInternal(info.getKeystoreName(), info.getAlias(), info.getAlgorithm(), info.getSize(),
+                        info.getSignatureAlgorithm(), info.getAttributes());
                 // Don't store private keys
                 // } else if (request.getType() == EntryType.PRIVATE_KEY) {
                 // PrivateKeyInfo info = (PrivateKeyInfo) request;
                 // storePrivateKeyInternal(info.getKeystoreName(), info.getAlias(), info.getPrivateKey(),
                 // info.getCertificateChain());
             } else {
-                throw new WebApplicationException("Invalid entry type");
+                throw new WebApplicationException(INVALID_ENTRY_TYPE);
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GeneralSecurityException | IOException | KuraException e) {
             throw new WebApplicationException(e);
         }
         return request.getKeystoreName() + ":" + request.getAlias();
     }
 
-    protected String storeKeyEntryInternal(WriteRequest writeRequest) {
+    protected String storeKeyEntryInternal(final WriteRequest writeRequest) {
         try {
             if (EntryType.valueOfType(writeRequest.getType()) == EntryType.TRUSTED_CERTIFICATE) {
                 storeCertificateInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
                         writeRequest.getCertificate());
+            } else if (EntryType.valueOfType(writeRequest.getType()) == EntryType.KEY_PAIR) {
+                storeKeyPairInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
+                        writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
+                        writeRequest.getAttributes());
                 // Don't store private keys
                 // } else if (EntryType.valueOfType(writeRequest.getType()) == EntryType.PRIVATE_KEY) {
                 // storePrivateKeyInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
                 // writeRequest.getPrivateKey(), writeRequest.getCertificateChain());
             } else {
-                throw new WebApplicationException("Invalid entry type");
+                throw new WebApplicationException(INVALID_ENTRY_TYPE);
             }
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (GeneralSecurityException | IOException | KuraException e) {
             throw new WebApplicationException(e);
         }
         return writeRequest.getKeystoreName() + ":" + writeRequest.getAlias();
@@ -229,6 +268,11 @@ public class KeystoreServiceRemoteService {
         }
 
         this.keystoreServices.get(keystoreName).setEntry(alias, new PrivateKeyEntry(privkey, certs));
+    }
+
+    private void storeKeyPairInternal(String keystoreName, String alias, String algorithm, int size,
+            String signatureAlgorithm, String attributes) throws KuraException {
+        this.keystoreServices.get(keystoreName).createKeyPair(alias, algorithm, size, signatureAlgorithm, attributes);
     }
 
     private X509Certificate[] parsePublicCertificates(String[] publicKeys) throws CertificateException {

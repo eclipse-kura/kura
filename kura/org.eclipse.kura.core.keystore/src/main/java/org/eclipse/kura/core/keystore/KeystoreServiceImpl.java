@@ -33,11 +33,18 @@ import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Provider;
+import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +58,12 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -61,6 +74,7 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -398,6 +412,30 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
+    public String getCSR(X500Principal principal, String alias, String signerAlg) throws KuraException {
+        if (isNull(principal) || isNull(alias) || isNull(signerAlg) || signerAlg.trim().isEmpty()) {
+            throw new IllegalArgumentException("Input parameters cannot be null!");
+        }
+        String csr = null;
+        try {
+            Entry entry = getEntry(alias);
+            if (entry == null) {
+                throw new KuraException(KuraErrorCode.NOT_FOUND);
+            }
+            if (!(entry instanceof PrivateKeyEntry)) {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            }
+            PrivateKey privateKey = ((PrivateKeyEntry) entry).getPrivateKey();
+            PublicKey publicKey = ((PrivateKeyEntry) entry).getCertificate().getPublicKey();
+            KeyPair keyPair = new KeyPair(publicKey, privateKey);
+            csr = getCSR(principal, keyPair, signerAlg);
+        } catch (IOException | GeneralSecurityException e) {
+            throw new KuraIOException(e, "Failed to get CSR");
+        }
+        return csr;
+    }
+
+    @Override
     public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException {
         if (isNull(algorithm)) {
             throw new IllegalArgumentException("Algorithm cannot be null!");
@@ -458,22 +496,50 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public KeyPair createKeyPair(String algorithm, int keySize) throws KuraException {
-        return createKeyPair(algorithm, keySize, new SecureRandom());
+    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes)
+            throws KuraException {
+        createKeyPair(alias, algorithm, keySize, signatureAlgorithm, attributes, new SecureRandom());
     }
 
     @Override
-    public KeyPair createKeyPair(String algorithm, int keySize, SecureRandom secureRandom) throws KuraException {
+    public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes,
+            SecureRandom secureRandom) throws KuraException {
         if (isNull(algorithm) || algorithm.trim().isEmpty() || isNull(secureRandom)) {
             throw new IllegalArgumentException("Algorithm or random cannot be null or empty!");
         }
+        KeyPair keyPair;
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance(algorithm);
             keyGen.initialize(keySize, secureRandom);
-            return keyGen.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
+            keyPair = keyGen.generateKeyPair();
+            setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
+                    generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
+        } catch (GeneralSecurityException | OperatorCreationException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
     }
 
+    public X509Certificate[] generateCertificateChain(KeyPair keyPair, String signatureAlgorithm, String attributes)
+            throws OperatorCreationException, CertificateException {
+        Provider bcProvider = new BouncyCastleProvider();
+        Security.addProvider(bcProvider);
+        long now = System.currentTimeMillis();
+        Date startDate = new Date(now);
+        X500Name dnName = new X500Name(attributes);
+        // Use the timestamp as serial number
+        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        calendar.add(Calendar.YEAR, 1);
+        Date endDate = calendar.getTime();
+
+        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic().getEncoded());
+        X509v3CertificateBuilder certificateBuilder = new X509v3CertificateBuilder(dnName, certSerialNumber, startDate,
+                endDate, dnName, subjectPublicKeyInfo);
+        ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).setProvider(bcProvider)
+                .build(keyPair.getPrivate());
+        X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
+
+        return new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(certificateHolder) };
+    }
 }

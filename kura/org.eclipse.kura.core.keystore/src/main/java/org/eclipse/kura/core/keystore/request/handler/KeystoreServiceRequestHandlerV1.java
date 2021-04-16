@@ -45,6 +45,7 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Resource not found";
     private static final String KEYSTORES = "keystores";
     private static final String KEYS = "keys";
+    private static final String CSR = "csr";
 
     // ----------------------------------------------------------------
     //
@@ -77,6 +78,7 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
     @Override
     public KuraMessage doGet(final RequestHandlerContext context, final KuraMessage reqMessage) throws KuraException {
         final List<String> resourcePath = extractResourcePath(reqMessage);
+        KuraPayload reqPayload = reqMessage.getPayload();
 
         if (resourcePath.isEmpty()) {
             logger.error(NONE_RESOURCE_FOUND_MESSAGE);
@@ -91,6 +93,14 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
             return jsonResponse(getKeysInternal(resourcePath.get(1)));
         } else if (resourcePath.size() == 3 && resourcePath.get(0).equals(KEYS)) {
             return jsonResponse(getKeyInternal(resourcePath.get(1), resourcePath.get(2)));
+        } else if (resourcePath.size() == 1 && resourcePath.get(0).equals(CSR)) {
+            String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
+            EntryInfo request = unmarshal(body, EntryInfo.class);
+            if (request != null) {
+                return jsonResponse(getCSRInternal(request));
+            } else {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            }
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }

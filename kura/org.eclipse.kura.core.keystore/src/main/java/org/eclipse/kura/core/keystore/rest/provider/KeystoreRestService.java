@@ -76,6 +76,14 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
         return getKeyInternal(id, alias);
     }
 
+    @GET
+    @Path("csr")
+    @RolesAllowed("keystores")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getCSR(ReadRequest readRequest) {
+        return getCSRInternal(readRequest);
+    }
+
     @POST
     @Path("/keys/_store")
     @RolesAllowed("keystores")

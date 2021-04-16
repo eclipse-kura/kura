@@ -23,6 +23,10 @@ public class WriteRequest implements Validable {
     private String privateKey;
     private String[] certificateChain;
     private String certificate;
+    private String algorithm;
+    private String signatureAlgorithm;
+    private String attributes;
+    private int size;
 
     public String getKeystoreName() {
         return this.keystoreName;
@@ -48,6 +52,22 @@ public class WriteRequest implements Validable {
         return this.certificate;
     }
 
+    public String getAlgorithm() {
+        return this.algorithm;
+    }
+
+    public String getSignatureAlgorithm() {
+        return this.signatureAlgorithm;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public String getAttributes() {
+        return this.attributes;
+    }
+
     @Override
     public String toString() {
         return "WriteRequest [keystoreName=" + this.keystoreName + ", alias=" + this.alias + ", type=" + this.type
@@ -59,10 +79,15 @@ public class WriteRequest implements Validable {
         if (this.keystoreName == null || this.alias == null || this.type == null) {
             return false;
         }
-        if (EntryType.valueOfType(this.type) != EntryType.TRUSTED_CERTIFICATE) {
+        if (EntryType.valueOfType(this.type) != EntryType.TRUSTED_CERTIFICATE
+                && EntryType.valueOfType(this.type) != EntryType.KEY_PAIR) {
             return false;
         }
-        return !(EntryType.valueOfType(this.type) == EntryType.TRUSTED_CERTIFICATE && certificate == null);
+        if (EntryType.valueOfType(this.type) == EntryType.TRUSTED_CERTIFICATE && certificate == null) {
+            return false;
+        }
+        return !(EntryType.valueOfType(this.type) == EntryType.KEY_PAIR && (this.algorithm == null || this.size == 0
+                || this.signatureAlgorithm == null || this.attributes == null));
     }
 
 }

@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.eclipse.kura.web.server.util.GwtComponentServiceInternal;
 import org.eclipse.kura.web.server.util.GwtServerUtil;
@@ -27,21 +28,21 @@ import org.eclipse.kura.web.shared.service.GwtRestrictedComponentService;
 public class BaseGwtRestrictedComponentService extends OsgiRemoteServiceServlet
         implements GwtRestrictedComponentService {
 
-    private final Class<?>[] managedServiceInterfaces;
+    private final Predicate<Set<String>> providedInterfacesFilter;
 
-    public BaseGwtRestrictedComponentService(Class<?>... managedServiceInterfaces) {
+    public BaseGwtRestrictedComponentService(final Predicate<Set<String>> providedInterfacesFilter) {
         super();
-        this.managedServiceInterfaces = managedServiceInterfaces;
+        this.providedInterfacesFilter = providedInterfacesFilter;
     }
 
     @Override
     public Set<String> listFactoryPids() throws GwtKuraException {
-        return GwtServerUtil.getServiceProviderFactoryPids(managedServiceInterfaces);
+        return GwtServerUtil.getServiceProviderFactoryPids(providedInterfacesFilter);
     }
 
     @Override
     public List<GwtComponentInstanceInfo> listServiceInstances() throws GwtKuraException {
-        return GwtServerUtil.getComponentInstances(managedServiceInterfaces);
+        return GwtServerUtil.getComponentInstances(providedInterfacesFilter);
     }
 
     @Override
@@ -82,17 +83,14 @@ public class BaseGwtRestrictedComponentService extends OsgiRemoteServiceServlet
     }
 
     private void requireIsManagedServiceFactory(String factoryPid) throws GwtKuraException {
-        if (!(GwtServerUtil.isFactoryOfAnyService(factoryPid, managedServiceInterfaces))) {
+        if (!(GwtServerUtil.isFactoryOf(factoryPid, providedInterfacesFilter))) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
     }
 
     private void requireIsManagedService(String kuraServicePid) throws GwtKuraException {
-        for (final Class<?> managedInterface : managedServiceInterfaces) {
-            if (GwtServerUtil.providesService(kuraServicePid, managedInterface)) {
-                return;
-            }
+        if (!(GwtServerUtil.providesService(kuraServicePid, providedInterfacesFilter))) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
-        throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
     }
 }

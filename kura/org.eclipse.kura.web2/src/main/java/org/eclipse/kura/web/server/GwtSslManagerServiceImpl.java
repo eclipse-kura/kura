@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.web.shared.service.GwtSslManagerService;
 
@@ -23,7 +24,7 @@ public class GwtSslManagerServiceImpl extends BaseGwtRestrictedComponentService 
     private static final long serialVersionUID = -1480613592267828475L;
 
     public GwtSslManagerServiceImpl() {
-        super(SslManagerService.class);
+        super(i -> i.contains(SslManagerService.class.getName()) && i.contains(ConfigurableComponent.class.getName()));
     }
 
 }

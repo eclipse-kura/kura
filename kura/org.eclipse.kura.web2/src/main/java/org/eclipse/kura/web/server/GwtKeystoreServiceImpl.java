@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.shared.service.GwtKeystoreService;
 
@@ -23,6 +24,6 @@ public class GwtKeystoreServiceImpl extends BaseGwtRestrictedComponentService im
     private static final long serialVersionUID = 7977086145487902679L;
 
     public GwtKeystoreServiceImpl() {
-        super(KeystoreService.class);
+        super(i -> i.contains(KeystoreService.class.getName()) && i.contains(ConfigurableComponent.class.getName()));
     }
 }

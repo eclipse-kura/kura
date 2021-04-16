@@ -57,9 +57,10 @@ public class CertificatesManager implements CertificatesService {
     private static final String RESOURCE_CERTIFICATE_DM = "dm";
     private static final String RESOURCE_CERTIFICATE_LOGIN = "login";
     private static final String RESOURCE_CERTIFICATE_BUNDLE = "bundle";
+    private static final String RESOURCE_CERTIFICATE_SSL = "ssl";
 
-    private static final String LOGIN_KEYSTORE_SERVICE_PID = "HttpsKeystore";
-    private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
+    private static final String LOGIN_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.HttpsKeystore";
+    private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.SSLKeystore";
     private static final String DEFAULT_KEYSTORE_SERVICE_PID = "org.eclipse.kura.crypto.CryptoService";
 
     private CryptoService cryptoService;
@@ -128,10 +129,14 @@ public class CertificatesManager implements CertificatesService {
 
     @Override
     public void storeCertificate(Certificate cert, String alias) throws KuraException {
-        if (alias.startsWith(RESOURCE_CERTIFICATE_DM) || alias.startsWith(RESOURCE_CERTIFICATE_BUNDLE)) {
+        if (alias.startsWith(RESOURCE_CERTIFICATE_DM)) {
+            storeDmCertificate(cert, alias);
+        } else if (alias.startsWith(RESOURCE_CERTIFICATE_BUNDLE)) {
             storeTrustRepoCertificate(cert, alias);
         } else if (alias.startsWith(RESOURCE_CERTIFICATE_LOGIN)) {
             storeLoginCertificate(cert, alias);
+        } else if (alias.startsWith(RESOURCE_CERTIFICATE_SSL)) {
+            storeSSLCertificate(cert, alias);
         }
     }
 
@@ -140,9 +145,18 @@ public class CertificatesManager implements CertificatesService {
         addCertificate(kuraCertificate);
     }
 
+    protected void storeSSLCertificate(Certificate cert, String alias) throws KuraException {
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(SSL_KEYSTORE_SERVICE_PID, alias, cert);
+        addCertificate(kuraCertificate);
+    }
+
     protected void storeTrustRepoCertificate(Certificate cert, String alias) throws KuraException {
         KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID, alias, cert);
         addCertificate(kuraCertificate);
+    }
+
+    protected void storeDmCertificate(Certificate cert, String alias) throws KuraException {
+        storeTrustRepoCertificate(cert, alias);
     }
 
     @Override
@@ -181,7 +195,7 @@ public class CertificatesManager implements CertificatesService {
         return true;
     }
 
-    private Enumeration<String> listCertificatesAliases(String keystoreId) {
+    protected Enumeration<String> listCertificatesAliases(String keystoreId) {
         try {
             return Collections.enumeration(getKeystore(keystoreId).getAliases());
         } catch (IllegalArgumentException | GeneralSecurityException | IOException | KuraException e) {

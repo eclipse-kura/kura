@@ -93,9 +93,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 }
             }
 
-        } catch (GeneralSecurityException |
-
-                IOException e) {
+        } catch (GeneralSecurityException | IOException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }

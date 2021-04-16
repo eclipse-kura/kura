@@ -24,8 +24,10 @@ import org.osgi.annotation.versioning.ProviderType;
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 1.2
+ * @deprecated The functionality provided by this service can be replaced by simple calls to OSGi/DS APIs.
  */
 @ProviderType
+@Deprecated
 public interface DriverService {
 
     /**

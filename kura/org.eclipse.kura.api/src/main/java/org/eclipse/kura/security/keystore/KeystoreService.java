@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.security.keystore;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
@@ -38,7 +36,7 @@ public interface KeystoreService {
      *
      * @return
      */
-    public KeyStore getKeyStore() throws GeneralSecurityException, IOException;
+    public KeyStore getKeyStore() throws KuraException;
 
     /**
      * Returns the entry object specified by the provided alias
@@ -48,18 +46,18 @@ public interface KeystoreService {
      * @throws IllegalArgumentException
      *             if the alias is null
      */
-    public Entry getEntry(String alias) throws GeneralSecurityException, IOException;
+    public Entry getEntry(String alias) throws KuraException;
 
-    public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException;
+    public void setEntry(String alias, Entry entry) throws KuraException;
 
     /**
      * Returns the map representing the entries associated with the corresponding aliases in the keystore
      *
      * @return
      */
-    public Map<String, Entry> getEntries() throws GeneralSecurityException, IOException;
+    public Map<String, Entry> getEntries() throws KuraException;
 
-    public void deleteEntry(String alias) throws GeneralSecurityException, IOException;
+    public void deleteEntry(String alias) throws KuraException;
 
     /**
      * Returns one key manager for each type of key material.
@@ -73,7 +71,7 @@ public interface KeystoreService {
      * @throws IllegalArgumentException
      *             if the algorithm is null
      */
-    public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException;
+    public List<KeyManager> getKeyManagers(String algorithm) throws KuraException;
 
     public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes)
             throws KuraException;
@@ -85,6 +83,6 @@ public interface KeystoreService {
 
     public String getCSR(X500Principal principal, String alias, String signerAlg) throws KuraException;
 
-    public List<String> getAliases() throws GeneralSecurityException, IOException;
+    public List<String> getAliases() throws KuraException;
 
 }

@@ -15,7 +15,6 @@ package org.eclipse.kura.certificate;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-import java.util.Optional;
 
 /**
  *
@@ -30,13 +29,13 @@ public class KuraPrivateKeyEntry {
     private final String privateKeyId;
     private final String keystoreId;
     private final String alias;
-    private final Optional<PrivateKeyEntry> privateKeyEntry;
+    private final PrivateKeyEntry privateKeyEntry;
 
     public KuraPrivateKeyEntry(String keystoreId, String alias, PrivateKeyEntry privateKeyEntry) {
         super();
         this.keystoreId = keystoreId;
         this.alias = alias;
-        this.privateKeyEntry = Optional.ofNullable(privateKeyEntry);
+        this.privateKeyEntry = privateKeyEntry;
         this.privateKeyId = keystoreId + ":" + alias;
     }
 
@@ -44,7 +43,7 @@ public class KuraPrivateKeyEntry {
         super();
         this.keystoreId = keystoreId;
         this.alias = alias;
-        this.privateKeyEntry = Optional.ofNullable(new PrivateKeyEntry(privateKey, certificateChain));
+        this.privateKeyEntry = new PrivateKeyEntry(privateKey, certificateChain);
         this.privateKeyId = keystoreId + ":" + alias;
     }
 
@@ -60,7 +59,7 @@ public class KuraPrivateKeyEntry {
         return this.alias;
     }
 
-    public Optional<PrivateKeyEntry> getPrivateKey() {
+    public PrivateKeyEntry getPrivateKey() {
         return this.privateKeyEntry;
     }
 

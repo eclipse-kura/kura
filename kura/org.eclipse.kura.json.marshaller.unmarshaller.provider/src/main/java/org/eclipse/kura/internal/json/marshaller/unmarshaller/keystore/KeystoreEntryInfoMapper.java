@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore;
 
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
+import org.eclipse.kura.core.keystore.util.CsrInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
 import org.eclipse.kura.core.keystore.util.KeyPairInfo;
@@ -86,6 +87,10 @@ public class KeystoreEntryInfoMapper {
             } else if (EntryType.valueOfType(type) == EntryType.PRIVATE_KEY) {
                 PrivateKeyInfo entry = gson.fromJson(json, PrivateKeyInfo.class);
                 entry.setType(EntryType.PRIVATE_KEY);
+                return entry;
+            } else if (EntryType.valueOfType(type) == EntryType.CSR) {
+                CsrInfo entry = gson.fromJson(json, CsrInfo.class);
+                entry.setType(EntryType.CSR);
                 return entry;
             } else {
                 return gson.fromJson(json, EntryInfo.class);

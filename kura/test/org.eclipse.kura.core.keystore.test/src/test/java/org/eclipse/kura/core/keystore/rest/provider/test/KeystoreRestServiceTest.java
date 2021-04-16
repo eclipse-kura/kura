@@ -1,7 +1,10 @@
 package org.eclipse.kura.core.keystore.rest.provider.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,8 +24,10 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.rest.provider.DeleteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.KeystoreRestService;
+import org.eclipse.kura.core.keystore.rest.provider.ReadRequest;
 import org.eclipse.kura.core.keystore.rest.provider.WriteRequest;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
@@ -104,7 +109,7 @@ public class KeystoreRestServiceTest {
                     + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----" };
 
     @Test
-    public void listKeystoresTest() throws IOException, GeneralSecurityException {
+    public void listKeystoresTest() throws KuraException, IOException, GeneralSecurityException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -129,7 +134,7 @@ public class KeystoreRestServiceTest {
     }
 
     @Test
-    public void listKeysTest() throws IOException, GeneralSecurityException {
+    public void listKeysTest() throws KuraException, IOException, GeneralSecurityException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -161,7 +166,7 @@ public class KeystoreRestServiceTest {
     }
 
     @Test
-    public void listKeysTestWithId() throws IOException, GeneralSecurityException {
+    public void listKeysTestWithId() throws KuraException, IOException, GeneralSecurityException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -194,7 +199,7 @@ public class KeystoreRestServiceTest {
     }
 
     @Test
-    public void listKeyTest() throws IOException, GeneralSecurityException {
+    public void listKeyTest() throws KuraException, IOException, GeneralSecurityException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -224,7 +229,8 @@ public class KeystoreRestServiceTest {
     }
 
     @Test
-    public void storeKeyEntryCertTest() throws IOException, GeneralSecurityException, NoSuchFieldException {
+    public void storeKeyEntryCertTest()
+            throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -256,7 +262,8 @@ public class KeystoreRestServiceTest {
     }
 
     @Test(expected = WebApplicationException.class)
-    public void storeKeyEntryKeyTest() throws IOException, GeneralSecurityException, NoSuchFieldException {
+    public void storeKeyEntryKeyTest()
+            throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -288,7 +295,7 @@ public class KeystoreRestServiceTest {
     }
 
     @Test
-    public void deleteKeyEntryTest() throws IOException, GeneralSecurityException, NoSuchFieldException {
+    public void deleteKeyEntryTest() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -315,5 +322,87 @@ public class KeystoreRestServiceTest {
 
         krs.deleteKeyEntry(deleteRequest);
         verify(ksMock).deleteEntry("MyAlias");
+    }
+
+    @Test
+    public void createKeyPairTest() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        when(ksMock.getKeyStore()).thenReturn(ks);
+
+        KeystoreRestService krs = new KeystoreRestService() {
+
+            @Override
+            public void activate(ComponentContext componentContext) {
+                keystoreServices.put("MyKeystore", ksMock);
+                try {
+                    certFactory = CertificateFactory.getInstance("X.509");
+                } catch (CertificateException e) {
+                    // Do nothing...
+                }
+            }
+        };
+        krs.activate(null);
+
+        WriteRequest writeRequest = new WriteRequest();
+        TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
+        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
+        TestUtil.setFieldValue(writeRequest, "type", "KeyPair");
+        TestUtil.setFieldValue(writeRequest, "algorithm", "RSA");
+        TestUtil.setFieldValue(writeRequest, "signatureAlgorithm", "SHA256WithRSA");
+        TestUtil.setFieldValue(writeRequest, "size", 1024);
+        TestUtil.setFieldValue(writeRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        krs.storeKeyEntry(writeRequest);
+
+        assertEquals("MyKeystore:MyAlias", krs.storeKeyEntry(writeRequest));
+    }
+
+    @Test
+    public void getCSRTest() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        when(ksMock.getKeyStore()).thenReturn(ks);
+        when(ksMock.getCSR(anyObject(), eq("MyAlias"), eq("SHA256WithRSA")))
+                .thenReturn("-----BEGIN CERTIFICATE REQUEST-----");
+
+        KeystoreRestService krs = new KeystoreRestService() {
+
+            @Override
+            public void activate(ComponentContext componentContext) {
+                keystoreServices.put("MyKeystore", ksMock);
+                try {
+                    certFactory = CertificateFactory.getInstance("X.509");
+                } catch (CertificateException e) {
+                    // Do nothing...
+                }
+            }
+        };
+        krs.activate(null);
+
+        WriteRequest writeRequest = new WriteRequest();
+        TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
+        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
+        TestUtil.setFieldValue(writeRequest, "type", "KeyPair");
+        TestUtil.setFieldValue(writeRequest, "algorithm", "RSA");
+        TestUtil.setFieldValue(writeRequest, "signatureAlgorithm", "SHA256WithRSA");
+        TestUtil.setFieldValue(writeRequest, "size", 1024);
+        TestUtil.setFieldValue(writeRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        krs.storeKeyEntry(writeRequest);
+
+        ReadRequest readRequest = new ReadRequest();
+        TestUtil.setFieldValue(readRequest, "keystoreName", "MyKeystore");
+        TestUtil.setFieldValue(readRequest, "alias", "MyAlias");
+        TestUtil.setFieldValue(readRequest, "signatureAlgorithm", "SHA256WithRSA");
+        TestUtil.setFieldValue(readRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        String csr = krs.getCSR(readRequest);
+        assertNotNull(csr);
+        assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
     }
 }

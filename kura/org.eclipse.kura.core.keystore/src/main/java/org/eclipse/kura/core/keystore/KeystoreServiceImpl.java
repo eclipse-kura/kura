@@ -74,7 +74,6 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -303,7 +302,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     private void changeKeyStorePassword(char[] oldPassword, char[] newPassword)
-            throws IOException, GeneralSecurityException {
+            throws IOException, GeneralSecurityException, KuraException {
 
         KeyStore keystore = getKeyStore();
 
@@ -344,45 +343,55 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public KeyStore getKeyStore() throws GeneralSecurityException, IOException {
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-
-        char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword(cryptoService);
-
+    public KeyStore getKeyStore() throws KuraException {
+        KeyStore ks = null;
         try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath());) {
+            ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword(cryptoService);
+
             ks.load(tsReadStream, keystorePassword);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get the KeyStore");
         }
 
         return ks;
     }
 
     @Override
-    public Entry getEntry(String alias) throws GeneralSecurityException, IOException {
+    public Entry getEntry(String alias) throws KuraException {
         if (isNull(alias)) {
             throw new IllegalArgumentException("Key Pair alias cannot be null!");
         }
         KeyStore ks = getKeyStore();
 
-        if (ks.entryInstanceOf(alias, PrivateKeyEntry.class) || ks.entryInstanceOf(alias, SecretKeyEntry.class)) {
-            return ks.getEntry(alias,
-                    new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword(cryptoService)));
-        } else {
-            return ks.getEntry(alias, null);
+        try {
+            if (ks.entryInstanceOf(alias, PrivateKeyEntry.class) || ks.entryInstanceOf(alias, SecretKeyEntry.class)) {
+                return ks.getEntry(alias,
+                        new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword(cryptoService)));
+            } else {
+                return ks.getEntry(alias, null);
+            }
+        } catch (GeneralSecurityException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get the entry " + alias);
         }
     }
 
     @Override
-    public Map<String, Entry> getEntries() throws GeneralSecurityException, IOException {
+    public Map<String, Entry> getEntries() throws KuraException {
         Map<String, Entry> result = new HashMap<>();
 
         KeyStore ks = getKeyStore();
-        List<String> aliases = Collections.list(ks.aliases());
+        try {
+            List<String> aliases = Collections.list(ks.aliases());
 
-        for (String alias : aliases) {
-            Entry tempEntry = getEntry(alias);
-            result.put(alias, tempEntry);
+            for (String alias : aliases) {
+                Entry tempEntry = getEntry(alias);
+                result.put(alias, tempEntry);
+            }
+            return result;
+        } catch (GeneralSecurityException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get the entries");
         }
-        return result;
     }
 
     @Override
@@ -397,7 +406,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
         try {
             signer = csBuilder.build(keypair.getPrivate());
         } catch (OperatorCreationException e) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get CSR");
         }
         PKCS10CertificationRequest csr = p10Builder.build(signer);
         try (StringWriter str = new StringWriter(); JcaPEMWriter pemWriter = new JcaPEMWriter(str);) {
@@ -407,54 +416,60 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             pemWriter.flush();
             return str.toString();
         } catch (IOException e) {
-            throw new KuraException(KuraErrorCode.ENCODE_ERROR);
+            throw new KuraException(KuraErrorCode.ENCODE_ERROR, e, "Failed to get CSR");
         }
     }
 
     @Override
     public String getCSR(X500Principal principal, String alias, String signerAlg) throws KuraException {
-        if (isNull(principal) || isNull(alias) || isNull(signerAlg) || signerAlg.trim().isEmpty()) {
+        if (isNull(principal) || isNull(alias) || alias.trim().isEmpty() || isNull(signerAlg)
+                || signerAlg.trim().isEmpty()) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
         String csr = null;
-        try {
-            Entry entry = getEntry(alias);
-            if (entry == null) {
-                throw new KuraException(KuraErrorCode.NOT_FOUND);
-            }
-            if (!(entry instanceof PrivateKeyEntry)) {
-                throw new KuraException(KuraErrorCode.BAD_REQUEST);
-            }
-            PrivateKey privateKey = ((PrivateKeyEntry) entry).getPrivateKey();
-            PublicKey publicKey = ((PrivateKeyEntry) entry).getCertificate().getPublicKey();
-            KeyPair keyPair = new KeyPair(publicKey, privateKey);
-            csr = getCSR(principal, keyPair, signerAlg);
-        } catch (IOException | GeneralSecurityException e) {
-            throw new KuraIOException(e, "Failed to get CSR");
+        Entry entry = getEntry(alias);
+        if (entry == null) {
+            throw new KuraException(KuraErrorCode.NOT_FOUND);
         }
+        if (!(entry instanceof PrivateKeyEntry)) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+        PrivateKey privateKey = ((PrivateKeyEntry) entry).getPrivateKey();
+        PublicKey publicKey = ((PrivateKeyEntry) entry).getCertificate().getPublicKey();
+        KeyPair keyPair = new KeyPair(publicKey, privateKey);
+        csr = getCSR(principal, keyPair, signerAlg);
         return csr;
     }
 
     @Override
-    public List<KeyManager> getKeyManagers(String algorithm) throws GeneralSecurityException, IOException {
+    public List<KeyManager> getKeyManagers(String algorithm) throws KuraException {
         if (isNull(algorithm)) {
             throw new IllegalArgumentException("Algorithm cannot be null!");
         }
         KeyStore ks = getKeyStore();
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-        kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword(cryptoService));
+        try {
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
+            kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword(cryptoService));
 
-        return Arrays.asList(kmf.getKeyManagers());
+            return Arrays.asList(kmf.getKeyManagers());
+        } catch (GeneralSecurityException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e,
+                    "Failed to get the key managers for algorithm " + algorithm);
+        }
     }
 
     @Override
-    public void deleteEntry(String alias) throws GeneralSecurityException, IOException {
+    public void deleteEntry(String alias) throws KuraException {
         if (isNull(alias)) {
             throw new IllegalArgumentException("Alias cannot be null!");
         }
         KeyStore ks = getKeyStore();
-        ks.deleteEntry(alias);
-        saveKeystore(ks);
+        try {
+            ks.deleteEntry(alias);
+            saveKeystore(ks);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to delete entry " + alias);
+        }
     }
 
     private void saveKeystore(KeyStore ks)
@@ -470,7 +485,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     }
 
     @Override
-    public void setEntry(String alias, Entry entry) throws GeneralSecurityException, IOException {
+    public void setEntry(String alias, Entry entry) throws KuraException {
         if (isNull(alias) || alias.trim().isEmpty() || isNull(entry)) {
             throw new IllegalArgumentException("Input cannot be null or empty!");
         }
@@ -484,15 +499,22 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             protectionParameter = new PasswordProtection(
                     this.keystoreServiceOptions.getKeystorePassword(cryptoService));
         }
-
-        ks.setEntry(alias, entry, protectionParameter);
-        saveKeystore(ks);
+        try {
+            ks.setEntry(alias, entry, protectionParameter);
+            saveKeystore(ks);
+        } catch (GeneralSecurityException | IOException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to set the entry " + alias);
+        }
     }
 
     @Override
-    public List<String> getAliases() throws GeneralSecurityException, IOException {
+    public List<String> getAliases() throws KuraException {
         KeyStore ks = getKeyStore();
-        return Collections.list(ks.aliases());
+        try {
+            return Collections.list(ks.aliases());
+        } catch (GeneralSecurityException e) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get aliases");
+        }
     }
 
     @Override
@@ -504,8 +526,10 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
     @Override
     public void createKeyPair(String alias, String algorithm, int keySize, String signatureAlgorithm, String attributes,
             SecureRandom secureRandom) throws KuraException {
-        if (isNull(algorithm) || algorithm.trim().isEmpty() || isNull(secureRandom)) {
-            throw new IllegalArgumentException("Algorithm or random cannot be null or empty!");
+        if (isNull(algorithm) || algorithm.trim().isEmpty() || isNull(secureRandom) || isNull(alias)
+                || isNull(attributes) || attributes.trim().isEmpty() || isNull(signatureAlgorithm)
+                || signatureAlgorithm.trim().isEmpty()) {
+            throw new IllegalArgumentException("Parameters cannot be null or empty!");
         }
         KeyPair keyPair;
         try {
@@ -514,7 +538,7 @@ public class KeystoreServiceImpl implements KeystoreService, ConfigurableCompone
             keyPair = keyGen.generateKeyPair();
             setEntry(alias, new PrivateKeyEntry(keyPair.getPrivate(),
                     generateCertificateChain(keyPair, signatureAlgorithm, attributes)));
-        } catch (GeneralSecurityException | OperatorCreationException | IOException e) {
+        } catch (GeneralSecurityException | OperatorCreationException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
     }

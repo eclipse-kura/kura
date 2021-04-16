@@ -8,10 +8,15 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -24,12 +29,16 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.keystore.request.handler.KeystoreServiceRequestHandlerV1;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
+import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.core.keystore.util.PrivateKeyInfo;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -120,6 +129,13 @@ public class KeystoreServiceRequestHandlerTest {
     private final String JSON_MESSAGE_PUT_KEY = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
             + "   \"alias\":\"myPrivateKey\",\n" + "   \"type\":\"PrivateKey\",\n" + "   \"privateKey\" : \""
             + PRIVATE_KEY + ",\n" + "   \"certificateChain\":[\"" + CERTIFICATE_CHAIN + "\"]\n" + "}";
+    private final String JSON_MESSAGE_PUT_KEY_PAIR = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
+            + "   \"alias\":\"myKeyPair\",\n" + "   \"type\":\"KeyPair\",\n" + "   \"algorithm\" : \"RSA\",\n"
+            + "   \"size\": 2048,\n" + "   \"signatureAlgorithm\" : \"SHA256WithRSA\",\n"
+            + "   \"attributes\" : \"CN=Kura, OU=IoT, O=Eclipse, C=US\"\n" + "}";
+    private final String JSON_MESSAGE_GET_CSR = "{\n" + "    \"keystoreName\":\"MyKeystore\",\n"
+            + "    \"alias\":\"alias\",\n" + "    \"algorithm\" : \"SHA256withRSA\",\n"
+            + "    \"attributes\" : \"CN=Kura, OU=IoT, O=Eclipse, C=US\"\n" + "}";
 
     @Test(expected = KuraException.class)
     public void doGetTestNoResources() throws KuraException {
@@ -420,6 +436,105 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
+    public void testDoPutKeyPair() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        when(ksMock.getKeyStore()).thenReturn(ks);
+
+        KeystoreServiceRequestHandlerV1 keystoreRH = new KeystoreServiceRequestHandlerV1() {
+
+            @Override
+            public void activate(ComponentContext componentContext) {
+                keystoreServices.put("MyKeystore", ksMock);
+                try {
+                    certFactory = CertificateFactory.getInstance("X.509");
+                } catch (CertificateException e) {
+                    // Do nothing...
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected <T> T unmarshal(String jsonString, Class<T> clazz) {
+                KeyPairInfo info = new KeyPairInfo("myKeyPair", "MyKeystore");
+                info.setType(EntryType.KEY_PAIR);
+                info.setAlgorithm("RSA");
+                info.setSignatureAlgorithm("SHA256WithRSA");
+                info.setAttributes("CN=Kura, OU=IoT, O=Eclipse, C=US");
+                info.setSize(2048);
+                return (T) info;
+            }
+        };
+        keystoreRH.activate(null);
+
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("keys");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        request.setBody(JSON_MESSAGE_PUT_KEY_PAIR.getBytes());
+        KuraMessage message = new KuraMessage(request, reqResources);
+
+        KuraMessage resMessage = keystoreRH.doPut(null, message);
+        KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+        assertEquals("\"MyKeystore" + ":" + "myKeyPair\"", new String(resPayload.getBody(), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void getCSRTest() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        when(ksMock.getKeyStore()).thenReturn(ks);
+        when(ksMock.getEntry("alias")).thenReturn(createPrivateKey("alias", PRIVATE_KEY, CERTIFICATE_CHAIN));
+
+        KeystoreServiceRequestHandlerV1 keystoreRH = new KeystoreServiceRequestHandlerV1() {
+
+            @Override
+            public void activate(ComponentContext componentContext) {
+                keystoreServices.put("MyKeystore", ksMock);
+                try {
+                    certFactory = CertificateFactory.getInstance("X.509");
+                } catch (CertificateException e) {
+                    // Do nothing...
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected <T> T unmarshal(String jsonString, Class<T> clazz) {
+                PrivateKeyInfo info = new PrivateKeyInfo("alias", "MyKeystore");
+                info.setType(EntryType.PRIVATE_KEY);
+                info.setPrivateKey(PRIVATE_KEY);
+                info.setCertificateChain(CERTIFICATE_CHAIN);
+                return (T) info;
+            }
+        };
+        keystoreRH.activate(null);
+
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add("csr");
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        request.setBody(JSON_MESSAGE_GET_CSR.getBytes());
+        KuraMessage message = new KuraMessage(request, reqResources);
+
+        KuraMessage resMessage = keystoreRH.doGet(null, message);
+        KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
+
+        String reds = new String(resPayload.getBody(), StandardCharsets.UTF_8);
+        assertTrue(reds.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
+    }
+
+    @Test
     public void testDoDel() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -461,5 +576,34 @@ public class KeystoreServiceRequestHandlerTest {
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+    }
+
+    private PrivateKeyEntry createPrivateKey(String alias, String privateKey, String[] certificateChain)
+            throws IOException, GeneralSecurityException, KuraException {
+        // Works with RSA and DSA. EC is not supported since the certificate is encoded
+        // with ECDSA while the corresponding private key with EC.
+        // This cause an error when the PrivateKeyEntry is generated.
+        Certificate[] certs = parsePublicCertificates(certificateChain);
+
+        Security.addProvider(new BouncyCastleProvider());
+        PEMParser pemParser = new PEMParser(new StringReader(privateKey));
+        Object object = pemParser.readObject();
+        pemParser.close();
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+        PrivateKey privkey = null;
+        if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
+            privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
+        }
+
+        return new PrivateKeyEntry(privkey, certs);
+    }
+
+    private X509Certificate[] parsePublicCertificates(String[] publicKeys) throws CertificateException {
+        List<X509Certificate> certificateChain = new ArrayList<>();
+        for (String publicKey : publicKeys) {
+            ByteArrayInputStream is = new ByteArrayInputStream(publicKey.getBytes());
+            certificateChain.add((X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is));
+        }
+        return certificateChain.toArray(new X509Certificate[0]);
     }
 }

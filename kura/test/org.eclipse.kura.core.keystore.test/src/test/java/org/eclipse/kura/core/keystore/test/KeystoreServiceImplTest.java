@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
-import java.security.InvalidParameterException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -36,6 +35,7 @@ import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -98,7 +98,7 @@ public class KeystoreServiceImplTest {
     }
 
     @Test
-    public void testGetKeyStore() throws GeneralSecurityException, IOException {
+    public void testGetKeyStore() throws KuraException, KeyStoreException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -117,7 +117,7 @@ public class KeystoreServiceImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testGetEntryNullAlias() throws GeneralSecurityException, IOException {
+    public void testGetEntryNullAlias() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -133,7 +133,7 @@ public class KeystoreServiceImplTest {
     }
 
     @Test
-    public void testGetEntryEmptyAlias() throws GeneralSecurityException, IOException {
+    public void testGetEntryEmptyAlias() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -432,7 +432,7 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.createKeyPair(null, 0);
+        keystoreService.createKeyPair("alias", null, 1024, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -450,10 +450,10 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.createKeyPair("", 0);
+        keystoreService.createKeyPair("alias", "", 1024, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
-    @Test(expected = InvalidParameterException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testCreateKeyPairZeroKeyLength() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -468,7 +468,7 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.createKeyPair("DSA", 0);
+        keystoreService.createKeyPair("alias", "DSA", 0, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
     @Test(expected = KuraException.class)
@@ -486,11 +486,11 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.createKeyPair("KSA", 0);
+        keystoreService.createKeyPair("alias", "KSA", 1024, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
-    @Test
-    public void testCreateKeyPair() throws KuraException {
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateKeyPairEmptyAlias() throws KuraException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -504,10 +504,79 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        KeyPair keyPair = keystoreService.createKeyPair("DSA", 1024);
-        assertNotNull(keyPair);
-        assertNotNull(keyPair.getPrivate());
-        assertNotNull(keyPair.getPublic());
+        keystoreService.createKeyPair("", "DSA", 1024, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateKeyPairEmptyAttributes() throws KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.createKeyPair("alias", "DSA", 1024, "SHA256WithDSA", "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateKeyPairEmptySigAlg() throws KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.createKeyPair("alias", "DSA", 0, "", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+    }
+
+    @Test
+    public void testCreateKeyPair()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl() {
+
+            @Override
+            public KeyStore getKeyStore() throws KuraException {
+                return ks;
+            }
+        };
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.createKeyPair("alias", "DSA", 1024, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        Entry entry = keystoreService.getEntry("alias");
+        assertNotNull(entry);
+        assertTrue(entry instanceof PrivateKeyEntry);
+        assertNotNull(((PrivateKeyEntry) entry).getPrivateKey());
+        assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
+        assertEquals("DSA", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
+        assertEquals("DSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -525,11 +594,11 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.getCSR(null, null, null);
+        keystoreService.getCSR(null, "alias", "alg");
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCreateCSRNullKeypair() throws KuraException {
+    public void testCreateCSRNullSignerAlg() throws KuraException, NoSuchAlgorithmException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -544,33 +613,15 @@ public class KeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-
-        keystoreService.getCSR(principal, null, null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testCreateCSRNullSignerAlg() throws KuraException {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
-        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
-
-        CryptoService cryptoService = mock(CryptoService.class);
-        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
-
-        ComponentContext componentContext = mock(ComponentContext.class);
-
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
-        keystoreService.setCryptoService(cryptoService);
-        keystoreService.activate(componentContext, properties);
-
-        X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        KeyPair keyPair = keystoreService.createKeyPair("RSA", 2048);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        keyGen.initialize(1024, new SecureRandom());
+        KeyPair keyPair = keyGen.generateKeyPair();
 
         keystoreService.getCSR(principal, keyPair, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCreateCSREmptyAlg() throws KuraException {
+    public void testCreateCSREmptyAlg() throws KuraException, NoSuchAlgorithmException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -585,13 +636,15 @@ public class KeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        KeyPair keyPair = keystoreService.createKeyPair("RSA", 2048);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        keyGen.initialize(1024, new SecureRandom());
+        KeyPair keyPair = keyGen.generateKeyPair();
 
         keystoreService.getCSR(principal, keyPair, "");
     }
 
     @Test
-    public void testCreateCSR() throws KuraException {
+    public void testCreateCSRWithKeyPair() throws KuraException, NoSuchAlgorithmException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -606,9 +659,44 @@ public class KeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        KeyPair keyPair = keystoreService.createKeyPair("RSA", 2048);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        keyGen.initialize(1024, new SecureRandom());
+        KeyPair keyPair = keyGen.generateKeyPair();
 
         String csr = keystoreService.getCSR(principal, keyPair, "SHA256withRSA");
+        assertNotNull(csr);
+        assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
+    }
+
+    @Test
+    public void testCreateCSRWithAlias()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl() {
+
+            @Override
+            public KeyStore getKeyStore() throws KuraException {
+                return ks;
+            }
+        };
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.createKeyPair("alias", "RSA", 2048, "SHA256withRSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+        X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        String csr = keystoreService.getCSR(principal, "alias", "SHA256withRSA");
         assertNotNull(csr);
         assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
     }

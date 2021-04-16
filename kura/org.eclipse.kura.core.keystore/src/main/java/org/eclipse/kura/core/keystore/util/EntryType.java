@@ -16,7 +16,8 @@ public enum EntryType {
 
     TRUSTED_CERTIFICATE("TrustedCertificate"),
     PRIVATE_KEY("PrivateKey"),
-    KEY_PAIR("KeyPair");
+    KEY_PAIR("KeyPair"),
+    CSR("CSR");
 
     String type;
 

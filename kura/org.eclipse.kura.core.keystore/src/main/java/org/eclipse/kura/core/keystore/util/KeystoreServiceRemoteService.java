@@ -96,7 +96,7 @@ public class KeystoreServiceRemoteService {
                 if (entry.getValue().getKeyStore() != null) {
                     keystores.add(buildKeystoreInfo(entry.getKey(), entry.getValue().getKeyStore()));
                 }
-            } catch (GeneralSecurityException | IOException e) {
+            } catch (KuraException | KeyStoreException e) {
                 throw new WebApplicationException(e);
             }
         });
@@ -117,7 +117,7 @@ public class KeystoreServiceRemoteService {
                                     (TrustedCertificateEntry) entry.getValue(), false));
                         }
                     });
-                } catch (GeneralSecurityException | IOException e) {
+                } catch (KuraException e) {
                     throw new WebApplicationException(e);
                 }
             }
@@ -138,7 +138,7 @@ public class KeystoreServiceRemoteService {
                                 true));
                     }
                 });
-            } catch (GeneralSecurityException | IOException e) {
+            } catch (KuraException e) {
                 throw new WebApplicationException(e);
             }
         } else {
@@ -149,24 +149,30 @@ public class KeystoreServiceRemoteService {
 
     protected EntryInfo getKeyInternal(final String id, final String alias) {
         Entry entry;
-        try {
-            entry = keystoreServices.get(id).getEntry(alias);
-            if (entry instanceof PrivateKeyEntry) {
-                return buildPrivateKeyInfo(id, alias, (PrivateKeyEntry) entry, true);
-            } else if (entry instanceof TrustedCertificateEntry) {
-                return buildCertificateInfo(id, alias, (TrustedCertificateEntry) entry, true);
-            } else {
-                throw new WebApplicationException("404");
+        KeystoreService keystoreService = this.keystoreServices.get(id);
+        if (keystoreService != null) {
+            try {
+                entry = keystoreService.getEntry(alias);
+                if (entry instanceof PrivateKeyEntry) {
+                    return buildPrivateKeyInfo(id, alias, (PrivateKeyEntry) entry, true);
+                } else if (entry instanceof TrustedCertificateEntry) {
+                    return buildCertificateInfo(id, alias, (TrustedCertificateEntry) entry, true);
+                } else {
+                    throw new WebApplicationException(404);
+                }
+
+            } catch (KuraException e) {
+                throw new WebApplicationException(e);
             }
-        } catch (GeneralSecurityException | IOException e) {
-            throw new WebApplicationException(e);
+        } else {
+            throw new WebApplicationException(404);
         }
     }
 
     protected String getCSRInternal(final EntryInfo request) {
         try {
-            if (request.getType() == EntryType.KEY_PAIR) {
-                KeyPairInfo info = (KeyPairInfo) request;
+            if (request.getType() == EntryType.CSR) {
+                CsrInfo info = (CsrInfo) request;
 
                 X500Principal principal = new X500Principal(info.getAttributes());
                 return this.keystoreServices.get(info.getKeystoreName()).getCSR(principal, info.getAlias(),
@@ -207,7 +213,7 @@ public class KeystoreServiceRemoteService {
             } else {
                 throw new WebApplicationException(INVALID_ENTRY_TYPE);
             }
-        } catch (GeneralSecurityException | IOException | KuraException e) {
+        } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
         return request.getKeystoreName() + ":" + request.getAlias();
@@ -229,7 +235,7 @@ public class KeystoreServiceRemoteService {
             } else {
                 throw new WebApplicationException(INVALID_ENTRY_TYPE);
             }
-        } catch (GeneralSecurityException | IOException | KuraException e) {
+        } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
         return writeRequest.getKeystoreName() + ":" + writeRequest.getAlias();
@@ -238,20 +244,20 @@ public class KeystoreServiceRemoteService {
     protected void deleteKeyEntryInternal(String keystoreName, String alias) {
         try {
             this.keystoreServices.get(keystoreName).deleteEntry(alias);
-        } catch (GeneralSecurityException | IOException e) {
+        } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
     }
 
     private void storeCertificateInternal(String keystoreName, String alias, String certificate)
-            throws GeneralSecurityException, IOException {
+            throws KuraException, CertificateException {
         ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes());
         X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
         this.keystoreServices.get(keystoreName).setEntry(alias, new TrustedCertificateEntry(cert));
     }
 
     private void storePrivateKeyInternal(String keystoreName, String alias, String privateKey,
-            String[] certificateChain) throws IOException, GeneralSecurityException {
+            String[] certificateChain) throws IOException, GeneralSecurityException, KuraException {
         // Works with RSA and DSA. EC is not supported since the certificate is encoded
         // with ECDSA while the corresponding private key with EC.
         // This cause an error when the PrivateKeyEntry is generated.

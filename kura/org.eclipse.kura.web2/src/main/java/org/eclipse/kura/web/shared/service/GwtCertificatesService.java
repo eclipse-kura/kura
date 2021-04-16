@@ -18,7 +18,7 @@ import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
-import org.eclipse.kura.web.shared.model.GwtCertificate;
+import org.eclipse.kura.web.shared.model.GwtKeystoreEntry;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -36,10 +36,10 @@ public interface GwtCertificatesService extends RemoteService {
     public void storeCertificate(GwtXSRFToken xsrfToken, String keyStorePid, String certificate, String alias)
             throws GwtKuraException;
 
-    public List<GwtCertificate> listCertificates() throws GwtKuraException;
+    public List<GwtKeystoreEntry> listEntries() throws GwtKuraException;
 
     public List<String> listKeystoreServicePids() throws GwtKuraException;
 
     @Audit(componentName = "UI Certificate", description = "Remove certificate")
-    public void removeCertificate(GwtXSRFToken xsrfToken, GwtCertificate certificate) throws GwtKuraException;
+    public void removeEntry(GwtXSRFToken xsrfToken, GwtKeystoreEntry certificate) throws GwtKuraException;
 }

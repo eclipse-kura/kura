@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,11 +16,23 @@ import java.io.Serializable;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class GwtCertificate extends GwtBaseModel implements IsSerializable, Serializable {
+public class GwtKeystoreEntry extends GwtBaseModel implements IsSerializable, Serializable {
 
     private static final long serialVersionUID = 5876379937604300640L;
 
-    public GwtCertificate() {
+    public enum Kind {
+        TRUSTED_CERT,
+        KEY_PAIR,
+        SECRET_KEY
+    }
+
+    public GwtKeystoreEntry() {
+    }
+
+    public GwtKeystoreEntry(final String alias, final String keystoreName, final Kind kind) {
+        set("alias", alias);
+        set("keystoreName", keystoreName);
+        set("kind", kind.toString());
     }
 
     public String getAlias() {
@@ -31,11 +43,7 @@ public class GwtCertificate extends GwtBaseModel implements IsSerializable, Seri
         return get("keystoreName");
     }
 
-    public void setAlias(String alias) {
-        set("alias", alias);
-    }
-
-    public void setKeystoreName(String keystoreName) {
-        set("keystoreName", keystoreName);
+    public Kind getKind() {
+        return Kind.valueOf(get("kind"));
     }
 }

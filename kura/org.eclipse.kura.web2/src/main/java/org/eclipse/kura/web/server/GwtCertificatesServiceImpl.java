@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.SecretKeyEntry;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -32,6 +35,7 @@ import java.util.Base64.Decoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
@@ -40,7 +44,8 @@ import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
-import org.eclipse.kura.web.shared.model.GwtCertificate;
+import org.eclipse.kura.web.shared.model.GwtKeystoreEntry;
+import org.eclipse.kura.web.shared.model.GwtKeystoreEntry.Kind;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.osgi.framework.ServiceReference;
@@ -78,11 +83,13 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             } else {
                 PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(privKey, certs);
                 final String filter = format("(%s=%s)", "kura.service.pid", keyStorePid);
+
                 final Collection<ServiceReference<KeystoreService>> keystoreServiceReferences = ServiceLocator
                         .getInstance().getServiceReferences(KeystoreService.class, filter);
                 for (ServiceReference<KeystoreService> reference : keystoreServiceReferences) {
                     KeystoreService keystoreService = ServiceLocator.getInstance().getService(reference);
                     keystoreService.setEntry(alias, privateKeyEntry);
+                    ServiceLocator.getInstance().ungetService(reference);
                 }
             }
 
@@ -159,46 +166,75 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
     }
 
     @Override
-    public List<GwtCertificate> listCertificates() throws GwtKuraException {
-        CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
+    public List<GwtKeystoreEntry> listEntries() throws GwtKuraException {
 
-        if (certificateService == null) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-        }
+        List<GwtKeystoreEntry> result = new ArrayList<>();
 
-        try {
-            List<KuraCertificateEntry> certs = certificateService.getCertificates();
-            List<GwtCertificate> certificates = new ArrayList<>();
-            certs.forEach(certInfo -> {
-                GwtCertificate gwtCertificate = new GwtCertificate();
-                gwtCertificate.setAlias(certInfo.getAlias());
-                gwtCertificate.setKeystoreName(certInfo.getKeystoreId());
-                certificates.add(gwtCertificate);
-            });
+        ServiceLocator.withAllServiceReferences(KeystoreService.class, null, (ref, context) -> {
 
-            return certificates;
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-        }
+            final Object kuraServicePid = ref.getProperty("kura.service.pid");
 
+            if (!(kuraServicePid instanceof String)) {
+                return;
+            }
+
+            final KeystoreService service = context.getService(ref);
+
+            if (service == null) {
+                return;
+            }
+
+            try {
+                for (final Map.Entry<String, Entry> e : service.getEntries().entrySet()) {
+
+                    final Kind kind;
+
+                    if (e.getValue() instanceof PrivateKeyEntry) {
+                        kind = Kind.KEY_PAIR;
+                    } else if (e.getValue() instanceof TrustedCertificateEntry) {
+                        kind = Kind.TRUSTED_CERT;
+                    } else if (e.getValue() instanceof SecretKeyEntry) {
+                        kind = Kind.SECRET_KEY;
+                    } else {
+                        continue;
+                    }
+
+                    result.add(new GwtKeystoreEntry(e.getKey(), (String) kuraServicePid, kind));
+                }
+            } finally {
+                context.ungetService(ref);
+            }
+        });
+
+        return result;
     }
 
     @Override
-    public void removeCertificate(GwtXSRFToken xsrfToken, GwtCertificate certificate) throws GwtKuraException {
-        CertificatesService certificateService = ServiceLocator.getInstance().getService(CertificatesService.class);
+    public void removeEntry(GwtXSRFToken xsrfToken, GwtKeystoreEntry entry) throws GwtKuraException {
 
-        if (certificateService == null) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        final Collection<ServiceReference<KeystoreService>> refs = ServiceLocator.getInstance()
+                .getServiceReferences(KeystoreService.class, "(kura.service.pid=" + entry.getKeystoreName() + ")");
+
+        if (refs.isEmpty()) {
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
 
-        String alias = certificate.getAlias();
-        String keystoreName = certificate.getKeystoreName();
+        for (final ServiceReference<KeystoreService> ref : refs) {
+            final KeystoreService service = ServiceLocator.getInstance().getService(ref);
 
-        try {
-            certificateService.deleteCertificate(keystoreName + ":" + alias);
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+            if (service == null) {
+                continue;
+            }
+
+            try {
+                try {
+                    service.deleteEntry(entry.getAlias());
+                } catch (Exception e) {
+                    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+                }
+            } finally {
+                ServiceLocator.getInstance().ungetService(ref);
+            }
         }
-
     }
 }

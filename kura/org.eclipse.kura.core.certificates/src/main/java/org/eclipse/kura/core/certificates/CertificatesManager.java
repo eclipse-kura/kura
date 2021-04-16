@@ -135,12 +135,12 @@ public class CertificatesManager implements CertificatesService {
         }
     }
 
-    private void storeLoginCertificate(Certificate cert, String alias) throws KuraException {
+    protected void storeLoginCertificate(Certificate cert, String alias) throws KuraException {
         KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(LOGIN_KEYSTORE_SERVICE_PID, alias, cert);
         addCertificate(kuraCertificate);
     }
 
-    private void storeTrustRepoCertificate(Certificate cert, String alias) throws KuraException {
+    protected void storeTrustRepoCertificate(Certificate cert, String alias) throws KuraException {
         KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID, alias, cert);
         addCertificate(kuraCertificate);
     }

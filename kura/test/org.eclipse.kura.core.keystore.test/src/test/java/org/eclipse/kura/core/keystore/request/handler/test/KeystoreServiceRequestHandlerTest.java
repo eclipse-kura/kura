@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -36,6 +38,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.core.keystore.request.handler.KeystoreServiceRequestHandlerV1;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
+import org.eclipse.kura.core.keystore.util.CsrInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
 import org.eclipse.kura.core.keystore.util.KeyPairInfo;
@@ -432,7 +435,7 @@ public class KeystoreServiceRequestHandlerTest {
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doPut(null, message);
-        KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
+        resMessage.getPayload();
     }
 
     @Test
@@ -493,6 +496,8 @@ public class KeystoreServiceRequestHandlerTest {
         ks.load(null, password);
         when(ksMock.getKeyStore()).thenReturn(ks);
         when(ksMock.getEntry("alias")).thenReturn(createPrivateKey("alias", PRIVATE_KEY, CERTIFICATE_CHAIN));
+        String csrString = "-----BEGIN CERTIFICATE REQUEST-----";
+        when(ksMock.getCSR(any(X500Principal.class), any(String.class), any(String.class))).thenReturn(csrString);
 
         KeystoreServiceRequestHandlerV1 keystoreRH = new KeystoreServiceRequestHandlerV1() {
 
@@ -509,10 +514,10 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                PrivateKeyInfo info = new PrivateKeyInfo("alias", "MyKeystore");
-                info.setType(EntryType.PRIVATE_KEY);
-                info.setPrivateKey(PRIVATE_KEY);
-                info.setCertificateChain(CERTIFICATE_CHAIN);
+                CsrInfo info = new CsrInfo("alias", "MyKeystore");
+                info.setType(EntryType.CSR);
+                info.setSignatureAlgorithm("SHA256withRSA");
+                info.setAttributes("CN=Kura, OU=IoT, O=Eclipse, C=US");
                 return (T) info;
             }
         };
@@ -531,7 +536,7 @@ public class KeystoreServiceRequestHandlerTest {
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         String reds = new String(resPayload.getBody(), StandardCharsets.UTF_8);
-        assertTrue(reds.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
+        assertTrue(reds.contains(csrString));
     }
 
     @Test

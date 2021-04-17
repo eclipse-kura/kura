@@ -594,7 +594,7 @@ public class KeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        keystoreService.getCSR(null, "alias", "alg");
+        keystoreService.getCSR("alias", null, "alg");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -617,7 +617,7 @@ public class KeystoreServiceImplTest {
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keyPair = keyGen.generateKeyPair();
 
-        keystoreService.getCSR(principal, keyPair, null);
+        keystoreService.getCSR(keyPair, principal, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -640,7 +640,7 @@ public class KeystoreServiceImplTest {
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keyPair = keyGen.generateKeyPair();
 
-        keystoreService.getCSR(principal, keyPair, "");
+        keystoreService.getCSR(keyPair, principal, "");
     }
 
     @Test
@@ -663,7 +663,7 @@ public class KeystoreServiceImplTest {
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keyPair = keyGen.generateKeyPair();
 
-        String csr = keystoreService.getCSR(principal, keyPair, "SHA256withRSA");
+        String csr = keystoreService.getCSR(keyPair, principal, "SHA256withRSA");
         assertNotNull(csr);
         assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
     }
@@ -696,7 +696,7 @@ public class KeystoreServiceImplTest {
         keystoreService.createKeyPair("alias", "RSA", 2048, "SHA256withRSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
 
-        String csr = keystoreService.getCSR(principal, "alias", "SHA256withRSA");
+        String csr = keystoreService.getCSR("alias", principal, "SHA256withRSA");
         assertNotNull(csr);
         assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
     }

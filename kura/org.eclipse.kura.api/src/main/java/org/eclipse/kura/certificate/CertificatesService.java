@@ -39,7 +39,7 @@ public interface CertificatesService {
      *            A string that will be used to identify the certificate in a key store
      * @throws KuraException
      *             raised if the certificate storage operation failed
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #addCertificate(KuraCertificateEntry)}
      */
     @Deprecated
     public void storeCertificate(Certificate cert, String alias) throws KuraException;
@@ -50,7 +50,7 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the CA aliases stored in a key store.
      *
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #getCertificateEntry(String)}
      */
     @Deprecated
     public Enumeration<String> listCACertificatesAliases();
@@ -61,7 +61,7 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the aliases stored in a key store.
      *
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #getCertificateEntry(String)}
      */
     @Deprecated
     public Enumeration<String> listSSLCertificatesAliases();
@@ -73,7 +73,7 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the aliases stored in a key store.
      *
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #getCertificateEntry(String)}
      */
     @Deprecated
     public Enumeration<String> listDMCertificatesAliases();
@@ -85,7 +85,7 @@ public interface CertificatesService {
      *
      * @return An enumeration containing the strings that represent the aliases stored in a key store.
      *
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #getCertificateEntry(String)}
      */
     @Deprecated
     public Enumeration<String> listBundleCertificatesAliases();
@@ -97,7 +97,7 @@ public interface CertificatesService {
      *            The string used to identify the certificate in a key store
      * @return A Certificate object retrieved from a key store.
      *
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #getCertificateEntry(String)}
      */
     @Deprecated
     public Certificate returnCertificate(String alias) throws KuraException;
@@ -111,7 +111,7 @@ public interface CertificatesService {
      * @throws KuraException
      *             raised if the certificate removal operation failed
      *
-     * @deprecated
+     * @deprecated Since 2.2 use {@link #deleteCertificate(String)}
      */
     @Deprecated
     public void removeCertificate(String alias) throws KuraException;

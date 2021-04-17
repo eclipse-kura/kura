@@ -1,29 +1,24 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
-import java.security.PrivateKey;
-import java.security.Security;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -38,9 +33,6 @@ import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.rest.provider.ReadRequest;
 import org.eclipse.kura.core.keystore.rest.provider.WriteRequest;
@@ -77,7 +69,7 @@ public class KeystoreServiceRemoteService {
         this.keystoreServiceTrackerCustomizer = new KeystoreServiceTrackerCustomizer();
         initKeystoreServiceTracking();
         try {
-            certFactory = CertificateFactory.getInstance("X.509");
+            this.certFactory = CertificateFactory.getInstance("X.509");
         } catch (CertificateException e) {
             logger.error("Failed to get the certificate factory", e);
         }
@@ -175,7 +167,7 @@ public class KeystoreServiceRemoteService {
                 CsrInfo info = (CsrInfo) request;
 
                 X500Principal principal = new X500Principal(info.getAttributes());
-                return this.keystoreServices.get(info.getKeystoreName()).getCSR(principal, info.getAlias(),
+                return this.keystoreServices.get(info.getKeystoreName()).getCSR(info.getAlias(), principal,
                         info.getSignatureAlgorithm());
 
             } else {
@@ -189,7 +181,7 @@ public class KeystoreServiceRemoteService {
     protected String getCSRInternal(final ReadRequest request) {
         try {
             X500Principal principal = new X500Principal(request.getAttributes());
-            return this.keystoreServices.get(request.getKeystoreName()).getCSR(principal, request.getAlias(),
+            return this.keystoreServices.get(request.getKeystoreName()).getCSR(request.getAlias(), principal,
                     request.getSignatureAlgorithm());
         } catch (KuraException e) {
             throw new WebApplicationException(e);
@@ -205,11 +197,6 @@ public class KeystoreServiceRemoteService {
                 KeyPairInfo info = (KeyPairInfo) request;
                 storeKeyPairInternal(info.getKeystoreName(), info.getAlias(), info.getAlgorithm(), info.getSize(),
                         info.getSignatureAlgorithm(), info.getAttributes());
-                // Don't store private keys
-                // } else if (request.getType() == EntryType.PRIVATE_KEY) {
-                // PrivateKeyInfo info = (PrivateKeyInfo) request;
-                // storePrivateKeyInternal(info.getKeystoreName(), info.getAlias(), info.getPrivateKey(),
-                // info.getCertificateChain());
             } else {
                 throw new WebApplicationException(INVALID_ENTRY_TYPE);
             }
@@ -228,10 +215,6 @@ public class KeystoreServiceRemoteService {
                 storeKeyPairInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
                         writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
                         writeRequest.getAttributes());
-                // Don't store private keys
-                // } else if (EntryType.valueOfType(writeRequest.getType()) == EntryType.PRIVATE_KEY) {
-                // storePrivateKeyInternal(writeRequest.getKeystoreName(), writeRequest.getAlias(),
-                // writeRequest.getPrivateKey(), writeRequest.getCertificateChain());
             } else {
                 throw new WebApplicationException(INVALID_ENTRY_TYPE);
             }
@@ -252,42 +235,13 @@ public class KeystoreServiceRemoteService {
     private void storeCertificateInternal(String keystoreName, String alias, String certificate)
             throws KuraException, CertificateException {
         ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes());
-        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
+        X509Certificate cert = (X509Certificate) this.certFactory.generateCertificate(is);
         this.keystoreServices.get(keystoreName).setEntry(alias, new TrustedCertificateEntry(cert));
-    }
-
-    private void storePrivateKeyInternal(String keystoreName, String alias, String privateKey,
-            String[] certificateChain) throws IOException, GeneralSecurityException, KuraException {
-        // Works with RSA and DSA. EC is not supported since the certificate is encoded
-        // with ECDSA while the corresponding private key with EC.
-        // This cause an error when the PrivateKeyEntry is generated.
-        Certificate[] certs = parsePublicCertificates(certificateChain);
-
-        Security.addProvider(new BouncyCastleProvider());
-        PEMParser pemParser = new PEMParser(new StringReader(privateKey));
-        Object object = pemParser.readObject();
-        pemParser.close();
-        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
-        PrivateKey privkey = null;
-        if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
-            privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
-        }
-
-        this.keystoreServices.get(keystoreName).setEntry(alias, new PrivateKeyEntry(privkey, certs));
     }
 
     private void storeKeyPairInternal(String keystoreName, String alias, String algorithm, int size,
             String signatureAlgorithm, String attributes) throws KuraException {
         this.keystoreServices.get(keystoreName).createKeyPair(alias, algorithm, size, signatureAlgorithm, attributes);
-    }
-
-    private X509Certificate[] parsePublicCertificates(String[] publicKeys) throws CertificateException {
-        List<X509Certificate> certificateChain = new ArrayList<>();
-        for (String publicKey : publicKeys) {
-            ByteArrayInputStream is = new ByteArrayInputStream(publicKey.getBytes());
-            certificateChain.add((X509Certificate) certFactory.generateCertificate(is));
-        }
-        return certificateChain.toArray(new X509Certificate[0]);
     }
 
     private KeystoreInfo buildKeystoreInfo(String id, KeyStore keystore) throws KeyStoreException {

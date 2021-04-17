@@ -1,11 +1,23 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.core.keystore.request.handler.test;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.any;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -79,7 +91,7 @@ public class KeystoreServiceRequestHandlerTest {
             + "44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\n" + "-----END CERTIFICATE-----";
     private final String JSON_MESSAGE_PUT_CERT = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
             + "   \"alias\":\"myCertTest99\",\n" + "   \"type\":\"TrustedCertificate\",\n" + "   \"certificate\":\""
-            + CERTIFICATE + "\n" + "}";
+            + this.CERTIFICATE + "\n" + "}";
     private final String JSON_MESSAGE_DEL = "{\n" + "    \"keystoreName\" : \"MyKeystore\",\n"
             + "    \"alias\" : \"mycerttestec\"\n" + "}";
     private final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n"
@@ -131,7 +143,7 @@ public class KeystoreServiceRequestHandlerTest {
                     + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----" };
     private final String JSON_MESSAGE_PUT_KEY = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
             + "   \"alias\":\"myPrivateKey\",\n" + "   \"type\":\"PrivateKey\",\n" + "   \"privateKey\" : \""
-            + PRIVATE_KEY + ",\n" + "   \"certificateChain\":[\"" + CERTIFICATE_CHAIN + "\"]\n" + "}";
+            + this.PRIVATE_KEY + ",\n" + "   \"certificateChain\":[\"" + this.CERTIFICATE_CHAIN + "\"]\n" + "}";
     private final String JSON_MESSAGE_PUT_KEY_PAIR = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
             + "   \"alias\":\"myKeyPair\",\n" + "   \"type\":\"KeyPair\",\n" + "   \"algorithm\" : \"RSA\",\n"
             + "   \"size\": 2048,\n" + "   \"signatureAlgorithm\" : \"SHA256WithRSA\",\n"
@@ -182,9 +194,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -203,7 +215,7 @@ public class KeystoreServiceRequestHandlerTest {
         KuraMessage resMessage = keystoreRH.doGet(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
-        List<String> responses = Arrays.asList(EMPTY_KEYSTORE_1, EMPTY_KEYSTORE_2);
+        List<String> responses = Arrays.asList(this.EMPTY_KEYSTORE_1, this.EMPTY_KEYSTORE_2);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertTrue(responses.contains(new String(resPayload.getBody(), StandardCharsets.UTF_8)));
     }
@@ -214,7 +226,7 @@ public class KeystoreServiceRequestHandlerTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
@@ -226,9 +238,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -247,7 +259,7 @@ public class KeystoreServiceRequestHandlerTest {
         KuraMessage resMessage = keystoreRH.doGet(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
-        List<String> responses = Arrays.asList(KEYSTORE_ENTRY_1, KEYSTORE_ENTRY_2);
+        List<String> responses = Arrays.asList(this.KEYSTORE_ENTRY_1, this.KEYSTORE_ENTRY_2);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertTrue(responses.contains(new String(resPayload.getBody(), StandardCharsets.UTF_8)));
     }
@@ -259,7 +271,7 @@ public class KeystoreServiceRequestHandlerTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
@@ -271,9 +283,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -293,7 +305,7 @@ public class KeystoreServiceRequestHandlerTest {
         KuraMessage resMessage = keystoreRH.doGet(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
-        List<String> responses = Arrays.asList(KEYSTORE_ENTRY_WITH_CERT_1, KEYSTORE_ENTRY_WITH_CERT_2);
+        List<String> responses = Arrays.asList(this.KEYSTORE_ENTRY_WITH_CERT_1, this.KEYSTORE_ENTRY_WITH_CERT_2);
         String response = new String(resPayload.getBody(), StandardCharsets.UTF_8);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertTrue(responses.contains(response.substring(1, response.length() - 1)));
@@ -305,7 +317,7 @@ public class KeystoreServiceRequestHandlerTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         when(ksMock.getKeyStore()).thenReturn(ks);
@@ -315,9 +327,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -338,7 +350,7 @@ public class KeystoreServiceRequestHandlerTest {
         KuraMessage resMessage = keystoreRH.doGet(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
-        List<String> responses = Arrays.asList(KEYSTORE_ENTRY_WITH_CERT_1, KEYSTORE_ENTRY_WITH_CERT_2);
+        List<String> responses = Arrays.asList(this.KEYSTORE_ENTRY_WITH_CERT_1, this.KEYSTORE_ENTRY_WITH_CERT_2);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertTrue(responses.contains(new String(resPayload.getBody(), StandardCharsets.UTF_8)));
     }
@@ -356,9 +368,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -367,10 +379,10 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                assertEquals(JSON_MESSAGE_PUT_CERT, jsonString);
+                assertEquals(KeystoreServiceRequestHandlerTest.this.JSON_MESSAGE_PUT_CERT, jsonString);
                 CertificateInfo info = new CertificateInfo("myCertTest99", "MyKeystore");
                 info.setType(EntryType.TRUSTED_CERTIFICATE);
-                info.setCertificate(CERTIFICATE);
+                info.setCertificate(KeystoreServiceRequestHandlerTest.this.CERTIFICATE);
                 return (T) info;
             }
         };
@@ -382,7 +394,7 @@ public class KeystoreServiceRequestHandlerTest {
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
-        request.setBody(JSON_MESSAGE_PUT_CERT.getBytes());
+        request.setBody(this.JSON_MESSAGE_PUT_CERT.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doPut(null, message);
@@ -405,9 +417,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -418,8 +430,8 @@ public class KeystoreServiceRequestHandlerTest {
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
                 PrivateKeyInfo info = new PrivateKeyInfo("myPrivateKey", "MyKeystore");
                 info.setType(EntryType.PRIVATE_KEY);
-                info.setPrivateKey(PRIVATE_KEY);
-                info.setCertificateChain(CERTIFICATE_CHAIN);
+                info.setPrivateKey(KeystoreServiceRequestHandlerTest.this.PRIVATE_KEY);
+                info.setCertificateChain(KeystoreServiceRequestHandlerTest.this.CERTIFICATE_CHAIN);
                 return (T) info;
             }
         };
@@ -431,7 +443,7 @@ public class KeystoreServiceRequestHandlerTest {
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
-        request.setBody(JSON_MESSAGE_PUT_KEY.getBytes());
+        request.setBody(this.JSON_MESSAGE_PUT_KEY.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doPut(null, message);
@@ -450,9 +462,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -478,7 +490,7 @@ public class KeystoreServiceRequestHandlerTest {
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
-        request.setBody(JSON_MESSAGE_PUT_KEY_PAIR.getBytes());
+        request.setBody(this.JSON_MESSAGE_PUT_KEY_PAIR.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doPut(null, message);
@@ -495,17 +507,17 @@ public class KeystoreServiceRequestHandlerTest {
         char[] password = "some password".toCharArray();
         ks.load(null, password);
         when(ksMock.getKeyStore()).thenReturn(ks);
-        when(ksMock.getEntry("alias")).thenReturn(createPrivateKey("alias", PRIVATE_KEY, CERTIFICATE_CHAIN));
+        when(ksMock.getEntry("alias")).thenReturn(createPrivateKey("alias", this.PRIVATE_KEY, this.CERTIFICATE_CHAIN));
         String csrString = "-----BEGIN CERTIFICATE REQUEST-----";
-        when(ksMock.getCSR(any(X500Principal.class), any(String.class), any(String.class))).thenReturn(csrString);
+        when(ksMock.getCSR(any(String.class), any(X500Principal.class), any(String.class))).thenReturn(csrString);
 
         KeystoreServiceRequestHandlerV1 keystoreRH = new KeystoreServiceRequestHandlerV1() {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -529,7 +541,7 @@ public class KeystoreServiceRequestHandlerTest {
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
-        request.setBody(JSON_MESSAGE_GET_CSR.getBytes());
+        request.setBody(this.JSON_MESSAGE_GET_CSR.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doGet(null, message);
@@ -551,9 +563,9 @@ public class KeystoreServiceRequestHandlerTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -562,7 +574,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                assertEquals(JSON_MESSAGE_DEL, jsonString);
+                assertEquals(KeystoreServiceRequestHandlerTest.this.JSON_MESSAGE_DEL, jsonString);
                 return (T) new EntryInfo("mycerttestec", "MyKeystore");
             }
         };
@@ -574,7 +586,7 @@ public class KeystoreServiceRequestHandlerTest {
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
-        request.setBody(JSON_MESSAGE_DEL.getBytes());
+        request.setBody(this.JSON_MESSAGE_DEL.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doDel(null, message);

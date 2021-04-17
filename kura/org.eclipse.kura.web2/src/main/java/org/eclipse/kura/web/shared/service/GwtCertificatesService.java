@@ -18,7 +18,7 @@ import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
-import org.eclipse.kura.web.shared.model.GwtCertificate;
+import org.eclipse.kura.web.shared.model.GwtKeystoreEntry;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -28,26 +28,18 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("certificate")
 public interface GwtCertificatesService extends RemoteService {
 
-    @Audit(componentName = "UI Certificate", description = "Store SSL key")
-    public Integer storeSSLPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateCert, String publicCert,
-            String password, String alias) throws GwtKuraException;
+    @Audit(componentName = "UI Certificate", description = "Store Key Pair")
+    public void storeKeyPair(GwtXSRFToken xsrfToken, String keyStorePid, String privateKey, String publicCert,
+            String alias) throws GwtKuraException;
 
-    @Audit(componentName = "UI Certificate", description = "Store public chain")
-    public Integer storeSSLPublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias) throws GwtKuraException;
-
-    @Audit(componentName = "UI Certificate", description = "Store application public chain")
-    public Integer storeApplicationPublicChain(GwtXSRFToken xsrfToken, String publicCert, String alias)
+    @Audit(componentName = "UI Certificate", description = "Store Certificate")
+    public void storeCertificate(GwtXSRFToken xsrfToken, String keyStorePid, String certificate, String alias)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Certificate", description = "Store login public chain")
-    public Integer storeLoginPublicChain(GwtXSRFToken xsrfToken, String publicCert) throws GwtKuraException;
+    public List<GwtKeystoreEntry> listEntries() throws GwtKuraException;
 
-    @Audit(componentName = "UI Certificate", description = "Store UI HTTPS key")
-    public Integer storeLoginPublicPrivateKeys(GwtXSRFToken xsrfToken, String privateKey, String publicCert,
-            String password, String alias) throws GwtKuraException;
-
-    public List<GwtCertificate> listCertificates() throws GwtKuraException;
+    public List<String> listKeystoreServicePids() throws GwtKuraException;
 
     @Audit(componentName = "UI Certificate", description = "Remove certificate")
-    public void removeCertificate(GwtXSRFToken xsrfToken, GwtCertificate certificate) throws GwtKuraException;
+    public void removeEntry(GwtXSRFToken xsrfToken, GwtKeystoreEntry certificate) throws GwtKuraException;
 }

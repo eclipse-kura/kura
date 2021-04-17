@@ -20,19 +20,17 @@
        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
 
-   <reference name="CryptoService"
-   			  bind="setCryptoService"
-   			  unbind="unsetCryptoService"
-   			  interface="org.eclipse.kura.crypto.CryptoService"/>
    <reference name="SystemService"
               bind="setSystemService"
               unbind="unsetSystemService"
               cardinality="1..1"
               policy="static"
               interface="org.eclipse.kura.system.SystemService"/>
-   <reference name="ConfigurationService"
-              bind="setConfigurationService"
-              unbind="unsetConfigurationService"
-              interface="org.eclipse.kura.configuration.ConfigurationService"/>
+   <reference name="KeystoreService"
+           policy="dynamic"
+           bind="setKeystoreService"
+           unbind="unsetKeystoreService"
+           cardinality="0..1"
+           interface="org.eclipse.kura.security.keystore.KeystoreService"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
 </scr:component>

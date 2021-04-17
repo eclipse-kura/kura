@@ -507,6 +507,16 @@
                                     <artifactId>org.apache.felix.useradmin</artifactId>
                                     <version>${org.apache.felix.useradmin.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcpkix-jdk15on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcprov-jdk15on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -613,6 +623,8 @@
                                 <move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.activemq.artemis.jar" tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
+                                <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

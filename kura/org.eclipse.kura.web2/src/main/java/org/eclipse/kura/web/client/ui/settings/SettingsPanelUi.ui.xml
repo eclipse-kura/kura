@@ -45,15 +45,10 @@
                 <b:NavTabs ui:field="navTabs">
                     <b:TabListItem dataTarget="#snapshotsPanel" text="Snapshots"
                         ui:field="snapshots" active="true"/>
-                    <b:TabListItem dataTarget="#sslConfigPanel" text="SSL Configuration"
-                        ui:field="sslConfig" />
                 </b:NavTabs>
                 <b:TabContent ui:field="tabContent">
                     <b:TabPane b:id="snapshotsPanel" active="true">
                         <settings:SnapshotsTabUi ui:field="snapshotsPanel"></settings:SnapshotsTabUi >
-                    </b:TabPane>
-                    <b:TabPane b:id="sslConfigPanel">
-                        <settings:SslTabUi ui:field="sslConfigPanel"></settings:SslTabUi>
                     </b:TabPane>
                 </b:TabContent>
             </b:Well>

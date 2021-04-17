@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,34 +12,31 @@
  *******************************************************************************/
 package org.eclipse.kura.core.ssl;
 
+import static java.util.Objects.isNull;
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
+import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStore.Entry;
-import java.security.KeyStore.PasswordProtection;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -47,16 +44,16 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
-import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -68,19 +65,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private SslServiceListeners sslServiceListeners;
 
-    private ComponentContext ctx;
-    private Map<String, Object> properties;
     private SslManagerServiceOptions options;
 
-    private CryptoService cryptoService;
-    private ConfigurationService configurationService;
-
-    private ScheduledExecutorService selfUpdaterExecutor;
-    private ScheduledFuture<?> selfUpdaterFuture;
+    private KeystoreService keystoreService;
 
     private Map<ConnectionSslOptions, SSLContext> sslContexts;
-
-    private SystemService systemService;
 
     // ----------------------------------------------------------------
     //
@@ -88,28 +77,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     //
     // ----------------------------------------------------------------
 
-    public void setCryptoService(CryptoService cryptoService) {
-        this.cryptoService = cryptoService;
+    public void setKeystoreService(KeystoreService keystoreService) {
+        this.keystoreService = keystoreService;
+
+        if (this.sslServiceListeners != null) {
+            // Notify listeners that service has been updated
+            this.sslServiceListeners.onConfigurationUpdated();
+        }
     }
 
-    public void unsetCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
-    }
-
-    public void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
-    }
-
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
-    }
-
-    public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
+    public void unsetKeystoreService(KeystoreService keystoreService) {
+        if (this.keystoreService == keystoreService) {
+            this.keystoreService = null;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -121,14 +101,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("activate...");
 
-        //
-        // save the bundle context and the properties
-        this.ctx = componentContext;
-        this.properties = properties;
         this.options = new SslManagerServiceOptions(properties);
         this.sslContexts = new ConcurrentHashMap<>();
-
-        this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
         ServiceTracker<SslServiceListener, SslServiceListener> listenersTracker = new ServiceTracker<>(
                 componentContext.getBundleContext(), SslServiceListener.class, null);
@@ -138,18 +112,13 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         // ServiceFactory.getService
         // on ProSyst
         this.sslServiceListeners = new SslServiceListeners(listenersTracker);
-
-        accessKeystore();
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("updated...");
 
-        this.properties = properties;
         this.options = new SslManagerServiceOptions(properties);
         this.sslContexts = new ConcurrentHashMap<>();
-
-        accessKeystore();
 
         // Notify listeners that service has been updated
         this.sslServiceListeners.onConfigurationUpdated();
@@ -158,12 +127,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.sslServiceListeners.close();
-        if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
-
-            logger.info("Self updater task running. Stopping it");
-
-            this.selfUpdaterFuture.cancel(true);
-        }
     }
 
     // ----------------------------------------------------------------
@@ -181,23 +144,18 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public SSLContext getSSLContext(String keyAlias) throws GeneralSecurityException, IOException {
         String protocol = this.options.getSslProtocol();
         String ciphers = this.options.getSslCiphers();
-        String trustStore = this.options.getSslKeyStore();
-        char[] keyStorePassword = getKeyStorePassword();
         boolean hostnameVerifcation = this.options.isSslHostnameVerification();
 
-        return getSSLContext(protocol, ciphers, trustStore, trustStore, keyStorePassword, keyAlias,
-                hostnameVerifcation);
+        return getSSLContext(protocol, ciphers, null, null, null, keyAlias, hostnameVerifcation);
     }
 
-    @Override
-    public SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
+    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
             char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException {
         return getSSLContext(protocol, ciphers, trustStore, keyStore, keyStorePassword, keyAlias,
                 this.options.isSslHostnameVerification());
     }
 
-    @Override
-    public SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
+    private SSLContext getSSLContext(String protocol, String ciphers, String trustStore, String keyStore,
             char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
             throws GeneralSecurityException, IOException {
         ConnectionSslOptions connSslOpts = new ConnectionSslOptions(this.options);
@@ -205,11 +163,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         connSslOpts.setCiphers(ciphers);
         connSslOpts.setTrustStore(trustStore);
         connSslOpts.setKeyStore(keyStore);
-        if (keyStorePassword == null) {
-            connSslOpts.setKeyStorePassword(getKeyStorePassword());
-        } else {
-            connSslOpts.setKeyStorePassword(keyStorePassword);
-        }
+        connSslOpts.setKeyStorePassword(keyStorePassword);
         connSslOpts.setAlias(keyAlias);
         connSslOpts.setHostnameVerification(hostnameVerification);
 
@@ -243,8 +197,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     @Override
     public X509Certificate[] getTrustCertificates() throws GeneralSecurityException, IOException {
         X509Certificate[] cacerts = null;
-        String trustStore = this.options.getSslKeyStore();
-        TrustManager[] tms = getTrustManagers(trustStore, this.options.getSslKeystorePassword().toCharArray());
+        TrustManager[] tms = getTrustManagers();
         for (TrustManager tm : tms) {
             if (tm instanceof X509TrustManager) {
                 X509TrustManager x509tm = (X509TrustManager) tm;
@@ -259,47 +212,40 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void installTrustCertificate(String alias, X509Certificate x509crt)
             throws GeneralSecurityException, IOException {
 
-        String keyStore = this.options.getSslKeyStore();
-        char[] keyStorePassword = getKeyStorePassword();
+        if (isNull(this.keystoreService)) {
+            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR); // TO DO:review
+        }
 
-        KeyStore ks = loadKeystore(keyStore, keyStorePassword);
-
-        ks.setCertificateEntry(alias, x509crt);
-
-        saveKeystore(keyStore, keyStorePassword, ks);
+        TrustedCertificateEntry trustedCertificateEntry = new TrustedCertificateEntry(x509crt);
+        try {
+            this.keystoreService.setEntry(alias, trustedCertificateEntry);
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException {
-        String keyStore = this.options.getSslKeyStore();
-        char[] keyStorePassword = getKeyStorePassword();
-
-        KeyStore ks = loadKeystore(keyStore, keyStorePassword);
-
-        ks.deleteEntry(alias);
-
-        saveKeystore(keyStore, keyStorePassword, ks);
+        try {
+            this.keystoreService.deleteEntry(alias);
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
             throws GeneralSecurityException, IOException {
-        // Note that password parameter is unused
+        if (isNull(this.keystoreService)) {
+            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR); // TO DO:review
+        }
 
-        String keyStore = this.options.getSslKeyStore();
-        char[] keyStorePassword = getKeyStorePassword();
+        PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(privateKey, publicCerts);
 
-        KeyStore ks = loadKeystore(keyStore, keyStorePassword);
-
-        ks.setKeyEntry(alias, privateKey, keyStorePassword, publicCerts);
-
-        saveKeystore(keyStore, keyStorePassword, ks);
-    }
-
-    private void saveKeystore(String keyStoreFileName, char[] keyStorePassword, KeyStore ks)
-            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        try (FileOutputStream tsOutStream = new FileOutputStream(keyStoreFileName);) {
-            ks.store(tsOutStream, keyStorePassword);
+        try {
+            this.keystoreService.setEntry(alias, privateKeyEntry);
+        } catch (KuraException e) {
+            throw new IOException(e);
         }
     }
 
@@ -312,142 +258,6 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
 
         return ks;
-    }
-
-    private void accessKeystore() {
-        String keystorePath = this.options.getSslKeyStore();
-        File fKeyStore = new File(keystorePath);
-        if (!fKeyStore.exists()) {
-            return;
-        }
-
-        if (isFirstBoot()) {
-            changeDefaultKeystorePassword();
-            return;
-        }
-
-        char[] oldPassword = getOldKeystorePassword(keystorePath);
-        char[] newPassword = null;
-
-        try {
-            newPassword = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
-        } catch (KuraException e) {
-            logger.warn("Failed to decrypt keystore password");
-        }
-
-        if (newPassword != null && !Arrays.equals(oldPassword, newPassword)) {
-            updateKeystorePassword(oldPassword, newPassword);
-        }
-    }
-
-    private char[] getOldKeystorePassword(String keystorePath) {
-        char[] password = this.cryptoService.getKeyStorePassword(keystorePath);
-        if (password != null && isKeyStoreAccessible(this.options.getSslKeyStore(), password)) {
-            return password;
-        }
-
-        try {
-            password = this.cryptoService.decryptAes(this.options.getSslKeystorePassword().toCharArray());
-        } catch (KuraException e) {
-            password = new char[0];
-        }
-
-        return password;
-    }
-
-    private void updateKeystorePassword(char[] oldPassword, char[] newPassword) {
-        try {
-            changeKeyStorePassword(this.options.getSslKeyStore(), oldPassword, newPassword);
-
-            this.cryptoService.setKeyStorePassword(this.options.getSslKeyStore(), newPassword);
-        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | UnrecoverableEntryException
-                | IOException e) {
-            logger.warn("Failed to change keystore password");
-        } catch (KuraException e) {
-            logger.warn("Failed to persist keystore password");
-        }
-    }
-
-    private void changeDefaultKeystorePassword() {
-
-        char[] oldPassword = this.systemService.getJavaKeyStorePassword();
-
-        if (isDefaultFromCrypto()) {
-            oldPassword = this.cryptoService.getKeyStorePassword(this.options.getSslKeyStore());
-        }
-
-        char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
-
-        try {
-            changeKeyStorePassword(this.options.getSslKeyStore(), oldPassword, newPassword);
-
-            this.cryptoService.setKeyStorePassword(this.options.getSslKeyStore(), newPassword);
-
-            updatePasswordInConfigService(newPassword);
-        } catch (Exception e) {
-            logger.warn("Keystore password change failed", e);
-        }
-    }
-
-    private void updatePasswordInConfigService(char[] newPassword) {
-        // update our configuration with the newly generated password
-        final String pid = (String) this.properties.get("service.pid");
-
-        Map<String, Object> props = new HashMap<>(this.properties);
-        props.put(SslManagerServiceOptions.PROP_TRUST_PASSWORD, new Password(newPassword));
-
-        this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
-            try {
-                if (SslManagerServiceImpl.this.ctx.getServiceReference() != null
-                        && SslManagerServiceImpl.this.configurationService.getComponentConfiguration(pid) != null) {
-                    SslManagerServiceImpl.this.configurationService.updateConfiguration(pid, props);
-                    throw new RuntimeException("Updated. The task will be terminated.");
-                } else {
-                    logger.info("No service or configuration available yet.");
-                }
-            } catch (KuraException e) {
-                logger.warn("Cannot get/update configuration for pid: {}", pid, e);
-            }
-        }, 1000, 1000, TimeUnit.MILLISECONDS);
-    }
-
-    private boolean isFirstBoot() {
-        boolean result = false;
-        if (isSnapshotPasswordDefault() && (isDefaultFromUser() || isDefaultFromCrypto())) {
-            result = true;
-        }
-        return result;
-    }
-
-    private boolean isSnapshotPasswordDefault() {
-        boolean result = false;
-
-        char[] snapshotPassword = getUnencryptedSslKeystorePassword();
-        if (Arrays.equals(SslManagerServiceOptions.PROP_DEFAULT_TRUST_PASSWORD.toCharArray(), snapshotPassword)) {
-            result = true;
-        }
-
-        return result;
-    }
-
-    private char[] getUnencryptedSslKeystorePassword() {
-        char[] snapshotPassword = this.options.getSslKeystorePassword().toCharArray();
-        try {
-            snapshotPassword = this.cryptoService.decryptAes(snapshotPassword);
-        } catch (KuraException e) {
-            // Nothing to do
-        }
-        return snapshotPassword;
-    }
-
-    private boolean isDefaultFromCrypto() {
-        char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.options.getSslKeyStore());
-
-        return isKeyStoreAccessible(this.options.getSslKeyStore(), cryptoPassword);
-    }
-
-    private boolean isDefaultFromUser() {
-        return isKeyStoreAccessible(this.options.getSslKeyStore(), this.systemService.getJavaKeyStorePassword());
     }
 
     // ----------------------------------------------------------------
@@ -467,9 +277,15 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         if (context == null) {
             logger.info("Creating a new SSLSocketFactory instance");
 
-            TrustManager[] tms = getTrustManagers(options.getTrustStore(), options.getKeyStorePassword());
-
-            KeyManager[] kms = getKeyManagers(options.getKeyStore(), options.getKeyStorePassword(), options.getAlias());
+            TrustManager[] tms = null;
+            KeyManager[] kms = null;
+            if (isNull(options.getTrustStore()) && isNull(options.getKeyStorePassword())) {
+                tms = getTrustManagers();
+                kms = getKeyManagers();
+            } else {
+                tms = getTrustManagers(options.getTrustStore(), options.getKeyStorePassword());
+                kms = getKeyManagers(options.getKeyStore(), options.getKeyStorePassword(), options.getAlias());
+            }
 
             context = createSSLContext(options.getProtocol(), options.getCiphers(), kms, tms,
                     options.getHostnameVerification());
@@ -501,8 +317,24 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         };
     }
 
-    private static TrustManager[] getTrustManagers(String trustStore, char[] keyStorePassword)
-            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    private TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
+        TrustManager[] result = new TrustManager[0];
+        TrustManagerFactory tmf = null;
+        if (this.keystoreService != null) {
+            try {
+                KeyStore ts = this.keystoreService.getKeyStore();
+                tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                tmf.init(ts);
+                result = tmf.getTrustManagers();
+            } catch (KuraException e) {
+                throw new IOException(e);
+            }
+        }
+        return result;
+    }
+
+    private TrustManager[] getTrustManagers(String trustStore, char[] keyStorePassword)
+            throws IOException, GeneralSecurityException {
         TrustManager[] result = new TrustManager[0];
         TrustManagerFactory tmf = null;
         if (trustStore != null) {
@@ -523,6 +355,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return result;
     }
 
+    private KeyManager[] getKeyManagers() throws IOException {
+        if (isNull(this.keystoreService)) {
+            throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR); // TO DO:review
+        }
+        try {
+            return this.keystoreService.getKeyManagers(KeyManagerFactory.getDefaultAlgorithm())
+                    .toArray(new KeyManager[0]);
+            // TO DO: it was possible to load a keystore based on Alias. Now it is not possible.
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
+    }
+
     private KeyManager[] getKeyManagers(String keyStore, char[] keyStorePassword, String keyAlias)
             throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException,
             UnrecoverableEntryException {
@@ -531,11 +376,15 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(ks, keyStorePassword);
 
-        return kmf.getKeyManagers();
+        final List<KeyManager> matching = Arrays.stream(kmf.getKeyManagers())
+                .filter(m -> m instanceof X509KeyManager && ((X509KeyManager) m).getCertificateChain(keyAlias) != null)
+                .map(k -> new SingleAliasX509KeyManager(keyAlias, (X509KeyManager) k)).collect(Collectors.toList());
+
+        return matching.toArray(new KeyManager[matching.size()]);
     }
 
-    private KeyStore getKeyStore(String keyStore, char[] keyStorePassword, String keyAlias) throws KeyStoreException,
-            IOException, NoSuchAlgorithmException, CertificateException, UnrecoverableEntryException {
+    private KeyStore getKeyStore(String keyStore, char[] keyStorePassword, String keyAlias)
+            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
 
         // Load the configured the Key Store
         File fKeyStore = new File(keyStore);
@@ -550,19 +399,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             // if we have an alias, then build KeyStore with such key
             if (ks.containsAlias(keyAlias) && ks.isKeyEntry(keyAlias)) {
-                PasswordProtection pp = new PasswordProtection(keyStorePassword);
-                Entry entry = ks.getEntry(keyAlias, pp);
-                ks = KeyStore.getInstance(KeyStore.getDefaultType());
-                ks.load(null, null);
-                ks.setEntry(keyAlias, entry, pp);
+                return ks;
             }
 
             return ks;
         }
-    }
-
-    private char[] getKeyStorePassword() {
-        return this.cryptoService.getKeyStorePassword(this.options.getSslKeyStore());
     }
 
     private boolean isKeyStoreAccessible(String location, char[] password) {
@@ -574,26 +415,50 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
     }
 
-    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,
-            NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
+    private class SingleAliasX509KeyManager implements X509KeyManager {
 
-        KeyStore keystore = loadKeystore(location, oldPassword);
+        private final String alias;
+        private final X509KeyManager wrapped;
 
-        updateKeyEntiesPasswords(keystore, oldPassword, newPassword);
-        saveKeystore(location, newPassword, keystore);
-    }
+        public SingleAliasX509KeyManager(final String alias, final X509KeyManager wrapped) {
+            this.alias = alias;
+            this.wrapped = wrapped;
+        }
 
-    private static void updateKeyEntiesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
-            throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
-        Enumeration<String> aliases = keystore.aliases();
-        while (aliases.hasMoreElements()) {
-            String alias = aliases.nextElement();
-            if (keystore.isKeyEntry(alias)) {
-                PasswordProtection oldPP = new PasswordProtection(oldPassword);
-                Entry entry = keystore.getEntry(alias, oldPP);
-                PasswordProtection newPP = new PasswordProtection(newPassword);
-                keystore.setEntry(alias, entry, newPP);
+        @Override
+        public String[] getClientAliases(String keyType, Principal[] issuers) {
+            return new String[] { this.alias };
+        }
+
+        @Override
+        public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
+            return this.alias;
+        }
+
+        @Override
+        public String[] getServerAliases(String keyType, Principal[] issuers) {
+            return new String[] { this.alias };
+        }
+
+        @Override
+        public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
+            return this.alias;
+        }
+
+        @Override
+        public X509Certificate[] getCertificateChain(String alias) {
+            if (this.alias.equals(alias)) {
+                return this.wrapped.getCertificateChain(alias);
             }
+            return new X509Certificate[0];
+        }
+
+        @Override
+        public PrivateKey getPrivateKey(String alias) {
+            if (this.alias.equals(alias)) {
+                return this.wrapped.getPrivateKey(alias);
+            }
+            return null;
         }
     }
 

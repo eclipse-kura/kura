@@ -683,6 +683,12 @@
             <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
                 <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
             </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.ssl.SslManagerService</esf:value>
+            </esf:property>
+            <esf:property name="service.ranking" array="false" encrypted="false" type="Integer">
+                <esf:value>100</esf:value>
+            </esf:property>
         </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.http.server.manager.HttpService">

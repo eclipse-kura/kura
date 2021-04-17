@@ -22,9 +22,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
@@ -34,12 +38,16 @@ import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 
@@ -484,22 +492,16 @@ public final class GwtServerUtil {
         return result;
     }
 
-    public static boolean isFactoryOfAnyService(final String factoryPid, final Class<?>... interfaces) {
+    public static boolean isFactoryOf(final String factoryPid, final Predicate<Set<String>> filter) {
 
         try {
             return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
                     scr -> scr.getComponentDescriptionDTOs().stream().anyMatch(c -> {
-                        if (!Objects.equals(factoryPid, c.name) || c.serviceInterfaces == null) {
+                        if (!Objects.equals(factoryPid, c.name)) {
                             return false;
                         }
 
-                        for (final Class<?> intf : interfaces) {
-                            if (Arrays.stream(c.serviceInterfaces).anyMatch(i -> i.equals(intf.getName()))) {
-                                return true;
-                            }
-                        }
-
-                        return false;
+                        return providedInterfacesMatch(c.serviceInterfaces, filter);
                     }));
         } catch (final Exception e) {
             return false;
@@ -507,13 +509,121 @@ public final class GwtServerUtil {
 
     }
 
-    public static boolean providesService(final String kuraServicePid, final Class<?> serviceInterface) {
-        final BundleContext context = FrameworkUtil.getBundle(GwtServerUtil.class).getBundleContext();
+    public static boolean isFactoryOfAnyService(final String factoryPid, final Class<?>... interfaces) {
+        return isFactoryOf(factoryPid, s -> {
+            for (final Class<?> intf : interfaces) {
+                if (s.contains(intf.getName())) {
+                    return true;
+                }
+            }
 
-        final String filter = "(kura.service.pid=" + kuraServicePid + ")";
+            return false;
+        });
+    }
+
+    public static Set<String> getServiceProviderComponentNames(final Predicate<Set<String>> filter)
+            throws GwtKuraException {
 
         try {
-            return !context.getServiceReferences(serviceInterface, filter).isEmpty();
+            return ServiceLocator
+                    .applyToServiceOptionally(ServiceComponentRuntime.class,
+                            scr -> scr.getComponentDescriptionDTOs().stream()
+                                    .filter(c -> providedInterfacesMatch(c.serviceInterfaces, filter)))
+                    .map(c -> c.name).collect(Collectors.toSet());
+        } catch (final Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    public static Set<String> getServiceProviderFactoryPids(final Predicate<Set<String>> filter)
+            throws GwtKuraException {
+        final Set<String> names = getServiceProviderComponentNames(filter);
+
+        final Set<String> factoryPids = ServiceLocator.applyToServiceOptionally(ConfigurationService.class,
+                ConfigurationService::getFactoryComponentPids);
+
+        names.removeIf(n -> !factoryPids.contains(n));
+
+        return names;
+    }
+
+    public static List<GwtComponentInstanceInfo> getComponentInstances(final Predicate<Set<String>> filter)
+            throws GwtKuraException {
+        try {
+            return ServiceLocator.applyToServiceOptionally(ServiceComponentRuntime.class,
+                    scr -> scr.getComponentDescriptionDTOs().stream()
+                            .filter(c -> providedInterfacesMatch(c.serviceInterfaces, filter))
+                            .flatMap(c -> scr.getComponentConfigurationDTOs(c).stream()).map(c -> {
+                                final Map<String, Object> properties = c.properties;
+
+                                final Object kuraServicePid = properties.get(KURA_SERVICE_PID);
+                                final Object rawFactoryPid = properties.get("service.factoryPid");
+
+                                if (!(kuraServicePid instanceof String)) {
+                                    return null;
+                                }
+
+                                final Optional<String> factoryPid;
+
+                                if (rawFactoryPid instanceof String) {
+                                    factoryPid = Optional.of((String) rawFactoryPid);
+                                } else {
+                                    factoryPid = Optional.empty();
+                                }
+
+                                return new GwtComponentInstanceInfo((String) kuraServicePid, factoryPid);
+
+                            }).filter(Objects::nonNull).collect(Collectors.toList()));
+        } catch (final Exception e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    private static boolean providedInterfacesMatch(final String[] providedInterfaces,
+            final Predicate<Set<String>> filter) {
+        if (providedInterfaces == null) {
+            return filter.test(Collections.emptySet());
+        }
+
+        return filter.test(Arrays.stream(providedInterfaces).collect(Collectors.toSet()));
+    }
+
+    public static boolean providesService(final String kuraServicePid, final Class<?> serviceInterface) {
+        return providesService(kuraServicePid, s -> s.contains(serviceInterface.getName()));
+    }
+
+    public static boolean providesService(final String kuraServicePid, final Predicate<Set<String>> filter) {
+        final BundleContext context = FrameworkUtil.getBundle(GwtServerUtil.class).getBundleContext();
+
+        final String pidFilter = "(kura.service.pid=" + kuraServicePid + ")";
+
+        try {
+            final ServiceReference<?>[] refs = context.getAllServiceReferences(null, pidFilter);
+
+            if (refs == null) {
+                return false;
+            }
+
+            for (final ServiceReference<?> ref : refs) {
+                final Object rawProvidedInterfaces = ref.getProperty("objectClass");
+
+                final Set<String> providedInterfaces;
+
+                if (rawProvidedInterfaces instanceof String) {
+                    providedInterfaces = Collections.singleton((String) rawProvidedInterfaces);
+                } else if (rawProvidedInterfaces instanceof String[]) {
+                    providedInterfaces = Arrays.asList((String[]) rawProvidedInterfaces).stream()
+                            .collect(Collectors.toSet());
+                } else {
+                    providedInterfaces = Collections.emptySet();
+                }
+
+                if (filter.test(providedInterfaces)) {
+                    return true;
+                }
+            }
+
+            return false;
         } catch (InvalidSyntaxException e) {
             return false;
         }

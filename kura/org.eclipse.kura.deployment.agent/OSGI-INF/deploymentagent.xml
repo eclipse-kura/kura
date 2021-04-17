@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -14,17 +14,18 @@
     Red Hat Inc 
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.deployment.agent">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" name="org.eclipse.kura.deployment.agent">
    <implementation class="org.eclipse.kura.deployment.agent.impl.DeploymentAgent"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
    <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
    <service>
       <provide interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"/>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
    <reference name="SslManagerService"
-              policy="static"
-              cardinality="1..1"
+              policy="dynamic"
+              cardinality="0..1"
               bind="setSslManagerService"
               unbind="unsetSslManagerService"
               interface="org.eclipse.kura.ssl.SslManagerService"/>

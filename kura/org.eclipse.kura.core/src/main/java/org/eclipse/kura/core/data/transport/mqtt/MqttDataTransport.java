@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.data.transport.mqtt.MqttClientConfiguration.PersistenceType;
-import org.eclipse.kura.core.ssl.SslManagerServiceOptions;
 import org.eclipse.kura.core.util.ValidationUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
@@ -100,12 +99,6 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     private static final String TOPIC_ACCOUNT_NAME_CTX_NAME = "account-name";
     private static final String TOPIC_DEVICE_ID_CTX_NAME = "client-id";
 
-    private static final String SSL_PROTOCOL = SslManagerServiceOptions.PROP_PROTOCOL;
-    private static final String SSL_CIPHERS = SslManagerServiceOptions.PROP_CIPHERS;
-    private static final String SSL_HN_VERIFY = SslManagerServiceOptions.PROP_HN_VERIFY;
-    private static final String SSL_CERT_ALIAS = "ssl.certificate.alias";
-    private static final String SSL_DEFAULT_HN_VERIFY = "use-ssl-service-config";
-
     private SystemService systemService;
     private SslManagerService sslManagerService;
     private CloudConnectionStatusService cloudConnectionStatusService;
@@ -128,6 +121,8 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
 
     private CryptoService cryptoService;
 
+    private final Object updateLock = new Object();
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -143,11 +138,24 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void setSslManagerService(SslManagerService sslManagerService) {
-        this.sslManagerService = sslManagerService;
+        final boolean update;
+
+        synchronized (updateLock) {
+            this.sslManagerService = sslManagerService;
+            update = this.clientConf != null;
+        }
+
+        if (update) {
+            update();
+        }
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        this.sslManagerService = null;
+        synchronized (updateLock) {
+            if (sslManagerService == this.sslManagerService) {
+                this.sslManagerService = null;
+            }
+        }
     }
 
     public void setCryptoService(CryptoService cryptoService) {
@@ -173,41 +181,43 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        synchronized (updateLock) {
+            logger.info("Activating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
-        // We need to catch the configuration exception and activate anyway.
-        // Otherwise the ConfigurationService will not be able to track us.
-        HashMap<String, Object> decryptedPropertiesMap = new HashMap<>();
+            // We need to catch the configuration exception and activate anyway.
+            // Otherwise the ConfigurationService will not be able to track us.
+            HashMap<String, Object> decryptedPropertiesMap = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
-                try {
-                    Password decryptedPassword = new Password(
-                            this.cryptoService.decryptAes(((String) value).toCharArray()));
-                    decryptedPropertiesMap.put(key, decryptedPassword);
-                } catch (Exception e) {
-                    logger.info("Password is not encrypted");
-                    decryptedPropertiesMap.put(key, new Password((String) value));
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
+                    try {
+                        Password decryptedPassword = new Password(
+                                this.cryptoService.decryptAes(((String) value).toCharArray()));
+                        decryptedPropertiesMap.put(key, decryptedPassword);
+                    } catch (Exception e) {
+                        logger.info("Password is not encrypted");
+                        decryptedPropertiesMap.put(key, new Password((String) value));
+                    }
+                } else {
+                    decryptedPropertiesMap.put(key, value);
                 }
-            } else {
-                decryptedPropertiesMap.put(key, value);
             }
+
+            this.properties.putAll(decryptedPropertiesMap);
+            try {
+                this.clientConf = buildConfiguration(this.properties);
+            } catch (RuntimeException e) {
+                logger.error(
+                        "Invalid client configuration. Service will not be able to connect until the configuration is updated",
+                        e);
+            }
+
+            this.dataTransportListeners = new DataTransportListenerS(componentContext);
+
+            // Do nothing waiting for the connect request from the upper layer.
         }
-
-        this.properties.putAll(decryptedPropertiesMap);
-        try {
-            this.clientConf = buildConfiguration(this.properties);
-        } catch (RuntimeException e) {
-            logger.error(
-                    "Invalid client configuration. Service will not be able to connect until the configuration is updated",
-                    e);
-        }
-
-        this.dataTransportListeners = new DataTransportListenerS(componentContext);
-
-        // Do nothing waiting for the connect request from the upper layer.
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -226,32 +236,36 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
+        synchronized (updateLock) {
+            logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
-        this.properties.clear();
+            this.properties.clear();
 
-        HashMap<String, Object> decryptedPropertiesMap = new HashMap<>();
+            HashMap<String, Object> decryptedPropertiesMap = new HashMap<>();
 
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
-                try {
-                    Password decryptedPassword = new Password(
-                            this.cryptoService.decryptAes(((String) value).toCharArray()));
-                    decryptedPropertiesMap.put(key, decryptedPassword);
-                } catch (Exception e) {
-                    logger.info("Password is not encrypted");
-                    decryptedPropertiesMap.put(key, new Password((String) value));
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if (key.equals(MQTT_PASSWORD_PROP_NAME)) {
+                    try {
+                        Password decryptedPassword = new Password(
+                                this.cryptoService.decryptAes(((String) value).toCharArray()));
+                        decryptedPropertiesMap.put(key, decryptedPassword);
+                    } catch (Exception e) {
+                        logger.info("Password is not encrypted");
+                        decryptedPropertiesMap.put(key, new Password((String) value));
+                    }
+                } else {
+                    decryptedPropertiesMap.put(key, value);
                 }
-            } else {
-                decryptedPropertiesMap.put(key, value);
             }
+
+            this.properties.putAll(decryptedPropertiesMap);
+
         }
 
-        this.properties.putAll(decryptedPropertiesMap);
-
         update();
+
     }
 
     private void update() {
@@ -266,7 +280,10 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // Throwing a RuntimeException here is fine.
         // Listeners will not be notified of an invalid configuration update.
         logger.info("Building new configuration...");
-        this.clientConf = buildConfiguration(this.properties);
+
+        synchronized (updateLock) {
+            this.clientConf = buildConfiguration(this.properties);
+        }
 
         // We do nothing other than notifying the listeners which may later
         // request to disconnect and reconnect again.
@@ -798,22 +815,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
         // SSL
         if (brokerUrl.startsWith("ssl") || brokerUrl.startsWith("wss")) {
             try {
-                String alias = (String) this.properties.get(SSL_CERT_ALIAS);
-                if (alias == null || "".equals(alias.trim())) {
-                    alias = this.topicContext.get(TOPIC_ACCOUNT_NAME_CTX_NAME);
-                }
-
-                String protocol = (String) this.properties.get(SSL_PROTOCOL);
-                String ciphers = (String) this.properties.get(SSL_CIPHERS);
-                String hnVerification = (String) this.properties.get(SSL_HN_VERIFY);
-
-                SSLSocketFactory ssf;
-                if (SSL_DEFAULT_HN_VERIFY.equals(hnVerification)) {
-                    ssf = this.sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias);
-                } else {
-                    ssf = this.sslManagerService.getSSLSocketFactory(protocol, ciphers, null, null, null, alias,
-                            Boolean.valueOf(hnVerification));
-                }
+                SSLSocketFactory ssf = this.sslManagerService.getSSLSocketFactory();
 
                 conOpt.setSocketFactory(ssf);
             } catch (Exception e) {
@@ -1034,7 +1036,7 @@ public class MqttDataTransport implements DataTransportService, MqttCallback, Co
             this.mqttClient = null;
         }
     }
-    
+
     private static String getMqttVersionLabel(int mqttVersion) {
 
         switch (mqttVersion) {

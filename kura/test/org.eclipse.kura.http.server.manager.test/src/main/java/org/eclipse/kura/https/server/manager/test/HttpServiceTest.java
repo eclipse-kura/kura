@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -48,8 +48,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
@@ -63,11 +65,14 @@ import org.slf4j.LoggerFactory;
 
 public class HttpServiceTest {
 
+    private static final String TEST_KEYSTORE_PID = "testKeystore";
     private static final Logger logger = LoggerFactory.getLogger(HttpServiceTest.class);
     private static final String HTTP_SERVER_MANAGER_PID = "org.eclipse.kura.http.server.manager.HttpService";
+    private static final String HTTPS_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.HttpsKeystore";
 
     private static CompletableFuture<ConfigurationService> configurationService = new CompletableFuture<>();
     private static CompletableFuture<CryptoService> cryptoService = new CompletableFuture<>();
+    private static CompletableFuture<KeystoreService> keystoreService = new CompletableFuture<>();
 
     public void setConfigurationService(final ConfigurationService configurationService) {
         HttpServiceTest.configurationService.complete(configurationService);
@@ -75,6 +80,10 @@ public class HttpServiceTest {
 
     public void setCryptoService(final CryptoService cryptoService) {
         HttpServiceTest.cryptoService.complete(cryptoService);
+    }
+
+    public void setKeystoreService(final KeystoreService keystoreService) {
+        HttpServiceTest.keystoreService.complete(keystoreService);
     }
 
     @Test
@@ -137,94 +146,161 @@ public class HttpServiceTest {
     }
 
     @Test
-    public void shouldSupportHttps() throws KuraException, InvalidSyntaxException, InterruptedException,
-            ExecutionException, TimeoutException, IOException {
-
-        final File httpsKeystore = deployResource("/httpskeystore.ks");
+    public void shouldSupportHttps() throws Exception {
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().withHttpsPorts(4442)
-                        .withKeystorePath(httpsKeystore.getAbsolutePath()).withKeystorePassword("changeit", cryptoSvc)
-                        .toProperties()).get(30, TimeUnit.SECONDS);
+        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
+                    HttpServiceOptions.defaultConfiguration().withHttpsPorts(4442)
+                            .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
+                                    TimeUnit.SECONDS);
 
-        assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4442/", Optional.empty(),
-                Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
-        assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
-        assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/") instanceof Failure);
-        assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
-
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4442/", Optional.empty(),
+                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/") instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
+        }
     }
 
     @Test
-    public void shouldSupportHttpsClientAuth() throws KuraException, InvalidSyntaxException, InterruptedException,
-            ExecutionException, TimeoutException, IOException, UnrecoverableKeyException, KeyManagementException,
-            KeyStoreException, NoSuchAlgorithmException, CertificateException {
-
-        final File httpsKeystore = deployResource("/httpskeystore.ks");
+    public void shouldSupportHttpsClientAuth() throws Exception {
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
-                        .withKeystorePath(httpsKeystore.getAbsolutePath()).withKeystorePassword("changeit", cryptoSvc)
-                        .toProperties()).get(30, TimeUnit.SECONDS);
+        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-        final KeyManager[] keyManagers = buildClientKeyManagers();
+            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
+                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
+                            .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
+                                    TimeUnit.SECONDS);
 
-        assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
-        assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
-        assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
-        assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
+            final KeyManager[] keyManagers = buildClientKeyManagers();
 
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
+                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
+
+        }
+
+        configSvc.deleteFactoryConfiguration(HTTPS_KEYSTORE_SERVICE_PID, false);
     }
 
     @Test
-    public void shouldRejectClientConnectionWithNoCert() throws KuraException, InvalidSyntaxException,
-            InterruptedException, ExecutionException, TimeoutException, IOException, UnrecoverableKeyException,
-            KeyManagementException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-
-        final File httpsKeystore = deployResource("/httpskeystore.ks");
+    public void shouldRejectClientConnectionWithNoCert() throws Exception {
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
-                        .withKeystorePath(httpsKeystore.getAbsolutePath()).withKeystorePassword("changeit", cryptoSvc)
-                        .toProperties()).get(30, TimeUnit.SECONDS);
+        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-        assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.empty(),
-                Optional.of(buildClientTrustManagers())) instanceof Failure);
+            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
+                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
+                            .withKeystoreServiceTarget(testKeystore.getTargetFilter()).toProperties()).get(30,
+                                    TimeUnit.SECONDS);
 
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.empty(),
+                    Optional.of(buildClientTrustManagers())) instanceof Failure);
+
+        }
     }
 
     @Test
-    public void shouldSupportAllAuthMethods() throws KuraException, InvalidSyntaxException, InterruptedException,
-            ExecutionException, TimeoutException, IOException, UnrecoverableKeyException, KeyManagementException,
-            KeyStoreException, NoSuchAlgorithmException, CertificateException {
-
-        final File httpsKeystore = deployResource("/httpskeystore.ks");
+    public void shouldSupportAllAuthMethods() throws Exception {
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
         final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
 
-        updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
-                HttpServiceOptions.defaultConfiguration().withHttpPorts(8080).withHttpsPorts(4442)
-                        .withHttpsClientAuthPorts(4443).withKeystorePath(httpsKeystore.getAbsolutePath())
-                        .withKeystorePassword("changeit", cryptoSvc).toProperties()).get(30, TimeUnit.SECONDS);
+        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration())) {
 
-        final KeyManager[] keyManagers = buildClientKeyManagers();
+            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
+                    HttpServiceOptions.defaultConfiguration().withHttpPorts(8080).withHttpsPorts(4442)
+                            .withHttpsClientAuthPorts(4443).withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                            .toProperties()).get(30, TimeUnit.SECONDS);
 
-        assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
-                Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
-        assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8080/").equals(new StatusCode(404)));
-        assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4442/", Optional.empty(),
-                Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            final KeyManager[] keyManagers = buildClientKeyManagers();
+
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
+                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("http://localhost:8080/").equals(new StatusCode(404)));
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4442/", Optional.empty(),
+                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+        }
+
+    }
+
+    private static class TestKeystore implements AutoCloseable {
+
+        private final ConfigurationService configSvc;
+        private final String pid;
+
+        public TestKeystore(final ConfigurationService configSvc, final CryptoService cryptoSvc, final String pid,
+                final HttpsKeystoreServiceOptions options)
+                throws InterruptedException, ExecutionException, TimeoutException, IOException, KuraException {
+            this.configSvc = configSvc;
+            this.pid = pid;
+
+            final File httpsKeystore = deployResource("/httpskeystore.ks");
+
+            WireTestUtil
+                    .createFactoryConfiguration(configSvc, ConfigurableComponent.class, pid,
+                            "org.eclipse.kura.core.keystore.KeystoreServiceImpl",
+                            options.withKeystorePath(httpsKeystore.getAbsolutePath())
+                                    .withKeystorePassword("changeit", cryptoSvc).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+        }
+
+        String getTargetFilter() {
+            return "(kura.service.pid=" + pid + ")";
+        }
+
+        @Override
+        public void close() throws Exception {
+            WireTestUtil.deleteFactoryConfiguration(configSvc, pid).get(30, TimeUnit.SECONDS);
+        }
+
+    }
+
+    private static class HttpsKeystoreServiceOptions {
+
+        private String keystorePath = "";
+        private String keystorePassword = "";
+
+        private HttpsKeystoreServiceOptions() {
+        }
+
+        static HttpsKeystoreServiceOptions defaultConfiguration() {
+            return new HttpsKeystoreServiceOptions();
+        }
+
+        HttpsKeystoreServiceOptions withKeystorePath(final String keystorePath) {
+            this.keystorePath = keystorePath;
+            return this;
+        }
+
+        HttpsKeystoreServiceOptions withKeystorePassword(final String keystorePassword,
+                final CryptoService cryptoService) throws KuraException {
+            this.keystorePassword = new String(cryptoService.encryptAes(keystorePassword.toCharArray()));
+            return this;
+        }
+
+        Map<String, Object> toProperties() {
+            final Map<String, Object> result = new HashMap<>();
+
+            result.put("keystore.path", this.keystorePath);
+            result.put("keystore.password", this.keystorePassword);
+
+            return result;
+        }
 
     }
 
@@ -233,8 +309,7 @@ public class HttpServiceTest {
         private Integer[] httpPorts = new Integer[] {};
         private Integer[] httpsPorts = new Integer[] {};
         private Integer[] httpsClientAuthPorts = new Integer[] {};
-        private Optional<String> keystorePath = Optional.empty();
-        private Optional<String> keystorePassword = Optional.empty();
+        private Optional<String> keystoreServiceTarget = Optional.empty();
 
         private HttpServiceOptions() {
         }
@@ -258,25 +333,18 @@ public class HttpServiceTest {
             return this;
         }
 
-        HttpServiceOptions withKeystorePath(final String keystorePath) {
-            this.keystorePath = Optional.of(keystorePath);
-            return this;
-        }
-
-        HttpServiceOptions withKeystorePassword(final String keystorePassword, final CryptoService cryptoService)
-                throws KuraException {
-            this.keystorePassword = Optional.of(new String(cryptoService.encryptAes(keystorePassword.toCharArray())));
+        HttpServiceOptions withKeystoreServiceTarget(final String target) {
+            this.keystoreServiceTarget = Optional.of(target);
             return this;
         }
 
         Map<String, Object> toProperties() {
             final Map<String, Object> result = new HashMap<>();
 
-            result.put("http.ports", httpPorts);
-            result.put("https.ports", httpsPorts);
-            result.put("https.client.auth.ports", httpsClientAuthPorts);
-            result.put("https.keystore.path", this.keystorePath.orElse(""));
-            this.keystorePassword.ifPresent(p -> result.put("https.keystore.password", p));
+            result.put("http.ports", this.httpPorts);
+            result.put("https.ports", this.httpsPorts);
+            result.put("https.client.auth.ports", this.httpsClientAuthPorts);
+            result.put("KeystoreService.target", this.keystoreServiceTarget.orElse("(kura.service.pid=changeit)"));
 
             return result;
         }
@@ -297,7 +365,7 @@ public class HttpServiceTest {
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hash(this.value);
         }
 
         @Override
@@ -312,12 +380,12 @@ public class HttpServiceTest {
                 return false;
             }
             StatusCode other = (StatusCode) obj;
-            return value == other.value;
+            return this.value == other.value;
         }
 
         @Override
         public String toString() {
-            return "StatusCode [value=" + value + "]";
+            return "StatusCode [value=" + this.value + "]";
         }
 
     }
@@ -332,7 +400,7 @@ public class HttpServiceTest {
 
         @Override
         public String toString() {
-            return "Failure [cause=" + cause + "]";
+            return "Failure [cause=" + this.cause + "]";
         }
 
     }
@@ -394,12 +462,12 @@ public class HttpServiceTest {
     static CompletableFuture<Void> updateComponentConfiguration(final ConfigurationService configurationService,
             final String pid, final Map<String, Object> properties) throws KuraException, InvalidSyntaxException {
 
-        final CompletableFuture<Void> tracked = new CompletableFuture<Void>();
+        final CompletableFuture<Void> tracked = new CompletableFuture<>();
 
-        final CompletableFuture<Void> result = new CompletableFuture<Void>();
+        final CompletableFuture<Void> result = new CompletableFuture<>();
         final BundleContext context = FrameworkUtil.getBundle(WireTestUtil.class).getBundleContext();
 
-        final ServiceTracker<?, ?> tracker = new ServiceTracker<Object, Object>(context,
+        final ServiceTracker<?, ?> tracker = new ServiceTracker<>(context,
                 FrameworkUtil.createFilter("(kura.service.pid=" + pid + ")"),
                 new ServiceTrackerCustomizer<Object, Object>() {
 

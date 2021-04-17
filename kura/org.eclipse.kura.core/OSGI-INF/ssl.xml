@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -19,19 +19,12 @@
       <provide interface="org.eclipse.kura.ssl.SslManagerService"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.ssl.SslManagerService"/>
-   <reference name="ConfigurationService" 
-              bind="setConfigurationService"
-              unbind="unsetConfigurationService"
-              interface="org.eclipse.kura.configuration.ConfigurationService"/> 
-   <reference name="CryptoService"
-   			  bind="setCryptoService"
-   			  unbind="unsetCryptoService"
-   			  interface="org.eclipse.kura.crypto.CryptoService"/>
-   <reference name="SystemService"
-              bind="setSystemService"
-              unbind="unsetSystemService"
-              cardinality="1..1"
-              policy="static"
-              interface="org.eclipse.kura.system.SystemService"/>
+   <reference name="KeystoreService"
+           policy="dynamic"
+           bind="setKeystoreService"
+           unbind="unsetKeystoreService"
+           cardinality="0..1"
+           interface="org.eclipse.kura.security.keystore.KeystoreService"/>
+   <property name="kura.ui.factory.hide" type="String" value="true"/>
+   <property name="kura.ui.service.hide" type="String" value="true"/>
 </scr:component>

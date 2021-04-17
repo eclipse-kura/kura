@@ -112,7 +112,12 @@
                         -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                           -Dosgi.console=5002</argLine>
+                        <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
+                            <dependency>
+	                            <type>p2-installable-unit</type>
+	                            <artifactId>moquette-broker</artifactId>
+	                        </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.eclipse.equinox.ds</artifactId>
@@ -221,8 +226,25 @@
                                 <type>p2-installable-unit</type>
                                 <artifactId>org.apache.activemq.artemis-mqtt-protocol</artifactId>
                             </dependency>
+                            <dependency>
+                                <type>p2-installable-unit</type>
+                                <artifactId>org.eclipse.kura.core.keystore</artifactId>
+                            </dependency>
+                            <dependency>
+	                            <type>p2-installable-unit</type>
+	                            <artifactId>org.apache.felix.dependencymanager</artifactId>
+	                        </dependency>
+                            <dependency>
+	                            <type>p2-installable-unit</type>
+	                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
+	                        </dependency>
                         </dependencies>
                         <bundleStartLevel>
+	                        <bundle>
+	                            <id>moquette-broker</id>
+	                            <level>3</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
                             <bundle>
                                 <id>org.eclipse.equinox.ds</id>
                                 <level>4</level>
@@ -469,6 +491,11 @@
                                 <autoStart>true</autoStart>
                             </bundle>
                             <bundle>
+                                <id>org.eclipse.kura.broker.artemis.xml</id>
+                                <level>4</level>
+                                <autoStart>true</autoStart>
+                            </bundle>
+                            <bundle>
                                 <id>org.apache.activemq.artemis-mqtt-protocol</id>
                                 <level>4</level>
                                 <autoStart>true</autoStart>
@@ -523,6 +550,16 @@
                                 <level>4</level>
                                 <autoStart>true</autoStart>
                             </bundle>
+                            <bundle>
+	                            <id>org.apache.felix.dependencymanager</id>
+	                            <level>4</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
+	                        <bundle>
+	                            <id>org.apache.felix.deploymentadmin</id>
+	                            <level>4</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
                         </bundleStartLevel>
                     </configuration>
                 </plugin>
@@ -750,6 +787,11 @@
                                     <id>org.apache.felix.useradmin</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.core.keystore</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
                             </extraRequirements>
                         </dependency-resolution>
                     </configuration>
@@ -837,6 +879,7 @@
         <module>org.eclipse.kura.network.threat.manager.test</module>
         <module>org.eclipse.kura.core.tamper.detection.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
+        <module>org.eclipse.kura.core.keystore.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

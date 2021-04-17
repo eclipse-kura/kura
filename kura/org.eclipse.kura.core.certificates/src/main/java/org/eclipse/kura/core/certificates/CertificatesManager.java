@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,30 +12,34 @@
  *******************************************************************************/
 package org.eclipse.kura.core.certificates;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.certificate.CertificateInfo;
-import org.eclipse.kura.certificate.CertificateType;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.certificate.CertificatesService;
-import org.eclipse.kura.configuration.ComponentConfiguration;
+import org.eclipse.kura.certificate.KuraCertificateEntry;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.message.KuraApplicationTopic;
 import org.eclipse.kura.message.KuraPayload;
+import org.eclipse.kura.security.keystore.KeystoreService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,19 +50,23 @@ public class CertificatesManager implements CertificatesService {
 
     private static final Logger logger = LoggerFactory.getLogger(CertificatesManager.class);
 
-    private static final String DEFAULT_KEYSTORE = System.getProperty("org.osgi.framework.trust.repositories");
-
     public static final String APP_ID = "org.eclipse.kura.core.certificates.CertificatesManager";
 
     private static final String RESOURCE_CERTIFICATE_DM = "dm";
     private static final String RESOURCE_CERTIFICATE_LOGIN = "login";
     private static final String RESOURCE_CERTIFICATE_BUNDLE = "bundle";
+    private static final String RESOURCE_CERTIFICATE_SSL = "ssl";
 
-    private static final String HTTP_SERVICE_PID = "org.eclipse.kura.http.server.manager.HttpService";
-    private static final String SSL_SERVICE_PID = "org.eclipse.kura.ssl.SslManagerService";
+    private static final String LOGIN_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.HttpsKeystore";
+    private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.SSLKeystore";
+    private static final String DEFAULT_KEYSTORE_SERVICE_PID = "org.eclipse.kura.crypto.CryptoService";
 
     private CryptoService cryptoService;
     private ConfigurationService configurationService;
+    private Map<String, KeystoreService> keystoreServices = new HashMap<>();
+    private BundleContext bundleContext;
+    private ServiceTrackerCustomizer<KeystoreService, KeystoreService> keystoreServiceTrackerCustomizer;
+    private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
 
     // ----------------------------------------------------------------
     //
@@ -71,7 +79,9 @@ public class CertificatesManager implements CertificatesService {
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
+        if (this.cryptoService == cryptoService) {
+            this.cryptoService = null;
+        }
     }
 
     public void setConfigurationService(ConfigurationService configurationService) {
@@ -79,7 +89,9 @@ public class CertificatesManager implements CertificatesService {
     }
 
     public void unsetConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = null;
+        if (this.configurationService == configurationService) {
+            this.configurationService = null;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -89,131 +101,86 @@ public class CertificatesManager implements CertificatesService {
     // ----------------------------------------------------------------
 
     protected void activate(ComponentContext componentContext) {
+        this.bundleContext = componentContext.getBundleContext();
+        this.keystoreServiceTrackerCustomizer = new KeystoreServiceTrackerCustomizer();
+        initKeystoreServiceTracking();
         logger.info("Bundle {} has started!", APP_ID);
     }
 
     protected void deactivate(ComponentContext componentContext) {
+        if (this.keystoreServiceTracker != null) {
+            this.keystoreServiceTracker.close();
+        }
         logger.info("Bundle {} is deactivating!", APP_ID);
     }
 
     @Override
     public Certificate returnCertificate(String alias) throws KuraException {
+        TrustedCertificateEntry cert;
         try {
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-            return getCertificateFromKeyStore(keystorePassword, alias);
-        } catch (Exception e) {
-            throw KuraException.internalError("Error retrieving the certificate from the keystore");
+            cert = getCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID + ":" + alias).getCertificateEntry();
+        } catch (KuraException e) {
+            return null;
         }
+        return cert.getTrustedCertificate();
     }
 
     @Override
     public void storeCertificate(Certificate cert, String alias) throws KuraException {
-        if (alias.startsWith(RESOURCE_CERTIFICATE_DM) || alias.startsWith(RESOURCE_CERTIFICATE_BUNDLE)) {
+        if (alias.startsWith(RESOURCE_CERTIFICATE_DM)) {
+            storeDmCertificate(cert, alias);
+        } else if (alias.startsWith(RESOURCE_CERTIFICATE_BUNDLE)) {
             storeTrustRepoCertificate(cert, alias);
         } else if (alias.startsWith(RESOURCE_CERTIFICATE_LOGIN)) {
             storeLoginCertificate(cert, alias);
+        } else if (alias.startsWith(RESOURCE_CERTIFICATE_SSL)) {
+            storeSSLCertificate(cert, alias);
         }
     }
 
-    private void storeLoginCertificate(Certificate arg1, String alias) throws KuraException {
-        String path = getLoginKeystorePath();
-
-        try {
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
-            KeyStore ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
-            ks.setCertificateEntry(alias, arg1);
-            KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
-        } catch (Exception e) {
-            throw KuraException.internalError("Error adding the certificate to the keystore");
-        }
+    protected void storeLoginCertificate(Certificate cert, String alias) throws KuraException {
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(LOGIN_KEYSTORE_SERVICE_PID, alias, cert);
+        addCertificate(kuraCertificate);
     }
 
-    private void storeTrustRepoCertificate(Certificate arg1, String alias) throws KuraException {
-        try {
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-            KeyStore ks = KeyStoreManagement.loadKeyStore(DEFAULT_KEYSTORE, keystorePassword);
-            ks.setCertificateEntry(alias, arg1);
-            KeyStoreManagement.saveKeyStore(DEFAULT_KEYSTORE, ks, keystorePassword);
-        } catch (Exception e) {
-            throw KuraException.internalError("Error adding the certificate to the keystore");
-        }
+    protected void storeSSLCertificate(Certificate cert, String alias) throws KuraException {
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(SSL_KEYSTORE_SERVICE_PID, alias, cert);
+        addCertificate(kuraCertificate);
+    }
+
+    protected void storeTrustRepoCertificate(Certificate cert, String alias) throws KuraException {
+        KuraCertificateEntry kuraCertificate = new KuraCertificateEntry(DEFAULT_KEYSTORE_SERVICE_PID, alias, cert);
+        addCertificate(kuraCertificate);
+    }
+
+    protected void storeDmCertificate(Certificate cert, String alias) throws KuraException {
+        storeTrustRepoCertificate(cert, alias);
     }
 
     @Override
     public Enumeration<String> listBundleCertificatesAliases() {
-        return listStoredCertificatesAliases();
+        return listCertificatesAliases(DEFAULT_KEYSTORE_SERVICE_PID);
     }
 
     @Override
     public Enumeration<String> listDMCertificatesAliases() {
-        return listStoredCertificatesAliases();
+        return listCertificatesAliases(DEFAULT_KEYSTORE_SERVICE_PID);
     }
 
     @Override
     public Enumeration<String> listSSLCertificatesAliases() {
-        try {
-            String path = getSslKeystorePath();
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
-            return getAliasesFromKeyStore(path, keystorePassword);
-        } catch (Exception e) {
-            return Collections.emptyEnumeration();
-        }
-    }
-
-    protected String getSslKeystorePath() throws KuraException {
-        ComponentConfiguration cc = this.configurationService.getComponentConfiguration(SSL_SERVICE_PID);
-        return (String) cc.getConfigurationProperties().get("ssl.default.trustStore");
+        return listCertificatesAliases(SSL_KEYSTORE_SERVICE_PID);
     }
 
     @Override
     public Enumeration<String> listCACertificatesAliases() {
-        return listStoredCertificatesAliases();
+        return listCertificatesAliases(DEFAULT_KEYSTORE_SERVICE_PID);
     }
 
     @Override
     public void removeCertificate(String alias) throws KuraException {
-        removeTrustRepoCertificate(alias);
-        removeSslCertificate(alias);
-        removeLoginCertificate(alias);
-    }
-
-    private void removeTrustRepoCertificate(String alias) {
-        try {
-            String path = DEFAULT_KEYSTORE;
-            removeCertificate(alias, path);
-        } catch (Exception e) {
-            logger.info("Impossible to remove the certificate with alias: {} from trust keystore", alias);
-        }
-    }
-
-    private void removeSslCertificate(String alias) {
-        try {
-            String path = getSslKeystorePath();
-            removeCertificate(alias, path);
-        } catch (Exception e) {
-            logger.info("Impossible to remove the certificate with alias: {} from ssl keystore", alias);
-        }
-    }
-
-    private void removeLoginCertificate(String alias) {
-        try {
-            String path = getLoginKeystorePath();
-            removeCertificate(alias, path);
-        } catch (Exception e) {
-            logger.info("Impossible to remove the certificate with alias: {} from login keystore", alias);
-        }
-    }
-
-    private void removeCertificate(String alias, String path)
-            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException {
-        if (path == null || !(new File(path).exists())) {
-            return;
-        }
-        char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
-        KeyStore ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
-        if (ks.getCertificate(alias) != null) {
-            ks.deleteEntry(alias);
-            KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
+        for (Entry<String, KeystoreService> keystoreServiceEntry : this.keystoreServices.entrySet()) {
+            keystoreServiceEntry.getValue().deleteEntry(alias);
         }
     }
 
@@ -222,93 +189,104 @@ public class CertificatesManager implements CertificatesService {
         return true;
     }
 
-    protected Certificate getCertificateFromKeyStore(char[] keyStorePassword, String alias)
-            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-        KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
-        return ks.getCertificate(alias);
-    }
-
-    protected Enumeration<String> getAliasesFromKeyStore(char[] keyStorePassword)
-            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-        KeyStore ks = KeyStoreManagement.loadKeyStore(keyStorePassword);
-        return ks.aliases();
-    }
-
-    protected Enumeration<String> getAliasesFromKeyStore(final String path, char[] keyStorePassword)
-            throws NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
-        KeyStore ks = KeyStoreManagement.loadKeyStore(path, keyStorePassword);
-        return ks.aliases();
-    }
-
-    private Enumeration<String> listStoredCertificatesAliases() {
+    protected Enumeration<String> listCertificatesAliases(String keystoreId) {
         try {
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(DEFAULT_KEYSTORE);
-            return getAliasesFromKeyStore(keystorePassword);
-        } catch (Exception e) {
+            return Collections.enumeration(getKeystore(keystoreId).getAliases());
+        } catch (IllegalArgumentException | KuraException e) {
             return Collections.emptyEnumeration();
         }
     }
 
-    private Enumeration<String> listLoginAliases() throws KuraException {
-        String path = getLoginKeystorePath();
-        KeyStore ks = null;
-        try {
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
-            ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
-            return ks.aliases();
-        } catch (Exception e) {
-            return Collections.emptyEnumeration();
+    @Override
+    public List<KuraCertificateEntry> getCertificates() throws KuraException {
+        List<KuraCertificateEntry> certificates = new ArrayList<>();
+        for (Entry<String, KeystoreService> keystoreServiceEntry : this.keystoreServices.entrySet()) {
+            String keystoreId = keystoreServiceEntry.getKey();
+            Map<String, java.security.KeyStore.Entry> keystoreEntries = keystoreServiceEntry.getValue().getEntries();
+            keystoreEntries.entrySet().stream().filter(entry -> entry.getValue() instanceof TrustedCertificateEntry)
+                    .forEach(entry -> {
+                        String alias = entry.getKey();
+                        certificates.add(new KuraCertificateEntry(keystoreId, alias,
+                                (TrustedCertificateEntry) entry.getValue()));
+                    });
         }
-    }
-
-    private String getLoginKeystorePath() throws KuraException {
-        ComponentConfiguration cc = this.configurationService.getComponentConfiguration(HTTP_SERVICE_PID);
-        return (String) cc.getConfigurationProperties().get("https.keystore.path");
+        return certificates;
     }
 
     @Override
-    public Set<CertificateInfo> listStoredCertificates() throws KuraException {
-        List<String> trustRepoCertAliases = Collections.list(listStoredCertificatesAliases());
-        List<String> loginCertAliases = Collections.list(listLoginAliases());
-        List<String> sslCertAliases = Collections.list(listSSLCertificatesAliases());
-
-        Set<CertificateInfo> certsInfo = new HashSet<>();
-
-        trustRepoCertAliases.forEach(trustRepoCertAlias -> {
-            CertificateType type;
-            if (trustRepoCertAlias.startsWith(RESOURCE_CERTIFICATE_DM)) {
-                type = CertificateType.DM;
-            } else {
-                type = CertificateType.BUNDLE;
-            }
-            CertificateInfo certificateInfo = new CertificateInfo(trustRepoCertAlias, type);
-            certsInfo.add(certificateInfo);
-        });
-
-        loginCertAliases.forEach(loginCert -> certsInfo.add(new CertificateInfo(loginCert, CertificateType.LOGIN)));
-        sslCertAliases.forEach(sslCertAlias -> certsInfo.add(new CertificateInfo(sslCertAlias, CertificateType.SSL)));
-        return certsInfo;
-    }
-
-    @Override
-    public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] certificateChain)
-            throws KuraException {
-        if (alias.startsWith(RESOURCE_CERTIFICATE_LOGIN)) {
-            storeLoginKeyPair(alias, privateKey, certificateChain);
+    public KuraCertificateEntry getCertificateEntry(String id) throws KuraException {
+        String keystoreId = KuraCertificateEntry.getKeystoreId(id);
+        String alias = KuraCertificateEntry.getAlias(id);
+        java.security.KeyStore.Entry keystoreEntry = getKeystore(keystoreId).getEntry(alias);
+        if (keystoreEntry instanceof TrustedCertificateEntry) {
+            return new KuraCertificateEntry(keystoreId, alias, (TrustedCertificateEntry) keystoreEntry);
+        } else {
+            throw new KuraIOException("Failed to retrieve certificate " + id);
         }
     }
 
-    private void storeLoginKeyPair(String alias, PrivateKey privateKey, Certificate[] certificateChain)
-            throws KuraException {
-        String path = getLoginKeystorePath();
+    @Override
+    public void updateCertificate(KuraCertificateEntry certificate) throws KuraException {
+        addCertificate(certificate);
+    }
 
+    @Override
+    public void addCertificate(KuraCertificateEntry certificate) throws KuraException {
+        getKeystore(certificate.getKeystoreId()).setEntry(certificate.getAlias(), certificate.getCertificateEntry());
+    }
+
+    @Override
+    public void deleteCertificate(String id) throws KuraException {
+        String keystoreId = KuraCertificateEntry.getKeystoreId(id);
+        String alias = KuraCertificateEntry.getAlias(id);
+        getKeystore(keystoreId).deleteEntry(alias);
+    }
+
+    private void initKeystoreServiceTracking() {
+        String filterString = String.format("(&(%s=%s))", Constants.OBJECTCLASS, KeystoreService.class.getName());
+        Filter filter = null;
         try {
-            char[] keystorePassword = this.cryptoService.getKeyStorePassword(path);
-            KeyStore ks = KeyStoreManagement.loadKeyStore(path, keystorePassword);
-            ks.setKeyEntry(alias, privateKey, keystorePassword, certificateChain);
-            KeyStoreManagement.saveKeyStore(path, ks, keystorePassword);
-        } catch (Exception e) {
-            throw KuraException.internalError("Error adding a key pair to the keystore");
+            filter = this.bundleContext.createFilter(filterString);
+        } catch (InvalidSyntaxException e) {
+            logger.error("Filter setup exception ", e);
+        }
+        this.keystoreServiceTracker = new ServiceTracker<>(this.bundleContext, filter,
+                this.keystoreServiceTrackerCustomizer);
+        this.keystoreServiceTracker.open();
+    }
+
+    private KeystoreService getKeystore(String keystoreId) throws KuraException {
+        KeystoreService service = this.keystoreServices.get(keystoreId);
+        if (service == null) {
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "KeystoreService " + keystoreId + " not found");
+        }
+        return service;
+    }
+
+    private final class KeystoreServiceTrackerCustomizer
+            implements ServiceTrackerCustomizer<KeystoreService, KeystoreService> {
+
+        private static final String KURA_SERVICE_PID = "kura.service.pid";
+
+        @Override
+        public KeystoreService addingService(final ServiceReference<KeystoreService> reference) {
+            String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
+            CertificatesManager.this.keystoreServices.put(kuraServicePid,
+                    CertificatesManager.this.bundleContext.getService(reference));
+            return CertificatesManager.this.keystoreServices.get(kuraServicePid);
+        }
+
+        @Override
+        public void modifiedService(final ServiceReference<KeystoreService> reference, final KeystoreService service) {
+            String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
+            CertificatesManager.this.keystoreServices.put(kuraServicePid,
+                    CertificatesManager.this.bundleContext.getService(reference));
+        }
+
+        @Override
+        public void removedService(final ServiceReference<KeystoreService> reference, final KeystoreService service) {
+            String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
+            CertificatesManager.this.keystoreServices.remove(kuraServicePid);
         }
     }
 }

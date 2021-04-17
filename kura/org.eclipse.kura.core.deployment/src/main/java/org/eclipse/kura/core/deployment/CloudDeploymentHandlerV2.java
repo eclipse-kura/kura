@@ -181,7 +181,9 @@ public class CloudDeploymentHandlerV2 implements ConfigurableComponent, RequestH
     }
 
     public void unsetSslManagerService(SslManagerService sslManagerService) {
-        this.sslManagerService = null;
+        if (this.sslManagerService == sslManagerService) {
+            this.sslManagerService = null;
+        }
     }
 
     protected void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {

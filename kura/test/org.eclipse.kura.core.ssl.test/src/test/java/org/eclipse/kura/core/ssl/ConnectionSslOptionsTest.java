@@ -110,73 +110,12 @@ public class ConnectionSslOptionsTest {
     }
 
     @Test
-    public void testSetTrustStoreNull() {
-        SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
-        ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
-
-        when(serviceOptions.getSslKeyStore()).thenReturn("ts1");
-        sslOptions.setTrustStore(null);
-        assertEquals("ts1", sslOptions.getTrustStore());
-    }
-
-    @Test
-    public void testSetTrustStoreEmpty() {
-        SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
-        ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
-
-        when(serviceOptions.getSslKeyStore()).thenReturn("ts2");
-        sslOptions.setTrustStore("");
-        assertEquals("ts2", sslOptions.getTrustStore());
-    }
-
-    @Test
-    public void testSetTrustStoreWhitespace() {
-        SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
-        ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
-
-        when(serviceOptions.getSslKeyStore()).thenReturn("ts3");
-        sslOptions.setTrustStore(" \t\r\b\f");
-
-        assertEquals("ts3", sslOptions.getTrustStore());
-    }
-
-    @Test
     public void testSetTrustStoreNonEmpty() {
         SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
         ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
 
         sslOptions.setTrustStore("ts4");
         assertEquals("ts4", sslOptions.getTrustStore());
-    }
-
-    @Test
-    public void testSetKeyStoreNull() {
-        SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
-        ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
-
-        when(serviceOptions.getSslKeyStore()).thenReturn("ks1");
-        sslOptions.setKeyStore(null);
-        assertEquals("ks1", sslOptions.getKeyStore());
-    }
-
-    @Test
-    public void testSetKeyStoreEmpty() {
-        SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
-        ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
-
-        when(serviceOptions.getSslKeyStore()).thenReturn("ks2");
-        sslOptions.setKeyStore("");
-        assertEquals("ks2", sslOptions.getKeyStore());
-    }
-
-    @Test
-    public void testSetKeyStoreWhitespace() {
-        SslManagerServiceOptions serviceOptions = mock(SslManagerServiceOptions.class);
-        ConnectionSslOptions sslOptions = new ConnectionSslOptions(serviceOptions);
-
-        when(serviceOptions.getSslKeyStore()).thenReturn("ks3");
-        sslOptions.setKeyStore(" \t\r\b\f");
-        assertEquals("ks3", sslOptions.getKeyStore());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -68,57 +68,6 @@ public interface SslManagerService {
     public SSLContext getSSLContext(String keyAlias) throws GeneralSecurityException, IOException;
 
     /**
-     * Returns an SSLContext based on the specified parameters and applying best practices
-     * like Hostname Verification (enabled by default) and disables the legacy SSL-2.0-compatible Client Hello.<br>
-     *
-     * @param protocol
-     *            the protocol to use to initialize the SSLContext - e.g. TLSv1.2
-     * @param cipherSuites
-     *            allowed cipher suites for the returned SSLSocketFactory
-     * @param trustStorePath
-     *            Location of the Java keystore file containing the collection of CA certificates trusted by this
-     *            application process (trust store). Key store type is expected to be JKS.
-     * @param keyStorePath
-     *            Location of the Java keystore file containing an application process's own certificate and private
-     *            key. Key store type is expected to be JKS.
-     * @param keyStorePassword
-     *            Password to access the private key from the keystore file.
-     * @param keyAlias
-     *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
-     * @return the SSLContext
-     * @since 2.2
-     */
-    public SSLContext getSSLContext(String protocol, String cipherSuites, String trustStorePath, String keyStorePath,
-            char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException;
-
-    /**
-     * Returns an SSLContext based on the specified parameters and applying best practices
-     * like Hostname Verification and disables the legacy SSL-2.0-compatible Client Hello.<br>
-     *
-     * @param protocol
-     *            the protocol to use to initialize the SSLContext - e.g. TLSv1.2
-     * @param cipherSuites
-     *            allowed cipher suites for the returned SSLSocketFactory
-     * @param trustStorePath
-     *            Location of the Java keystore file containing the collection of CA certificates trusted by this
-     *            application process (trust store). Key store type is expected to be JKS.
-     * @param keyStorePath
-     *            Location of the Java keystore file containing an application process's own certificate and private
-     *            key. Key store type is expected to be JKS.
-     * @param keyStorePassword
-     *            Password to access the private key from the keystore file.
-     * @param keyAlias
-     *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
-     * @param hostnameVerification
-     *            enable server Hostname Verification
-     * @return the SSLContext
-     * @since 2.2
-     */
-    public SSLContext getSSLContext(String protocol, String cipherSuites, String trustStorePath, String keyStorePath,
-            char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
-            throws GeneralSecurityException, IOException;
-
-    /**
      * Shorthand for getSSLContext().getSocketFactory().
      *
      * @return the SSLSocketFactory
@@ -152,7 +101,9 @@ public interface SslManagerService {
      * @param keyAlias
      *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
      * @return the SSLSocketFactory
+     * @deprecated The methods that allow to explicitly specify a keystore should not be used anymore.
      */
+    @Deprecated
     public SSLSocketFactory getSSLSocketFactory(String protocol, String cipherSuites, String trustStorePath,
             String keyStorePath, char[] keyStorePassword, String keyAlias) throws GeneralSecurityException, IOException;
 
@@ -176,7 +127,9 @@ public interface SslManagerService {
      * @param hostnameVerification
      *            enable server Hostname Verification
      * @return the SSLSocketFactory
+     * @deprecated The methods that allow to explicitly specify a keystore should not be used anymore.
      */
+    @Deprecated
     public SSLSocketFactory getSSLSocketFactory(String protocol, String cipherSuites, String trustStorePath,
             String keyStorePath, char[] keyStorePassword, String keyAlias, boolean hostnameVerification)
             throws GeneralSecurityException, IOException;
@@ -188,7 +141,9 @@ public interface SslManagerService {
      * Otherwise the default Java VM trust store will be listed.
      *
      * @return the X509Certificates
+     * @deprecated
      */
+    @Deprecated
     public X509Certificate[] getTrustCertificates() throws GeneralSecurityException, IOException;
 
     /**
@@ -199,7 +154,9 @@ public interface SslManagerService {
      *
      * @param x509crt
      *            certificate to be installed
+     * @deprecated
      */
+    @Deprecated
     public void installTrustCertificate(String alias, X509Certificate x509crt)
             throws GeneralSecurityException, IOException;
 
@@ -210,7 +167,9 @@ public interface SslManagerService {
      * Otherwise the certificate will be deleted from the default Java VM trust store.
      *
      * @param alias
+     * @deprecated
      */
+    @Deprecated
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException;
 
     /**
@@ -225,8 +184,9 @@ public interface SslManagerService {
      *            that represents the password used to encode the keys in the key store
      * @param publicCerts
      *            that represents an array of Certificate objects that contain the public certificate chain
-     *
+     * @deprecated
      */
+    @Deprecated
     public void installPrivateKey(String alias, PrivateKey privateKey, char[] password, Certificate[] publicCerts)
             throws GeneralSecurityException, IOException;
 }

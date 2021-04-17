@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -69,7 +69,6 @@ public class ServicesUi extends AbstractServicesUi {
     interface ServicesUiUiBinder extends UiBinder<Widget, ServicesUi> {
     }
 
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
 
     private boolean dirty;
@@ -77,6 +76,8 @@ public class ServicesUi extends AbstractServicesUi {
     private GwtConfigComponent originalConfig;
 
     private final Optional<Validator> validator;
+
+    private Backend backend = new GwtComponentServiceBackend();
 
     NavPills menu;
     PanelBody content;
@@ -232,6 +233,14 @@ public class ServicesUi extends AbstractServicesUi {
         }
     }
 
+    public void setDeleteButtonVisible(final boolean deleteButtonVisible) {
+        this.delete.setVisible(deleteButtonVisible);
+    }
+
+    public void setBackend(final Backend backend) {
+        this.backend = backend;
+    }
+
     public void delete() {
         if (this.configurableComponent.isFactoryComponent()) {
             EntryClassUi.showWaitModal();
@@ -245,8 +254,8 @@ public class ServicesUi extends AbstractServicesUi {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
-                    ServicesUi.this.gwtComponentService.deleteFactoryConfiguration(token,
-                            ServicesUi.this.configurableComponent.getComponentId(), true, new AsyncCallback<Void>() {
+                    ServicesUi.this.backend.deleteFactoryConfiguration(token,
+                            ServicesUi.this.configurableComponent.getComponentId(), new AsyncCallback<Void>() {
 
                                 @Override
                                 public void onFailure(Throwable caught) {
@@ -334,37 +343,33 @@ public class ServicesUi extends AbstractServicesUi {
                         AlertDialog.Severity.INFO, ok -> {
                             if (ok) {
                                 RequestQueue.submit(context -> ServicesUi.this.gwtXSRFService.generateSecurityToken(
-                                        context.callback(token -> ServicesUi.this.gwtComponentService
-                                                .updateComponentConfiguration(token,
-                                                        ServicesUi.this.configurableComponent,
-                                                        context.callback(new AsyncCallback<Void>() {
+                                        context.callback(token -> ServicesUi.this.backend.updateComponentConfiguration(
+                                                token, ServicesUi.this.configurableComponent,
+                                                context.callback(new AsyncCallback<Void>() {
 
-                                                            @Override
-                                                            public void onFailure(Throwable caught) {
-                                                                FailureHandler.handle(caught);
-                                                                errorLogger.log(Level.SEVERE,
-                                                                        caught.getLocalizedMessage() != null
-                                                                                ? caught.getLocalizedMessage()
-                                                                                : caught.getClass().getName(),
-                                                                        caught);
-                                                                onApply.ifPresent(
-                                                                        action -> action.accept(Optional.of(caught)));
-                                                            }
+                                                    @Override
+                                                    public void onFailure(Throwable caught) {
+                                                        FailureHandler.handle(caught);
+                                                        errorLogger.log(Level.SEVERE,
+                                                                caught.getLocalizedMessage() != null
+                                                                        ? caught.getLocalizedMessage()
+                                                                        : caught.getClass().getName(),
+                                                                caught);
+                                                        onApply.ifPresent(action -> action.accept(Optional.of(caught)));
+                                                    }
 
-                                                            @Override
-                                                            public void onSuccess(Void result) {
-                                                                logger.info(MSGS.info() + ": "
-                                                                        + MSGS.deviceConfigApplied());
-                                                                ServicesUi.this.apply.setEnabled(false);
-                                                                ServicesUi.this.reset.setEnabled(false);
-                                                                setDirty(false);
-                                                                ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
-                                                                context.defer(2000, () -> ServicesUi.this.listener
-                                                                        .ifPresent(Listener::onConfigurationChanged));
-                                                                onApply.ifPresent(
-                                                                        action -> action.accept(Optional.empty()));
-                                                            }
-                                                        })))));
+                                                    @Override
+                                                    public void onSuccess(Void result) {
+                                                        logger.info(MSGS.info() + ": " + MSGS.deviceConfigApplied());
+                                                        ServicesUi.this.apply.setEnabled(false);
+                                                        ServicesUi.this.reset.setEnabled(false);
+                                                        setDirty(false);
+                                                        ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
+                                                        context.defer(2000, () -> ServicesUi.this.listener
+                                                                .ifPresent(Listener::onConfigurationChanged));
+                                                        onApply.ifPresent(action -> action.accept(Optional.empty()));
+                                                    }
+                                                })))));
                             }
                         }, messages.toArray(new String[messages.size()]));
             }
@@ -400,6 +405,7 @@ public class ServicesUi extends AbstractServicesUi {
     public interface Listener {
 
         public void onConfigurationChanged();
+
     }
 
     public interface ValidationResult {
@@ -444,5 +450,30 @@ public class ServicesUi extends AbstractServicesUi {
     public interface Validator {
 
         public List<ValidationResult> validate(final GwtConfigComponent config);
+    }
+
+    public interface Backend {
+
+        void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                AsyncCallback<Void> callback);
+
+        void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback);
+    }
+
+    private static class GwtComponentServiceBackend implements Backend {
+
+        private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
+
+        @Override
+        public void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                AsyncCallback<Void> callback) {
+            gwtComponentService.updateComponentConfiguration(token, component, callback);
+
+        }
+
+        @Override
+        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
+            gwtComponentService.deleteFactoryConfiguration(token, pid, true, callback);
+        }
     }
 }

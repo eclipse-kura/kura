@@ -62,11 +62,8 @@ public class ConnectionSslOptions {
     }
 
     public void setTrustStore(String trustStore) {
-        if (trustStore == null || "".equals(trustStore.trim())) {
-            this.trustStore = this.sslManagerOpts.getSslKeyStore();
-        } else {
+
             this.trustStore = trustStore;
-        }
     }
 
     public String getKeyStore() {
@@ -74,11 +71,7 @@ public class ConnectionSslOptions {
     }
 
     public void setKeyStore(String keyStore) {
-        if (keyStore == null || "".equals(keyStore.trim())) {
-            this.keyStore = this.sslManagerOpts.getSslKeyStore();
-        } else {
             this.keyStore = keyStore;
-        }
     }
 
     public char[] getKeyStorePassword() {

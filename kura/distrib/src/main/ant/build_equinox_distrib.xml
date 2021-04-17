@@ -182,7 +182,10 @@
 
 		<!-- Threat Management bundles config -->
 		<antcall target="threat-management-config" />
-
+		
+		<!-- Keystore Management bundles config -->
+		<antcall target="keystore-management-config" />
+		
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
 			target -->
 		<available
@@ -718,6 +721,8 @@ fi]]>
 		<antcall target="misc-jar" />
 
 		<antcall target="threat-management-jar" />
+		
+		<antcall target="keystore-management-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -927,6 +932,10 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcpkix_${org.bouncycastle.jar.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcprov_${org.bouncycastle.jar.version}.jar@3" />
 		</propertyfile>
 	</target>
 
@@ -1745,6 +1754,22 @@ fi]]>
 			update="true">
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+		</zip>
+	</target>
+	
+	<target name="keystore-management-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+	<target name="keystore-management-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip"
+			update="true">
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
    which is available at https://www.eclipse.org/legal/epl-2.0/
- 
+
 	SPDX-License-Identifier: EPL-2.0
-	
+
 	Contributors:
 	 Eurotech
     Red Hat Inc
@@ -24,13 +24,13 @@
               interface="org.osgi.service.deploymentadmin.DeploymentAdmin"/>
    <reference name="RequestHandlerRegistry"
               policy="dynamic"
-              cardinality="0..n" 
+              cardinality="0..n"
               bind="setRequestHandlerRegistry"
               unbind="unsetRequestHandlerRegistry"
               interface="org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry"/>
    <reference name="SslManagerService"
-              policy="static"
-              cardinality="1..1"
+              policy="dynamic"
+              cardinality="0..1"
               bind="setSslManagerService"
               unbind="unsetSslManagerService"
               interface="org.eclipse.kura.ssl.SslManagerService"/>

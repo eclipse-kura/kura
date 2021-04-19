@@ -14,6 +14,7 @@ package org.eclipse.kura.core.keystore.util;
 
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -24,6 +25,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.DSAPublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.ECParameterSpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -261,6 +266,7 @@ public class KeystoreServiceRemoteService {
             certificateInfo.setStartDate(x509Certificate.getNotBefore());
             certificateInfo.setExpirationdate(x509Certificate.getNotAfter());
             certificateInfo.setAlgorithm(x509Certificate.getSigAlgName());
+            certificateInfo.setSize(getSize(x509Certificate.getPublicKey()));
             try {
                 certificateInfo.setSubjectAN(x509Certificate.getSubjectAlternativeNames());
             } catch (CertificateParsingException e) {
@@ -289,6 +295,7 @@ public class KeystoreServiceRemoteService {
         PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(alias, keystoreName);
         if (privateKey != null) {
             privateKeyInfo.setAlgorithm(privateKey.getPrivateKey().getAlgorithm());
+            privateKeyInfo.setSize(getSize(privateKey.getCertificate().getPublicKey()));
             if (withCertificate) {
                 final Base64.Encoder encoder = Base64.getMimeEncoder(64, LINE_SEPARATOR.getBytes());
                 String[] certificateChain = new String[privateKey.getCertificateChain().length];
@@ -310,6 +317,26 @@ public class KeystoreServiceRemoteService {
 
         }
         return privateKeyInfo;
+    }
+
+    private int getSize(Key key) {
+        int size = 0;
+        if (key instanceof RSAPublicKey) {
+            size = ((RSAPublicKey) key).getModulus().bitLength();
+        } else if (key instanceof ECPublicKey) {
+            ECParameterSpec spec = ((ECPublicKey) key).getParams();
+            if (spec != null) {
+                size = spec.getOrder().bitLength();
+            }
+        } else if (key instanceof DSAPublicKey) {
+            DSAPublicKey dsaCertificate = (DSAPublicKey) key;
+            if (dsaCertificate.getParams() != null) {
+                size = dsaCertificate.getParams().getP().bitLength();
+            } else {
+                size = dsaCertificate.getY().bitLength();
+            }
+        }
+        return size;
     }
 
     private void initKeystoreServiceTracking() {

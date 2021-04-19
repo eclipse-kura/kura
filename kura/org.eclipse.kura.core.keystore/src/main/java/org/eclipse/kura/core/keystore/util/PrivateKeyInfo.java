@@ -16,6 +16,7 @@ package org.eclipse.kura.core.keystore.util;
 public class PrivateKeyInfo extends EntryInfo {
 
     private String algorithm;
+    private int size;
     private String privateKey;
     private String[] certificateChain;
 
@@ -30,6 +31,14 @@ public class PrivateKeyInfo extends EntryInfo {
 
     public void setAlgorithm(String algorithm) {
         this.algorithm = algorithm;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public String getPrivateKey() {

@@ -31,6 +31,7 @@ public class CertificateInfo extends EntryInfo {
     private Date startDate;
     private Date expirationdate;
     private String algorithm;
+    private int size;
     private String certificate;
 
     public CertificateInfo(String alias, String keystoreName) {
@@ -84,6 +85,14 @@ public class CertificateInfo extends EntryInfo {
 
     public void setAlgorithm(String algorithm) {
         this.algorithm = algorithm;
+    }
+
+    public int getSize() {
+        return this.size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public String getCertificate() {

@@ -48,6 +48,7 @@ import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
 import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.security.keystore.KeystoreService;
@@ -166,7 +167,13 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         connSslOpts.setAlias(keyAlias);
         connSslOpts.setHostnameVerification(hostnameVerification);
 
-        return getSSLContextInternal(connSslOpts);
+        SSLContext sslContext = null;
+        try {
+            sslContext = getSSLContextInternal(connSslOpts);
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
+        return sslContext;
     }
 
     @Override
@@ -196,13 +203,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     @Override
     public X509Certificate[] getTrustCertificates() throws GeneralSecurityException, IOException {
         X509Certificate[] cacerts = null;
-        TrustManager[] tms = getTrustManagers();
-        for (TrustManager tm : tms) {
-            if (tm instanceof X509TrustManager) {
-                X509TrustManager x509tm = (X509TrustManager) tm;
-                cacerts = x509tm.getAcceptedIssuers();
-                break;
+        try {
+            TrustManager[] tms = getTrustManagers();
+            for (TrustManager tm : tms) {
+                if (tm instanceof X509TrustManager) {
+                    X509TrustManager x509tm = (X509TrustManager) tm;
+                    cacerts = x509tm.getAcceptedIssuers();
+                    break;
+                }
             }
+        } catch (KuraException e) {
+            throw new IOException(e);
         }
         return cacerts;
     }
@@ -216,12 +227,20 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
 
         TrustedCertificateEntry trustedCertificateEntry = new TrustedCertificateEntry(x509crt);
-        this.keystoreService.setEntry(alias, trustedCertificateEntry);
+        try {
+            this.keystoreService.setEntry(alias, trustedCertificateEntry);
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public void deleteTrustCertificate(String alias) throws GeneralSecurityException, IOException {
-        this.keystoreService.deleteEntry(alias);
+        try {
+            this.keystoreService.deleteEntry(alias);
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -232,8 +251,11 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         }
 
         PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(privateKey, publicCerts);
-
-        this.keystoreService.setEntry(alias, privateKeyEntry);
+        try {
+            this.keystoreService.setEntry(alias, privateKeyEntry);
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
     }
 
     private KeyStore loadKeystore(String keyStore, char[] keyStorePassword)
@@ -254,7 +276,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     // ----------------------------------------------------------------
 
     private SSLContext getSSLContextInternal(ConnectionSslOptions options)
-            throws GeneralSecurityException, IOException {
+            throws GeneralSecurityException, IOException, KuraException {
         // Only create a new SSLSocketFactory instance if the configuration has
         // changed or
         // for a new alias.
@@ -304,7 +326,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         };
     }
 
-    private TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
+    private TrustManager[] getTrustManagers() throws GeneralSecurityException, KuraException {
         TrustManager[] result = new TrustManager[0];
         TrustManagerFactory tmf = null;
         if (this.keystoreService != null) {
@@ -338,7 +360,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         return result;
     }
 
-    private KeyManager[] getKeyManagers() throws GeneralSecurityException, IOException {
+    private KeyManager[] getKeyManagers() throws KuraException {
         if (isNull(this.keystoreService)) {
             throw new KuraRuntimeException(KuraErrorCode.INTERNAL_ERROR); // TO DO:review
         }

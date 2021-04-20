@@ -101,7 +101,7 @@ following steps:
      ![Proceed trusting the source]({{ site.baseurl }}/assets/images/admin/untrusted_cert3.png)
 
      Once trusted the source, the user will be redirected to a login page where the default **username** is:
-
+     
      <pre>admin</pre>
 
      and the default **password** is:

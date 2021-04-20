@@ -26,10 +26,10 @@ The following procedure will create a wire graph that collects data from a simul
 
 ## Configure Kura Wires OPC/UA application
 
-1. Install the OPC/UA driver from the Eclipse Kura Marketplace ([here](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-3xy) or [here](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-4xy))
+1. Install the OPC/UA driver from the Eclipse Kura Marketplace ([here for Kura 3.X](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-3xy) or [here for Kura 4.X](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-4xy))
 2. On the Kura web interface, add the OPC/UA driver:
   * Under "Services", click the "+" button
-  * Select "org.eclipse.kura.driver.opcua", type in a name and click "Apply": a new service will show up under Services.
+  * Select "org.eclipse.kura.driver.opcua", type in a name and click "Apply": a new service will show in the **Drivers and Assets** menu.
   * Configure the new service as follows:
     * endpoint.ip : localhost
     * endpoint.port : 1234
@@ -38,25 +38,38 @@ The following procedure will create a wire graph that collects data from a simul
 ![opcua_driver]({{ site.baseurl }}/assets/images/wires/OPCUADriver.png)
 
 {:start="3"}
-3. Click on "Wires" under "System"
+3. Click on "Wire Graph" under "System"
 4. Add a new "Timer" component and configure the interval at which the OPC/UA server will be sampled
-5. Add a new "Asset" with the previously added OPC/UA driver
-6. Configure the new OPC/UA asset, adding new Channels as shown in the following image. Be sure that all channels are set to READ.
+5. Add a new "WireAsset" with the previously added OPC/UA driver
+6. Configure the new OPC/UA asset, adding new Channels as shown in the following image. Be sure that all channels are set to READ and that the associated "node.id" fields are set to:
+  * "fan" for the fan channel;
+  * "buzzer" for the buzzer channel;
+  * "lightSensor" for the light channel;
+  * "temperatureSensor" for the temperature channel;
+  * "led" for the led channel;
+  * "waterSensor" for the water channel
 
 ![opcua_driver_config1]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig1.png)
 
 {:start="7"}
-7. Add a new "DBStore" component and configure it as follows:
+7. Add a new "H2 DB Store" component and configure it as follows:
   * table.name : WR_data
   * maximum.table.size : 10000
   * cleanup.records.keep : 0
 8. Add a new "Publisher" component and configure the chosen cloud platform stack in "cloud.service.pid" option
 9. Add "Logger" component
 10. Add another instance of "Timer"
-11. Add a new "DBFilter" component and configure as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
-  * sql.view : SELECT (CASE WHEN "light" < 200 THEN 1 ELSE 0 END) AS "led" FROM "WR_data" ORDER BY TIMESTAMP DESC LIMIT 1;
+11. Add a new "H2 DB Filter" component and configure as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
+  * sql.view :
+    ```
+    SELECT (CASE WHEN "light" < 200 THEN 1 ELSE 0 END) AS "led" FROM "WR_data" ORDER BY TIMESTAMP DESC LIMIT 1;
+    ```
+
   * cache.expiration.interval : 0
-12. Add another "Asset" with the OPC/UA driver, configured as shown in the following image. Be sure that all channels are set to WRITE.
+12. Add another "WireAsset" with the OPC/UA driver, configured as shown in the following image. Be sure that all channels are set to WRITE and that the associated "node.id" fields are set to:
+  * "fan" for the fan channel;
+  * "buzzer" for the buzzer channel;
+  * "led" for the led channel
 
 ![opcua_driver_config2]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig2.png)
 

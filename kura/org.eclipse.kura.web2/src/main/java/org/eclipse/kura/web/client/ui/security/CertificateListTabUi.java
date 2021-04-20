@@ -32,6 +32,7 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -40,10 +41,13 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -77,6 +81,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     Button closeModalButton;
     @UiField
     AlertDialog alertDialog;
+    @UiField
+    PanelFooter tablePanelFooter;
 
     @UiField
     CellTable<GwtKeystoreEntry> certificatesGrid;
@@ -85,13 +91,33 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     private final ListDataProvider<GwtKeystoreEntry> certificatesDataProvider = new ListDataProvider<>();
 
+    private final SimplePager pager;
+
     private List<String> pids;
 
     public CertificateListTabUi() {
         logger.log(Level.FINER, "Initiating CertificatesTabUI...");
         initWidget(uiBinder.createAndBindUi(this));
-        initTable();
 
+        this.pager = new SimplePager(TextLocation.CENTER, false, 0, true) {
+
+            @Override
+            public void nextPage() {
+                setPage(getPage() + 1);
+            }
+
+            @Override
+            public void setPageStart(int index) {
+                final HasRows display = getDisplay();
+                if (display != null) {
+                    display.setVisibleRange(index, getPageSize());
+                }
+            }
+        };
+        this.pager.setPageSize(15);
+        this.pager.setDisplay(this.certificatesGrid);
+        this.tablePanelFooter.add(this.pager);
+        initTable();
         initInterfaceButtons();
     }
 

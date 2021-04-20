@@ -14,32 +14,23 @@ package org.eclipse.kura.web.server;
 
 import static java.lang.String.format;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
-import java.security.KeyFactory;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
-import java.security.PrivateKey;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Base64.Decoder;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.certificate.CertificatesService;
 import org.eclipse.kura.certificate.KuraCertificateEntry;
+import org.eclipse.kura.core.keystore.util.KeystoreServiceRemoteService;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -56,7 +47,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
      *
      */
     private static final long serialVersionUID = 7402961266449489433L;
-    private static final Decoder BASE64_DECODER = Base64.getDecoder();
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
 
     @Override
     public void storeKeyPair(GwtXSRFToken xsrfToken, String keyStorePid, String privateKey, String publicCert,
@@ -64,31 +55,18 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         checkXSRFToken(xsrfToken);
 
         try {
-            // Remove header if exists
-            String key = privateKey.replace("-----BEGIN PRIVATE KEY-----", "").replace("\n", "");
-            key = key.replace("-----END PRIVATE KEY-----", "");
+            PrivateKeyEntry entry = KeystoreServiceRemoteService.createPrivateKey(privateKey, publicCert);
 
-            byte[] conversion = base64Decode(key);
-            // Parse Base64 - after PKCS8
-            PKCS8EncodedKeySpec specPriv = new PKCS8EncodedKeySpec(conversion);
-
-            // Create RSA key
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            PrivateKey privKey = kf.generatePrivate(specPriv);
-
-            Certificate[] certs = parsePublicCertificates(publicCert);
-
-            if (privKey == null) {
+            if (entry == null) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
             } else {
-                PrivateKeyEntry privateKeyEntry = new PrivateKeyEntry(privKey, certs);
-                final String filter = format("(%s=%s)", "kura.service.pid", keyStorePid);
+                final String filter = format("(%s=%s)", KURA_SERVICE_PID, keyStorePid);
 
                 final Collection<ServiceReference<KeystoreService>> keystoreServiceReferences = ServiceLocator
                         .getInstance().getServiceReferences(KeystoreService.class, filter);
                 for (ServiceReference<KeystoreService> reference : keystoreServiceReferences) {
                     KeystoreService keystoreService = ServiceLocator.getInstance().getService(reference);
-                    keystoreService.setEntry(alias, privateKeyEntry);
+                    keystoreService.setEntry(alias, entry);
                     ServiceLocator.getInstance().ungetService(reference);
                 }
             }
@@ -104,7 +82,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         checkXSRFToken(xsrfToken);
 
         try {
-            X509Certificate[] certs = parsePublicCertificates(certificate);
+            X509Certificate[] certs = KeystoreServiceRemoteService.parsePublicCertificates(certificate);
 
             if (certs.length == 0) {
                 throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
@@ -117,7 +95,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 }
             }
 
-        } catch (CertificateException | UnsupportedEncodingException | KuraException e) {
+        } catch (CertificateException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
@@ -127,7 +105,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         final List<String> pids = new ArrayList<>();
 
         ServiceLocator.withAllServiceReferences(null, (r, c) -> {
-            final Object pid = r.getProperties().get("kura.service.pid");
+            final Object pid = r.getProperties().get(KURA_SERVICE_PID);
 
             if (pid instanceof String) {
                 pids.add((String) pid);
@@ -137,32 +115,6 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
         return pids;
     }
 
-    private X509Certificate[] parsePublicCertificates(String publicKey)
-            throws CertificateException, UnsupportedEncodingException {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        Collection<? extends Certificate> publicCertificates = certFactory
-                .generateCertificates(new ByteArrayInputStream(publicKey.getBytes("UTF-8")));
-        Iterator<? extends Certificate> certIterator = publicCertificates.iterator();
-
-        X509Certificate[] certs = new X509Certificate[publicCertificates.size()];
-        int i = 0;
-
-        while (certIterator.hasNext()) {
-            X509Certificate cert = (X509Certificate) certIterator.next();
-            certs[i] = cert;
-            i++;
-        }
-        return certs;
-    }
-
-    private byte[] base64Decode(String key) throws GwtKuraException {
-        try {
-            return BASE64_DECODER.decode(key);
-        } catch (final Exception e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
     @Override
     public List<GwtKeystoreEntry> listEntries() throws GwtKuraException {
 
@@ -170,7 +122,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 
         ServiceLocator.withAllServiceReferences(KeystoreService.class, null, (ref, context) -> {
 
-            final Object kuraServicePid = ref.getProperty("kura.service.pid");
+            final Object kuraServicePid = ref.getProperty(KURA_SERVICE_PID);
 
             if (!(kuraServicePid instanceof String)) {
                 return;
@@ -210,8 +162,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
     @Override
     public void removeEntry(GwtXSRFToken xsrfToken, GwtKeystoreEntry entry) throws GwtKuraException {
 
-        final Collection<ServiceReference<KeystoreService>> refs = ServiceLocator.getInstance()
-                .getServiceReferences(KeystoreService.class, "(kura.service.pid=" + entry.getKeystoreName() + ")");
+        final Collection<ServiceReference<KeystoreService>> refs = ServiceLocator.getInstance().getServiceReferences(
+                KeystoreService.class, "(" + KURA_SERVICE_PID + "=" + entry.getKeystoreName() + ")");
 
         if (refs.isEmpty()) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);

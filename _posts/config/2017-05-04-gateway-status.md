@@ -10,7 +10,7 @@ The status of a gateway may be viewed from the Status window, which is accessed 
 
 This section provides a summary of the IoT Cloud connections status including the following details:
 
-- **Connection Status** - provides the status of the DataService and DataTransport connection. Valid values are CONNECTED or DISCONNECTED.
+- **Service Status** - provides the status of the DataService and DataTransport connection. Valid values are CONNECTED or DISCONNECTED.
 
 - **Auto-connect** - specifies whether the DataService automatically connects to the remote IoT Cloud Service on startup and disconnect.
 

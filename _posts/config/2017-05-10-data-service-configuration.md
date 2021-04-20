@@ -10,7 +10,7 @@ The DataService also adds the capability of storing published messages in a pers
 
 In order to overcome the potential latencies introduced by buffering messages, the DataService allows a priority level to be assigned to​ each published message. Depending on the store configuration, there are certain guarantees that stored messages are not lost due to sudden crashes or power outages.
 
-To use this service, select the **DataService** option located in the **Cloud Services** area as shown in the screen capture below.
+To use this service, select the **DataService** option located in the **Cloud Connections** area as shown in the screen capture below.
 
 ![kura_cloud_stack]({{ site.baseurl }}/assets/images/config/Kura_data_service.png)
 

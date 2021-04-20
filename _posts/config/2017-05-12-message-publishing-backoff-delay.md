@@ -10,7 +10,7 @@ This feature, enabled by default, integrates the [Token Bucket concept](https://
 
 In the image below, the parameters that need to be tuned, in the Data Service, to take advantage of this feature:
 
-![kura_cloud_stack]({{ site.baseurl }}/assets/images/config/Kura_rate_limit.png)
+![kura_cloud_stack]({{ site.baseurl }}/assets/images/config/Kura_rate-limit.png)
 
 - **enable.rate.limit** - Enables the token bucket message rate limiting.
 

@@ -21,10 +21,12 @@ The **Threads** tab shows a list of the threads that are currently running in th
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceThreads.png)
 
+<!---
 ## System Packages
 The **System Packages** tab shows the list of all the Linux packages installed on the OS. The package is detailed with the name, version and type (DEB/RPM).
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceSystemPackages.png)
+--->
 
 ## System Properties
 The **System Properties** tab shows a list of relevant properties including OS and JVM parameters.
@@ -34,7 +36,10 @@ The **System Properties** tab shows a list of relevant properties including OS a
 ## Command
 A detailed description of this tab is presented in the [Command Service](../builtin/command-service.html) page.
 
+<!---
 ## System Logs
 The **System Logs** tab allows to download a compressed file containing all the relevant log files from the gateway.
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceSystemLogs.png)
+
+--->

@@ -271,6 +271,11 @@ Right-click the example project and select **New | Other**. From the
 wizard, select **Plug-in Development | Component Definition** and click
 **Next**.
 
+{% include alerts.html message="This option is available only if the Plug-in 
+Development Environment (PDE) is installed in Eclipse (plugins can be 
+installed into Eclipse IDE by searching the name in the **Eclipse Marketplace**
+under the **Help** menu)." %}
+
 ![]({{ site.baseurl }}/assets/images/hello_example/media/image12.png)
 
 In the Class field of the New Component Definition window shown below,

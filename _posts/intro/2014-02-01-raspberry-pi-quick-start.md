@@ -91,16 +91,18 @@ following steps:
 
 10. Kura setups a local web ui that is available using a browser via:
 
-     <pre>https://&lt;device-ip&gt;</pre>
+     <pre>http://&lt;device-ip&gt;</pre>
 
-     The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
-     ![Untrusted certificate page]({{ site.baseurl }}/assets/images/admin/untrusted_cert1.png)
+     <!---The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
+     ![Untrusted certificate page]({{ site.baseurl }}/assets/images/admin/untrusted_cert1.png)--->
 
-     ![Untrusted certificate details]({{ site.baseurl }}/assets/images/admin/untrusted_cert2.png)
+     <!---![Untrusted certificate details]({{ site.baseurl }}/assets/images/admin/untrusted_cert2.png)--->
 
-     ![Proceed trusting the source]({{ site.baseurl }}/assets/images/admin/untrusted_cert3.png)
+     <!---![Proceed trusting the source]({{ site.baseurl }}/assets/images/admin/untrusted_cert3.png)--->
 
-     Once trusted the source, the user will be redirected to a login page where the default **username** is:
+     <!---Once trusted the source, the user will be redirected to a login page where the default **username** is:--->
+     
+     The user will be prompted for login credentials where the default **username** is:
 
      <pre>admin</pre>
 

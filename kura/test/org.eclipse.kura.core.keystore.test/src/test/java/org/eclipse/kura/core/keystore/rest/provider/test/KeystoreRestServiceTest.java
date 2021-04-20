@@ -29,7 +29,6 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.KeyStore.TrustedCertificateEntry;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -248,57 +247,18 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                this.keystoreServices.put("MyKeystore", ksMock);
-                try {
-                    this.certFactory = CertificateFactory.getInstance("X.509");
-                } catch (CertificateException e) {
-                    // Do nothing...
-                }
+                keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
 
         TrustedCertificateWriteRequest writeRequest = new TrustedCertificateWriteRequest("MyKeystore", "MyAlias");
-
         TestUtil.setFieldValue(writeRequest, "certificate", this.CERTIFICATE_RSA);
-
         krs.storeTrustedCertificateEntry(writeRequest);
 
         verify(ksMock, times(1)).setEntry(eq("MyAlias"), any(TrustedCertificateEntry.class));
 
     }
-
-    // @Test(expected = WebApplicationException.class)
-    // public void storeKeyEntryKeyTest()
-    // throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
-    // KeystoreService ksMock = mock(KeystoreService.class);
-    // KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-    // char[] password = "some password".toCharArray();
-    // ks.load(null, password);
-    // when(ksMock.getKeyStore()).thenReturn(ks);
-    //
-    // KeystoreRestService krs = new KeystoreRestService() {
-    //
-    // @Override
-    // public void activate(ComponentContext componentContext) {
-    // this.keystoreServices.put("MyKeystore", ksMock);
-    // try {
-    // this.certFactory = CertificateFactory.getInstance("X.509");
-    // } catch (CertificateException e) {
-    // // Do nothing...
-    // }
-    // }
-    // };
-    // krs.activate(null);
-    //
-    // PrivateKeyWriteRequest writeRequest = new PrivateKeyWriteRequest();
-    // TestUtil.setFieldValue(writeRequest, "keystoreServicePid", "MyKeystore");
-    // TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
-    // TestUtil.setFieldValue(writeRequest, "privateKey", this.PRIVATE_KEY);
-    // TestUtil.setFieldValue(writeRequest, "certificateChain", this.CERTIFICATE_CHAIN);
-    //
-    // krs.storeKeypairEntry(writeRequest);
-    // }
 
     @Test
     public void deleteKeyEntryTest() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
@@ -312,12 +272,8 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                this.keystoreServices.put("MyKeystore", ksMock);
-                try {
-                    this.certFactory = CertificateFactory.getInstance("X.509");
-                } catch (CertificateException e) {
-                    // Do nothing...
-                }
+
+                keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -342,12 +298,8 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                this.keystoreServices.put("MyKeystore", ksMock);
-                try {
-                    this.certFactory = CertificateFactory.getInstance("X.509");
-                } catch (CertificateException e) {
-                    // Do nothing...
-                }
+
+                keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -378,12 +330,8 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                this.keystoreServices.put("MyKeystore", ksMock);
-                try {
-                    this.certFactory = CertificateFactory.getInstance("X.509");
-                } catch (CertificateException e) {
-                    // Do nothing...
-                }
+
+                keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);

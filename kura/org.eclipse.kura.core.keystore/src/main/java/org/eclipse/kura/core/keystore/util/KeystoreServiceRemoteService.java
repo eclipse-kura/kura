@@ -29,6 +29,10 @@ import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -68,6 +72,7 @@ public class KeystoreServiceRemoteService {
     private ServiceTrackerCustomizer<KeystoreService, KeystoreService> keystoreServiceTrackerCustomizer;
     private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
     protected CertificateFactory certFactory;
+    private DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
@@ -263,8 +268,12 @@ public class KeystoreServiceRemoteService {
             X509Certificate x509Certificate = (X509Certificate) certificate.getTrustedCertificate();
             certificateInfo.setSubjectDN(x509Certificate.getSubjectDN().getName());
             certificateInfo.setIssuer(x509Certificate.getIssuerX500Principal().getName());
-            certificateInfo.setStartDate(x509Certificate.getNotBefore());
-            certificateInfo.setExpirationdate(x509Certificate.getNotAfter());
+            ZonedDateTime startDate = Instant.ofEpochMilli(x509Certificate.getNotBefore().getTime())
+                    .atZone(ZoneOffset.UTC);
+            certificateInfo.setStartDate(formatter.format(startDate));
+            ZonedDateTime expirationDate = Instant.ofEpochMilli(x509Certificate.getNotAfter().getTime())
+                    .atZone(ZoneOffset.UTC);
+            certificateInfo.setExpirationDate(formatter.format(expirationDate));
             certificateInfo.setAlgorithm(x509Certificate.getSigAlgName());
             certificateInfo.setSize(getSize(x509Certificate.getPublicKey()));
             try {

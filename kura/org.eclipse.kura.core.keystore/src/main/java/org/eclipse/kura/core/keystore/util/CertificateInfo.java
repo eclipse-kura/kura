@@ -14,7 +14,6 @@
 package org.eclipse.kura.core.keystore.util;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,8 +27,8 @@ public class CertificateInfo extends EntryInfo {
     private String subjectDN;
     private Collection<List<?>> subjectAN;
     private String issuer;
-    private Date startDate;
-    private Date expirationdate;
+    private String startDate;
+    private String expirationDate;
     private String algorithm;
     private int size;
     private String certificate;
@@ -63,20 +62,20 @@ public class CertificateInfo extends EntryInfo {
         this.issuer = issuer;
     }
 
-    public Date getStartDate() {
+    public String getStartDate() {
         return this.startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
 
-    public Date getExpirationdate() {
-        return this.expirationdate;
+    public String getExpirationDate() {
+        return this.expirationDate;
     }
 
-    public void setExpirationdate(Date expirationdate) {
-        this.expirationdate = expirationdate;
+    public void setExpirationDate(String expirationDate) {
+        this.expirationDate = expirationDate;
     }
 
     public String getAlgorithm() {

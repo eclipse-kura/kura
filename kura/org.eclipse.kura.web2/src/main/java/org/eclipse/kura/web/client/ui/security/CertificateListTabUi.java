@@ -39,6 +39,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -137,6 +138,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
             }
         };
         this.certificatesGrid.addColumn(col1, MSGS.certificateAlias());
+        col1.setSortable(true);
 
         TextColumn<GwtKeystoreEntry> col2 = new TextColumn<GwtKeystoreEntry>() {
 
@@ -168,28 +170,64 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         col3.setSortable(true);
         this.certificatesGrid.addColumn(col3, MSGS.certificateKeystoreName());
 
-        // ListHandler<GwtCertificate> columnSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
-        // columnSortHandler.setComparator(col2, (o1, o2) -> {
-        // if (o1 == o2) {
-        // return 0;
-        // }
-        //
-        // // Compare the name columns.
-        // if (o1 != null) {
-        // return o2 != null ? o1.getType().name().compareTo(o2.getType().name()) : 1;
-        // }
-        // return -1;
-        // });
-
-        this.selectionModel.addSelectionChangeHandler(e -> {
-            this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null);
-        });
+        this.selectionModel.addSelectionChangeHandler(
+                e -> this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null));
 
         this.certificatesGrid.getColumnSortList().push(col2);
-        // this.certificatesGrid.addColumnSortHandler(columnSortHandler);
+        this.certificatesGrid.addColumnSortHandler(getAliasSortHandler(col1));
+        this.certificatesGrid.addColumnSortHandler(getTypeSortHandler(col2));
+        this.certificatesGrid.addColumnSortHandler(getNameSortHandler(col3));
 
         this.certificatesDataProvider.addDataDisplay(this.certificatesGrid);
         this.certificatesGrid.setSelectionModel(this.selectionModel);
+    }
+
+    private ListHandler<GwtKeystoreEntry> getNameSortHandler(TextColumn<GwtKeystoreEntry> col3) {
+        ListHandler<GwtKeystoreEntry> nameSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        nameSortHandler.setComparator(col3, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+                return o2 != null ? o1.getKeystoreName().compareTo(o2.getKeystoreName()) : 1;
+            }
+            return -1;
+        });
+        return nameSortHandler;
+    }
+
+    private ListHandler<GwtKeystoreEntry> getTypeSortHandler(TextColumn<GwtKeystoreEntry> col2) {
+        ListHandler<GwtKeystoreEntry> typeSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        typeSortHandler.setComparator(col2, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            // Compare the type columns.
+            if (o1 != null) {
+                return o2 != null ? o1.getKind().name().compareTo(o2.getKind().name()) : 1;
+            }
+            return -1;
+        });
+        return typeSortHandler;
+    }
+
+    private ListHandler<GwtKeystoreEntry> getAliasSortHandler(TextColumn<GwtKeystoreEntry> col1) {
+        ListHandler<GwtKeystoreEntry> aliasSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        aliasSortHandler.setComparator(col1, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            // Compare the alias columns.
+            if (o1 != null) {
+                return o2 != null ? o1.getAlias().compareTo(o2.getAlias()) : 1;
+            }
+            return -1;
+        });
+        return aliasSortHandler;
     }
 
     private void initInterfaceButtons() {

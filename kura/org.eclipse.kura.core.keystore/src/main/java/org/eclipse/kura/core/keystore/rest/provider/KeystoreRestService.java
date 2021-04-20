@@ -45,7 +45,8 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     private static final String BAD_GET_KEY_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
             + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\"}";
     private static final String BAD_GET_CSR_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
-            + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\", \"signatureAlgorithm\": \"...\", \"attributes\": \"...\"}";
+            + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\", "
+            + "\"signatureAlgorithm\": \"...\", \"attributes\": \"...\"}";
     private static final String BAD_DELETE_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
             + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\"}";
 
@@ -72,6 +73,7 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     @Path("/keys")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public List<EntryInfo> getKeys(KeysReadRequest keysReadRequest) {
         validate(keysReadRequest, BAD_GET_KEYS_REQUEST_ERROR_MESSAGE);
 
@@ -83,9 +85,10 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     }
 
     @GET
-    @Path("/keys")
+    @Path("/keys/key")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public EntryInfo getKey(KeyReadRequest keyReadRequest) {
         validate(keyReadRequest, BAD_GET_KEY_REQUEST_ERROR_MESSAGE);
         return getKeyInternal(keyReadRequest.getKeystoreServicePid(), keyReadRequest.getAlias());
@@ -95,6 +98,7 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     @Path("/keys/csr")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public String getCSR(CsrReadRequest csrReadRequest) {
         validate(csrReadRequest, BAD_GET_CSR_REQUEST_ERROR_MESSAGE);
         return getCSRInternal(csrReadRequest);
@@ -109,7 +113,7 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         return storeTrustedCertificateEntryInternal(writeRequest);
     }
-    
+
     @POST
     @Path("/keys/keypair")
     @RolesAllowed("keystores")

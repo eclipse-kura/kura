@@ -346,9 +346,13 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        TrustedCertificateWriteRequest writeRequest = new TrustedCertificateWriteRequest();
+        PrivateKeyWriteRequest writeRequest = new PrivateKeyWriteRequest();
+        TestUtil.setFieldValue(writeRequest, "keystoreServicePid", "MyKeystore");
+        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
+        TestUtil.setFieldValue(writeRequest, "privateKey", this.PRIVATE_KEY);
+        TestUtil.setFieldValue(writeRequest, "certificateChain", this.CERTIFICATE_CHAIN);
 
-        krs.storeTrustedCertificateEntry(writeRequest);
+        krs.storeKeypairEntry(writeRequest);
     }
 
     @Test

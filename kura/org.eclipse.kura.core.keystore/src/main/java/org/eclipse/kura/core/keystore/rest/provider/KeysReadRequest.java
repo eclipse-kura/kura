@@ -14,7 +14,7 @@ package org.eclipse.kura.core.keystore.rest.provider;
 
 import org.eclipse.kura.rest.utils.Validable;
 
-public class DeleteRequest implements Validable {
+public class KeysReadRequest implements Validable {
 
     private String keystoreServicePid;
     private String alias;
@@ -29,12 +29,12 @@ public class DeleteRequest implements Validable {
 
     @Override
     public String toString() {
-        return "DeleteRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + "]";
+        return "KeysReadRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + "]";
     }
 
     @Override
     public boolean isValid() {
-        return this.keystoreServicePid != null && this.alias != null;
+        return this.keystoreServicePid != null || this.alias != null;
     }
 
 }

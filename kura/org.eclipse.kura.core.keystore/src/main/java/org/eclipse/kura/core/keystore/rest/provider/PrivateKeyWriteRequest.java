@@ -12,32 +12,25 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.rest.provider;
 
-import org.eclipse.kura.core.keystore.util.EntryType;
 import org.eclipse.kura.rest.utils.Validable;
 
-public class WriteRequest implements Validable {
+public class PrivateKeyWriteRequest implements Validable {
 
-    private String keystoreName;
+    private String keystoreServicePid;
     private String alias;
-    private String type;
     private String privateKey;
     private String[] certificateChain;
-    private String certificate;
     private String algorithm;
     private String signatureAlgorithm;
     private String attributes;
     private int size;
 
-    public String getKeystoreName() {
-        return this.keystoreName;
+    public String getKeystoreServicePid() {
+        return this.keystoreServicePid;
     }
 
     public String getAlias() {
         return this.alias;
-    }
-
-    public String getType() {
-        return this.type;
     }
 
     public String getPrivateKey() {
@@ -46,10 +39,6 @@ public class WriteRequest implements Validable {
 
     public String[] getCertificateChain() {
         return this.certificateChain;
-    }
-
-    public String getCertificate() {
-        return this.certificate;
     }
 
     public String getAlgorithm() {
@@ -70,24 +59,16 @@ public class WriteRequest implements Validable {
 
     @Override
     public String toString() {
-        return "WriteRequest [keystoreName=" + this.keystoreName + ", alias=" + this.alias + ", type=" + this.type
-                + "]";
+        return "WriteRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + "]";
     }
 
     @Override
     public boolean isValid() {
-        if (this.keystoreName == null || this.alias == null || this.type == null) {
+        if (this.keystoreServicePid == null || this.alias == null) {
             return false;
         }
-        if (EntryType.valueOfType(this.type) != EntryType.TRUSTED_CERTIFICATE
-                && EntryType.valueOfType(this.type) != EntryType.KEY_PAIR) {
-            return false;
-        }
-        if (EntryType.valueOfType(this.type) == EntryType.TRUSTED_CERTIFICATE && certificate == null) {
-            return false;
-        }
-        return !(EntryType.valueOfType(this.type) == EntryType.KEY_PAIR && (this.algorithm == null || this.size == 0
-                || this.signatureAlgorithm == null || this.attributes == null));
+        return !(this.algorithm == null || this.size == 0 || this.signatureAlgorithm == null
+                || this.attributes == null);
     }
 
 }

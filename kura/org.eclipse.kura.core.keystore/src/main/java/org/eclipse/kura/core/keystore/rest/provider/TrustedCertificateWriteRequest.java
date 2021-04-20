@@ -14,39 +14,36 @@ package org.eclipse.kura.core.keystore.rest.provider;
 
 import org.eclipse.kura.rest.utils.Validable;
 
-public class ReadRequest implements Validable {
+public class TrustedCertificateWriteRequest implements Validable {
 
-    private String keystoreName;
+    private String keystoreServicePid;
     private String alias;
-    private String signatureAlgorithm;
-    private String attributes;
+    private String certificate;
 
-    public String getKeystoreName() {
-        return this.keystoreName;
+    public String getKeystoreServicePid() {
+        return this.keystoreServicePid;
     }
 
     public String getAlias() {
         return this.alias;
     }
 
-    public String getSignatureAlgorithm() {
-        return this.signatureAlgorithm;
-    }
-
-    public String getAttributes() {
-        return this.attributes;
+    public String getCertificate() {
+        return this.certificate;
     }
 
     @Override
     public String toString() {
-        return "WriteRequest [keystoreName=" + this.keystoreName + ", alias=" + this.alias + ", algorithm="
-                + this.signatureAlgorithm + ", attributes=" + this.attributes + "]";
+        return "WriteRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + "]";
     }
 
     @Override
     public boolean isValid() {
-        return this.keystoreName != null && this.alias != null && this.signatureAlgorithm != null
-                && this.attributes != null;
+        boolean result = true;
+        if (this.keystoreServicePid == null || this.alias == null || this.certificate == null) {
+            result = false;
+        }
+        return result;
     }
 
 }

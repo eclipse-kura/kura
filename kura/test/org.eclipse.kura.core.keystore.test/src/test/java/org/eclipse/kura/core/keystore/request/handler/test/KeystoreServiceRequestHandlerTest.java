@@ -63,10 +63,10 @@ import org.osgi.service.component.ComponentContext;
 
 public class KeystoreServiceRequestHandlerTest {
 
-    private final String EMPTY_KEYSTORE_1 = "[{\"id\":\"MyKeystore\",\"type\":\"jks\",\"size\":0}]";
-    private final String EMPTY_KEYSTORE_2 = "[{\"id\":\"MyKeystore\",\"type\":\"pkcs12\",\"size\":0}]";
-    private final String KEYSTORE_ENTRY = "[{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":\"Wed, 14 Apr 2021 08:02:28 GMT\",\"expirationDate\":\"Tue, 13 Jul 2021 08:02:28 GMT\",\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"id\":\"MyKeystore:alias\",\"keystoreName\":\"MyKeystore\",\"alias\":\"alias\",\"type\":\"TRUSTED_CERTIFICATE\"}]";
-    private final String KEYSTORE_ENTRY_WITH_CERT = "{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":\"Wed, 14 Apr 2021 08:02:28 GMT\",\"expirationDate\":\"Tue, 13 Jul 2021 08:02:28 GMT\",\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"certificate\":\"-----BEGIN CERTIFICATE-----\\nMIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\\nbmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\\nVQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\\nMB4XDTIxMDQxNDA4MDIyOFoXDTIxMDcxMzA4MDIyOFowbDEQMA4GA1UEBhMHVW5r\\nbm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\\nChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\\nASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJSWJDxu8UNC4JGOgK31WCvz\\nNKy2ONH+jTVKnBY7Ckb1hljJY0sKO55aG1HNDfkev2lJTsPIz0nJjNsqBvB1flvf\\nr6XVCxdN0yxvU5g9SpRxE/iiPX0Qt7463OfzyKW97haJrrhF005RHYNcORMY/Phj\\nhFDnZhtAwpbQLzq2UuIZ7okJsx0IgRbjH71ZZuvYCqG7Ct/bp1D7w3tT7gTbIKYH\\nppQyG9rJDEh9+cr9Hyk8Gz7aAbPT/wMH+/vXDjH2j/M1Tmed0ajuGCJumaTQ4eHs\\n9xW3B3ugycb6e7Osl/4ESRO5RQL1k2GBONv10OrKDoZ5b66xwSJmC/w3BRWQ1cMC\\nAwEAAaMhMB8wHQYDVR0OBBYEFPospETb5HNeD/DmS9mwt+v/AYq/MA0GCSqGSIb3\\nDQEBCwUAA4IBAQBxMe1xQVQKt36A5qVlEZyxI9eb6eQRlYzorOgP2tFaOsvDPpRI\\nCALhPmxgQl/5QvKFfCXKoxWj1Spg4sF6fJp6jhSjLpmChS9lf5fRaWS20/pxIddM\\n10diq3r6HxLKSxCYK7Pf5scOeZquvwfo8Kxye01bvCMFf1s1K3ZEZszk5Oo2MnWU\\nU22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq\\nnDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O\\n44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\\n-----END CERTIFICATE-----\",\"id\":\"MyKeystore:alias\",\"keystoreName\":\"MyKeystore\",\"alias\":\"alias\",\"type\":\"TRUSTED_CERTIFICATE\"}";
+    private final String EMPTY_KEYSTORE_1 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"jks\",\"size\":0}]";
+    private final String EMPTY_KEYSTORE_2 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"pkcs12\",\"size\":0}]";
+    private final String KEYSTORE_ENTRY = "[{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":\"Wed, 14 Apr 2021 08:02:28 GMT\",\"expirationDate\":\"Tue, 13 Jul 2021 08:02:28 GMT\",\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\",\"type\":\"TRUSTED_CERTIFICATE\"}]";
+    private final String KEYSTORE_ENTRY_WITH_CERT = "{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":\"Wed, 14 Apr 2021 08:02:28 GMT\",\"expirationDate\":\"Tue, 13 Jul 2021 08:02:28 GMT\",\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"certificate\":\"-----BEGIN CERTIFICATE-----\\nMIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\\nbmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\\nVQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\\nMB4XDTIxMDQxNDA4MDIyOFoXDTIxMDcxMzA4MDIyOFowbDEQMA4GA1UEBhMHVW5r\\nbm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\\nChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\\nASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJSWJDxu8UNC4JGOgK31WCvz\\nNKy2ONH+jTVKnBY7Ckb1hljJY0sKO55aG1HNDfkev2lJTsPIz0nJjNsqBvB1flvf\\nr6XVCxdN0yxvU5g9SpRxE/iiPX0Qt7463OfzyKW97haJrrhF005RHYNcORMY/Phj\\nhFDnZhtAwpbQLzq2UuIZ7okJsx0IgRbjH71ZZuvYCqG7Ct/bp1D7w3tT7gTbIKYH\\nppQyG9rJDEh9+cr9Hyk8Gz7aAbPT/wMH+/vXDjH2j/M1Tmed0ajuGCJumaTQ4eHs\\n9xW3B3ugycb6e7Osl/4ESRO5RQL1k2GBONv10OrKDoZ5b66xwSJmC/w3BRWQ1cMC\\nAwEAAaMhMB8wHQYDVR0OBBYEFPospETb5HNeD/DmS9mwt+v/AYq/MA0GCSqGSIb3\\nDQEBCwUAA4IBAQBxMe1xQVQKt36A5qVlEZyxI9eb6eQRlYzorOgP2tFaOsvDPpRI\\nCALhPmxgQl/5QvKFfCXKoxWj1Spg4sF6fJp6jhSjLpmChS9lf5fRaWS20/pxIddM\\n10diq3r6HxLKSxCYK7Pf5scOeZquvwfo8Kxye01bvCMFf1s1K3ZEZszk5Oo2MnWU\\nU22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq\\nnDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O\\n44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\\n-----END CERTIFICATE-----\",\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\",\"type\":\"TRUSTED_CERTIFICATE\"}";
     private final String CERTIFICATE = "-----BEGIN CERTIFICATE-----\n"
             + "MIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
             + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
@@ -87,10 +87,10 @@ public class KeystoreServiceRequestHandlerTest {
             + "U22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq\n"
             + "nDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O\n"
             + "44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\n" + "-----END CERTIFICATE-----";
-    private final String JSON_MESSAGE_PUT_CERT = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
+    private final String JSON_MESSAGE_PUT_CERT = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n"
             + "   \"alias\":\"myCertTest99\",\n" + "   \"type\":\"TrustedCertificate\",\n" + "   \"certificate\":\""
             + this.CERTIFICATE + "\n" + "}";
-    private final String JSON_MESSAGE_DEL = "{\n" + "    \"keystoreName\" : \"MyKeystore\",\n"
+    private final String JSON_MESSAGE_DEL = "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n"
             + "    \"alias\" : \"mycerttestec\"\n" + "}";
     private final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n"
             + "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCCcZ1Nu9AVYKJd\n"
@@ -139,14 +139,14 @@ public class KeystoreServiceRequestHandlerTest {
                     + "PMAqecHfS24TzyWi8T4gLctcpSN22Aa394ky7sgBJPAQHWe7VWhRB0bVTZntwRsQ\n"
                     + "pEraINImKSw+m7MF/75s151yjKOzQxPZufl91oYyQMXoqX2fi0EUWo1oLm1x01dN\n"
                     + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----" };
-    private final String JSON_MESSAGE_PUT_KEY = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
+    private final String JSON_MESSAGE_PUT_KEY = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n"
             + "   \"alias\":\"myPrivateKey\",\n" + "   \"type\":\"PrivateKey\",\n" + "   \"privateKey\" : \""
             + this.PRIVATE_KEY + ",\n" + "   \"certificateChain\":[\"" + this.CERTIFICATE_CHAIN + "\"]\n" + "}";
-    private final String JSON_MESSAGE_PUT_KEY_PAIR = "{\n" + "   \"keystoreName\":\"MyKeystore\",\n"
+    private final String JSON_MESSAGE_PUT_KEY_PAIR = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n"
             + "   \"alias\":\"myKeyPair\",\n" + "   \"type\":\"KeyPair\",\n" + "   \"algorithm\" : \"RSA\",\n"
             + "   \"size\": 2048,\n" + "   \"signatureAlgorithm\" : \"SHA256WithRSA\",\n"
             + "   \"attributes\" : \"CN=Kura, OU=IoT, O=Eclipse, C=US\"\n" + "}";
-    private final String JSON_MESSAGE_GET_CSR = "{\n" + "    \"keystoreName\":\"MyKeystore\",\n"
+    private final String JSON_MESSAGE_GET_CSR = "{\n" + "    \"keystoreServicePid\":\"MyKeystore\",\n"
             + "    \"alias\":\"alias\",\n" + "    \"algorithm\" : \"SHA256withRSA\",\n"
             + "    \"attributes\" : \"CN=Kura, OU=IoT, O=Eclipse, C=US\"\n" + "}";
 

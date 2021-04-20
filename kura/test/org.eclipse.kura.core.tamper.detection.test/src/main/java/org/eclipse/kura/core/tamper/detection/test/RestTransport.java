@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +51,19 @@ public class RestTransport implements Transport {
 
             configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService",
                     Collections.singletonMap("http.ports", new Integer[] { 8080 }), false);
-            waitPortOpen("localhost", 8080, 30, TimeUnit.SECONDS);
+            waitPortOpen("localhost", 8080, 3, TimeUnit.MINUTES);
+
+            ServiceUtil
+                    .trackService(ConfigurableComponent.class,
+                            Optional.of("(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"))
+                    .get(1, TimeUnit.MINUTES);
+
+            ServiceUtil
+                    .trackService("org.eclipse.kura.core.tamper.detection.TamperDetectionRestService", Optional.empty())
+                    .get(1, TimeUnit.MINUTES);
+
             Thread.sleep(5000);
+
             initialized = true;
         } catch (final Exception e) {
             throw new RuntimeException(e);
@@ -104,6 +116,8 @@ public class RestTransport implements Transport {
             }
             Thread.sleep(1000);
         }
+
+        throw new IllegalStateException("Port " + port + "not open");
     }
 
     private interface ResponseCollector<T> {

@@ -15,23 +15,17 @@ package org.eclipse.kura.core.keystore.util;
 
 public class EntryInfo {
 
-    private final String id;
-    private final String keystoreName;
+    private final String keystoreServicePid;
     private final String alias;
     private EntryType type;
 
-    public EntryInfo(String alias, String keystoreName) {
+    public EntryInfo(String alias, String keystoreServicePid) {
         this.alias = alias;
-        this.keystoreName = keystoreName;
-        this.id = keystoreName + ":" + alias;
+        this.keystoreServicePid = keystoreServicePid;
     }
 
-    public String getId() {
-        return this.id;
-    }
-
-    public String getKeystoreName() {
-        return this.keystoreName;
+    public String getKeystoreServicePid() {
+        return this.keystoreServicePid;
     }
 
     public String getAlias() {

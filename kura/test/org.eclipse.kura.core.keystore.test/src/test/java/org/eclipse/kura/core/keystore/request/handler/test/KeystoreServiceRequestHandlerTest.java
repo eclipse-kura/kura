@@ -63,6 +63,8 @@ import org.osgi.service.component.ComponentContext;
 
 public class KeystoreServiceRequestHandlerTest {
 
+    private static final String ENTRIES_RESOURCE = "entries";
+    private static final String KEYSTORES_RESOURCE = "keystores";
     private final String EMPTY_KEYSTORE_1 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"jks\",\"size\":0}]";
     private final String EMPTY_KEYSTORE_2 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"pkcs12\",\"size\":0}]";
     private final String KEYSTORE_ENTRY = "[{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":\"Wed, 14 Apr 2021 08:02:28 GMT\",\"expirationDate\":\"Tue, 13 Jul 2021 08:02:28 GMT\",\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\",\"type\":\"TRUSTED_CERTIFICATE\"}]";
@@ -149,6 +151,11 @@ public class KeystoreServiceRequestHandlerTest {
     private final String JSON_MESSAGE_GET_CSR = "{\n" + "    \"keystoreServicePid\":\"MyKeystore\",\n"
             + "    \"alias\":\"alias\",\n" + "    \"algorithm\" : \"SHA256withRSA\",\n"
             + "    \"attributes\" : \"CN=Kura, OU=IoT, O=Eclipse, C=US\"\n" + "}";
+    private final String JSON_MESSAGE_GET_KEYS_BY_KEYSTORE = "{\n" + "    \"keystoreServicePid\":\"MyKeystore\"\n"
+            + "}";
+    private final String JSON_MESSAGE_GET_KEYS_BY_ALIAS = "{\n" + "    \"alias\":\"alias\"\n" + "}";
+    private final String JSON_MESSAGE_GET_KEYS_BY_KEYSTORE_ALIAS = "{\n"
+            + "    \"keystoreServicePid\":\"MyKeystore\", \n" + "    \"alias\":\"alias\"\n" + "}";
 
     @Test(expected = KuraException.class)
     public void doGetTestNoResources() throws KuraException {
@@ -203,7 +210,7 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keystores");
+        resourcesList.add(KEYSTORES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -219,7 +226,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKeys() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetAllKeys() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -247,7 +254,8 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -263,7 +271,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKeysWithId()
+    public void testDoGetKeysByKeystore()
             throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -288,16 +296,24 @@ public class KeystoreServiceRequestHandlerTest {
                     // Do nothing...
                 }
             }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected <T> T unmarshal(String jsonString, Class<T> clazz) {
+                EntryInfo entryInfo = new EntryInfo(null, "MyKeystore");
+                return (T) entryInfo;
+            }
         };
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
-        resourcesList.add("MyKeystore");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
+        request.setBody(this.JSON_MESSAGE_GET_KEYS_BY_KEYSTORE.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doGet(null, message);
@@ -309,7 +325,65 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoGetKey() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoGetKeyByAlias()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        KeystoreService ksMock = mock(KeystoreService.class);
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] password = "some password".toCharArray();
+        ks.load(null, password);
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE.getBytes());
+        X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        ks.setCertificateEntry("alias", cert);
+        when(ksMock.getKeyStore()).thenReturn(ks);
+        when(ksMock.getEntry("alias")).thenReturn(new KeyStore.TrustedCertificateEntry(cert));
+
+        List<String> aliases = new ArrayList<>();
+        aliases.add("alias");
+        when(ksMock.getAliases()).thenReturn(aliases);
+
+        KeystoreServiceRequestHandlerV1 keystoreRH = new KeystoreServiceRequestHandlerV1() {
+
+            @Override
+            public void activate(ComponentContext componentContext) {
+                this.keystoreServices.put("MyKeystore", ksMock);
+                try {
+                    this.certFactory = CertificateFactory.getInstance("X.509");
+                } catch (CertificateException e) {
+                    // Do nothing...
+                }
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected <T> T unmarshal(String jsonString, Class<T> clazz) {
+                EntryInfo entryInfo = new EntryInfo("alias", null);
+                return (T) entryInfo;
+            }
+        };
+        keystoreRH.activate(null);
+
+        List<String> resourcesList = new ArrayList<>();
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
+        Map<String, Object> reqResources = new HashMap<>();
+        reqResources.put(ARGS_KEY.value(), resourcesList);
+
+        KuraRequestPayload request = new KuraRequestPayload();
+        request.setBody(this.JSON_MESSAGE_GET_KEYS_BY_ALIAS.getBytes());
+        KuraMessage message = new KuraMessage(request, reqResources);
+
+        KuraMessage resMessage = keystoreRH.doGet(null, message);
+        KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
+
+        String response = new String(resPayload.getBody(), StandardCharsets.UTF_8);
+        assertEquals(this.KEYSTORE_ENTRY_WITH_CERT, response);
+    }
+
+    @Test
+    public void testDoGetKeyByKeystoreAlias()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -331,17 +405,24 @@ public class KeystoreServiceRequestHandlerTest {
                     // Do nothing...
                 }
             }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            protected <T> T unmarshal(String jsonString, Class<T> clazz) {
+                EntryInfo entryInfo = new EntryInfo("alias", "MyKeystore");
+                return (T) entryInfo;
+            }
         };
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
-        resourcesList.add("MyKeystore");
-        resourcesList.add("alias");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
         KuraRequestPayload request = new KuraRequestPayload();
+        request.setBody(this.JSON_MESSAGE_GET_KEYS_BY_KEYSTORE_ALIAS.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
         KuraMessage resMessage = keystoreRH.doGet(null, message);
@@ -386,7 +467,8 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -398,7 +480,6 @@ public class KeystoreServiceRequestHandlerTest {
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
-        assertEquals("\"MyKeystore" + ":" + "myCertTest99\"", new String(resPayload.getBody(), StandardCharsets.UTF_8));
     }
 
     @Test(expected = WebApplicationException.class)
@@ -435,7 +516,8 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -482,7 +564,8 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -494,7 +577,6 @@ public class KeystoreServiceRequestHandlerTest {
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
-        assertEquals("\"MyKeystore" + ":" + "myKeyPair\"", new String(resPayload.getBody(), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -533,6 +615,8 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         resourcesList.add("csr");
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
@@ -578,7 +662,8 @@ public class KeystoreServiceRequestHandlerTest {
         keystoreRH.activate(null);
 
         List<String> resourcesList = new ArrayList<>();
-        resourcesList.add("keys");
+        resourcesList.add(KEYSTORES_RESOURCE);
+        resourcesList.add(ENTRIES_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 

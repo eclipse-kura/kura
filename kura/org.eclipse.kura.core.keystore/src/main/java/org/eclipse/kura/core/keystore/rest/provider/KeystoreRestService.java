@@ -24,26 +24,23 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.kura.core.keystore.util.EntryInfo;
-import org.eclipse.kura.core.keystore.util.KeystoreServiceRemoteService;
+import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
 @Path("/keystores")
-public class KeystoreRestService extends KeystoreServiceRemoteService {
+public class KeystoreRestService extends KeystoreRemoteService {
 
     private static final String BAD_REQUEST_MESSAGE = "Bad request, ";
 
     private static final String BAD_WRITE_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
             + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": "
             + "\"MyAlias\", \"type\": \"TrustedCertificate\", \"certificate\": \"...\"}";
-    private static final String BAD_GET_KEYS_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
-            + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\"} or {\"alias\": \"MyAlias\"}";
-    private static final String BAD_GET_KEY_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
-            + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\"}";
     private static final String BAD_GET_CSR_REQUEST_ERROR_MESSAGE = BAD_REQUEST_MESSAGE
             + "expected request format: {\"keystoreServicePid\": \"MyKeystoreName\", \"alias\": \"MyAlias\", "
             + "\"signatureAlgorithm\": \"...\", \"attributes\": \"...\"}";
@@ -62,40 +59,31 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     }
 
     @GET
-    @Path("/keys")
+    @Path("/entries")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EntryInfo> getKeys() {
-        return getKeysInternal();
-    }
-
-    @GET
-    @Path("/keys")
-    @RolesAllowed("keystores")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public List<EntryInfo> getKeys(KeysReadRequest keysReadRequest) {
-        validate(keysReadRequest, BAD_GET_KEYS_REQUEST_ERROR_MESSAGE);
-
-        if (isNull(keysReadRequest.getAlias())) {
-            return getKeysInternal(keysReadRequest.getKeystoreServicePid());
+    public List<EntryInfo> getEntries(@QueryParam("keystoreServicePid") String keystoreServicePid,
+            @QueryParam("alias") String alias) {
+        if (isNull(keystoreServicePid) && isNull(alias)) {
+            return getKeysInternal();
+        } else if (!isNull(keystoreServicePid)) {
+            return getKeysByPidInternal(keystoreServicePid);
         } else {
-            return getKeysByAliasInternal(keysReadRequest.getAlias());
+            return getKeysByAliasInternal(alias);
         }
     }
 
     @GET
-    @Path("/keys/key")
+    @Path("/entries/entry")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public EntryInfo getKey(KeyReadRequest keyReadRequest) {
-        validate(keyReadRequest, BAD_GET_KEY_REQUEST_ERROR_MESSAGE);
-        return getKeyInternal(keyReadRequest.getKeystoreServicePid(), keyReadRequest.getAlias());
+    public EntryInfo getEntry(@QueryParam("keystoreServicePid") String keystoreServicePid,
+            @QueryParam("alias") String alias) {
+        return getKeyInternal(keystoreServicePid, alias);
     }
 
-    @GET
-    @Path("/keys/csr")
+    @POST
+    @Path("/entries/csr")
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -105,27 +93,25 @@ public class KeystoreRestService extends KeystoreServiceRemoteService {
     }
 
     @POST
-    @Path("/keys/certificate")
+    @Path("/entries/certificate")
     @RolesAllowed("keystores")
-    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String storeTrustedCertificateEntry(TrustedCertificateWriteRequest writeRequest) {
+    public void storeTrustedCertificateEntry(TrustedCertificateWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
-        return storeTrustedCertificateEntryInternal(writeRequest);
+        storeTrustedCertificateEntryInternal(writeRequest);
     }
 
     @POST
-    @Path("/keys/keypair")
+    @Path("/entries/keypair")
     @RolesAllowed("keystores")
-    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String storeKeypairEntry(PrivateKeyWriteRequest writeRequest) {
+    public void storeKeypairEntry(PrivateKeyWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
-        return storeKeyPairEntryInternal(writeRequest);
+        storeKeyPairEntryInternal(writeRequest);
     }
 
     @DELETE
-    @Path("/keys/_delete")
+    @Path("/entries/_delete")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
     public void deleteKeyEntry(DeleteRequest deleteRequest) {

@@ -15,9 +15,11 @@ package org.eclipse.kura.core.keystore.rest.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -39,8 +42,6 @@ import javax.ws.rs.WebApplicationException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
 import org.eclipse.kura.core.keystore.rest.provider.DeleteRequest;
-import org.eclipse.kura.core.keystore.rest.provider.KeyReadRequest;
-import org.eclipse.kura.core.keystore.rest.provider.KeysReadRequest;
 import org.eclipse.kura.core.keystore.rest.provider.KeystoreRestService;
 import org.eclipse.kura.core.keystore.rest.provider.PrivateKeyWriteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.TrustedCertificateWriteRequest;
@@ -202,14 +203,13 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        List<EntryInfo> keys = krs.getKeys();
+        List<EntryInfo> keys = krs.getEntries(null, null);
 
         assertEquals(1, keys.size());
         assertTrue(keys.get(0) instanceof CertificateInfo);
         assertEquals("alias", keys.get(0).getAlias());
-        assertEquals("MyKeystore", keys.get(0).getKeystoreName());
+        assertEquals("MyKeystore", keys.get(0).getKeystoreServicePid());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
-        assertEquals("MyKeystore:alias", keys.get(0).getId());
         assertEquals(2048, ((CertificateInfo) keys.get(0)).getSize());
         assertEquals("SHA256withRSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
     }
@@ -237,17 +237,13 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        KeysReadRequest keysReadRequest = new KeysReadRequest();
-        TestUtil.setFieldValue(keysReadRequest, "keystoreServicePid", "MyKeystore");
-
-        List<EntryInfo> keys = krs.getKeys(keysReadRequest);
+        List<EntryInfo> keys = krs.getEntries("MyKeystore", null);
 
         assertEquals(1, keys.size());
         assertTrue(keys.get(0) instanceof CertificateInfo);
         assertEquals("alias", keys.get(0).getAlias());
-        assertEquals("MyKeystore", keys.get(0).getKeystoreName());
+        assertEquals("MyKeystore", keys.get(0).getKeystoreServicePid());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
-        assertEquals("MyKeystore:alias", keys.get(0).getId());
         assertEquals(1024, ((CertificateInfo) keys.get(0)).getSize());
         assertEquals("SHA256withDSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
         assertEquals(CERTIFICATE_DSA, ((CertificateInfo) keys.get(0)).getCertificate());
@@ -274,17 +270,12 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        KeyReadRequest keyReadRequest = new KeyReadRequest();
-        TestUtil.setFieldValue(keyReadRequest, "keystoreServicePid", "MyKeystore");
-        TestUtil.setFieldValue(keyReadRequest, "alias", "alias");
-
-        EntryInfo key = krs.getKey(keyReadRequest);
+        EntryInfo key = krs.getEntry("MyKeystore", "alias");
 
         assertTrue(key instanceof CertificateInfo);
         assertEquals("alias", key.getAlias());
-        assertEquals("MyKeystore", key.getKeystoreName());
+        assertEquals("MyKeystore", key.getKeystoreServicePid());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, key.getType());
-        assertEquals("MyKeystore:alias", key.getId());
         assertEquals(256, ((CertificateInfo) key).getSize());
         assertEquals("SHA256withECDSA", ((CertificateInfo) key).getAlgorithm());
         assertEquals(CERTIFICATE_EC, ((CertificateInfo) key).getCertificate());
@@ -316,10 +307,12 @@ public class KeystoreRestServiceTest {
         TrustedCertificateWriteRequest writeRequest = new TrustedCertificateWriteRequest();
         TestUtil.setFieldValue(writeRequest, "keystoreServicePid", "MyKeystore");
         TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
-        TestUtil.setFieldValue(writeRequest, "type", "TrustedCertificate");
-        TestUtil.setFieldValue(writeRequest, "certificate", CERTIFICATE_RSA);
 
-        assertEquals("MyKeystore:MyAlias", krs.storeTrustedCertificateEntry(writeRequest));
+        TestUtil.setFieldValue(writeRequest, "certificate", CERTIFICATE_RSA);
+        
+        krs.storeTrustedCertificateEntry(writeRequest);
+
+        verify(ksMock, times(1)).setEntry(eq("MyAlias"), any(TrustedCertificateEntry.class));
 
     }
 
@@ -415,7 +408,10 @@ public class KeystoreRestServiceTest {
         TestUtil.setFieldValue(writeRequest, "size", 1024);
         TestUtil.setFieldValue(writeRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
 
-        assertEquals("MyKeystore:MyAlias", krs.storeKeypairEntry(writeRequest));
+        krs.storeKeypairEntry(writeRequest);
+        
+        verify(ksMock, times(1)).createKeyPair("MyAlias", "RSA", 1024, "SHA256WithRSA",
+                "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
     @Test

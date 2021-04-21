@@ -59,9 +59,9 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeystoreServiceRemoteService {
+public class KeystoreRemoteService {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRemoteService.class);
+    private static final Logger logger = LoggerFactory.getLogger(KeystoreRemoteService.class);
 
     private static final String INVALID_ENTRY_TYPE = "Invalid entry type";
     public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
@@ -128,7 +128,7 @@ public class KeystoreServiceRemoteService {
         return keys;
     }
 
-    protected List<EntryInfo> getKeysInternal(final String keystoreServicePid) {
+    protected List<EntryInfo> getKeysByPidInternal(final String keystoreServicePid) {
         List<EntryInfo> keys = new ArrayList<>();
         KeystoreService keystoreService = this.keystoreServices.get(keystoreServicePid);
         if (keystoreService != null) {
@@ -207,7 +207,7 @@ public class KeystoreServiceRemoteService {
                 CsrInfo info = (CsrInfo) request;
 
                 X500Principal principal = new X500Principal(info.getAttributes());
-                return this.keystoreServices.get(info.getKeystoreName()).getCSR(info.getAlias(), principal,
+                return this.keystoreServices.get(info.getKeystoreServicePid()).getCSR(info.getAlias(), principal,
                         info.getSignatureAlgorithm());
 
             } else {
@@ -228,14 +228,14 @@ public class KeystoreServiceRemoteService {
         }
     }
 
-    protected String storeKeyEntryInternal(final EntryInfo request) {
+    protected void storeKeyEntryInternal(final EntryInfo request) {
         try {
             if (request.getType() == EntryType.TRUSTED_CERTIFICATE) {
                 CertificateInfo info = (CertificateInfo) request;
-                storeCertificateInternal(info.getKeystoreName(), info.getAlias(), info.getCertificate());
+                storeCertificateInternal(info.getKeystoreServicePid(), info.getAlias(), info.getCertificate());
             } else if (request.getType() == EntryType.KEY_PAIR) {
                 KeyPairInfo info = (KeyPairInfo) request;
-                storeKeyPairInternal(info.getKeystoreName(), info.getAlias(), info.getAlgorithm(), info.getSize(),
+                storeKeyPairInternal(info.getKeystoreServicePid(), info.getAlias(), info.getAlgorithm(), info.getSize(),
                         info.getSignatureAlgorithm(), info.getAttributes());
             } else {
                 throw new WebApplicationException(INVALID_ENTRY_TYPE);
@@ -243,20 +243,18 @@ public class KeystoreServiceRemoteService {
         } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
-        return request.getKeystoreName() + ":" + request.getAlias();
     }
 
-    protected String storeTrustedCertificateEntryInternal(final TrustedCertificateWriteRequest writeRequest) {
+    protected void storeTrustedCertificateEntryInternal(final TrustedCertificateWriteRequest writeRequest) {
         try {
             storeCertificateInternal(writeRequest.getKeystoreServicePid(), writeRequest.getAlias(),
                     writeRequest.getCertificate());
         } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
-        return writeRequest.getKeystoreServicePid() + ":" + writeRequest.getAlias();
     }
 
-    protected String storeKeyPairEntryInternal(final PrivateKeyWriteRequest writeRequest) {
+    protected void storeKeyPairEntryInternal(final PrivateKeyWriteRequest writeRequest) {
         try {
             storeKeyPairInternal(writeRequest.getKeystoreServicePid(), writeRequest.getAlias(),
                     writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
@@ -264,7 +262,6 @@ public class KeystoreServiceRemoteService {
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
-        return writeRequest.getKeystoreServicePid() + ":" + writeRequest.getAlias();
     }
 
     protected void deleteKeyEntryInternal(String keystoreServicePid, String alias) {
@@ -403,22 +400,22 @@ public class KeystoreServiceRemoteService {
         @Override
         public KeystoreService addingService(final ServiceReference<KeystoreService> reference) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            KeystoreServiceRemoteService.this.keystoreServices.put(kuraServicePid,
-                    KeystoreServiceRemoteService.this.bundleContext.getService(reference));
-            return KeystoreServiceRemoteService.this.keystoreServices.get(kuraServicePid);
+            KeystoreRemoteService.this.keystoreServices.put(kuraServicePid,
+                    KeystoreRemoteService.this.bundleContext.getService(reference));
+            return KeystoreRemoteService.this.keystoreServices.get(kuraServicePid);
         }
 
         @Override
         public void modifiedService(final ServiceReference<KeystoreService> reference, final KeystoreService service) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            KeystoreServiceRemoteService.this.keystoreServices.put(kuraServicePid,
-                    KeystoreServiceRemoteService.this.bundleContext.getService(reference));
+            KeystoreRemoteService.this.keystoreServices.put(kuraServicePid,
+                    KeystoreRemoteService.this.bundleContext.getService(reference));
         }
 
         @Override
         public void removedService(final ServiceReference<KeystoreService> reference, final KeystoreService service) {
             String kuraServicePid = (String) reference.getProperty(KURA_SERVICE_PID);
-            KeystoreServiceRemoteService.this.keystoreServices.remove(kuraServicePid);
+            KeystoreRemoteService.this.keystoreServices.remove(kuraServicePid);
         }
     }
 }

@@ -52,7 +52,7 @@ import org.osgi.service.component.ComponentContext;
 
 public class KeystoreRestServiceTest {
 
-    private final String CERTIFICATE = "-----BEGIN CERTIFICATE-----\n"
+    private final String CERTIFICATE_RSA = "-----BEGIN CERTIFICATE-----\n"
             + "MIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
             + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
             + "VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\n"
@@ -72,6 +72,37 @@ public class KeystoreRestServiceTest {
             + "U22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq\n"
             + "nDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O\n"
             + "44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\n" + "-----END CERTIFICATE-----";
+    private final String CERTIFICATE_DSA = "-----BEGIN CERTIFICATE-----\n"
+            + "MIIDODCCAvSgAwIBAgIERIUjyDANBglghkgBZQMEAwIFADBsMRAwDgYDVQQGEwdV\n"
+            + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
+            + "VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\n"
+            + "MB4XDTIxMDQxMzA4MTk0M1oXDTIxMDcxMjA4MTk0M1owbDEQMA4GA1UEBhMHVW5r\n"
+            + "bm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\n"
+            + "ChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\n"
+            + "AbcwggEsBgcqhkjOOAQBMIIBHwKBgQD9f1OBHXUSKVLfSpwu7OTn9hG3UjzvRADD\n"
+            + "Hj+AtlEmaUVdQCJR+1k9jVj6v8X1ujD2y5tVbNeBO4AdNG/yZmC3a5lQpaSfn+gE\n"
+            + "exAiwk+7qdf+t8Yb+DtX58aophUPBPuD9tPFHsMCNVQTWhaRMvZ1864rYdcq7/Ii\n"
+            + "Axmd0UgBxwIVAJdgUI8VIwvMspK5gqLrhAvwWBz1AoGBAPfhoIXWmz3ey7yrXDa4\n"
+            + "V7l5lK+7+jrqgvlXTAs9B4JnUVlXjrrUWU/mcQcQgYC0SRZxI+hMKBYTt88JMozI\n"
+            + "puE8FnqLVHyNKOCjrh4rs6Z1kW6jfwv6ITVi8ftiegEkO8yk8b6oUZCJqIPf4Vrl\n"
+            + "nwaSi2ZegHtVJWQBTDv+z0kqA4GEAAKBgDJAY6FsVu1ibRVd4XIn/VLHJ1GJrFFK\n"
+            + "d0I9u76h1KYbO+buEqmRIrnpUMXjErYwad+wc+Fe5/kGhhCKfEts3yNVwNvuLsNU\n"
+            + "kVmdTC8vI3BqlyV2F+9Ekar2ogiqtE+BxNPHMEOGIXOJMjSMSWsOHaMOM2c29bXy\n"
+            + "IdZr1ENwcPZloyEwHzAdBgNVHQ4EFgQUQa440XL4ulW3fLrOHq7uWiKo/UYwDQYJ\n"
+            + "YIZIAWUDBAMCBQADLwAwLAIUbWlpb/M22woaHk/uCyscfbEJqv4CFFPG75R7jtvz\n" + "FllKUJXh+xxmMVfc\n"
+            + "-----END CERTIFICATE-----";
+    private final String CERTIFICATE_EC = "-----BEGIN CERTIFICATE-----\n"
+            + "MIIB7zCCAZOgAwIBAgIEc21cijAMBggqhkjOPQQDAgUAMGwxEDAOBgNVBAYTB1Vu\n"
+            + "a25vd24xEDAOBgNVBAgTB1Vua25vd24xEDAOBgNVBAcTB1Vua25vd24xEDAOBgNV\n"
+            + "BAoTB1Vua25vd24xEDAOBgNVBAsTB1Vua25vd24xEDAOBgNVBAMTB1Vua25vd24w\n"
+            + "HhcNMjEwNDIwMDkwNTA1WhcNMjEwNzE5MDkwNTA1WjBsMRAwDgYDVQQGEwdVbmtu\n"
+            + "b3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYDVQQK\n"
+            + "EwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3duMFkw\n"
+            + "EwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEASCbfb0l60WEkKVAgKFvPslueJE2ppKQ\n"
+            + "aa6AfQnGHnhGvKtRMVOMpy96aZPcYWdpX9323DMMPyhbosE/GjK5sqMhMB8wHQYD\n"
+            + "VR0OBBYEFJ+MTQRX0X4ihcyt9h9+ODxCh/5LMAwGCCqGSM49BAMCBQADSAAwRQIh\n"
+            + "AISr/AGgA2FwJeZFPKB2KEoWPCPsPMpBgA4KrsoJBQmVAiBAkLzQIUWad1cvyEUn\n" + "WNntICChHGdKmvPhWZSQ6n61ew==\n"
+            + "-----END CERTIFICATE-----";
     private final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n"
             + "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCCcZ1Nu9AVYKJd\n"
             + "p6gcdObxCiofeOVbJv3Ws19JVa6PGTSgREFy5c97/k+SsSBhHAFp1n3738E2gdxD\n"
@@ -151,7 +182,7 @@ public class KeystoreRestServiceTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE_RSA.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
@@ -171,10 +202,13 @@ public class KeystoreRestServiceTest {
         List<EntryInfo> keys = krs.getKeys();
 
         assertEquals(1, keys.size());
+        assertTrue(keys.get(0) instanceof CertificateInfo);
         assertEquals("alias", keys.get(0).getAlias());
         assertEquals("MyKeystore", keys.get(0).getKeystoreName());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
         assertEquals("MyKeystore:alias", keys.get(0).getId());
+        assertEquals(2048, ((CertificateInfo) keys.get(0)).getSize());
+        assertEquals("SHA256withRSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
     }
 
     @Test
@@ -183,7 +217,7 @@ public class KeystoreRestServiceTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE_DSA.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
@@ -203,11 +237,14 @@ public class KeystoreRestServiceTest {
         List<EntryInfo> keys = krs.getKeys("MyKeystore");
 
         assertEquals(1, keys.size());
+        assertTrue(keys.get(0) instanceof CertificateInfo);
         assertEquals("alias", keys.get(0).getAlias());
         assertEquals("MyKeystore", keys.get(0).getKeystoreName());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
         assertEquals("MyKeystore:alias", keys.get(0).getId());
-        assertEquals(CERTIFICATE, ((CertificateInfo) keys.get(0)).getCertificate());
+        assertEquals(1024, ((CertificateInfo) keys.get(0)).getSize());
+        assertEquals("SHA256withDSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
+        assertEquals(CERTIFICATE_DSA, ((CertificateInfo) keys.get(0)).getCertificate());
     }
 
     @Test
@@ -216,7 +253,7 @@ public class KeystoreRestServiceTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE_EC.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         when(ksMock.getKeyStore()).thenReturn(ks);
@@ -233,11 +270,14 @@ public class KeystoreRestServiceTest {
 
         EntryInfo key = krs.getKey("MyKeystore", "alias");
 
+        assertTrue(key instanceof CertificateInfo);
         assertEquals("alias", key.getAlias());
         assertEquals("MyKeystore", key.getKeystoreName());
         assertEquals(EntryType.TRUSTED_CERTIFICATE, key.getType());
         assertEquals("MyKeystore:alias", key.getId());
-        assertEquals(CERTIFICATE, ((CertificateInfo) key).getCertificate());
+        assertEquals(256, ((CertificateInfo) key).getSize());
+        assertEquals("SHA256withECDSA", ((CertificateInfo) key).getAlgorithm());
+        assertEquals(CERTIFICATE_EC, ((CertificateInfo) key).getCertificate());
     }
 
     @Test
@@ -267,7 +307,7 @@ public class KeystoreRestServiceTest {
         TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
         TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
         TestUtil.setFieldValue(writeRequest, "type", "TrustedCertificate");
-        TestUtil.setFieldValue(writeRequest, "certificate", CERTIFICATE);
+        TestUtil.setFieldValue(writeRequest, "certificate", CERTIFICATE_RSA);
 
         assertEquals("MyKeystore:MyAlias", krs.storeKeyEntry(writeRequest));
 

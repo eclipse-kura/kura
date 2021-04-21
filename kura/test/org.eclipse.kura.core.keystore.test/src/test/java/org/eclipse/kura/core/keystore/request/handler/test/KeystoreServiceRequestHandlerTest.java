@@ -378,7 +378,7 @@ public class KeystoreServiceRequestHandlerTest {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
 
         String response = new String(resPayload.getBody(), StandardCharsets.UTF_8);
-        assertEquals(this.KEYSTORE_ENTRY_WITH_CERT, response);
+        assertEquals("[" + KEYSTORE_ENTRY_WITH_CERT + "]", response);
     }
 
     @Test

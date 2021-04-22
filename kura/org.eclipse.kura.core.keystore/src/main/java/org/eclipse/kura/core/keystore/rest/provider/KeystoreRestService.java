@@ -111,7 +111,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
     }
 
     @DELETE
-    @Path("/entries/_delete")
+    @Path("/entries")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
     public void deleteKeyEntry(DeleteRequest deleteRequest) {

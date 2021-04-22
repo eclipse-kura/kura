@@ -105,7 +105,7 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @Path("/entries/keypair")
     @RolesAllowed("keystores")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void storeKeypairEntry(PrivateKeyWriteRequest writeRequest) {
+    public void storeKeypairEntry(KeyPairWriteRequest writeRequest) {
         validate(writeRequest, BAD_WRITE_REQUEST_ERROR_MESSAGE);
         storeKeyPairEntryInternal(writeRequest);
     }

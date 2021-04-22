@@ -20,8 +20,8 @@ public class KeyPairInfo extends EntryInfo {
     private String signatureAlgorithm;
     private String attributes;
 
-    public KeyPairInfo(String alias, String keystoreName) {
-        super(alias, keystoreName);
+    public KeyPairInfo(String keystoreName, String alias) {
+        super(keystoreName, alias);
         setType(EntryType.KEY_PAIR);
     }
 

@@ -25,7 +25,10 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.core.keystore.util.CertificateInfo;
+import org.eclipse.kura.core.keystore.util.CsrInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
+import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
@@ -46,7 +49,10 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService imple
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Resource not found";
     private static final String KEYSTORES = "keystores";
     private static final String ENTRIES = "entries";
+    private static final String ENTRY = "entry";
     private static final String CSR = "csr";
+    private static final String CERTIFICATE = "certificate";
+    private static final String KEYPAIR = "keypair";
 
     // ----------------------------------------------------------------
     //
@@ -92,18 +98,15 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService imple
                 && resourcePath.get(1).equals(ENTRIES)) {
             return doGetEntries(reqPayload);
         } else if (resourcePath.size() == 3 && resourcePath.get(0).equals(KEYSTORES)
-                && resourcePath.get(1).equals(ENTRIES) && resourcePath.get(2).equals(CSR)) {
-            return doGetCsr(reqPayload);
-        } else {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
-        }
-    }
-
-    private KuraMessage doGetCsr(KuraPayload reqPayload) throws KuraException {
-        String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
-        EntryInfo request = unmarshal(body, EntryInfo.class);
-        if (request != null) {
-            return jsonResponse(getCSRInternal(request));
+                && resourcePath.get(1).equals(ENTRIES) && resourcePath.get(2).equals(ENTRY)) {
+            EntryInfo request = unmarshal(new String(reqPayload.getBody(), StandardCharsets.UTF_8), EntryInfo.class);
+            String keystoreServicePid = request.getKeystoreServicePid();
+            String keyAlias = request.getAlias();
+            if (!isNull(keystoreServicePid) && !isNull(keyAlias)) {
+                return jsonResponse(getKeyInternal(keystoreServicePid, keyAlias));
+            } else {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            }
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -128,25 +131,49 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService imple
     }
 
     @Override
-    public KuraMessage doPut(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
+    public KuraMessage doPost(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
         final List<String> resourcePath = extractResourcePath(reqMessage);
         KuraPayload reqPayload = reqMessage.getPayload();
 
-        if (resourcePath.size() != 2 || reqPayload.getBody() == null || reqPayload.getBody().length == 0
-                || !resourcePath.get(0).equals(KEYSTORES)) {
+        if (resourcePath.size() != 3 || reqPayload.getBody() == null || reqPayload.getBody().length == 0
+                || !resourcePath.get(0).equals(KEYSTORES) || !resourcePath.get(1).equals(ENTRIES)) {
             logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (resourcePath.get(1).equals(ENTRIES)) {
+        if (resourcePath.get(2).equals(CSR)) {
+            return doPostCsr(reqPayload);
+        } else if (resourcePath.get(2).equals(CERTIFICATE)) {
             String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
             EntryInfo request = unmarshal(body, EntryInfo.class);
-            if (request != null) {
-                storeKeyEntryInternal(request);
+            if (request instanceof CertificateInfo) {
+                CertificateInfo certificateInfo = (CertificateInfo) request;
+                storeTrustedCertificateEntryInternal(certificateInfo);
                 return new KuraMessage(new KuraResponsePayload(200));
             } else {
                 throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
+        } else if (resourcePath.get(2).equals(KEYPAIR)) {
+            String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
+            EntryInfo request = unmarshal(body, EntryInfo.class);
+
+            if (request instanceof KeyPairInfo) {
+                KeyPairInfo keyPairInfo = (KeyPairInfo) request;
+                storeKeyPairEntryInternal(keyPairInfo);
+                return new KuraMessage(new KuraResponsePayload(200));
+            } else {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            }
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+    }
+
+    private KuraMessage doPostCsr(KuraPayload reqPayload) throws KuraException {
+        String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
+        CsrInfo request = unmarshal(body, CsrInfo.class);
+        if (request != null) {
+            return jsonResponse(getCSRInternal(request));
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }

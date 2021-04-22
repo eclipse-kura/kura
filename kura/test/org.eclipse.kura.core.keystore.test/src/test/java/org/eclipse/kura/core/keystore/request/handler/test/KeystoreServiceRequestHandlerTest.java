@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
-import javax.ws.rs.WebApplicationException;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
@@ -65,6 +64,8 @@ public class KeystoreServiceRequestHandlerTest {
 
     private static final String ENTRIES_RESOURCE = "entries";
     private static final String KEYSTORES_RESOURCE = "keystores";
+    private static final String CERTIFICATE_RESOURCE = "certificate";
+    private static final String KEYPAIR_RESOURCE = "keypair";
     private final String EMPTY_KEYSTORE_1 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"jks\",\"size\":0}]";
     private final String EMPTY_KEYSTORE_2 = "[{\"keystoreServicePid\":\"MyKeystore\",\"type\":\"pkcs12\",\"size\":0}]";
     private final String KEYSTORE_ENTRY = "[{\"subjectDN\":\"CN=Unknown, OU=Unknown, O=Unknown, L=Unknown, ST=Unknown, C=Unknown\",\"issuer\":\"CN=Unknown,OU=Unknown,O=Unknown,L=Unknown,ST=Unknown,C=Unknown\",\"startDate\":\"Wed, 14 Apr 2021 08:02:28 GMT\",\"expirationDate\":\"Tue, 13 Jul 2021 08:02:28 GMT\",\"algorithm\":\"SHA256withRSA\",\"size\":2048,\"keystoreServicePid\":\"MyKeystore\",\"alias\":\"alias\",\"type\":\"TRUSTED_CERTIFICATE\"}]";
@@ -267,7 +268,7 @@ public class KeystoreServiceRequestHandlerTest {
         String response = new String(resPayload.getBody(), StandardCharsets.UTF_8);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
-        assertEquals(KEYSTORE_ENTRY, response);
+        assertEquals(this.KEYSTORE_ENTRY, response);
     }
 
     @Test
@@ -300,7 +301,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                EntryInfo entryInfo = new EntryInfo(null, "MyKeystore");
+                EntryInfo entryInfo = new EntryInfo("MyKeystore", null);
                 return (T) entryInfo;
             }
         };
@@ -321,7 +322,7 @@ public class KeystoreServiceRequestHandlerTest {
 
         String response = new String(resPayload.getBody(), StandardCharsets.UTF_8);
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
-        assertEquals("[" + KEYSTORE_ENTRY_WITH_CERT + "]", response);
+        assertEquals("[" + this.KEYSTORE_ENTRY_WITH_CERT + "]", response);
     }
 
     @Test
@@ -356,7 +357,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                EntryInfo entryInfo = new EntryInfo("alias", null);
+                EntryInfo entryInfo = new EntryInfo(null, "alias");
                 return (T) entryInfo;
             }
         };
@@ -378,7 +379,7 @@ public class KeystoreServiceRequestHandlerTest {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
 
         String response = new String(resPayload.getBody(), StandardCharsets.UTF_8);
-        assertEquals("[" + KEYSTORE_ENTRY_WITH_CERT + "]", response);
+        assertEquals("[" + this.KEYSTORE_ENTRY_WITH_CERT + "]", response);
     }
 
     @Test
@@ -409,7 +410,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                EntryInfo entryInfo = new EntryInfo("alias", "MyKeystore");
+                EntryInfo entryInfo = new EntryInfo("MyKeystore", "alias");
                 return (T) entryInfo;
             }
         };
@@ -434,7 +435,7 @@ public class KeystoreServiceRequestHandlerTest {
     }
 
     @Test
-    public void testDoPutTrustedCertificate()
+    public void testDoPostTrustedCertificate()
             throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -458,7 +459,7 @@ public class KeystoreServiceRequestHandlerTest {
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
                 assertEquals(KeystoreServiceRequestHandlerTest.this.JSON_MESSAGE_PUT_CERT, jsonString);
-                CertificateInfo info = new CertificateInfo("myCertTest99", "MyKeystore");
+                CertificateInfo info = new CertificateInfo("MyKeystore", "myCertTest99");
                 info.setType(EntryType.TRUSTED_CERTIFICATE);
                 info.setCertificate(KeystoreServiceRequestHandlerTest.this.CERTIFICATE);
                 return (T) info;
@@ -469,6 +470,7 @@ public class KeystoreServiceRequestHandlerTest {
         List<String> resourcesList = new ArrayList<>();
         resourcesList.add(KEYSTORES_RESOURCE);
         resourcesList.add(ENTRIES_RESOURCE);
+        resourcesList.add(CERTIFICATE_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -476,14 +478,14 @@ public class KeystoreServiceRequestHandlerTest {
         request.setBody(this.JSON_MESSAGE_PUT_CERT.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
-        KuraMessage resMessage = keystoreRH.doPut(null, message);
+        KuraMessage resMessage = keystoreRH.doPost(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
     }
 
-    @Test(expected = WebApplicationException.class)
-    public void testDoPutPrivateKey()
+    @Test(expected = KuraException.class)
+    public void testDoPostPrivateKey()
             throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -506,7 +508,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                PrivateKeyInfo info = new PrivateKeyInfo("myPrivateKey", "MyKeystore");
+                PrivateKeyInfo info = new PrivateKeyInfo("MyKeystore", "myPrivateKey");
                 info.setType(EntryType.PRIVATE_KEY);
                 info.setPrivateKey(KeystoreServiceRequestHandlerTest.this.PRIVATE_KEY);
                 info.setCertificateChain(KeystoreServiceRequestHandlerTest.this.CERTIFICATE_CHAIN);
@@ -525,12 +527,12 @@ public class KeystoreServiceRequestHandlerTest {
         request.setBody(this.JSON_MESSAGE_PUT_KEY.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
-        KuraMessage resMessage = keystoreRH.doPut(null, message);
+        KuraMessage resMessage = keystoreRH.doPost(null, message);
         resMessage.getPayload();
     }
 
     @Test
-    public void testDoPutKeyPair() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+    public void testDoPostKeyPair() throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
@@ -552,7 +554,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                KeyPairInfo info = new KeyPairInfo("myKeyPair", "MyKeystore");
+                KeyPairInfo info = new KeyPairInfo("MyKeystore", "myKeyPair");
                 info.setType(EntryType.KEY_PAIR);
                 info.setAlgorithm("RSA");
                 info.setSignatureAlgorithm("SHA256WithRSA");
@@ -566,6 +568,7 @@ public class KeystoreServiceRequestHandlerTest {
         List<String> resourcesList = new ArrayList<>();
         resourcesList.add(KEYSTORES_RESOURCE);
         resourcesList.add(ENTRIES_RESOURCE);
+        resourcesList.add(KEYPAIR_RESOURCE);
         Map<String, Object> reqResources = new HashMap<>();
         reqResources.put(ARGS_KEY.value(), resourcesList);
 
@@ -573,7 +576,7 @@ public class KeystoreServiceRequestHandlerTest {
         request.setBody(this.JSON_MESSAGE_PUT_KEY_PAIR.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
-        KuraMessage resMessage = keystoreRH.doPut(null, message);
+        KuraMessage resMessage = keystoreRH.doPost(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
@@ -605,7 +608,7 @@ public class KeystoreServiceRequestHandlerTest {
             @SuppressWarnings("unchecked")
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
-                CsrInfo info = new CsrInfo("alias", "MyKeystore");
+                CsrInfo info = new CsrInfo("MyKeystore", "alias");
                 info.setType(EntryType.CSR);
                 info.setSignatureAlgorithm("SHA256withRSA");
                 info.setAttributes("CN=Kura, OU=IoT, O=Eclipse, C=US");
@@ -625,7 +628,7 @@ public class KeystoreServiceRequestHandlerTest {
         request.setBody(this.JSON_MESSAGE_GET_CSR.getBytes());
         KuraMessage message = new KuraMessage(request, reqResources);
 
-        KuraMessage resMessage = keystoreRH.doGet(null, message);
+        KuraMessage resMessage = keystoreRH.doPost(null, message);
         KuraResponsePayload resPayload = (KuraResponsePayload) resMessage.getPayload();
 
         String reds = new String(resPayload.getBody(), StandardCharsets.UTF_8);
@@ -656,7 +659,7 @@ public class KeystoreServiceRequestHandlerTest {
             @Override
             protected <T> T unmarshal(String jsonString, Class<T> clazz) {
                 assertEquals(KeystoreServiceRequestHandlerTest.this.JSON_MESSAGE_DEL, jsonString);
-                return (T) new EntryInfo("mycerttestec", "MyKeystore");
+                return (T) new EntryInfo("MyKeystore", "mycerttestec");
             }
         };
         keystoreRH.activate(null);

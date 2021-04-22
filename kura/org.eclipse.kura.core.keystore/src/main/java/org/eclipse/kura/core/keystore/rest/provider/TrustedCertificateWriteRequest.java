@@ -12,35 +12,24 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.rest.provider;
 
+import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.rest.utils.Validable;
 
-public class TrustedCertificateWriteRequest implements Validable {
+public class TrustedCertificateWriteRequest extends CertificateInfo implements Validable {
 
-    private String keystoreServicePid;
-    private String alias;
-    private String certificate;
-
-    public String getKeystoreServicePid() {
-        return this.keystoreServicePid;
-    }
-
-    public String getAlias() {
-        return this.alias;
-    }
-
-    public String getCertificate() {
-        return this.certificate;
+    public TrustedCertificateWriteRequest(String alias, String keystoreName) {
+        super(alias, keystoreName);
     }
 
     @Override
     public String toString() {
-        return "WriteRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + "]";
+        return "WriteRequest [keystoreServicePid=" + getKeystoreServicePid() + ", alias=" + getAlias() + "]";
     }
 
     @Override
     public boolean isValid() {
         boolean result = true;
-        if (this.keystoreServicePid == null || this.alias == null || this.certificate == null) {
+        if (getKeystoreServicePid() == null || getAlias() == null || getCertificate() == null) {
             result = false;
         }
         return result;

@@ -44,8 +44,6 @@ import javax.ws.rs.WebApplicationException;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
-import org.eclipse.kura.core.keystore.rest.provider.PrivateKeyWriteRequest;
-import org.eclipse.kura.core.keystore.rest.provider.TrustedCertificateWriteRequest;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.osgi.framework.BundleContext;
@@ -73,7 +71,7 @@ public class KeystoreRemoteService {
     private ServiceTrackerCustomizer<KeystoreService, KeystoreService> keystoreServiceTrackerCustomizer;
     private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
     protected CertificateFactory certFactory;
-    private DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+    private final DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
@@ -245,7 +243,7 @@ public class KeystoreRemoteService {
         }
     }
 
-    protected void storeTrustedCertificateEntryInternal(final TrustedCertificateWriteRequest writeRequest) {
+    protected void storeTrustedCertificateEntryInternal(final CertificateInfo writeRequest) {
         try {
             storeCertificateInternal(writeRequest.getKeystoreServicePid(), writeRequest.getAlias(),
                     writeRequest.getCertificate());
@@ -254,7 +252,7 @@ public class KeystoreRemoteService {
         }
     }
 
-    protected void storeKeyPairEntryInternal(final PrivateKeyWriteRequest writeRequest) {
+    protected void storeKeyPairEntryInternal(final KeyPairInfo writeRequest) {
         try {
             storeKeyPairInternal(writeRequest.getKeystoreServicePid(), writeRequest.getAlias(),
                     writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
@@ -294,17 +292,17 @@ public class KeystoreRemoteService {
 
     private CertificateInfo buildCertificateInfo(String keystoreServicePid, String alias,
             TrustedCertificateEntry certificate, boolean withCertificate) {
-        CertificateInfo certificateInfo = new CertificateInfo(alias, keystoreServicePid);
+        CertificateInfo certificateInfo = new CertificateInfo(keystoreServicePid, alias);
         if (certificate != null && certificate.getTrustedCertificate() instanceof X509Certificate) {
             X509Certificate x509Certificate = (X509Certificate) certificate.getTrustedCertificate();
             certificateInfo.setSubjectDN(x509Certificate.getSubjectDN().getName());
             certificateInfo.setIssuer(x509Certificate.getIssuerX500Principal().getName());
             ZonedDateTime startDate = Instant.ofEpochMilli(x509Certificate.getNotBefore().getTime())
                     .atZone(ZoneOffset.UTC);
-            certificateInfo.setStartDate(formatter.format(startDate));
+            certificateInfo.setStartDate(this.formatter.format(startDate));
             ZonedDateTime expirationDate = Instant.ofEpochMilli(x509Certificate.getNotAfter().getTime())
                     .atZone(ZoneOffset.UTC);
-            certificateInfo.setExpirationDate(formatter.format(expirationDate));
+            certificateInfo.setExpirationDate(this.formatter.format(expirationDate));
             certificateInfo.setAlgorithm(x509Certificate.getSigAlgName());
             certificateInfo.setSize(getSize(x509Certificate.getPublicKey()));
             try {
@@ -332,7 +330,7 @@ public class KeystoreRemoteService {
 
     private PrivateKeyInfo buildPrivateKeyInfo(String keystoreServicePid, String alias, PrivateKeyEntry privateKey,
             boolean withCertificate) {
-        PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(alias, keystoreServicePid);
+        PrivateKeyInfo privateKeyInfo = new PrivateKeyInfo(keystoreServicePid, alias);
         if (privateKey != null) {
             privateKeyInfo.setAlgorithm(privateKey.getPrivateKey().getAlgorithm());
             privateKeyInfo.setSize(getSize(privateKey.getCertificate().getPublicKey()));

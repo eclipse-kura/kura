@@ -33,9 +33,9 @@ public class CertificateInfo extends EntryInfo {
     private int size;
     private String certificate;
 
-    public CertificateInfo(String alias, String keystoreName) {
-        super(alias, keystoreName);
-        this.setType(EntryType.TRUSTED_CERTIFICATE);
+    public CertificateInfo(String keystoreName, String alias) {
+        super(keystoreName, alias);
+        setType(EntryType.TRUSTED_CERTIFICATE);
     }
 
     public String getSubjectDN() {

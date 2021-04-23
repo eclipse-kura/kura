@@ -68,7 +68,7 @@ public class HttpServiceTest {
     private static final String TEST_KEYSTORE_PID = "testKeystore";
     private static final Logger logger = LoggerFactory.getLogger(HttpServiceTest.class);
     private static final String HTTP_SERVER_MANAGER_PID = "org.eclipse.kura.http.server.manager.HttpService";
-    private static final String HTTPS_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.HttpsKeystore";
+    private static final String HTTPS_KEYSTORE_SERVICE_PID = "HttpsKeystore";
 
     private static CompletableFuture<ConfigurationService> configurationService = new CompletableFuture<>();
     private static CompletableFuture<CryptoService> cryptoService = new CompletableFuture<>();
@@ -253,7 +253,7 @@ public class HttpServiceTest {
 
             WireTestUtil
                     .createFactoryConfiguration(configSvc, ConfigurableComponent.class, pid,
-                            "org.eclipse.kura.core.keystore.KeystoreServiceImpl",
+                            "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
                             options.withKeystorePath(httpsKeystore.getAbsolutePath())
                                     .withKeystorePassword("changeit", cryptoSvc).toProperties())
                     .get(30, TimeUnit.SECONDS);

@@ -607,7 +607,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="KeystoreService.target" type="String">
-                <esf:value>(kura.service.pid=org.eclipse.kura.core.keystore.SSLKeystore)</esf:value>
+                <esf:value>(kura.service.pid=SSLKeystore)</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.ssl.SslManagerService</esf:value>
@@ -626,7 +626,7 @@
                 <esf:value>4443</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="KeystoreService.target" type="String">
-                <esf:value>(kura.service.pid=org.eclipse.kura.core.keystore.HttpsKeystore)</esf:value>
+                <esf:value>(kura.service.pid=HttpsKeystore)</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
                 <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
@@ -646,7 +646,7 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.core.keystore.HttpsKeystore">
+    <esf:configuration pid="HttpsKeystore">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="keystore.path" type="String">
                 <esf:value>/opt/eclipse/kura/user/security/httpskeystore.ks</esf:value>
@@ -658,14 +658,14 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.core.keystore.KeystoreServiceImpl</esf:value>
+                <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>org.eclipse.kura.core.keystore.HttpsKeystore</esf:value>
+                <esf:value>HttpsKeystore</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.core.keystore.SSLKeystore">
+    <esf:configuration pid="SSLKeystore">
         <esf:properties>
             <esf:property array="false" encrypted="false" name="keystore.path" type="String">
                 <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
@@ -677,10 +677,10 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.core.keystore.KeystoreServiceImpl</esf:value>
+                <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>org.eclipse.kura.core.keystore.SSLKeystore</esf:value>
+                <esf:value>SSLKeystore</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

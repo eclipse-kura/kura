@@ -77,21 +77,13 @@ public class KeystoreEntryInfoMapper {
         } else {
             String type = typeElement.getAsString();
             if (EntryType.valueOfType(type) == EntryType.TRUSTED_CERTIFICATE) {
-                CertificateInfo entry = gson.fromJson(json, CertificateInfo.class);
-                entry.setType(EntryType.TRUSTED_CERTIFICATE);
-                return entry;
+                return gson.fromJson(json, CertificateInfo.class);
             } else if (EntryType.valueOfType(type) == EntryType.KEY_PAIR) {
-                KeyPairInfo entry = gson.fromJson(json, KeyPairInfo.class);
-                entry.setType(EntryType.KEY_PAIR);
-                return entry;
+                return gson.fromJson(json, KeyPairInfo.class);
             } else if (EntryType.valueOfType(type) == EntryType.PRIVATE_KEY) {
-                PrivateKeyInfo entry = gson.fromJson(json, PrivateKeyInfo.class);
-                entry.setType(EntryType.PRIVATE_KEY);
-                return entry;
+                return gson.fromJson(json, PrivateKeyInfo.class);
             } else if (EntryType.valueOfType(type) == EntryType.CSR) {
-                CsrInfo entry = gson.fromJson(json, CsrInfo.class);
-                entry.setType(EntryType.CSR);
-                return entry;
+                return gson.fromJson(json, CsrInfo.class);
             } else {
                 return gson.fromJson(json, EntryInfo.class);
             }

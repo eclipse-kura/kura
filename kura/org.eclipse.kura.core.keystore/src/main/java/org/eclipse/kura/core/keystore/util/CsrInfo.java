@@ -20,7 +20,6 @@ public class CsrInfo extends EntryInfo {
 
     public CsrInfo(String keystoreServicePid, String alias) {
         super(keystoreServicePid, alias);
-        setType(EntryType.CSR);
     }
 
     public String getSignatureAlgorithm() {

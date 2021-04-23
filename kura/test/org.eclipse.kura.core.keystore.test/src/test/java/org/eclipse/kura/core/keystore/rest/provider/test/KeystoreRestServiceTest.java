@@ -105,53 +105,6 @@ public class KeystoreRestServiceTest {
             + "VR0OBBYEFJ+MTQRX0X4ihcyt9h9+ODxCh/5LMAwGCCqGSM49BAMCBQADSAAwRQIh\n"
             + "AISr/AGgA2FwJeZFPKB2KEoWPCPsPMpBgA4KrsoJBQmVAiBAkLzQIUWad1cvyEUn\n" + "WNntICChHGdKmvPhWZSQ6n61ew==\n"
             + "-----END CERTIFICATE-----";
-    private final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n"
-            + "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCCcZ1Nu9AVYKJd\n"
-            + "p6gcdObxCiofeOVbJv3Ws19JVa6PGTSgREFy5c97/k+SsSBhHAFp1n3738E2gdxD\n"
-            + "auftKpmV3ZZ93rEQQ+Db71PiyFlrEEtcDE//14EH2jaHBIghxqWmgvWu0e8pca4u\n"
-            + "xnmOOJAPCabNYLLs4pnTh9xJn+B+Mdz+/NNj/C7BV53W2nAcsdVqpbmLjfCrDSd/\n"
-            + "hgel8AoAbdjiRGkYHkgvEuztjx01pO2iGAgpkctigdxF/ygwwOOxcPASw/55ZjSE\n"
-            + "gMZx7PMyxEiIL7jgt/cgG68QhlQ3neYfJ9cd+gLvn1g1fwsGtGpw3Mh3dgs6DQkr\n"
-            + "8HMQW0bpAgMBAAECggEAL2IR3/C/L2TA1gBWwq98TEaC8pe5yJirUFgr3rmvBPAE\n"
-            + "+8qPc6si6UmBoimRN3Uy1j1B2kJ3LtORLTQiNzZoP9YUGnjQHLZrcbjH4fMg+BEd\n"
-            + "LrySOr8PccjEUdtFj+9WsNuVXwGHPKi8uuUBtrW5Lp006BmeJQpTElGhpWTb6Tqy\n"
-            + "OcNceNz+oP1N3AZ3Mnf6Aq6GuvD4QeGMVEiosHPxMqY0eddNK672zq3A0o1NPA9z\n"
-            + "yaVt9UK7SZ6/yOKYrAAM/2iLHmNbrYRer567hgg2B1LGJCRSdB/c34u6lTnPo+Ai\n"
-            + "olQahQNFhiJKTXr2kK9WgS6tWXhqUqsVLUCug4mDAQKBgQDKLbhidAYClyOKJW7U\n"
-            + "GsbM5dmQV80NsnsN3qphKZDTEMinhs3N4oknhi+mZPeyge4MY73BiHXhnMcUkfhw\n"
-            + "nbhRNhrkZTt18S6rTzEp/vDDx+ZosxRKYXmPyuDDWDmvG6ocRyOLIgoYhT0kPQ7a\n"
-            + "oXQkpFPjBq1UmqNOcUwEpNG2sQKBgQClKzyAopsjWNptBQPo/j/PN24uThpdd3yX\n"
-            + "NenmLZsYJyloKDbOGzEXpuyzdtNAiIVDsQ8RzN5lkF6xVvXnOlSA2gmEc8KJmRl8\n"
-            + "/gWzPRHHHNR7QUiGmg9QThrUp2l6DiAm/IcuL0btj99kQa2XcLGlTohwWpdVySSx\n"
-            + "abDX7pSRuQKBgH/jy+77VZHt6R1J8IFbLsYN30HfSGaRsCVl5IDxuhrJUyQlsam6\n"
-            + "0uediibHV6gjaGGN9kql92tvsL7iVzVlj2JPx1MSdjp1BgB3Z7IZAlPV73nrTbp/\n"
-            + "TlYXD3aCKHsMFN8uYN1x+tDn93Uk6nCCEOXczPOfFaWe7A6CvINzfvUBAoGAUJEm\n"
-            + "khi/VB6jbUpk/eIHfiyrsiqm8bC3NYs27PCSFtYDfKshEKhy6faiv2fW5EOzvbFA\n"
-            + "iI5GbYRerGKe0IvDbJbuzY0p97SWmkHOxf+kDFwjyXuuxPmhPqraq6B98uuxA1Nr\n"
-            + "HTwyfO8RKPZglt6ByQDlzOhjqZTUMTY87ReToQECgYBKdX3Idr4zvODkXIlG852C\n"
-            + "o135W+7AWr+dYRLx1FcvgMU9SbF9cwUU5Zutbrv+Kl8xGPyfx09MJ6BNxTkkr09J\n"
-            + "BpbrbOZsUDjMjojyQYL4Ll9rLohk+Pq73xXJjtTRIXZVXJg27pEEqzcVB4o9vgli\n" + "yzOqhyTKM9JP7Uda6Fv6DA==\n"
-            + "-----END PRIVATE KEY-----";
-    private final String[] CERTIFICATE_CHAIN = {
-            "-----BEGIN CERTIFICATE-----\n" + "MIIDdzCCAl+gAwIBAgIED3hXJjANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
-                    + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
-                    + "VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\n"
-                    + "MB4XDTIxMDQxMzA4MTQxOVoXDTIxMDcxMjA4MTQxOVowbDEQMA4GA1UEBhMHVW5r\n"
-                    + "bm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\n"
-                    + "ChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\n"
-                    + "ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIJxnU270BVgol2nqBx05vEK\n"
-                    + "Kh945Vsm/dazX0lVro8ZNKBEQXLlz3v+T5KxIGEcAWnWffvfwTaB3ENq5+0qmZXd\n"
-                    + "ln3esRBD4NvvU+LIWWsQS1wMT//XgQfaNocEiCHGpaaC9a7R7ylxri7GeY44kA8J\n"
-                    + "ps1gsuzimdOH3Emf4H4x3P7802P8LsFXndbacByx1WqluYuN8KsNJ3+GB6XwCgBt\n"
-                    + "2OJEaRgeSC8S7O2PHTWk7aIYCCmRy2KB3EX/KDDA47Fw8BLD/nlmNISAxnHs8zLE\n"
-                    + "SIgvuOC39yAbrxCGVDed5h8n1x36Au+fWDV/Cwa0anDcyHd2CzoNCSvwcxBbRukC\n"
-                    + "AwEAAaMhMB8wHQYDVR0OBBYEFCXFCTq9DDNw6jr0nE2VHw+6wqG0MA0GCSqGSIb3\n"
-                    + "DQEBCwUAA4IBAQAjsKeIU0vf7vaOhUAMV60eP54kr6koiWBjhCxyKXQ+MECTFntn\n"
-                    + "L459+uTFOCyoytWYjbe9ph79ossTWTCUUPCx9ZSaVdrpK5TyzXI+KBBWqGcLHxqc\n"
-                    + "1jvU7zKLVf9oKGfhugnFvmj2EqC2vsrQPiG+p1RDfiLI9BqmhoDzBWzjZDdB6xt6\n"
-                    + "PMAqecHfS24TzyWi8T4gLctcpSN22Aa394ky7sgBJPAQHWe7VWhRB0bVTZntwRsQ\n"
-                    + "pEraINImKSw+m7MF/75s151yjKOzQxPZufl91oYyQMXoqX2fi0EUWo1oLm1x01dN\n"
-                    + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----" };
 
     @Test
     public void listKeystoresTest() throws KuraException, IOException, GeneralSecurityException {
@@ -205,11 +158,12 @@ public class KeystoreRestServiceTest {
 
         assertEquals(1, keys.size());
         assertTrue(keys.get(0) instanceof CertificateInfo);
-        assertEquals("alias", keys.get(0).getAlias());
-        assertEquals("MyKeystore", keys.get(0).getKeystoreServicePid());
-        assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
-        assertEquals(2048, ((CertificateInfo) keys.get(0)).getSize());
-        assertEquals("SHA256withRSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
+        CertificateInfo result = (CertificateInfo) keys.get(0);
+        assertEquals("alias", result.getAlias());
+        assertEquals("MyKeystore", result.getKeystoreServicePid());
+        assertEquals(EntryType.TRUSTED_CERTIFICATE, result.getType());
+        assertEquals(2048, result.getSize());
+        assertEquals("SHA256withRSA", result.getAlgorithm());
     }
 
     @Test
@@ -239,12 +193,13 @@ public class KeystoreRestServiceTest {
 
         assertEquals(1, keys.size());
         assertTrue(keys.get(0) instanceof CertificateInfo);
-        assertEquals("alias", keys.get(0).getAlias());
-        assertEquals("MyKeystore", keys.get(0).getKeystoreServicePid());
-        assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
-        assertEquals(1024, ((CertificateInfo) keys.get(0)).getSize());
-        assertEquals("SHA256withDSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
-        assertEquals(this.CERTIFICATE_DSA, ((CertificateInfo) keys.get(0)).getCertificate());
+        CertificateInfo result = (CertificateInfo) keys.get(0);
+        assertEquals("alias", result.getAlias());
+        assertEquals("MyKeystore", result.getKeystoreServicePid());
+        assertEquals(EntryType.TRUSTED_CERTIFICATE, result.getType());
+        assertEquals(1024, result.getSize());
+        assertEquals("SHA256withDSA", result.getAlgorithm());
+        assertEquals(this.CERTIFICATE_DSA, result.getCertificate());
     }
 
     @Test
@@ -271,12 +226,13 @@ public class KeystoreRestServiceTest {
         EntryInfo key = krs.getEntry("MyKeystore", "alias");
 
         assertTrue(key instanceof CertificateInfo);
-        assertEquals("alias", key.getAlias());
-        assertEquals("MyKeystore", key.getKeystoreServicePid());
-        assertEquals(EntryType.TRUSTED_CERTIFICATE, key.getType());
-        assertEquals(256, ((CertificateInfo) key).getSize());
-        assertEquals("SHA256withECDSA", ((CertificateInfo) key).getAlgorithm());
-        assertEquals(this.CERTIFICATE_EC, ((CertificateInfo) key).getCertificate());
+        CertificateInfo result = (CertificateInfo) key;
+        assertEquals("alias", result.getAlias());
+        assertEquals("MyKeystore", result.getKeystoreServicePid());
+        assertEquals(EntryType.TRUSTED_CERTIFICATE, result.getType());
+        assertEquals(256, result.getSize());
+        assertEquals("SHA256withECDSA", result.getAlgorithm());
+        assertEquals(this.CERTIFICATE_EC, result.getCertificate());
     }
 
     @Test

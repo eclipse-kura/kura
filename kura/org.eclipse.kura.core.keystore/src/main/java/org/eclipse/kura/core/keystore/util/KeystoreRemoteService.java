@@ -61,7 +61,6 @@ public class KeystoreRemoteService {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreRemoteService.class);
 
-    private static final String INVALID_ENTRY_TYPE = "Invalid entry type";
     public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERT = "-----END CERTIFICATE-----";
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -199,18 +198,11 @@ public class KeystoreRemoteService {
         }
     }
 
-    protected String getCSRInternal(final EntryInfo request) {
+    protected String getCSRInternal(final CsrInfo info) {
         try {
-            if (request.getType() == EntryType.CSR) {
-                CsrInfo info = (CsrInfo) request;
-
-                X500Principal principal = new X500Principal(info.getAttributes());
-                return this.keystoreServices.get(info.getKeystoreServicePid()).getCSR(info.getAlias(), principal,
-                        info.getSignatureAlgorithm());
-
-            } else {
-                throw new WebApplicationException(INVALID_ENTRY_TYPE);
-            }
+            X500Principal principal = new X500Principal(info.getAttributes());
+            return this.keystoreServices.get(info.getKeystoreServicePid()).getCSR(info.getAlias(), principal,
+                    info.getSignatureAlgorithm());
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
@@ -222,23 +214,6 @@ public class KeystoreRemoteService {
             return this.keystoreServices.get(request.getKeystoreServicePid()).getCSR(request.getAlias(), principal,
                     request.getSignatureAlgorithm());
         } catch (KuraException e) {
-            throw new WebApplicationException(e);
-        }
-    }
-
-    protected void storeKeyEntryInternal(final EntryInfo request) {
-        try {
-            if (request.getType() == EntryType.TRUSTED_CERTIFICATE) {
-                CertificateInfo info = (CertificateInfo) request;
-                storeCertificateInternal(info.getKeystoreServicePid(), info.getAlias(), info.getCertificate());
-            } else if (request.getType() == EntryType.KEY_PAIR) {
-                KeyPairInfo info = (KeyPairInfo) request;
-                storeKeyPairInternal(info.getKeystoreServicePid(), info.getAlias(), info.getAlgorithm(), info.getSize(),
-                        info.getSignatureAlgorithm(), info.getAttributes());
-            } else {
-                throw new WebApplicationException(INVALID_ENTRY_TYPE);
-            }
-        } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
     }

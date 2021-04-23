@@ -17,7 +17,6 @@ public class EntryInfo {
 
     private final String keystoreServicePid;
     private final String alias;
-    private EntryType type;
 
     public EntryInfo(String keystoreServicePid, String alias) {
         this.keystoreServicePid = keystoreServicePid;
@@ -30,13 +29,5 @@ public class EntryInfo {
 
     public String getAlias() {
         return this.alias;
-    }
-
-    public EntryType getType() {
-        return this.type;
-    }
-
-    public void setType(EntryType type) {
-        this.type = type;
     }
 }

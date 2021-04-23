@@ -32,10 +32,10 @@ public class CertificateInfo extends EntryInfo {
     private String algorithm;
     private int size;
     private String certificate;
+    private EntryType type = EntryType.TRUSTED_CERTIFICATE;
 
     public CertificateInfo(String keystoreName, String alias) {
         super(keystoreName, alias);
-        setType(EntryType.TRUSTED_CERTIFICATE);
     }
 
     public String getSubjectDN() {
@@ -100,5 +100,9 @@ public class CertificateInfo extends EntryInfo {
 
     public void setCertificate(String certificate) {
         this.certificate = certificate;
+    }
+
+    public EntryType getType() {
+        return this.type;
     }
 }

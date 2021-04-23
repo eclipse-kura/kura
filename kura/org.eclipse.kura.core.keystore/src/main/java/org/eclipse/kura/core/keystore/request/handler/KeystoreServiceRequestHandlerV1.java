@@ -120,9 +120,7 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService imple
             EntryInfo request = unmarshal(new String(reqPayload.getBody(), StandardCharsets.UTF_8), EntryInfo.class);
             String keystoreServicePid = request.getKeystoreServicePid();
             String keyAlias = request.getAlias();
-            if (!isNull(keystoreServicePid) && !isNull(keyAlias)) {
-                return jsonResponse(getKeyInternal(keystoreServicePid, keyAlias));
-            } else if (isNull(keystoreServicePid) && !isNull(keyAlias)) {
+            if (isNull(keystoreServicePid) && !isNull(keyAlias)) {
                 return jsonResponse(getKeysByAliasInternal(keyAlias));
             } else {
                 return jsonResponse(getKeysByPidInternal(keystoreServicePid));
@@ -171,9 +169,10 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService imple
 
     private KuraMessage doPostCsr(KuraPayload reqPayload) throws KuraException {
         String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
-        CsrInfo request = unmarshal(body, CsrInfo.class);
-        if (request != null) {
-            return jsonResponse(getCSRInternal(request));
+        EntryInfo request = unmarshal(body, EntryInfo.class);
+        if (request != null && request instanceof CsrInfo) {
+            CsrInfo csrInfo = (CsrInfo) request;
+            return jsonResponse(getCSRInternal(csrInfo));
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }

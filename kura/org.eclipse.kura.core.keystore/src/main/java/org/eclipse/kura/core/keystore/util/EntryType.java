@@ -14,20 +14,14 @@ package org.eclipse.kura.core.keystore.util;
 
 public enum EntryType {
 
-    TRUSTED_CERTIFICATE("TrustedCertificate"),
-    PRIVATE_KEY("PrivateKey"),
-    KEY_PAIR("KeyPair"),
-    CSR("CSR");
-
-    String type;
-
-    private EntryType(String type) {
-        this.type = type;
-    }
+    TRUSTED_CERTIFICATE,
+    PRIVATE_KEY,
+    KEY_PAIR,
+    CSR;
 
     public static EntryType valueOfType(String type) {
         for (EntryType e : values()) {
-            if (e.type.equals(type)) {
+            if (e.name().equals(type)) {
                 return e;
             }
         }

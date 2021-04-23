@@ -22,7 +22,6 @@ public class KeyPairInfo extends EntryInfo {
 
     public KeyPairInfo(String keystoreName, String alias) {
         super(keystoreName, alias);
-        setType(EntryType.KEY_PAIR);
     }
 
     public String getAlgorithm() {

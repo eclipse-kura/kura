@@ -14,15 +14,15 @@ package org.eclipse.kura.core.keystore.rest.provider;
 
 import org.eclipse.kura.rest.utils.Validable;
 
-public class ReadRequest implements Validable {
+public class CsrReadRequest implements Validable {
 
-    private String keystoreName;
+    private String keystoreServicePid;
     private String alias;
     private String signatureAlgorithm;
     private String attributes;
 
-    public String getKeystoreName() {
-        return this.keystoreName;
+    public String getKeystoreServicePid() {
+        return this.keystoreServicePid;
     }
 
     public String getAlias() {
@@ -39,13 +39,13 @@ public class ReadRequest implements Validable {
 
     @Override
     public String toString() {
-        return "WriteRequest [keystoreName=" + this.keystoreName + ", alias=" + this.alias + ", algorithm="
+        return "ReadRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + ", algorithm="
                 + this.signatureAlgorithm + ", attributes=" + this.attributes + "]";
     }
 
     @Override
     public boolean isValid() {
-        return this.keystoreName != null && this.alias != null && this.signatureAlgorithm != null
+        return this.keystoreServicePid != null && this.alias != null && this.signatureAlgorithm != null
                 && this.attributes != null;
     }
 

@@ -21,16 +21,16 @@ package org.eclipse.kura.security.keystore;
  */
 public class KeystoreInfo {
 
-    private final String id;
+    private final String keystoreServicePid;
     private String type;
     private int size;
 
-    public KeystoreInfo(String keystoreName) {
-        this.id = keystoreName;
+    public KeystoreInfo(String keystoreServicePid) {
+        this.keystoreServicePid = keystoreServicePid;
     }
 
-    public String getId() {
-        return this.id;
+    public String getKeystoreServicePid() {
+        return this.keystoreServicePid;
     }
 
     public String getType() {

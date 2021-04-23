@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.request.handler;
 
+import static java.util.Objects.isNull;
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
 import java.nio.charset.StandardCharsets;
@@ -24,8 +25,11 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
+import org.eclipse.kura.core.keystore.util.CertificateInfo;
+import org.eclipse.kura.core.keystore.util.CsrInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
-import org.eclipse.kura.core.keystore.util.KeystoreServiceRemoteService;
+import org.eclipse.kura.core.keystore.util.KeyPairInfo;
+import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -37,15 +41,18 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteService implements RequestHandler {
+public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService implements RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceRequestHandlerV1.class);
     public static final String APP_ID = "KEYS-V1";
 
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Resource not found";
     private static final String KEYSTORES = "keystores";
-    private static final String KEYS = "keys";
+    private static final String ENTRIES = "entries";
+    private static final String ENTRY = "entry";
     private static final String CSR = "csr";
+    private static final String CERTIFICATE = "certificate";
+    private static final String KEYPAIR = "keypair";
 
     // ----------------------------------------------------------------
     //
@@ -87,17 +94,16 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
 
         if (resourcePath.size() == 1 && resourcePath.get(0).equals(KEYSTORES)) {
             return jsonResponse(listKeystoresInternal());
-        } else if (resourcePath.size() == 1 && resourcePath.get(0).equals(KEYS)) {
-            return jsonResponse(getKeysInternal());
-        } else if (resourcePath.size() == 2 && resourcePath.get(0).equals(KEYS)) {
-            return jsonResponse(getKeysInternal(resourcePath.get(1)));
-        } else if (resourcePath.size() == 3 && resourcePath.get(0).equals(KEYS)) {
-            return jsonResponse(getKeyInternal(resourcePath.get(1), resourcePath.get(2)));
-        } else if (resourcePath.size() == 1 && resourcePath.get(0).equals(CSR)) {
-            String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
-            EntryInfo request = unmarshal(body, EntryInfo.class);
-            if (request != null) {
-                return jsonResponse(getCSRInternal(request));
+        } else if (resourcePath.size() == 2 && resourcePath.get(0).equals(KEYSTORES)
+                && resourcePath.get(1).equals(ENTRIES)) {
+            return doGetEntries(reqPayload);
+        } else if (resourcePath.size() == 3 && resourcePath.get(0).equals(KEYSTORES)
+                && resourcePath.get(1).equals(ENTRIES) && resourcePath.get(2).equals(ENTRY)) {
+            EntryInfo request = unmarshal(new String(reqPayload.getBody(), StandardCharsets.UTF_8), EntryInfo.class);
+            String keystoreServicePid = request.getKeystoreServicePid();
+            String keyAlias = request.getAlias();
+            if (!isNull(keystoreServicePid) && !isNull(keyAlias)) {
+                return jsonResponse(getKeyInternal(keystoreServicePid, keyAlias));
             } else {
                 throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
@@ -106,24 +112,67 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
         }
     }
 
+    private KuraMessage doGetEntries(KuraPayload reqPayload) {
+        byte[] body = reqPayload.getBody();
+        if (isNull(body) || body.length == 0) {
+            return jsonResponse(getKeysInternal());
+        } else {
+            EntryInfo request = unmarshal(new String(reqPayload.getBody(), StandardCharsets.UTF_8), EntryInfo.class);
+            String keystoreServicePid = request.getKeystoreServicePid();
+            String keyAlias = request.getAlias();
+            if (isNull(keystoreServicePid) && !isNull(keyAlias)) {
+                return jsonResponse(getKeysByAliasInternal(keyAlias));
+            } else {
+                return jsonResponse(getKeysByPidInternal(keystoreServicePid));
+            }
+        }
+    }
+
     @Override
-    public KuraMessage doPut(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
+    public KuraMessage doPost(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException {
         final List<String> resourcePath = extractResourcePath(reqMessage);
         KuraPayload reqPayload = reqMessage.getPayload();
 
-        if (resourcePath.size() != 1 || reqPayload.getBody() == null || reqPayload.getBody().length == 0) {
+        if (resourcePath.size() != 3 || reqPayload.getBody() == null || reqPayload.getBody().length == 0
+                || !resourcePath.get(0).equals(KEYSTORES) || !resourcePath.get(1).equals(ENTRIES)) {
             logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (resourcePath.get(0).equals(KEYS)) {
+        if (resourcePath.get(2).equals(CSR)) {
+            return doPostCsr(reqPayload);
+        } else if (resourcePath.get(2).equals(CERTIFICATE)) {
             String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
             EntryInfo request = unmarshal(body, EntryInfo.class);
-            if (request != null) {
-                return jsonResponse(storeKeyEntryInternal(request));
+            if (request instanceof CertificateInfo) {
+                CertificateInfo certificateInfo = (CertificateInfo) request;
+                storeTrustedCertificateEntryInternal(certificateInfo);
+                return new KuraMessage(new KuraResponsePayload(200));
             } else {
                 throw new KuraException(KuraErrorCode.BAD_REQUEST);
             }
+        } else if (resourcePath.get(2).equals(KEYPAIR)) {
+            String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
+            EntryInfo request = unmarshal(body, EntryInfo.class);
+
+            if (request instanceof KeyPairInfo) {
+                KeyPairInfo keyPairInfo = (KeyPairInfo) request;
+                storeKeyPairEntryInternal(keyPairInfo);
+                return new KuraMessage(new KuraResponsePayload(200));
+            } else {
+                throw new KuraException(KuraErrorCode.BAD_REQUEST);
+            }
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+    }
+
+    private KuraMessage doPostCsr(KuraPayload reqPayload) throws KuraException {
+        String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
+        EntryInfo request = unmarshal(body, EntryInfo.class);
+        if (request != null && request instanceof CsrInfo) {
+            CsrInfo csrInfo = (CsrInfo) request;
+            return jsonResponse(getCSRInternal(csrInfo));
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
@@ -134,16 +183,17 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreServiceRemoteServic
         final List<String> resourcePath = extractResourcePath(reqMessage);
         KuraPayload reqPayload = reqMessage.getPayload();
 
-        if (resourcePath.size() != 1 || reqPayload.getBody() == null || reqPayload.getBody().length == 0) {
+        if (resourcePath.size() != 2 || reqPayload.getBody() == null || reqPayload.getBody().length == 0
+                || !resourcePath.get(0).equals(KEYSTORES)) {
             logger.error(NONE_RESOURCE_FOUND_MESSAGE);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        if (resourcePath.get(0).equals(KEYS)) {
+        if (resourcePath.get(1).equals(ENTRIES)) {
             String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
             EntryInfo request = unmarshal(body, EntryInfo.class);
             if (request != null) {
-                deleteKeyEntryInternal(request.getKeystoreName(), request.getAlias());
+                deleteKeyEntryInternal(request.getKeystoreServicePid(), request.getAlias());
                 return new KuraMessage(new KuraResponsePayload(200));
             } else {
                 throw new KuraException(KuraErrorCode.BAD_REQUEST);

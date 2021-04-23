@@ -9,32 +9,26 @@
  *
  * Contributors:
  *  Eurotech
+ *
  *******************************************************************************/
 package org.eclipse.kura.core.keystore.rest.provider;
 
+import org.eclipse.kura.core.keystore.util.KeyPairInfo;
 import org.eclipse.kura.rest.utils.Validable;
 
-public class DeleteRequest implements Validable {
+public class KeyPairWriteRequest extends KeyPairInfo implements Validable {
 
-    private String keystoreServicePid;
-    private String alias;
-
-    public String getKeystoreServicePid() {
-        return this.keystoreServicePid;
-    }
-
-    public String getAlias() {
-        return this.alias;
-    }
-
-    @Override
-    public String toString() {
-        return "DeleteRequest [keystoreServicePid=" + this.keystoreServicePid + ", alias=" + this.alias + "]";
+    public KeyPairWriteRequest(String keystoreName, String alias) {
+        super(keystoreName, alias);
     }
 
     @Override
     public boolean isValid() {
-        return this.keystoreServicePid != null && this.alias != null;
+        if (getKeystoreServicePid() == null || getAlias() == null) {
+            return false;
+        }
+        return !(getAlgorithm() == null || getSize() == 0 || getSignatureAlgorithm() == null
+                || getAttributes() == null);
     }
 
 }

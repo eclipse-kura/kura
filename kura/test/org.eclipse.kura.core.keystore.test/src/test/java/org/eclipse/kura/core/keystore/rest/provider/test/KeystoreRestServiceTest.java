@@ -15,9 +15,11 @@ package org.eclipse.kura.core.keystore.rest.provider.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +28,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
+import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -34,13 +37,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
-
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
 import org.eclipse.kura.core.keystore.rest.provider.DeleteRequest;
+import org.eclipse.kura.core.keystore.rest.provider.KeyPairWriteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.KeystoreRestService;
-import org.eclipse.kura.core.keystore.rest.provider.ReadRequest;
-import org.eclipse.kura.core.keystore.rest.provider.WriteRequest;
+import org.eclipse.kura.core.keystore.rest.provider.TrustedCertificateWriteRequest;
 import org.eclipse.kura.core.keystore.util.CertificateInfo;
 import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.core.keystore.util.EntryType;
@@ -103,53 +105,6 @@ public class KeystoreRestServiceTest {
             + "VR0OBBYEFJ+MTQRX0X4ihcyt9h9+ODxCh/5LMAwGCCqGSM49BAMCBQADSAAwRQIh\n"
             + "AISr/AGgA2FwJeZFPKB2KEoWPCPsPMpBgA4KrsoJBQmVAiBAkLzQIUWad1cvyEUn\n" + "WNntICChHGdKmvPhWZSQ6n61ew==\n"
             + "-----END CERTIFICATE-----";
-    private final String PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\n"
-            + "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCCcZ1Nu9AVYKJd\n"
-            + "p6gcdObxCiofeOVbJv3Ws19JVa6PGTSgREFy5c97/k+SsSBhHAFp1n3738E2gdxD\n"
-            + "auftKpmV3ZZ93rEQQ+Db71PiyFlrEEtcDE//14EH2jaHBIghxqWmgvWu0e8pca4u\n"
-            + "xnmOOJAPCabNYLLs4pnTh9xJn+B+Mdz+/NNj/C7BV53W2nAcsdVqpbmLjfCrDSd/\n"
-            + "hgel8AoAbdjiRGkYHkgvEuztjx01pO2iGAgpkctigdxF/ygwwOOxcPASw/55ZjSE\n"
-            + "gMZx7PMyxEiIL7jgt/cgG68QhlQ3neYfJ9cd+gLvn1g1fwsGtGpw3Mh3dgs6DQkr\n"
-            + "8HMQW0bpAgMBAAECggEAL2IR3/C/L2TA1gBWwq98TEaC8pe5yJirUFgr3rmvBPAE\n"
-            + "+8qPc6si6UmBoimRN3Uy1j1B2kJ3LtORLTQiNzZoP9YUGnjQHLZrcbjH4fMg+BEd\n"
-            + "LrySOr8PccjEUdtFj+9WsNuVXwGHPKi8uuUBtrW5Lp006BmeJQpTElGhpWTb6Tqy\n"
-            + "OcNceNz+oP1N3AZ3Mnf6Aq6GuvD4QeGMVEiosHPxMqY0eddNK672zq3A0o1NPA9z\n"
-            + "yaVt9UK7SZ6/yOKYrAAM/2iLHmNbrYRer567hgg2B1LGJCRSdB/c34u6lTnPo+Ai\n"
-            + "olQahQNFhiJKTXr2kK9WgS6tWXhqUqsVLUCug4mDAQKBgQDKLbhidAYClyOKJW7U\n"
-            + "GsbM5dmQV80NsnsN3qphKZDTEMinhs3N4oknhi+mZPeyge4MY73BiHXhnMcUkfhw\n"
-            + "nbhRNhrkZTt18S6rTzEp/vDDx+ZosxRKYXmPyuDDWDmvG6ocRyOLIgoYhT0kPQ7a\n"
-            + "oXQkpFPjBq1UmqNOcUwEpNG2sQKBgQClKzyAopsjWNptBQPo/j/PN24uThpdd3yX\n"
-            + "NenmLZsYJyloKDbOGzEXpuyzdtNAiIVDsQ8RzN5lkF6xVvXnOlSA2gmEc8KJmRl8\n"
-            + "/gWzPRHHHNR7QUiGmg9QThrUp2l6DiAm/IcuL0btj99kQa2XcLGlTohwWpdVySSx\n"
-            + "abDX7pSRuQKBgH/jy+77VZHt6R1J8IFbLsYN30HfSGaRsCVl5IDxuhrJUyQlsam6\n"
-            + "0uediibHV6gjaGGN9kql92tvsL7iVzVlj2JPx1MSdjp1BgB3Z7IZAlPV73nrTbp/\n"
-            + "TlYXD3aCKHsMFN8uYN1x+tDn93Uk6nCCEOXczPOfFaWe7A6CvINzfvUBAoGAUJEm\n"
-            + "khi/VB6jbUpk/eIHfiyrsiqm8bC3NYs27PCSFtYDfKshEKhy6faiv2fW5EOzvbFA\n"
-            + "iI5GbYRerGKe0IvDbJbuzY0p97SWmkHOxf+kDFwjyXuuxPmhPqraq6B98uuxA1Nr\n"
-            + "HTwyfO8RKPZglt6ByQDlzOhjqZTUMTY87ReToQECgYBKdX3Idr4zvODkXIlG852C\n"
-            + "o135W+7AWr+dYRLx1FcvgMU9SbF9cwUU5Zutbrv+Kl8xGPyfx09MJ6BNxTkkr09J\n"
-            + "BpbrbOZsUDjMjojyQYL4Ll9rLohk+Pq73xXJjtTRIXZVXJg27pEEqzcVB4o9vgli\n" + "yzOqhyTKM9JP7Uda6Fv6DA==\n"
-            + "-----END PRIVATE KEY-----";
-    private final String[] CERTIFICATE_CHAIN = {
-            "-----BEGIN CERTIFICATE-----\n" + "MIIDdzCCAl+gAwIBAgIED3hXJjANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV\n"
-                    + "bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD\n"
-                    + "VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du\n"
-                    + "MB4XDTIxMDQxMzA4MTQxOVoXDTIxMDcxMjA4MTQxOVowbDEQMA4GA1UEBhMHVW5r\n"
-                    + "bm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE\n"
-                    + "ChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC\n"
-                    + "ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIJxnU270BVgol2nqBx05vEK\n"
-                    + "Kh945Vsm/dazX0lVro8ZNKBEQXLlz3v+T5KxIGEcAWnWffvfwTaB3ENq5+0qmZXd\n"
-                    + "ln3esRBD4NvvU+LIWWsQS1wMT//XgQfaNocEiCHGpaaC9a7R7ylxri7GeY44kA8J\n"
-                    + "ps1gsuzimdOH3Emf4H4x3P7802P8LsFXndbacByx1WqluYuN8KsNJ3+GB6XwCgBt\n"
-                    + "2OJEaRgeSC8S7O2PHTWk7aIYCCmRy2KB3EX/KDDA47Fw8BLD/nlmNISAxnHs8zLE\n"
-                    + "SIgvuOC39yAbrxCGVDed5h8n1x36Au+fWDV/Cwa0anDcyHd2CzoNCSvwcxBbRukC\n"
-                    + "AwEAAaMhMB8wHQYDVR0OBBYEFCXFCTq9DDNw6jr0nE2VHw+6wqG0MA0GCSqGSIb3\n"
-                    + "DQEBCwUAA4IBAQAjsKeIU0vf7vaOhUAMV60eP54kr6koiWBjhCxyKXQ+MECTFntn\n"
-                    + "L459+uTFOCyoytWYjbe9ph79ossTWTCUUPCx9ZSaVdrpK5TyzXI+KBBWqGcLHxqc\n"
-                    + "1jvU7zKLVf9oKGfhugnFvmj2EqC2vsrQPiG+p1RDfiLI9BqmhoDzBWzjZDdB6xt6\n"
-                    + "PMAqecHfS24TzyWi8T4gLctcpSN22Aa394ky7sgBJPAQHWe7VWhRB0bVTZntwRsQ\n"
-                    + "pEraINImKSw+m7MF/75s151yjKOzQxPZufl91oYyQMXoqX2fi0EUWo1oLm1x01dN\n"
-                    + "L7w7ELyBzbNlk8a3dQc3Dcg+tu7VAf2tRtmc\n" + "-----END CERTIFICATE-----" };
 
     @Test
     public void listKeystoresTest() throws KuraException, IOException, GeneralSecurityException {
@@ -163,7 +118,7 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -182,7 +137,7 @@ public class KeystoreRestServiceTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE_RSA.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE_RSA.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
@@ -194,30 +149,30 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
 
-        List<EntryInfo> keys = krs.getKeys();
+        List<EntryInfo> keys = krs.getEntries(null, null);
 
         assertEquals(1, keys.size());
         assertTrue(keys.get(0) instanceof CertificateInfo);
-        assertEquals("alias", keys.get(0).getAlias());
-        assertEquals("MyKeystore", keys.get(0).getKeystoreName());
-        assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
-        assertEquals("MyKeystore:alias", keys.get(0).getId());
-        assertEquals(2048, ((CertificateInfo) keys.get(0)).getSize());
-        assertEquals("SHA256withRSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
+        CertificateInfo result = (CertificateInfo) keys.get(0);
+        assertEquals("alias", result.getAlias());
+        assertEquals("MyKeystore", result.getKeystoreServicePid());
+        assertEquals(EntryType.TRUSTED_CERTIFICATE, result.getType());
+        assertEquals(2048, result.getSize());
+        assertEquals("SHA256withRSA", result.getAlgorithm());
     }
 
     @Test
-    public void listKeysTestWithId() throws KuraException, IOException, GeneralSecurityException {
+    public void listKeysTestWithId() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE_DSA.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE_DSA.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         Map<String, Entry> certs = new HashMap<>();
@@ -229,31 +184,31 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
 
-        List<EntryInfo> keys = krs.getKeys("MyKeystore");
+        List<EntryInfo> keys = krs.getEntries("MyKeystore", null);
 
         assertEquals(1, keys.size());
         assertTrue(keys.get(0) instanceof CertificateInfo);
-        assertEquals("alias", keys.get(0).getAlias());
-        assertEquals("MyKeystore", keys.get(0).getKeystoreName());
-        assertEquals(EntryType.TRUSTED_CERTIFICATE, keys.get(0).getType());
-        assertEquals("MyKeystore:alias", keys.get(0).getId());
-        assertEquals(1024, ((CertificateInfo) keys.get(0)).getSize());
-        assertEquals("SHA256withDSA", ((CertificateInfo) keys.get(0)).getAlgorithm());
-        assertEquals(CERTIFICATE_DSA, ((CertificateInfo) keys.get(0)).getCertificate());
+        CertificateInfo result = (CertificateInfo) keys.get(0);
+        assertEquals("alias", result.getAlias());
+        assertEquals("MyKeystore", result.getKeystoreServicePid());
+        assertEquals(EntryType.TRUSTED_CERTIFICATE, result.getType());
+        assertEquals(1024, result.getSize());
+        assertEquals("SHA256withDSA", result.getAlgorithm());
+        assertEquals(this.CERTIFICATE_DSA, result.getCertificate());
     }
 
     @Test
-    public void listKeyTest() throws KuraException, IOException, GeneralSecurityException {
+    public void listKeyTest() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
         KeystoreService ksMock = mock(KeystoreService.class);
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        ByteArrayInputStream is = new ByteArrayInputStream(CERTIFICATE_EC.getBytes());
+        ByteArrayInputStream is = new ByteArrayInputStream(this.CERTIFICATE_EC.getBytes());
         X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
         ks.setCertificateEntry("alias", cert);
         when(ksMock.getKeyStore()).thenReturn(ks);
@@ -263,21 +218,21 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
 
-        EntryInfo key = krs.getKey("MyKeystore", "alias");
+        EntryInfo key = krs.getEntry("MyKeystore", "alias");
 
         assertTrue(key instanceof CertificateInfo);
-        assertEquals("alias", key.getAlias());
-        assertEquals("MyKeystore", key.getKeystoreName());
-        assertEquals(EntryType.TRUSTED_CERTIFICATE, key.getType());
-        assertEquals("MyKeystore:alias", key.getId());
-        assertEquals(256, ((CertificateInfo) key).getSize());
-        assertEquals("SHA256withECDSA", ((CertificateInfo) key).getAlgorithm());
-        assertEquals(CERTIFICATE_EC, ((CertificateInfo) key).getCertificate());
+        CertificateInfo result = (CertificateInfo) key;
+        assertEquals("alias", result.getAlias());
+        assertEquals("MyKeystore", result.getKeystoreServicePid());
+        assertEquals(EntryType.TRUSTED_CERTIFICATE, result.getType());
+        assertEquals(256, result.getSize());
+        assertEquals("SHA256withECDSA", result.getAlgorithm());
+        assertEquals(this.CERTIFICATE_EC, result.getCertificate());
     }
 
     @Test
@@ -293,9 +248,9 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -303,48 +258,47 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        WriteRequest writeRequest = new WriteRequest();
-        TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
-        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
-        TestUtil.setFieldValue(writeRequest, "type", "TrustedCertificate");
-        TestUtil.setFieldValue(writeRequest, "certificate", CERTIFICATE_RSA);
+        TrustedCertificateWriteRequest writeRequest = new TrustedCertificateWriteRequest("MyKeystore", "MyAlias");
 
-        assertEquals("MyKeystore:MyAlias", krs.storeKeyEntry(writeRequest));
+        TestUtil.setFieldValue(writeRequest, "certificate", this.CERTIFICATE_RSA);
+
+        krs.storeTrustedCertificateEntry(writeRequest);
+
+        verify(ksMock, times(1)).setEntry(eq("MyAlias"), any(TrustedCertificateEntry.class));
 
     }
 
-    @Test(expected = WebApplicationException.class)
-    public void storeKeyEntryKeyTest()
-            throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
-        KeystoreService ksMock = mock(KeystoreService.class);
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] password = "some password".toCharArray();
-        ks.load(null, password);
-        when(ksMock.getKeyStore()).thenReturn(ks);
-
-        KeystoreRestService krs = new KeystoreRestService() {
-
-            @Override
-            public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
-                try {
-                    certFactory = CertificateFactory.getInstance("X.509");
-                } catch (CertificateException e) {
-                    // Do nothing...
-                }
-            }
-        };
-        krs.activate(null);
-
-        WriteRequest writeRequest = new WriteRequest();
-        TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
-        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
-        TestUtil.setFieldValue(writeRequest, "type", "PrivateKey");
-        TestUtil.setFieldValue(writeRequest, "privateKey", PRIVATE_KEY);
-        TestUtil.setFieldValue(writeRequest, "certificateChain", CERTIFICATE_CHAIN);
-
-        krs.storeKeyEntry(writeRequest);
-    }
+    // @Test(expected = WebApplicationException.class)
+    // public void storeKeyEntryKeyTest()
+    // throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
+    // KeystoreService ksMock = mock(KeystoreService.class);
+    // KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+    // char[] password = "some password".toCharArray();
+    // ks.load(null, password);
+    // when(ksMock.getKeyStore()).thenReturn(ks);
+    //
+    // KeystoreRestService krs = new KeystoreRestService() {
+    //
+    // @Override
+    // public void activate(ComponentContext componentContext) {
+    // this.keystoreServices.put("MyKeystore", ksMock);
+    // try {
+    // this.certFactory = CertificateFactory.getInstance("X.509");
+    // } catch (CertificateException e) {
+    // // Do nothing...
+    // }
+    // }
+    // };
+    // krs.activate(null);
+    //
+    // PrivateKeyWriteRequest writeRequest = new PrivateKeyWriteRequest();
+    // TestUtil.setFieldValue(writeRequest, "keystoreServicePid", "MyKeystore");
+    // TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
+    // TestUtil.setFieldValue(writeRequest, "privateKey", this.PRIVATE_KEY);
+    // TestUtil.setFieldValue(writeRequest, "certificateChain", this.CERTIFICATE_CHAIN);
+    //
+    // krs.storeKeypairEntry(writeRequest);
+    // }
 
     @Test
     public void deleteKeyEntryTest() throws KuraException, IOException, GeneralSecurityException, NoSuchFieldException {
@@ -358,9 +312,9 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -369,7 +323,7 @@ public class KeystoreRestServiceTest {
         krs.activate(null);
 
         DeleteRequest deleteRequest = new DeleteRequest();
-        TestUtil.setFieldValue(deleteRequest, "keystoreName", "MyKeystore");
+        TestUtil.setFieldValue(deleteRequest, "keystoreServicePid", "MyKeystore");
         TestUtil.setFieldValue(deleteRequest, "alias", "MyAlias");
 
         krs.deleteKeyEntry(deleteRequest);
@@ -388,9 +342,9 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -398,18 +352,16 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        WriteRequest writeRequest = new WriteRequest();
-        TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
-        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
-        TestUtil.setFieldValue(writeRequest, "type", "KeyPair");
+        KeyPairWriteRequest writeRequest = new KeyPairWriteRequest("MyKeystore", "MyAlias");
         TestUtil.setFieldValue(writeRequest, "algorithm", "RSA");
         TestUtil.setFieldValue(writeRequest, "signatureAlgorithm", "SHA256WithRSA");
         TestUtil.setFieldValue(writeRequest, "size", 1024);
         TestUtil.setFieldValue(writeRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
 
-        krs.storeKeyEntry(writeRequest);
+        krs.storeKeypairEntry(writeRequest);
 
-        assertEquals("MyKeystore:MyAlias", krs.storeKeyEntry(writeRequest));
+        verify(ksMock, times(1)).createKeyPair("MyAlias", "RSA", 1024, "SHA256WithRSA",
+                "CN=Kura, OU=IoT, O=Eclipse, C=US");
     }
 
     @Test
@@ -426,9 +378,9 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
                 try {
-                    certFactory = CertificateFactory.getInstance("X.509");
+                    this.certFactory = CertificateFactory.getInstance("X.509");
                 } catch (CertificateException e) {
                     // Do nothing...
                 }
@@ -436,19 +388,16 @@ public class KeystoreRestServiceTest {
         };
         krs.activate(null);
 
-        WriteRequest writeRequest = new WriteRequest();
-        TestUtil.setFieldValue(writeRequest, "keystoreName", "MyKeystore");
-        TestUtil.setFieldValue(writeRequest, "alias", "MyAlias");
-        TestUtil.setFieldValue(writeRequest, "type", "KeyPair");
+        KeyPairWriteRequest writeRequest = new KeyPairWriteRequest("MyKeystore", "MyAlias");
         TestUtil.setFieldValue(writeRequest, "algorithm", "RSA");
         TestUtil.setFieldValue(writeRequest, "signatureAlgorithm", "SHA256WithRSA");
         TestUtil.setFieldValue(writeRequest, "size", 1024);
         TestUtil.setFieldValue(writeRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
 
-        krs.storeKeyEntry(writeRequest);
+        krs.storeKeypairEntry(writeRequest);
 
-        ReadRequest readRequest = new ReadRequest();
-        TestUtil.setFieldValue(readRequest, "keystoreName", "MyKeystore");
+        CsrReadRequest readRequest = new CsrReadRequest();
+        TestUtil.setFieldValue(readRequest, "keystoreServicePid", "MyKeystore");
         TestUtil.setFieldValue(readRequest, "alias", "MyAlias");
         TestUtil.setFieldValue(readRequest, "signatureAlgorithm", "SHA256WithRSA");
         TestUtil.setFieldValue(readRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");

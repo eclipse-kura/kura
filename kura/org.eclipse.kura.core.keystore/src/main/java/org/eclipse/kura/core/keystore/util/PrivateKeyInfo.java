@@ -19,10 +19,10 @@ public class PrivateKeyInfo extends EntryInfo {
     private int size;
     private String privateKey;
     private String[] certificateChain;
+    private EntryType type = EntryType.PRIVATE_KEY;
 
     public PrivateKeyInfo(String alias, String keystoreName) {
         super(alias, keystoreName);
-        setType(EntryType.PRIVATE_KEY);
     }
 
     public String getAlgorithm() {
@@ -55,5 +55,9 @@ public class PrivateKeyInfo extends EntryInfo {
 
     public void setCertificateChain(String[] certificateChain) {
         this.certificateChain = certificateChain;
+    }
+
+    public EntryType getType() {
+        return this.type;
     }
 }

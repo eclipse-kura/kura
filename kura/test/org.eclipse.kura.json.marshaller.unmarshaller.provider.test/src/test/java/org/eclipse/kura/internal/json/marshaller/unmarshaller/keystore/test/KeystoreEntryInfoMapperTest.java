@@ -29,7 +29,7 @@ public class KeystoreEntryInfoMapperTest {
 
         String jsonString = "{\n" + "    \"keystoreServicePid\" : \"MyKeystore\",\n"
                 + "    \"alias\" : \"mycerttestec\"\n" + "}";
-        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString);
+        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString, EntryInfo.class);
 
         assertTrue(entry instanceof EntryInfo);
         assertEquals("mycerttestec", entry.getAlias());
@@ -61,7 +61,7 @@ public class KeystoreEntryInfoMapperTest {
                 + "44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD\n" + "-----END CERTIFICATE-----";
         String jsonString = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n" + "   \"alias\":\"myCertTest99\",\n"
                 + "   \"type\":\"TRUSTED_CERTIFICATE\",\n" + "   \"certificate\":\"" + CERTIFICATE + "\"" + "}";
-        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString);
+        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString, CertificateInfo.class);
 
         assertTrue(entry instanceof CertificateInfo);
         CertificateInfo certificateInfo = (CertificateInfo) entry;
@@ -124,7 +124,7 @@ public class KeystoreEntryInfoMapperTest {
         String jsonString = "{\n" + "   \"keystoreServicePid\":\"MyKeystore\",\n" + "   \"alias\":\"myPrivateKey1\",\n"
                 + "   \"type\":\"PRIVATE_KEY\",\n" + "   \"privateKey\" : \"" + PRIVATEKEY + "\",\n"
                 + "   \"certificateChain\":[\"" + CERTIFICATE_CHAIN + "\"]\n" + "}";
-        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString);
+        EntryInfo entry = KeystoreEntryInfoMapper.unmarshal(jsonString, PrivateKeyInfo.class);
 
         assertTrue(entry instanceof PrivateKeyInfo);
         PrivateKeyInfo privateKeyInfo = (PrivateKeyInfo) entry;

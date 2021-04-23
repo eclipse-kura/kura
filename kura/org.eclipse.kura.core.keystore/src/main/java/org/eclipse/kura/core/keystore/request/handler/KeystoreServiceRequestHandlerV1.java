@@ -143,39 +143,23 @@ public class KeystoreServiceRequestHandlerV1 extends KeystoreRemoteService imple
             return doPostCsr(reqPayload);
         } else if (resourcePath.get(2).equals(CERTIFICATE)) {
             String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
-            EntryInfo request = unmarshal(body, EntryInfo.class);
-            if (request instanceof CertificateInfo) {
-                CertificateInfo certificateInfo = (CertificateInfo) request;
-                storeTrustedCertificateEntryInternal(certificateInfo);
-                return new KuraMessage(new KuraResponsePayload(200));
-            } else {
-                throw new KuraException(KuraErrorCode.BAD_REQUEST);
-            }
+            CertificateInfo certificateInfo = unmarshal(body, CertificateInfo.class);
+            storeTrustedCertificateEntryInternal(certificateInfo);
+            return new KuraMessage(new KuraResponsePayload(200));
         } else if (resourcePath.get(2).equals(KEYPAIR)) {
             String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
-            EntryInfo request = unmarshal(body, EntryInfo.class);
-
-            if (request instanceof KeyPairInfo) {
-                KeyPairInfo keyPairInfo = (KeyPairInfo) request;
-                storeKeyPairEntryInternal(keyPairInfo);
-                return new KuraMessage(new KuraResponsePayload(200));
-            } else {
-                throw new KuraException(KuraErrorCode.BAD_REQUEST);
-            }
+            KeyPairInfo keyPairInfo = unmarshal(body, KeyPairInfo.class);
+            storeKeyPairEntryInternal(keyPairInfo);
+            return new KuraMessage(new KuraResponsePayload(200));
         } else {
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
     }
 
-    private KuraMessage doPostCsr(KuraPayload reqPayload) throws KuraException {
+    private KuraMessage doPostCsr(KuraPayload reqPayload) {
         String body = new String(reqPayload.getBody(), StandardCharsets.UTF_8);
-        EntryInfo request = unmarshal(body, EntryInfo.class);
-        if (request != null && request instanceof CsrInfo) {
-            CsrInfo csrInfo = (CsrInfo) request;
-            return jsonResponse(getCSRInternal(csrInfo));
-        } else {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
-        }
+        CsrInfo csrInfo = unmarshal(body, CsrInfo.class);
+        return jsonResponse(getCSRInternal(csrInfo));
     }
 
     @Override

@@ -63,8 +63,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             return (T) WireGraphJsonMarshallUnmarshallImpl.unmarshalToWireGraphConfiguration(s);
         } else if (clazz.equals(KuraPayload.class)) {
             return (T) CloudPayloadJsonDecoder.buildFromString(s);
-        } else if (clazz.equals(EntryInfo.class)) {
-            return (T) KeystoreEntryInfoMapper.unmarshal(s);
+        } else if (EntryInfo.class.isAssignableFrom(clazz)) {
+            return (T) KeystoreEntryInfoMapper.unmarshal(s, clazz);
         }
         throw new IllegalArgumentException("Invalid parameter!");
     }

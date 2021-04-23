@@ -396,11 +396,6 @@ public class KeystoreServiceRequestHandlerTest {
             @Override
             public void activate(ComponentContext componentContext) {
                 this.keystoreServices.put("MyKeystore", ksMock);
-                try {
-                    this.certFactory = CertificateFactory.getInstance("X.509");
-                } catch (CertificateException e) {
-                    // Do nothing...
-                }
             }
 
             @SuppressWarnings("unchecked")

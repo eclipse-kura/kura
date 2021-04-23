@@ -12,10 +12,10 @@ import java.security.interfaces.DSAPublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 
-import org.eclipse.kura.core.keystore.util.KeystoreServiceRemoteService;
+import org.eclipse.kura.core.keystore.util.KeystoreRemoteService;
 import org.junit.Test;
 
-public class KeystoreServiceRemoteServiceTest {
+public class KeystoreRemoteServiceTest {
 
     private final String publicKeyDSA = "-----BEGIN CERTIFICATE-----\n"
             + "MIIEjjCCBDmgAwIBAgIED6yGqzANBglghkgBZQMEAwIFADBJMQswCQYDVQQGEwJm\n"
@@ -104,7 +104,7 @@ public class KeystoreServiceRemoteServiceTest {
 
     @Test
     public void createCertificateDSAEntryTest() throws CertificateException {
-        TrustedCertificateEntry entry = KeystoreServiceRemoteService.createCertificateEntry(publicKeyDSA);
+        TrustedCertificateEntry entry = KeystoreRemoteService.createCertificateEntry(publicKeyDSA);
 
         assertNotNull(entry);
         assertEquals("DSA", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
@@ -116,7 +116,7 @@ public class KeystoreServiceRemoteServiceTest {
 
     @Test
     public void createCertificateRSAEntryTest() throws CertificateException {
-        TrustedCertificateEntry entry = KeystoreServiceRemoteService.createCertificateEntry(publicKeyRSA);
+        TrustedCertificateEntry entry = KeystoreRemoteService.createCertificateEntry(publicKeyRSA);
 
         assertNotNull(entry);
         assertEquals("RSA", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
@@ -127,7 +127,7 @@ public class KeystoreServiceRemoteServiceTest {
 
     @Test
     public void createCertificateECEntryTest() throws CertificateException {
-        TrustedCertificateEntry entry = KeystoreServiceRemoteService.createCertificateEntry(publicKeyEC);
+        TrustedCertificateEntry entry = KeystoreRemoteService.createCertificateEntry(publicKeyEC);
 
         assertNotNull(entry);
         assertEquals("EC", entry.getTrustedCertificate().getPublicKey().getAlgorithm());
@@ -139,7 +139,7 @@ public class KeystoreServiceRemoteServiceTest {
 
     @Test
     public void createPrivateKeyDSAEntryTest() throws IOException, GeneralSecurityException {
-        PrivateKeyEntry entry = KeystoreServiceRemoteService.createPrivateKey(privateKeyDSA, publicKeyDSA);
+        PrivateKeyEntry entry = KeystoreRemoteService.createPrivateKey(privateKeyDSA, publicKeyDSA);
 
         assertNotNull(entry);
         assertEquals("DSA", entry.getCertificate().getPublicKey().getAlgorithm());
@@ -150,7 +150,7 @@ public class KeystoreServiceRemoteServiceTest {
 
     @Test
     public void createPrivateKeyRSAEntryTest() throws IOException, GeneralSecurityException {
-        PrivateKeyEntry entry = KeystoreServiceRemoteService.createPrivateKey(privateKeyRSA, publicKeyRSA);
+        PrivateKeyEntry entry = KeystoreRemoteService.createPrivateKey(privateKeyRSA, publicKeyRSA);
 
         assertNotNull(entry);
         assertEquals("RSA", entry.getCertificate().getPublicKey().getAlgorithm());

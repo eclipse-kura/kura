@@ -72,12 +72,12 @@ public class KeystoreRemoteService {
     public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERT = "-----END CERTIFICATE-----";
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME;
 
     protected Map<String, KeystoreService> keystoreServices = new HashMap<>();
     protected BundleContext bundleContext;
     private ServiceTrackerCustomizer<KeystoreService, KeystoreService> keystoreServiceTrackerCustomizer;
     private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
-    private static final DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
@@ -298,10 +298,10 @@ public class KeystoreRemoteService {
             certificateInfo.setIssuer(x509Certificate.getIssuerX500Principal().getName());
             ZonedDateTime startDate = Instant.ofEpochMilli(x509Certificate.getNotBefore().getTime())
                     .atZone(ZoneOffset.UTC);
-            certificateInfo.setStartDate(formatter.format(startDate));
+            certificateInfo.setStartDate(FORMATTER.format(startDate));
             ZonedDateTime expirationDate = Instant.ofEpochMilli(x509Certificate.getNotAfter().getTime())
                     .atZone(ZoneOffset.UTC);
-            certificateInfo.setExpirationDate(formatter.format(expirationDate));
+            certificateInfo.setExpirationDate(FORMATTER.format(expirationDate));
             certificateInfo.setAlgorithm(x509Certificate.getSigAlgName());
             certificateInfo.setSize(getSize(x509Certificate.getPublicKey()));
             try {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -56,7 +56,6 @@ import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
-import org.eclipse.kura.core.configuration.upgrade.ConfigurationUpgrade;
 import org.eclipse.kura.core.configuration.util.CollectionsUtil;
 import org.eclipse.kura.core.configuration.util.ComponentUtil;
 import org.eclipse.kura.core.configuration.util.StringUtil;
@@ -819,7 +818,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 factoryPid = (String) properties.get(ConfigurationAdmin.SERVICE_FACTORYPID);
             }
             if (factoryPid != null && !this.allActivatedPids.contains(config.getPid())) {
-                ConfigurationUpgrade.upgrade(config, this.bundleContext);
                 String pid = config.getPid();
                 logger.info("Creating configuration with pid: {} and factory pid: {}", pid, factoryPid);
                 try {
@@ -1666,10 +1664,6 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     break;
                 }
             }
-        }
-
-        for (final ComponentConfiguration config : result) {
-            ConfigurationUpgrade.upgrade(config, this.bundleContext);
         }
 
         return result;

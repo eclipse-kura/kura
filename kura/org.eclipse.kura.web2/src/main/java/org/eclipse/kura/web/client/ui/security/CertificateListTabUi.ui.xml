@@ -59,6 +59,8 @@
   				</b:ModalFooter>
   			</b:Modal>
         </b:Column>
+        <b:PanelFooter ui:field="tablePanelFooter">
+        </b:PanelFooter>
         <kura:AlertDialog ui:field="alertDialog"/>
     </b:Container>
 </ui:UiBinder> 

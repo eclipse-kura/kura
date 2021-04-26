@@ -13,6 +13,8 @@
 package org.eclipse.kura.core.keystore.util;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -20,6 +22,9 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.KeyStoreException;
+import java.security.PrivateKey;
+import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -42,6 +47,9 @@ import java.util.Map;
 import javax.security.auth.x500.X500Principal;
 import javax.ws.rs.WebApplicationException;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
 import org.eclipse.kura.security.keystore.KeystoreInfo;
@@ -64,29 +72,58 @@ public class KeystoreRemoteService {
     public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
     public static final String END_CERT = "-----END CERTIFICATE-----";
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.RFC_1123_DATE_TIME;
 
     protected Map<String, KeystoreService> keystoreServices = new HashMap<>();
     protected BundleContext bundleContext;
     private ServiceTrackerCustomizer<KeystoreService, KeystoreService> keystoreServiceTrackerCustomizer;
     private ServiceTracker<KeystoreService, KeystoreService> keystoreServiceTracker;
-    protected CertificateFactory certFactory;
-    private final DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
     public void activate(ComponentContext componentContext) {
         this.bundleContext = componentContext.getBundleContext();
         this.keystoreServiceTrackerCustomizer = new KeystoreServiceTrackerCustomizer();
         initKeystoreServiceTracking();
-        try {
-            this.certFactory = CertificateFactory.getInstance("X.509");
-        } catch (CertificateException e) {
-            logger.error("Failed to get the certificate factory", e);
-        }
     }
 
     public void deactivate(ComponentContext componentContext) {
         if (this.keystoreServiceTracker != null) {
             this.keystoreServiceTracker.close();
         }
+    }
+
+    public static TrustedCertificateEntry createCertificateEntry(String certificate) throws CertificateException {
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes());
+        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(is);
+        return new TrustedCertificateEntry(cert);
+    }
+
+    public static PrivateKeyEntry createPrivateKey(String privateKey, String publicKey)
+            throws IOException, GeneralSecurityException {
+        // Works with RSA and DSA. EC is not supported since the certificate is encoded
+        // with ECDSA while the corresponding private key with EC.
+        // This cause an error when the PrivateKeyEntry is generated.
+        Certificate[] certs = parsePublicCertificates(publicKey);
+
+        Security.addProvider(new BouncyCastleProvider());
+        PEMParser pemParser = new PEMParser(new StringReader(privateKey));
+        Object object = pemParser.readObject();
+        pemParser.close();
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
+        PrivateKey privkey = null;
+        if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
+            privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
+        }
+
+        return new PrivateKeyEntry(privkey, certs);
+    }
+
+    public static X509Certificate[] parsePublicCertificates(String publicKey) throws CertificateException {
+        List<X509Certificate> certificateChain = new ArrayList<>();
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        ByteArrayInputStream is = new ByteArrayInputStream(publicKey.getBytes());
+        certificateChain.add((X509Certificate) certFactory.generateCertificate(is));
+        return certificateChain.toArray(new X509Certificate[0]);
     }
 
     protected List<KeystoreInfo> listKeystoresInternal() {
@@ -220,8 +257,8 @@ public class KeystoreRemoteService {
 
     protected void storeTrustedCertificateEntryInternal(final CertificateInfo writeRequest) {
         try {
-            storeCertificateInternal(writeRequest.getKeystoreServicePid(), writeRequest.getAlias(),
-                    writeRequest.getCertificate());
+            this.keystoreServices.get(writeRequest.getKeystoreServicePid()).setEntry(writeRequest.getAlias(),
+                    createCertificateEntry(writeRequest.getCertificate()));
         } catch (GeneralSecurityException | KuraException e) {
             throw new WebApplicationException(e);
         }
@@ -229,7 +266,7 @@ public class KeystoreRemoteService {
 
     protected void storeKeyPairEntryInternal(final KeyPairInfo writeRequest) {
         try {
-            storeKeyPairInternal(writeRequest.getKeystoreServicePid(), writeRequest.getAlias(),
+            this.keystoreServices.get(writeRequest.getKeystoreServicePid()).createKeyPair(writeRequest.getAlias(),
                     writeRequest.getAlgorithm(), writeRequest.getSize(), writeRequest.getSignatureAlgorithm(),
                     writeRequest.getAttributes());
         } catch (KuraException e) {
@@ -243,19 +280,6 @@ public class KeystoreRemoteService {
         } catch (KuraException e) {
             throw new WebApplicationException(e);
         }
-    }
-
-    private void storeCertificateInternal(String keystoreServicePid, String alias, String certificate)
-            throws KuraException, CertificateException {
-        ByteArrayInputStream is = new ByteArrayInputStream(certificate.getBytes());
-        X509Certificate cert = (X509Certificate) this.certFactory.generateCertificate(is);
-        this.keystoreServices.get(keystoreServicePid).setEntry(alias, new TrustedCertificateEntry(cert));
-    }
-
-    private void storeKeyPairInternal(String keystoreServicePid, String alias, String algorithm, int size,
-            String signatureAlgorithm, String attributes) throws KuraException {
-        this.keystoreServices.get(keystoreServicePid).createKeyPair(alias, algorithm, size, signatureAlgorithm,
-                attributes);
     }
 
     private KeystoreInfo buildKeystoreInfo(String keystoreServicePid, KeyStore keystore) throws KeyStoreException {
@@ -274,10 +298,10 @@ public class KeystoreRemoteService {
             certificateInfo.setIssuer(x509Certificate.getIssuerX500Principal().getName());
             ZonedDateTime startDate = Instant.ofEpochMilli(x509Certificate.getNotBefore().getTime())
                     .atZone(ZoneOffset.UTC);
-            certificateInfo.setStartDate(this.formatter.format(startDate));
+            certificateInfo.setStartDate(FORMATTER.format(startDate));
             ZonedDateTime expirationDate = Instant.ofEpochMilli(x509Certificate.getNotAfter().getTime())
                     .atZone(ZoneOffset.UTC);
-            certificateInfo.setExpirationDate(this.formatter.format(expirationDate));
+            certificateInfo.setExpirationDate(FORMATTER.format(expirationDate));
             certificateInfo.setAlgorithm(x509Certificate.getSigAlgName());
             certificateInfo.setSize(getSize(x509Certificate.getPublicKey()));
             try {

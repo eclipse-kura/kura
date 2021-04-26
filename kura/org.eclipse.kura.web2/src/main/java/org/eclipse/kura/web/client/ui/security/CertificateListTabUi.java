@@ -32,6 +32,7 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.ModalFooter;
+import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -39,10 +40,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -76,6 +81,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     Button closeModalButton;
     @UiField
     AlertDialog alertDialog;
+    @UiField
+    PanelFooter tablePanelFooter;
 
     @UiField
     CellTable<GwtKeystoreEntry> certificatesGrid;
@@ -84,13 +91,33 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     private final ListDataProvider<GwtKeystoreEntry> certificatesDataProvider = new ListDataProvider<>();
 
+    private final SimplePager pager;
+
     private List<String> pids;
 
     public CertificateListTabUi() {
         logger.log(Level.FINER, "Initiating CertificatesTabUI...");
         initWidget(uiBinder.createAndBindUi(this));
-        initTable();
 
+        this.pager = new SimplePager(TextLocation.CENTER, false, 0, true) {
+
+            @Override
+            public void nextPage() {
+                setPage(getPage() + 1);
+            }
+
+            @Override
+            public void setPageStart(int index) {
+                final HasRows display = getDisplay();
+                if (display != null) {
+                    display.setVisibleRange(index, getPageSize());
+                }
+            }
+        };
+        this.pager.setPageSize(15);
+        this.pager.setDisplay(this.certificatesGrid);
+        this.tablePanelFooter.add(this.pager);
+        initTable();
         initInterfaceButtons();
     }
 
@@ -137,6 +164,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
             }
         };
         this.certificatesGrid.addColumn(col1, MSGS.certificateAlias());
+        col1.setSortable(true);
 
         TextColumn<GwtKeystoreEntry> col2 = new TextColumn<GwtKeystoreEntry>() {
 
@@ -168,28 +196,64 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         col3.setSortable(true);
         this.certificatesGrid.addColumn(col3, MSGS.certificateKeystoreName());
 
-        // ListHandler<GwtCertificate> columnSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
-        // columnSortHandler.setComparator(col2, (o1, o2) -> {
-        // if (o1 == o2) {
-        // return 0;
-        // }
-        //
-        // // Compare the name columns.
-        // if (o1 != null) {
-        // return o2 != null ? o1.getType().name().compareTo(o2.getType().name()) : 1;
-        // }
-        // return -1;
-        // });
-
-        this.selectionModel.addSelectionChangeHandler(e -> {
-            this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null);
-        });
+        this.selectionModel.addSelectionChangeHandler(
+                e -> this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null));
 
         this.certificatesGrid.getColumnSortList().push(col2);
-        // this.certificatesGrid.addColumnSortHandler(columnSortHandler);
+        this.certificatesGrid.addColumnSortHandler(getAliasSortHandler(col1));
+        this.certificatesGrid.addColumnSortHandler(getTypeSortHandler(col2));
+        this.certificatesGrid.addColumnSortHandler(getNameSortHandler(col3));
 
         this.certificatesDataProvider.addDataDisplay(this.certificatesGrid);
         this.certificatesGrid.setSelectionModel(this.selectionModel);
+    }
+
+    private ListHandler<GwtKeystoreEntry> getNameSortHandler(TextColumn<GwtKeystoreEntry> col3) {
+        ListHandler<GwtKeystoreEntry> nameSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        nameSortHandler.setComparator(col3, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            // Compare the name columns.
+            if (o1 != null) {
+                return o2 != null ? o1.getKeystoreName().compareTo(o2.getKeystoreName()) : 1;
+            }
+            return -1;
+        });
+        return nameSortHandler;
+    }
+
+    private ListHandler<GwtKeystoreEntry> getTypeSortHandler(TextColumn<GwtKeystoreEntry> col2) {
+        ListHandler<GwtKeystoreEntry> typeSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        typeSortHandler.setComparator(col2, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            // Compare the type columns.
+            if (o1 != null) {
+                return o2 != null ? o1.getKind().name().compareTo(o2.getKind().name()) : 1;
+            }
+            return -1;
+        });
+        return typeSortHandler;
+    }
+
+    private ListHandler<GwtKeystoreEntry> getAliasSortHandler(TextColumn<GwtKeystoreEntry> col1) {
+        ListHandler<GwtKeystoreEntry> aliasSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        aliasSortHandler.setComparator(col1, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            // Compare the alias columns.
+            if (o1 != null) {
+                return o2 != null ? o1.getAlias().compareTo(o2.getAlias()) : 1;
+            }
+            return -1;
+        });
+        return aliasSortHandler;
     }
 
     private void initInterfaceButtons() {

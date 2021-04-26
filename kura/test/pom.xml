@@ -659,6 +659,11 @@
                                 </requirement>
                                 <requirement>
                                     <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.core.cloud.factory</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.comm</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
@@ -831,6 +836,7 @@
         <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration.test</module>
         <module>org.eclipse.kura.core.cloud.test</module>
+        <module>org.eclipse.kura.core.cloud.factory.test</module>
         <module>org.eclipse.kura.core.crypto.test</module>
         <module>org.eclipse.kura.core.db.test</module>
         <module>org.eclipse.kura.core.deployment.test</module>

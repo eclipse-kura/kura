@@ -198,6 +198,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.cloud.factory</artifactId>
+                                    <version>${org.eclipse.kura.core.cloud.factory.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.comm</artifactId>
                                     <version>${org.eclipse.kura.core.comm.version}</version>
                                 </artifactItem>
@@ -633,6 +638,8 @@
                                     tofile="target/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.cloud.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.cloud.factory.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.comm.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.configuration.jar"

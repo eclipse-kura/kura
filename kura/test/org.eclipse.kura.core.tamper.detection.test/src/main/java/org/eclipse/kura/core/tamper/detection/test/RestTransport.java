@@ -98,14 +98,19 @@ public class RestTransport implements Transport {
     private static void waitPortOpen(final String url, final int port, final long timeout, final TimeUnit timeoutUnit)
             throws InterruptedException {
         final long now = System.nanoTime();
+        int successCount = 0;
 
         while (System.nanoTime() - now < timeoutUnit.toNanos(timeout)) {
             try {
                 new Socket(url, port).close();
+                successCount++;
+                if (successCount == 10) {
+                    return;
+                }
                 logger.info("port open");
-                return;
             } catch (final Exception e) {
                 logger.warn("failed to connect");
+                successCount = 0;
             }
             Thread.sleep(1000);
         }

@@ -225,17 +225,4 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="org.eclipse.kura.core.keystore.HttpsKeystore">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.core.keystore.KeystoreServiceImpl</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>org.eclipse.kura.core.keystore.HttpsKeystore</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
 </esf:configurations>

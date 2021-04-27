@@ -20,12 +20,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Base64.Encoder;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +44,19 @@ public class RestTransport implements Transport {
         }
 
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
+            waitPortOpen("localhost", 8080, 3, TimeUnit.MINUTES);
 
-            configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService",
-                    Collections.singletonMap("http.ports", new Integer[] { 8080 }), false);
-            waitPortOpen("localhost", 8080, 30, TimeUnit.SECONDS);
+            ServiceUtil
+                    .trackService(ConfigurableComponent.class,
+                            Optional.of("(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"))
+                    .get(1, TimeUnit.MINUTES);
+
+            ServiceUtil
+                    .trackService("org.eclipse.kura.core.tamper.detection.TamperDetectionRestService", Optional.empty())
+                    .get(1, TimeUnit.MINUTES);
+
             Thread.sleep(5000);
+
             initialized = true;
         } catch (final Exception e) {
             throw new RuntimeException(e);
@@ -93,17 +98,24 @@ public class RestTransport implements Transport {
     private static void waitPortOpen(final String url, final int port, final long timeout, final TimeUnit timeoutUnit)
             throws InterruptedException {
         final long now = System.nanoTime();
+        int successCount = 0;
 
         while (System.nanoTime() - now < timeoutUnit.toNanos(timeout)) {
             try {
                 new Socket(url, port).close();
+                successCount++;
+                if (successCount == 10) {
+                    return;
+                }
                 logger.info("port open");
-                return;
             } catch (final Exception e) {
                 logger.warn("failed to connect");
+                successCount = 0;
             }
             Thread.sleep(1000);
         }
+
+        throw new IllegalStateException("Port " + port + "not open");
     }
 
     private interface ResponseCollector<T> {

@@ -27,27 +27,33 @@ public class ServiceUtil {
     private ServiceUtil() {
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> CompletableFuture<T> trackService(final Class<T> classz, final Optional<String> filter) {
+        return trackService(classz.getName(), filter).thenApply(c -> (T) c);
+    }
+
+    public static CompletableFuture<Object> trackService(final String serviceInterfaceName,
+            final Optional<String> filter) {
         try {
             final BundleContext bundleContext = FrameworkUtil.getBundle(ServiceUtil.class).getBundleContext();
 
-            final CompletableFuture<T> result = new CompletableFuture<>();
+            final CompletableFuture<Object> result = new CompletableFuture<>();
 
             final Filter osgiFilter;
 
             if (filter.isPresent()) {
                 osgiFilter = FrameworkUtil
-                        .createFilter("(&(objectClass=" + classz.getName() + ")" + filter.get() + ")");
+                        .createFilter("(&(objectClass=" + serviceInterfaceName + ")" + filter.get() + ")");
             } else {
-                osgiFilter = FrameworkUtil.createFilter("(objectClass=" + classz.getName() + ")");
+                osgiFilter = FrameworkUtil.createFilter("(objectClass=" + serviceInterfaceName + ")");
             }
 
-            final ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext, osgiFilter,
-                    new ServiceTrackerCustomizer<T, T>() {
+            final ServiceTracker<Object, Object> tracker = new ServiceTracker<>(bundleContext, osgiFilter,
+                    new ServiceTrackerCustomizer<Object, Object>() {
 
                         @Override
-                        public T addingService(final ServiceReference<T> ref) {
-                            final T obj = bundleContext.getService(ref);
+                        public Object addingService(final ServiceReference<Object> ref) {
+                            final Object obj = bundleContext.getService(ref);
 
                             result.complete(obj);
 
@@ -56,12 +62,12 @@ public class ServiceUtil {
                         }
 
                         @Override
-                        public void modifiedService(final ServiceReference<T> ref, final T comp) {
+                        public void modifiedService(final ServiceReference<Object> ref, final Object comp) {
                             // nothing to do
                         }
 
                         @Override
-                        public void removedService(final ServiceReference<T> ref, final T comp) {
+                        public void removedService(final ServiceReference<Object> ref, final Object comp) {
                             bundleContext.ungetService(ref);
                         }
                     });

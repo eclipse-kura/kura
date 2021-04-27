@@ -20,13 +20,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Base64.Encoder;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +44,6 @@ public class RestTransport implements Transport {
         }
 
         try {
-            final ConfigurationService configurationService = ServiceUtil
-                    .trackService(ConfigurationService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
-
-            configurationService.updateConfiguration("org.eclipse.kura.http.server.manager.HttpService",
-                    Collections.singletonMap("http.ports", new Integer[] { 8080 }), false);
             waitPortOpen("localhost", 8080, 3, TimeUnit.MINUTES);
 
             ServiceUtil

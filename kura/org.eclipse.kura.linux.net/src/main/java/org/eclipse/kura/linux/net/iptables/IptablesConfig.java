@@ -675,6 +675,10 @@ public class IptablesConfig extends IptablesConfigConstants {
         if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
             return;
         }
+        // Ignore flooding protection rules
+        if (line.contains("connlimit") || line.contains("tcp-flags") || line.contains("conntrack")) {
+            return;
+        }
         final String lineFinal = line;
         String match = Arrays.stream(ALLOW_ICMP).filter(s -> s.equals(lineFinal)).findFirst().orElse("");
         if (match != null && !match.isEmpty()) {

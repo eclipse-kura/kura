@@ -13,7 +13,7 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.http.server.manager.HttpService">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.http.server.manager.HttpService">
    <implementation class="org.eclipse.kura.http.server.manager.HttpService"/>
    <property name="service.pid" type="String" value="org.eclipse.kura.http.server.manager.HttpService"/>
    <service>
@@ -22,14 +22,13 @@
 
    <reference name="SystemService"
               bind="setSystemService"
-              unbind="unsetSystemService"
               cardinality="1..1"
               policy="static"
               interface="org.eclipse.kura.system.SystemService"/>
    <reference name="KeystoreService"
-           policy="dynamic"
+           policy="static"
+           policy-option="greedy"
            bind="setKeystoreService"
-           unbind="unsetKeystoreService"
            cardinality="0..1"
            interface="org.eclipse.kura.security.keystore.KeystoreService"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>

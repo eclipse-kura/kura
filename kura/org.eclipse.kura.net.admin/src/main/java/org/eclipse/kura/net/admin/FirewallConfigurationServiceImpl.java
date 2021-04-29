@@ -115,6 +115,7 @@ public class FirewallConfigurationServiceImpl
         }
 
         this.firewall = getLinuxFirewall();
+        setFloodingProtectionConfiguration();
 
         Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { FloodingProtectionConfigurationChangeEvent.FP_EVENT_CONFIG_CHANGE_TOPIC };

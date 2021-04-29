@@ -652,15 +652,16 @@ public class IptablesConfig extends IptablesConfigConstants {
 
     private void parseNatTable(String line, List<NatPreroutingChainRule> natPreroutingChain,
             List<NatPostroutingChainRule> natPostroutingChain) throws KuraException {
-        if (line.startsWith("-A prerouting-kura")) {
+        if (line.startsWith("-A prerouting-kura") && !line.startsWith("-A prerouting-kura -j prerouting-kura-")) {
             natPreroutingChain.add(new NatPreroutingChainRule(line));
-        } else if (line.startsWith("-A postrouting-kura")) {
+        } else if (line.startsWith("-A postrouting-kura")
+                && !line.startsWith("-A postrouting-kura -j postrouting-kura-")) {
             natPostroutingChain.add(new NatPostroutingChainRule(line));
         }
     }
 
     private void parseFilterTable(String line, List<FilterForwardChainRule> filterForwardChain) throws KuraException {
-        if (line.startsWith("-A forward-kura")) {
+        if (line.startsWith("-A forward-kura") && !line.startsWith("-A forward-kura -j forward-kura-")) {
             filterForwardChain.add(new FilterForwardChainRule(line));
         } else if (line.startsWith("-A input-kura")) {
             readInputChain(line);
@@ -672,6 +673,10 @@ public class IptablesConfig extends IptablesConfigConstants {
             return;
         }
         if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
+            return;
+        }
+        // Ignore flooding protection rules
+        if (line.contains("connlimit") || line.contains("tcp-flags") || line.contains("conntrack")) {
             return;
         }
         final String lineFinal = line;

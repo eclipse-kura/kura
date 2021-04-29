@@ -50,14 +50,14 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.keystore.KeystoreServiceImpl;
+import org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
-public class KeystoreServiceImplTest {
+public class FilesystemKeystoreServiceImplTest {
 
     private static final String DEFAULT_KEY_ALIAS = "alias";
     private static final String CERT_FILE_PATH = "target/test-classes/cert";
@@ -106,7 +106,7 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -125,7 +125,7 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -141,7 +141,7 @@ public class KeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -159,7 +159,7 @@ public class KeystoreServiceImplTest {
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -181,7 +181,7 @@ public class KeystoreServiceImplTest {
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -201,7 +201,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -218,7 +218,7 @@ public class KeystoreServiceImplTest {
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -240,7 +240,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -262,7 +262,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -283,7 +283,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -301,7 +301,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -319,7 +319,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -337,7 +337,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -355,7 +355,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -391,7 +391,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -409,7 +409,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -428,7 +428,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -446,7 +446,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -464,7 +464,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -482,7 +482,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -500,7 +500,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -518,7 +518,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -536,7 +536,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -558,7 +558,7 @@ public class KeystoreServiceImplTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl() {
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl() {
 
             @Override
             public KeyStore getKeyStore() throws KuraException {
@@ -590,7 +590,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -608,7 +608,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -631,7 +631,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -654,7 +654,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -683,7 +683,7 @@ public class KeystoreServiceImplTest {
         KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
         char[] password = "some password".toCharArray();
         ks.load(null, password);
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl() {
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl() {
 
             @Override
             public KeyStore getKeyStore() throws KuraException {
@@ -721,7 +721,7 @@ public class KeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeystoreServiceImpl keystoreService = new KeystoreServiceImpl();
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setCryptoService(cryptoService);
         keystoreService.setSystemService(systemService);
         keystoreService.activate(componentContext, properties);

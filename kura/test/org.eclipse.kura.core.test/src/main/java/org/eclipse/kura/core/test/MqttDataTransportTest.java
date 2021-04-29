@@ -53,7 +53,7 @@ public class MqttDataTransportTest {
     private static final String TEST_KEYSTORE_FILTER = "(kura.service.pid=testKeystore)";
     private static final String TEST_SSL_MANAGER_SERVICE_PID = "testSsl";
     private static final String TEST_KEYSTORE_PID = "testKeystore";
-    private static final String KEYSTORE_SERVICE_FACTORY_PID = "org.eclipse.kura.core.keystore.KeystoreServiceImpl";
+    private static final String KEYSTORE_SERVICE_FACTORY_PID = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl";
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static File brokerKeyStore;
     private static File brokerTrustStore;

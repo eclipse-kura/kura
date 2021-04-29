@@ -57,8 +57,8 @@ public class CertificatesManager implements CertificatesService {
     private static final String RESOURCE_CERTIFICATE_BUNDLE = "bundle";
     private static final String RESOURCE_CERTIFICATE_SSL = "ssl";
 
-    private static final String LOGIN_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.HttpsKeystore";
-    private static final String SSL_KEYSTORE_SERVICE_PID = "org.eclipse.kura.core.keystore.SSLKeystore";
+    private static final String LOGIN_KEYSTORE_SERVICE_PID = "HttpsKeystore";
+    private static final String SSL_KEYSTORE_SERVICE_PID = "SSLKeystore";
     private static final String DEFAULT_KEYSTORE_SERVICE_PID = "org.eclipse.kura.crypto.CryptoService";
 
     private CryptoService cryptoService;

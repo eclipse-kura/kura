@@ -709,8 +709,8 @@
             <esf:property name="ssl.hostname.verification" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property name="ssl.default.trustStore" array="false" encrypted="false" type="String">
-                <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
+            <esf:property array="false" encrypted="false" name="KeystoreService.target" type="String">
+                <esf:value>(kura.service.pid=SSLKeystore)</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
                 <esf:value>org.eclipse.kura.ssl.SslManagerService</esf:value>
@@ -728,17 +728,52 @@
             <esf:property array="true" encrypted="false" name="https.client.auth.ports" type="Integer">
                 <esf:value>4443</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="https.keystore.path" type="String">
-                <esf:value>/opt/eclipse/kura/user/security/httpskeystore.ks</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="true" name="https.keystore.password" type="Password">
-                <esf:value>Y2hhbmdlaXQ=</esf:value>
+            <esf:property array="false" encrypted="false" name="KeystoreService.target" type="String">
+                <esf:value>(kura.service.pid=HttpsKeystore)</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
                 <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="service.pid" type="String">
                 <esf:value>org.eclipse.kura.http.server.manager.HttpService</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="HttpsKeystore">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="keystore.path" type="String">
+                <esf:value>/opt/eclipse/kura/user/security/httpskeystore.ks</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="true" name="keystore.password" type="Password">
+                <esf:value>Y2hhbmdlaXQ=</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>HttpsKeystore</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="SSLKeystore">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="keystore.path" type="String">
+                <esf:value>/opt/eclipse/kura/user/security/cacerts.ks</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="true" name="keystore.password" type="Password">
+                <esf:value>Y2hhbmdlaXQ=</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="randomize.password" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>SSLKeystore</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

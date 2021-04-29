@@ -85,12 +85,12 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeystoreServiceImpl implements KeystoreService, ConfigurableComponent {
+public class FilesystemKeystoreServiceImpl implements KeystoreService, ConfigurableComponent {
 
     private static final String PEM_CERTIFICATE_REQUEST_TYPE = "CERTIFICATE REQUEST";
     private static final String KURA_HTTPS_KEY_STORE_PASSWORD_KEY = "kura.https.keyStorePassword";
 
-    private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilesystemKeystoreServiceImpl.class);
 
     private ComponentContext componentContext;
 

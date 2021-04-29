@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +24,7 @@ import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
+import org.eclipse.kura.web.shared.DateUtils;
 import org.eclipse.kura.web.shared.model.GwtKeystoreEntry;
 import org.eclipse.kura.web.shared.model.GwtKeystoreEntry.Kind;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
@@ -195,6 +199,26 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         };
         col3.setSortable(true);
         this.certificatesGrid.addColumn(col3, MSGS.certificateKeystoreName());
+        
+        TextColumn<GwtKeystoreEntry> col4 = new TextColumn<GwtKeystoreEntry>() {
+        	@Override
+        	public String getValue(GwtKeystoreEntry object) {
+        		Date date = object.getValidityStartDate();
+        		return date != null ? DateUtils.formatDateTime(date) : "";
+        	}
+        };
+        this.certificatesGrid.addColumn(col4, MSGS.certificateValidityStart());
+        col4.setSortable(true);
+        
+        TextColumn<GwtKeystoreEntry> col5 = new TextColumn<GwtKeystoreEntry>() {
+        	@Override
+        	public String getValue(GwtKeystoreEntry object) {
+        		Date date = object.getValidityEndDate();
+        		return date != null ? DateUtils.formatDateTime(date) : "";
+        	}
+        };
+        this.certificatesGrid.addColumn(col5, MSGS.certificateValidityEnd());
+        col5.setSortable(true);
 
         this.selectionModel.addSelectionChangeHandler(
                 e -> this.uninstall.setEnabled(this.selectionModel.getSelectedObject() != null));
@@ -203,6 +227,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certificatesGrid.addColumnSortHandler(getAliasSortHandler(col1));
         this.certificatesGrid.addColumnSortHandler(getTypeSortHandler(col2));
         this.certificatesGrid.addColumnSortHandler(getNameSortHandler(col3));
+        this.certificatesGrid.addColumnSortHandler(getStartDateSortHandler(col4));
+        this.certificatesGrid.addColumnSortHandler(getEndDateSortHandler(col5));
 
         this.certificatesDataProvider.addDataDisplay(this.certificatesGrid);
         this.certificatesGrid.setSelectionModel(this.selectionModel);
@@ -254,6 +280,66 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
             return -1;
         });
         return aliasSortHandler;
+    }
+    
+    private ListHandler<GwtKeystoreEntry> getStartDateSortHandler(TextColumn<GwtKeystoreEntry> col4) {
+        ListHandler<GwtKeystoreEntry> startDateSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        startDateSortHandler.setComparator(col4, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            if (o1 == null) {
+            	return -1;
+            }
+            if(o2 == null) {
+            	return 1;
+            }
+            
+            // Compare the validity from columns
+            Date d1 = o1.getValidityStartDate();
+            Date d2 = o2.getValidityStartDate();
+            
+            if(d1 == null) {
+            	return -1;
+            }
+            if(d2 == null) {
+            	return 1;
+            }
+            
+            return d1.compareTo(d2);
+        });
+        return startDateSortHandler;
+    }
+    
+    private ListHandler<GwtKeystoreEntry> getEndDateSortHandler(TextColumn<GwtKeystoreEntry> col5) {
+        ListHandler<GwtKeystoreEntry> endDateSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        endDateSortHandler.setComparator(col5, (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+
+            if (o1 == null) {
+            	return -1;
+            }
+            if(o2 == null) {
+            	return 1;
+            }
+            
+            // Compare the validity to columns
+            Date d1 = o1.getValidityEndDate();
+            Date d2 = o2.getValidityEndDate();
+            
+            if(d1 == null) {
+            	return -1;
+            }
+            if(d2 == null) {
+            	return 1;
+            }
+            
+            return d1.compareTo(d2);
+        });
+        return endDateSortHandler;
     }
 
     private void initInterfaceButtons() {

@@ -111,7 +111,7 @@ public class PppAuthSecrets {
 		} finally {
 			if (br != null) {
 				try {
-					fr.close();
+                    fr.close();
 					br.close();
 				} catch (IOException ex) {
 					s_logger.error("I/O Exception while closing BufferedReader!");

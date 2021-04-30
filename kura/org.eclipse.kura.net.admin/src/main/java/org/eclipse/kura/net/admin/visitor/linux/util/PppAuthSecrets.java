@@ -70,6 +70,7 @@ public class PppAuthSecrets {
         this.ipAddresses = new ArrayList<>();
 
         BufferedReader br = null;
+        FileReader fr = null;
         try {
             File secretsFile = new File(this.secretsFilename);
 
@@ -77,7 +78,8 @@ public class PppAuthSecrets {
                 String currentLine = null;
                 StringTokenizer st = null;
 
-                br = new BufferedReader(new FileReader(this.secretsFilename));
+                fr = new FileReader(this.secretsFilename);
+                br = new BufferedReader(fr);
 
                 while ((currentLine = br.readLine()) != null) {
                     currentLine = currentLine.trim();
@@ -109,6 +111,7 @@ public class PppAuthSecrets {
         } finally {
             if (br != null) {
                 try {
+                	fr.close();
                     br.close();
                 } catch (IOException ex) {
                     s_logger.error("I/O Exception while closing BufferedReader!");

@@ -12,10 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -201,6 +202,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certificatesGrid.addColumn(col3, MSGS.certificateKeystoreName());
         
         TextColumn<GwtKeystoreEntry> col4 = new TextColumn<GwtKeystoreEntry>() {
+        	
         	@Override
         	public String getValue(GwtKeystoreEntry object) {
         		Date date = object.getValidityStartDate();
@@ -211,6 +213,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         col4.setSortable(true);
         
         TextColumn<GwtKeystoreEntry> col5 = new TextColumn<GwtKeystoreEntry>() {
+        	
         	@Override
         	public String getValue(GwtKeystoreEntry object) {
         		Date date = object.getValidityEndDate();
@@ -234,111 +237,63 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certificatesGrid.setSelectionModel(this.selectionModel);
     }
 
+    private <U extends Comparable<U>> Comparator<GwtKeystoreEntry> getComparator(Function<GwtKeystoreEntry, U> comparableElementSupplier) {
+    	return new Comparator<GwtKeystoreEntry>() {
+
+			@Override
+			public int compare(GwtKeystoreEntry o1, GwtKeystoreEntry o2) {
+				if(o1 == o2)
+					return 0;
+				if(o1 == null)
+					return -1;
+				if(o2 == null)
+					return 1;
+				
+				U item1 = comparableElementSupplier.apply(o1);
+				U item2 = comparableElementSupplier.apply(o2);
+				
+				return item1.compareTo(item2);
+			}
+    	};
+    }
+    
     private ListHandler<GwtKeystoreEntry> getNameSortHandler(TextColumn<GwtKeystoreEntry> col3) {
         ListHandler<GwtKeystoreEntry> nameSortHandler = new ListHandler<>(certificatesDataProvider.getList());
-        nameSortHandler.setComparator(col3, (o1, o2) -> {
-            if (o1 == o2) {
-                return 0;
-            }
 
-            // Compare the name columns.
-            if (o1 != null) {
-                return o2 != null ? o1.getKeystoreName().compareTo(o2.getKeystoreName()) : 1;
-            }
-            return -1;
-        });
+        nameSortHandler.setComparator(col3, getComparator(GwtKeystoreEntry::getKeystoreName));
+        
         return nameSortHandler;
     }
 
     private ListHandler<GwtKeystoreEntry> getTypeSortHandler(TextColumn<GwtKeystoreEntry> col2) {
         ListHandler<GwtKeystoreEntry> typeSortHandler = new ListHandler<>(certificatesDataProvider.getList());
-        typeSortHandler.setComparator(col2, (o1, o2) -> {
-            if (o1 == o2) {
-                return 0;
-            }
 
-            // Compare the type columns.
-            if (o1 != null) {
-                return o2 != null ? o1.getKind().name().compareTo(o2.getKind().name()) : 1;
-            }
-            return -1;
-        });
+        typeSortHandler.setComparator(col2, getComparator(entry -> entry.getKind().name()));
+        
         return typeSortHandler;
     }
 
     private ListHandler<GwtKeystoreEntry> getAliasSortHandler(TextColumn<GwtKeystoreEntry> col1) {
         ListHandler<GwtKeystoreEntry> aliasSortHandler = new ListHandler<>(certificatesDataProvider.getList());
-        aliasSortHandler.setComparator(col1, (o1, o2) -> {
-            if (o1 == o2) {
-                return 0;
-            }
 
-            // Compare the alias columns.
-            if (o1 != null) {
-                return o2 != null ? o1.getAlias().compareTo(o2.getAlias()) : 1;
-            }
-            return -1;
-        });
+        aliasSortHandler.setComparator(col1, getComparator(GwtKeystoreEntry::getAlias));
+        
         return aliasSortHandler;
     }
     
     private ListHandler<GwtKeystoreEntry> getStartDateSortHandler(TextColumn<GwtKeystoreEntry> col4) {
         ListHandler<GwtKeystoreEntry> startDateSortHandler = new ListHandler<>(certificatesDataProvider.getList());
-        startDateSortHandler.setComparator(col4, (o1, o2) -> {
-            if (o1 == o2) {
-                return 0;
-            }
-
-            if (o1 == null) {
-            	return -1;
-            }
-            if(o2 == null) {
-            	return 1;
-            }
-            
-            // Compare the validity from columns
-            Date d1 = o1.getValidityStartDate();
-            Date d2 = o2.getValidityStartDate();
-            
-            if(d1 == null) {
-            	return -1;
-            }
-            if(d2 == null) {
-            	return 1;
-            }
-            
-            return d1.compareTo(d2);
-        });
+        
+        startDateSortHandler.setComparator(col4, getComparator(GwtKeystoreEntry::getValidityStartDate));
+ 
         return startDateSortHandler;
     }
     
     private ListHandler<GwtKeystoreEntry> getEndDateSortHandler(TextColumn<GwtKeystoreEntry> col5) {
         ListHandler<GwtKeystoreEntry> endDateSortHandler = new ListHandler<>(certificatesDataProvider.getList());
-        endDateSortHandler.setComparator(col5, (o1, o2) -> {
-            if (o1 == o2) {
-                return 0;
-            }
 
-            if (o1 == null) {
-            	return -1;
-            }
-            if(o2 == null) {
-            	return 1;
-            }
-            
-            // Compare the validity to columns
-            Date d1 = o1.getValidityEndDate();
-            Date d2 = o2.getValidityEndDate();
-            
-            if(d1 == null) {
-            	return -1;
-            }
-            if(d2 == null) {
-            	return 1;
-            }
-            
-            return d1.compareTo(d2);
-        });
+        endDateSortHandler.setComparator(col5, getComparator(GwtKeystoreEntry::getValidityEndDate));
+        
         return endDateSortHandler;
     }
 

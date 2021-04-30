@@ -150,11 +150,10 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         
                         PrivateKeyEntry pke = (PrivateKeyEntry) e.getValue();
                         Certificate[] chain = pke.getCertificateChain();
-                        // retrieving the leaf of the chain
+                        
                         if(chain.length > 0) {
                         	Certificate leaf = chain[chain.length - 1];
                         	
-                        	// downcast to X509 certificate for retrieving validity dates
                         	if(leaf instanceof X509Certificate) {
                         		validityStartDate = ((X509Certificate) leaf).getNotBefore();
                         		validityEndDate = ((X509Certificate) leaf).getNotAfter();
@@ -163,9 +162,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                     } else if (e.getValue() instanceof TrustedCertificateEntry) {
                         kind = Kind.TRUSTED_CERT;
 
-                        // downcast series to X509 certificate for retrieving validity dates
-                        TrustedCertificateEntry tce = (TrustedCertificateEntry) e.getValue();
-                        Certificate cert = tce.getTrustedCertificate();
+                        Certificate cert = ((TrustedCertificateEntry) e.getValue()).getTrustedCertificate();
                         
                         if(cert instanceof X509Certificate) {
                         	validityStartDate = ((X509Certificate) cert).getNotBefore();

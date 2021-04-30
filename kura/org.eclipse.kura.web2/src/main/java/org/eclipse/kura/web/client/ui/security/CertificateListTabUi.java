@@ -252,6 +252,13 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 				U item1 = comparableElementSupplier.apply(o1);
 				U item2 = comparableElementSupplier.apply(o2);
 				
+				if(item1 == item2)
+					return 0;
+				if(item1 == null)
+					return -1;
+				if(item2 == null)
+					return 1;
+				
 				return item1.compareTo(item2);
 			}
     	};

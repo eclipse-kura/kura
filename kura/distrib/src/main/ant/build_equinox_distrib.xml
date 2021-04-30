@@ -182,10 +182,10 @@
 
 		<!-- Threat Management bundles config -->
 		<antcall target="threat-management-config" />
-		
+
 		<!-- Keystore Management bundles config -->
 		<antcall target="keystore-management-config" />
-		
+
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
 			target -->
 		<available
@@ -635,6 +635,9 @@ fi]]>
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
@@ -721,7 +724,7 @@ fi]]>
 		<antcall target="misc-jar" />
 
 		<antcall target="threat-management-jar" />
-		
+
 		<antcall target="keystore-management-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
@@ -978,6 +981,8 @@ fi]]>
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 
@@ -1757,7 +1762,7 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
-	
+
 	<target name="keystore-management-config">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">

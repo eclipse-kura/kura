@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -52,7 +52,7 @@ public class DateUtils {
         // return something like "Tomorrow 10:30 am"
         else if (dDayDiff >= 1) {
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
-            date = "Tomorrow" + dtf.format(d);
+            date = "Tomorrow " + dtf.format(d);
         }
 
         // if the modification time is still today, or it is midnight
@@ -60,7 +60,7 @@ public class DateUtils {
         // return something like "Today 10:30 am"
         else if (dDayDiff >= 0) {
             DateTimeFormat dtf = DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.TIME_MEDIUM);
-            date = "Today" + dtf.format(d);
+            date = "Today " + dtf.format(d);
         }
 
         // if the modification time is yesterday,

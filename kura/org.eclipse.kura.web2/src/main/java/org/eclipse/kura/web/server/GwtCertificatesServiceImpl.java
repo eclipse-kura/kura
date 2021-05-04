@@ -20,8 +20,11 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -138,18 +141,40 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 for (final Map.Entry<String, Entry> e : service.getEntries().entrySet()) {
 
                     final Kind kind;
+                    
+                    Date validityStartDate = null;
+                    Date validityEndDate = null;
 
                     if (e.getValue() instanceof PrivateKeyEntry) {
                         kind = Kind.KEY_PAIR;
+                        
+                        PrivateKeyEntry pke = (PrivateKeyEntry) e.getValue();
+                        Certificate[] chain = pke.getCertificateChain();
+                        
+                        if(chain.length > 0) {
+                        	Certificate leaf = chain[chain.length - 1];
+                        	
+                        	if(leaf instanceof X509Certificate) {
+                        		validityStartDate = ((X509Certificate) leaf).getNotBefore();
+                        		validityEndDate = ((X509Certificate) leaf).getNotAfter();
+                        	}
+                        }
                     } else if (e.getValue() instanceof TrustedCertificateEntry) {
                         kind = Kind.TRUSTED_CERT;
+
+                        Certificate cert = ((TrustedCertificateEntry) e.getValue()).getTrustedCertificate();
+                        
+                        if(cert instanceof X509Certificate) {
+                        	validityStartDate = ((X509Certificate) cert).getNotBefore();
+                            validityEndDate = ((X509Certificate) cert).getNotAfter();
+                        }
                     } else if (e.getValue() instanceof SecretKeyEntry) {
                         kind = Kind.SECRET_KEY;
                     } else {
                         continue;
                     }
 
-                    result.add(new GwtKeystoreEntry(e.getKey(), (String) kuraServicePid, kind));
+                    result.add(new GwtKeystoreEntry(e.getKey(), (String) kuraServicePid, kind, validityStartDate, validityEndDate));
                 }
             } finally {
                 context.ungetService(ref);

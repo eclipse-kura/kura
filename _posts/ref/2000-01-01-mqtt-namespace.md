@@ -1249,3 +1249,274 @@ The bundle JSON message is comprised of the following bundle elements:
 * Version
 
 * Type
+
+### Remote Certificates and Keys Management via MQTT 
+
+The **org.eclipse.kura.core.keystore** bundle allows the user to remotely manage keystores and their content.
+The request handler allows the remote management platform to get a list of all the KeystoreService instances and corresponding keys managed by the framework in a given device.
+The request handler allows, also, to install new trusted certificate and to generate new key pairs directly in the device. Finally, the remote platform can request, from a defined key pair, the generation of a CSR that can be countersigned remotely by a trusted CA.
+
+#### KEYS-V1
+
+The “KEYS-V1” application supports *read*, *post* and *delete* resource operations as described in the following sections.
+
+##### Read All the KestoreServices
+
+This operation returns the list of all the KeystoreServices instantiated in the framework.
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/GET/keystores**
+* Request Payload:
+    * Nothing application-specific beyond the request ID and requester client ID
+* Response Payload:
+    * List of all the managed KeystoreService instances with number of entries stored
+
+The following JSON message is an example of an output provided:
+
+```json
+[
+    {
+        "id": "org.eclipse.kura.core.keystore.SSLKeystore",
+        "type": "jks",
+        "size": 4
+    },
+    {
+        "id": "org.eclipse.kura.crypto.CryptoService",
+        "type": "jks",
+        "size": 3
+    },
+    {
+        "id": "org.eclipse.kura.core.keystore.HttpsKeystore",
+        "type": "jks",
+        "size": 1
+    },
+    {
+        "id": "org.eclipse.kura.core.keystore.DMKeystore",
+        "type": "jks",
+        "size": 1
+    }
+]
+```
+
+Each entry of the array is specified by the following values:
+
+* **id**: the KeystoreService PID
+* **type**: the type of keystore managed by the given instance
+* **size**: the number of entries in a given KeystoreService instance
+
+##### Read Key Entries
+
+This operation returns the list of all the key entries managed by the framework. If a request payload is specified, the list of entries is filtered based on the parameters in the request
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/GET/keystores/entries**
+* Request Payload:
+    * Nothing application-specific beyond the request ID and requester client ID. In this case the response will contain all the entries in all the managed keystoreService instances.
+    * A JSON object with one of the following:
+
+```json
+{
+  "keystoreServicePid": "org.eclipse.kura.core.keystore.SSLKeystore"
+}
+```
+```json
+{
+  "alias": "ca-godaddyclass2ca"
+}
+```
+
+* Response Payload:
+    * List of all the key entries managed by the framework eventually filtered based on the parameters in the request.
+
+The following JSON message is an example of an output provided in the response body:
+
+```json
+[
+    {
+        "subjectDN": "OU=Go Daddy Class 2 Certification Authority, O=\"The Go Daddy Group, Inc.\", C=US",
+        "issuer": "OU=Go Daddy Class 2 Certification Authority,O=The Go Daddy Group\\, Inc.,C=US",
+        "startDate": "Tue, 29 Jun 2004 17:06:20 GMT",
+        "expirationDate": "Thu, 29 Jun 2034 17:06:20 GMT",
+        "algorithm": "SHA1withRSA",
+        "size": 2048,
+        "keystoreServicePid": "org.eclipse.kura.core.keystore.SSLKeystore",
+        "alias": "ca-godaddyclass2ca",
+        "type": "TRUSTED_CERTIFICATE"
+    },
+    {
+        "algorithm": "RSA",
+        "size": 4096,
+        "keystoreServicePid": "org.eclipse.kura.core.keystore.HttpsKeystore",
+        "alias": "localhost",
+        "type": "PRIVATE_KEY"
+    }
+]
+```
+
+##### Read Key Details
+
+This operation returns the details associated to a specified key in a keystore
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/GET/keystores/entries/entry**
+* Request Payload:
+    * A JSON with the *keystoreServicePid* and the *alias* of the desired key
+
+```json
+{
+  "keystoreServicePid": "org.eclipse.kura.core.keystore.HttpsKeystore"
+  "alias": "localhost"
+}
+```
+
+* Response Payload:
+    * List of all the details associated to a key managed by the framework
+
+The following JSON message is an example of an output provided:
+
+```json
+{
+    "algorithm": "RSA",
+    "size": 4096,
+    "certificateChain": [
+        "-----BEGIN CERTIFICATE-----\nMIIFkTCCA3mgAwIBAgIECtXoiDANBgkqhkiG9w0BAQsFADBZMQswCQYDVQQGEwJJ\nVDELMAkGA1UECBMCVUQxDjAMBgNVBAcTBUFtYXJvMREwDwYDVQQKEwhFdXJvdGVj\naDEMMAoGA1UECxMDRVNGMQwwCgYDVQQDEwNFU0YwHhcNMjEwNDIyMTUxNTU1WhcN\nMjQwMTE3MTUxNTU1WjBZMQswCQYDVQQGEwJJVDELMAkGA1UECBMCVUQxDjAMBgNV\nBAcTBUFtYXJvMREwDwYDVQQKEwhFdXJvdGVjaDEMMAoGA1UECxMDRVNGMQwwCgYD\nVQQDEwNFU0YwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC7iZ3fHUQa\nTPgnvSxGZK4f6MZYfLclD74yqaCCWAztNxPQoiBoSPGdsBGBLNeFbwY0Yzg3qwXw\nYvgzLJmoXV9rSix7LgXPzsSYfUGfu7PeYTy5bG9X2UVyw9LloUM5DKnw++5F7Xy7\nF0KQQi0z6/HbbPkZ2aGyNRtMCTh1iAGy3gDh/mMnjpUYuoq1luoX1x6I77X0C+NP\nTxldVYrTeQiswItAHZmkK1R8AYedbFBgjDuTrfRODxBwESn4kQSMLJ8yHYDRm8S6\ngVz5LdkcM48UiV5hhF+bCD3UvYA00ZgZm2oOG1ONchYrE7pJr7eQVCYaXkS1lALB\nKaVJzn03wiLJJv1FYLmGt5J/MwfqyCtBTLlieEVfwnxFCkymtews6SYK32e9q/uJ\nfcdpWH7tOoarnAf7j5mE84rRU3HqzghK0bMxntfrSH3t18ZUt1/4Qx78WfiM1Te3\nJtnWBqUNJtX6lgT8IxTWwyEqD183tyKIo8hPGyeJrzWA5RL5hYF5rCNTWzqz5Upi\n0b/YI5K09+Rn8XmEzzaWjFq5zu6/WpqwPRA8kc2RAEA2scnOT+3yl9Lof/M7BrfL\nMdjVOZ4MfXgl/fhFyd16AObXuZRUIeiWowKtEiNaiUn8paLDxG+LNV7p5wEQCZZI\n+MsXMMp6G8Te4yILLCcGov7OkO2wx4GPWQIDAQABo2EwXzAxBgNVHSUEKjAoBggr\nBgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUFBwMDBggrBgEFBQcDCDALBgNVHQ8EBAMC\nAvwwHQYDVR0OBBYEFKM5PlHoe8qFC6w0quGacazGWE/LMA0GCSqGSIb3DQEBCwUA\nA4ICAQBvpXmbS9LN8n0A+uq+tM3CNtF3YotWRbQHIGJAFTvdq3003W3CVdmykFc8\n9Kz8PoY1swBJms7GKjQLkqgTHoq6jU/cIXw+CoLQWmvAugva5C1u/5AHJZqTC06J\nGZyn1Z9N5Lp0XcgogEyhxdbkHniv7jvcmbCurQijZc9nsd5St7e1pT0Co7KKI6Ff\nODdVP6kZYBzKo4t20tATdAZJ8t7YHNKNq7ZVs1ej9oYUmmQieNXuE4UoHe5hzVQw\n567cNHWcTHJoyPve03TSQV91wp5rRUKZm2p0WtFNuv22f5p5sQmttsJltzHCgTwE\nK0j6qYKnXiq+EQs0A3uF9uiIB/KEDLjxscstqsQGFCFOmjA3GSbmJiKCnss3HkNn\naknT7XCV6tqgDOfPnNzbWJODjYZ+V0DyNY5uqkG2cyREm/qGbH1kLEXhqdWbKqEs\nsdW6x8p0ImTaPuRl3XEmXbolavIq+FTtOSz8vW1PsdD3quO6krrwiQMXKv1ZMjup\nDGIZZ4hUUhN84efjlZyoFRvPRvZ8YvjjrHXLij0vcRxndlicevwl5ezlm0LBOpsT\nkI2uWrbSbxlue/XdgwFCbN0+mXX88fGj6cjhpvd/xnwHaDHfSG9UoU149LJb6ZIZ\nru+07QriQQxK8V7AdPr6bhmKPxbbFenvSQmsmgjAY93qtanbNg==\n-----END CERTIFICATE-----"
+    ],
+    "keystoreServicePid": "org.eclipse.kura.core.keystore.HttpsKeystore",
+    "alias": "localhost",
+    "type": "PRIVATE_KEY"
+}
+```
+
+##### Create CSR
+
+This operation returns the CSR for a specific key pair managed by the framework
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/POST/keystores/entries/csr**
+* Request Payload:
+    * A JSON with the all the details necessary to generate the CSR
+
+```json
+{ 
+    "keystoreServicePid":"org.eclipse.kura.core.keystore.HttpsKeystore",
+    "alias":"localhost",
+    "signatureAlgorithm" : "SHA256withRSA",
+    "attributes" : "CN=Kura, OU=IoT, O=Eclipse, C=US"
+}
+```
+
+* Response Payload:
+    * The generated CSR in the body of the message
+
+```
+-----BEGIN CERTIFICATE REQUEST-----
+MIIEgTCCAmkCAQAwPDELMAkGA1UEBhMCVVMxEDAOBgNVBAoTB0VjbGlwc2UxDDAK
+BgNVBAsTA0lvVDENMAsGA1UEAxMES3VyYTCCAiIwDQYJKoZIhvcNAQEBBQADggIP
+ADCCAgoCggIBAICTNbBm2wIV/TvddB3OW2s2WJmhAOBxwDSdpxGpgWDzmFAydCt5
+SfWCIeC0kmQfrJpcvcIB7IoE2I7HWtIOxV9c+E+n6R76NvdBQzB8enFfZu4ahIKy
+ul2VXQSj0VtYLZvG3yx6af4j8UFWsf2AuAe5Fd1dSBq9aEoRU/D5/uNQOQJi45Hk
+ds1KK0FcTkfPjugUCLf1Uf0xXnK1V7yZGrgDpPDbZAYCrcsGomdziO8zkE88gKaa
+oC1madGL44yz5tiHTKvbf+O+fKc31N4iDvnIg8f87IMF0D4afDF+3AJjVfcFtp3Q
+xWP3zpKqzPzpzWagTzsW446YMxamZgkDxLsVLitQtesom4ON3HT8s+jxHQhCO5LR
+83Ge10+6viJtkp20GYCqANO85c3TaD9njOE0y8P/T7Nk8MwnBbVgwa15QEWRqjEd
+HB6dF5jKdxlfZhPe2AVnLWAd/W96tCIBSqYu6TTH8npprp/S4t10tRkpaLGa+24c
+VlsjR6AFUX4KksvE/mbXd9QsvKgw/h3g4Jly4W/Ourt1LAH19tzGwULNCS7Ft9rp
+IXUsbmUUwb0V3B3ptcJUDzPUw8LdbItPnXzaPegxmkHO8IllcrdRBXrpcTwJl1ug
+MTMWKW/UjUwKcNQ0mGIxQ18aS0mHk8x8bVTnYLcCnGq3NeiFWvOiJIJpAgMBAAGg
+ADANBgkqhkiG9w0BAQsFAAOCAgEATsHVZAEjkMSpwozWbVvDw4iJOSYaQ7ZJXhGZ
+n81puMy/kcdNVD2hfG2c4ern8KPib6hYd1mbQpyNtsbJ68VOPIYOdiaqFd7+lbtM
+IVNETBA9ezXzzXwPCtiJYpmeDYz6HfIzRRzuoJhZtOrgyw8v5wiM0NkenDbTQs4l
+Od/YPFlHnEDkTNM+B/ZJJxRIg3sPhAAgj5HH0Mj2053z66hLDYAo4Tos98MwUcuA
+dY1pcs3brxg6z7xz4vbNKyj0Lh8Gua92OSbl1AFZYb6KXm/7+Md0la/YD+K/E2n6
+hUAcHkr3ayNuTI6lkQFptCHzb4Zr8rdbu63JRno9PFTnW+fa/0xi35DoHD2SAhwA
+CUGXTR+HQXkzB/9NE9X0TxS8SwyrE8sfw4usZm25tACdZ33xziqJXOmbChETyL2b
+J1IcbsHaeN2Shjnj7UQj+hQFnjVwRLTd0zWMN/l7mPj6TiW9ehubE8ce5siHW7NO
+mqJU1bklxTefefSNHTXrvTInuDXT81gLBRE3x+6uqU2kkJnL8jkrkebDDBhYF+qO
+6dB4W5WGbEHxorX2qfjImvy2Ohsl3rL/DqJgqECZaubTz1Xcj/kl9bdxs0pfa6IY
+Inre5iom9bGcA6W6U34jRsrE2pobi6c9Yimrbr/R2O/8Oy2k94FQta8tg8jbAxBi
+Z0Vd1nM=
+-----END CERTIFICATE REQUEST-----
+```
+
+##### Store Trusted Certificate
+
+This operation stores the provided certificate as a Trusted Certificate Entry managed by the framework
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/POST/keystores/entries/certificate**
+* Request Payload:
+    * A JSON with the all the details necessary to generate create the new entry
+
+```json
+{
+    "keystoreServicePid":"MyKeystore",
+    "alias":"myCertTest99",
+    "certificate":"-----BEGIN CERTIFICATE-----
+        MIIDdzCCAl+gAwIBAgIEQsO0gDANBgkqhkiG9w0BAQsFADBsMRAwDgYDVQQGEwdV
+        bmtub3duMRAwDgYDVQQIEwdVbmtub3duMRAwDgYDVQQHEwdVbmtub3duMRAwDgYD
+        VQQKEwdVbmtub3duMRAwDgYDVQQLEwdVbmtub3duMRAwDgYDVQQDEwdVbmtub3du
+        MB4XDTIxMDQxNDA4MDIyOFoXDTIxMDcxMzA4MDIyOFowbDEQMA4GA1UEBhMHVW5r
+        bm93bjEQMA4GA1UECBMHVW5rbm93bjEQMA4GA1UEBxMHVW5rbm93bjEQMA4GA1UE
+        ChMHVW5rbm93bjEQMA4GA1UECxMHVW5rbm93bjEQMA4GA1UEAxMHVW5rbm93bjCC
+        ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJSWJDxu8UNC4JGOgK31WCvz
+        NKy2ONH+jTVKnBY7Ckb1hljJY0sKO55aG1HNDfkev2lJTsPIz0nJjNsqBvB1flvf
+        r6XVCxdN0yxvU5g9SpRxE/iiPX0Qt7463OfzyKW97haJrrhF005RHYNcORMY/Phj
+        hFDnZhtAwpbQLzq2UuIZ7okJsx0IgRbjH71ZZuvYCqG7Ct/bp1D7w3tT7gTbIKYH
+        ppQyG9rJDEh9+cr9Hyk8Gz7aAbPT/wMH+/vXDjH2j/M1Tmed0ajuGCJumaTQ4eHs
+        9xW3B3ugycb6e7Osl/4ESRO5RQL1k2GBONv10OrKDoZ5b66xwSJmC/w3BRWQ1cMC
+        AwEAAaMhMB8wHQYDVR0OBBYEFPospETb5HNeD/DmS9mwt+v/AYq/MA0GCSqGSIb3
+        DQEBCwUAA4IBAQBxMe1xQVQKt36A5qVlEZyxI9eb6eQRlYzorOgP2tFaOsvDPpRI
+        CALhPmxgQl/5QvKFfCXKoxWj1Spg4sF6fJp6jhSjLpmChS9lf5fRaWS20/pxIddM
+        10diq3r6HxLKSxCYK7Pf5scOeZquvwfo8Kxye01bvCMFf1s1K3ZEZszk5Oo2MnWU
+        U22YnXfZm1C0h2WMUcou35A7CeVAHPWI0Rvefojv1qYlQScJOkCN5lO6C/1qvRhq
+        nDQdQN/m1HQbpfh2DD6F33nBjkyLQyMRF8uMnspLrLLj8lecSTJZO4fGJOaIXh3O
+        44da9A02FAf5nRRQpwP2x/4IZ5RTRBzrqbqD
+        -----END CERTIFICATE-----"
+}
+```
+
+* Response Payload:
+    * Nothing
+
+##### Generate KeyPair
+
+This operation will generate a new key pair directly in the device, based on the parameters received from the request
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/POST/keystores/entries/keypair**
+* Request Payload:
+    * A JSON with the all the details necessary to create the new key pair
+
+```json
+{
+    "keystoreServicePid":"MyKeystore",
+    "alias":"keypair1",
+    "algorithm" : "RSA",
+    "size": 1024,
+    "signatureAlgorithm" : "SHA256WithRSA",
+    "attributes" : "CN=Kura, OU=IoT, O=Eclipse, C=US"
+}
+```
+
+* Response Payload:
+    * Nothing
+
+##### Delete Entry
+
+This operation will delete the specified entry from the framework managed keystores
+
+* Request Topic:
+    * **$EDC/account_name/client_id/KEYS-V1/DEL/keystores/entries**
+* Request Payload:
+    * A JSON with the all the details necessary to identify the entry to be deleted
+
+```json
+{
+    "keystoreServicePid" : "MyKeystore",
+    "alias" : "mycerttestec"
+}
+```
+
+* Response Payload:
+    * Nothing
+

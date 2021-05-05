@@ -6,7 +6,7 @@ categories: [dev]
 
 [Overview](#overview)
 
-[TinyB - BLE GATT API](#tinyb---ble-gatt-api)
+[Bluez-Dbus - BLE GATT API](#bluez-dbus---ble-gatt-api)
 
 [APIs description](#apis-description)
 
@@ -21,14 +21,9 @@ Starting from version 3.1.0, Eclipse Kura implements a new set of APIs for manag
 The purpose of the new BLE APIs is to simplify the development of applications that interact with Bluetooth LE devices, offering clear and easy-to-use methods, and add new features to correctly manage the connection with remote devices.
 Moreover, the APIs organize the methods in a logical way to access all levels of a GATT client, from GATT services to GATT characteristics and descriptors, using UUIDs to identify the correct resource.
 
-## TinyB - BLE GATT API
+## Bluez-Dbus - BLE GATT API
 
-The implementation of the new Kura BLE APIs is based on the <a href="https://github.com/intel-iot-devkit/tinyb" about="_blank">TinyB</a> library that provides a clean, modern and easy to use Bluetooth LE API based on BlueZ over DBus. The library eases the access to GATT services and the management of BLE connections and discovery. More information about the project can be found <a href="https://github.com/intel-iot-devkit/tinyb" about="_blank">here</a> while <a href="http://iotdk.intel.com/docs/master/tinyb/java/" about="_blank">here</a> is the Java APIs description.
-
-Eclipse Kura provides the TinyB library for the following hardware architectures:
-
-* ARMv6 HardFloat
-* x86 64 bit
+The implementation of the new Kura BLE APIs is based on the <a href="https://github.com/hypfvieh/bluez-dbus" about="_blank">Bluez-Dbus</a> library that provides an easy to use Bluetooth LE API based on BlueZ over DBus. The library eases the access to GATT services and the management of BLE connections and discovery, without using any wrapper library as it is based on a newer version of dbus-java which uses jnr-unixsocket.
 
 ## APIs description
 

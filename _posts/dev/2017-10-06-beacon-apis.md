@@ -164,6 +164,8 @@ scanner.removeBeaconListener(listener);
 this.bluetoothLeIBeaconService.deleteBeaconScanner(scanner);
 ```
 
+{% include alerts.html message='The **kura.legacy.bluetooth.beacon.scan property** in the **kura.properties** file defines how the scan for beacons is performed. If set to **true**, the deprecated **hcitool** command is used. This guarantees that all the advertisement packets are reported. If set to **false**, the library will communicate to the OS using dbus. In the latter case, the rate of reports is limited and not all the advertisement packets are reported.' %}
+
 ## How to use Kura Eddystone&trade; APIs
 
 Eddystone&trade; is a protocol specification that defines a BLE message format for proximity beacon messages. It describes several different frame types that may be used individually or in combinations to create beacons that can be used for a variety of applications. For more information please see <a href="https://developers.google.com/beacons/" about="_blank">here</a> and <a href="https://github.com/google/eddystone" about="_blank">here</a>.
@@ -323,6 +325,8 @@ if (scanner.isScanning()) {
 scanner.removeBeaconListener(listener);
 this.bluetoothLeEddystoneService.deleteBeaconScanner(scanner);
 ```
+
+{% include alerts.html message='The **kura.legacy.bluetooth.beacon.scan property** in the **kura.properties** file defines how the scan for beacons is performed. If set to **true**, the deprecated **hcitool** command is used. This guarantees that all the advertisement packets are reported. If set to **false**, the library will communicate to the OS using dbus. In the latter case, the rate of reports is limited and not all the advertisement packets are reported.' %}
 
 ## Add new Beacon APIs implementation
 

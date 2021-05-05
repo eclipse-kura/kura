@@ -22,7 +22,26 @@ This section describes the changes applied by Kura at the Linux networking confi
 
 {% include alerts.html message='Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.' %}
 
-When a new firewall configuration is submitted, the iptables command is executed accordingly the desired configuration and the rules are saved into the /etc/sysconfig/iptables file.
+When a new firewall configuration is submitted, Kura immediately applies it using the iptables service provided by the OS. Moreover, the rules are stored in the filesystem, so that the **firewall** service in the OS will re-apply them at the system startup.
+
+In order to allow a better coexistence between Kura and external applications that need to modify firewall rules, Kura writes its rules to a set of custom iptables chains. They are *input-kura*, *output-kura*, *forward-kura*, *forward-kura-pf* and *forward-kura-ipf* for the filter table and *input-kura*, *output-kura*, *prerouting-kura*, *prerouting-kura-pf*, *postrouting-kura*, *postrouting-kura-pf* and *postrouting-kura-ipf* for the nat table. The custom chains are then put in their respective standard iptables chains, as shown in the following:
+
+```
+iptables -t filter -I INPUT -j input-kura
+iptables -t filter -I OUTPUT -j output-kura
+iptables -t filter -I FORWARD -j forward-kura
+iptables -t filter -I forward-kura -j forward-kura-pf
+iptables -t filter -I forward-kura -j forward-kura-ipf
+iptables -t nat -I PREROUTING -j prerouting-kura
+iptables -t nat -I prerouting-kura -j prerouting-kura-pf
+iptables -t nat -I INPUT -j input-kura
+iptables -t nat -I OUTPUT -j output-kura
+iptables -t nat -I POSTROUTING -j postrouting-kura
+iptables -t nat -I postrouting-kura -j postrouting-kura-pf
+iptables -t nat -I postrouting-kura -j postrouting-kura-ipf
+```
+
+Even if many firewall rules can be handled by Kura, it could be that some rules cannot be filled through the Web Console. In this case, custom firewall rules may be added to the /etc/init.d/firewall_cust script manually. These rules are applied/reapplied every time the firewall service starts, that is at the gateway startup. These custom rules should not be applied to the Kura custom chains, but to the standard ones.
 
 ## Open Ports
 
@@ -47,6 +66,8 @@ The **New Open Port Entry** form contains the following configuration parameters
 - **Source Port Range** - only allows packets with source port in the defined range (<high>:<low>).
 
 Complete the **New Open Port Entry** form and click the **Submit** button when finished. Once the form is submitted, a new port entry will appear. Click the **Apply** button for the change to take effect.
+
+The firewall rules related to the open ports section are stored in the *input-kura* custom chain of the filter table.
 
 ![]({{ site.baseurl }}/assets/images/config/NetFirewall.png)
 
@@ -79,6 +100,8 @@ The **Port Forward Entry** form contains the following configuration parameters:
 - **Source Port Range** - only forwards if the packet's source port is within the defined range.
 
 Complete the **Port Forward Entry** form and click the **Apply** button for the desired port forwarding rules to take effect.
+
+The firewall rules related to the port forwarding section are stored in the *forward-kura-pf* custom chain of the filter table and in the *postrouting-kura-pf* and *prerouting-kura-pf* chains of the nat table.
 
 ### Port Forwarding example
 
@@ -120,13 +143,13 @@ The following port forwarding entries are added to the second RaspberryPi config
 
 The _Permitted Network_, _Permitted MAC Address_, and _Source Port Range_ fields are left blank.
 
-The following iptables rules are added to the /etc/sysconfig/iptables file:
+The following iptables rules are applied and added to the /etc/sysconfig/iptables file:
 
 ```
--A FORWARD -d 172.16.0.5/32 -i wlan0 -o eth0 -p tcp -m tcp -j ACCEPT
--A FORWARD -s 172.16.0.5/32 -i eth0 -o wlan0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT
--A PREROUTING -i wlan0 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 172.16.0.5:80
--A POSTROUTING -d 172.16.0.5/32 -o eth0 -p tcp -j MASQUERADE
+iptables -t nat -A prerouting-kura-pf -i wlan0 -p tcp -s 0.0.0.0/0 --dport 8080 -j DNAT --to 172.16.0.5:80
+iptables -t nat -A postrouting-kura-pf -o eth0 -p tcp -d 172.16.0.5 -j MASQUERADE
+iptables -A forward-kura-pf -i wlan0 -o eth0 -p tcp -s 0.0.0.0/0 --dport 80 -d 172.16.0.5 -j ACCEPT
+iptables -A forward-kura-pf -i eth0 -o wlan0 -p tcp -s 172.16.0.5 -m state --state RELATED,ESTABLISHED -j ACCEPT
 ```
 
 The following iptables commands may be used to verify that the new rules have been applied:
@@ -138,29 +161,7 @@ sudo iptables -v -n -L -t nat
 
 At this point, it is possible to try to connect to  http://10.200.12.6 and to http://10.200.12.6:8080 from the laptop. Note that when a connection is made to the device on port 80, it is to the Kura configuration page on the device itself (the second RaspberryPi). When the gateway is connected on port 8080, you are forwarded to the Kura Gateway Administration Console on the first RaspberryPi. The destination host can only be reached by connecting to the gateway on port 8080.
 
-Another way to connect to the Kura Gateway Administration Console on the first RaspberryPi would be to add an IP Forwarding/Masquerading entry as described in the next section. In this case, the following additional iptables rules need to be added to the system:
-
-```
-#custom port forward service rules
-sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp -s 0.0.0.0/0 --dport 8080 -j DNAT --to-destination 172.16.0.5:80
-sudo iptables -A FORWARD -i wlan0 -o eth0 -p tcp -s 0.0.0.0/0 --dport 80 -d 172.16.0.5 -j ACCEPT
-sudo iptables -A FORWARD -i eth0 -o wlan0 -p tcp -s 172.16.0.5 -m state --state RELATED,ESTABLISHED -j ACCEPT
-
-#custom automatic NAT service rules (if NAT option is enabled for LAN interface)
-
-#custom NAT service rules
-sudo iptables -t nat -A POSTROUTING -p tcp -s 0.0.0.0/0 -d 172.16.0.5/32 -o eth0 -j MASQUERADE
-sudo iptables -A FORWARD -p tcp -s 172.16.0.5/32 -d 0.0.0.0/0 -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
-sudo iptables -A FORWARD -p tcp -s 0.0.0.0/0 -d 172.16.0.5/32 -i wlan0 -o eth0 -j ACCEPT
-```
-
-This solution is less desirable for the following reasons:
-
-- The IP Forwarding solution is no longer self-contained.
-
-- Extra FORWARDING rules are defined.
-
-- It allows the gateway to forward/masquerade all traffic to the destination host; therefore, if a connecting laptop has a route to the destination host, it provides a way to ssh to the RaspberryPi as well and may present a security problem.
+Another way to connect to the Kura Gateway Administration Console on the first RaspberryPi would be to add an IP Forwarding/Masquerading entry as described in the next section.
 
 ## IP Forwarding/Masquerading
 
@@ -179,6 +180,8 @@ The **IP Forwarding/Masquerading** form contains the following configuration par
 - **Destination Network/Host** - identifies the destination network or host name (CIDR notation). Set to 0.0.0.0/0 if empty.
 
 - **Enable Masquerading** - defines whether masquerading is used (yes or no). If set to 'yes', masquerading is enabled. If set to 'no', only FORWARDING rules are being added. (Required field.)
+
+The rules will be added to the *forward-kura-ipf* chain in the filter table and in the *postrouting-kura-ipf* one in the nat table.
 
 As a use-case scenario, consider the same setup as in port forwarding. In this case, the interfaces of the gateway are configured as follows:
 
@@ -203,10 +206,9 @@ To reach the RaspberryPi unit sitting on the 172.16.0.5/24 from a specific host 
 This case adds the following iptables rules to the /etc/sysconfig/iptables file:
 
 ```
-#custom NAT service rules
--A POSTROUTING -p tcp -s 10.200.12.10/32 -d 172.16.0.5/32 -o eth0 -j MASQUERADE
--A FORWARD -p tcp -s 172.16.0.5/32 -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
--A FORWARD -p tcp -s 10.200.12.10/32 -d 172.16.0.5/32 -i wlan0 -o eth0 -j ACCEPT
+iptables -t nat -A postrouting-kura-ipf -p tcp -s 10.200.12.6/32 -d 172.16.0.5/32 -o eth0 -j MASQUERADE
+iptables -A forward-kura-ipf -p tcp -s 172.16.0.5/32 -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A forward-kura-ipf -p tcp -s 10.200.12.6/32 -d 172.16.0.5/32 -i wlan0 -o eth0 -m tcp -j ACCEPT
 ```
 
 Additionally, a route to the 172.16.0.0/24 network needs to be configured on a connecting laptop as shown below:
@@ -220,10 +222,9 @@ Since _masquerading_ is enabled, there is no need to specify the back route on t
 If the _Source Network/Host_ and _Destination Network/Host_ fields are empty, iptables rules appear as follows:
 
 ```
-#custom NAT service rules
--A POSTROUTING -p tcp -s 0.0.0.0/0 -d 0.0.0.0/0 -o eth0 -j MASQUERADE
--A FORWARD -p tcp -s 0.0.0.0/0 -d 0.0.0.0/0 -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
--A FORWARD -p tcp -s 0.0.0.0/0 -d 0.0.0.0/0 -i wlan0 -o eth0 -j ACCEPT
+iptables -t nat -A postrouting-kura-ipf -p tcp -s 0.0.0.0/0 -d 0.0.0.0/0 -o eth0 -j MASQUERADE
+iptables -A forward-kura-ipf -p tcp -s 0.0.0.0/0 -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A forward-kura-ipf -p tcp -s 0.0.0.0/0 -d 0.0.0.0/0 -i wlan0 -o eth0 -j ACCEPT
 ```
 
 The RaspberryPi forwards packets from any external host (connected to wlan0) to any destination on the local network (eth0 interface).

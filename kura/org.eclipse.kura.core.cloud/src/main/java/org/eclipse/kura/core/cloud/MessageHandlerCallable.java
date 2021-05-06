@@ -236,11 +236,11 @@ public class MessageHandlerCallable implements Callable<Void> {
     public void setException(KuraPayload payload, Throwable t) {
         if (t != null) {
             payload.addMetric(METRIC_EXCEPTION_MSG, t.getMessage());
-            payload.addMetric(METRIC_EXCEPTION_STACK, stackTraceAsString(t));
         }
     }
 
-    private String stackTraceAsString(Throwable t) {
+    @SuppressWarnings("unused")
+	private String stackTraceAsString(Throwable t) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);

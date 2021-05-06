@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@
             cardinality="0" 
             required="true"
             default="mqtt://broker-url:1883/" 
-            description="URL of the mqtt broker to connect to. Everyware Cloud: mqtt://broker-sandbox.everyware-cloud.com:1883/, mqtts://broker-sandbox.everyware-cloud.com:8883/, ws://broker-sandbox.everyware-cloud.com:8080/ or wss://broker-sandbox.everyware-cloud.com:443/. Eclipse IoT: mqtt://mqtt.eclipse.org:1883/, mqtts://mqtt.eclipse.org:8883/."/>
+            description="URL of the MQTT broker to connect to, specifying protocol, hostname and port (for example mqtt://your.broker.url:1883/ ). Supported protocols are mqtt, mqtts, ws and wss."/>
 
         <AD id="topic.context.account-name"
             name="Topic Context Account-Name"

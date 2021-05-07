@@ -63,7 +63,6 @@ import org.eclipse.kura.web2.ext.AuthenticationHandler;
 import org.eclipse.kura.web2.ext.Context;
 import org.eclipse.kura.web2.ext.ExtensionRegistry;
 import org.eclipse.kura.web2.ext.WidgetFactory;
-import org.gwtbootstrap3.client.ui.Anchor;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
@@ -97,7 +96,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class EntryClassUi extends Composite implements Context, ServicesUi.Listener {
@@ -152,12 +150,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     TextBox textSearch;
     @UiField
     NavPills servicesMenu;
-    @UiField
-    Panel stackTraceContainer;
-    @UiField
-    Anchor errorStackTraceAreaOneAnchor;
-    @UiField
-    VerticalPanel errorStackTraceAreaOne;
     @UiField
     Modal errorPopup;
     @UiField
@@ -325,24 +317,10 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private void initExceptionReportModal() {
         this.errorPopup.setTitle(MSGS.warning());
-        this.errorStackTraceAreaOneAnchor.setText(MSGS.showStackTrace());
         FailureHandler.setBackend((title, message, stackTrace) -> {
             this.errorPopup.setTitle(title);
 
             this.errorMessage.setText(message);
-
-            if (stackTrace == null) {
-                stackTraceContainer.setVisible(false);
-            } else {
-                this.errorStackTraceAreaOne.clear();
-
-                for (StackTraceElement element : stackTrace) {
-                    Label tempLabel = new Label();
-                    tempLabel.setText(element.toString());
-                    this.errorStackTraceAreaOne.add(tempLabel);
-                }
-                stackTraceContainer.setVisible(true);
-            }
             this.errorPopup.show();
         });
     }

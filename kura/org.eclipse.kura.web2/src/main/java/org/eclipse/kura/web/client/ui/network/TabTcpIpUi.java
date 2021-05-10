@@ -683,6 +683,15 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.dns.setEnabled(true);
             }
             this.configure.setSelectedIndex(this.configure.getItemText(0).equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
+        } else if (this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK) {
+            // loopback interface should not be editable
+            this.status.setEnabled(false);
+            this.configure.setEnabled(false);
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
+            this.dns.setEnabled(false);
+            this.renew.setEnabled(false);
         } else {
             if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
                     || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())

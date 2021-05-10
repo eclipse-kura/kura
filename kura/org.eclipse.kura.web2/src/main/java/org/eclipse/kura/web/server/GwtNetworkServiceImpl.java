@@ -139,6 +139,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     private List<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations() throws GwtKuraException {
+
         logger.debug("Starting");
 
         List<GwtNetInterfaceConfig> gwtNetConfigs = new ArrayList<>();
@@ -236,8 +237,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     gwtNetConfig.setStatus(GwtNetIfStatus.netIPv4StatusDisabled.name());
                                 }
 
-                                if (((NetConfigIP4) netConfig).isDhcp()) {
-                                    gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+                                if (((NetConfigIP4) netConfig).isDhcp() || netIfConfig.isLoopback()) {
+                                    if (((NetConfigIP4) netConfig).isDhcp()) {
+                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name());
+                                    }
+
+                                    if (netIfConfig.isLoopback()) {
+                                        gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
+                                    }
 
                                     // since DHCP - populate current data
                                     if (addressConfig.getAddress() != null) {
@@ -1658,7 +1665,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
+    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
+            throws GwtKuraException {
         logger.info("Find Frequency Network Service impl");
         List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
         List<GwtWifiHotspotEntry> channels = new ArrayList<GwtWifiHotspotEntry>();
@@ -1693,4 +1701,3 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 }
-

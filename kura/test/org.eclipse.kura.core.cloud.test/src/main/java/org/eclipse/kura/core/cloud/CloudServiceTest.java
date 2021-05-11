@@ -357,7 +357,7 @@ public class CloudServiceTest {
             Mockito.when(tamperDetectionService.getTamperStatus()).thenReturn(tamperStatus);
 
             final CompletableFuture<byte[]> message = observerInspector.nextMessage("$EDC/mqtt/underTest/MQTT/BIRTH");
-            eventAdmin.postEvent(new TamperEvent(tamperStatus));
+            eventAdmin.postEvent(new TamperEvent("foo", tamperStatus));
 
             metrics = getMetrics(message.get(30, TimeUnit.SECONDS));
 

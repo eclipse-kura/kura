@@ -43,7 +43,7 @@ public interface SystemService {
     public static final String KEY_KURA_VERSION = "kura.version";
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public static final String KEY_KURA_NET_VIRTUAL_DEVICES_CONFIG = "kura.net.virtual.devices.config";
     /**
@@ -102,17 +102,17 @@ public interface SystemService {
     public static final String CONFIG_CONSOLE_DEVICE_MANAGE_SERVICE_IGNORE = "console.device.management.service.ignore";
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public static final String KEY_COMMAND_USER = "kura.command.user";
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public static final String KEY_CPU_VERSION = "cpu.version";
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
 
@@ -466,7 +466,7 @@ public interface SystemService {
      * 
      * @return the list of the installed packages
      * @throws KuraProcessExecutionErrorException
-     * @since 2.2
+     * @since 3.0
      */
     public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException;
 
@@ -524,14 +524,14 @@ public interface SystemService {
      * Returns the default configuration for virtual network interfaces
      * 
      * @return a String that represent the default configuration for virtual interfaces
-     * @since 2.2
+     * @since 3.0
      */
     public String getNetVirtualDevicesConfig();
 
     /**
      * Gets the user to be used for running commands.
      *
-     * @since 2.2
+     * @since 3.0
      * @return command user
      */
     public String getCommandUser();
@@ -539,7 +539,7 @@ public interface SystemService {
     /**
      * Gets the CPU version of the device.
      *
-     * @since 2.2
+     * @since 3.0
      * @return CPU version
      */
     public String getCpuVersion();
@@ -547,7 +547,7 @@ public interface SystemService {
     /**
      * Returns a set of {@link ExtendedProperties}.
      * 
-     * @since 2.2
+     * @since 3.0
      * @return the extended properties, or empty if the SystemService implementation does not provide extended
      *         properties.
      */
@@ -557,7 +557,7 @@ public interface SystemService {
      * Returns the configuration for the bluetooth beacon scan.
      * If true, the legacy "hcitool" is used for beacon scanning.
      *
-     * @since 2.2s
+     * @since 3.0
      * @return if the legacy beacon scan has to be used
      */
     public boolean isLegacyBluetoothBeaconScan();

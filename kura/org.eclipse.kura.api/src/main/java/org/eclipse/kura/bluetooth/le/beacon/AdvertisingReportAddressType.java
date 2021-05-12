@@ -27,8 +27,17 @@ public enum AdvertisingReportAddressType {
 
     PUBLIC((byte) 0x00),
     RANDOM((byte) 0x01),
+    /**
+     * @since 3.0
+     */
     PUBLIC_IDENTITY((byte) 0x02),
+    /**
+     * @since 3.0
+     */
     RANDOM_IDENTITY((byte) 0x03),
+    /**
+     * @since 3.0
+     */
     UNRESOLVED((byte) 0xFE);
 
     private final byte addressType;

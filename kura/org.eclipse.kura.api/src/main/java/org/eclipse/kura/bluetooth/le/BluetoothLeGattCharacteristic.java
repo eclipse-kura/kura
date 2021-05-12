@@ -53,8 +53,7 @@ public interface BluetoothLeGattCharacteristic {
      * @return The BluetoothLeGattDescriptor
      * @throws KuraBluetoothResourceNotFoundException
      * 
-     * @deprecated use instead {@link findDescriptor(UUID)}
-     * @since 2.2
+     * @deprecated since 3.0 use instead {@link findDescriptor(UUID)}
      */
     @Deprecated
     public BluetoothLeGattDescriptor findDescriptor(UUID uuid, long timeout)

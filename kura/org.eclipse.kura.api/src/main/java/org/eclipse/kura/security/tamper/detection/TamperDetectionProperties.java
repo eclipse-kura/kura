@@ -17,7 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * Defines some well known keys for the properties returned by {@link TamperStatus#getProperties()}.
  *
- * @since 2.2
+ * @since 3.0
  */
 @ProviderType
 public enum TamperDetectionProperties {

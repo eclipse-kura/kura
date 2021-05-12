@@ -13,7 +13,7 @@
 package org.eclipse.kura.executor;
 
 /**
- * @since 2.2
+ * @since 3.0
  */
 public interface Pid {
 

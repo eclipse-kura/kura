@@ -19,7 +19,7 @@ package org.eclipse.kura.bluetooth.le.beacon;
  * 0x02 : LE 2M
  * 0x03 : LE Coded
  *
- * @since 2.2
+ * @since 3.0
  */
 public enum AdvertisingReportPhy {
 

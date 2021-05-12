@@ -44,13 +44,13 @@ public class FirewallNatConfig implements NetConfig {
     /**
      * Represent the type of the rule
      * 
-     * @since 2.2
+     * @since 3.0
      */
     private final RuleType type;
 
     /**
      * 
-     * @deprecated since version 2.2. It will be removed in the next major release. Use instead
+     * @deprecated since version 3.0. It will be removed in the next major release. Use instead
      *             {@link #FirewallNatConfig(String, String, String, String, String, boolean, RuleType)}
      */
     @Deprecated
@@ -84,7 +84,7 @@ public class FirewallNatConfig implements NetConfig {
      * @param type
      *            the type of the rule (IP forwarding, Port forwarding or generic)
      * 
-     * @since 2.2
+     * @since 3.0
      */
     public FirewallNatConfig(String srcIface, String dstIface, String protocol, String src, String dst,
             boolean masquerade, RuleType type) {
@@ -123,7 +123,7 @@ public class FirewallNatConfig implements NetConfig {
 
     /**
      * 
-     * @since 2.2
+     * @since 3.0
      */
     public RuleType getRuleType() {
         return this.type;

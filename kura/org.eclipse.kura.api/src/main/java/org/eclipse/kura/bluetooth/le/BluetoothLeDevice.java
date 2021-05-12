@@ -53,8 +53,7 @@ public interface BluetoothLeDevice {
      * @return The BluetoothLeGattService
      * @throws KuraBluetoothResourceNotFoundException
      * 
-     * @deprecated use instead {@link findService(UUID)}
-     * @since 2.2
+     * @deprecated since 3.0 use instead {@link findService(UUID)}
      */
     @Deprecated
     public BluetoothLeGattService findService(UUID uuid, long timeout) throws KuraBluetoothResourceNotFoundException;
@@ -272,7 +271,7 @@ public interface BluetoothLeDevice {
      *
      * @throws BluetKuraBluetoothRemoveExceptionoothException
      *
-     * @since 2.0
+     * @since 3.0
      */
     public void remove() throws KuraBluetoothRemoveException;
 }

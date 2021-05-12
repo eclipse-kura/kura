@@ -63,42 +63,72 @@ public class AdvertisingReportRecord {
         this.address = address;
     }
 
+    /**
+     * @since 3.0
+     */
     public AdvertisingReportAddressType getDirectAddressType() {
         return this.directAddressType;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setDirectAddressType(int addressType) {
         this.directAddressType = AdvertisingReportAddressType.valueOf((byte) addressType);
     }
 
+    /**
+     * @since 3.0
+     */
     public String getDirectAddress() {
         return this.directAddress;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setDirectAddress(String address) {
         this.directAddress = address;
     }
 
+    /**
+     * @since 3.0
+     */
     public AdvertisingReportPhy getPrimaryPhy() {
         return this.primaryPhy;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setPrimaryPhy(int phy) {
         this.primaryPhy = AdvertisingReportPhy.valueOf((byte) phy);
     }
 
+    /**
+     * @since 3.0
+     */
     public AdvertisingReportPhy getSecondaryPhy() {
         return this.secondaryPhy;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setSecondaryPhy(int phy) {
         this.secondaryPhy = AdvertisingReportPhy.valueOf((byte) phy);
     }
 
+    /**
+     * @since 3.0
+     */
     public int getPeriodicAdvertisingInterval() {
         return this.periodicAdvertisingInterval;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setPeriodicAdvertisingInterval(int periodicAdvertisingInterval) {
         this.periodicAdvertisingInterval = periodicAdvertisingInterval;
     }
@@ -119,18 +149,30 @@ public class AdvertisingReportRecord {
         this.length = length;
     }
 
+    /**
+     * @since 3.0
+     */
     public int getSid() {
         return this.sid;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setSid(int sid) {
         this.sid = sid;
     }
 
+    /**
+     * @since 3.0
+     */
     public int getTxPower() {
         return this.txPower;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setTxPower(int txPower) {
         this.txPower = txPower;
     }
@@ -143,10 +185,16 @@ public class AdvertisingReportRecord {
         this.rssi = rssi;
     }
 
+    /**
+     * @since 3.0
+     */
     public boolean isExtendedReport() {
         return this.extended;
     }
 
+    /**
+     * @since 3.0
+     */
     public void setExtendedReport(boolean extended) {
         this.extended = extended;
     }

@@ -22,7 +22,7 @@ import java.security.cert.Certificate;
  * along with the its certificate chain.
  * The private key entry is identified by an id made with the id of the keystore and the alias.
  *
- * @since 2.2
+ * @since 3.0
  */
 public class KuraPrivateKeyEntry {
 

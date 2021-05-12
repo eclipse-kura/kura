@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -110,9 +110,9 @@ public class MessageHandlerCallable implements Callable<Void> {
         final Map<String, String> auditProperties = new HashMap<>();
 
         auditProperties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "DefaultCloudConnectionService");
-        auditProperties.put("cloud.app.id", appId);
-        auditProperties.put("cloud.app.topic", appTopic);
-        auditProperties.put("cloud.connection.pid", cloudService.getOwnPid());
+        auditProperties.put("cloud.app.id", this.appId);
+        auditProperties.put("cloud.app.topic", this.appTopic);
+        auditProperties.put("cloud.connection.pid", this.cloudService.getOwnPid());
 
         try (final Scope scope = AuditContext.openScope(new AuditContext(auditProperties))) {
             try {
@@ -174,12 +174,14 @@ public class MessageHandlerCallable implements Callable<Void> {
             }
 
             final Object responseCode = response.getPayload().getMetric(METRIC_RESPONSE_CODE);
-            final boolean isSuccessful = responseCode instanceof Integer && ((Integer) responseCode) / 200 == 1;
+            final boolean isSuccessful = responseCode instanceof Integer && (Integer) responseCode / 200 == 1;
 
             if (isSuccessful) {
-                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call", AuditContext.currentOrInternal());
+                auditLogger.info("{} CloudCall - Success - Execute RequestHandler call",
+                        AuditContext.currentOrInternal());
             } else {
-                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call", AuditContext.currentOrInternal());
+                auditLogger.warn("{} CloudCall - Failure - Execute RequestHandler call",
+                        AuditContext.currentOrInternal());
             }
 
             buildResponseMessage(requestId, requesterClientId, response);
@@ -240,7 +242,7 @@ public class MessageHandlerCallable implements Callable<Void> {
     }
 
     @SuppressWarnings("unused")
-	private String stackTraceAsString(Throwable t) {
+    private String stackTraceAsString(Throwable t) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         t.printStackTrace(pw);

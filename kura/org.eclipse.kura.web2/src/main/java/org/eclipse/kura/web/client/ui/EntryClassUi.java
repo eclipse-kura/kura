@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -236,7 +236,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private final EntryClassUi ui;
     private GwtUserData userData;
-    private GwtSecurityCapabilities securityCapabilities;
+    private final GwtSecurityCapabilities securityCapabilities;
 
     private GwtSession currentSession;
     private GwtConfigComponent selected = null;
@@ -248,19 +248,20 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
         @Override
         public void run() {
-            RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(
-                    c.callback(token -> gwtSessionService.getUserConfig(token, c.callback(config -> {
+            RequestQueue.submit(c -> EntryClassUi.this.gwtXSRFService.generateSecurityToken(
+                    c.callback(token -> EntryClassUi.this.gwtSessionService.getUserConfig(token, c.callback(config -> {
                         if (config == null) {
                             logout();
                             return;
                         }
 
-                        if (!config.equals(userData)) {
-                            alertDialog.show(MSGS.usersIdentityConfigChanged(userData.getUserName()),
+                        if (!config.equals(EntryClassUi.this.userData)) {
+                            EntryClassUi.this.alertDialog.show(
+                                    MSGS.usersIdentityConfigChanged(EntryClassUi.this.userData.getUserName()),
                                     AlertDialog.Severity.ALERT, (ConfirmListener) null);
                         }
 
-                        userData = config;
+                        EntryClassUi.this.userData = config;
                     })))), false);
         }
     };
@@ -365,7 +366,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     public void initSystemPanel(GwtSession gwtSession) {
         final EntryClassUi instanceReference = this;
         if (!gwtSession.isNetAdminAvailable()
-                || !userData.checkPermissions(Collections.singleton(KuraPermission.NETWORK_ADMIN))) {
+                || !this.userData.checkPermissions(Collections.singleton(KuraPermission.NETWORK_ADMIN))) {
             this.network.setVisible(false);
             this.firewall.setVisible(false);
         }
@@ -395,7 +396,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initDriversAndAssetsPanel() {
-        if (!userData.checkPermission(KuraPermission.WIRES_ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.WIRES_ADMIN)) {
             this.driversAndAssetsServices.setVisible(false);
             return;
         }
@@ -416,7 +417,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initWiresPanel() {
-        if (!userData.checkPermission(KuraPermission.WIRES_ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.WIRES_ADMIN)) {
             this.wires.setVisible(false);
             return;
         }
@@ -437,7 +438,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initCloudServicesPanel() {
-        if (!userData.checkPermission(KuraPermission.CLOUD_CONNECTION_ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.CLOUD_CONNECTION_ADMIN)) {
             this.cloudServices.setVisible(false);
             return;
         }
@@ -459,7 +460,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initSettingsPanel() {
-        if (!userData.checkPermission(KuraPermission.ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.ADMIN)) {
             this.settings.setVisible(false);
             return;
         }
@@ -481,9 +482,9 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initSecurityPanel() {
-        final boolean isVisible = userData.checkPermission(KuraPermission.ADMIN)
-                || (userData.checkPermission(KuraPermission.MAINTENANCE)
-                        && this.securityCapabilities.isTamperDetectionAvailable());
+        final boolean isVisible = this.userData.checkPermission(KuraPermission.ADMIN)
+                || this.userData.checkPermission(KuraPermission.MAINTENANCE)
+                        && this.securityCapabilities.isTamperDetectionAvailable();
 
         if (!isVisible) {
             this.security.setVisible(false);
@@ -507,7 +508,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initUsersPanel() {
-        if (!userData.checkPermission(KuraPermission.ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.ADMIN)) {
             this.users.setVisible(false);
             return;
         }
@@ -528,7 +529,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initPackagesPanel() {
-        if (!userData.checkPermission(KuraPermission.PACKAGES_ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.PACKAGES_ADMIN)) {
             this.packages.setVisible(false);
             return;
         }
@@ -588,7 +589,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initDevicePanel() {
-        if (!userData.checkPermission(KuraPermission.DEVICE)) {
+        if (!this.userData.checkPermission(KuraPermission.DEVICE)) {
             this.device.setVisible(false);
             return;
         }
@@ -610,7 +611,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void initStatusPanel(final EntryClassUi instanceReference) {
-        if (!userData.checkPermission(KuraPermission.DEVICE)) {
+        if (!this.userData.checkPermission(KuraPermission.DEVICE)) {
             this.status.setVisible(false);
             return;
         }
@@ -693,12 +694,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     public void fetchAvailableServices() {
-        if (!userData.checkPermission(KuraPermission.ADMIN)) {
+        if (!this.userData.checkPermission(KuraPermission.ADMIN)) {
             return;
         }
 
-        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(
-                token -> gwtComponentService.findComponentConfigurations(token, SERVICES_FILTER, c.callback(result -> {
+        RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(token -> this.gwtComponentService
+                .findComponentConfigurations(token, SERVICES_FILTER, c.callback(result -> {
                     sortConfigurationsByName(result);
                     EntryClassUi.this.servicesMenu.clear();
                     for (GwtConfigComponent configComponent : result) {
@@ -726,12 +727,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private void logout() {
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
-                c.callback(token -> gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
+                c.callback(token -> this.gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
     }
 
     private void initServicesTree() {
-        if (!userData.checkPermission(KuraPermission.ADMIN)) {
-            servicesContainer.setVisible(false);
+        if (!this.userData.checkPermission(KuraPermission.ADMIN)) {
+            this.servicesContainer.setVisible(false);
             return;
         }
 
@@ -838,7 +839,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     public void confirmIfUiDirty(final Runnable action) {
         if (isUiDirty()) {
-            alertDialog.show(MSGS.deviceConfigDirty(), () -> {
+            this.alertDialog.show(MSGS.deviceConfigDirty(), () -> {
                 forceTabsCleaning();
                 action.run();
             });
@@ -988,11 +989,11 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     public void init() {
-        userNameLarge.setText(userData.getUserName());
-        userNameSmall.setText(userData.getUserName());
+        this.userNameLarge.setText(this.userData.getUserName());
+        this.userNameSmall.setText(this.userData.getUserName());
 
         final EventService.Handler userAdminEventHandler = e -> {
-            userConfigReloadTimer.schedule(1000);
+            this.userConfigReloadTimer.schedule(1000);
         };
 
         EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED, userAdminEventHandler);
@@ -1002,15 +1003,15 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         EventService.subscribe(ForwardedEventTopic.ROLE_CREATED_SHORT, userAdminEventHandler);
         EventService.subscribe(ForwardedEventTopic.ROLE_CHANGED_SHORT, userAdminEventHandler);
 
-        if (userData.getPermissions().isEmpty()) {
-            alertDialog.show("The current user has no permissions", Severity.ALERT, (ConfirmListener) null);
+        if (this.userData.getPermissions().isEmpty()) {
+            this.alertDialog.show("The current user has no permissions", Severity.ALERT, (ConfirmListener) null);
             return;
         }
 
-        if (userData.checkPermission(KuraPermission.ADMIN)) {
+        if (this.userData.checkPermission(KuraPermission.ADMIN)) {
             fetchAvailableServices();
         }
-        if (userData.checkPermission(KuraPermission.DEVICE)) {
+        if (this.userData.checkPermission(KuraPermission.DEVICE)) {
             showStatusPanel();
         }
         fetchUserOptions();

@@ -14,7 +14,8 @@ package org.eclipse.kura.security.tamper.detection;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.osgi.service.event.Event;
 
@@ -43,16 +44,22 @@ public class TamperEvent extends Event {
      * The key of a Event property containing the new {@link TamperStatus}
      */
     public static final String TAMPER_STATUS_PROPERTY_KEY = "tamper.status";
+    /**
+     * The key of a Event property containing the kura.service.pid of the sender {@link TamperDetectionService}
+     */
+    public static final String SENDER_PID_PROPERTY_KEY = "sender.pid";
 
     /**
      * Creates a new {@link TamperEvent} instance.
+     * 
+     * @param tamperDetectionKuraServicePid
+     *            the kura.service.pid of the sender {@link TamperDetectionService}.
      *
      * @param tamperStatus
      *            the new {@link TamperStatus}, cannot be <code>null</code>.
      */
-    public TamperEvent(final TamperStatus tamperStatus) {
-        super(TAMPER_EVENT_TOPIC, Collections.singletonMap(TAMPER_STATUS_PROPERTY_KEY,
-                requireNonNull(tamperStatus, "Tamper status cannot be null")));
+    public TamperEvent(final String tamperDetectionServicePid, final TamperStatus tamperStatus) {
+        super(TAMPER_EVENT_TOPIC, buildEventProperties(tamperDetectionServicePid, tamperStatus));
     }
 
     /**
@@ -62,6 +69,26 @@ public class TamperEvent extends Event {
      */
     public TamperStatus getTamperStatus() {
         return (TamperStatus) getProperty(TAMPER_STATUS_PROPERTY_KEY);
+    }
+
+    /**
+     * Returns the kura.service.pid of the sender {@link TamperDetectionService}.
+     * 
+     * @return the kura.service.pid of the sender {@link TamperDetectionService}.
+     */
+    public String getSenderPid() {
+        return (String) getProperty(SENDER_PID_PROPERTY_KEY);
+    }
+
+    private static Map<String, Object> buildEventProperties(final String tamperDetectionServicePid,
+            final TamperStatus tamperStatus) {
+        final Map<String, Object> properties = new HashMap<>();
+
+        properties.put(TAMPER_STATUS_PROPERTY_KEY, requireNonNull(tamperStatus, "Tamper status cannot be null"));
+        properties.put(SENDER_PID_PROPERTY_KEY,
+                requireNonNull(tamperDetectionServicePid, "Tamper detection service pid cannot be null"));
+
+        return properties;
     }
 
 }

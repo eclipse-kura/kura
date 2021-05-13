@@ -134,7 +134,7 @@ public class SensorTagDriverTest {
 
         verify(tist, times(1)).connect();
         verify(tist, times(2)).isConnected();
-        verify(tist, times(0)).enableThermometer();
+        verify(tist, times(0)).enableTermometer();
     }
 
     @Test
@@ -155,7 +155,7 @@ public class SensorTagDriverTest {
         verify(tist, times(1)).connect();
         verify(tist, times(2)).isConnected();
 
-        verify(tist, times(1)).enableThermometer();
+        verify(tist, times(1)).enableTermometer();
 
         verify(tist, times(1)).setAccelerometerPeriod(50);
         verify(tist, times(1)).enableAccelerometer(new byte[] { 1 });

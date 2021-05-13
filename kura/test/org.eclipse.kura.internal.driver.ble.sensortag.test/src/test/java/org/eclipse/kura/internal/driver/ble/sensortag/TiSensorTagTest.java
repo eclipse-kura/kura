@@ -205,13 +205,13 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testEnableThermometer() throws Throwable {
+    public void testEnableTermometer() throws Throwable {
         testEnable(true, TiSensorTagGatt.UUID_TEMP_SENSOR_ENABLE, TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE,
-                "enableThermometer");
+                "enableTermometer");
     }
 
     @Test
-    public void testEnableThermometerFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+    public void testEnableTermometerFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
         doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(anyObject());
 
@@ -221,19 +221,19 @@ public class TiSensorTagTest {
         TiSensorTag tag = new TiSensorTagBuilder(true, true)
                 .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, svcMock).build(true);
 
-        tag.enableThermometer();
+        tag.enableTermometer();
 
         verify(bch, times(1)).writeValue(new byte[] { 1 });
     }
 
     @Test
-    public void testDisableThermometer() throws Throwable {
+    public void testDisableTermometer() throws Throwable {
         testDisable(true, TiSensorTagGatt.UUID_TEMP_SENSOR_ENABLE, TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE,
-                "disableThermometer");
+                "disableTermometer");
     }
 
     @Test
-    public void testDisableThermometerFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+    public void testDisableTermometerFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
         doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(anyObject());
 
@@ -243,7 +243,7 @@ public class TiSensorTagTest {
         TiSensorTag tag = new TiSensorTagBuilder(true, true)
                 .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, svcMock).build(true);
 
-        tag.disableThermometer();
+        tag.disableTermometer();
 
         verify(bch, times(1)).writeValue(new byte[] { 0 });
     }
@@ -281,13 +281,13 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testSetThermometerPeriod() throws Throwable {
+    public void testSetTermometerPeriod() throws Throwable {
         testSetPeriod(true, TiSensorTagGatt.UUID_TEMP_SENSOR_PERIOD, TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE,
-                "setThermometerPeriod");
+                "setTermometerPeriod");
     }
 
     @Test
-    public void testSetThermometerPeriodFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
+    public void testSetTermometerPeriodFail() throws KuraBluetoothResourceNotFoundException, KuraBluetoothIOException {
         BluetoothLeGattCharacteristic bch = mock(BluetoothLeGattCharacteristic.class);
         doThrow(new KuraBluetoothIOException("test")).when(bch).writeValue(anyObject());
 
@@ -297,7 +297,7 @@ public class TiSensorTagTest {
         TiSensorTag tag = new TiSensorTagBuilder(true, true)
                 .addService(TiSensorTagGatt.UUID_TEMP_SENSOR_SERVICE, svcMock).build(true);
 
-        tag.setThermometerPeriod(1000);
+        tag.setTermometerPeriod(1000);
 
         verify(bch, times(1)).writeValue(new byte[] { -24 });
     }

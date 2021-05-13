@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -52,10 +52,7 @@ public interface BluetoothLeDevice {
      *            The timeout for retrieving the service
      * @return The BluetoothLeGattService
      * @throws KuraBluetoothResourceNotFoundException
-     * 
-     * @deprecated since 3.0 use instead {@link findService(UUID)}
      */
-    @Deprecated
     public BluetoothLeGattService findService(UUID uuid, long timeout) throws KuraBluetoothResourceNotFoundException;
 
     /**
@@ -269,9 +266,10 @@ public interface BluetoothLeDevice {
      * Remove this device from the system. Be aware that after the removing the object representing the device
      * will not be valid anymore and any operation on it will have no effect.
      *
+     * @return TRUE if the device has been removed
      * @throws BluetKuraBluetoothRemoveExceptionoothException
      *
-     * @since 3.0
+     * @since 2.0
      */
-    public void remove() throws KuraBluetoothRemoveException;
+    public boolean remove() throws KuraBluetoothRemoveException;
 }

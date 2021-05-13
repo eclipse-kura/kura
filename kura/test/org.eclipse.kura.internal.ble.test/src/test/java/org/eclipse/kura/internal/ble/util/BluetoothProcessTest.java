@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,41 +12,81 @@
  ******************************************************************************/
 package org.eclipse.kura.internal.ble.util;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
 
 public class BluetoothProcessTest {
 
     @Test
-    public void execTest() {
-        CommandExecutorService executorMock = mock(CommandExecutorService.class);
-        BluetoothProcess bluetoothProcess = new BluetoothProcess(executorMock);
+    public void testExec() throws IOException, InterruptedException {
+        boolean win = System.getProperty("os.name").matches("[Ww]indows.*");
 
-        String[] commandLine = { "hcitool", "lescan" };
-        Command command = new Command(commandLine);
-        bluetoothProcess.exec(commandLine, null);
+        String[] cmdArray = { "target/test-classes/execTestCmd.sh" };
+        if (win) {
+            cmdArray[0] = "target/test-classes/execTestCmd.bat";
+        } else {
+            File f = new File(cmdArray[0]);
+            assumeTrue(f.canExecute());
+        }
 
-        verify(executorMock, times(1)).execute(eq(command), anyObject());
-    }
+        boolean[] visited = { false, false };
+        BluetoothProcessListener listener = new BluetoothProcessListener() {
 
-    @Test
-    public void execSnoopTest() {
-        CommandExecutorService executorMock = mock(CommandExecutorService.class);
-        BluetoothProcess bluetoothProcess = new BluetoothProcess(executorMock);
+            @Override
+            public void processInputStream(int ch) throws KuraException {
+                // not needed
+            }
 
-        String[] commandLine = { "hcitool", "lescan" };
-        Command command = new Command("{ exec hcitool lescan >/dev/null; } 3>&1".split(" "));
-        command.setExecuteInAShell(true);
-        bluetoothProcess.execSnoop(commandLine, null);
+            @Override
+            public void processInputStream(String string) throws KuraException {
+                assertTrue(string.matches("test\r?\n"));
 
-        verify(executorMock, times(1)).execute(eq(command), anyObject());
+                visited[0] = true;
+            }
+
+            @Override
+            public void processErrorStream(String string) throws KuraException {
+                assertTrue(string.matches("testerror\r?\n"));
+
+                visited[1] = true;
+            }
+        };
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(3);
+        baos.write("test\\r?\\n".getBytes(UTF_8));
+        ByteArrayOutputStream baes = new ByteArrayOutputStream(3);
+        baes.write("testerror\\r?\\n".getBytes(UTF_8));
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        status.setErrorStream(baes);
+        status.setOutputStream(baos);
+        status.setTimedout(false);
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        when(esMock.execute(anyObject())).thenReturn(status);
+        BluetoothProcess proc = new BluetoothProcess(esMock);
+        proc.exec(cmdArray, listener);
+
+        Thread.sleep(100);
+
+        proc.destroy();
+
+        assertTrue(visited[0]);
+        assertTrue(visited[1]);
     }
 
 }

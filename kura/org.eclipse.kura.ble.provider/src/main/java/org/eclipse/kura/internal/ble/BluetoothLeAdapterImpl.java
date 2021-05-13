@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.ble;
 
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +22,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,25 +31,19 @@ import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothTransportType;
-import org.freedesktop.dbus.exceptions.DBusException;
-import org.freedesktop.dbus.exceptions.DBusExecutionException;
-import org.freedesktop.dbus.types.UInt16;
-import org.freedesktop.dbus.types.Variant;
 
-import com.github.hypfvieh.bluetooth.DeviceManager;
-import com.github.hypfvieh.bluetooth.DiscoveryTransport;
-import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter;
-import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
+import tinyb.BluetoothDevice;
+import tinyb.BluetoothException;
+import tinyb.TransportType;
 
 public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     private static final Logger logger = LogManager.getLogger(BluetoothLeAdapterImpl.class);
-    private static final String STOP_DISCOVERY_FAILED = "Stop discovery failed";
-    private static final String START_DISCOVERY_FAILED = "Start discovery failed";
+    private static final long TIMEOUT = 30;
 
-    private final BluetoothAdapter adapter;
+    private final tinyb.BluetoothAdapter adapter;
 
-    public BluetoothLeAdapterImpl(BluetoothAdapter adapter) {
+    public BluetoothLeAdapterImpl(tinyb.BluetoothAdapter adapter) {
         this.adapter = adapter;
     }
 
@@ -65,12 +59,12 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public String getInterfaceName() {
-        return this.adapter.getDeviceName();
+        return this.adapter.getInterfaceName();
     }
 
     @Override
     public String getModalias() {
-        return this.adapter.getModAlias();
+        return this.adapter.getModalias();
     }
 
     @Override
@@ -85,13 +79,12 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public long getBluetoothClass() {
-        Integer deviceClass = this.adapter.getDeviceClass();
-        return deviceClass == null ? -1 : deviceClass;
+        return this.adapter.getBluetoothClass();
     }
 
     @Override
     public boolean isPowered() {
-        return this.adapter.isPowered();
+        return this.adapter.getPowered();
     }
 
     @Override
@@ -101,11 +94,7 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public boolean isDiscoverable() {
-        Boolean discoverable = this.adapter.isDiscoverable();
-        if (discoverable != null) {
-            return discoverable;
-        }
-        return false;
+        return this.adapter.getDiscoverable();
     }
 
     @Override
@@ -115,27 +104,17 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public long getDiscoverableTimeout() {
-        Integer timeout = this.adapter.getDiscoverableTimeout();
-        return timeout == null ? -1 : timeout;
+        return this.adapter.getDiscoverableTimeout();
     }
 
     @Override
     public void setDiscoverableTimout(long value) {
-        this.setDiscoverableTimeout(value);
-    }
-
-    @Override
-    public void setDiscoverableTimeout(long value) {
-        this.adapter.setDiscoverableTimeout((int) value);
+        setDiscoverableTimout(value);
     }
 
     @Override
     public boolean isPairable() {
-        Boolean pairable = this.adapter.isPairable();
-        if (pairable != null) {
-            return pairable;
-        }
-        return false;
+        return this.adapter.getPairable();
     }
 
     @Override
@@ -145,52 +124,35 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public long getPairableTimeout() {
-        Integer timeout = this.adapter.getPairableTimeout();
-        return timeout == null ? -1 : timeout;
+        return this.adapter.getPairableTimeout();
     }
 
     @Override
     public void setPairableTimeout(long value) {
-        this.adapter.setPairableTimeout((int) value);
+        this.adapter.setPairableTimeout(value);
     }
 
     @Override
     public boolean isDiscovering() {
-        return this.adapter.isDiscovering();
+        return this.adapter.getDiscovering();
     }
 
     @Override
     public UUID[] getUUIDs() {
         List<UUID> uuidList = new ArrayList<>();
-        String[] strUuids = this.adapter.getUuids();
-        if (strUuids != null) {
-            for (String uuid : strUuids) {
-                uuidList.add(UUID.fromString(uuid));
-            }
+        for (String uuid : this.adapter.getUUIDs()) {
+            uuidList.add(UUID.fromString(uuid));
         }
         UUID[] uuids = new UUID[uuidList.size()];
         return uuidList.toArray(uuids);
     }
 
     @Override
-    public void startDiscovery() throws KuraBluetoothDiscoveryException {
-        try {
-            if (!this.adapter.startDiscovery()) {
-                throw new KuraBluetoothDiscoveryException(START_DISCOVERY_FAILED);
-            }
-        } catch (DBusExecutionException ex) {
-            throw new KuraBluetoothDiscoveryException(START_DISCOVERY_FAILED);
-        }
-    }
-
-    @Override
     public void stopDiscovery() throws KuraBluetoothDiscoveryException {
         try {
-            if (!this.adapter.stopDiscovery()) {
-                throw new KuraBluetoothDiscoveryException(STOP_DISCOVERY_FAILED);
-            }
-        } catch (DBusExecutionException ex) {
-            throw new KuraBluetoothDiscoveryException(STOP_DISCOVERY_FAILED);
+            this.adapter.stopDiscovery();
+        } catch (BluetoothException e) {
+            throw new KuraBluetoothDiscoveryException(e, "Stop discovery failed");
         }
     }
 
@@ -261,75 +223,52 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             try {
-                if (!BluetoothLeAdapterImpl.this.adapter.stopDiscovery()) {
-                    logger.error(STOP_DISCOVERY_FAILED);
-                    return false;
-                }
-            } catch (DBusExecutionException ex) {
-                logger.error(STOP_DISCOVERY_FAILED, ex);
+                BluetoothLeAdapterImpl.this.adapter.stopDiscovery();
+            } catch (BluetoothException e) {
+                logger.error("Stop discovery failed", e);
                 return false;
             }
-
             return super.cancel(mayInterruptIfRunning);
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public void run() {
-            if (BluetoothLeAdapterImpl.this.isDiscovering()) {
-                completeExceptionally(new KuraBluetoothDiscoveryException("The BLE adapter is already discovering..."));
+            if (BluetoothLeAdapterImpl.this.adapter.getDiscovering()) {
+                completeExceptionally(
+                        new KuraBluetoothDiscoveryException("The BLE adapter has already been discovering..."));
             }
             try {
-                if (!BluetoothLeAdapterImpl.this.adapter.startDiscovery()) {
-                    logger.error(START_DISCOVERY_FAILED);
-                }
-            } catch (DBusExecutionException ex) {
-                logger.error(START_DISCOVERY_FAILED, ex);
+                BluetoothLeAdapterImpl.this.adapter.startDiscovery();
+            } catch (BluetoothException e) {
+                logger.error("Start discovery failed", e);
             }
             waitForStop();
-            List<BluetoothDevice> devices = getDeviceManager()
-                    .getDevices(BluetoothLeAdapterImpl.this.adapter.getAddress(), true);
-            if (devices.isEmpty()) {
-                complete((T) null);
-            }
-            if (this.name != null || this.address != null) {
-                getDevice(devices);
-            } else {
-                List<BluetoothLeDevice> leDevices = new ArrayList<>();
-                for (BluetoothDevice device : devices) {
-                    leDevices.add(new BluetoothLeDeviceImpl(device));
-                }
-                complete((T) leDevices);
-                if (this.consumer != null) {
-                    this.consumer.accept((T) leDevices);
-                }
-            }
             try {
-                if (!BluetoothLeAdapterImpl.this.adapter.stopDiscovery()) {
-                    logger.error(STOP_DISCOVERY_FAILED);
+                if (this.name != null || this.address != null) {
+                    BluetoothDevice leDevice = BluetoothLeAdapterImpl.this.adapter.find(this.name, this.address,
+                            Duration.ofSeconds(TIMEOUT));
+                    if (leDevice == null || leDevice.getRSSI() == 0) {
+                        complete((T) null);
+                    } else {
+                        complete((T) new BluetoothLeDeviceImpl(leDevice));
+                    }
+                    if (leDevice != null && this.consumer != null) {
+                        this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
+                    }
+                } else {
+                    List<BluetoothLeDevice> devices = BluetoothLeAdapterImpl.this.adapter.getDevices().stream()
+                            .filter(device -> device.getRSSI() != 0).map(BluetoothLeDeviceImpl::new)
+                            .collect(Collectors.toList());
+                    complete((T) devices);
+                    if (this.consumer != null) {
+                        this.consumer.accept((T) devices);
+                    }
                 }
-            } catch (DBusExecutionException ex) {
-                logger.error(STOP_DISCOVERY_FAILED, ex);
-            }
-        }
 
-        @SuppressWarnings("unchecked")
-        private void getDevice(List<BluetoothDevice> devices) {
-            BluetoothDevice leDevice = null;
-            for (BluetoothDevice device : devices) {
-                if (this.address != null && device.getAddress().equals(this.address)
-                        || this.name != null && device.getName().equals(this.name)) {
-                    leDevice = device;
-                    break;
-                }
-            }
-            if (leDevice == null) {
-                complete((T) null);
-            } else {
-                complete((T) new BluetoothLeDeviceImpl(leDevice));
-            }
-            if (leDevice != null && this.consumer != null) {
-                this.consumer.accept((T) new BluetoothLeDeviceImpl(leDevice));
+                BluetoothLeAdapterImpl.this.adapter.stopDiscovery();
+            } catch (BluetoothException e) {
+                logger.error("Stop discovery failed", e);
             }
         }
 
@@ -344,19 +283,14 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
                 }
             }
         }
-
     }
 
     @Override
     public int removeDevices() throws KuraBluetoothRemoveException {
         int removedDevices = 0;
         try {
-            List<BluetoothDevice> devices = getDeviceManager().getDevices(this.adapter.getAddress(), true);
-            for (BluetoothDevice device : devices) {
-                this.adapter.removeDevice(device.getRawDevice());
-                removedDevices++;
-            }
-        } catch (DBusException e) {
+            removedDevices = this.adapter.removeDevices();
+        } catch (BluetoothException e) {
             throw new KuraBluetoothRemoveException(e, "Failed to remove devices");
         }
         return removedDevices;
@@ -364,63 +298,24 @@ public class BluetoothLeAdapterImpl implements BluetoothLeAdapter {
 
     @Override
     public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType) {
-        this.setDiscoveryFilter(uuids, rssi, pathloss, transportType, false);
-    }
-
-    @Override
-    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType,
-            boolean duplicateData) {
-        Map<String, Variant<?>> filter = new LinkedHashMap<>();
-
-        // UUIDs
-        if (uuids != null && !uuids.isEmpty()) {
-            String[] strUuids = new String[uuids.size()];
-            for (int i = 0; i < uuids.size(); i++) {
-                strUuids[i] = uuids.get(i).toString();
-            }
-            filter.put("UUIDs", new Variant<>(strUuids));
-        }
-
-        // RSSI & Pathloss
-        if (rssi != 0) {
-            filter.put("RSSI", new Variant<>((short) rssi));
-        } else if (pathloss != 0) {
-            filter.put("Pathloss", new Variant<>(new UInt16(pathloss)));
-        }
-
-        // Transport Type
-        filter.put("Transport", new Variant<>(toDiscoveryTransport(transportType).toString()));
-
-        // Duplicate Data
-        filter.put("DuplicateData", new Variant<>(Boolean.valueOf(duplicateData)));
-
-        try {
-            this.adapter.setDiscoveryFilter(filter);
-        } catch (DBusException | DBusExecutionException e) {
-            logger.error("Failed to set discovery filter", e);
-        }
+        this.adapter.setDiscoveryFilter(uuids, rssi, pathloss, toTransportType(transportType));
     }
 
     @Override
     public void setRssiDiscoveryFilter(int rssi) {
-        setDiscoveryFilter(null, rssi, 0, BluetoothTransportType.AUTO, false);
+        this.adapter.setRssiDiscoveryFilter(rssi);
     }
 
-    private DiscoveryTransport toDiscoveryTransport(BluetoothTransportType type) {
+    private TransportType toTransportType(BluetoothTransportType type) {
         switch (type) {
         case AUTO:
-            return DiscoveryTransport.AUTO;
+            return TransportType.AUTO;
         case BREDR:
-            return DiscoveryTransport.BREDR;
+            return TransportType.BREDR;
         case LE:
-            return DiscoveryTransport.LE;
+            return TransportType.LE;
         default:
-            return DiscoveryTransport.AUTO;
+            return TransportType.AUTO;
         }
-    }
-
-    // For test only
-    public DeviceManager getDeviceManager() {
-        return DeviceManager.getInstance();
     }
 }

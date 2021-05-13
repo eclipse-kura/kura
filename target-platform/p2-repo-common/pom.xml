@@ -67,6 +67,26 @@
                                     <version>${com.codeminders.hidapi.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb.armv6hf</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb.x86_64</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>tinyb.aarch64</artifactId>
+                                    <version>${tinyb.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>org.apache</groupId>
                                     <artifactId>org.apache.commons.net</artifactId>
                                     <version>${org.apache.commons.net.version}</version>
@@ -336,11 +356,6 @@
                                     <artifactId>com.google.gson</artifactId>
                                     <version>${com.google.gson.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.github.hypfvieh</groupId>
-                                    <artifactId>bluez-dbus-osgi</artifactId>
-                                    <version>${bluez-dbus-osgi.version}</version>
-                                </artifactItem>
                                 <!-- Artemis Broker -->
                                 <artifactItem>
                                     <groupId>com.google.guava</groupId>
@@ -525,6 +540,10 @@
                                 <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.jar" tofile="target/source/plugins/tinyb_${tinyb.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.armv6hf.jar" tofile="target/source/plugins/tinyb.armv6hf_${tinyb.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.x86_64.jar" tofile="target/source/plugins/tinyb.x86_64_${tinyb.version}.jar"/>
+                                <move file="target/source/plugins/tinyb.aarch64.jar" tofile="target/source/plugins/tinyb.aarch64_${tinyb.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
                                 <move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
                                 <move file="target/source/plugins/protobuf-java.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
@@ -583,7 +602,6 @@
                                 <move file="target/source/plugins/jakarta.annotation-api.jar" tofile="target/source/plugins/jakarta.annotation-api_${jakarta.annotation-api.version}.jar"/>
                                 <move file="target/source/plugins/jaxb-osgi.jar" tofile="target/source/plugins/jaxb-osgi_${jaxb-osgi.version}.jar"/>
                                 <move file="target/source/plugins/osgi-resource-locator.jar" tofile="target/source/plugins/osgi-resource-locator_${osgi-resource-locator.version}.jar"/>
-                                <move file="target/source/plugins/bluez-dbus-osgi.jar" tofile="target/source/plugins/bluez-dbus-osgi_${com.github.hypfvieh.bluez-dbus-osgi.version}.jar"/>
                                 <!-- Artemis Broker -->
                                 <move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>
                                 <move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar"/>

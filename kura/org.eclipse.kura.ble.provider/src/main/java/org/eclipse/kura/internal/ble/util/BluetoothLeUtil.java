@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,10 +9,10 @@
  * 
  * Contributors:
  *  Eurotech
- *  Scott Ware
  *******************************************************************************/
 package org.eclipse.kura.internal.ble.util;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.bluetooth.le.beacon.AdvertisingReportRecord;
@@ -35,16 +36,33 @@ public class BluetoothLeUtil {
     private static final ExecutorService processExecutor = Executors.newSingleThreadExecutor();
 
     public static final String HCITOOL = "hcitool";
+    public static final String BTDUMP = "/tmp/BluetoothUtil.btsnoopdump.sh";
 
     public static final String COMMAND_ERROR = "Error executing command: {}";
     public static final String COMMAND_EXEC = "Command executed : {}";
+
+    // Write bluetooth dumping script into /tmp
+    static {
+        try {
+            File f = new File(BTDUMP);
+            FileUtils.writeStringToFile(f, "#!/bin/bash\n" + "set -e\n" + "ADAPTER=$1\n"
+                    + "{ exec hcidump -i $ADAPTER -R -w /dev/fd/3 >/dev/null; } 3>&1", false);
+
+            if (!f.setExecutable(true)) {
+                logger.warn("Unable to set as executable");
+            }
+        } catch (IOException e) {
+            logger.info("Unable to update", e);
+        }
+
+    }
 
     private BluetoothLeUtil() {
         // Empty constructor
     }
 
     /**
-     * Start a bluetooth monitor process for the examination of BLE advertisement packets
+     * Start an hci dump process for the examination of BLE advertisement packets
      *
      * @param name
      *            Name of HCI device (hci0, for example)
@@ -54,7 +72,7 @@ public class BluetoothLeUtil {
      */
     public static BluetoothProcess btdumpCmd(String name, CommandExecutorService executorService,
             BTSnoopListener listener) throws IOException {
-        String[] command = { "btmon", "-i", name, "-w", "/dev/fd/3" };
+        String[] command = { BTDUMP, name };
         return execSnoop(command, executorService, listener);
     }
 
@@ -131,8 +149,7 @@ public class BluetoothLeUtil {
     /**
      * Check for advertisement out of an HCL LE Advertising Report Event
      *
-     * See Bluetooth Core 5.2; 7.7.65.2 LE Advertising Report Event
-     * See Bluetooth Core 5.2; 7.7.65.13 LE Advertising Report Event
+     * See Bluetooth Core 4.0; 7.7.65.2 LE Advertising Report Event
      *
      * @param b
      *            the byte stream
@@ -142,42 +159,28 @@ public class BluetoothLeUtil {
 
         List<AdvertisingReportRecord> reportRecords = new ArrayList<>();
 
-        // Event Code : LE Meta (0x3E)
-        if (b[0] != 0x3E) {
-            // Not an Advertising Packet
+        // HCI Packet Type : HCI Event (0x04)
+        // Event Code : LE Advertising Report (0x3E)
+        if (b[0] != 0x04 || b[1] != 0x3E) {
+            // Not an Advertisement Packet
             return reportRecords;
         }
 
-        // Sub Event Code : LE Advertising Report (0x02)
-        // Sub Event Code : LE Extended Advertising Report (0x0D)
-        if (b[2] != 0x02 && b[2] != 0x0D) {
-            // Not an Advertisement Event
+        // Subevent Code : LE Advertisement Subevent (0x02)
+        if (b[3] != 0x02) {
+            // Not an Advertisement Sub Event
             return reportRecords;
-        }
-
-        // Determine if this is an extended advertising report
-        boolean extendedAdvertisingReport = false;
-
-        if (b[2] == 0x0D) {
-            extendedAdvertisingReport = true;
         }
 
         // Number of reports in this advertisement
-        int reportRecordsNumber = b[3];
+        int reportRecordsNumber = b[4];
 
         // Parse each report
-        int ptr = 4;
+        int ptr = 5;
         for (int nr = 0; nr < reportRecordsNumber; nr++) {
 
             AdvertisingReportRecord arr = new AdvertisingReportRecord();
-            arr.setExtendedReport(extendedAdvertisingReport);
-
-            if (extendedAdvertisingReport) {
-                arr.setEventType(((b[ptr++] & 0xFF) | (b[ptr++] & 0xFF) << 8));
-            } else {
-                arr.setEventType(b[ptr++]);
-            }
-
+            arr.setEventType(b[ptr++]);
             arr.setAddressType(b[ptr++]);
 
             // Extract remote address
@@ -186,38 +189,7 @@ public class BluetoothLeUtil {
 
             arr.setAddress(address);
 
-            // Skip past address bytes
             ptr += 6;
-
-            // Additional Extended Advertising Report attributes
-            if (extendedAdvertisingReport) {
-                // Primary & Secondary Phy
-                arr.setPrimaryPhy(b[ptr++]);
-                arr.setSecondaryPhy(b[ptr++]);
-
-                // SID
-                arr.setSid(b[ptr++]);
-
-                // Tx Power
-                arr.setTxPower(b[ptr++]);
-
-                // RSSI
-                arr.setRssi(b[ptr++]);
-
-                // Periodic Advertising Interval
-                arr.setPeriodicAdvertisingInterval(((b[ptr++] & 0xFF) | (b[ptr++] & 0xFF) << 8));
-
-                // Direct Address
-                arr.setDirectAddressType(b[ptr++]);
-
-                String directAddress = String.format("%02X:%02X:%02X:%02X:%02X:%02X", b[ptr + 5], b[ptr + 4],
-                        b[ptr + 3], b[ptr + 2], b[ptr + 1], b[ptr + 0]);
-
-                arr.setDirectAddress(directAddress);
-
-                // Skip past direct address bytes
-                ptr += 6;
-            }
 
             int arrDataLength = b[ptr++];
 
@@ -227,11 +199,7 @@ public class BluetoothLeUtil {
             byte[] arrData = new byte[arrDataLength];
             System.arraycopy(b, ptr, arrData, 0, arrDataLength);
             arr.setReportData(arrData);
-
-            // RSSI
-            if (!extendedAdvertisingReport) {
-                arr.setRssi(b[ptr + arrDataLength]);
-            }
+            arr.setRssi(b[ptr + arrDataLength]);
 
             reportRecords.add(arr);
 
@@ -251,7 +219,7 @@ public class BluetoothLeUtil {
     }
 
     public static boolean stopBtdump(String interfaceName, CommandExecutorService executorService) {
-        String[] command = { "btmon", "-i", interfaceName, "-w", "/dev/fd/3" };
-        return executorService.kill(command, LinuxSignal.SIGTERM);
+        String[] killCommand = { BTDUMP, interfaceName };
+        return executorService.kill(killCommand, null);
     }
 }

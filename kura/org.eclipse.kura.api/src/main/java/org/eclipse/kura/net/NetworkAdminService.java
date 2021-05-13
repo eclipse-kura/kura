@@ -223,7 +223,7 @@ public interface NetworkAdminService {
      *            - name of WiFi interface
      * @return list of channels and frequencies.
      * @throws KuraException
-     * @since 3.0
+     * @since 2.2
      */
     public List<WifiChannel> getWifiFrequencies(String ifaceName) throws KuraException;
 
@@ -232,7 +232,7 @@ public interface NetworkAdminService {
      *
      * @return Name of the Country Code or 00 if unknown.
      * @throws KuraException
-     * @since 3.0
+     * @since 2.2
      */
     public String getWifiCountryCode() throws KuraException;
 

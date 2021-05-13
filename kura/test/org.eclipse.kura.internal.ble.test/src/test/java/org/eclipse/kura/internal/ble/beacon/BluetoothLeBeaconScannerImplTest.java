@@ -47,7 +47,7 @@ public class BluetoothLeBeaconScannerImplTest {
                 lock.notifyAll();
             }
             return null;
-        }).when(beaconManagerMock).stopBeaconScan(adapterMock);
+        }).when(beaconManagerMock).stopBeaconScan(devName);
 
         new Thread(() -> {
             try {
@@ -67,8 +67,8 @@ public class BluetoothLeBeaconScannerImplTest {
         Thread.sleep(100);
         assertFalse("Should not be scanning anymore", svc.isScanning());
 
-        verify(beaconManagerMock, times(1)).startBeaconScan(adapterMock);
-        verify(beaconManagerMock, times(1)).stopBeaconScan(adapterMock);
+        verify(beaconManagerMock, times(1)).startBeaconScan(devName);
+        verify(beaconManagerMock, times(1)).stopBeaconScan(devName);
     }
 
     @Test

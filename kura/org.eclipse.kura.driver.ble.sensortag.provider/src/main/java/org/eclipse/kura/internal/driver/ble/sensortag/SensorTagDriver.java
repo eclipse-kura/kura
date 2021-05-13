@@ -166,7 +166,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
         sensorTag.connect();
         if (sensorTag.isConnected()) {
             sensorTag.init();
-            sensorTag.enableThermometer();
+            sensorTag.enableTermometer();
 
             sensorTag.setAccelerometerPeriod(50);
             if (sensorTag.isCC2650()) {
@@ -521,7 +521,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     private void registerNotification(SensorListener sensorListener) {
         switch (sensorListener.getSensorType()) {
         case "TEMP":
-            sensorListener.getSensorTag().setThermometerPeriod(sensorListener.getPeriod() / 10);
+            sensorListener.getSensorTag().setTermometerPeriod(sensorListener.getPeriod() / 10);
             unregisterTemperatureNotification(sensorListener);
             sensorListener.getSensorTag()
                     .enableTemperatureNotifications(SensorListener.getSensorConsumer(sensorListener));
@@ -620,7 +620,7 @@ public final class SensorTagDriver implements Driver, ConfigurableComponent {
     }
 
     private void unregisterTemperatureNotification(SensorListener sensorListener) {
-        if (sensorListener.getSensorTag().isThermometerNotifying()) {
+        if (sensorListener.getSensorTag().isTermometerNotifying()) {
             sensorListener.getSensorTag().disableTemperatureNotifications();
         }
     }

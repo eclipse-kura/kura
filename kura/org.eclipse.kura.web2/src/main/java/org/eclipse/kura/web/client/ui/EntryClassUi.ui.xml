@@ -254,30 +254,6 @@
 													</b:Heading>
 												</b:Alert>
 											</b:Panel>
-											<b:Panel ui:field="stackTraceContainer">
-												<b:PanelHeader>
-													<b:Heading size="H6">
-														<b:Anchor dataToggle="COLLAPSE"
-															dataParent="#accordion"
-															dataTarget="#collapseErrorStackTrace"
-															ui:field="errorStackTraceAreaOneAnchor" />
-													</b:Heading>
-												</b:PanelHeader>
-												<b:PanelCollapse
-													b:id="collapseErrorStackTrace"
-													ui:field="errorStackTraceAreaOneCollapse">
-													<b:PanelBody>
-														<b:Well>
-															<b:Container fluid="true"
-																addStyleNames="failure-handler-stack-trace-container">
-																<g:VerticalPanel
-																	ui:field="errorStackTraceAreaOne">
-																</g:VerticalPanel>
-															</b:Container>
-														</b:Well>
-													</b:PanelBody>
-												</b:PanelCollapse>
-											</b:Panel>
 										</b:PanelGroup>
 									</g:ScrollPanel>
 								</b:ModalBody>

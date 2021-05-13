@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,7 +9,6 @@
  * 
  * Contributors:
  *  Eurotech
- *  Scott Ware
  *******************************************************************************/
 package org.eclipse.kura.internal.ble.util;
 
@@ -37,7 +36,7 @@ import org.eclipse.kura.executor.CommandStatus;
 public class BluetoothProcess {
 
     private static final Logger logger = LogManager.getLogger(BluetoothProcess.class);
-
+    
     @SuppressWarnings("checkstyle:constantName")
     private static final ExecutorService streamGobblers = Executors.newCachedThreadPool();
 
@@ -110,22 +109,9 @@ public class BluetoothProcess {
         }
         Consumer<CommandStatus> callback = status -> logger.debug("Command ended with exit value {}",
                 status.getExitStatus().getExitCode());
-
-        // Build command
-        StringBuilder commandLine = new StringBuilder();
-        commandLine.append("{ exec");
-        Arrays.asList(cmdArray).stream().forEach(s -> {
-            commandLine.append(" ");
-            commandLine.append(s);
-        });
-        commandLine.append(" >/dev/null;");
-        commandLine.append(" }");
-        commandLine.append(" 3>&1");
-
-        Command command = new Command(commandLine.toString().split("\\s+"));
+        Command command = new Command(cmdArray);
         command.setOutputStream(this.outputStream);
         command.setErrorStream(this.errorStream);
-        command.setExecuteInAShell(true);
         this.executorService.execute(command, callback);
 
         this.futureInputGobbler = streamGobblers.submit(() -> {
@@ -133,7 +119,7 @@ public class BluetoothProcess {
             try {
                 readBTSnoopStreamFully(this.readOutputStream, listener);
             } catch (IOException e) {
-                logger.debug("Process snoop input stream failed", e);
+                logger.error("Process snoop input stream failed", e);
             }
         });
 
@@ -143,7 +129,7 @@ public class BluetoothProcess {
             try {
                 readBTErrorStreamFully(this.readErrorStream, listener);
             } catch (IOException e) {
-                logger.debug("Process snoop error stream failed", e);
+                logger.error("Process snoop error stream failed", e);
             }
         });
     }
@@ -179,12 +165,11 @@ public class BluetoothProcess {
         while (this.btSnoopReady) {
             if (is != null) {
                 byte[] packet = this.parser.readRecord();
-                if (packet.length > 0) {
-                    listener.processBTSnoopRecord(packet);
-                }
+                listener.processBTSnoopRecord(packet);
             }
         }
-        logger.debug("End of btsnoop stream!");
+        closeStreams();
+        logger.debug("End of stream!");
     }
 
     private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener)

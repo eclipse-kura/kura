@@ -109,7 +109,7 @@ public interface CryptoService {
      * @return String that has been hashed.
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
-     * @since 3.0
+     * @since 2.2
      */
     default String sha256Hash(String s) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         return hash(s, "SHA-256");
@@ -125,7 +125,7 @@ public interface CryptoService {
      * @return String that has been hashed.
      * @throws NoSuchAlgorithmException
      * @throws UnsupportedEncodingException
-     * @since 3.0
+     * @since 2.2
      */
     public String hash(String s, String algorithm) throws NoSuchAlgorithmException, UnsupportedEncodingException;
 

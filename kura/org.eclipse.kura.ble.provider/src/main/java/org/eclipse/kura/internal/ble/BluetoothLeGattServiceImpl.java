@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.ble;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -21,10 +22,12 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeDevice;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattService;
 
-import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattCharacteristic;
-import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattService;
+import tinyb.BluetoothGattCharacteristic;
+import tinyb.BluetoothGattService;
 
 public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
+
+    private static final long TIMEOUT = 30;
 
     private final BluetoothGattService service;
 
@@ -34,8 +37,14 @@ public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
 
     @Override
     public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid) throws KuraBluetoothResourceNotFoundException {
+        return findCharacteristic(uuid, BluetoothLeGattServiceImpl.TIMEOUT);
+    }
+
+    @Override
+    public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid, long timeout)
+            throws KuraBluetoothResourceNotFoundException {
         BluetoothGattCharacteristic characteristic;
-        characteristic = this.service.getGattCharacteristicByUuid(uuid.toString());
+        characteristic = this.service.find(uuid.toString(), Duration.ofSeconds(timeout));
         if (characteristic != null) {
             return new BluetoothLeGattCharacteristicImpl(characteristic);
         } else {
@@ -44,17 +53,11 @@ public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
     }
 
     @Override
-    public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid, long timeout)
-            throws KuraBluetoothResourceNotFoundException {
-        return findCharacteristic(uuid);
-    }
-
-    @Override
     public List<BluetoothLeGattCharacteristic> findCharacteristics() throws KuraBluetoothResourceNotFoundException {
-        List<BluetoothGattCharacteristic> characteristicList = this.service.getGattCharacteristics();
+        List<BluetoothGattCharacteristic> tinybCharacteristics = this.service.getCharacteristics();
         List<BluetoothLeGattCharacteristic> characteristics = new ArrayList<>();
-        if (characteristicList != null) {
-            for (BluetoothGattCharacteristic characteristic : characteristicList) {
+        if (tinybCharacteristics != null) {
+            for (BluetoothGattCharacteristic characteristic : tinybCharacteristics) {
                 characteristics.add(new BluetoothLeGattCharacteristicImpl(characteristic));
             }
         } else {
@@ -65,11 +68,7 @@ public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
 
     @Override
     public UUID getUUID() {
-        String uuid = this.service.getUuid();
-        if (uuid == null) {
-            return null;
-        }
-        return UUID.fromString(uuid);
+        return UUID.fromString(this.service.getUUID());
     }
 
     @Override
@@ -79,11 +78,7 @@ public class BluetoothLeGattServiceImpl implements BluetoothLeGattService {
 
     @Override
     public boolean isPrimary() {
-        Boolean primary = this.service.isPrimary();
-        if (primary != null) {
-            return primary;
-        }
-        return false;
+        return this.service.getPrimary();
     }
 
 }

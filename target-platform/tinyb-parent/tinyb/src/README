@@ -1,0 +1,41 @@
+Tiny Bluetooth LE Library
+
+TinyB project aims to create clean, modern and easy to use Bluetooth LE API. TinyB exposes the BLE GATT API for C++, Java and other languages, using BlueZ over DBus.
+
+How to build TinyB
+
+TinyB requires CMake 3.1+ and GLib/GIO 2.40+ for building. It also requires BlueZ with GATT profile activated.
+1. Clone to git repository containing the source code:
+    git clone https://github.com/eurotech/tinyb.git
+    
+2. Change directory to tinyb:
+    cd tinyb
+
+3. Checkout to kura branch
+    git checkout v0.5.1
+    
+4. Set up variables for java. Change the paths according to your installation:
+    export JAVA_HOME=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt
+    export JAVA_AWT_LIBRARY=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/jre/lib/arm/libawt.so
+    export JAVA_JVM_LIBRARY=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/jre/lib/arm/server/libjvm.so
+    export JAVA_INCLUDE_PATH=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/include
+    export JAVA_INCLUDE_PATH2=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/include/linux
+    export JAVA_AWT_INCLUDE_PATH=/usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/include
+        
+5. Create build folder:
+    mkdir build
+    
+6. Change directory:
+    cd build
+    
+7. Configure the project enabling Java bindings:
+    cmake -DBUILDJAVA=ON ..
+    
+8. Compile:
+    make
+
+The resulting libraries will be
+    tinyb/build/src/libtinyb.so.<version>
+    tinyb/build/java/tinyb.jar
+    tinyb/build/java/jni/libjavatinyb.so.<version>
+

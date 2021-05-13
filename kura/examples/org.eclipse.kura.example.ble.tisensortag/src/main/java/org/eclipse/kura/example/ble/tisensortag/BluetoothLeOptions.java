@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@ public class BluetoothLeOptions {
     private static final String PROPERTY_SCAN_NAME = "scan_enable";
     private static final String PROPERTY_SCANTIME_NAME = "scan_time";
     private static final String PROPERTY_PERIOD_NAME = "period";
-    private static final String PROPERTY_TEMP_NAME = "enableThermometer";
+    private static final String PROPERTY_TEMP_NAME = "enableTermometer";
     private static final String PROPERTY_ACC_NAME = "enableAccelerometer";
     private static final String PROPERTY_HUM_NAME = "enableHygrometer";
     private static final String PROPERTY_MAG_NAME = "enableMagnetometer";

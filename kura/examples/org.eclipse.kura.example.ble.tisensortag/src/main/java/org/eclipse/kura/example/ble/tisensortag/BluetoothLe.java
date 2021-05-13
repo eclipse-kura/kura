@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -459,7 +459,7 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
     }
 
     private void readTemperature(TiSensorTag myTiSensorTag, KuraPayload payload) {
-        myTiSensorTag.enableThermometer();
+        myTiSensorTag.enableTermometer();
         waitFor(1000);
         double[] temperatures = myTiSensorTag.readTemperature();
 

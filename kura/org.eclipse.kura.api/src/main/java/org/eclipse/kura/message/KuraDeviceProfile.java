@@ -33,7 +33,7 @@ public class KuraDeviceProfile {
     public static final String TOTAL_MEMORY_KEY = "total_memory";
     public static final String FIRMWARE_VERSION_KEY = "firmware_version";
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public static final String CPU_VERSION_KEY = "cpu_version";
     public static final String BIOS_VERSION_KEY = "bios_version";
@@ -162,7 +162,7 @@ public class KuraDeviceProfile {
     /**
      * Returns the CPU version information.
      * 
-     * @since 3.0
+     * @since 2.2
      * @return A string representing the CPU version information.
      */
     public String getCpuVersion() {
@@ -371,7 +371,7 @@ public class KuraDeviceProfile {
     /**
      * Sets the CPU version information
      * 
-     * @since 3.0
+     * @since 2.2
      * @param cpuVersion
      *            the CPU version information
      */

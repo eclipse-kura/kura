@@ -24,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * An extended property group has a name and some properties.
  * 
  * @noextend This class is not intended to be subclassed by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public class ExtendedPropertyGroup {

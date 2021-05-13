@@ -41,7 +41,7 @@ import org.apache.commons.io.output.NullOutputStream;
  * false.</li>
  * </ul>
  * 
- * @since 3.0
+ * @since 2.2
  *
  */
 public class Command {

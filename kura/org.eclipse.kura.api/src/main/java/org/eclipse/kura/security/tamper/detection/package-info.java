@@ -13,6 +13,6 @@
 /**
  * Defines APIs for tamper detection.
  *
- * @since 3.0
+ * @since 2.2
  */
 package org.eclipse.kura.security.tamper.detection;

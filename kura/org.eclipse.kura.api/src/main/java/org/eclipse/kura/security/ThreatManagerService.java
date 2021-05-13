@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This marker interface is used to group the services that manage the network threats.
  * 
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public interface ThreatManagerService {

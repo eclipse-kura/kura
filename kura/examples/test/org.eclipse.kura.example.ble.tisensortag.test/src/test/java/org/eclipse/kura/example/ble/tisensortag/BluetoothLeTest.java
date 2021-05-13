@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -111,7 +111,7 @@ public class BluetoothLeTest {
         properties.put("scan_time", 2);
         properties.put("publishTopic", "testTopic");
         properties.put("discoverServicesAndCharacteristics", true);
-        properties.put("enableTermometer", true);
+        properties.put("enableThermometer", true);
         properties.put("enableAccelerometer", true);
         properties.put("enableHygrometer", true);
         properties.put("enableMagnetometer", true);
@@ -171,7 +171,7 @@ public class BluetoothLeTest {
 
         Thread.sleep(13000);
 
-        verify(tistMock, atLeast(1)).enableTermometer();
+        verify(tistMock, atLeast(1)).enableThermometer();
         verify(tistMock, atLeast(1)).enableAccelerometer("3802");
         verify(tistMock, atLeast(1)).enableLuxometer();
         verify(tistMock, atLeast(1)).enableHygrometer();

@@ -47,7 +47,7 @@ public class BluetoothLeBeaconScannerImpl<T extends BluetoothLeBeacon> implement
     @Override
     public void startBeaconScan(long timeout) throws KuraBluetoothCommandException {
         try {
-            this.beaconManager.startBeaconScan(this.adapter.getInterfaceName());
+            this.beaconManager.startBeaconScan(this.adapter);
             this.isScanning = true;
             long start = System.currentTimeMillis();
             while (System.currentTimeMillis() - start < timeout * 1000L) {
@@ -61,7 +61,7 @@ public class BluetoothLeBeaconScannerImpl<T extends BluetoothLeBeacon> implement
 
     @Override
     public void stopBeaconScan() {
-        this.beaconManager.stopBeaconScan(this.adapter.getInterfaceName());
+        this.beaconManager.stopBeaconScan(this.adapter);
         this.isScanning = false;
     }
 

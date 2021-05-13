@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * interface provides the highest available level of permissions.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 2.2
+ * @since 3.0
  */
 @ProviderType
 public interface PrivilegedExecutorService extends CommandExecutorService {

@@ -28,7 +28,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The number of returned groups, their names and contained property keys and values are not specified by Kura APIs.
  * 
  * @noextend This class is not intended to be subclassed by clients.
- * @since 2.2
+ * @since 3.0
  */
 @ProviderType
 public class ExtendedProperties {

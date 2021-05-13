@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * installed in the host system running the framework.
  *
  * @noextend This class is not intended to be subclassed by clients.
- * @since 2.2
+ * @since 3.0
  */
 @Immutable
 @ThreadSafe

@@ -17,9 +17,9 @@ import java.util.UUID;
 import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattCharacteristic;
 import org.eclipse.kura.bluetooth.le.BluetoothLeGattDescriptor;
+import org.freedesktop.dbus.exceptions.DBusException;
 
-import tinyb.BluetoothException;
-import tinyb.BluetoothGattDescriptor;
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattDescriptor;
 
 public class BluetoothLeGattDescriptorImpl implements BluetoothLeGattDescriptor {
 
@@ -33,8 +33,8 @@ public class BluetoothLeGattDescriptorImpl implements BluetoothLeGattDescriptor 
     public byte[] readValue() throws KuraBluetoothIOException {
         byte[] value;
         try {
-            value = BluetoothLeGattDescriptorImpl.this.descriptor.readValue();
-        } catch (BluetoothException e) {
+            value = this.descriptor.readValue(null);
+        } catch (DBusException e) {
             throw new KuraBluetoothIOException(e, "Read descriptor value failed");
         }
         return value;
@@ -43,15 +43,19 @@ public class BluetoothLeGattDescriptorImpl implements BluetoothLeGattDescriptor 
     @Override
     public void writeValue(byte[] value) throws KuraBluetoothIOException {
         try {
-            BluetoothLeGattDescriptorImpl.this.descriptor.writeValue(value);
-        } catch (BluetoothException e) {
+            this.descriptor.writeValue(value, null);
+        } catch (DBusException e) {
             throw new KuraBluetoothIOException(e, "Write descriptor value failed");
         }
     }
 
     @Override
     public UUID getUUID() {
-        return UUID.fromString(this.descriptor.getUUID());
+        String uuid = this.descriptor.getUuid();
+        if (uuid == null) {
+            return null;
+        }
+        return UUID.fromString(uuid);
     }
 
     @Override

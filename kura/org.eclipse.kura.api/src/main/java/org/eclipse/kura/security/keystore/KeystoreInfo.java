@@ -17,7 +17,7 @@ package org.eclipse.kura.security.keystore;
  * Identifies a keystore with its name.
  * Further keystore information can be added (type, size...).
  *
- * @since 2.2
+ * @since 3.0
  */
 public class KeystoreInfo {
 

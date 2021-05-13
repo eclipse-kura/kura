@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This interface is used to provide the configuration for the flooding protection.
  * 
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 2.2
+ * @since 3.0
  */
 @ProviderType
 public interface FloodingProtectionConfigurationService {

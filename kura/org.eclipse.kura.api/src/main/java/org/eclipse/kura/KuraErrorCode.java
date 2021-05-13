@@ -239,7 +239,7 @@ public enum KuraErrorCode {
     /**
      * Error during IO operation.
      * 
-     * @since 2.2
+     * @since 3.0
      */
     IO_ERROR;
 }

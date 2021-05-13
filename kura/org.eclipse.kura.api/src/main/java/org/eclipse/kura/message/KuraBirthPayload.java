@@ -50,7 +50,7 @@ public class KuraBirthPayload extends KuraPayload {
     /**
      * Provides information on the device tampering status.
      * 
-     * @since 2.2
+     * @since 3.0
      */
     public enum TamperStatus {
 
@@ -78,7 +78,7 @@ public class KuraBirthPayload extends KuraPayload {
     private static final String MODEM_FIRMWARE_VERSION = "modem_firmware_version";
     private static final String PAYLOAD_ENCODING_KEY = "payload_encoding";
     /**
-     * @since 2.2
+     * @since 3.0
      */
     private static final String TAMPER_STATUS = "tamper_status";
 
@@ -115,7 +115,7 @@ public class KuraBirthPayload extends KuraPayload {
     }
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public String getCpuVersion() {
         return (String) getMetric(CPU_VERSION_KEY);
@@ -142,7 +142,7 @@ public class KuraBirthPayload extends KuraPayload {
     }
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public TamperStatus getTamperStatus() {
         final String tamperStatus = (String) getMetric(TAMPER_STATUS);
@@ -231,7 +231,7 @@ public class KuraBirthPayload extends KuraPayload {
     }
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public String getModemFirmwareVersion() {
         return (String) getMetric(MODEM_FIRMWARE_VERSION);
@@ -390,7 +390,7 @@ public class KuraBirthPayload extends KuraPayload {
         }
 
         /**
-         * @since 2.2
+         * @since 3.0
          */
         public KuraBirthPayloadBuilder withCpuVersion(String cpuVersion) {
             this.cpuVersion = cpuVersion;
@@ -479,7 +479,7 @@ public class KuraBirthPayload extends KuraPayload {
         }
 
         /**
-         * @since 2.2
+         * @since 3.0
          */
         public KuraBirthPayloadBuilder withModemFirmwareVersion(String modemFirmwareVersion) {
             this.modemFirmwareVersion = modemFirmwareVersion;
@@ -497,7 +497,7 @@ public class KuraBirthPayload extends KuraPayload {
         }
 
         /**
-         * @since 2.2
+         * @since 3.0
          */
         public KuraBirthPayloadBuilder withTamperStatus(TamperStatus tamperStatus) {
             this.tamperStatus = tamperStatus;

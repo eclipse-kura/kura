@@ -180,7 +180,6 @@ public class Xdk {
 
     public void enableHighNotifications(Consumer<float[]> callback) {
         Consumer<byte[]> callbackHigh = valueBytes -> callback.accept(calculateHighData(valueBytes));
-
         try {
             this.gattResources.get(HIGH_PRIORITY_ARRAY).getGattService()
                     .findCharacteristic(XdkGatt.UUID_XDK_HIGH_DATA_RATE_HIGH_PRIORITY_ARREY)

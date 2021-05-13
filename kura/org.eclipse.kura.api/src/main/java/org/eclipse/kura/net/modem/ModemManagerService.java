@@ -28,7 +28,7 @@ public interface ModemManagerService {
     /**
      * Returns the modem tracked with the given id.
      * 
-     * @deprecated since 2.2 use {@link ModemManagerService#withModemService(String, Function)} instead
+     * @deprecated since 3.0 use {@link ModemManagerService#withModemService(String, Function)} instead
      * @param id
      *            The id of the modem, in case of an USB modem, the id is the USB port as returned by
      *            {@link org.eclipse.kura.usb.UsbModemDevice#getUsbPort()}, in case of a serial modem the id is the
@@ -41,7 +41,7 @@ public interface ModemManagerService {
     /**
      * Returns the list of currently tracked modems
      * 
-     * @deprecated since 2.2 use {@link ModemManagerService#withAllModemServices(Function)} instead
+     * @deprecated since 3.0 use {@link ModemManagerService#withAllModemServices(Function)} instead
      * @return the list of currently tracked modems
      */
     @Deprecated
@@ -51,7 +51,7 @@ public interface ModemManagerService {
      * Applies the provided function to the modem named {@code id}.
      * The function will have exclusive access to the modem until it returns.
      * 
-     * @since 2.2
+     * @since 3.0
      * 
      * @param <T>
      *            The return type of the function
@@ -69,7 +69,7 @@ public interface ModemManagerService {
      * The function will have exclusive access to the modems until it returns.
      * 
      * 
-     * @since 2.2
+     * @since 3.0
      * 
      * @param <T>
      *            The return type of the function
@@ -81,7 +81,7 @@ public interface ModemManagerService {
 
     /**
      * 
-     * @since 2.2
+     * @since 3.0
      * 
      * @param <T>
      * @param <U>

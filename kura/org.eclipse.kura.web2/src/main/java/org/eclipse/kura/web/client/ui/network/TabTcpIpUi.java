@@ -715,7 +715,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.gateway.setText("");
                 this.dns.setText("");
             } else {
-                // this.configure.setEnabled(true);
                 String configureValue = this.configure.getSelectedValue();
                 if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
                     this.ip.setEnabled(false);

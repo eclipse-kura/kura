@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -670,8 +670,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     }
 
     private void refreshForm() {
+        this.status.setEnabled(true);
+        this.configure.setEnabled(true);
+        this.ip.setEnabled(true);
+        this.subnet.setEnabled(true);
+        this.gateway.setEnabled(true);
+        this.dns.setEnabled(true);
+        this.renew.setEnabled(true);
+
+        // disabling fields based on the interface
         if (this.selectedNetIfConfig != null && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
-            this.status.setEnabled(true);
             this.configure.setEnabled(false);
             this.ip.setEnabled(false);
             this.subnet.setEnabled(false);
@@ -679,10 +687,18 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
                     || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())) {
                 this.dns.setEnabled(false);
-            } else {
-                this.dns.setEnabled(true);
             }
             this.configure.setSelectedIndex(this.configure.getItemText(0).equals(IPV4_MODE_DHCP_MESSAGE) ? 0 : 1);
+        } else if (this.selectedNetIfConfig != null
+                && this.selectedNetIfConfig.getHwTypeEnum() == GwtNetIfType.LOOPBACK) {
+            // loopback interface should not be editable
+            this.status.setEnabled(false);
+            this.configure.setEnabled(false);
+            this.ip.setEnabled(false);
+            this.subnet.setEnabled(false);
+            this.gateway.setEnabled(false);
+            this.dns.setEnabled(false);
+            this.renew.setEnabled(false);
         } else {
             if (VMSGS.netIPv4StatusDisabled().equals(this.status.getSelectedValue())
                     || VMSGS.netIPv4StatusUnmanaged().equals(this.status.getSelectedValue())
@@ -699,26 +715,16 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                 this.gateway.setText("");
                 this.dns.setText("");
             } else {
-                this.configure.setEnabled(true);
                 String configureValue = this.configure.getSelectedValue();
                 if (configureValue.equals(IPV4_MODE_DHCP_MESSAGE)) {
                     this.ip.setEnabled(false);
                     this.subnet.setEnabled(false);
                     this.gateway.setEnabled(false);
-                    this.renew.setEnabled(true);
-                    if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
-                        this.dns.setEnabled(true);
-                    } else {
+                    if (!this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
                         this.dns.setEnabled(false);
                     }
                 } else {
-                    this.ip.setEnabled(true);
-                    this.subnet.setEnabled(true);
-
-                    if (this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
-                        this.gateway.setEnabled(true);
-                        this.dns.setEnabled(true);
-                    } else {
+                    if (!this.status.getSelectedValue().equals(IPV4_STATUS_WAN_MESSAGE)) {
                         this.gateway.setText("");
                         this.gateway.setEnabled(false);
                         this.dns.setEnabled(false);
@@ -737,7 +743,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
         } else {
             this.dnsRead.setVisible(false);
         }
-
     }
 
     private void reset() {

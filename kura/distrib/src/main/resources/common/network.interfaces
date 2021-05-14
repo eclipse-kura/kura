@@ -2,9 +2,7 @@
  
 # The loopback interface
 auto lo
-iface lo inet static
-	address 127.0.0.1
-	netmask 255.0.0.0
+iface lo inet loopback
 
 # Wireless interfaces
 auto wlan0

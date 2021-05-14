@@ -246,7 +246,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                         gwtNetConfig.setConfigMode(GwtNetIfConfigMode.netIPv4ConfigModeManual.name());
                                     }
 
-                                    // since DHCP - populate current data
+                                    // since DHCP or loopback - populate current data
                                     if (addressConfig.getAddress() != null) {
                                         gwtNetConfig.setIpAddress(addressConfig.getAddress().getHostAddress());
                                     } else {

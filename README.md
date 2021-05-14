@@ -58,13 +58,17 @@ For Java
 brew tap adoptopenjdk/openjdk 
 brew cask install adoptopenjdk8   
 ```
+Make sure to set this version in your path, this can be done by:
+```
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
+```
 Run `java -version` to make sure it is installed correctly.  
 
 For Maven
 ```
 brew install maven@3.5
 ```
-Run `mvn -version`to ensure that Maven has been added to the PATH.
+Run `mvn -version` to ensure that Maven has been added to the PATH.
 If Maven cannot be found, try running `brew link maven@3.5 --force`.  
 
 #### Installing Prerequisites in Linux
@@ -77,10 +81,12 @@ For Maven
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
 
 ### Eclipse IDE
-The simplest way to start developing on Eclipse Kura is to use an Eclipse Installer based setup.
+The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup.
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
-- Select "Eclipse for Committers" and configure the "Product Version", then select a JRE 1.8+ and press the Next button
+- Switch to advanced mode (top right hamburger menu > Advanced Mode)
+- Select "Eclipse for Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
+- Set the Java 1.8+ VM: to the recently installed local jdk-8 VM, and press the Next button
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
   - "User": if you want to develop applications or bundles running on Kura, select this option. It will install only the APIs and the examples.
@@ -88,8 +94,10 @@ To correctly setup the environment, proceed as follows:
 - Update Eclipse Kura Git repository username and customize further settings if you like (e.g. Root install folder, Installation folder name). To show these options, make sure that the "Show all variables" checkbox is enabled
 - Leave all Bootstrap Tasks selected and press the Finish button
 - Accept all the licenses and wait for the installation to finish
+At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. 
+- When the tasks are completed. In the IDE open (double click) Target Platform > Target-Definition > Kura Target Platform Equinox 3.16.0, and press "Set as Target Platform" located at the top right of the window
 
-At first startup Eclipse IDE will checkout the code, perform a full build and configure a few Working Sets. Now you are ready to develop on Eclipse Kura.
+Now you are ready to develop on Eclipse Kura.
 
 To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
 

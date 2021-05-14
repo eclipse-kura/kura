@@ -22,7 +22,6 @@ import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.ArrayList;
@@ -43,6 +42,8 @@ import org.eclipse.kura.web.shared.model.GwtKeystoreEntry.Kind;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet implements GwtCertificatesService {
 
@@ -51,6 +52,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
      */
     private static final long serialVersionUID = 7402961266449489433L;
     private static final String KURA_SERVICE_PID = "kura.service.pid";
+
+    private static final Logger logger = LoggerFactory.getLogger(GwtCertificatesServiceImpl.class);
 
     @Override
     public void storeKeyPair(GwtXSRFToken xsrfToken, String keyStorePid, String privateKey, String publicCert,
@@ -141,31 +144,31 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 for (final Map.Entry<String, Entry> e : service.getEntries().entrySet()) {
 
                     final Kind kind;
-                    
+
                     Date validityStartDate = null;
                     Date validityEndDate = null;
 
                     if (e.getValue() instanceof PrivateKeyEntry) {
                         kind = Kind.KEY_PAIR;
-                        
+
                         PrivateKeyEntry pke = (PrivateKeyEntry) e.getValue();
                         Certificate[] chain = pke.getCertificateChain();
-                        
-                        if(chain.length > 0) {
-                        	Certificate leaf = chain[chain.length - 1];
-                        	
-                        	if(leaf instanceof X509Certificate) {
-                        		validityStartDate = ((X509Certificate) leaf).getNotBefore();
-                        		validityEndDate = ((X509Certificate) leaf).getNotAfter();
-                        	}
+
+                        if (chain.length > 0) {
+                            Certificate leaf = chain[chain.length - 1];
+
+                            if (leaf instanceof X509Certificate) {
+                                validityStartDate = ((X509Certificate) leaf).getNotBefore();
+                                validityEndDate = ((X509Certificate) leaf).getNotAfter();
+                            }
                         }
                     } else if (e.getValue() instanceof TrustedCertificateEntry) {
                         kind = Kind.TRUSTED_CERT;
 
                         Certificate cert = ((TrustedCertificateEntry) e.getValue()).getTrustedCertificate();
-                        
-                        if(cert instanceof X509Certificate) {
-                        	validityStartDate = ((X509Certificate) cert).getNotBefore();
+
+                        if (cert instanceof X509Certificate) {
+                            validityStartDate = ((X509Certificate) cert).getNotBefore();
                             validityEndDate = ((X509Certificate) cert).getNotAfter();
                         }
                     } else if (e.getValue() instanceof SecretKeyEntry) {
@@ -174,8 +177,12 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                         continue;
                     }
 
-                    result.add(new GwtKeystoreEntry(e.getKey(), (String) kuraServicePid, kind, validityStartDate, validityEndDate));
+                    result.add(new GwtKeystoreEntry(e.getKey(), (String) kuraServicePid, kind, validityStartDate,
+                            validityEndDate));
                 }
+            } catch (KuraException keystoreException) {
+                logger.error("Error while accessing keystore file of Keystore Service '" + (String) kuraServicePid
+                        + "': " + keystoreException.getMessage(), keystoreException);
             } finally {
                 context.ungetService(ref);
             }

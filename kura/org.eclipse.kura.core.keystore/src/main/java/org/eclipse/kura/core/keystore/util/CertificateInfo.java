@@ -27,8 +27,8 @@ public class CertificateInfo extends EntryInfo {
     private String subjectDN;
     private Collection<List<?>> subjectAN;
     private String issuer;
-    private String startDate;
-    private String expirationDate;
+    private long startDate;
+    private long expirationDate;
     private String algorithm;
     private int size;
     private String certificate;
@@ -62,19 +62,19 @@ public class CertificateInfo extends EntryInfo {
         this.issuer = issuer;
     }
 
-    public String getStartDate() {
+    public long getStartDate() {
         return this.startDate;
     }
 
-    public void setStartDate(String startDate) {
+    public void setStartDate(long startDate) {
         this.startDate = startDate;
     }
 
-    public String getExpirationDate() {
+    public long getExpirationDate() {
         return this.expirationDate;
     }
 
-    public void setExpirationDate(String expirationDate) {
+    public void setExpirationDate(long expirationDate) {
         this.expirationDate = expirationDate;
     }
 

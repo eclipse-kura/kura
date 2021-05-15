@@ -106,10 +106,11 @@ public class PppAuthSecrets {
         } catch (Exception e) {
             s_logger.error("Could not initialize", e);
         } finally {
+
             if (br != null) {
                 try {
-                    fr.close();
                     br.close();
+                    fr.close();
                 } catch (IOException ex) {
                     s_logger.error("I/O Exception while closing BufferedReader!");
                 }

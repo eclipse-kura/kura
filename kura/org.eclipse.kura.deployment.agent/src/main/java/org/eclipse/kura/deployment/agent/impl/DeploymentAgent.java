@@ -232,6 +232,11 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         this.instPackageUrls = null;
     }
 
+    public void updated(ComponentContext componentContext) {
+        logger.debug("Updating DeploymentAgent...");
+        logger.debug("DeploymentAgent updated");
+    }
+
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
         this.deploymentAdmin = deploymentAdmin;
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@ package org.eclipse.kura.internal.wire.h2db.filter;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.sql.Blob;
 import java.sql.ResultSet;
@@ -44,15 +43,9 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * The Class DbWireRecordFilter is responsible for representing a wire component
@@ -67,6 +60,8 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
 
     private H2DbServiceHelper dbHelper;
 
+    private H2DbService dbService;
+
     private H2DbWireRecordFilterOptions options;
 
     private volatile WireHelperService wireHelperService;
@@ -77,16 +72,17 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
 
     private int cacheExpirationInterval;
 
-    private ServiceTracker<H2DbService, H2DbService> dbServiceTracker;
-
-    private ComponentContext componentContext;
-
     public synchronized void bindDbService(H2DbService dbService) {
+        this.dbService = dbService;
         this.dbHelper = H2DbServiceHelper.of(dbService);
     }
 
     public synchronized void unbindDbService(H2DbService dbService) {
-        this.dbHelper = null;
+        if (this.dbService == dbService) {
+            this.dbHelper = null;
+            this.dbService = null;
+            this.options = null;
+        }
     }
 
     /**
@@ -123,7 +119,6 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating DB Wire Record Filter...");
-        this.componentContext = componentContext;
         this.options = new H2DbWireRecordFilterOptions(properties);
 
         this.wireSupport = this.wireHelperService.newWireSupport(this,
@@ -135,7 +130,6 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         // expired
         this.lastRefreshedTime = Calendar.getInstance();
         this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
-        restartDbServiceTracker();
         logger.debug("Activating DB Wire Record Filter... Done");
     }
 
@@ -147,13 +141,10 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      */
     public void updated(final Map<String, Object> properties) {
         logger.debug("Updating DB Wire Record Filter... {}", properties);
-        final String oldDbServicePid = this.options.getDbServiceInstancePid();
+
+        final String oldSqlView = this.options.getSqlView();
 
         this.options = new H2DbWireRecordFilterOptions(properties);
-
-        if (!oldDbServicePid.equals(this.options.getDbServiceInstancePid())) {
-            restartDbServiceTracker();
-        }
 
         this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
 
@@ -161,6 +152,12 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
         // expired
         this.lastRefreshedTime = Calendar.getInstance();
         this.lastRefreshedTime.add(Calendar.SECOND, -this.cacheExpirationInterval);
+
+        // do not want the history related to other queries
+        if (!oldSqlView.equals(this.options.getSqlView())) {
+            this.lastRecords = null;
+        }
+
         logger.debug("Updating DB Wire Record Filter... Done");
     }
 
@@ -172,6 +169,9 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Dectivating DB Wire Record Filter...");
+        this.dbHelper = null;
+        this.dbService = null;
+        this.options = null;
         logger.debug("Dectivating DB Wire Record Filter... Done");
     }
 
@@ -228,8 +228,8 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
 
     /**
      * Trigger data emit as soon as new {@link WireEnvelope} is received. The component caches the last database
-     * read and provides, as output, this value until the cache validity is not expired. Otherwise, a new database read
-     * is performed, and the value is kept in the {@link #lastRecords} field.
+     * read and provides, as output, this value until the cache validity is not expired or the query is changed.
+     * Otherwise, a new database read is performed, and the value is kept in the {@link #lastRecords} field.
      * The cache validity is determined by the {@link H2DbWireRecordFilterOptions#CONF_CACHE_EXPIRATION_INTERVAL}
      * property
      * provided by the user in the component configuration.
@@ -266,47 +266,6 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
             this.lastRefreshedTime = Calendar.getInstance(this.lastRefreshedTime.getTimeZone());
         } catch (SQLException e) {
             logger.error("Error while filtering Wire Records...", e);
-        }
-    }
-
-    protected void restartDbServiceTracker() {
-        stopDbServiceTracker();
-        try {
-            final Filter filter = FrameworkUtil
-                    .createFilter("(" + KURA_SERVICE_PID + "=" + this.options.getDbServiceInstancePid() + ")");
-            this.dbServiceTracker = new ServiceTracker<>(this.componentContext.getBundleContext(), filter,
-                    new ServiceTrackerCustomizer<H2DbService, H2DbService>() {
-
-                        @Override
-                        public H2DbService addingService(ServiceReference<H2DbService> reference) {
-                            logger.info("H2DbService instance found");
-                            H2DbService dbService = H2DbWireRecordFilter.this.componentContext.getBundleContext()
-                                    .getService(reference);
-                            bindDbService(dbService);
-                            return dbService;
-                        }
-
-                        @Override
-                        public void modifiedService(ServiceReference<H2DbService> reference, H2DbService service) {
-                        }
-
-                        @Override
-                        public void removedService(ServiceReference<H2DbService> reference, H2DbService service) {
-                            logger.info("H2DbService instance removed");
-                            unbindDbService(service);
-                            H2DbWireRecordFilter.this.componentContext.getBundleContext().ungetService(reference);
-                        }
-                    });
-            this.dbServiceTracker.open();
-        } catch (InvalidSyntaxException e) {
-            throw new ComponentException(e);
-        }
-    }
-
-    private void stopDbServiceTracker() {
-        if (this.dbServiceTracker != null) {
-            this.dbServiceTracker.close();
-            this.dbServiceTracker = null;
         }
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     
-    Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -30,7 +30,6 @@
       <provide interface="org.osgi.service.wireadmin.Producer"/>
       <provide interface="org.osgi.service.wireadmin.Consumer"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.wire.H2DbWireRecordFilter"/>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
    <reference bind="bindWireHelperService"
               cardinality="1..1"
@@ -38,4 +37,10 @@
               name="WireHelperService"
               policy="static"
               unbind="unbindWireHelperService"/>
+   <reference name="H2DbService"
+           policy="dynamic"
+           bind="bindDbService"
+           unbind="unbindDbService"
+           cardinality="1..1"
+           interface="org.eclipse.kura.db.H2DbService"/>
 </scr:component>

@@ -1864,6 +1864,9 @@
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud.factory_${org.eclipse.kura.core.cloud.factory.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />                                            
+                                        <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.comm_${org.eclipse.kura.core.comm.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
@@ -1874,13 +1877,22 @@
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.deployment_${org.eclipse.kura.core.deployment.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" /> 
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.http.server.manager_${org.eclipse.kura.http.server.manager.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />                                                                                                         
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.inventory_${org.eclipse.kura.core.inventory.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />                                            
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.deployment.agent_${org.eclipse.kura.deployment.agent.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
@@ -1939,6 +1951,9 @@
                                             file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins"
                                             failonerror="false" />
+                                        <copy
+                                        	file ="${project.build.directory}/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar"
+                                        	todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <!-- Add REST bundles-->
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar"
@@ -2007,6 +2022,10 @@
                                         <mkdir dir="${project.build.directory}/staging/emulator/launch_configs"/>
                                         <copy file="src/main/resources/common/Kura_Emulator_Linux.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
                                         <copy file="src/main/resources/common/Kura_Emulator_OSX.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
+                                        
+                                        <!-- Add SSL Keystore -->
+                                        <copy file="src/main/resources/common/cacerts.ks" todir="${project.build.directory}/staging/emulator/src/main/resources" />
+                                        
                                         <copy file="src/main/resources/common/classpaths/emulator.classpath"
                                             tofile="${project.build.directory}/staging/emulator/emulator.classpath" />
                                         <copy overwrite="true" file="src/main/resources/common/projects/emulator.project"

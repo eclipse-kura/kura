@@ -246,7 +246,7 @@ public class H2DbWireRecordStoreTest {
         dependencyLatch.countDown();
     }
 
-    public void unbindDbSvc(WireComponent dbSvc) {
+    public void unbindDbSvc(H2DbService dbSvc) {
         H2DbWireRecordStoreTest.cfgsvc = null;
     }
 

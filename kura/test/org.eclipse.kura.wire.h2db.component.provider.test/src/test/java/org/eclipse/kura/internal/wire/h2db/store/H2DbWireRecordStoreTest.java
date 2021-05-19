@@ -29,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DoubleValue;
@@ -80,17 +82,8 @@ public class H2DbWireRecordStoreTest {
 
         H2DbService dbServiceMock = createMockH2DbService(connection);
 
-        AtomicInteger resets = new AtomicInteger(0);
-        H2DbWireRecordStore store = new H2DbWireRecordStore() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(dbServiceMock);
-
-                resets.set(resets.get() + 1);
-            }
-        };
-
+        H2DbWireRecordStore store = new H2DbWireRecordStore();
+        
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
         when(whsMock.newWireSupport(store, null)).thenReturn(wireSupportMock);
@@ -104,8 +97,7 @@ public class H2DbWireRecordStoreTest {
 
         // init
         store.activate(ctx, props);
-
-        assertEquals(1, resets.get());
+        store.bindDbService(dbServiceMock);
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();
@@ -191,16 +183,7 @@ public class H2DbWireRecordStoreTest {
 
         // update the configuration
         store.updated(props);
-
-        assertEquals(1, resets.get()); // reset didn't happen
-
-        // update the configuration with a new DB service pid
-        props.put("db.service.pid", "newPid"); // trigger tracker reset
-
-        store.updated(props);
-
-        assertEquals(2, resets.get()); // reset happened
-
+        
         // deinit
         store.deactivate(null);
         connection.prepareStatement("SHUTDOWN").execute();
@@ -213,13 +196,7 @@ public class H2DbWireRecordStoreTest {
 
         H2DbService dbServiceMock = createMockH2DbService(connection);
 
-        H2DbWireRecordStore store = new H2DbWireRecordStore() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(dbServiceMock);
-            }
-        };
+        H2DbWireRecordStore store = new H2DbWireRecordStore();
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
@@ -236,6 +213,7 @@ public class H2DbWireRecordStoreTest {
 
         // init
         store.activate(ctx, props);
+        store.bindDbService(dbServiceMock);
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();
@@ -291,13 +269,7 @@ public class H2DbWireRecordStoreTest {
 
         H2DbService dbServiceMock = createMockH2DbService(connection);
 
-        H2DbWireRecordStore store = new H2DbWireRecordStore() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(dbServiceMock);
-            }
-        };
+        H2DbWireRecordStore store = new H2DbWireRecordStore();
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
@@ -314,6 +286,7 @@ public class H2DbWireRecordStoreTest {
 
         // init
         store.activate(ctx, props);
+        store.bindDbService(dbServiceMock);
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();
@@ -369,13 +342,7 @@ public class H2DbWireRecordStoreTest {
 
         H2DbService dbServiceMock = createMockH2DbService(connection);
 
-        H2DbWireRecordStore store = new H2DbWireRecordStore() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(dbServiceMock);
-            }
-        };
+        H2DbWireRecordStore store = new H2DbWireRecordStore();
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);
@@ -392,6 +359,7 @@ public class H2DbWireRecordStoreTest {
 
         // init
         store.activate(ctx, props);
+        store.bindDbService(dbServiceMock);
 
         String emitterPid = "emitter";
         List<WireRecord> wireRecords = new ArrayList<WireRecord>();

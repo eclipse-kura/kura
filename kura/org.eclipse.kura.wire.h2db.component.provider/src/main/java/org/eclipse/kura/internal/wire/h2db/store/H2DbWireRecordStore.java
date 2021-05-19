@@ -140,6 +140,10 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
+        if (nonNull(this.dbService)) {
+            reconcileDB(this.wireRecordStoreOptions.getTableName());
+        }
+
         logger.debug("Activating DB Wire Record Store... Done");
     }
 
@@ -154,8 +158,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
         this.wireRecordStoreOptions = new H2DbWireRecordStoreOptions(properties);
 
-        final String tableName = this.wireRecordStoreOptions.getTableName();
-        reconcileDB(tableName);
+        reconcileDB(this.wireRecordStoreOptions.getTableName());
 
         logger.debug("Updating DB Wire Record Store... Done");
     }

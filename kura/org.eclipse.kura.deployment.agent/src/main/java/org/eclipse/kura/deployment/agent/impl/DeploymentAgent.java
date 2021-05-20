@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
+import static java.util.Objects.isNull;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -187,7 +189,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
     protected void deactivate(ComponentContext componentContext) {
         if (installerTask != null && !installerTask.isDone()) {
             logger.debug("Cancelling DeploymentAgent task ...");
-            installerTask.cancel(true);
+            installerTask.cancel(false);
             logger.info("DeploymentAgent task cancelled? = {}", installerTask.isDone());
             installerTask = null;
         }
@@ -207,7 +209,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
         if (uninstallerTask != null && !uninstallerTask.isDone()) {
             logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
-            uninstallerTask.cancel(true);
+            uninstallerTask.cancel(false);
             logger.info("DeploymentAgent:Uninstall task cancelled? = {}", uninstallerTask.isDone());
             uninstallerTask = null;
         }
@@ -228,6 +230,11 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         this.dpaConfPath = null;
         this.uninstPackageNames = null;
         this.instPackageUrls = null;
+    }
+
+    public void updated(ComponentContext componentContext) {
+        logger.debug("Updating DeploymentAgent...");
+        logger.debug("DeploymentAgent updated");
     }
 
     public void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
@@ -323,7 +330,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             } catch (Exception e) {
                 logger.error("Unexpected exception", e);
             }
-        } while (true);
+        } while (!isNull(this.instPackageUrls));
     }
 
     private void execInstall(String url) {
@@ -364,7 +371,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             } catch (Throwable t) {
                 logger.error("Unexpected throwable", t);
             }
-        } while (true);
+        } while (!isNull(this.uninstPackageNames));
     }
 
     private void execUninstall(String name) {

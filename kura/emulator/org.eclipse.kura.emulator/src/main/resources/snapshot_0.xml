@@ -63,6 +63,9 @@
             <esf:property name="username" array="false" encrypted="false" type="String">
                 <esf:value>username</esf:value>
             </esf:property>
+            <esf:property name="client-id" array="false" encrypted="false" type="String">
+            	<esf:value>{{client-id-placeholder}}</esf:value>
+            </esf:property>
             <esf:property name="topic.context.account-name" array="false" encrypted="false" type="String">
                 <esf:value>account-name</esf:value>
             </esf:property>

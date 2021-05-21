@@ -241,7 +241,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         this.selfUpdaterFuture = this.selfUpdaterExecutor.scheduleAtFixedRate(() -> {
             try {
                 if (this.componentContext.getServiceReference() != null
-                        && this.configurationService.getComponentConfiguration(pid) != null) {
+                        && this.configurationService.getComponentConfiguration(pid) != null
+                        && this.configurationService.getComponentConfiguration(pid).getDefinition() != null) {
                     this.configurationService.updateConfiguration(pid, props);
                     throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_SNAPSHOT_TAKING,
                             "Updated. The task will be terminated.");

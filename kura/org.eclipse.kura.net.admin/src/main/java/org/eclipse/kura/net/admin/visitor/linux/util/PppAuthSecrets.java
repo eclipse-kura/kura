@@ -36,12 +36,9 @@ import org.slf4j.LoggerFactory;
 public class PppAuthSecrets {
 
     /*
-     * #Secrets for authentication using PAP/CHAP
-     * #client server secret IP addresses Provider
-     * ISP@CINGULARGPRS.COM * CINGULAR1 * #att
-     * mobileweb * password * #o2
-     * user * pass * #orange
-     * web * web * #vodaphone
+     * #Secrets for authentication using PAP/CHAP #client server secret IP addresses
+     * Provider ISP@CINGULARGPRS.COM * CINGULAR1 * #att mobileweb * password * #o2
+     * user * pass * #orange web * web * #vodaphone
      */
 
     private static final Logger s_logger = LoggerFactory.getLogger(PppAuthSecrets.class);
@@ -70,6 +67,7 @@ public class PppAuthSecrets {
         this.ipAddresses = new ArrayList<>();
 
         BufferedReader br = null;
+        FileReader fr = null;
         try {
             File secretsFile = new File(this.secretsFilename);
 
@@ -77,7 +75,8 @@ public class PppAuthSecrets {
                 String currentLine = null;
                 StringTokenizer st = null;
 
-                br = new BufferedReader(new FileReader(this.secretsFilename));
+                fr = new FileReader(this.secretsFilename);
+                br = new BufferedReader(fr);
 
                 while ((currentLine = br.readLine()) != null) {
                     currentLine = currentLine.trim();
@@ -107,9 +106,11 @@ public class PppAuthSecrets {
         } catch (Exception e) {
             s_logger.error("Could not initialize", e);
         } finally {
+
             if (br != null) {
                 try {
                     br.close();
+                    fr.close();
                 } catch (IOException ex) {
                     s_logger.error("I/O Exception while closing BufferedReader!");
                 }
@@ -121,16 +122,11 @@ public class PppAuthSecrets {
     /**
      * Add a new entry to the secrets file
      *
-     * @param provider
-     *            cellular provider for which this secret applies
-     * @param client
-     *            client/username for this secret
-     * @param server
-     *            server ip for which this entry requires
-     * @param secret
-     *            secret/password for this account
-     * @param ipAddress
-     *            ipaddress for this account
+     * @param provider  cellular provider for which this secret applies
+     * @param client    client/username for this secret
+     * @param server    server ip for which this entry requires
+     * @param secret    secret/password for this account
+     * @param ipAddress ipaddress for this account
      * @throws Exception
      */
     public void addEntry(String provider, String client, String server, String secret, String ipAddress)
@@ -169,8 +165,7 @@ public class PppAuthSecrets {
     /**
      * Writes current contents in ram back to the pap-secrets file
      *
-     * @throws Exception
-     *             for file IO errors
+     * @throws Exception for file IO errors
      */
     @SuppressWarnings("checkstyle:fileTabCharacter")
     private void writeToFile() throws IOException {
@@ -187,7 +182,7 @@ public class PppAuthSecrets {
         try (final FileOutputStream fos = new FileOutputStream(tempFile);
                 final PrintWriter pw = new PrintWriter(fos);) {
             pw.write("#Secrets for authentication using " + authType + "\n");
-            pw.write("#client					server			secret			IP addresses	#Provider\n");
+            pw.write("#client server secret IP addresses #Provider\n");
 
             for (int i = 0; i < this.providers.size(); ++i) {
                 pw.write(this.clients.get(i) + "\t");
@@ -210,18 +205,15 @@ public class PppAuthSecrets {
 
     /**
      * Removed an entry based on a 'type' where the type can be either provider,
-     * client, server, secret, or ipaddress. Note if the type occurs more than
-     * once, all entries of 'type' matching 'value' will be removed
+     * client, server, secret, or ipaddress. Note if the type occurs more than once,
+     * all entries of 'type' matching 'value' will be removed
      *
-     * @param type
-     *            can be either provider, client, server, secret, or ipaddress
+     * @param type  can be either provider, client, server, secret, or ipaddress
      *
-     * @param value
-     *            is the value for the given type. For example, if the type is
-     *            provider, then the value could be att
+     * @param value is the value for the given type. For example, if the type is
+     *              provider, then the value could be att
      *
-     * @throws Exception
-     *             for indexing problems
+     * @throws Exception for indexing problems
      */
     public void removeEntry(String type, String value) throws Exception {
         if ("provider".equals(type)) {
@@ -251,11 +243,9 @@ public class PppAuthSecrets {
     /**
      * removed an entry based on an index
      *
-     * @param index
-     *            the index of the entry to be removed
+     * @param index the index of the entry to be removed
      *
-     * @throws Exception
-     *             if the index is invalid
+     * @throws Exception if the index is invalid
      */
     public void removeEntry(int index) throws Exception {
         try {
@@ -274,19 +264,12 @@ public class PppAuthSecrets {
     /**
      * Checks to see if an entry is already present
      *
-     * @param provider
-     *            cellular provider for which this secret applies
-     * @param client
-     *            client/username for this secret
-     * @param server
-     *            server ip for which this entry requires
-     * @param secret
-     *            secret/password for this account
-     * @param ipAddress
-     *            ipaddress for this account
-     * @return boolean
-     *         true - entry found
-     *         false - entry not found
+     * @param provider  cellular provider for which this secret applies
+     * @param client    client/username for this secret
+     * @param server    server ip for which this entry requires
+     * @param secret    secret/password for this account
+     * @param ipAddress ipaddress for this account
+     * @return boolean true - entry found false - entry not found
      */
     public boolean checkForEntry(String provider, String client, String server, String secret, String ipAddress) {
         for (int i = 0; i < this.providers.size(); ++i) {
@@ -305,16 +288,13 @@ public class PppAuthSecrets {
     }
 
     /**
-     * Return the secret as a string, given the other parameters. Return null if not found.
+     * Return the secret as a string, given the other parameters. Return null if not
+     * found.
      *
-     * @param provider
-     *            cellular provider for which this secret applies
-     * @param client
-     *            client/username for this secret
-     * @param server
-     *            server ip for which this entry requires
-     * @param ipAddress
-     *            ipaddress for this account
+     * @param provider  cellular provider for which this secret applies
+     * @param client    client/username for this secret
+     * @param server    server ip for which this entry requires
+     * @param ipAddress ipaddress for this account
      * @return String
      */
     public String getSecret(String provider, String client, String server, String ipAddress) {

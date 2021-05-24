@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,6 @@ package org.eclipse.kura.internal.wire.h2db.store;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
-import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -55,15 +54,9 @@ import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireReceiver;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
-import org.osgi.framework.Filter;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.osgi.service.wireadmin.Wire;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
  * The Class DbWireRecordStore is a wire component which is responsible to store
@@ -98,23 +91,26 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
     private H2DbServiceHelper dbHelper;
 
+    private H2DbService dbService;
+
     private H2DbWireRecordStoreOptions wireRecordStoreOptions;
 
     private volatile WireHelperService wireHelperService;
 
     private WireSupport wireSupport;
 
-    private ServiceTracker<H2DbService, H2DbService> dbServiceTracker;
-
-    private ComponentContext componentContext;
-
-    public synchronized void bindDbService(final H2DbService dbService) {
-        H2DbWireRecordStore.this.dbHelper = H2DbServiceHelper.of(dbService);
+    public synchronized void bindDbService(H2DbService dbService) {
+        this.dbService = dbService;
+        this.dbHelper = H2DbServiceHelper.of(dbService);
         reconcileDB(this.wireRecordStoreOptions.getTableName());
     }
 
-    public synchronized void unbindDbService(final H2DbService dbService) {
-        H2DbWireRecordStore.this.dbHelper = null;
+    public synchronized void unbindDbService(H2DbService dbService) {
+        if (this.dbService == dbService) {
+            this.dbHelper = null;
+            this.dbService = null;
+            this.wireRecordStoreOptions = null;
+        }
     }
 
     public void bindWireHelperService(final WireHelperService wireHelperService) {
@@ -139,13 +135,15 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating DB Wire Record Store...");
-        this.componentContext = componentContext;
         this.wireRecordStoreOptions = new H2DbWireRecordStoreOptions(properties);
 
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
 
-        restartDbServiceTracker();
+        if (nonNull(this.dbService)) {
+            reconcileDB(this.wireRecordStoreOptions.getTableName());
+        }
+
         logger.debug("Activating DB Wire Record Store... Done");
     }
 
@@ -158,16 +156,9 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug("Updating DB Wire Record Store...");
 
-        final String oldDbServicePid = this.wireRecordStoreOptions.getDbServiceInstancePid();
-
         this.wireRecordStoreOptions = new H2DbWireRecordStoreOptions(properties);
 
-        if (oldDbServicePid.equals(this.wireRecordStoreOptions.getDbServiceInstancePid())) {
-            final String tableName = this.wireRecordStoreOptions.getTableName();
-            reconcileDB(tableName);
-        } else {
-            restartDbServiceTracker();
-        }
+        reconcileDB(this.wireRecordStoreOptions.getTableName());
 
         logger.debug("Updating DB Wire Record Store... Done");
     }
@@ -180,7 +171,9 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Deactivating DB Wire Record Store...");
-        stopDbServiceTracker();
+        this.dbHelper = null;
+        this.dbService = null;
+        this.wireRecordStoreOptions = null;
         logger.debug("Deactivating DB Wire Record Store... Done");
     }
 
@@ -250,23 +243,23 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     @Override
     public synchronized void onWireReceive(final WireEnvelope wireEvelope) {
         requireNonNull(wireEvelope, "Wire Envelope cannot be null");
-
         final List<WireRecord> records = wireEvelope.getRecords();
 
-        if (this.dbHelper != null) {
-            try {
-                if (getTableSize() >= this.wireRecordStoreOptions.getMaximumTableSize()) {
-                    truncate();
-                }
-            } catch (SQLException e) {
-                logger.warn("Exception while trying to clean db");
-            }
+        if (this.dbHelper == null) {
+            logger.warn("H2DbService instance not attached");
+            return;
+        }
 
-            for (WireRecord wireRecord : records) {
-                store(wireRecord);
+        try {
+            if (getTableSize() >= this.wireRecordStoreOptions.getMaximumTableSize()) {
+                truncate();
             }
-        } else {
-            logger.warn("DbService instance not attached");
+        } catch (SQLException e) {
+            logger.warn("Exception while trying to clean db");
+        }
+
+        for (WireRecord wireRecord : records) {
+            store(wireRecord);
         }
 
         // emit the list of Wire Records to the downstream components
@@ -513,49 +506,6 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
         }
         return stmt;
 
-    }
-
-    protected void restartDbServiceTracker() {
-        stopDbServiceTracker();
-        try {
-            final Filter filter = FrameworkUtil.createFilter(
-                    "(" + KURA_SERVICE_PID + "=" + this.wireRecordStoreOptions.getDbServiceInstancePid() + ")");
-            this.dbServiceTracker = new ServiceTracker<>(this.componentContext.getBundleContext(), filter,
-                    new ServiceTrackerCustomizer<H2DbService, H2DbService>() {
-
-                        @Override
-                        public H2DbService addingService(ServiceReference<H2DbService> reference) {
-                            logger.info("H2DbService instance found");
-                            H2DbService h2DbService = H2DbWireRecordStore.this.componentContext.getBundleContext()
-                                    .getService(reference);
-                            bindDbService(h2DbService);
-                            return h2DbService;
-                        }
-
-                        @Override
-                        public void modifiedService(ServiceReference<H2DbService> reference, H2DbService service) {
-                            logger.info("H2DbService instance updated, recreating table if needed...");
-                            reconcileDB(H2DbWireRecordStore.this.wireRecordStoreOptions.getTableName());
-                        }
-
-                        @Override
-                        public void removedService(ServiceReference<H2DbService> reference, H2DbService service) {
-                            logger.info("H2DbService instance removed");
-                            unbindDbService(service);
-                            H2DbWireRecordStore.this.componentContext.getBundleContext().ungetService(reference);
-                        }
-                    });
-            this.dbServiceTracker.open();
-        } catch (InvalidSyntaxException e) {
-            throw new ComponentException(e);
-        }
-    }
-
-    private void stopDbServiceTracker() {
-        if (this.dbServiceTracker != null) {
-            this.dbServiceTracker.close();
-            this.dbServiceTracker = null;
-        }
     }
 
     /** {@inheritDoc} */

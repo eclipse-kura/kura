@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,15 +20,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.db.H2DbService;
-
 /**
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
  * Record related filter options
  */
 final class H2DbWireRecordFilterOptions {
-
-    private static final String DB_SERVICE_INSTANCE = "db.service.pid";
 
     private static final String CONF_CACHE_EXPIRATION_INTERVAL = "cache.expiration.interval";
 
@@ -75,15 +71,6 @@ final class H2DbWireRecordFilterOptions {
             sqlView = String.valueOf(view);
         }
         return sqlView;
-    }
-
-    String getDbServiceInstancePid() {
-        String dbServicePid = H2DbService.DEFAULT_INSTANCE_PID;
-        final Object pid = this.properties.get(DB_SERVICE_INSTANCE);
-        if (nonNull(pid) && pid instanceof String) {
-            dbServicePid = pid.toString();
-        }
-        return dbServicePid;
     }
 
     boolean emitOnEmptyResult() {

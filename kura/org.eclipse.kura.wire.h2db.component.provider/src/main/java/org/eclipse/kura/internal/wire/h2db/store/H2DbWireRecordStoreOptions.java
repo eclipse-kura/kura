@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,15 +20,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.db.H2DbService;
-
 /**
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
  */
 final class H2DbWireRecordStoreOptions {
-
-    private static final String DB_SERVICE_INSTANCE = "db.service.pid";
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
 
@@ -86,14 +82,5 @@ final class H2DbWireRecordStoreOptions {
             tableName = name.toString();
         }
         return tableName;
-    }
-
-    String getDbServiceInstancePid() {
-        String dbServicePid = H2DbService.DEFAULT_INSTANCE_PID;
-        final Object pid = this.properties.get(DB_SERVICE_INSTANCE);
-        if (nonNull(pid) && pid instanceof String) {
-            dbServicePid = pid.toString();
-        }
-        return dbServicePid;
     }
 }

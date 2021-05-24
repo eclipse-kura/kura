@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,16 +58,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        AtomicInteger resets = new AtomicInteger(0);
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(mockDbService);
-
-                resets.set(resets.get() + 1);
-            }
-        };
+        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -80,8 +71,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", expectedSqlView);
 
         filter.activate(mock(ComponentContext.class), properties);
-
-        assertEquals(1, resets.get());
+        filter.bindDbService(mockDbService);
 
         H2DbWireRecordFilterOptions options = (H2DbWireRecordFilterOptions) TestUtil.getFieldValue(filter, "options");
 
@@ -109,11 +99,7 @@ public class H2DbWireRecordFilterTest {
         expectedSqlView = "updated view";
         properties.put("cache.expiration.interval", expectedCacheExpirationInterval);
         properties.put("sql.view", expectedSqlView);
-        properties.put("db.service.pid", "newdbservicepid"); // trigger tracker reset
-
         filter.updated(properties);
-
-        assertEquals(2, resets.get());
 
         options = (H2DbWireRecordFilterOptions) TestUtil.getFieldValue(filter, "options");
 
@@ -135,13 +121,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(mockDbService);
-            }
-        };
+        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -152,6 +132,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", "view");
 
         filter.activate(mock(ComponentContext.class), properties);
+        filter.bindDbService(mockDbService);
 
         Wire[] wires = new Wire[2];
         wires[0] = mock(Wire.class);
@@ -170,13 +151,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(mockDbService);
-            }
-        };
+        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -187,6 +162,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", "sql command");
 
         filter.activate(mock(ComponentContext.class), properties);
+        filter.bindDbService(mockDbService);
 
         ResultSetMetaData mockResultSetMetaData = mock(ResultSetMetaData.class);
         when(mockResultSetMetaData.getColumnCount()).thenReturn(1);
@@ -213,13 +189,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(mockDbService);
-            }
-        };
+        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -230,6 +200,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", "view");
 
         filter.activate(mock(ComponentContext.class), properties);
+        filter.bindDbService(mockDbService);
 
         Wire mockWire = mock(Wire.class);
         filter.polled(mockWire);
@@ -243,13 +214,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(mockDbService);
-            }
-        };
+        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -260,6 +225,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", "view");
 
         filter.activate(mock(ComponentContext.class), properties);
+        filter.bindDbService(mockDbService);
 
         Wire[] wires = new Wire[2];
         wires[0] = mock(Wire.class);
@@ -276,13 +242,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter() {
-
-            @Override
-            protected void restartDbServiceTracker() {
-                bindDbService(mockDbService);
-            }
-        };
+        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -293,6 +253,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", "view");
 
         filter.activate(mock(ComponentContext.class), properties);
+        filter.bindDbService(mockDbService);
 
         Wire mockWire = mock(Wire.class);
         filter.updated(mockWire, 42);

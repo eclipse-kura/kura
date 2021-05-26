@@ -52,6 +52,7 @@ public class CRLManager implements Closeable {
     private final CRLVerifier verifier;
 
     private Optional<ScheduledFuture<?>> updateTask = Optional.empty();
+    private Optional<Listener> listener;
 
     public CRLManager(final File storeFile, final long storeDelayMs, final long periodicRecheckIntervalMs,
             final long forceUpdateIntervalMs, final CRLVerifier verifier) {
@@ -60,6 +61,10 @@ public class CRLManager implements Closeable {
         this.forceUpdateIntervalNanos = Duration.ofMillis(forceUpdateIntervalMs).toNanos();
         this.verifier = verifier;
         requestUpdate();
+    }
+
+    public void setListener(final Optional<Listener> listener) {
+        this.listener = listener;
     }
 
     public synchronized void addDistributionPoint(final Set<URI> uris) {
@@ -121,6 +126,7 @@ public class CRLManager implements Closeable {
 
     @Override
     public void close() {
+        listener = Optional.empty();
         updateExecutor.shutdown();
         downloadExecutor.shutdown();
     }
@@ -136,6 +142,7 @@ public class CRLManager implements Closeable {
 
     private synchronized void update() {
 
+        boolean changed = false;
         final long now = System.nanoTime();
 
         for (final DistributionPointState state : referencedDistributionPoints) {
@@ -150,7 +157,7 @@ public class CRLManager implements Closeable {
                 try {
                     final X509CRL crl = future.get(1, TimeUnit.MINUTES);
 
-                    validateAndStoreCRL(now, state, storedCrl, crl);
+                    changed |= validateAndStoreCRL(now, state, storedCrl, crl);
                 } catch (final Exception e) {
                     logger.warn("failed to download CRL", e);
                     future.cancel(true);
@@ -158,11 +165,15 @@ public class CRLManager implements Closeable {
             }
         }
 
-        this.store.removeCRLs(c -> this.referencedDistributionPoints.stream()
+        changed |= this.store.removeCRLs(c -> this.referencedDistributionPoints.stream()
                 .noneMatch(p -> p.distributionPoints.equals(c.getDistributionPoints())));
+
+        if (changed) {
+            listener.ifPresent(Listener::onCRLCacheChanged);
+        }
     }
 
-    private void validateAndStoreCRL(final long now, final DistributionPointState state,
+    private boolean validateAndStoreCRL(final long now, final DistributionPointState state,
             final Optional<StoredCRL> storedCrl, final X509CRL newCrl) {
 
         if (storedCrl.isPresent()) {
@@ -170,20 +181,23 @@ public class CRLManager implements Closeable {
 
             if (stored.equals(newCrl)) {
                 logger.info("current CRL is up to date");
-                return;
+                state.lastDownloadInstantNanos = OptionalLong.of(now);
+                return false;
             }
 
             if (!stored.getIssuerX500Principal().equals(newCrl.getIssuerX500Principal())) {
                 logger.warn("CRL issuer differs, not updating CRL");
-                return;
+                return false;
             }
         }
 
         if (verifier.verifyCRL(newCrl)) {
             store.storeCRL(new StoredCRL(state.distributionPoints, newCrl));
             state.lastDownloadInstantNanos = OptionalLong.of(now);
+            return true;
         } else {
             logger.warn("CRL verification failed");
+            return false;
         }
     }
 
@@ -211,5 +225,10 @@ public class CRLManager implements Closeable {
     public interface CRLVerifier {
 
         public boolean verifyCRL(final X509CRL crl);
+    }
+
+    public interface Listener {
+
+        public void onCRLCacheChanged();
     }
 }

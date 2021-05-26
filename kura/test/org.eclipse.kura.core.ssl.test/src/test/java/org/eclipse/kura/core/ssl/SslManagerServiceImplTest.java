@@ -38,6 +38,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -144,7 +145,7 @@ public class SslManagerServiceImplTest {
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
 
-        svc.setKeystoreService(keystoreService);
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
         svc.activate(ccMock, properties);
 
         TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
@@ -194,7 +195,7 @@ public class SslManagerServiceImplTest {
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
 
-        svc.setKeystoreService(keystoreService);
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
 
         svc.updated(properties);
 
@@ -257,8 +258,8 @@ public class SslManagerServiceImplTest {
 
         KeystoreService keystoreService = mock(KeystoreService.class);
         when(keystoreService.getKeyStore()).thenReturn(store);
-        
-        svc.setKeystoreService(keystoreService);
+
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
 
         SslServiceListeners listener = new SslServiceListeners(null) {
 

@@ -91,9 +91,11 @@ import org.eclipse.kura.core.keystore.crl.CRLManager;
 import org.eclipse.kura.core.keystore.crl.CRLManager.CRLVerifier;
 import org.eclipse.kura.core.keystore.crl.CRLManagerOptions;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,6 +111,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     private CryptoService cryptoService;
     private SystemService systemService;
     private ConfigurationService configurationService;
+    private EventAdmin eventAdmin;
 
     private KeystoreServiceOptions keystoreServiceOptions;
     private CRLManagerOptions crlManagerOptions;
@@ -117,6 +120,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
     private ScheduledExecutorService selfUpdaterExecutor;
     private ScheduledFuture<?> selfUpdaterFuture;
+
+    private String ownPid;
 
     // ----------------------------------------------------------------
     //
@@ -136,6 +141,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         this.configurationService = configurationService;
     }
 
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -146,6 +155,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         logger.info("Bundle {} is starting!", this.getClass().getSimpleName());
         this.componentContext = context;
 
+        this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -494,6 +504,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         try {
             ks.deleteEntry(alias);
             saveKeystore(ks);
+            postChangedEvent();
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to delete entry " + alias);
         }
@@ -529,6 +540,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         try {
             ks.setEntry(alias, entry, protectionParameter);
             saveKeystore(ks);
+            postChangedEvent();
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to set the entry " + alias);
         }
@@ -604,6 +616,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
                             .orElseGet(() -> new File(this.keystoreServiceOptions.getKeystorePath() + ".crl")),
                     5000, newCRLManagerOptions.getCrlCheckIntervalMs(), newCRLManagerOptions.getCrlUpdateIntervalMs(),
                     getCRLVerifier(newCRLManagerOptions));
+
+            currentCRLManager.setListener(Optional.of(this::postChangedEvent));
 
             for (final URI uri : newCRLManagerOptions.getCrlURIs()) {
                 currentCRLManager.addDistributionPoint(Collections.singleton(uri));
@@ -700,5 +714,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
         }
+    }
+
+    private void postChangedEvent() {
+        this.eventAdmin.postEvent(new KeystoreChangedEvent(ownPid));
     }
 }

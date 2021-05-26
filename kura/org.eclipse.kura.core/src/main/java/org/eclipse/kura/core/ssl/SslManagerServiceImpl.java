@@ -44,6 +44,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -61,16 +62,20 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.ssl.SslManagerServiceOptions.RevocationCheckMode;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent {
+public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 
@@ -82,14 +87,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private Map<ConnectionSslOptions, SSLContext> sslContexts;
 
+    private Optional<String> keystoreServicePid = Optional.empty();
+
     // ----------------------------------------------------------------
     //
     // Dependencies
     //
     // ----------------------------------------------------------------
 
-    public void setKeystoreService(KeystoreService keystoreService) {
+    public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
+        this.keystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         if (this.sslServiceListeners != null) {
             // Notify listeners that service has been updated
@@ -100,6 +108,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void unsetKeystoreService(KeystoreService keystoreService) {
         if (this.keystoreService == keystoreService) {
             this.keystoreService = null;
+            this.keystoreServicePid = Optional.empty();
         }
     }
 
@@ -516,6 +525,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                 return this.wrapped.getPrivateKey(alias);
             }
             return null;
+        }
+    }
+
+    @Override
+    public void handleEvent(final Event event) {
+        if (!(event instanceof KeystoreChangedEvent)) {
+            return;
+        }
+
+        final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
+
+        if (this.keystoreServicePid.equals(Optional.of(keystoreChangedEvent.getSenderPid()))) {
+            this.sslServiceListeners.onConfigurationUpdated();
         }
     }
 

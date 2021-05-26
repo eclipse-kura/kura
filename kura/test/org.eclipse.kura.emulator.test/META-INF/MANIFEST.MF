@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.emulator.test
+Bundle-SymbolicName: org.eclipse.kura.emulator.test;singleton:=true
+Bundle-Version: 5.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Fragment-Host: org.eclipse.kura.emulator
+Import-Package: org.mockito;version="1.10.19"
+Require-Bundle: 
+ org.apache.logging.log4j.slf4j-impl;bundle-version="2.8.2",
+ org.apache.logging.log4j.api;bundle-version="2.8.2",
+ org.apache.logging.log4j.core;bundle-version="2.8.2"

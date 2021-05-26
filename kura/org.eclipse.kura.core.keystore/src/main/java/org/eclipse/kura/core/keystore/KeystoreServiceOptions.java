@@ -14,8 +14,8 @@ package org.eclipse.kura.core.keystore;
 
 import static java.util.Objects.isNull;
 
+import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
@@ -98,7 +98,14 @@ public class KeystoreServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(keystorePassword, keystorePath, pid, properties, randomPassword);
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.keystorePassword == null ? 0 : this.keystorePassword.hashCode());
+        result = prime * result + (this.keystorePath == null ? 0 : this.keystorePath.hashCode());
+        result = prime * result + (this.pid == null ? 0 : this.pid.hashCode());
+        result = prime * result + (this.properties == null ? 0 : this.properties.hashCode());
+        result = prime * result + (this.randomPassword ? 1231 : 1237);
+        return result;
     }
 
     @Override
@@ -106,12 +113,45 @@ public class KeystoreServiceOptions {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof KeystoreServiceOptions)) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
             return false;
         }
         KeystoreServiceOptions other = (KeystoreServiceOptions) obj;
-        return Objects.equals(keystorePassword, other.keystorePassword)
-                && Objects.equals(keystorePath, other.keystorePath) && Objects.equals(pid, other.pid)
-                && Objects.equals(properties, other.properties) && randomPassword == other.randomPassword;
+        if (this.keystorePassword == null) {
+            if (other.keystorePassword != null) {
+                return false;
+            }
+        } else if (!Arrays.equals(this.keystorePassword.getPassword(), other.keystorePassword.getPassword())) {
+            return false;
+        }
+        if (this.keystorePath == null) {
+            if (other.keystorePath != null) {
+                return false;
+            }
+        } else if (!this.keystorePath.equals(other.keystorePath)) {
+            return false;
+        }
+        if (this.pid == null) {
+            if (other.pid != null) {
+                return false;
+            }
+        } else if (!this.pid.equals(other.pid)) {
+            return false;
+        }
+        if (this.properties == null) {
+            if (other.properties != null) {
+                return false;
+            }
+        } else if (!this.properties.equals(other.properties)) {
+            return false;
+        }
+        boolean result = true;
+        if (this.randomPassword != other.randomPassword) {
+            result = false;
+        }
+        return result;
     }
 }

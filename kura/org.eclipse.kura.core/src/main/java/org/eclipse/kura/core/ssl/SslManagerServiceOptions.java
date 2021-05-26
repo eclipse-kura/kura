@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,12 @@ import org.eclipse.kura.util.configuration.Property;
 
 public class SslManagerServiceOptions {
 
+    public enum RevocationCheckMode {
+        PREFER_OCSP,
+        PREFER_CRL,
+        CRL_ONLY
+    }
+
     public static final String PROP_PROTOCOL = "ssl.default.protocol";
     public static final String PROP_CIPHERS = "ssl.default.cipherSuites";
     public static final String PROP_HN_VERIFY = "ssl.hostname.verification";
@@ -31,12 +37,20 @@ public class SslManagerServiceOptions {
     private static final Property<String> SELECTED_SSL_CIPHERS = new Property<>(PROP_CIPHERS, "");
     private static final Property<Boolean> SELECTED_SSL_HN_VERIFICATION = new Property<>(PROP_HN_VERIFY,
             PROP_DEFAULT_HN_VERIFY);
+    private static final Property<Boolean> SSL_REVOCATION_CHECK_ENABLED = new Property<>("ssl.revocation.check.enabled",
+            false);
+    private static final Property<Boolean> SSL_REVOCATION_SOFT_FAIL = new Property<>("ssl.revocation.soft.fail", false);
+    private static final Property<String> SSL_REVOCATION_MODE = new Property<>("ssl.revocation.mode",
+            RevocationCheckMode.PREFER_CRL.name());
 
     private final Map<String, Object> properties;
 
     private final String sslProtocol;
     private final String sslCiphers;
     private final boolean sslHNVerification;
+    private final boolean sslRevocationCheckEnabled;
+    private final RevocationCheckMode sslRevocationMode;
+    private final boolean sslRevocationSoftFail;
 
     public SslManagerServiceOptions(Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -46,6 +60,9 @@ public class SslManagerServiceOptions {
         this.sslProtocol = SELECTED_SSL_PROTOCOL.get(properties).trim();
         this.sslCiphers = SELECTED_SSL_CIPHERS.get(properties).trim();
         this.sslHNVerification = SELECTED_SSL_HN_VERIFICATION.get(properties);
+        this.sslRevocationCheckEnabled = SSL_REVOCATION_CHECK_ENABLED.get(properties);
+        this.sslRevocationMode = RevocationCheckMode.valueOf(SSL_REVOCATION_MODE.get(properties));
+        this.sslRevocationSoftFail = SSL_REVOCATION_SOFT_FAIL.get(properties);
     }
 
     public Map<String, Object> getConfigurationProperties() {
@@ -77,6 +94,18 @@ public class SslManagerServiceOptions {
      */
     public Boolean isSslHostnameVerification() {
         return this.sslHNVerification;
+    }
+
+    public boolean isSslRevocationCheckEnabled() {
+        return sslRevocationCheckEnabled;
+    }
+
+    public RevocationCheckMode getRevocationCheckMode() {
+        return sslRevocationMode;
+    }
+
+    public boolean isSslRevocationSoftFail() {
+        return sslRevocationSoftFail;
     }
 
     @Override

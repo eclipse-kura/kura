@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -52,6 +52,34 @@
             required="false"
             default=""
             description="Comma-separated list of allosed ciphers. If not specifed, all Java VM ciphers will be allowed."/>
+        
+         <AD id="ssl.revocation.check.enabled"
+            name="Revocation Check Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="Specifies whether to check revocation status of server certificates."/>
+            
+        <AD id="ssl.revocation.mode"
+            name="Revocation Check Mode"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="PREFER_OCSP"
+            description="Specifies the mode for performing revocation check.">
+            <Option label="Prefer OCSP" value="PREFER_OCSP"/>
+            <Option label="Prefer CRL" value="PREFER_CRL"/>
+            <Option label="CRL Only" value="CRL_ONLY"/>
+        </AD>
+
+        <AD id="ssl.revocation.soft.fail"
+            name="Revocation Soft-fail Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Specifies whether the revocation soft fail is enabled or not. If it is not enabled and the gateway is not able verify the revocation status of a server certificate, the certificate will be rejected."/>
 
     </OCD>
 

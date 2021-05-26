@@ -13,7 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.jetty.customizer;
 
-import java.net.URI;
 import java.security.KeyStore;
 import java.security.cert.CertPathValidator;
 import java.security.cert.CertStore;
@@ -145,6 +144,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final Object keystoreProvider = settings.get("org.eclipse.kura.keystore.provider");
         final Object keyManagerProvider = settings.get("org.eclipse.kura.keymanager.provider");
+        final Object crlStore = settings.get("org.eclipse.kura.crl.store");
 
         final Optional<String> keyStorePath = getOptional(settings, JettyConstants.SSL_KEYSTORE, String.class);
         final Optional<String> keyStorePassword = getOptional(settings, JettyConstants.SSL_PASSWORD, String.class);
@@ -161,6 +161,10 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             }
 
             sslContextFactory.setKeyManagersProvider((Function<String, List<KeyManager>>) keyManagerProvider);
+
+            if (crlStore instanceof CertStore) {
+                sslContextFactory.setCRLStore((CertStore) crlStore);
+            }
 
         } else if (keyStorePath.isPresent() && keyStorePassword.isPresent()) {
             sslContextFactory.setKeyStorePath(keyStorePath.get());
@@ -238,6 +242,15 @@ public class KuraJettyCustomizer extends JettyCustomizer {
     private static class BaseSslContextFactory extends SslContextFactory.Server {
 
         private Optional<Function<String, List<KeyManager>>> keyManagersProvider = Optional.empty();
+        private Optional<CertStore> crlStore = Optional.empty();
+
+        public void setCRLStore(final CertStore crlStore) {
+            this.crlStore = Optional.of(crlStore);
+        }
+
+        public Optional<CertStore> getCRLStore() {
+            return crlStore;
+        }
 
         public void setKeyManagersProvider(Function<String, List<KeyManager>> keyManagersProvider) {
             this.keyManagersProvider = Optional.of(keyManagersProvider);
@@ -287,15 +300,11 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                 final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator
                         .getInstance("PKIX").getRevocationChecker();
 
-                final String responderURL = getOcspResponderURL();
-                if (responderURL != null) {
-                    revocationChecker.setOcspResponder(new URI(responderURL));
-                }
-                final Object softFail = getOrDefault(settings, "org.eclipse.kura.revocation.soft.fail", false);
-                if (softFail instanceof Boolean && (boolean) softFail) {
-                    revocationChecker.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL,
-                            PKIXRevocationChecker.Option.NO_FALLBACK));
-                }
+                final EnumSet<PKIXRevocationChecker.Option> revocationOptions = getOrDefault(settings,
+                        "org.eclipse.kura.revocation.checker.options",
+                        EnumSet.noneOf(PKIXRevocationChecker.Option.class));
+
+                revocationChecker.setOptions(revocationOptions);
 
                 pbParams.addCertPathChecker(revocationChecker);
             }
@@ -304,13 +313,12 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                 pbParams.addCertPathChecker(getPkixCertPathChecker());
             }
 
-            if (crls != null && !crls.isEmpty()) {
-                pbParams.addCertStore(CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls)));
-            }
+            final Optional<CertStore> crlStore = getCRLStore();
 
-            if (isEnableCRLDP()) {
-                // Enable Certificate Revocation List Distribution Points (CRLDP) support
-                System.setProperty("com.sun.security.enableCRLDP", "true");
+            if (crlStore.isPresent()) {
+                pbParams.addCertStore(crlStore.get());
+            } else if (crls != null && !crls.isEmpty()) {
+                pbParams.addCertStore(CertStore.getInstance("Collection", new CollectionCertStoreParameters(crls)));
             }
 
             return pbParams;

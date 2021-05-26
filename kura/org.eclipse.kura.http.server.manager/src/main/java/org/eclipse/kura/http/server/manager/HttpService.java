@@ -13,11 +13,12 @@
 package org.eclipse.kura.http.server.manager;
 
 import java.security.KeyStore;
+import java.security.cert.PKIXRevocationChecker;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -26,7 +27,9 @@ import javax.net.ssl.KeyManager;
 
 import org.eclipse.equinox.http.jetty.JettyConfigurator;
 import org.eclipse.equinox.http.jetty.JettyConstants;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.http.server.manager.HttpServiceOptions.RevocationCheckMode;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.system.SystemService;
 import org.slf4j.Logger;
@@ -141,6 +144,11 @@ public class HttpService implements ConfigurableComponent {
                 throw new IllegalStateException(e);
             }
         });
+        try {
+            jettyConfig.put("org.eclipse.kura.crl.store", currentKeystoreService.getCRLStore());
+        } catch (final KuraException e) {
+            logger.warn("failed to obtain CRL store", e);
+        }
         jettyConfig.put(JettyConstants.SSL_KEYSTORE, "/tmp/foo");
         jettyConfig.put(JettyConstants.SSL_PASSWORD, "foo");
 
@@ -148,18 +156,26 @@ public class HttpService implements ConfigurableComponent {
 
         jettyConfig.put("org.eclipse.kura.revocation.check.enabled", isRevocationEnabled);
 
-        final Optional<String> ocspURI = this.options.getOcspURI();
-        final Optional<String> crlPath = this.options.getCrlPath();
-        final boolean softFail = this.options.isRevocationSoftFailEnabled();
+        final RevocationCheckMode revocationCheckMode = this.options.getRevocationCheckMode();
 
         if (isRevocationEnabled) {
-            if (ocspURI.isPresent() && !ocspURI.get().trim().isEmpty()) {
-                jettyConfig.put("org.eclipse.kura.revocation.ocsp.uri", ocspURI.get());
+            final EnumSet<PKIXRevocationChecker.Option> checkerOptions;
+
+            if (revocationCheckMode == RevocationCheckMode.CRL_ONLY) {
+                checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS,
+                        PKIXRevocationChecker.Option.NO_FALLBACK);
+            } else if (revocationCheckMode == RevocationCheckMode.PREFER_CRL) {
+                checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS);
+            } else {
+                checkerOptions = EnumSet.noneOf(PKIXRevocationChecker.Option.class);
             }
-            if (crlPath.isPresent() && !crlPath.get().trim().isEmpty()) {
-                jettyConfig.put("org.eclipse.kura.revocation.crl.path", crlPath.get());
+
+            if (this.options.isRevocationSoftFailEnabled()) {
+                checkerOptions.add(PKIXRevocationChecker.Option.SOFT_FAIL);
             }
-            jettyConfig.put("org.eclipse.kura.revocation.soft.fail", softFail);
+
+            jettyConfig.put("org.eclipse.kura.revocation.checker.options", checkerOptions);
+
         }
 
         return jettyConfig;

@@ -5,7 +5,8 @@ Bundle-SymbolicName: org.eclipse.kura.core.keystore;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.gson;version="2.7.0",
+Import-Package: com.eclipsesource.json;version="0.9.5",
+ com.google.gson;version="2.7.0",
  com.google.gson.annotations;version="2.7.0",
  javax.annotation.security;version="1.2.0",
  javax.ws.rs;version="2.0.1",
@@ -39,6 +40,7 @@ Import-Package: com.google.gson;version="2.7.0",
  org.eclipse.kura.rest.utils;version="[1.0,2.0)",
  org.eclipse.kura.security.keystore;version="[1.0,2.0)",
  org.eclipse.kura.system;version="[1.5,2.0)",
+ org.eclipse.kura.util.configuration;version="[1.0,2.0)",
  org.eclipse.kura.util.service;version="[1.0,2.0)",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.component;version="1.2.0",

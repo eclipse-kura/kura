@@ -29,7 +29,7 @@ public class CRLManagerOptions {
 
     private static final Logger logger = LoggerFactory.getLogger(CRLManagerOptions.class);
 
-    private static final Property<Boolean> CRL_MANAGEMENT_ENABLED = new Property<>("crl.management enabled", false);
+    private static final Property<Boolean> CRL_MANAGEMENT_ENABLED = new Property<>("crl.management.enabled", false);
     private static final Property<Long> CRL_UPDATE_INTERVAL = new Property<>("crl.update.interval", 1L);
     private static final Property<String> CRL_UPDATE_INTERVAL_TIME_UNIT = new Property<>(
             "crl.update.interval.time.unit", TimeUnit.DAYS.name());

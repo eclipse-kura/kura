@@ -14,7 +14,9 @@ package org.eclipse.kura.core.keystore.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URLConnection;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -93,7 +95,8 @@ public class CRLUtil {
         executor.execute(() -> {
             for (final URI uri : uris) {
                 logger.info("fetching CRL from: {}...", uri);
-                try (final InputStream in = uri.toURL().openStream()) {
+
+                try (final InputStream in = openConnection(uri)) {
                     final CertificateFactory cf = CertificateFactory.getInstance("X.509");
                     final X509CRL crl = (X509CRL) cf.generateCRL(in);
                     logger.info("fetching CRL from: {}...done", uri);
@@ -113,6 +116,17 @@ public class CRLUtil {
         });
 
         return result;
+    }
+
+    private static InputStream openConnection(final URI uri) throws IOException {
+        final URLConnection connection = uri.toURL().openConnection();
+
+        if (connection instanceof HttpURLConnection) {
+            ((HttpURLConnection) connection).setRequestProperty("Accept", "*/*");
+            ((HttpURLConnection) connection).setRequestProperty("Connection", "Close");
+        }
+
+        return connection.getInputStream();
     }
 
     private static Optional<URI> parseURI(final String value) {

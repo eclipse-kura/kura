@@ -194,7 +194,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         logger.info("Bundle {} has updated!", this.getClass().getSimpleName());
     }
 
-    protected void deactivate() {
+    public void deactivate() {
         logger.info("Bundle {} is deactivating!", this.getClass().getSimpleName());
 
         if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
@@ -500,11 +500,19 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         if (isNull(alias)) {
             throw new IllegalArgumentException("Alias cannot be null!");
         }
+        final Optional<Entry> currentEntry = Optional.ofNullable(getEntry(alias));
+
         KeyStore ks = getKeyStore();
         try {
-            ks.deleteEntry(alias);
             saveKeystore(ks);
-            postChangedEvent();
+            ks.deleteEntry(alias);
+            boolean crlStoreChanged = false;
+            if (currentEntry.isPresent()) {
+                crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());
+            }
+            if (!crlStoreChanged) {
+                postChangedEvent();
+            }
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to delete entry " + alias);
         }
@@ -540,7 +548,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         try {
             ks.setEntry(alias, entry, protectionParameter);
             saveKeystore(ks);
-            postChangedEvent();
+            if (!tryAddToCrlManagement(entry)) {
+                postChangedEvent();
+            }
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to set the entry " + alias);
         }
@@ -670,6 +680,44 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
                 return false;
             }
         };
+    }
+
+    private Optional<X509Certificate> extractCertificate(final Entry entry) {
+        if (!(entry instanceof TrustedCertificateEntry)) {
+            return Optional.empty();
+        }
+
+        final TrustedCertificateEntry trustedCertificateEntry = (TrustedCertificateEntry) entry;
+        final Certificate certificate = trustedCertificateEntry.getTrustedCertificate();
+
+        if (!(certificate instanceof X509Certificate)) {
+            return Optional.empty();
+        } else {
+            return Optional.of((X509Certificate) certificate);
+        }
+
+    }
+
+    private boolean tryAddToCrlManagement(final Entry entry) {
+        final Optional<X509Certificate> certificate = extractCertificate(entry);
+        final Optional<CRLManager> currentCrlManager = this.crlManager;
+
+        if (certificate.isPresent() && currentCrlManager.isPresent()) {
+            return currentCrlManager.get().addTrustedCertificate(certificate.get());
+        } else {
+            return false;
+        }
+    }
+
+    private boolean tryRemoveFromCrlManagement(final Entry entry) {
+        final Optional<X509Certificate> certificate = extractCertificate(entry);
+        final Optional<CRLManager> currentCrlManager = this.crlManager;
+
+        if (certificate.isPresent() && crlManager.isPresent()) {
+            return currentCrlManager.get().removeTrustedCertificate(certificate.get());
+        } else {
+            return false;
+        }
     }
 
     private boolean verifyCRL(X509CRL crl, final TrustedCertificateEntry trustedCertEntry) {

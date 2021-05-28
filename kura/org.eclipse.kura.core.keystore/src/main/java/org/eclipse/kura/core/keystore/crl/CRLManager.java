@@ -67,25 +67,34 @@ public class CRLManager implements Closeable {
         this.listener = listener;
     }
 
-    public synchronized void addDistributionPoint(final Set<URI> uris) {
+    public synchronized boolean addDistributionPoint(final Set<URI> uris) {
+        logger.info("referencing distribution points: {}", uris);
+
         final Optional<DistributionPointState> existing = this.referencedDistributionPoints.stream()
                 .filter(p -> p.distributionPoints.equals(uris)).findAny();
 
         if (existing.isPresent()) {
             existing.get().ref();
+            return false;
         } else {
             this.referencedDistributionPoints.add(new DistributionPointState(uris));
             requestUpdate();
+            return true;
         }
     }
 
-    public synchronized void removeDistributionPoint(final Set<URI> uris) {
+    public synchronized boolean removeDistributionPoint(final Set<URI> uris) {
+        logger.info("unreferencing distribution points: {}", uris);
+
         if (this.referencedDistributionPoints.removeIf(p -> p.distributionPoints.equals(uris) && p.unref() <= 0)) {
             requestUpdate();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public void addTrustedCertificate(final X509Certificate entry) {
+    public boolean addTrustedCertificate(final X509Certificate entry) {
 
         final Set<URI> distributionPoints;
 
@@ -93,26 +102,27 @@ public class CRLManager implements Closeable {
             distributionPoints = CRLUtil.getCrlURIs(entry);
         } catch (final Exception e) {
             logger.warn("failed to get distribution points for {}", entry.getSubjectX500Principal(), e);
-            return;
+            return false;
         }
 
         if (distributionPoints.isEmpty()) {
             logger.info("certificate {} has no CRL distribution points", entry.getSubjectX500Principal());
-            return;
+            return false;
         }
 
-        addDistributionPoint(distributionPoints);
+        return addDistributionPoint(distributionPoints);
     }
 
-    public void removeTrustedCertificate(final X509Certificate entry) {
+    public boolean removeTrustedCertificate(final X509Certificate entry) {
 
         try {
             final Set<URI> distributionPoints = CRLUtil.getCrlURIs(entry);
 
-            removeDistributionPoint(distributionPoints);
+            return removeDistributionPoint(distributionPoints);
 
         } catch (final Exception e) {
             logger.warn("failed to get distribution points for {}", entry.getSubjectX500Principal(), e);
+            return false;
         }
     }
 
@@ -158,6 +168,10 @@ public class CRLManager implements Closeable {
                     final X509CRL crl = future.get(1, TimeUnit.MINUTES);
 
                     changed |= validateAndStoreCRL(now, state, storedCrl, crl);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.warn("failed to download CRL", e);
+                    future.cancel(true);
                 } catch (final Exception e) {
                     logger.warn("failed to download CRL", e);
                     future.cancel(true);

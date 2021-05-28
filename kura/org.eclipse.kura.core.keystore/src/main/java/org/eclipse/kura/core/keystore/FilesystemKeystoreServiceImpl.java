@@ -504,8 +504,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         KeyStore ks = getKeyStore();
         try {
-            saveKeystore(ks);
             ks.deleteEntry(alias);
+            saveKeystore(ks);
             boolean crlStoreChanged = false;
             if (currentEntry.isPresent()) {
                 crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());

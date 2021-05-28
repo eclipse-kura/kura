@@ -371,6 +371,33 @@ public class MqttDataTransportTest {
         }
     }
 
+    @Test
+    public void connectionShouldFailWithRevocationChechEnabled() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttKeyStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withHostnameVerification(false).withRevocationCheckEnabled(true).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            test.connect();
+        }
+    }
+
     private static class MqttDataTransportOptions {
 
         private Optional<String> brokerUrl = Optional.empty();
@@ -421,12 +448,18 @@ public class MqttDataTransportTest {
 
         private Optional<Boolean> hostnameVerification = Optional.empty();
         private Optional<String> keystoreTargetFilter = Optional.empty();
+        private Optional<Boolean> revocationCheckEnabled = Optional.empty();
 
         private SslManagerServiceOptions() {
         }
 
         static SslManagerServiceOptions defaultConfiguration() {
             return new SslManagerServiceOptions();
+        }
+
+        SslManagerServiceOptions withRevocationCheckEnabled(final boolean revocationCheckEnabled) {
+            this.revocationCheckEnabled = Optional.of(revocationCheckEnabled);
+            return this;
         }
 
         SslManagerServiceOptions withHostnameVerification(final boolean hostnameVerification) {
@@ -444,6 +477,7 @@ public class MqttDataTransportTest {
 
             this.hostnameVerification.ifPresent(v -> result.put("ssl.hostname.verification", v));
             this.keystoreTargetFilter.ifPresent(v -> result.put("KeystoreService.target", v));
+            this.revocationCheckEnabled.ifPresent(v -> result.put("ssl.revocation.check.enabled", v));
 
             return result;
         }

@@ -58,6 +58,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
     private static final long serialVersionUID = -4176701819112753800L;
 
+    private static final String KURA_MODE = "org.eclipse.kura.mode";
+    private static final String EMULATOR = "emulator";
+
     @Override
     public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
@@ -299,23 +302,26 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public ArrayList<GwtGroupedNVPair> findSystemPackages(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
+        if (!isEmulatorMode()) {
 
-        SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
-        List<SystemResourceInfo> packages = null;
-        try {
-            packages = systemService.getSystemPackages();
-        } catch (KuraProcessExecutionErrorException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE, e);
+            SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+            List<SystemResourceInfo> packages = null;
+            try {
+                packages = systemService.getSystemPackages();
+            } catch (KuraProcessExecutionErrorException e) {
+                throw new GwtKuraException(GwtKuraErrorCode.RESOURCE_FETCHING_FAILURE, e);
+            }
+            if (packages != null) {
+                packages.stream().forEach(p -> {
+                    GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                    pair.setName(p.getName());
+                    pair.setVersion(p.getVersion());
+                    pair.setType(p.getTypeString());
+                    pairs.add(pair);
+                });
+            }
         }
-        if (packages != null) {
-            packages.stream().forEach(p -> {
-                GwtGroupedNVPair pair = new GwtGroupedNVPair();
-                pair.setName(p.getName());
-                pair.setVersion(p.getVersion());
-                pair.setType(p.getTypeString());
-                pairs.add(pair);
-            });
-        }
+
         return new ArrayList<>(pairs);
     }
 
@@ -404,6 +410,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                 .append(" hms");
 
         return sb.toString();
+    }
+
+    private boolean isEmulatorMode() {
+        return System.getProperty(KURA_MODE, "").equals(EMULATOR);
     }
 }
 

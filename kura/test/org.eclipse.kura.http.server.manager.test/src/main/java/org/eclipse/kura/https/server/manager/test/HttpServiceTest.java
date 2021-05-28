@@ -197,6 +197,33 @@ public class HttpServiceTest {
     }
 
     @Test
+    public void shouldSupportRevocationCheckWithNoSources() throws Exception {
+
+        final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
+        final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
+
+        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration())) {
+
+            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
+                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
+                            .withRevocationCheckEnabled(true).withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                            .toProperties()).get(30, TimeUnit.SECONDS);
+
+            final KeyManager[] keyManagers = buildClientKeyManagers();
+
+            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
+                    Optional.of(buildClientTrustManagers())) instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:8080/") instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4442/") instanceof Failure);
+            assertAlwaysTrue(() -> getHttpStatusCode("http://localhost:80/") instanceof Failure);
+
+        }
+
+        configSvc.deleteFactoryConfiguration(HTTPS_KEYSTORE_SERVICE_PID, false);
+    }
+
+    @Test
     public void shouldRejectClientConnectionWithNoCert() throws Exception {
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
@@ -313,6 +340,7 @@ public class HttpServiceTest {
         private Integer[] httpsPorts = new Integer[] {};
         private Integer[] httpsClientAuthPorts = new Integer[] {};
         private Optional<String> keystoreServiceTarget = Optional.empty();
+        private Optional<Boolean> revocationCheckEnabled = Optional.empty();
 
         private HttpServiceOptions() {
         }
@@ -341,12 +369,18 @@ public class HttpServiceTest {
             return this;
         }
 
+        HttpServiceOptions withRevocationCheckEnabled(final boolean enabled) {
+            this.revocationCheckEnabled = Optional.of(enabled);
+            return this;
+        }
+
         Map<String, Object> toProperties() {
             final Map<String, Object> result = new HashMap<>();
 
             result.put("http.ports", this.httpPorts);
             result.put("https.ports", this.httpsPorts);
             result.put("https.client.auth.ports", this.httpsClientAuthPorts);
+            this.revocationCheckEnabled.ifPresent(v -> result.put("https.revocation.check.enabled", v));
             result.put("KeystoreService.target", this.keystoreServiceTarget.orElse("(kura.service.pid=changeit)"));
 
             return result;

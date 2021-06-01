@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.driver.ble.xdk"
       label="%featureName"
-      version="1.0.0.qualifier"
+      version="1.0.0"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

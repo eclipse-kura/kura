@@ -4,10 +4,10 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.0.0</version>
     </parent>
     <artifactId>usb4java-javax</artifactId>
-    <version>1.2.600-SNAPSHOT</version>
+    <version>1.2.600</version>
     <packaging>bundle</packaging>
     <name>usb4java-javax</name>
     <description>javax.usb 1.0.2 API using usb4java</description>

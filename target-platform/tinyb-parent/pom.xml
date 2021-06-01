@@ -20,12 +20,12 @@
     <parent>
     	<groupId>org.eclipse.kura</groupId>
     	<artifactId>target-platform</artifactId>
-    	<version>5.0.0-SNAPSHOT</version>
+    	<version>5.0.0</version>
         <relativePath>..</relativePath>
     </parent>
     
 	<artifactId>tinyb-parent</artifactId>
-	<version>1.0.400-SNAPSHOT</version>
+	<version>1.0.400</version>
 	<packaging>pom</packaging>
 
     <modules>

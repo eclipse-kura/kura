@@ -20,12 +20,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>5.0.0-SNAPSHOT</version>
+		<version>5.0.0</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.http.server.manager</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

@@ -668,7 +668,7 @@ public class GwtComponentServiceInternal {
         return driverFactoriesPids;
     }
 
-    public static List<String> getPidsFromTarget(String pid, String targetRef) {
+    public static List<String> getPidsFromTarget(final String componentName, final String targetRef) {
 
         List<String> result = new ArrayList<>();
 
@@ -679,12 +679,7 @@ public class GwtComponentServiceInternal {
             final ServiceComponentRuntime scrService = context.getService(scrServiceRef);
 
             final Set<String> referenceInterfaces = scrService.getComponentDescriptionDTOs().stream()
-                    .filter(componentDescription -> scrService.getComponentConfigurationDTOs(componentDescription)
-                            .stream().anyMatch(componentConfiguration -> {
-                                String kuraServicePid = (String) componentConfiguration.properties
-                                        .get(ConfigurationService.KURA_SERVICE_PID);
-                                return kuraServicePid != null && kuraServicePid.equals(pid);
-                            }))
+                    .filter(componentDescription -> componentDescription.name.equals(componentName))
                     .map(componentDescription -> {
                         ReferenceDTO[] references = componentDescription.references;
                         for (ReferenceDTO reference : references) {

@@ -259,7 +259,7 @@ public abstract class AbstractServicesUi extends Composite {
 
             RequestQueue.submit(context -> this.gwtXSRFService.generateSecurityToken(
                     context.callback(token -> AbstractServicesUi.this.gwtComponentService.getPidsFromTarget(token,
-                            this.configurableComponent.getComponentId(), targetedService, context.callback(data -> {
+                            getSCRComponentName(this.configurableComponent), targetedService, context.callback(data -> {
                                 if (data.isEmpty()) {
                                     dropDownHeader.setText(MSGS.noTargetsAvailable());
                                 } else {
@@ -276,6 +276,16 @@ public abstract class AbstractServicesUi extends Composite {
         }
 
         textBox.validate(true);
+    }
+
+    private static final String getSCRComponentName(final GwtConfigComponent component) {
+        final String factoryPid = component.getFactoryId();
+
+        if (factoryPid != null) {
+            return factoryPid;
+        }
+
+        return component.getComponentId();
     }
 
     private AnchorListItem createListItem(final TextBoxBase textBox, String targetEntry) {

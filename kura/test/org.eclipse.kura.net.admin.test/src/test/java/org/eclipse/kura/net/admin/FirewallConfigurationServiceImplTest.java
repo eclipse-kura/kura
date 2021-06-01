@@ -512,20 +512,19 @@ public class FirewallConfigurationServiceImplTest {
     
     @Test
     public void addFloodingProtectionRulesTest() {
+        final LinuxFirewall mockFirewall = mock(LinuxFirewall.class);
+        
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
-            
             @Override
-            public void addFloodingProtectionRules(Set<String> floodingRules) {
-                try {
-                    LinuxFirewall mockFirewall = mock(LinuxFirewall.class);
-                    mockFirewall.setAdditionalRules(new HashSet<String>(), new HashSet<String>(), floodingRules);
-                } catch (KuraException e) {
-                    // test fails if we get here
-                    throw new RuntimeException("Failed to set Firewall Flooding Protection Configuration");
-                }
-            }
-            
+            protected LinuxFirewall getLinuxFirewall() {
+                return mockFirewall;
+            }   
         };
+        
+        ComponentContext mockContext = mock(ComponentContext.class);
+        Map<String, Object> floodingProperties = new HashMap<>();
+        floodingProperties.put("test", "test");
+        svc.activate(mockContext, floodingProperties);
         
         String[] floodingRules = {
                 "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
@@ -546,6 +545,12 @@ public class FirewallConfigurationServiceImplTest {
                 "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
         
         svc.addFloodingProtectionRules(new HashSet<>(Arrays.asList(floodingRules)));
+        
+        try {
+            verify(mockFirewall, times(1)).setAdditionalRules(anyObject(), anyObject(), anyObject());
+        } catch(KuraException e) {
+            assert(false);
+        }
     }
 
 }

@@ -35,42 +35,42 @@ public class FloodingProtectionConfigurator
     private FirewallConfigurationService firewallService;
 
     public synchronized void setFirewallConfigurationService(FirewallConfigurationService firewallService) {
-        logger.debug("Binding FirewallConfigurationService...");
+        logger.info("Binding FirewallConfigurationService...");
         this.firewallService = firewallService;
-        logger.debug("Binding FirewallConfigurationService... Done.");
+        logger.info("Binding FirewallConfigurationService... Done.");
     }
 
     public synchronized void unsetFirewallConfigurationService(FirewallConfigurationService firewallService) {
         if (this.firewallService == firewallService) {
-            logger.debug("Unbinding FirewallConfigurationService...");
+            logger.info("Unbinding FirewallConfigurationService...");
             this.firewallService = null;
-            logger.debug("Unbinding FirewallConfigurationService... Done.");
+            logger.info("Unbinding FirewallConfigurationService... Done.");
         }
     }
 
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.debug("Activating FloodingConfigurator...");
+        logger.info("Activating FloodingConfigurator...");
         doUpdate(properties);
-        logger.debug("Activating FloodingConfigurator... Done.");
+        logger.info("Activating FloodingConfigurator... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.debug("Updating FloodingConfigurator...");
+        logger.info("Updating FloodingConfigurator...");
         doUpdate(properties);
-        logger.debug("Updating FloodingConfigurator... Done.");
+        logger.info("Updating FloodingConfigurator... Done.");
     }
 
     public void deactivate(ComponentContext componentContext) {
-        logger.debug("Deactivating FloodingConfigurator...");
-        logger.debug("Deactivating FloodingConfigurator... Done.");
+        logger.info("Deactivating FloodingConfigurator...");
+        logger.info("Deactivating FloodingConfigurator... Done.");
     }
 
     private void doUpdate(Map<String, Object> properties) {
-        logger.debug("Updating firewall configuration...");
+        logger.info("Updating firewall configuration...");
         this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
         this.firewallService
                 .addFloodingProtectionRules(this.floodingProtectionOptions.getFloodingProtectionMangleRules());
-        logger.debug("Updating firewall configuration... Done.");
+        logger.info("Updating firewall configuration... Done.");
     }
 
     @Override

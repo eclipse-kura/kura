@@ -56,7 +56,6 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.system.SystemService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -2162,7 +2161,6 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSaveSnapshotNewerLastPid() throws Throwable {
         // new snapshot, too recent old PID => predictable SID
 

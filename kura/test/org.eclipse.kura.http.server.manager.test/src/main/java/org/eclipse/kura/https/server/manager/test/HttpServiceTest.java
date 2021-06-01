@@ -14,21 +14,22 @@ package org.eclipse.kura.https.server.manager.test;
 
 import static org.junit.Assert.fail;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.security.KeyManagementException;
+import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,12 +51,21 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.testutil.event.EventAdminUtil;
+import org.eclipse.kura.core.testutil.http.TestServer;
+import org.eclipse.kura.core.testutil.pki.TestCA;
+import org.eclipse.kura.core.testutil.pki.TestCA.CRLCreationOptions;
+import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
+import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -77,6 +87,11 @@ public class HttpServiceTest {
     private static CompletableFuture<CryptoService> cryptoService = new CompletableFuture<>();
     private static CompletableFuture<KeystoreService> keystoreService = new CompletableFuture<>();
 
+    private static File serverKeystore;
+    private static File clientKeystore;
+    private static TestCA clientCA;
+    private static X509Certificate clientCertificate;
+
     public void setConfigurationService(final ConfigurationService configurationService) {
         HttpServiceTest.configurationService.complete(configurationService);
     }
@@ -87,6 +102,33 @@ public class HttpServiceTest {
 
     public void setKeystoreService(final KeystoreService keystoreService) {
         HttpServiceTest.keystoreService.complete(keystoreService);
+    }
+
+    @BeforeClass
+    public static void setUp() throws TestCAException, IOException {
+
+        final TestCA serverCA = new TestCA(
+                CertificateCreationOptions.builder(new X500Name("cn=Server CA, dn=foo.org")).build());
+
+        final KeyPair serverKeyPair = TestCA.generateKeyPair();
+
+        final X509Certificate serverCertificate = serverCA.createAndSignCertificate(
+                CertificateCreationOptions.builder(new X500Name("cn=Server Cert, dn=foo.org")).build(), serverKeyPair);
+
+        clientCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=Client CA, dn=bar.org")).build());
+
+        serverKeystore = TestCA.writeKeystore(
+                new KeyStore.PrivateKeyEntry(serverKeyPair.getPrivate(),
+                        new Certificate[] { serverCertificate, serverCA.getCertificate() }),
+                new KeyStore.TrustedCertificateEntry(clientCA.getCertificate()));
+
+        final KeyPair clientKeyPair = TestCA.generateKeyPair();
+
+        clientCertificate = clientCA.createAndSignCertificate(
+                CertificateCreationOptions.builder(new X500Name("cn=admin, dn=bar.org")).build(), clientKeyPair);
+
+        clientKeystore = TestCA.writeKeystore(new KeyStore.PrivateKeyEntry(clientKeyPair.getPrivate(),
+                new Certificate[] { clientCertificate, clientCA.getCertificate() }));
     }
 
     @Test
@@ -224,6 +266,55 @@ public class HttpServiceTest {
     }
 
     @Test
+    public void shouldSupportRevocation() throws Exception {
+        final BundleContext bundleContext = FrameworkUtil.getBundle(HttpServiceTest.class).getBundleContext();
+
+        final TestServer server = new TestServer(8087, Optional.empty());
+
+        final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
+        final CryptoService cryptoSvc = cryptoService.get(5, TimeUnit.MINUTES);
+
+        try (final TestKeystore testKeystore = new TestKeystore(configSvc, cryptoSvc, TEST_KEYSTORE_PID,
+                HttpsKeystoreServiceOptions.defaultConfiguration().withCrlManagerEnabled(true)
+                        .withCrlUrls(new String[] { "http://localhost:8087/crl.pem" }))) {
+
+            updateComponentConfiguration(configSvc, HTTP_SERVER_MANAGER_PID,
+                    HttpServiceOptions.defaultConfiguration().withHttpsClientAuthPorts(4443)
+                            .withRevocationCheckEnabled(true).withKeystoreServiceTarget(testKeystore.getTargetFilter())
+                            .toProperties()).get(30, TimeUnit.SECONDS);
+
+            CompletableFuture<KeystoreChangedEvent> nextEvent = EventAdminUtil.nextEvent(
+                    new String[] { KeystoreChangedEvent.EVENT_TOPIC }, KeystoreChangedEvent.class, bundleContext);
+
+            server.setResource("/crl.pem", encodeCrl(clientCA.generateCRL(CRLCreationOptions.builder().build())));
+            nextEvent.get(10, TimeUnit.SECONDS);
+
+            final KeyManager[] keyManagers = buildClientKeyManagers();
+
+            Thread.sleep(10000);
+
+            assertTrueAtLeastOnce(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
+                    Optional.of(buildClientTrustManagers())).equals(new StatusCode(404)));
+
+            nextEvent = EventAdminUtil.nextEvent(new String[] { KeystoreChangedEvent.EVENT_TOPIC },
+                    KeystoreChangedEvent.class, bundleContext);
+
+            clientCA.revokeCertificate(clientCertificate);
+            server.setResource("/crl.pem", encodeCrl(clientCA.generateCRL(CRLCreationOptions.builder().build())));
+
+            nextEvent.get(10, TimeUnit.SECONDS);
+
+            Thread.sleep(10000);
+
+            assertAlwaysTrue(() -> getHttpStatusCode("https://localhost:4443/", Optional.of(keyManagers),
+                    Optional.of(buildClientTrustManagers())) instanceof Failure);
+
+        } finally {
+            server.close();
+        }
+    }
+
+    @Test
     public void shouldRejectClientConnectionWithNoCert() throws Exception {
 
         final ConfigurationService configSvc = configurationService.get(5, TimeUnit.MINUTES);
@@ -268,6 +359,17 @@ public class HttpServiceTest {
 
     }
 
+    private static byte[] encodeCrl(final X509CRL crl) throws IOException {
+        final byte[] crlData;
+
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            TestCA.encodeToPEM(crl, out);
+            crlData = out.toByteArray();
+        }
+
+        return crlData;
+    }
+
     private static class TestKeystore implements AutoCloseable {
 
         private final ConfigurationService configSvc;
@@ -279,12 +381,10 @@ public class HttpServiceTest {
             this.configSvc = configSvc;
             this.pid = pid;
 
-            final File httpsKeystore = deployResource("/httpskeystore.ks");
-
             WireTestUtil
                     .createFactoryConfiguration(configSvc, ConfigurableComponent.class, pid,
                             "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl",
-                            options.withKeystorePath(httpsKeystore.getAbsolutePath())
+                            options.withKeystorePath(serverKeystore.getAbsolutePath())
                                     .withKeystorePassword("changeit", cryptoSvc).toProperties())
                     .get(30, TimeUnit.SECONDS);
         }
@@ -304,6 +404,8 @@ public class HttpServiceTest {
 
         private String keystorePath = "";
         private String keystorePassword = "";
+        private boolean crlManagerEnabled = false;
+        private Optional<String[]> crlUrls = Optional.empty();
 
         private HttpsKeystoreServiceOptions() {
         }
@@ -323,11 +425,27 @@ public class HttpServiceTest {
             return this;
         }
 
+        HttpsKeystoreServiceOptions withCrlManagerEnabled(boolean crlManagerEnabled) {
+            this.crlManagerEnabled = crlManagerEnabled;
+            return this;
+        }
+
+        HttpsKeystoreServiceOptions withCrlUrls(String[] crlUrls) {
+            this.crlUrls = Optional.of(crlUrls);
+            return this;
+        }
+
         Map<String, Object> toProperties() {
             final Map<String, Object> result = new HashMap<>();
 
             result.put("keystore.path", this.keystorePath);
             result.put("keystore.password", this.keystorePassword);
+            result.put("crl.check.interval", 1L);
+            result.put("crl.check.interval.time.unit", TimeUnit.SECONDS.name());
+            result.put("crl.update.interval", 1L);
+            result.put("crl.update.interval.time.unit", TimeUnit.SECONDS.name());
+            result.put("crl.management.enabled", crlManagerEnabled);
+            this.crlUrls.ifPresent(u -> result.put("crl.urls", u));
 
             return result;
         }
@@ -548,32 +666,15 @@ public class HttpServiceTest {
         });
     }
 
-    private static File deployResource(final String resourcePath) throws IOException {
-
-        final File target = Files.createTempFile(null, null).toFile();
-
-        final byte[] buf = new byte[4096];
-
-        try (final FileOutputStream out = new FileOutputStream(target);
-                final InputStream in = HttpServiceTest.class.getResourceAsStream(resourcePath)) {
-            int rd;
-            while ((rd = in.read(buf)) > 0) {
-                out.write(buf, 0, rd);
-            }
-        }
-
-        return target;
-    }
-
     private static KeyManager[] buildClientKeyManagers() throws KeyStoreException, NoSuchAlgorithmException,
             CertificateException, IOException, UnrecoverableKeyException, KeyManagementException {
         final KeyStore keystore = KeyStore.getInstance("JKS");
-        try (final FileInputStream in = new FileInputStream(deployResource("/clientkeystore.ks"))) {
+        try (final FileInputStream in = new FileInputStream(clientKeystore)) {
             keystore.load(in, "changeit".toCharArray());
         }
 
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
-        keyManagerFactory.init(keystore, "foobar".toCharArray());
+        keyManagerFactory.init(keystore, "changeit".toCharArray());
 
         return keyManagerFactory.getKeyManagers();
     }

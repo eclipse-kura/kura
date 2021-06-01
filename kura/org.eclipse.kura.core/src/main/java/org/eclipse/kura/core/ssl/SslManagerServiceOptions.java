@@ -41,7 +41,7 @@ public class SslManagerServiceOptions {
             false);
     private static final Property<Boolean> SSL_REVOCATION_SOFT_FAIL = new Property<>("ssl.revocation.soft.fail", false);
     private static final Property<String> SSL_REVOCATION_MODE = new Property<>("ssl.revocation.mode",
-            RevocationCheckMode.PREFER_CRL.name());
+            RevocationCheckMode.PREFER_OCSP.name());
 
     private final Map<String, Object> properties;
 

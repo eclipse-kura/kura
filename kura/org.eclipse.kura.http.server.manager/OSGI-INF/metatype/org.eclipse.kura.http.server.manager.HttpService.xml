@@ -63,7 +63,7 @@
             cardinality="0"
             required="false"
             default="false"
-            description="Specifies whether to check revocation status of client certificats."/>
+            description="Specifies whether to check revocation status of client certificates."/>
 
         <AD id="ssl.revocation.mode"
             name="Revocation Check Mode"

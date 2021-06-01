@@ -277,14 +277,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
             final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled",
                     true);
 
-            setEnableOCSP(isRevocationEnabled);
             setValidatePeerCerts(isRevocationEnabled);
-
-            if (isRevocationEnabled) {
-                getOptional(settings, "org.eclipse.kura.revocation.ocsp.uri", String.class)
-                        .ifPresent(this::setOcspResponderURL);
-                getOptional(settings, "org.eclipse.kura.revocation.crl.path", String.class).ifPresent(this::setCrlPath);
-            }
         }
 
         @Override
@@ -292,22 +285,21 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                 Collection<? extends java.security.cert.CRL> crls) throws Exception {
             PKIXBuilderParameters pbParams = new PKIXBuilderParameters(trustStore, new X509CertSelector());
 
+            final boolean isRevocationEnabled = getOrDefault(settings, "org.eclipse.kura.revocation.check.enabled",
+                    true);
+
             pbParams.setMaxPathLength(getMaxCertPathLength());
-            pbParams.setRevocationEnabled(false);
+            pbParams.setRevocationEnabled(isRevocationEnabled);
 
-            if (isEnableOCSP()) {
+            final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator
+                    .getInstance("PKIX").getRevocationChecker();
 
-                final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) CertPathValidator
-                        .getInstance("PKIX").getRevocationChecker();
+            final EnumSet<PKIXRevocationChecker.Option> revocationOptions = getOrDefault(settings,
+                    "org.eclipse.kura.revocation.checker.options", EnumSet.noneOf(PKIXRevocationChecker.Option.class));
 
-                final EnumSet<PKIXRevocationChecker.Option> revocationOptions = getOrDefault(settings,
-                        "org.eclipse.kura.revocation.checker.options",
-                        EnumSet.noneOf(PKIXRevocationChecker.Option.class));
+            revocationChecker.setOptions(revocationOptions);
 
-                revocationChecker.setOptions(revocationOptions);
-
-                pbParams.addCertPathChecker(revocationChecker);
-            }
+            pbParams.addCertPathChecker(revocationChecker);
 
             if (getPkixCertPathChecker() != null) {
                 pbParams.addCertPathChecker(getPkixCertPathChecker());

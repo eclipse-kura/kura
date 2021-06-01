@@ -13,12 +13,13 @@
 package org.eclipse.kura.core.keystore.crl.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.security.KeyStore;
@@ -39,18 +40,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.bouncycastle.asn1.x500.X500Name;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl;
+import org.eclipse.kura.core.testutil.http.TestServer;
 import org.eclipse.kura.core.testutil.pki.TestCA;
 import org.eclipse.kura.core.testutil.pki.TestCA.CRLCreationOptions;
 import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
@@ -97,6 +90,45 @@ public class FilesystemKeystoreServiceImplCrlTest {
             assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
             assertEquals(DEFAULT_KEYSTORE_PID,
                     ((KeystoreChangedEvent) nextEventAdminEvent.get(1, TimeUnit.MINUTES)).getSenderPid());
+
+            Thread.sleep(6000);
+
+            assertTrue(new File(fixture.getKeystoreFile().getAbsolutePath() + ".crl").exists());
+        }
+    }
+
+    @Test
+    public void shouldSupportChangingStoreFile() throws Exception {
+        final X500Name name = new X500Name("cn=Test CA, dc=bar.com");
+
+        final TestCA ca = new TestCA(CertificateCreationOptions.builder(name).build());
+
+        try (final Fixture fixture = new Fixture()) {
+            final CompletableFuture<String> nextDownload = fixture.nextDownloadRelativeURI();
+            final CompletableFuture<Event> nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            fixture.activate();
+
+            final X509CRL crl = ca.generateCRL(CRLCreationOptions.builder().build());
+            fixture.setCrl("/foo.crl", crl);
+
+            fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
+
+            final File file = Files.createTempFile(null, null).toFile();
+
+            assertTrue(file.delete());
+            assertFalse(file.exists());
+
+            fixture.update(fixture.getOptions().setCrlManagerEnabled(true)
+                    .setCrlUrls(Collections.singletonList(fixture.getCrlDownloadURL("/foo.crl")))
+                    .setCrlStoreFile(Optional.of(file)));
+
+            assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
+            assertEquals(DEFAULT_KEYSTORE_PID,
+                    ((KeystoreChangedEvent) nextEventAdminEvent.get(1, TimeUnit.MINUTES)).getSenderPid());
+
+            Thread.sleep(6000);
+            assertTrue(file.exists());
         }
     }
 
@@ -260,17 +292,140 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
     }
 
+    @Test
+    public void shouldRejectUpdateIfIssuerNameDiffers() throws Exception {
+        final X500Name name = new X500Name("cn=Test CA, dc=bar.com");
+
+        try (final Fixture fixture = new Fixture()) {
+
+            final TestCA ca = new TestCA(CertificateCreationOptions.builder(name)
+                    .withCRLDownloadURI(new URI(fixture.getCrlDownloadURL("/foo.crl"))).build());
+
+            CompletableFuture<String> nextDownload = fixture.nextDownloadRelativeURI();
+            CompletableFuture<Event> nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            fixture.setOptions(fixture.getOptions().setCrlManagerEnabled(true).setCrlUpdateInterval(1)
+                    .setCrlUpdateIntervalTimeUnit(TimeUnit.SECONDS));
+            fixture.activate();
+
+            final X509CRL crl = ca.generateCRL(CRLCreationOptions.builder().build());
+            fixture.setCrl("/foo.crl", crl);
+
+            fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
+
+            assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
+            assertEquals(DEFAULT_KEYSTORE_PID,
+                    ((KeystoreChangedEvent) nextEventAdminEvent.get(1, TimeUnit.MINUTES)).getSenderPid());
+
+            nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            final TestCA otherCA = new TestCA(
+                    CertificateCreationOptions.builder(new X500Name("cn=Other CA, dc=baz.org")).build());
+            fixture.setCrl("/foo.crl", otherCA.generateCRL(CRLCreationOptions.builder().build()));
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            assertEquals(false, nextEventAdminEvent.isDone());
+
+        }
+    }
+
+    @Test
+    public void shouldRejectUpdateIfNotSignedByTrustedCert() throws Exception {
+        final X500Name name = new X500Name("cn=Test CA, dc=bar.com");
+
+        try (final Fixture fixture = new Fixture()) {
+
+            final TestCA ca = new TestCA(CertificateCreationOptions.builder(name)
+                    .withCRLDownloadURI(new URI(fixture.getCrlDownloadURL("/foo.crl"))).build());
+
+            CompletableFuture<String> nextDownload = fixture.nextDownloadRelativeURI();
+            CompletableFuture<Event> nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            fixture.setOptions(fixture.getOptions().setCrlManagerEnabled(true).setCrlUpdateInterval(1)
+                    .setCrlUpdateIntervalTimeUnit(TimeUnit.SECONDS));
+            fixture.activate();
+
+            final X509CRL crl = ca.generateCRL(CRLCreationOptions.builder().build());
+            fixture.setCrl("/foo.crl", crl);
+
+            fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
+
+            assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
+            assertEquals(DEFAULT_KEYSTORE_PID,
+                    ((KeystoreChangedEvent) nextEventAdminEvent.get(1, TimeUnit.MINUTES)).getSenderPid());
+
+            nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            final TestCA otherCA = new TestCA(CertificateCreationOptions.builder(name).build());
+            fixture.setCrl("/foo.crl", otherCA.generateCRL(CRLCreationOptions.builder().build()));
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            assertEquals(false, nextEventAdminEvent.isDone());
+
+        }
+    }
+
+    @Test
+    public void shouldAcceptUpdateIfNotSignedByTrustedCertAndVerificationDisabled() throws Exception {
+        final X500Name name = new X500Name("cn=Test CA, dc=bar.com");
+
+        try (final Fixture fixture = new Fixture()) {
+
+            final TestCA ca = new TestCA(CertificateCreationOptions.builder(name)
+                    .withCRLDownloadURI(new URI(fixture.getCrlDownloadURL("/foo.crl"))).build());
+
+            CompletableFuture<String> nextDownload = fixture.nextDownloadRelativeURI();
+            CompletableFuture<Event> nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            fixture.setOptions(fixture.getOptions().setCrlManagerEnabled(true).setCrlUpdateInterval(1)
+                    .setCrlVerificationEnabled(false).setCrlUpdateIntervalTimeUnit(TimeUnit.SECONDS));
+            fixture.activate();
+
+            final X509CRL crl = ca.generateCRL(CRLCreationOptions.builder().build());
+            fixture.setCrl("/foo.crl", crl);
+
+            fixture.keystoreService.setEntry("foo", new TrustedCertificateEntry(ca.getCertificate()));
+
+            assertEquals("/foo.crl", nextDownload.get(1, TimeUnit.MINUTES));
+            assertEquals(DEFAULT_KEYSTORE_PID,
+                    ((KeystoreChangedEvent) nextEventAdminEvent.get(1, TimeUnit.MINUTES)).getSenderPid());
+
+            nextEventAdminEvent = fixture.nextEventAdminEvent();
+
+            final TestCA otherCA = new TestCA(CertificateCreationOptions.builder(name).build());
+            fixture.setCrl("/foo.crl", otherCA.generateCRL(CRLCreationOptions.builder().build()));
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            nextDownload = fixture.nextDownloadRelativeURI();
+            nextDownload.get(1, TimeUnit.MINUTES);
+
+            assertEquals(true, nextEventAdminEvent.isDone());
+
+        }
+    }
+
     private static class Fixture implements AutoCloseable {
 
         private final FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
-        private Server server;
+        private TestServer server;
         private final EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
         private final ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
         private final CryptoService cryptoService = Mockito.mock(CryptoService.class);
         private final ComponentContext componentContext = Mockito.mock(ComponentContext.class);
         private Options options;
 
-        private final Map<String, byte[]> distributionPoints = new HashMap<>();
         private Optional<Consumer<String>> downloadListener = Optional.empty();
         private Optional<Consumer<Event>> eventAdminListener = Optional.empty();
         private final int currentPort;
@@ -306,18 +461,9 @@ public class FilesystemKeystoreServiceImplCrlTest {
             keystoreService.setEventAdmin(eventAdmin);
             keystoreService.setCryptoService(cryptoService);
 
-            this.server = new Server();
-
-            final ServerConnector connector = new ServerConnector(server);
-            connector.setPort(currentPort);
-            this.server.setConnectors(new ServerConnector[] { connector });
-
-            final ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-            context.setContextPath("/");
-            this.server.setHandler(context);
-
-            context.addServlet(new ServletHolder(new DownloadServlet()), "/*");
-            this.server.start();
+            this.server = new TestServer(currentPort, Optional.of(s -> {
+                this.downloadListener.ifPresent(l -> l.accept(s));
+            }));
         }
 
         public File getKeystoreFile() {
@@ -335,7 +481,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
         void setCrl(final String relativeURI, final X509CRL crl) throws IOException {
             try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 TestCA.encodeToPEM(crl, out);
-                this.distributionPoints.put(relativeURI, out.toByteArray());
+                this.server.setResource(relativeURI, out.toByteArray());
             }
         }
 
@@ -387,7 +533,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
         @Override
         public void close() throws Exception {
             this.keystoreService.deactivate();
-            this.server.stop();
+            this.server.close();
         }
 
         private void initializeKeystore(final File file)
@@ -399,40 +545,6 @@ public class FilesystemKeystoreServiceImplCrlTest {
                 keystore.store(out, DEFAULT_KEYSTORE_PASSWORD.toCharArray());
             }
         }
-
-        private class DownloadServlet extends HttpServlet {
-
-            @Override
-            protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
-                    throws ServletException, IOException {
-
-                logger.info("called");
-
-                final String uri = req.getRequestURI();
-
-                logger.info("got request {}", uri);
-
-                downloadListener.ifPresent(l -> l.accept(uri));
-
-                final Optional<byte[]> data = Optional.ofNullable(distributionPoints.get(uri));
-
-                try {
-                    if (data.isPresent()) {
-                        resp.setStatus(200);
-                        resp.setContentType("application/pkix-crl");
-                        final OutputStream out = resp.getOutputStream();
-                        out.write(data.get());
-                        out.flush();
-                    } else {
-                        resp.sendError(404);
-                    }
-                } catch (final IOException e) {
-                    // do nothing
-                }
-            }
-
-        }
-
     }
 
     private static class Options {

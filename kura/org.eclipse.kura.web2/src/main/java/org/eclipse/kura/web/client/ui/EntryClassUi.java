@@ -305,7 +305,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         initLogoutButtons();
         initServicesTree();
         initExtensions();
-        init();
     }
 
     private void initExtensions() {

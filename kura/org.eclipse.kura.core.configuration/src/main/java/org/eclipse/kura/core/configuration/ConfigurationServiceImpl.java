@@ -501,7 +501,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         List<ComponentConfiguration> configs = buildCurrentConfiguration(null);
 
-        return saveSnapshot(configs, false);
+        return saveSnapshot(configs);
     }
 
     @Override
@@ -603,7 +603,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         // might be the old one not the one just loaded from the snapshot and
         // updated through
         // the Configuration Admin. Instead just make a copy of the snapshot.
-        saveSnapshot(configs, false);
+        saveSnapshot(configs);
     }
 
     @Override
@@ -832,7 +832,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
 
         if (takeSnapshot && configs != null && !configs.isEmpty()) {
-            saveSnapshot(configs, false);
+            saveSnapshot(configs);
         }
 
         if (!causes.isEmpty()) {
@@ -1034,17 +1034,14 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
         }
     }
 
-    private synchronized long saveSnapshot(List<ComponentConfiguration> configs, boolean includeDefinition)
-            throws KuraException {
+    private synchronized long saveSnapshot(List<ComponentConfiguration> configs) throws KuraException {
 
         List<ComponentConfiguration> configsToSave = configs;
 
         // Remove definition from configurations
-        if (!includeDefinition) {
-            configsToSave = configs.stream()
-                    .map(cc -> new ComponentConfigurationImpl(cc.getPid(), null, cc.getConfigurationProperties()))
-                    .collect(Collectors.toList());
-        }
+        configsToSave = configs.stream()
+                .map(cc -> new ComponentConfigurationImpl(cc.getPid(), null, cc.getConfigurationProperties()))
+                .collect(Collectors.toList());
 
         // Build the XML structure
         XmlComponentConfigurations conf = new XmlComponentConfigurations();

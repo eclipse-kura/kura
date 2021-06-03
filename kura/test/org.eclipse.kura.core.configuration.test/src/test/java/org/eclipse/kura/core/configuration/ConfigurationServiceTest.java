@@ -2139,7 +2139,7 @@ public class ConfigurationServiceTest {
         XmlComponentConfigurations snapshot = prepareSnapshot();
         List<ComponentConfiguration> configs = snapshot.getConfigurations();
 
-        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs, false);
+        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
         verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
@@ -2223,7 +2223,7 @@ public class ConfigurationServiceTest {
         BundleContext bundleContext = mock(BundleContext.class);
         TestUtil.setFieldValue(cs, "bundleContext", bundleContext);
 
-        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs, false);
+        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
         verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();
@@ -2305,7 +2305,7 @@ public class ConfigurationServiceTest {
         XmlComponentConfigurations snapshot = prepareSnapshot();
         List<ComponentConfiguration> configs = snapshot.getConfigurations();
 
-        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs, false);
+        Long sid = (Long) TestUtil.invokePrivate(cs, "saveSnapshot", configs);
 
         verify(cryptoServiceMock, times(1)).encryptAes((char[]) Matchers.anyObject());
         verify(systemServiceMock, times(1)).getKuraSnapshotsCount();

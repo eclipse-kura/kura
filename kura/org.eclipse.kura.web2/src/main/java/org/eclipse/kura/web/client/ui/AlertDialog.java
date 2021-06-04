@@ -142,14 +142,14 @@ public class AlertDialog extends Composite implements HasId {
     }
 
     public void setAlertText(String message, Severity severity) {
-        if (severity == Severity.INFO) {
-            this.messageText.setText(message);
-            this.messageText.setVisible(true);
-            this.alertBody.setVisible(false);
-        } else {
+        if (severity == Severity.ERROR) {
             this.alertText.setText(message);
             this.alertBody.setVisible(true);
             this.messageText.setVisible(false);
+        } else {
+            this.messageText.setText(message);
+            this.messageText.setVisible(true);
+            this.alertBody.setVisible(false);
         }
     }
 

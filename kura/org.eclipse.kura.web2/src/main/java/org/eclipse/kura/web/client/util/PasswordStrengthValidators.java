@@ -28,8 +28,8 @@ public class PasswordStrengthValidators {
 
     private static final Messages MSGS = GWT.create(Messages.class);
 
-    private static final String DIGITS = "\\d";
-    private static final String NOT_ALPHANUMERIC = "[^a-zA-Z0-9]";
+    private static final String CONTAINS_DIGITS = ".*\\d.*";
+    private static final String CONTAINS_NOT_ALPHANUMERIC = ".*[^a-zA-Z0-9].*";
     private static final String LOWERCASE = "[a-z]";
     private static final String UPPERCASE = "[A-Z]";
 
@@ -68,12 +68,12 @@ public class PasswordStrengthValidators {
     }
 
     private static Validator<String> containsDigitsValidator() {
-        return new RegexValidator(DIGITS, MSGS.pwdStrengthDigitsRequired()) {
+        return new RegexValidator(CONTAINS_DIGITS, MSGS.pwdStrengthDigitsRequired()) {
         };
     }
 
     private static Validator<String> containsSpecialChars() {
-        return new RegexValidator(NOT_ALPHANUMERIC, MSGS.pwdStrengthNonAlphanumericRequired()) {
+        return new RegexValidator(CONTAINS_NOT_ALPHANUMERIC, MSGS.pwdStrengthNonAlphanumericRequired()) {
         };
     }
 

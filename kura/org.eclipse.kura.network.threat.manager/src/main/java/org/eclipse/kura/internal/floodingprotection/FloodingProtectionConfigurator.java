@@ -35,16 +35,12 @@ public class FloodingProtectionConfigurator
     private FirewallConfigurationService firewallService;
 
     public synchronized void setFirewallConfigurationService(FirewallConfigurationService firewallService) {
-        logger.info("Binding FirewallConfigurationService...");
         this.firewallService = firewallService;
-        logger.info("Binding FirewallConfigurationService... Done.");
     }
 
     public synchronized void unsetFirewallConfigurationService(FirewallConfigurationService firewallService) {
         if (this.firewallService == firewallService) {
-            logger.info("Unbinding FirewallConfigurationService...");
             this.firewallService = null;
-            logger.info("Unbinding FirewallConfigurationService... Done.");
         }
     }
 

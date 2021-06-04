@@ -56,7 +56,6 @@ public class FloodingProtectionConfiguratorTest {
 
     private FloodingProtectionConfigurator floodingProtectionConfigurator;
     private FirewallConfigurationService mockFirewallService;
-    //private EventAdmin eaMock;
     private final Map<String, Object> properties = new HashMap<>();
 
     @Before

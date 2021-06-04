@@ -293,14 +293,19 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         this.footerLeft.setStyleName("copyright");
         this.contentPanel.setVisible(false);
 
-        // Add handler for sidenav show/hide button
-        this.sidenavButton.addClickHandler(event -> {
-            if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
-                showSidenav();
-            } else {
-                hideSidenav();
-            }
-        });
+        if (this.userData.getPermissions().isEmpty()) {
+            // if user has no permissions, then sidenav has nothing to display and hamburger button becomes useless
+            this.sidenavButton.removeFromParent();
+        } else {
+            // Add handler for sidenav show/hide button
+            this.sidenavButton.addClickHandler(event -> {
+                if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
+                    showSidenav();
+                } else {
+                    hideSidenav();
+                }
+            });
+        }
 
         initLogoutButtons();
         initServicesTree();

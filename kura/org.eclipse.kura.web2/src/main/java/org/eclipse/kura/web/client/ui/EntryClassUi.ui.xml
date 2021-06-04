@@ -76,6 +76,7 @@
 		padding-left: 6px;
 		padding-right: 6px;
 		font-weight: bold;
+		white-space: pre-wrap;
 		}
 		
 		.user-icon {

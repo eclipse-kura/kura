@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.osgi.framework.Constants.SERVICE_PID;
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Dictionary;
@@ -105,23 +108,15 @@ public class FirewallConfigurationServiceImpl
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("activate()");
 
-        // we are intentionally ignoring the properties from ConfigAdmin at startup
-        if (properties == null) {
-            logger.debug("activate() :: Got null properties...");
-        } else {
-            for (Entry<String, Object> entry : properties.entrySet()) {
-                logger.debug("activate() :: Props... {}={}", entry.getKey(), entry.getValue());
-            }
-        }
-
         this.firewall = getLinuxFirewall();
-        setFloodingProtectionConfiguration();
 
         Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { FloodingProtectionConfigurationChangeEvent.FP_EVENT_CONFIG_CHANGE_TOPIC };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
         this.serviceRegistration = componentContext.getBundleContext().registerService(EventHandler.class.getName(),
                 this, props);
+
+        updated(properties);
     }
 
     protected void deactivate(ComponentContext componentContext) {
@@ -224,9 +219,11 @@ public class FirewallConfigurationServiceImpl
     public ComponentConfiguration getConfiguration() throws KuraException {
         logger.debug("getConfiguration()");
         try {
-            FirewallConfiguration firewallConfiguration = getFirewallConfiguration();
-            return new ComponentConfigurationImpl(PID, getDefinition(),
-                    firewallConfiguration.getConfigurationProperties());
+            Map<String, Object> firewallConfigurationProperties = getFirewallConfiguration()
+                    .getConfigurationProperties();
+            firewallConfigurationProperties.put(KURA_SERVICE_PID, PID);
+            firewallConfigurationProperties.put(SERVICE_PID, PID);
+            return new ComponentConfigurationImpl(PID, getDefinition(), firewallConfigurationProperties);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }

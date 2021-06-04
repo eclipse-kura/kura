@@ -296,6 +296,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         if (this.userData.getPermissions().isEmpty()) {
             // if user has no permissions, then sidenav has nothing to display and hamburger button becomes useless
             this.sidenavButton.removeFromParent();
+            this.sidenav.removeFromParent();
         } else {
             // Add handler for sidenav show/hide button
             this.sidenavButton.addClickHandler(event -> {

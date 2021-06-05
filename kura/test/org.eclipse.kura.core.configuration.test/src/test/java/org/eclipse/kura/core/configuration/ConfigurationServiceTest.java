@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -59,8 +59,6 @@ import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -216,20 +214,16 @@ public class ConfigurationServiceTest {
         Configuration cfgMock2 = mock(Configuration.class);
         when(configAdminMock.getConfiguration(caPid, "?")).thenReturn(cfgMock2);
 
-        doAnswer(new Answer() {
+        doAnswer(invocation -> {
+            Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
 
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+            assertNotNull(dict);
 
-                assertNotNull(dict);
+            assertEquals("one element in properties list - pid", 1, dict.size());
 
-                assertEquals("one element in properties list - pid", 1, dict.size());
+            assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
 
-                assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
-
-                return null;
-            }
+            return null;
         }).when(cfgMock2).update((Dictionary<String, Object>) anyObject());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
@@ -269,21 +263,17 @@ public class ConfigurationServiceTest {
         properties.put("key1", "val1");
         properties.put("key2", "val2");
 
-        Mockito.doAnswer(new Answer() {
+        Mockito.doAnswer(invocation -> {
+            Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
 
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+            assertNotNull(dict);
 
-                assertNotNull(dict);
+            assertEquals("3 elements in properties list", 3, dict.size());
 
-                assertEquals("3 elements in properties list", 3, dict.size());
+            assertEquals("additional key", "val1", dict.get("key1"));
+            assertEquals("additional key", "val2", dict.get("key2"));
 
-                assertEquals("additional key", "val1", dict.get("key1"));
-                assertEquals("additional key", "val2", dict.get("key2"));
-
-                return null;
-            }
+            return null;
         }).when(cfgMock2).update((Dictionary<String, Object>) Matchers.anyObject());
 
         cs.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot);
@@ -2342,11 +2332,11 @@ public class ConfigurationServiceTest {
     public void testLineBreakHandling() throws KuraException, IOException {
         final CryptoService csMock = mock(CryptoService.class);
 
-        when(csMock.encryptAes(Mockito.any(char[].class))).thenAnswer(invocation -> {
+        when(csMock.encryptAes(Matchers.any(char[].class))).thenAnswer(invocation -> {
             return invocation.getArgumentAt(0, char[].class);
         });
 
-        when(csMock.decryptAes(Mockito.any(char[].class))).thenAnswer(invocation -> {
+        when(csMock.decryptAes(Matchers.any(char[].class))).thenAnswer(invocation -> {
             return invocation.getArgumentAt(0, char[].class);
         });
 
@@ -2558,20 +2548,16 @@ public class ConfigurationServiceTest {
 
         when(cfgMock.getProperties()).thenReturn(null);
 
-        Mockito.doAnswer(new Answer<Object>() {
+        Mockito.doAnswer(invocation -> {
+            Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
 
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Dictionary<String, Object> dict = (Dictionary<String, Object>) invocation.getArguments()[0];
+            assertNotNull(dict);
 
-                assertNotNull(dict);
+            assertEquals("one element in properties list - pid", 1, dict.size());
 
-                assertEquals("one element in properties list - pid", 1, dict.size());
+            assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
 
-                assertEquals("expected configuration update PID", pid, dict.elements().nextElement());
-
-                return null;
-            }
+            return null;
         }).when(cfgMock).update((Dictionary<String, ?>) anyObject());
 
         TestUtil.invokePrivate(cs, "updateWithDefaultConfiguration", pid, ocd);

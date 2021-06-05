@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -1035,9 +1035,17 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     private synchronized long saveSnapshot(List<ComponentConfiguration> configs) throws KuraException {
+
+        List<ComponentConfiguration> configsToSave = configs;
+
+        // Remove definition from configurations
+        configsToSave = configs.stream()
+                .map(cc -> new ComponentConfigurationImpl(cc.getPid(), null, cc.getConfigurationProperties()))
+                .collect(Collectors.toList());
+
         // Build the XML structure
         XmlComponentConfigurations conf = new XmlComponentConfigurations();
-        conf.setConfigurations(configs);
+        conf.setConfigurations(configsToSave);
 
         // Write it to disk: marshall
         long sid = new Date().getTime();

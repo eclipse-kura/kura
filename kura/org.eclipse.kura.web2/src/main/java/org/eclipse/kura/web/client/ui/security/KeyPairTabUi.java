@@ -162,7 +162,17 @@ public class KeyPairTabUi extends Composite implements Tab {
             setDirty(true);
         });
 
+        this.storageAliasInput.addBlurHandler(e -> {
+            this.storageAliasInput.validate();
+            setDirty(true);
+        });
+
         this.certificateInput.addKeyUpHandler(e -> {
+            this.certificateInput.validate();
+            setDirty(true);
+        });
+
+        this.certificateInput.addBlurHandler(e -> {
             this.certificateInput.validate();
             setDirty(true);
         });
@@ -180,10 +190,17 @@ public class KeyPairTabUi extends Composite implements Tab {
         this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
         if (this.type == Type.KEY_PAIR) {
             this.privateKeyInput.addValidator(validator);
+
             this.privateKeyInput.addKeyUpHandler(e -> {
                 this.privateKeyInput.validate();
                 setDirty(true);
             });
+
+            this.privateKeyInput.addBlurHandler(e -> {
+                this.privateKeyInput.validate();
+                setDirty(true);
+            });
+
             this.privateKeyInput.setVisibleLines(20);
         }
 

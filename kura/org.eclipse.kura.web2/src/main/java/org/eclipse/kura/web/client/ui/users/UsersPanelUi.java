@@ -37,6 +37,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -100,11 +102,13 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                 }
             }
         };
-
-        this.userTable.addColumn(userColumn, MSGS.usersIdentities());
+        userColumn.setSortable(true);
 
         this.dataProvider.addDataDisplay(this.userTable);
 
+        this.userTable.addColumn(userColumn, MSGS.usersIdentities());
+        this.userTable.getColumnSortList().push(userColumn);
+        this.userTable.addColumnSortHandler(getUserNameSortHandler(userColumn));
         this.userTable.setSelectionModel(this.selectionModel);
 
         this.selectionModel.addSelectionChangeHandler(e -> {
@@ -157,7 +161,14 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                 }
             }, warnings.toArray(new String[warnings.size()]));
         });
+    }
 
+    private ListHandler<GwtUserConfig> getUserNameSortHandler(TextColumn<GwtUserConfig> userNameColumn) {
+        ListHandler<GwtUserConfig> handler = new ListHandler<>(this.dataProvider.getList());
+        handler.setComparator(userNameColumn,
+                (GwtUserConfig conf1, GwtUserConfig conf2) -> conf1.getUserName().compareTo(conf2.getUserName()));
+
+        return handler;
     }
 
     private List<String> getWarnings() {
@@ -227,6 +238,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                     final List<GwtUserConfig> list = this.dataProvider.getList();
                     list.clear();
                     list.addAll(result);
+                    ColumnSortEvent.fire(this.userTable, this.userTable.getColumnSortList());
                 })))));
         RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService
                 .getDefinedPermissions(token, c.callback(result -> this.definedPermissions = result)))));

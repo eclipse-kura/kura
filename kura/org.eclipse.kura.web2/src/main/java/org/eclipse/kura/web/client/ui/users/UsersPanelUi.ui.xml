@@ -60,7 +60,6 @@
                 </b:Panel>
             </b:Row>
             <b:Row>
-                
                 <b:Column size="MD_4">
 	                <b:PanelHeader>
 						<b:Heading size="H3" text="Identities" />
@@ -73,6 +72,7 @@
 	                    striped="true" hover="true" height="100%" width="100%"
 	                    ui:field="userTable" addStyleNames="{style.spaces-visible}"/>
 	                </b:PanelBody>
+	                <b:PanelFooter ui:field="tablePanelFooter"/>
                 </b:Column>
                 <b:Column size="MD_8">
                    <b.html:Paragraph ui:field="emptyLabel" addStyleNames="empty-table-label" text="{msgs.usersSelectIdentity}"></b.html:Paragraph>

@@ -122,7 +122,7 @@ public class KeyPairTabUi extends Composite implements Tab {
 
     private void initForm(final List<String> keyStorePids) {
         StringBuilder title = new StringBuilder();
-        title.append("<p>");
+        title.append("<p style=\"margin-right: 5%;\">");
         title.append(type == Type.KEY_PAIR ? MSGS.securityKeyPairDescription() : MSGS.securityCertificateDescription());
         title.append(" ");
         title.append(MSGS.securityCertificateFormat() + " "

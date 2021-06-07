@@ -59,7 +59,7 @@
             cardinality="0"
             required="false"
             default="false"
-            description="Specifies whether to check revocation status of server certificates."/>
+            description="If enabled, the revocation status of server certificates will be ckeched during TLS handshake. If a revoked certificate is detected, handshake will fail. The revocation status will be checked using OCSP, CRLDP or the CRLs cached by the attached KeystoreService instance, depending on the value of the Revocation Check Mode parameter. If not enabled, revocation ckeck will not be performed."/>
             
         <AD id="ssl.revocation.mode"
             name="Revocation Check Mode"
@@ -67,10 +67,10 @@
             cardinality="0"
             required="true"
             default="PREFER_OCSP"
-            description="Specifies the mode for performing revocation check.">
-            <Option label="Prefer OCSP" value="PREFER_OCSP"/>
-            <Option label="Prefer CRL" value="PREFER_CRL"/>
-            <Option label="CRL Only" value="CRL_ONLY"/>
+            description="Specifies the mode for performing revocation check. This parameter is ignored if Revocation Check Enabled is set to false.">
+            <Option label="Use OCSP first and then KeystoreService CRLs and CRLDP" value="PREFER_OCSP"/>
+            <Option label="Use KeystoreService CRLs and CRLDP first and then OCSP" value="PREFER_CRL"/>
+            <Option label="Use only KeystoreService CRLs and CRLDP" value="CRL_ONLY"/>
         </AD>
 
         <AD id="ssl.revocation.soft.fail"
@@ -79,7 +79,7 @@
             cardinality="0"
             required="true"
             default="false"
-            description="Specifies whether the revocation soft fail is enabled or not. If it is not enabled and the gateway is not able verify the revocation status of a server certificate, the certificate will be rejected."/>
+            description="Specifies whether the revocation soft fail is enabled or not. If it is not enabled and the gateway is not able to determine the revocation status of a server certificate, for example due to a network error, the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
 
     </OCD>
 

@@ -100,7 +100,7 @@ public class FloodingProtectionConfiguratorTest {
                 .containsAll(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
     }
     
-    @Test
+    @Test(expected = NullPointerException.class)
     public void addFloodingRulesTest() {
         this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
         this.floodingProtectionConfigurator.setFirewallConfigurationService(mockFirewallService);
@@ -118,11 +118,6 @@ public class FloodingProtectionConfiguratorTest {
         
         this.floodingProtectionConfigurator.unsetFirewallConfigurationService(mockFirewallService);
         
-        try {
-            this.floodingProtectionConfigurator.updated(this.properties);
-            assert(false);
-        } catch(Exception e) {
-            // exception is correct
-        }
+        this.floodingProtectionConfigurator.updated(this.properties);
     }
 }

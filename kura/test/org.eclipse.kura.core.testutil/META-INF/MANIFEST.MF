@@ -5,12 +5,37 @@ Bundle-SymbolicName: org.eclipse.kura.core.testutil;singleton:=true
 Bundle-Version: 5.0.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: junit.framework;version="4.12.0",
+Import-Package: javax.servlet;version="3.1.0",
+ javax.servlet.http;version="3.1.0",
+ junit.framework;version="4.12.0",
+ org.bouncycastle.asn1;version="1.65.0",
+ org.bouncycastle.asn1.x500;version="1.65.0",
+ org.bouncycastle.asn1.x509;version="1.65.0",
+ org.bouncycastle.cert;version="1.65.0",
+ org.bouncycastle.cert.bc;version="1.65.0",
+ org.bouncycastle.cert.jcajce;version="1.65.0",
+ org.bouncycastle.jce.provider;version="1.65.0",
+ org.bouncycastle.openssl;version="1.65.0",
+ org.bouncycastle.openssl.jcajce;version="1.65.0",
+ org.bouncycastle.operator;version="1.65.0",
+ org.bouncycastle.operator.jcajce;version="1.65.0",
+ org.bouncycastle.x509.extension;version="1.65.0",
+ org.eclipse.jetty.server;version="9.4.41",
+ org.eclipse.jetty.server.handler;version="9.4.41",
+ org.eclipse.jetty.servlet;version="9.4.41",
+ org.eclipse.jetty.util;version="9.4.41",
+ org.eclipse.jetty.util.component;version="9.4.41",
+ org.eclipse.kura.core.testutil.pki;version="1.0.0",
  org.junit;version="4.12.0",
  org.junit.rules;version="4.12.0",
  org.junit.runner;version="4.12.0",
  org.junit.runners.model;version="4.12.0",
+ org.osgi.framework;version="1.10.0",
+ org.osgi.service.event;version="1.4.0",
  org.slf4j;version="1.6.4"
 Bundle-ActivationPolicy: lazy
 Comment: Unit testing utilities
-Export-Package: org.eclipse.kura.core.testutil;version="1.0.0"
+Export-Package: org.eclipse.kura.core.testutil;version="1.0.0",
+ org.eclipse.kura.core.testutil.event;version="1.0.0",
+ org.eclipse.kura.core.testutil.http;version="1.0.0",
+ org.eclipse.kura.core.testutil.pki;version="1.0.0"

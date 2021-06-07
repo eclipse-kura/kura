@@ -5,10 +5,14 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
+import java.security.KeyPair;
+import java.security.KeyStore.PrivateKeyEntry;
+import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.cert.Certificate;
+import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,16 +23,25 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.bouncycastle.asn1.x500.X500Name;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.core.testutil.event.EventAdminUtil;
+import org.eclipse.kura.core.testutil.http.TestServer;
+import org.eclipse.kura.core.testutil.pki.TestCA;
+import org.eclipse.kura.core.testutil.pki.TestCA.CRLCreationOptions;
+import org.eclipse.kura.core.testutil.pki.TestCA.CertificateCreationOptions;
+import org.eclipse.kura.core.testutil.pki.TestCA.TestCAException;
 import org.eclipse.kura.data.DataTransportService;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
 /*******************************************************************************
@@ -62,13 +75,36 @@ public class MqttDataTransportTest {
 
     private static ConfigurationService configurationService;
 
+    private static TestCA brokerCA;
+    private static X509Certificate brokerCertificate;
+
     @BeforeClass
-    public static void setUp() throws IOException, InterruptedException, ExecutionException, TimeoutException,
-            KuraException, InvalidSyntaxException {
-        brokerKeyStore = deployResource("/keystores/brokerkeystore.ks");
-        brokerTrustStore = deployResource("/keystores/brokertruststore.ks");
-        mqttKeyStore = deployResource("/keystores/mqttkeystore.ks");
-        mqttTrustStore = deployResource("/keystores/mqtttruststore.ks");
+    public static void setUp() throws TestCAException, IOException, InterruptedException, ExecutionException,
+            TimeoutException, KuraException, InvalidSyntaxException {
+
+        brokerCA = new TestCA(CertificateCreationOptions.builder(new X500Name("cn=broker CA, dc=bar.com")).build());
+
+        final KeyPair brokerKeyPair = TestCA.generateKeyPair();
+
+        brokerCertificate = brokerCA.createAndSignCertificate(
+                CertificateCreationOptions.builder(new X500Name("cn=broker, dc=bar.com")).build(), brokerKeyPair);
+
+        final TestCA clientCA = new TestCA(
+                CertificateCreationOptions.builder(new X500Name("cn=client CA, dc=baz.com")).build());
+
+        final KeyPair clientKeyPair = TestCA.generateKeyPair();
+
+        final X509Certificate clientCertificate = clientCA.createAndSignCertificate(
+                CertificateCreationOptions.builder(new X500Name("cn=client, dc=baz.com")).build(), clientKeyPair);
+
+        brokerKeyStore = TestCA.writeKeystore(new PrivateKeyEntry(brokerKeyPair.getPrivate(),
+                new Certificate[] { brokerCertificate, brokerCA.getCertificate() }));
+        brokerTrustStore = TestCA.writeKeystore(new TrustedCertificateEntry(clientCA.getCertificate()));
+        mqttKeyStore = TestCA.writeKeystore(
+                new PrivateKeyEntry(clientKeyPair.getPrivate(),
+                        new Certificate[] { clientCertificate, clientCA.getCertificate() }),
+                new TrustedCertificateEntry(brokerCertificate));
+        mqttTrustStore = TestCA.writeKeystore(new TrustedCertificateEntry(brokerCA.getCertificate()));
 
         String brokerConfigXml = loadResource("/artemis_config.xml");
         brokerConfigXml = brokerConfigXml.replaceAll("[$]keyStorePath", brokerKeyStore.getAbsolutePath());
@@ -225,6 +261,80 @@ public class MqttDataTransportTest {
     }
 
     @Test
+    public void shouldSupportRevocation() throws Exception {
+        final BundleContext bundleContext = FrameworkUtil.getBundle(MqttDataTransportTest.class).getBundleContext();
+
+        final TestServer server = new TestServer(8087, Optional.empty());
+
+        server.setResource("/crl.pem", encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
+
+        try (final Fixture fixture = new Fixture()) {
+
+            CompletableFuture<KeystoreChangedEvent> nextEvent = EventAdminUtil.nextEvent(
+                    new String[] { KeystoreChangedEvent.EVENT_TOPIC }, KeystoreChangedEvent.class, bundleContext);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID,
+                    KeystoreServiceOptions.defaultConfiguration().withKeystorePath(mqttTrustStore.getAbsolutePath())
+                            .withCrlManagerEnabled(true).withCrlUrls(new String[] { "http://localhost:8087/crl.pem" })
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            nextEvent.get(10, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withHostnameVerification(false).withRevocationCheckEnabled(true)
+                            .withRevocationCheckMode(SslManagerServiceOptions.RevocationCheckMode.CRL_ONLY)
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8888")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+
+            test.connect();
+
+            nextEvent = EventAdminUtil.nextEvent(new String[] { KeystoreChangedEvent.EVENT_TOPIC },
+                    KeystoreChangedEvent.class, bundleContext);
+
+            brokerCA.revokeCertificate(brokerCertificate);
+            server.setResource("/crl.pem", encodeCrl(brokerCA.generateCRL(CRLCreationOptions.builder().build())));
+
+            nextEvent.get(10, TimeUnit.SECONDS);
+
+            test.disconnect(0);
+
+            try {
+                test.connect();
+            } catch (final KuraConnectException e) {
+                return;
+            }
+
+            fail("connection should have failed");
+        } finally {
+            server.close();
+        }
+    }
+
+    private static byte[] encodeCrl(final X509CRL crl) throws IOException {
+        final byte[] crlData;
+
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            TestCA.encodeToPEM(crl, out);
+            crlData = out.toByteArray();
+        }
+
+        return crlData;
+    }
+
+    @Test
     public void shouldConnectOverWssWithHostnameIdentificationDisabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
@@ -371,6 +481,33 @@ public class MqttDataTransportTest {
         }
     }
 
+    @Test
+    public void connectionShouldFailWithRevocationChechEnabled() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttKeyStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withHostnameVerification(false).withRevocationCheckEnabled(true).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            test.connect();
+        }
+    }
+
     private static class MqttDataTransportOptions {
 
         private Optional<String> brokerUrl = Optional.empty();
@@ -419,14 +556,32 @@ public class MqttDataTransportTest {
 
     private static class SslManagerServiceOptions {
 
+        public enum RevocationCheckMode {
+            PREFER_OCSP,
+            PREFER_CRL,
+            CRL_ONLY
+        }
+
         private Optional<Boolean> hostnameVerification = Optional.empty();
         private Optional<String> keystoreTargetFilter = Optional.empty();
+        private Optional<Boolean> revocationCheckEnabled = Optional.empty();
+        private Optional<RevocationCheckMode> revocationCheckMode = Optional.empty();
 
         private SslManagerServiceOptions() {
         }
 
         static SslManagerServiceOptions defaultConfiguration() {
             return new SslManagerServiceOptions();
+        }
+
+        SslManagerServiceOptions withRevocationCheckEnabled(final boolean revocationCheckEnabled) {
+            this.revocationCheckEnabled = Optional.of(revocationCheckEnabled);
+            return this;
+        }
+
+        SslManagerServiceOptions withRevocationCheckMode(final RevocationCheckMode revocationCheckMode) {
+            this.revocationCheckMode = Optional.of(revocationCheckMode);
+            return this;
         }
 
         SslManagerServiceOptions withHostnameVerification(final boolean hostnameVerification) {
@@ -444,6 +599,8 @@ public class MqttDataTransportTest {
 
             this.hostnameVerification.ifPresent(v -> result.put("ssl.hostname.verification", v));
             this.keystoreTargetFilter.ifPresent(v -> result.put("KeystoreService.target", v));
+            this.revocationCheckEnabled.ifPresent(v -> result.put("ssl.revocation.check.enabled", v));
+            this.revocationCheckMode.ifPresent(v -> result.put("ssl.revocation.mode", v.name()));
 
             return result;
         }
@@ -453,6 +610,8 @@ public class MqttDataTransportTest {
 
         private Optional<String> keystorePath = Optional.empty();
         private Optional<String> keystorePassword = Optional.empty();
+        private boolean crlManagerEnabled = false;
+        private Optional<String[]> crlUrls = Optional.empty();
 
         private KeystoreServiceOptions() {
         }
@@ -461,14 +620,18 @@ public class MqttDataTransportTest {
             return new KeystoreServiceOptions();
         }
 
-        KeystoreServiceOptions withKeystorePath(final String keystorePath) {
-            this.keystorePath = Optional.of(keystorePath);
+        KeystoreServiceOptions withCrlManagerEnabled(boolean crlManagerEnabled) {
+            this.crlManagerEnabled = crlManagerEnabled;
             return this;
         }
 
-        KeystoreServiceOptions withKeystorePassword(final String keystorePassword, final CryptoService cryptoService)
-                throws KuraException {
-            this.keystorePassword = Optional.of(new String(cryptoService.encryptAes(keystorePassword.toCharArray())));
+        KeystoreServiceOptions withCrlUrls(String[] crlUrls) {
+            this.crlUrls = Optional.of(crlUrls);
+            return this;
+        }
+
+        KeystoreServiceOptions withKeystorePath(final String keystorePath) {
+            this.keystorePath = Optional.of(keystorePath);
             return this;
         }
 
@@ -477,6 +640,12 @@ public class MqttDataTransportTest {
 
             this.keystorePath.ifPresent(v -> result.put("keystore.path", v));
             this.keystorePassword.ifPresent(v -> result.put("keystore.password", v));
+            result.put("crl.check.interval", 1L);
+            result.put("crl.check.interval.time.unit", TimeUnit.SECONDS.name());
+            result.put("crl.update.interval", 1L);
+            result.put("crl.update.interval.time.unit", TimeUnit.SECONDS.name());
+            result.put("crl.management.enabled", crlManagerEnabled);
+            this.crlUrls.ifPresent(u -> result.put("crl.urls", u));
 
             return result;
         }
@@ -504,23 +673,6 @@ public class MqttDataTransportTest {
             }
 
         }
-    }
-
-    private static File deployResource(final String resourcePath) throws IOException {
-
-        final File target = Files.createTempFile(null, null).toFile();
-
-        final byte[] buf = new byte[4096];
-
-        try (final FileOutputStream out = new FileOutputStream(target);
-                final InputStream in = MqttDataTransportTest.class.getResourceAsStream(resourcePath)) {
-            int rd;
-            while ((rd = in.read(buf)) > 0) {
-                out.write(buf, 0, rd);
-            }
-        }
-
-        return target;
     }
 
     private static String loadResource(final String resourcePath) throws IOException {

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -39,16 +40,24 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CRL;
+import java.security.cert.CertStore;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CollectionCertStoreParameters;
+import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -78,10 +87,15 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
+import org.eclipse.kura.core.keystore.crl.CRLManager;
+import org.eclipse.kura.core.keystore.crl.CRLManager.CRLVerifier;
+import org.eclipse.kura.core.keystore.crl.CRLManagerOptions;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,11 +111,17 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     private CryptoService cryptoService;
     private SystemService systemService;
     private ConfigurationService configurationService;
+    private EventAdmin eventAdmin;
 
     private KeystoreServiceOptions keystoreServiceOptions;
+    private CRLManagerOptions crlManagerOptions;
+
+    private Optional<CRLManager> crlManager = Optional.empty();
 
     private ScheduledExecutorService selfUpdaterExecutor;
     private ScheduledFuture<?> selfUpdaterFuture;
+
+    private String ownPid;
 
     // ----------------------------------------------------------------
     //
@@ -121,6 +141,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         this.configurationService = configurationService;
     }
 
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -131,6 +155,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         logger.info("Bundle {} is starting!", this.getClass().getSimpleName());
         this.componentContext = context;
 
+        this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -138,6 +163,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
                 && this.keystoreServiceOptions.needsRandomPassword()) {
             changeDefaultKeystorePassword();
         }
+
+        this.crlManagerOptions = new CRLManagerOptions(properties);
+
+        updateCRLManager(this.crlManagerOptions);
 
         logger.info("Bundle {} has started!", this.getClass().getSimpleName());
     }
@@ -153,10 +182,19 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
                 accessKeystore();
             }
         }
+
+        final CRLManagerOptions newCRLManagerOptions = new CRLManagerOptions(properties);
+
+        if (!this.crlManagerOptions.equals(newCRLManagerOptions)) {
+            this.crlManagerOptions = newCRLManagerOptions;
+
+            updateCRLManager(newCRLManagerOptions);
+        }
+
         logger.info("Bundle {} has updated!", this.getClass().getSimpleName());
     }
 
-    protected void deactivate() {
+    public void deactivate() {
         logger.info("Bundle {} is deactivating!", this.getClass().getSimpleName());
 
         if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
@@ -165,6 +203,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
             this.selfUpdaterFuture.cancel(true);
         }
+
+        shutdownCRLManager();
     }
 
     private boolean keystoreExists(String keystorePath) {
@@ -460,10 +500,19 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         if (isNull(alias)) {
             throw new IllegalArgumentException("Alias cannot be null!");
         }
+        final Optional<Entry> currentEntry = Optional.ofNullable(getEntry(alias));
+
         KeyStore ks = getKeyStore();
         try {
             ks.deleteEntry(alias);
             saveKeystore(ks);
+            boolean crlStoreChanged = false;
+            if (currentEntry.isPresent()) {
+                crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());
+            }
+            if (!crlStoreChanged) {
+                postChangedEvent();
+            }
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to delete entry " + alias);
         }
@@ -499,6 +548,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         try {
             ks.setEntry(alias, entry, protectionParameter);
             saveKeystore(ks);
+            if (!tryAddToCrlManagement(entry)) {
+                postChangedEvent();
+            }
         } catch (GeneralSecurityException | IOException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to set the entry " + alias);
         }
@@ -562,5 +614,157 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         X509CertificateHolder certificateHolder = certificateBuilder.build(contentSigner);
 
         return new X509Certificate[] { new JcaX509CertificateConverter().getCertificate(certificateHolder) };
+    }
+
+    private void updateCRLManager(final CRLManagerOptions newCRLManagerOptions) {
+        shutdownCRLManager();
+
+        if (this.crlManagerOptions.isCrlManagementEnabled()) {
+
+            final CRLManager currentCRLManager = new CRLManager(
+                    this.crlManagerOptions.getStoreFile()
+                            .orElseGet(() -> new File(this.keystoreServiceOptions.getKeystorePath() + ".crl")),
+                    5000, newCRLManagerOptions.getCrlCheckIntervalMs(), newCRLManagerOptions.getCrlUpdateIntervalMs(),
+                    getCRLVerifier(newCRLManagerOptions));
+
+            currentCRLManager.setListener(Optional.of(this::postChangedEvent));
+
+            for (final URI uri : newCRLManagerOptions.getCrlURIs()) {
+                currentCRLManager.addDistributionPoint(Collections.singleton(uri));
+            }
+
+            try {
+                for (final Entry e : this.getEntries().values()) {
+                    if (!(e instanceof TrustedCertificateEntry)) {
+                        continue;
+                    }
+
+                    final TrustedCertificateEntry certEntry = (TrustedCertificateEntry) e;
+
+                    final Certificate cert = certEntry.getTrustedCertificate();
+
+                    if (cert instanceof X509Certificate) {
+                        currentCRLManager.addTrustedCertificate((X509Certificate) cert);
+                    }
+                }
+
+            } catch (final Exception e) {
+                logger.warn("failed to add current trusted certificates to CRL manager", e);
+            }
+
+            this.crlManager = Optional.of(currentCRLManager);
+        }
+    }
+
+    private CRLVerifier getCRLVerifier(final CRLManagerOptions options) {
+        if (!options.isCRLVerificationEnabled()) {
+            return crl -> true;
+        }
+
+        return crl -> {
+            try {
+                for (final Entry e : getEntries().values()) {
+                    if (!(e instanceof TrustedCertificateEntry)) {
+                        continue;
+                    }
+
+                    final TrustedCertificateEntry trustedCertEntry = (TrustedCertificateEntry) e;
+
+                    if (verifyCRL(crl, trustedCertEntry)) {
+                        return true;
+                    }
+                }
+                return false;
+            } catch (final Exception e) {
+                logger.warn("Exception verifying CRL", e);
+                return false;
+            }
+        };
+    }
+
+    private Optional<X509Certificate> extractCertificate(final Entry entry) {
+        if (!(entry instanceof TrustedCertificateEntry)) {
+            return Optional.empty();
+        }
+
+        final TrustedCertificateEntry trustedCertificateEntry = (TrustedCertificateEntry) entry;
+        final Certificate certificate = trustedCertificateEntry.getTrustedCertificate();
+
+        if (!(certificate instanceof X509Certificate)) {
+            return Optional.empty();
+        } else {
+            return Optional.of((X509Certificate) certificate);
+        }
+
+    }
+
+    private boolean tryAddToCrlManagement(final Entry entry) {
+        final Optional<X509Certificate> certificate = extractCertificate(entry);
+        final Optional<CRLManager> currentCrlManager = this.crlManager;
+
+        if (certificate.isPresent() && currentCrlManager.isPresent()) {
+            return currentCrlManager.get().addTrustedCertificate(certificate.get());
+        } else {
+            return false;
+        }
+    }
+
+    private boolean tryRemoveFromCrlManagement(final Entry entry) {
+        final Optional<X509Certificate> certificate = extractCertificate(entry);
+        final Optional<CRLManager> currentCrlManager = this.crlManager;
+
+        if (certificate.isPresent() && crlManager.isPresent()) {
+            return currentCrlManager.get().removeTrustedCertificate(certificate.get());
+        } else {
+            return false;
+        }
+    }
+
+    private boolean verifyCRL(X509CRL crl, final TrustedCertificateEntry trustedCertEntry) {
+        try {
+            crl.verify(trustedCertEntry.getTrustedCertificate().getPublicKey());
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    private void shutdownCRLManager() {
+        if (this.crlManager.isPresent()) {
+            this.crlManager.get().close();
+            this.crlManager = Optional.empty();
+        }
+    }
+
+    @Override
+    public Collection<CRL> getCRLs() {
+
+        final Optional<CRLManager> currentCRLManager = this.crlManager;
+
+        if (!currentCRLManager.isPresent()) {
+            return Collections.emptyList();
+        } else {
+            return new ArrayList<>(currentCRLManager.get().getCrls());
+        }
+
+    }
+
+    @Override
+    public CertStore getCRLStore() throws KuraException {
+        final Optional<CRLManager> currentCRLManager = this.crlManager;
+
+        try {
+            if (!currentCRLManager.isPresent()) {
+                return CertStore.getInstance("Collection", new CollectionCertStoreParameters());
+            } else {
+                return currentCRLManager.get().getCertStore();
+            }
+        } catch (final Exception e) {
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+        }
+    }
+
+    private void postChangedEvent() {
+        this.eventAdmin.postEvent(new KeystoreChangedEvent(ownPid));
     }
 }

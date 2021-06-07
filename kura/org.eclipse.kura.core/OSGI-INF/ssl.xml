@@ -18,6 +18,7 @@
    <service>
       <provide interface="org.eclipse.kura.ssl.SslManagerService"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.osgi.service.event.EventHandler"/>
    </service>
    <reference name="KeystoreService"
            policy="dynamic"
@@ -27,4 +28,5 @@
            interface="org.eclipse.kura.security.keystore.KeystoreService"/>
    <property name="kura.ui.factory.hide" type="String" value="true"/>
    <property name="kura.ui.service.hide" type="String" value="true"/>
+   <property name="event.topics" type="String">org/eclipse/kura/security/keystore/KeystoreChangedEvent/KEYSTORE_CHANGED</property>
 </scr:component>

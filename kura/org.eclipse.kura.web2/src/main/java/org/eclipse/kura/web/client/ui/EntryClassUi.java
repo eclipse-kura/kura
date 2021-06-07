@@ -994,8 +994,8 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     public void init() {
-        this.userNameLarge.setText(this.userData.getUserName());
-        this.userNameSmall.setText(this.userData.getUserName());
+        this.userNameLarge.setText(this.userData.getUserNameEllipsed());
+        this.userNameSmall.setText(this.userData.getUserNameEllipsed());
 
         final EventService.Handler userAdminEventHandler = e -> {
             this.userConfigReloadTimer.schedule(1000);

@@ -91,7 +91,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
             @Override
             public String getValue(GwtUserConfig object) {
-                final String userName = object.getUserName();
+                final String userName = object.getUserNameEllipsed();
 
                 if (userName.startsWith(" ") || userName.endsWith(" ")) {
                     return '"' + userName + '"';
@@ -173,7 +173,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
         }
 
         this.dataProvider.getList().stream().filter(u -> u.getPermissions().isEmpty())
-                .forEach(u -> result.add(MSGS.usersNoPermissions(u.getUserName())));
+                .forEach(u -> result.add(MSGS.usersNoPermissions(u.getUserNameEllipsed())));
 
         return result;
     }

@@ -52,14 +52,11 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FirewallConfigurationServiceImpl
-        implements FirewallConfigurationService, SelfConfiguringComponent, EventHandler {
+public class FirewallConfigurationServiceImpl implements FirewallConfigurationService, SelfConfiguringComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
 
@@ -306,12 +303,6 @@ public class FirewallConfigurationServiceImpl
         addNatRules(natRules);
     }
 
-    @Override
-    public void handleEvent(Event event) {
-        logger.debug("Received event: {}", event.getTopic());
-        // no events managed
-    }
-
     protected void addLocalRules(ArrayList<LocalRule> localRules) throws KuraException {
         this.firewall.addLocalRules(localRules);
     }
@@ -408,15 +399,8 @@ public class FirewallConfigurationServiceImpl
 
     @Override
     public void addFloodingProtectionRules(Set<String> floodingRules) {
-        if (this.firewall instanceof LinuxFirewall) {
-            addIpTablesFloodingProtectionRules(floodingRules);
-        }
-        // other firewall types here
-    }
-
-    private void addIpTablesFloodingProtectionRules(Set<String> floodingMangleRules) {
         try {
-            this.firewall.setAdditionalRules(new HashSet<String>(), new HashSet<String>(), floodingMangleRules);
+            this.firewall.setAdditionalRules(new HashSet<>(), new HashSet<>(), floodingRules);
         } catch (KuraException e) {
             logger.error("Failed to set Firewall Flooding Protection Configuration", e);
         }

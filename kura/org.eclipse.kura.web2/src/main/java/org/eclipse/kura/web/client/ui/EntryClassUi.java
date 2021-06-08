@@ -949,6 +949,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     public static void showWaitModal() {
+        waitModal.center();
         waitModal.show();
     }
 

@@ -114,6 +114,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
         this.tablePanelFooter.add(this.pager);
 
         initTable();
+        initInterfaceButtons();
     }
 
     private void initTable() {
@@ -150,7 +151,9 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
             updateButtonState();
         });
+    }
 
+    private void initInterfaceButtons() {
         this.newIdentity.addClickHandler(e -> this.picker.builder(GwtUserConfig.class) //
                 .setTitle(MSGS.usersCreateIdentity()) //
                 .setMessage(MSGS.usersIdentityName()) //

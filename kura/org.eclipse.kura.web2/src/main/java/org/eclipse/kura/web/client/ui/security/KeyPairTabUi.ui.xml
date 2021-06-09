@@ -34,6 +34,10 @@
     .small-text {
     	font-size: 0.90em;
     }
+    
+    #storageAlias {
+    	text-transform: lowercase;
+    }
     </ui:style>
 
     <b:Container fluid="true">

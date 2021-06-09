@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
-import static java.util.Objects.isNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,14 +24,12 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -44,7 +40,6 @@ import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Version;
-import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentException;
@@ -88,18 +83,18 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
 
-    private static Future<?> installerTask;
-    private static Future<?> uninstallerTask;
-
     private DeploymentAdmin deploymentAdmin;
     private EventAdmin eventAdmin;
     private SystemService systemService;
 
-    private Queue<String> instPackageUrls;
-    private Queue<String> uninstPackageNames;
+    private Set<String> instPackageUrls = new HashSet<>();
+    private Set<String> uninstPackageNames = new HashSet<>();
 
-    private ExecutorService installerExecutor;
-    private ExecutorService uninstallerExecutor;
+    private ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+        final Thread result = Executors.defaultThreadFactory().newThread(r);
+        result.setName("DeploymentAgent");
+        return result;
+    });
 
     private String dpaConfPath;
     private String packagesPath;
@@ -119,7 +114,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         }
     }
 
-    protected void activate(ComponentContext componentContext) {
+    protected void activate() {
 
         this.dpaConfPath = System.getProperty(DPA_CONF_PATH_PROPNAME);
         if (this.dpaConfPath == null || this.dpaConfPath.isEmpty()) {
@@ -166,73 +161,24 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             throw new ComponentException("Cannot create packages directory");
         }
 
-        this.instPackageUrls = new ConcurrentLinkedQueue<>();
-        this.uninstPackageNames = new ConcurrentLinkedQueue<>();
-
-        this.installerExecutor = Executors.newSingleThreadExecutor();
-
-        this.uninstallerExecutor = Executors.newSingleThreadExecutor();
-
-        installerTask = this.installerExecutor.submit(() -> {
-            Thread.currentThread().setName("DeploymentAgent");
-            installer();
-        });
-
-        uninstallerTask = this.uninstallerExecutor.submit(() -> {
-            Thread.currentThread().setName("DeploymentAgent:Uninstall");
-            uninstaller();
-        });
-
         installPackagesFromConfFile();
     }
 
-    protected void deactivate(ComponentContext componentContext) {
-        if (installerTask != null && !installerTask.isDone()) {
-            logger.debug("Cancelling DeploymentAgent task ...");
-            installerTask.cancel(false);
-            logger.info("DeploymentAgent task cancelled? = {}", installerTask.isDone());
-            installerTask = null;
-        }
+    protected void deactivate() {
 
-        if (this.installerExecutor != null) {
-            logger.debug("Terminating DeploymentAgent Thread ...");
-            this.installerExecutor.shutdownNow();
-            try {
-                this.installerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.warn("Interrupted", e);
-            }
-            logger.info("DeploymentAgent Thread terminated? - {}", this.installerExecutor.isTerminated());
-            this.installerExecutor = null;
+        logger.debug("Terminating DeploymentAgent Thread ...");
+        this.executor.shutdownNow();
+        try {
+            this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Interrupted", e);
         }
+        logger.info("DeploymentAgent Thread terminated? - {}", this.executor.isTerminated());
 
-        if (uninstallerTask != null && !uninstallerTask.isDone()) {
-            logger.debug("Cancelling DeploymentAgent:Uninstall task ...");
-            uninstallerTask.cancel(false);
-            logger.info("DeploymentAgent:Uninstall task cancelled? = {}", uninstallerTask.isDone());
-            uninstallerTask = null;
-        }
-
-        if (this.uninstallerExecutor != null) {
-            logger.debug("Terminating DeploymentAgent:Uninstall Thread ...");
-            this.uninstallerExecutor.shutdownNow();
-            try {
-                this.uninstallerExecutor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.warn("Interrupted", e);
-            }
-            logger.info("DeploymentAgent:Uninstall Thread terminated? - {}", this.uninstallerExecutor.isTerminated());
-            this.uninstallerExecutor = null;
-        }
-
-        this.dpaConfPath = null;
-        this.uninstPackageNames = null;
-        this.instPackageUrls = null;
     }
 
-    public void updated(ComponentContext componentContext) {
+    public void updated() {
         logger.debug("Updating DeploymentAgent...");
         logger.debug("DeploymentAgent updated");
     }
@@ -241,96 +187,64 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         this.deploymentAdmin = deploymentAdmin;
     }
 
-    public void unsetDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
-        if (this.deploymentAdmin == deploymentAdmin) {
-            this.deploymentAdmin = null;
-        }
-    }
-
     protected void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
-    }
-
-    protected void unsetEventAdmin(EventAdmin eventAdmin) {
-        if (this.eventAdmin == eventAdmin) {
-            this.eventAdmin = null;
-        }
     }
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
 
-    public void unsetSystemService(SystemService systemService) {
-        if (this.systemService == systemService) {
-            this.systemService = null;
-        }
-    }
-
     @Override
     public void installDeploymentPackageAsync(String url) throws Exception {
-        if (this.instPackageUrls.contains(url)) {
-            throw new Exception("Element already exists");
+        synchronized (this.instPackageUrls) {
+            if (this.instPackageUrls.contains(url)) {
+                throw new Exception("Element already exists");
+            }
+            this.instPackageUrls.add(url);
         }
 
-        this.instPackageUrls.offer(url);
-        synchronized (this.instPackageUrls) {
-            this.instPackageUrls.notifyAll();
-        }
+        this.executor.submit(() -> {
+            try {
+                logger.info("About to install package at URL {}", url);
+                execInstall(url);
+            } catch (final Exception e) {
+                logger.error("Unexpected exception installing {}", url, e);
+            }
+        });
     }
 
     @Override
     public void uninstallDeploymentPackageAsync(String name) throws Exception {
-        if (this.uninstPackageNames.contains(name)) {
-            throw new Exception("Element already exists");
+        synchronized (this.uninstPackageNames) {
+            if (this.uninstPackageNames.contains(name)) {
+                throw new Exception("Element already exists");
+            }
+            this.uninstPackageNames.add(name);
         }
 
-        this.uninstPackageNames.offer(name);
-        synchronized (this.uninstPackageNames) {
-            this.uninstPackageNames.notifyAll();
-        }
+        this.executor.submit(() -> {
+            try {
+                logger.info("About to uninstall package {}", name);
+                execUninstall(name);
+            } catch (final Exception e) {
+                logger.error("Unexpected exception uninstalling {}", name, e);
+            }
+        });
     }
 
     @Override
     public boolean isInstallingDeploymentPackage(String url) {
-        boolean result = false;
-        if (this.instPackageUrls.contains(url)) {
-            result = true;
+        synchronized (this.instPackageUrls) {
+            return this.instPackageUrls.contains(url);
         }
-        return result;
     }
 
     @Override
     public boolean isUninstallingDeploymentPackage(String name) {
-        boolean result = false;
-        if (this.uninstPackageNames.contains(name)) {
-            result = true;
+        synchronized (this.uninstPackageNames) {
+            return this.uninstPackageNames.contains(name);
         }
-        return result;
-    }
-
-    private void installer() {
-        do {
-            try {
-                while (this.instPackageUrls.isEmpty()) {
-                    synchronized (this.instPackageUrls) {
-                        this.instPackageUrls.wait();
-                    }
-                }
-
-                String url = this.instPackageUrls.peek();
-                if (url != null) {
-                    logger.info("About to install package at URL {}", url);
-                    execInstall(url);
-                }
-            } catch (InterruptedException e) {
-                logger.info("Exiting...");
-                Thread.currentThread().interrupt();
-                return;
-            } catch (Exception e) {
-                logger.error("Unexpected exception", e);
-            }
-        } while (!isNull(this.instPackageUrls));
     }
 
     private void execInstall(String url) {
@@ -345,33 +259,11 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             boolean successful = dp != null;
             logger.info("Posting INSTALLED event for package at URL {}: {}", url,
                     successful ? "successful" : "unsuccessful");
-            this.instPackageUrls.poll();
+            synchronized (this.instPackageUrls) {
+                this.instPackageUrls.remove(url);
+            }
             postInstalledEvent(dp, url, successful, ex);
         }
-    }
-
-    private void uninstaller() {
-        do {
-            try {
-                while (this.uninstPackageNames.isEmpty()) {
-                    synchronized (this.uninstPackageNames) {
-                        this.uninstPackageNames.wait();
-                    }
-                }
-
-                String name = this.uninstPackageNames.peek();
-                if (name != null) {
-                    logger.info("About to uninstall package {}", name);
-                    execUninstall(name);
-                }
-            } catch (InterruptedException e) {
-                logger.info("Exiting...");
-                Thread.currentThread().interrupt();
-                return;
-            } catch (Throwable t) {
-                logger.error("Unexpected throwable", t);
-            }
-        } while (!isNull(this.uninstPackageNames));
     }
 
     private void execUninstall(String name) {
@@ -398,7 +290,9 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         } finally {
             logger.info("Posting UNINSTALLED event for package {}: {}", name,
                     successful ? "successful" : "unsuccessful");
-            this.uninstPackageNames.poll();
+            synchronized (this.uninstPackageNames) {
+                this.uninstPackageNames.remove(name);
+            }
             postUninstalledEvent(name, successful, ex);
         }
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,10 +12,19 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
-public class RegexValidator extends PredicateValidator {
+import java.util.function.Predicate;
 
-    public RegexValidator(final String pattern, final String message) {
-        super(v -> v.matches(pattern), message);
+public class NotEmptyValidator extends PredicateValidator {
+
+    private static final Predicate<String> notEmptyPredicat = value -> value != null && !value.isEmpty();
+
+    public NotEmptyValidator(String message) {
+        super(notEmptyPredicat, message);
+    }
+
+    @Override
+    public int getPriority() {
+        return Priority.HIGHEST;
     }
 
 }

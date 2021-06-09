@@ -12,10 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.NotEmptyValidator;
+import org.eclipse.kura.web.client.ui.PEMValidator;
+import org.eclipse.kura.web.client.ui.PKCS8Validator;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
@@ -27,13 +29,9 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
-import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -109,6 +107,7 @@ public class KeyPairTabUi extends Composite implements Tab {
         boolean validAlias = this.storageAliasInput.validate();
         boolean validPrivateKey = this.privateKeyInput.validate();
         boolean validDeviceCert = this.certificateInput.validate();
+
         return validAlias && validPrivateKey && validDeviceCert;
     }
 
@@ -130,32 +129,16 @@ public class KeyPairTabUi extends Composite implements Tab {
         title.append("</p>");
         this.description.add(new Span(title.toString()));
 
-        final Validator<String> validator = new Validator<String>() {
-
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-
-            @Override
-            public List<EditorError> validate(Editor<String> editor, String value) {
-                final List<EditorError> result = new ArrayList<>();
-
-                if (value == null || value.isEmpty()) {
-                    result.add(new BasicEditorError(editor, value, MSGS.formRequiredParameter()));
-                }
-
-                return result;
-            }
-        };
-
         for (final String pid : keyStorePids) {
             this.pidListBox.addItem(pid);
         }
 
-        this.storageAliasInput.addValidator(validator);
+        NotEmptyValidator notEmptyValidator = new NotEmptyValidator(MSGS.formRequiredParameter());
 
-        this.certificateInput.addValidator(validator);
+        this.storageAliasInput.addValidator(notEmptyValidator);
+
+        this.certificateInput.addValidator(notEmptyValidator);
+        this.certificateInput.addValidator(new PEMValidator(MSGS.formRequiredParameter()));
 
         this.storageAliasInput.addKeyUpHandler(e -> {
             this.storageAliasInput.validate();
@@ -189,7 +172,8 @@ public class KeyPairTabUi extends Composite implements Tab {
 
         this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
         if (this.type == Type.KEY_PAIR) {
-            this.privateKeyInput.addValidator(validator);
+            this.privateKeyInput.addValidator(notEmptyValidator);
+            this.privateKeyInput.addValidator(new PKCS8Validator(MSGS.formRequiredParameter()));
 
             this.privateKeyInput.addKeyUpHandler(e -> {
                 this.privateKeyInput.validate();
@@ -206,6 +190,7 @@ public class KeyPairTabUi extends Composite implements Tab {
 
         this.apply.addClickHandler(event -> {
             final boolean isValid = isValid();
+
             this.listener.onApply(isValid);
             if (isValid) {
                 if (this.type == Type.KEY_PAIR) {
@@ -246,7 +231,7 @@ public class KeyPairTabUi extends Composite implements Tab {
 
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
+        // nothing to clear
 
     }
 }

@@ -88,8 +88,7 @@ public class TamperDetectionServiceImpl implements TamperDetectionService, Confi
 
     @Override
     public void resetTamperStatus() throws KuraException {
-        configurationService.updateConfiguration(TamperDetectionServiceImpl.class.getName(),
-                Collections.singletonMap(TAMPERED_KEY, false));
+        configurationService.updateConfiguration(ownPid, Collections.singletonMap(TAMPERED_KEY, false));
     }
 
     private String extractPid(final Map<String, Object> properties) {

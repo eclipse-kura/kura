@@ -20,6 +20,8 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
 
+	<ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages" />
+
     <ui:style>
     .important {
     	font-weight: bold;
@@ -32,6 +34,11 @@
 
     <b:Container fluid="true">
         <b:Column size="MD_12">
+        	<b:Row>
+				<b.html:Paragraph alignment="LEFT">
+					<g:HTML HTML="{msgs.securityCertificateListWarning}" />
+				</b.html:Paragraph>
+        	</b:Row>
             <b:Row>
                 <b:Panel>
                     <b:NavPills justified="true">

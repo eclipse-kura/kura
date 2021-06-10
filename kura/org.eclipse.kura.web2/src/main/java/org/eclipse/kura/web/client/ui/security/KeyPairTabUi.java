@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.NotEmptyValidator;
+import org.eclipse.kura.web.client.ui.NotInListValidator;
 import org.eclipse.kura.web.client.ui.PEMValidator;
 import org.eclipse.kura.web.client.ui.PKCS8Validator;
 import org.eclipse.kura.web.client.ui.Tab;
@@ -78,12 +79,13 @@ public class KeyPairTabUi extends Composite implements Tab {
     @UiField
     Button apply;
 
-    public KeyPairTabUi(final Type type, final List<String> keyStorePids, final CertificateModalListener listener) {
+    public KeyPairTabUi(final Type type, final List<String> keyStorePids, final List<String> usedAliases,
+            final CertificateModalListener listener) {
         this.listener = listener;
         this.type = type;
 
         initWidget(uiBinder.createAndBindUi(this));
-        initForm(keyStorePids);
+        initForm(keyStorePids, usedAliases);
 
         setDirty(false);
         this.apply.setEnabled(false);
@@ -119,13 +121,14 @@ public class KeyPairTabUi extends Composite implements Tab {
         }
     }
 
-    private void initForm(final List<String> keyStorePids) {
+    private void initForm(final List<String> keyStorePids, List<String> usedAliases) {
         StringBuilder title = new StringBuilder();
         title.append("<p style=\"margin-right: 5%;\">");
-        title.append(type == Type.KEY_PAIR ? MSGS.securityKeyPairDescription() : MSGS.securityCertificateDescription());
+        title.append(
+                this.type == Type.KEY_PAIR ? MSGS.securityKeyPairDescription() : MSGS.securityCertificateDescription());
         title.append(" ");
         title.append(MSGS.securityCertificateFormat() + " "
-                + (type == Type.KEY_PAIR ? MSGS.securityPrivateKeyFormat() : ""));
+                + (this.type == Type.KEY_PAIR ? MSGS.securityPrivateKeyFormat() : ""));
         title.append("</p>");
         this.description.add(new Span(title.toString()));
 
@@ -136,9 +139,10 @@ public class KeyPairTabUi extends Composite implements Tab {
         NotEmptyValidator notEmptyValidator = new NotEmptyValidator(MSGS.formRequiredParameter());
 
         this.storageAliasInput.addValidator(notEmptyValidator);
+        this.storageAliasInput.addValidator(new NotInListValidator<>(usedAliases, MSGS.certificateAliasUsed()));
 
         this.certificateInput.addValidator(notEmptyValidator);
-        this.certificateInput.addValidator(new PEMValidator(MSGS.formRequiredParameter()));
+        this.certificateInput.addValidator(new PEMValidator(MSGS.securityCertificateFormat()));
 
         this.storageAliasInput.addKeyUpHandler(e -> {
             this.storageAliasInput.validate();
@@ -173,7 +177,7 @@ public class KeyPairTabUi extends Composite implements Tab {
         this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
         if (this.type == Type.KEY_PAIR) {
             this.privateKeyInput.addValidator(notEmptyValidator);
-            this.privateKeyInput.addValidator(new PKCS8Validator(MSGS.formRequiredParameter()));
+            this.privateKeyInput.addValidator(new PKCS8Validator(MSGS.securityPrivateKeyFormat()));
 
             this.privateKeyInput.addKeyUpHandler(e -> {
                 this.privateKeyInput.validate();
@@ -209,7 +213,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                         this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
                             reset();
                             setDirty(false);
-                            listener.onKeystoreChanged();
+                            this.listener.onKeystoreChanged();
                         })))));
     }
 
@@ -219,7 +223,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                         this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
                             reset();
                             setDirty(false);
-                            listener.onKeystoreChanged();
+                            this.listener.onKeystoreChanged();
                         })))));
     }
 

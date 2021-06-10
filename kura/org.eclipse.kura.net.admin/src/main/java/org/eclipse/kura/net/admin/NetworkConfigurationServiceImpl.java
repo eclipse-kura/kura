@@ -90,6 +90,7 @@ public class NetworkConfigurationServiceImpl
     private ScheduledExecutorService executorUtil;
     private boolean firstConfig = true;
     private LinuxNetworkUtil linuxNetworkUtil;
+    private Map<String, Object> properties;
 
     // ----------------------------------------------------------------
     //
@@ -151,15 +152,18 @@ public class NetworkConfigurationServiceImpl
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("activate(componentContext, properties)...");
 
+        this.properties = new HashMap<>();
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
         this.executorUtil = Executors.newSingleThreadScheduledExecutor();
-
         this.executorUtil.schedule(() -> {
             // make sure we don't miss the setting of firstConfig
-            NetworkConfigurationServiceImpl.this.firstConfig = false;
+            if (NetworkConfigurationServiceImpl.this.firstConfig) {
+                NetworkConfigurationServiceImpl.this.firstConfig = false;
+                updated(this.properties);
+            }
         }, 3, TimeUnit.MINUTES);
 
         initVisitors();
@@ -169,6 +173,7 @@ public class NetworkConfigurationServiceImpl
         if (properties == null) {
             logger.debug("Got null properties...");
         } else {
+            this.properties = properties;
             logger.debug("Props...{}", properties);
         }
     }
@@ -203,6 +208,7 @@ public class NetworkConfigurationServiceImpl
         if (topic.equals(KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC)) {
             this.firstConfig = false;
             this.executorUtil.schedule(() -> {
+                updated(this.properties);
                 Map<String, Object> props = new HashMap<>();
                 EventProperties eventProps = new EventProperties(props);
                 logger.info("postInstalledEvent() :: posting KuraNetConfigReadyEvent");
@@ -221,7 +227,7 @@ public class NetworkConfigurationServiceImpl
         // skip the first config
         if (this.firstConfig) {
             logger.debug("Ignoring first configuration");
-            this.firstConfig = false;
+            // this.firstConfig = false;
             return;
         }
 
@@ -230,10 +236,12 @@ public class NetworkConfigurationServiceImpl
                 logger.debug("new properties - updating");
                 logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
 
+                this.properties = properties;
+
                 // dynamically insert the type properties..
                 Map<String, Object> modifiedProps = new HashMap<>();
-                modifiedProps.putAll(properties);
-                String interfaces = (String) properties.get(NET_INTERFACES);
+                modifiedProps.putAll(this.properties);
+                String interfaces = (String) this.properties.get(NET_INTERFACES);
                 StringTokenizer st = new StringTokenizer(interfaces, ",");
                 while (st.hasMoreTokens()) {
                     String interfaceName = st.nextToken();

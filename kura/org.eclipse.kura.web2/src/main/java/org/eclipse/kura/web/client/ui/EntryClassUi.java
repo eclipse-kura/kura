@@ -194,6 +194,8 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     Span userNameLarge;
     @UiField
     Span userNameSmall;
+    @UiField
+    Row mainContainer;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -293,20 +295,14 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         this.footerLeft.setStyleName("copyright");
         this.contentPanel.setVisible(false);
 
-        if (this.userData.getPermissions().isEmpty()) {
-            // if user has no permissions, then sidenav has nothing to display and hamburger button becomes useless
-            this.sidenavButton.removeFromParent();
-            this.sidenav.removeFromParent();
-        } else {
-            // Add handler for sidenav show/hide button
-            this.sidenavButton.addClickHandler(event -> {
-                if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
-                    showSidenav();
-                } else {
-                    hideSidenav();
-                }
-            });
-        }
+        // Add handler for sidenav show/hide button
+        this.sidenavButton.addClickHandler(event -> {
+            if (EntryClassUi.this.sidenav.getStyleName().contains(SIDENAV_HIDDEN_STYLE_NAME)) {
+                showSidenav();
+            } else {
+                hideSidenav();
+            }
+        });
 
         initLogoutButtons();
         initServicesTree();
@@ -1011,6 +1007,9 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
         if (this.userData.getPermissions().isEmpty()) {
             this.alertDialog.show("The current user has no permissions", Severity.ALERT, (ConfirmListener) null);
+            // hamburger button and sidenav are not more useful since menus not contain anything
+            this.mainContainer.addStyleName("no-sidenav");
+            this.sidenavButton.removeFromParent();
             return;
         }
 

@@ -141,7 +141,10 @@
 					</b:Column>
 				</b:Row>
 			</b:Row>
-			<b:Row addStyleNames='main-container'>
+			<b:Row ui:field="mainContainer" addStyleNames='main-container'>
+				<b:Column size="MD_2" addStyleNames="no-sidenav-logo">
+					<b:Panel addStyleNames="{style.image} headerLogo" />
+				</b:Column>
 				<!-- ROW#2 content -->
 				<b:Column ui:field="sidenav" size="MD_2"
 					addStyleNames="center-panel z-depth-1 sidenav sidenav-hidden">

@@ -12,11 +12,11 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
@@ -80,6 +80,10 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     @UiField
     Button nextStepButton;
     @UiField
+    Button applyModalButton;
+    @UiField
+    Button resetModalButton;
+    @UiField
     Button closeModalButton;
     @UiField
     AlertDialog alertDialog;
@@ -96,8 +100,6 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     private final SimplePager pager;
 
     private List<String> pids;
-
-    private final List<String> storageAliases = new ArrayList<>();
 
     public CertificateListTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -126,6 +128,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     @Override
     public void setDirty(boolean flag) {
+        // unused
     }
 
     @Override
@@ -147,7 +150,6 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
                 CertificateListTabUi.this.certificatesDataProvider.getList().clear();
                 for (GwtKeystoreEntry pair : result) {
                     if (pair != null) {
-                        this.storageAliases.add(pair.getAlias());
                         this.certificatesDataProvider.getList().add(pair);
                     }
                 }
@@ -364,10 +366,16 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certAddModal.setTitle("Add Certificate");
         this.certAddModalBody.clear();
 
-        final KeyPairTabUi widget = new KeyPairTabUi(selectedCertType.getType(), this.pids, this.storageAliases, this);
+        List<String> storageAliases = this.certificatesDataProvider.getList().stream().map(GwtKeystoreEntry::getAlias)
+                .collect(Collectors.toList());
+
+        final KeyPairTabUi widget = new KeyPairTabUi(selectedCertType.getType(), this.pids, storageAliases, this,
+                this.resetModalButton, this.applyModalButton);
         this.certAddModalBody.add(widget);
 
         this.nextStepButton.setVisible(false);
+        this.resetModalButton.setVisible(true);
+        this.applyModalButton.setVisible(true);
     }
 
     private void uninstall(final GwtKeystoreEntry selected) {
@@ -415,6 +423,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     @Override
     public void onApply(final boolean isValid) {
+
         if (isValid) {
             this.certAddModal.hide();
         } else {

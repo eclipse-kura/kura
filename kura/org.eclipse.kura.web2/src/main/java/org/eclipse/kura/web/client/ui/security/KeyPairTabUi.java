@@ -74,29 +74,31 @@ public class KeyPairTabUi extends Composite implements Tab {
     TextArea privateKeyInput;
     @UiField
     TextArea certificateInput;
-    @UiField
-    Button reset;
-    @UiField
-    Button apply;
+
+    private final Button resetButton;
+
+    private final Button applyButton;
 
     public KeyPairTabUi(final Type type, final List<String> keyStorePids, final List<String> usedAliases,
-            final CertificateModalListener listener) {
+            final CertificateModalListener listener, Button resetButton, Button applyButton) {
         this.listener = listener;
         this.type = type;
+
+        this.applyButton = applyButton;
+        this.resetButton = resetButton;
 
         initWidget(uiBinder.createAndBindUi(this));
         initForm(keyStorePids, usedAliases);
 
         setDirty(false);
-        this.apply.setEnabled(false);
-        this.reset.setEnabled(false);
     }
 
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
-        this.reset.setEnabled(flag);
-        this.apply.setEnabled(flag);
+
+        this.resetButton.setEnabled(flag);
+        this.applyButton.setEnabled(flag);
     }
 
     @Override
@@ -166,13 +168,13 @@ public class KeyPairTabUi extends Composite implements Tab {
 
         this.certificateInput.setVisibleLines(20);
 
-        this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(event -> {
+        this.resetButton.setText(MSGS.reset());
+        this.resetButton.addClickHandler(event -> {
             reset();
             setDirty(false);
         });
 
-        this.apply.setText(MSGS.apply());
+        this.applyButton.setText(MSGS.apply());
 
         this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
         if (this.type == Type.KEY_PAIR) {
@@ -192,16 +194,17 @@ public class KeyPairTabUi extends Composite implements Tab {
             this.privateKeyInput.setVisibleLines(20);
         }
 
-        this.apply.addClickHandler(event -> {
+        this.applyButton.addClickHandler(event -> {
+
             final boolean isValid = isValid();
 
-            this.listener.onApply(isValid);
             if (isValid) {
                 if (this.type == Type.KEY_PAIR) {
                     storeKeyPair();
                 } else {
                     storeCertificate();
                 }
+                this.listener.onApply(isValid);
             }
         });
     }
@@ -238,4 +241,5 @@ public class KeyPairTabUi extends Composite implements Tab {
         // nothing to clear
 
     }
+
 }

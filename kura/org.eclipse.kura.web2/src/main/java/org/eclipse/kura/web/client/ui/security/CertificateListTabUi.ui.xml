@@ -61,7 +61,10 @@
   				    <g:ScrollPanel ui:field="certAddModalBody" addStyleNames="{style.modal-scroll-panel}"/>
   				</b:ModalBody>
   				<b:ModalFooter>
+  					<b:Button dataDismiss="MODAL" b:id="applyModalButton" ui:field="applyModalButton">Apply</b:Button>
+  					<b:Button dataDismiss="MODAL" b:id="resetModalButton" ui:field="resetModalButton">Reset</b:Button>
   					<b:Button dataDismiss="MODAL" b:id="closeModalButton" ui:field="closeModalButton">Close</b:Button>
+  					
   					<b:Button type="PRIMARY" b:id="nextStepButton" ui:field="nextStepButton">Do something</b:Button>
   				</b:ModalFooter>
   			</b:Modal>

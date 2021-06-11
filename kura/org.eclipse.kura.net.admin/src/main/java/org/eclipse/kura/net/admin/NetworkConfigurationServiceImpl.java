@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
+import static org.osgi.framework.Constants.SERVICE_PID;
+
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -287,8 +290,8 @@ public class NetworkConfigurationServiceImpl
         logger.debug("getConfiguration()");
         try {
             Map<String, Object> networkConfigurationProperties = getNetworkConfiguration().getConfigurationProperties();
-            networkConfigurationProperties.put("kura.service.pid", PID);
-            networkConfigurationProperties.put("service.pid", PID);
+            networkConfigurationProperties.put(KURA_SERVICE_PID, PID);
+            networkConfigurationProperties.put(SERVICE_PID, PID);
             return new ComponentConfigurationImpl(PID, getDefinition(), networkConfigurationProperties);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtUserService;
 import org.eclipse.kura.web.shared.service.GwtUserServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.Row;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 
@@ -37,9 +38,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 
@@ -70,6 +76,8 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     AlertDialog alertDialog;
     @UiField
     CellTable<GwtUserConfig> userTable;
+    @UiField
+    PanelFooter tablePanelFooter;
 
     private final GwtSecurityTokenServiceAsync gwtXsrfService = GWT.create(GwtSecurityTokenService.class);
     private final GwtUserServiceAsync gwtUserService = GWT.create(GwtUserService.class);
@@ -81,9 +89,32 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
     private boolean isDirty = false;
 
+    private final SimplePager pager;
+
     public UsersPanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
+
+        this.pager = new SimplePager(TextLocation.CENTER, false, 0, true) {
+
+            @Override
+            public void nextPage() {
+                setPage(getPage() + 1);
+            }
+
+            @Override
+            public void setPageStart(int index) {
+                final HasRows display = getDisplay();
+                if (display != null) {
+                    display.setVisibleRange(index, getPageSize());
+                }
+            }
+        };
+        this.pager.setPageSize(15);
+        this.pager.setDisplay(this.userTable);
+        this.tablePanelFooter.add(this.pager);
+
         initTable();
+        initInterfaceButtons();
     }
 
     private void initTable() {
@@ -91,7 +122,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
             @Override
             public String getValue(GwtUserConfig object) {
-                final String userName = object.getUserName();
+                final String userName = object.getUserNameEllipsed();
 
                 if (userName.startsWith(" ") || userName.endsWith(" ")) {
                     return '"' + userName + '"';
@@ -100,11 +131,13 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                 }
             }
         };
-
-        this.userTable.addColumn(userColumn, MSGS.usersIdentities());
+        userColumn.setSortable(true);
 
         this.dataProvider.addDataDisplay(this.userTable);
 
+        this.userTable.addColumn(userColumn, MSGS.usersIdentities());
+        this.userTable.getColumnSortList().push(userColumn);
+        this.userTable.addColumnSortHandler(getUserNameSortHandler(userColumn));
         this.userTable.setSelectionModel(this.selectionModel);
 
         this.selectionModel.addSelectionChangeHandler(e -> {
@@ -118,7 +151,9 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
             updateButtonState();
         });
+    }
 
+    private void initInterfaceButtons() {
         this.newIdentity.addClickHandler(e -> this.picker.builder(GwtUserConfig.class) //
                 .setTitle(MSGS.usersCreateIdentity()) //
                 .setMessage(MSGS.usersIdentityName()) //
@@ -157,7 +192,14 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                 }
             }, warnings.toArray(new String[warnings.size()]));
         });
+    }
 
+    private ListHandler<GwtUserConfig> getUserNameSortHandler(TextColumn<GwtUserConfig> userNameColumn) {
+        ListHandler<GwtUserConfig> handler = new ListHandler<>(this.dataProvider.getList());
+        handler.setComparator(userNameColumn,
+                (GwtUserConfig conf1, GwtUserConfig conf2) -> conf1.getUserName().compareTo(conf2.getUserName()));
+
+        return handler;
     }
 
     private List<String> getWarnings() {
@@ -173,7 +215,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
         }
 
         this.dataProvider.getList().stream().filter(u -> u.getPermissions().isEmpty())
-                .forEach(u -> result.add(MSGS.usersNoPermissions(u.getUserName())));
+                .forEach(u -> result.add(MSGS.usersNoPermissions(u.getUserNameEllipsed())));
 
         return result;
     }
@@ -227,6 +269,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                     final List<GwtUserConfig> list = this.dataProvider.getList();
                     list.clear();
                     list.addAll(result);
+                    ColumnSortEvent.fire(this.userTable, this.userTable.getColumnSortList());
                 })))));
         RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService
                 .getDefinedPermissions(token, c.callback(result -> this.definedPermissions = result)))));

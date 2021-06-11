@@ -1,6 +1,6 @@
 /**
  *
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  *  This program and the accompanying materials are made
  *  available under the terms of the Eclipse Public License 2.0
@@ -439,8 +439,20 @@ Sidenav START
 		left: 16.66666667% !important;
 	}
 	
+	.no-sidenav .sidenav {
+		display: none;
+	}
+	
+	.no-sidenav .footer {
+		left: 0 !important;
+	}
+	
+	.main-container:not(.no-sidenav) .no-sidenav-logo {
+		display: none;
+	}
+	
 	.footer {
-		left: 16.66666667% !important;
+		left: 16.66666667%;
 	}
 	
 	.sidenav-overlay {
@@ -478,6 +490,10 @@ Sidenav START
 	}
 	
 	.logout-ui:not(.header-logout-ui) {
+		display: none;
+	}
+	
+	.no-sidenav-logo {
 		display: none;
 	}
 }

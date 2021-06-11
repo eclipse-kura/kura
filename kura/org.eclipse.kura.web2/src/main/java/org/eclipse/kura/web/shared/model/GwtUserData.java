@@ -21,6 +21,7 @@ import org.eclipse.kura.web.shared.KuraPermission;
 public class GwtUserData extends GwtBaseModel implements Serializable {
 
     private static final long serialVersionUID = -1334340006399833329L;
+    private static final int MAX_TEXT_LENGTH = 22;
 
     @SuppressWarnings("unused")
     private HashSet<String> unused;
@@ -43,6 +44,15 @@ public class GwtUserData extends GwtBaseModel implements Serializable {
 
     public String getUserName() {
         return get("userName");
+    }
+
+    public String getUserNameEllipsed() {
+        String username = get("userName");
+        if (username.length() > MAX_TEXT_LENGTH) {
+            return username.substring(0, MAX_TEXT_LENGTH) + "...";
+        } else {
+            return username;
+        }
     }
 
     public Set<String> getPermissions() {

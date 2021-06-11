@@ -286,9 +286,10 @@ public class NetworkConfigurationServiceImpl
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
         logger.debug("getConfiguration()");
         try {
-            NetworkConfiguration networkConfiguration = getNetworkConfiguration();
-            return new ComponentConfigurationImpl(PID, getDefinition(),
-                    networkConfiguration.getConfigurationProperties());
+            Map<String, Object> networkConfigurationProperties = getNetworkConfiguration().getConfigurationProperties();
+            networkConfigurationProperties.put("kura.service.pid", PID);
+            networkConfigurationProperties.put("service.pid", PID);
+            return new ComponentConfigurationImpl(PID, getDefinition(), networkConfigurationProperties);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }

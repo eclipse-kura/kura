@@ -84,13 +84,6 @@
             required="false"
             default="false"
             description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
-
-            type="Boolean"
-            cardinality="0"
-            required="false"
-            default="false"
-            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
-
     </OCD>
 
     <Designate pid="org.eclipse.kura.http.server.manager.HttpService">

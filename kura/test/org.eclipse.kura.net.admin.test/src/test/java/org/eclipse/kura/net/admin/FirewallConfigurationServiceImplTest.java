@@ -55,47 +55,67 @@ import org.osgi.service.event.EventAdmin;
 
 public class FirewallConfigurationServiceImplTest {
 
-    @Test
-    public void testActivateNullProps() {
-        // only test logging
-
+    @Test(expected = NullPointerException.class)
+    public void testActivateEmptyProps() throws KuraException {
+        LinuxFirewall lfMock = mock(LinuxFirewall.class);
+        EventAdmin eaMock = mock(EventAdmin.class);
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
 
             @Override
             protected LinuxFirewall getLinuxFirewall() {
-                return null;
+                return lfMock;
             }
         };
+        svc.setEventAdmin(eaMock);
 
         ComponentContext componentContext = mock(ComponentContext.class);
         BundleContext bundleContext = mock(BundleContext.class);
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
 
         Map<String, Object> properties = null;
-
         svc.activate(componentContext, properties);
     }
 
     @Test
-    public void testActivate() {
-        // only test logging
-
+    public void testActivate() throws KuraException, NumberFormatException, UnknownHostException {
+        LinuxFirewall lfMock = mock(LinuxFirewall.class);
+        EventAdmin eaMock = mock(EventAdmin.class);
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
 
             @Override
             protected LinuxFirewall getLinuxFirewall() {
-                return null;
+                return lfMock;
             }
         };
+        svc.setEventAdmin(eaMock);
 
         ComponentContext componentContext = mock(ComponentContext.class);
         BundleContext bundleContext = mock(BundleContext.class);
         when(componentContext.getBundleContext()).thenReturn(bundleContext);
 
         Map<String, Object> properties = new HashMap<>();
-        properties.put("key", "value");
+        properties.put("firewall.open.ports", "22,tcp,1.2.3.4/32,eth1,,,,#");
+        properties.put("firewall.nat", "eth0,eth1,tcp,0.0.0.0/0,0.0.0.0/0,true,#");
+        properties.put("firewall.port.forwarding", "eth0,eth1,1.2.3.4,tcp,4050,3040,true,0.0.0.0/0,,,#");
+        List<LocalRule> localRules = new ArrayList<>();
+        localRules.add(new LocalRule(22, "tcp",
+                new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("1.2.3.4"), Short.parseShort("32")), "eth1",
+                null, null, null));
+        List<PortForwardRule> portForwardRules = new ArrayList<>();
+        portForwardRules.add(new PortForwardRule().inboundIface("eth0").outboundIface("eth1").address("1.2.3.4")
+                .protocol("tcp").inPort(4050).outPort(3040).masquerade(true).permittedNetwork("0.0.0.0")
+                .permittedNetworkMask(0));
+        List<NATRule> natRules = new ArrayList<>();
+        natRules.add(new NATRule("eth0", "eth1", "tcp", "0.0.0.0/0", "0.0.0.0/0", true, RuleType.IP_FORWARDING));
 
         svc.activate(componentContext, properties);
+
+        verify(lfMock).deleteAllLocalRules();
+        verify(lfMock).addLocalRules(localRules);
+        verify(lfMock).deleteAllPortForwardRules();
+        verify(lfMock).addPortForwardRules(portForwardRules);
+        verify(lfMock).deleteAllNatRules();
+        verify(lfMock).addNatRules(natRules);
     }
 
     @Test
@@ -162,7 +182,7 @@ public class FirewallConfigurationServiceImplTest {
         Map<String, Object> properties = configuration.getConfigurationProperties();
 
         assertNotNull(properties);
-        assertEquals(3, properties.size());
+        assertEquals(5, properties.size());
 
         assertTrue(properties.containsKey("firewall.open.ports"));
         String ports = (String) properties.get("firewall.open.ports");

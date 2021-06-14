@@ -15,12 +15,12 @@ Eclipse Kura is also available as a Docker container available in [Docker Hub](h
 To download and run, use the following command:
 
 ```
-docker run -d -p 8080:8080 -t eclipse/kura
+docker run -d -p 443:443 -t eclipse/kura
 ```
 
-This command will start Kura in background and the Kura Web Ui will be available through port 8080.
+This command will start Kura in background and the Kura Web Ui will be available through port 443.
 
-Once the image is started you can navigate your browser to [http://localhost:8080](http://localhost:8080) and log in using the credentials admin : admin.
+Once the image is started you can navigate your browser to [https://localhost](https://localhost) and log in using the credentials admin : admin.
 
 
 ## Command Toolbox

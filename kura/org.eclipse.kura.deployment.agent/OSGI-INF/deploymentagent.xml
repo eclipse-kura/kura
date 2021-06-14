@@ -16,13 +16,13 @@
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" deactivate="deactivate" enabled="true" immediate="true" modified="updated" name="org.eclipse.kura.deployment.agent">
    <implementation class="org.eclipse.kura.deployment.agent.impl.DeploymentAgent"/>
-   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
-   <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static" unbind="unsetDeploymentAdmin"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
+   <reference bind="setDeploymentAdmin" cardinality="1..1" interface="org.osgi.service.deploymentadmin.DeploymentAdmin" name="DeploymentAdmin" policy="static"/>
    <service>
       <provide interface="org.eclipse.kura.deployment.agent.DeploymentAgentService"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
+   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static"/>
    <reference name="SslManagerService"
               policy="dynamic"
               cardinality="0..1"

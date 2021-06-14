@@ -133,7 +133,9 @@ public class denali implements EntryPoint {
                                 if (result.isDebugMode()) {
                                     gwtSession.setDevelopMode(true);
                                 }
-                                RootPanel.get().add(new EntryClassUi(userConfig, result, gwtSession));
+                                EntryClassUi entryUi = new EntryClassUi(userConfig, result, gwtSession);
+                                RootPanel.get().add(entryUi);
+                                entryUi.init();
 
                                 gwtExtensionService
                                         .getConsoleExtensions(new AsyncCallback<List<GwtClientExtensionBundle>>() {

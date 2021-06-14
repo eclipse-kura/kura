@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -29,15 +30,25 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.CertPathBuilder;
+import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.PKIXBuilderParameters;
+import java.security.cert.PKIXParameters;
+import java.security.cert.PKIXRevocationChecker;
+import java.security.cert.X509CertSelector;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.CertPathTrustManagerParameters;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -51,15 +62,20 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.ssl.SslManagerServiceOptions.RevocationCheckMode;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent {
+public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
 
@@ -71,14 +87,17 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     private Map<ConnectionSslOptions, SSLContext> sslContexts;
 
+    private Optional<String> keystoreServicePid = Optional.empty();
+
     // ----------------------------------------------------------------
     //
     // Dependencies
     //
     // ----------------------------------------------------------------
 
-    public void setKeystoreService(KeystoreService keystoreService) {
+    public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
+        this.keystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
 
         if (this.sslServiceListeners != null) {
             // Notify listeners that service has been updated
@@ -89,6 +108,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void unsetKeystoreService(KeystoreService keystoreService) {
         if (this.keystoreService == keystoreService) {
             this.keystoreService = null;
+            this.keystoreServicePid = Optional.empty();
         }
     }
 
@@ -324,7 +344,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
             try {
                 KeyStore ts = this.keystoreService.getKeyStore();
                 tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init(ts);
+                initTrustManagerFactory(tmf, ts);
                 result = tmf.getTrustManagers();
             } catch (KuraException e) {
                 throw new IOException(e);
@@ -347,12 +367,58 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                 InputStream tsReadStream = new FileInputStream(trustStore);
                 ts.load(tsReadStream, keyStorePassword);
                 tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                tmf.init(ts);
+                initTrustManagerFactory(tmf, ts);
                 result = tmf.getTrustManagers();
                 tsReadStream.close();
             }
         }
         return result;
+    }
+
+    private void initTrustManagerFactory(final TrustManagerFactory trustManagerFactory, final KeyStore keyStore)
+            throws KeyStoreException, InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+
+        if (!this.options.isSslRevocationCheckEnabled()) {
+            trustManagerFactory.init(keyStore);
+            return;
+        }
+
+        List<CertStore> certStores;
+
+        try {
+            certStores = Collections.singletonList(keystoreService.getCRLStore());
+        } catch (final Exception e) {
+            logger.warn("Failed to get CRL store", e);
+            certStores = Collections.emptyList();
+        }
+
+        final EnumSet<PKIXRevocationChecker.Option> checkerOptions;
+
+        final RevocationCheckMode revocationCheckMode = options.getRevocationCheckMode();
+
+        if (revocationCheckMode == RevocationCheckMode.CRL_ONLY) {
+            checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS,
+                    PKIXRevocationChecker.Option.NO_FALLBACK);
+        } else if (revocationCheckMode == RevocationCheckMode.PREFER_CRL) {
+            checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS);
+        } else {
+            checkerOptions = EnumSet.noneOf(PKIXRevocationChecker.Option.class);
+        }
+
+        if (this.options.isSslRevocationSoftFail()) {
+            checkerOptions.add(PKIXRevocationChecker.Option.SOFT_FAIL);
+        }
+
+        final CertPathBuilder certPathBuilder = CertPathBuilder.getInstance("PKIX");
+        final PKIXRevocationChecker revocationChecker = (PKIXRevocationChecker) certPathBuilder.getRevocationChecker();
+        revocationChecker.setOptions(checkerOptions);
+
+        PKIXParameters pkixParams = new PKIXBuilderParameters(keyStore, new X509CertSelector());
+        pkixParams.setRevocationEnabled(true);
+        pkixParams.setCertStores(certStores);
+        pkixParams.addCertPathChecker(revocationChecker);
+
+        trustManagerFactory.init(new CertPathTrustManagerParameters(pkixParams));
     }
 
     private KeyManager[] getKeyManagers() throws IOException {
@@ -459,6 +525,19 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
                 return this.wrapped.getPrivateKey(alias);
             }
             return null;
+        }
+    }
+
+    @Override
+    public void handleEvent(final Event event) {
+        if (!(event instanceof KeystoreChangedEvent)) {
+            return;
+        }
+
+        final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
+
+        if (this.keystoreServicePid.equals(Optional.of(keystoreChangedEvent.getSenderPid()))) {
+            this.sslServiceListeners.onConfigurationUpdated();
         }
     }
 

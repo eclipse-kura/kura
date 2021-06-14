@@ -56,6 +56,7 @@ import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.event.EventAdmin;
 
 public class FilesystemKeystoreServiceImplTest {
 
@@ -107,6 +108,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -126,6 +128,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -142,6 +145,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -160,6 +164,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -182,6 +187,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -202,6 +208,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -219,6 +226,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -241,6 +249,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -263,6 +272,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -284,6 +294,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -302,6 +313,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -320,6 +332,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -338,6 +351,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -356,6 +370,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -392,6 +407,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -410,6 +426,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -429,6 +446,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -447,6 +465,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -465,6 +484,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -483,6 +503,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -501,6 +522,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -519,6 +541,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -537,6 +560,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -566,6 +590,7 @@ public class FilesystemKeystoreServiceImplTest {
             }
         };
         keystoreService.setCryptoService(cryptoService);
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.activate(componentContext, properties);
 
         keystoreService.createKeyPair("alias", "DSA", 1024, "SHA256WithDSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
@@ -591,6 +616,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -609,6 +635,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -632,6 +659,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -655,6 +683,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -690,6 +719,7 @@ public class FilesystemKeystoreServiceImplTest {
                 return ks;
             }
         };
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
@@ -722,6 +752,7 @@ public class FilesystemKeystoreServiceImplTest {
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.setSystemService(systemService);
         keystoreService.activate(componentContext, properties);

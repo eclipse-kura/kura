@@ -28,7 +28,7 @@
 
 		<acceptors>
    <acceptor name="mqtt">tcp://0.0.0.0:1889?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=MQTT</acceptor>
-<acceptor name="mqtts">tcp://0.0.0.0:8888?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=MQTT;sslEnabled=true;keyStorePath=$keyStorePath;keyStorePassword=changeit;</acceptor>
+<acceptor name="mqtts">tcp://0.0.0.0:8888?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=MQTT;sslEnabled=true;keyStorePath=$keyStorePath;keyStorePassword=changeit;needClientAuth=false</acceptor>
 <acceptor name="mqttsClientAuth">tcp://0.0.0.0:8889?tcpSendBufferSize=1048576;tcpReceiveBufferSize=1048576;protocols=MQTT;sslEnabled=true;keyStorePath=$keyStorePath;keyStorePassword=changeit;trustStorePath=$trustStorePath;trustStorePassword=changeit;needClientAuth=true</acceptor>
 </acceptors>
 

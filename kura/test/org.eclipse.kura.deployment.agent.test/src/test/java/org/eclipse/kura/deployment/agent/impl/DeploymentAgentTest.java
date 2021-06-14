@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,9 +31,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,13 +54,13 @@ public class DeploymentAgentTest {
 
         DeploymentAgent svc = new DeploymentAgent();
 
-        Queue<String> queue = new ConcurrentLinkedQueue<>();
+        Set<String> set = new HashSet<>();
 
-        TestUtil.setFieldValue(svc, "instPackageUrls", queue);
+        TestUtil.setFieldValue(svc, "instPackageUrls", set);
 
         String url = "dpUrl";
 
-        queue.offer(url);
+        set.add(url);
 
         assertTrue(svc.isInstallingDeploymentPackage(url));
 
@@ -73,37 +71,8 @@ public class DeploymentAgentTest {
             // OK
         }
 
-        assertEquals(1, queue.size());
-        assertTrue(queue.contains(url));
-    }
-
-    @Test(timeout = 400)
-    public void testInstallDeploymentPackageAsync() throws Exception {
-        // test asynch deployment queue
-
-        DeploymentAgent svc = new DeploymentAgent();
-
-        Queue<String> queue = new ConcurrentLinkedQueue<>();
-
-        TestUtil.setFieldValue(svc, "instPackageUrls", queue);
-
-        String url = "dpUrl";
-
-        assertFalse(svc.isInstallingDeploymentPackage(url));
-
-        new Thread(() -> {
-            try {
-                svc.installDeploymentPackageAsync(url);
-            } catch (Exception e) {
-            }
-        }).start();
-
-        synchronized (queue) {
-            queue.wait(500);
-        }
-
-        assertEquals(1, queue.size());
-        assertTrue(queue.contains(url));
+        assertEquals(1, set.size());
+        assertTrue(set.contains(url));
     }
 
     @Test
@@ -112,13 +81,13 @@ public class DeploymentAgentTest {
 
         DeploymentAgent svc = new DeploymentAgent();
 
-        Queue<String> queue = new ConcurrentLinkedQueue<>();
+        Set<String> set = new HashSet<>();
 
-        TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
+        TestUtil.setFieldValue(svc, "uninstPackageNames", set);
 
         String name = DP_NAME;
 
-        queue.offer(name);
+        set.add(name);
 
         assertTrue(svc.isUninstallingDeploymentPackage(name));
 
@@ -129,37 +98,8 @@ public class DeploymentAgentTest {
             // OK
         }
 
-        assertEquals(1, queue.size());
-        assertTrue(queue.contains(name));
-    }
-
-    @Test(timeout = 400)
-    public void testUninstallDeploymentPackageAsync() throws Exception {
-        // test asynch undeployment queue
-
-        DeploymentAgent svc = new DeploymentAgent();
-
-        Queue<String> queue = new ConcurrentLinkedQueue<>();
-
-        TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
-
-        String name = DP_NAME;
-
-        assertFalse(svc.isUninstallingDeploymentPackage(name));
-
-        new Thread(() -> {
-            try {
-                svc.uninstallDeploymentPackageAsync(name);
-            } catch (Exception e) {
-            }
-        }).start();
-
-        synchronized (queue) {
-            queue.wait(500);
-        }
-
-        assertEquals(1, queue.size());
-        assertTrue(queue.contains(name));
+        assertEquals(1, set.size());
+        assertTrue(set.contains(name));
     }
 
     @Test(timeout = 1400)
@@ -168,9 +108,9 @@ public class DeploymentAgentTest {
 
         DeploymentAgent svc = new DeploymentAgent();
 
-        Queue<String> queue = new ConcurrentLinkedQueue<>();
+        Set<String> set = new HashSet<>();
 
-        TestUtil.setFieldValue(svc, "instPackageUrls", queue);
+        TestUtil.setFieldValue(svc, "instPackageUrls", set);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -210,7 +150,7 @@ public class DeploymentAgentTest {
     public void testUninstaller() throws Throwable {
         // test the uninstaller method
 
-        Queue<String> queue = new ConcurrentLinkedQueue<>();
+        Set<String> set = new HashSet<>();
 
         String name = DP_NAME;
         final Properties deployedPackages = new Properties();
@@ -224,7 +164,7 @@ public class DeploymentAgentTest {
             }
         };
 
-        TestUtil.setFieldValue(svc, "uninstPackageNames", queue);
+        TestUtil.setFieldValue(svc, "uninstPackageNames", set);
 
         EventAdmin eaMock = mock(EventAdmin.class);
         svc.setEventAdmin(eaMock);
@@ -397,7 +337,8 @@ public class DeploymentAgentTest {
                 str.contains("file\\:target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp")
                         || str.contains("file\\:target\\\\" + DP_NAME + "_" + VERSION_1_0_0 + ".dp"));
 
-        assertTrue("DP file should have been copied", new File("target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp").exists());
+        assertTrue("DP file should have been copied",
+                new File("target/" + DP_NAME + "_" + VERSION_1_0_0 + ".dp").exists());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -93,12 +93,14 @@ public class UserConfigUi extends Composite {
             object.setAssigned(assigned);
 
             if (assigned) {
-                userData.getPermissions().add(permissionName);
+                if (userData.getPermissions().add(permissionName)) {
+                    this.listener.onUserDataChanged(userData);
+                }
             } else {
-                userData.getPermissions().remove(permissionName);
+                if (userData.getPermissions().remove(permissionName)) {
+                    this.listener.onUserDataChanged(userData);
+                }
             }
-
-            this.listener.onUserDataChanged(userData);
         });
 
         final TextColumn<AssignedPermission> nameColumn = new TextColumn<AssignedPermission>() {
@@ -125,7 +127,6 @@ public class UserConfigUi extends Composite {
 
         this.passwordEnabled.addChangeHandler(e -> {
             this.userData.setPasswordAuthEnabled(true);
-            this.listener.onUserDataChanged(this.userData);
             updatePasswordWidgetState();
             if (!this.hasPassword) {
                 pickPassword();
@@ -135,7 +136,6 @@ public class UserConfigUi extends Composite {
         this.passwordDisabled.addChangeHandler(e -> {
             this.userData.setPasswordAuthEnabled(false);
             this.userData.setNewPassword(Optional.empty());
-            this.listener.onUserDataChanged(this.userData);
             updatePasswordWidgetState();
         });
 

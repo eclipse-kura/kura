@@ -56,38 +56,40 @@
             default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the HTTPS Keystore.">
         </AD>
-
+      
         <AD id="https.revocation.check.enabled"
-            name="HTTPS Revocation Check Enabled"
+            name="Revocation Check Enabled"
             type="Boolean"
             cardinality="0"
             required="false"
             default="false"
-            description="Specifies whether to check revocation status of client certificates."/>
+            description="If enabled, the revocation status of client certificates will be ckeched during TLS handshake. If a revoked certificate is detected, handshake will fail. The revocation status will be checked using OCSP, CRLDP or the CRLs cached by the attached KeystoreService instance, depending on the value of the Revocation Check Mode parameter. If not enabled, revocation ckeck will not be performed."/>
 
-        <AD id="https.client.ocsp.url"
-            name="HTTPS Client Revocation URL"
+        <AD id="ssl.revocation.mode"
+            name="Revocation Check Mode"
             type="String"
             cardinality="0"
-            required="false"
-            default=""
-            description="Specifies the URI for OCSP responders."/>
-
-        <AD id="https.client.crl.path"
-            name="HTTPS Client CRL path"
-            type="String"
-            cardinality="0"
-            required="false"
-            default=""
-            description="Specifies the path for the CRL for client certificate revocation check."/>
+            required="true"
+            default="PREFER_OCSP"
+            description="Specifies the mode for performing revocation check. This parameter is ignored if Revocation Check Enabled is set to false.">
+            <Option label="Use OCSP first and then KeystoreService CRLs and CRLDP" value="PREFER_OCSP"/>
+            <Option label="Use KeystoreService CRLs and CRLDP first and then OCSP" value="PREFER_CRL"/>
+            <Option label="Use only KeystoreService CRLs and CRLDP" value="CRL_ONLY"/>
+        </AD>
 
         <AD id="https.client.revocation.soft.fail"
-            name="HTTPS Revocation Soft-fail Enabled"
+            name="Revocation Soft-fail Enabled"
             type="Boolean"
             cardinality="0"
             required="false"
             default="false"
-            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected."/>
+            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
+
+            type="Boolean"
+            cardinality="0"
+            required="false"
+            default="false"
+            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
 
     </OCD>
 

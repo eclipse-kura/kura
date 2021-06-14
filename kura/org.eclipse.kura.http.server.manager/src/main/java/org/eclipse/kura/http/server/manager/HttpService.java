@@ -13,11 +13,12 @@
 package org.eclipse.kura.http.server.manager;
 
 import java.security.KeyStore;
+import java.security.cert.PKIXRevocationChecker;
 import java.util.Dictionary;
+import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -26,13 +27,19 @@ import javax.net.ssl.KeyManager;
 
 import org.eclipse.equinox.http.jetty.JettyConfigurator;
 import org.eclipse.equinox.http.jetty.JettyConstants;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.http.server.manager.HttpServiceOptions.RevocationCheckMode;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HttpService implements ConfigurableComponent {
+public class HttpService implements ConfigurableComponent, EventHandler {
 
     private static final String KURA_JETTY_PID = "kura.default";
 
@@ -44,12 +51,15 @@ public class HttpService implements ConfigurableComponent {
 
     private KeystoreService keystoreService;
 
+    private String keystoreServicePid;
+
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
 
-    public void setKeystoreService(KeystoreService keystoreService) {
+    public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
+        this.keystoreServicePid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
     }
 
     public void activate(Map<String, Object> properties) {
@@ -71,9 +81,7 @@ public class HttpService implements ConfigurableComponent {
             logger.debug("Updating, new props");
             this.options = updatedOptions;
 
-            deactivateHttpService();
-
-            activateHttpService();
+            restartHttpService();
         }
 
         logger.info("Updating... Done.");
@@ -141,6 +149,11 @@ public class HttpService implements ConfigurableComponent {
                 throw new IllegalStateException(e);
             }
         });
+        try {
+            jettyConfig.put("org.eclipse.kura.crl.store", currentKeystoreService.getCRLStore());
+        } catch (final KuraException e) {
+            logger.warn("failed to obtain CRL store", e);
+        }
         jettyConfig.put(JettyConstants.SSL_KEYSTORE, "/tmp/foo");
         jettyConfig.put(JettyConstants.SSL_PASSWORD, "foo");
 
@@ -148,24 +161,37 @@ public class HttpService implements ConfigurableComponent {
 
         jettyConfig.put("org.eclipse.kura.revocation.check.enabled", isRevocationEnabled);
 
-        final Optional<String> ocspURI = this.options.getOcspURI();
-        final Optional<String> crlPath = this.options.getCrlPath();
-        final boolean softFail = this.options.isRevocationSoftFailEnabled();
+        final RevocationCheckMode revocationCheckMode = this.options.getRevocationCheckMode();
 
         if (isRevocationEnabled) {
-            if (ocspURI.isPresent() && !ocspURI.get().trim().isEmpty()) {
-                jettyConfig.put("org.eclipse.kura.revocation.ocsp.uri", ocspURI.get());
+            final EnumSet<PKIXRevocationChecker.Option> checkerOptions;
+
+            if (revocationCheckMode == RevocationCheckMode.CRL_ONLY) {
+                checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS,
+                        PKIXRevocationChecker.Option.NO_FALLBACK);
+            } else if (revocationCheckMode == RevocationCheckMode.PREFER_CRL) {
+                checkerOptions = EnumSet.of(PKIXRevocationChecker.Option.PREFER_CRLS);
+            } else {
+                checkerOptions = EnumSet.noneOf(PKIXRevocationChecker.Option.class);
             }
-            if (crlPath.isPresent() && !crlPath.get().trim().isEmpty()) {
-                jettyConfig.put("org.eclipse.kura.revocation.crl.path", crlPath.get());
+
+            if (this.options.isRevocationSoftFailEnabled()) {
+                checkerOptions.add(PKIXRevocationChecker.Option.SOFT_FAIL);
             }
-            jettyConfig.put("org.eclipse.kura.revocation.soft.fail", softFail);
+
+            jettyConfig.put("org.eclipse.kura.revocation.checker.options", checkerOptions);
+
         }
 
         return jettyConfig;
     }
 
-    private void activateHttpService() {
+    private synchronized void restartHttpService() {
+        deactivateHttpService();
+        activateHttpService();
+    }
+
+    private synchronized void activateHttpService() {
         try {
             logger.info("starting Jetty instance...");
             JettyConfigurator.startServer(KURA_JETTY_PID, getJettyConfig());
@@ -175,13 +201,26 @@ public class HttpService implements ConfigurableComponent {
         }
     }
 
-    private void deactivateHttpService() {
+    private synchronized void deactivateHttpService() {
         try {
             logger.info("stopping Jetty instance...");
             JettyConfigurator.stopServer(KURA_JETTY_PID);
             logger.info("stopping Jetty instance...done");
         } catch (final Exception e) {
             logger.error("Could not stop Jetty Web server", e);
+        }
+    }
+
+    @Override
+    public void handleEvent(final Event event) {
+        if (!(event instanceof KeystoreChangedEvent)) {
+            return;
+        }
+
+        final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
+
+        if (keystoreChangedEvent.getSenderPid().equals(keystoreServicePid)) {
+            restartHttpService();
         }
     }
 

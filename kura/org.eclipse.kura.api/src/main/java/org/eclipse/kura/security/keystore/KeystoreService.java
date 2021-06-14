@@ -16,6 +16,9 @@ import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.Entry;
 import java.security.SecureRandom;
+import java.security.cert.CRL;
+import java.security.cert.CertStore;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -168,5 +171,23 @@ public interface KeystoreService {
      *             if the list of aliases cannot be retrieved
      */
     public List<String> getAliases() throws KuraException;
+
+    /**
+     * Returns a list of the current cached CRLs.
+     * 
+     * @return a list of the current cached CRLs.
+     * @throws KuraException
+     *             if the list cannot be retrieved
+     */
+    public Collection<CRL> getCRLs() throws KuraException;
+
+    /**
+     * Returns a <code>CertStore</code> containing the cached CRLs.
+     * 
+     * @return a <code>CertStore</code> containing the cached CRLs.
+     * @throws KuraException
+     *             if the <code>CertStore</code> cannot be created.
+     */
+    public CertStore getCRLStore() throws KuraException;
 
 }

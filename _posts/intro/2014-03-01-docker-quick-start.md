@@ -20,7 +20,7 @@ docker run -d -p 443:443 -t eclipse/kura
 
 This command will start Kura in background and the Kura Web Ui will be available through port 443.
 
-Once the image is started you can navigate your browser to [https://localhost0](https://localhost) and log in using the credentials admin : admin.
+Once the image is started you can navigate your browser to [https://localhost](https://localhost) and log in using the credentials admin : admin.
 
 
 ## Command Toolbox

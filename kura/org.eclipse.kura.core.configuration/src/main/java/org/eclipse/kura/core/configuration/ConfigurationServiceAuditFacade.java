@@ -12,8 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.core.configuration;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.audit.AuditContext;
@@ -33,11 +35,13 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
             boolean takeSnapshot) throws KuraException {
         audit(() -> super.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot),
                 "Create factory configuration " + factoryPid + " " + pid);
+        postConfigurationChangedEvent(pid);
     }
 
     @Override
     public synchronized void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException {
         audit(() -> super.deleteFactoryConfiguration(pid, takeSnapshot), "Delete factory configuration: " + pid);
+        postConfigurationChangedEvent(pid);
     }
 
     @Override
@@ -58,17 +62,20 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     @Override
     public synchronized void updateConfiguration(String pid, Map<String, Object> properties) throws KuraException {
         audit(() -> super.updateConfiguration(pid, properties), "Update configuration: " + pid);
+        postConfigurationChangedEvent(pid);
     }
 
     @Override
     public synchronized void updateConfiguration(String pid, Map<String, Object> properties, boolean takeSnapshot)
             throws KuraException {
         audit(() -> super.updateConfiguration(pid, properties, takeSnapshot), "Update configuration: " + pid);
+        postConfigurationChangedEvent(pid);
     }
 
     @Override
     public synchronized void updateConfigurations(List<ComponentConfiguration> configs) throws KuraException {
         audit(() -> super.updateConfigurations(configs), "Update configurations: " + formatConfigurationPids(configs));
+        postConfigurationChangedEvent(formatConfigurationPids(configs));
     }
 
     @Override
@@ -76,6 +83,7 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
             throws KuraException {
         audit(() -> super.updateConfigurations(configs, takeSnapshot),
                 "Update configurations: " + formatConfigurationPids(configs));
+        postConfigurationChangedEvent(formatConfigurationPids(configs));
     }
 
     @Override
@@ -85,17 +93,20 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
 
     @Override
     public long snapshot() throws KuraException {
+        postConfigurationChangedEvent("");
         return audit(super::snapshot, "Take snapshot");
     }
 
     @Override
     public long rollback() throws KuraException {
+        postConfigurationChangedEvent("");
         return audit(() -> super.rollback(), "Rollback latest snapshot");
     }
 
     @Override
     public synchronized void rollback(long id) throws KuraException {
         audit(() -> super.rollback(id), "Rollback snapshot: " + id);
+        postConfigurationChangedEvent("");
     }
 
     private static <T, E extends Throwable> T audit(final FallibleSupplier<T, E> task, final String message) throws E {
@@ -131,5 +142,21 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     private interface FallibleTask<E extends Throwable> {
 
         public void run() throws E;
+    }
+
+    private void postConfigurationChangedEvent(String pid) {
+        Optional<AuditContext> auditContext = AuditContext.current();
+
+        if (auditContext.isPresent()) {
+            String sessionId = auditContext.get().getProperties().get("session.id");
+
+            Map<String, String> properties = new HashMap<>();
+            properties.put(ConfigurationChangeEvent.CONF_CHANGE_EVENT_PID_PROP, pid);
+            properties.put(ConfigurationChangeEvent.CONF_CHANGE_EVENT_SESSION_PROP, sessionId);
+
+            if (sessionId != null) {
+                this.eventAdmin.postEvent(new ConfigurationChangeEvent(properties));
+            }
+        }
     }
 }

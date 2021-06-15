@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.service.GwtEventService;
@@ -79,10 +80,22 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
         while (i.hasNext()) {
             GwtEventInfo next = i.next();
-            if (Long.parseLong(next.getTimestamp()) <= fromTimestamp) {
-                break;
+
+            // ignore concurrency events raised by myself
+            if (next.getTopic().equals(ConfigurationChangeEvent.CONF_CHANGE_EVENT_TOPIC)
+                    && getThreadLocalRequest().getSession(false) != null) {
+
+                String currentSession = getThreadLocalRequest().getSession().getId();
+                String eventSession = (String) next.get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_SESSION_PROP);
+
+                if (currentSession.equals(eventSession)) {
+                    break;
+                }
             }
-            result.push(next);
+
+            if (Long.parseLong(next.getTimestamp()) > fromTimestamp) {
+                result.push(next);
+            }
         }
 
         return result;

@@ -17,7 +17,7 @@ import java.util.Map;
 import org.osgi.service.event.Event;
 
 /**
- * @since 2.2
+ * @since 3.0
  */
 public class FloodingProtectionConfigurationChangeEvent extends Event {
 

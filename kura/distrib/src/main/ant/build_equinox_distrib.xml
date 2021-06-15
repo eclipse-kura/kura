@@ -593,7 +593,6 @@ fi]]>
 				<exclude name="com.gwt.user_*" />
 				<exclude name="org.junit*" />
 				<exclude name="org.moka7*" />
-				<exclude name="tinyb*" />
 
 				<!-- exclude source bundles -->
 				<exclude name="*.source_*.jar" />
@@ -611,7 +610,7 @@ fi]]>
 			</mappedresources>
 			<mappedresources>
 				<fileset dir="../target-definition/common/repository/plugins"
-					includes="*.SNAPSHOT.jar" excludes="tinyb*" />
+					includes="*.SNAPSHOT.jar" />
 				<globmapper from="*.SNAPSHOT.jar"
 					to="${build.output.name}/${plugins.folder}/*-SNAPSHOT.jar" />
 			</mappedresources>
@@ -736,7 +735,6 @@ fi]]>
 		<antcall target="linux-debian-jars" />
 		<antcall target="linux-redhat-jars" />
 		<antcall target="linux-systemd-jars" />
-		<antcall target="tinyb-jars" />
 
 		<echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -912,10 +910,6 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jdk.dio_${jdk.dio.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/tinyb.${native.tag}_${tinyb.version}.jar@3" />
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/tinyb_${tinyb.version}.jar@3:start" />
-			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.net_${org.apache.commons.net.version}.jar@3:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.exec_${org.apache.commons.exec.version}.jar" />
@@ -939,6 +933,8 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcpkix_${org.bouncycastle.jar.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcprov_${org.bouncycastle.jar.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar@3" />
 		</propertyfile>
 	</target>
 
@@ -1622,44 +1618,6 @@ fi]]>
 			update="true">
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.linux.systemd.provider_${org.eclipse.kura.linux.systemd.provider.version}.jar"
-				prefix="${build.output.name}/${plugins.folder}" />
-		</zip>
-	</target>
-
-	<target name="tinyb-jars">
-		<condition property="is.tinyb.snapshot" value="">
-			<contains string="${tinyb.version}" substring="SNAPSHOT" />
-		</condition>
-		<antcall target="tinyb-snapshot-jars" />
-		<antcall target="tinyb-no-snapshot-jars" />
-	</target>
-
-	<target name="tinyb-snapshot-jars" if="is.tinyb.snapshot">
-		<zip destfile="${project.build.directory}/${build.output.name}.zip"
-			update="true">
-			<mappedresources>
-				<fileset dir="../target-definition/common/repository/plugins"
-					includes="tinyb.${native.tag}_*.jar" />
-				<globmapper from="*.SNAPSHOT.jar"
-					to="${build.output.name}/${plugins.folder}/*-SNAPSHOT.jar" />
-			</mappedresources>
-			<mappedresources>
-				<fileset dir="../target-definition/common/repository/plugins"
-					includes="tinyb_*.jar" />
-				<globmapper from="*.SNAPSHOT.jar"
-					to="${build.output.name}/${plugins.folder}/*-SNAPSHOT.jar" />
-			</mappedresources>
-		</zip>
-	</target>
-
-	<target name="tinyb-no-snapshot-jars" unless="is.tinyb.snapshot">
-		<zip destfile="${project.build.directory}/${build.output.name}.zip"
-			update="true">
-			<zipfileset
-				file="../target-definition/common/repository/plugins/tinyb.${native.tag}_${tinyb.version}.jar"
-				prefix="${build.output.name}/${plugins.folder}" />
-			<zipfileset
-				file="../target-definition/common/repository/plugins/tinyb_${tinyb.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

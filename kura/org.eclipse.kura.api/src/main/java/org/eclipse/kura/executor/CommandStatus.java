@@ -33,7 +33,7 @@ import org.apache.commons.io.output.NullOutputStream;
  * <li>inputStream : the input stream used to send data to the process</li>
  * </ul>
  * 
- * @since 2.2
+ * @since 3.0
  *
  */
 public class CommandStatus {

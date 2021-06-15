@@ -187,8 +187,8 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
     /*
      * Enable temperature sensor
      */
-    public void enableTermometer() {
-        // Write "01" to enable temperature sensor
+    public void enableThermometer() {
+        // Write "01" to enable thermometer sensor
         if (this.cc2650) {
             this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "01");
         } else {
@@ -199,8 +199,8 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
     /*
      * Disable temperature sensor
      */
-    public void disableTermometer() {
-        // Write "00" disable temperature sensor
+    public void disableThermometer() {
+        // Write "00" disable thermometer sensor
         if (this.cc2650) {
             this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "00");
         } else {
@@ -275,7 +275,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
     /*
      * Set sampling period (only for CC2650)
      */
-    public void setTermometerPeriod(String period) {
+    public void setThermometerPeriod(String period) {
         this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_PERIOD_2650, period);
     }
 

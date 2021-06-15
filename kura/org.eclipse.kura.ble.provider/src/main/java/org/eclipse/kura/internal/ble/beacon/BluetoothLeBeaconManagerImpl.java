@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Scott Ware
  *******************************************************************************/
 package org.eclipse.kura.internal.ble.beacon;
 
@@ -24,8 +25,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.KuraBluetoothBeaconAdvertiserNotAvailable;
 import org.eclipse.kura.KuraBluetoothCommandException;
+import org.eclipse.kura.KuraBluetoothDiscoveryException;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
+import org.eclipse.kura.bluetooth.le.BluetoothTransportType;
 import org.eclipse.kura.bluetooth.le.beacon.AdvertisingReportRecord;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeacon;
 import org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconAdvertiser;
@@ -39,6 +42,7 @@ import org.eclipse.kura.internal.ble.util.BTSnoopListener;
 import org.eclipse.kura.internal.ble.util.BluetoothLeUtil;
 import org.eclipse.kura.internal.ble.util.BluetoothProcess;
 import org.eclipse.kura.internal.ble.util.BluetoothProcessListener;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 
 public class BluetoothLeBeaconManagerImpl
@@ -65,13 +69,26 @@ public class BluetoothLeBeaconManagerImpl
     private BluetoothProcess hcitoolProc;
     private Map<BluetoothLeBeaconListener<BluetoothLeBeacon>, Class<?>> listeners;
     private CommandExecutorService executorService;
+    private SystemService systemService;
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        this.executorService = null;
+        if (this.executorService == executorService) {
+            this.executorService = null;
+        }
+    }
+
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        if (this.systemService == systemService) {
+            this.systemService = null;
+        }
     }
 
     protected void activate(ComponentContext context) {
@@ -303,33 +320,55 @@ public class BluetoothLeBeaconManagerImpl
         return out;
     }
 
-    public void startBeaconScan(String interfaceName) throws KuraBluetoothCommandException {
-        if (checkStartScanCondition(interfaceName)) {
-            logger.info("Starting bluetooth beacon scan on {}", interfaceName);
+    public void startBeaconScan(BluetoothLeAdapter adapter) throws KuraBluetoothCommandException {
+        if (checkStartScanCondition(adapter.getInterfaceName())) {
+            logger.info("Starting bluetooth beacon scan on {}", adapter.getInterfaceName());
             try {
-                this.hcitoolProc = execHcitool(interfaceName, "lescan-passive", "--duplicates");
-                this.dumpProc = execBtDump(interfaceName);
-            } catch (IOException e) {
+                // Start scanning
+                if (!adapter.isDiscovering()) {
+                    if (systemService.isLegacyBluetoothBeaconScan()) {
+                        logger.info("Starting legacy bluetooth beacon scan on {}", adapter.getInterfaceName());
+                        this.hcitoolProc = execHcitool(adapter.getInterfaceName(), "lescan-passive", "--duplicates");
+                    } else {
+                        logger.info("Starting bluetooth beacon scan on {}", adapter.getInterfaceName());
+                        adapter.setDiscoveryFilter(null, 0, 0, BluetoothTransportType.LE, false);
+                        adapter.startDiscovery();
+                    }
+                }
+                this.dumpProc = execBtDump(adapter.getInterfaceName());
+            } catch (IOException | KuraBluetoothDiscoveryException e) {
                 throw new KuraBluetoothCommandException(e, "Start bluetooth beacon scan failed");
             }
         }
     }
 
-    public void stopBeaconScan(String interfaceName) {
+    public void stopBeaconScan(BluetoothLeAdapter adapter) {
         // Stop scan on interface only if there is only one scanner that is scanning...
-        if (checkStopScanCondition(interfaceName)) {
-            logger.info("Stopping bluetooth beacon scan on {}", interfaceName);
-            if (this.hcitoolProc != null) {
-                this.hcitoolProc.destroy();
+        if (checkStopScanCondition(adapter.getInterfaceName())) {
+            // Stop scanning
+            boolean isHcitoolStopped = true;
+            if (systemService.isLegacyBluetoothBeaconScan()) {
+                logger.info("Stopping legacy bluetooth beacon scan on {}", adapter.getInterfaceName());
+                if (this.hcitoolProc != null) {
+                    this.hcitoolProc.destroy();
+                }
+                isHcitoolStopped = BluetoothLeUtil.stopHcitool(adapter.getInterfaceName(), this.executorService,
+                        "lescan-passive", "--duplicates");
+            } else {
+                logger.info("Stopping bluetooth beacon scan on {}", adapter.getInterfaceName());
+                try {
+                    adapter.stopDiscovery();
+                    adapter.setDiscoveryFilter(null, 0, 0, BluetoothTransportType.AUTO, false);
+                } catch (KuraBluetoothDiscoveryException e) {
+                    logger.warn("Stop bluetooth beacon scan failed");
+                }
             }
             if (this.dumpProc != null) {
                 this.dumpProc.destroyBTSnoop();
             }
-            boolean isHcitoolStopped = BluetoothLeUtil.stopHcitool(interfaceName, this.executorService,
-                    "lescan-passive", "--duplicates");
-            boolean isBtdumpStopped = BluetoothLeUtil.stopBtdump(interfaceName, this.executorService);
+            boolean isBtdumpStopped = BluetoothLeUtil.stopBtdump(adapter.getInterfaceName(), this.executorService);
             if (!isHcitoolStopped || !isBtdumpStopped) {
-                logger.warn("Failed to stop beacon scan");
+                logger.warn("Failed to stop bluetooth beacon scan");
             }
         }
     }

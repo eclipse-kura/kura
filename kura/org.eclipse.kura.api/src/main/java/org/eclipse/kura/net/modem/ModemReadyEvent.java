@@ -31,11 +31,11 @@ public class ModemReadyEvent extends Event {
     public static final String ICCID = "ICCID";
     public static final String RSSI = "RSSI";
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public static final String FW_VERSION = "FW_VER";
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public static final String MODEM_DEVICE = "MODEM_DEVICE";
 

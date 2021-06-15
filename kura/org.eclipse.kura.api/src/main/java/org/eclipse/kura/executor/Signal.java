@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This interface provides a method to retrieve the signal to send to system commands or processes (i.e. to kill them).
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 2.2
+ * @since 3.0
  */
 @ProviderType
 public interface Signal {

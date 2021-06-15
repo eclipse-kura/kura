@@ -20,4 +20,5 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.bluetooth.le.beacon.BluetoothLeBeaconManager"/>
    <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
+   <reference bind="setSystemService" cardinality="1..1" interface="org.eclipse.kura.system.SystemService" name="SystemService" policy="static" unbind="unsetSystemService"/>
 </scr:component>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.example.ble.tisensortag.dbus.BluetoothLe"
+         name="BluetoothLe" 
+         description="Bluetooth Low Energy demo on a TI SensorTag.">
+         
+        <Icon resource="http://s3.amazonaws.com/kura-resources/application/icon/sensortag.png" size="32"/>
+
+        <AD id="CloudPublisher.target"
+            name="CloudPublisher Target Filter"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the Cloud Publisher used to publish messages to the cloud platform.">
+        </AD>
+        
+         <AD id="scan_enable"
+            name="scan_enable"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable scan for TI SensorTags." />
+            
+         <AD id="scan_time"
+            name="scan_time"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="5"
+            description="Scan for devices duration in seconds." />
+
+        <AD id="period"
+            name="period"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="120"
+            description="Period in seconds between 2 publishes. It must be greater than scan_time."/>
+            
+        <AD id="enableThermometer"
+            name="enableThermometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable temperature sensor."/>
+
+        <AD id="enableAccelerometer"
+            name="enableAccelerometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable accelerometer sensor."/>
+            
+
+        <AD id="enableHygrometer"
+            name="enableHygrometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable humidity sensor."/>
+            
+        <AD id="enableMagnetometer"
+            name="enableMagnetometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable magnetometer sensor."/>
+            
+        <AD id="enableBarometer"
+            name="enableBarometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable pressure sensor."/>
+            
+        <AD id="enableGyroscope"
+            name="enableGyroscope"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable gyroscope sensor."/>
+            
+        <AD id="enableLuxometer"
+            name="enableLuxometer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable light sensor (CC2650 only)."/>
+            
+        <AD id="enableButtons"
+            name="enableButtons"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable buttons."/>
+
+        <AD id="switchOnRedLed"
+            name="switchOnRedLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the red led."/>
+            
+        <AD id="switchOnGreenLed"
+            name="switchOnGreenLed"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the green led."/>
+            
+         <AD id="switchOnBuzzer"
+            name="switchOnBuzzer"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Switch on the buzzer."/>
+            
+         <AD id="discoverServicesAndCharacteristics"
+            name="discoverServicesAndCharacteristics"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Perform a discovery of GATT services and characteristics."/>
+
+        <AD id="iname"
+            name="iname"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="hci0"
+            description="Name of bluetooth adapter."/>
+                    
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.example.ble.tisensortag.dbus.BluetoothLe">
+        <Object ocdref="org.eclipse.kura.example.ble.tisensortag.dbus.BluetoothLe"/>
+    </Designate>
+</MetaData>

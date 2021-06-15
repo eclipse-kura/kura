@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 
 public class TiSensorTag {
 
-    private static final Logger logger = LoggerFactory.getLogger(TiSensorTag.class);
+    private Logger logger = LoggerFactory.getLogger(TiSensorTag.class);
 
     private static final String DEVINFO = "devinfo";
     private static final String TEMPERATURE = "temperature";
@@ -110,7 +110,7 @@ public class TiSensorTag {
     }
 
     public void disconnect() throws ConnectionException {
-        if (isTermometerNotifying()) {
+        if (isThermometerNotifying()) {
             disableTemperatureNotifications();
         }
         if (isHygrometerNotifying()) {
@@ -193,28 +193,28 @@ public class TiSensorTag {
     /*
      * Enable temperature sensor
      */
-    public void enableTermometer() {
-        // Write "01" to enable temperature sensor
+    public void enableThermometer() {
+        // Write "01" to enable thermometer sensor
         byte[] value = { 0x01 };
         try {
             this.gattResources.get(TEMPERATURE).getGattService()
                     .findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_ENABLE).writeValue(value);
         } catch (KuraException e) {
-            logger.error("Termometer enable failed", e);
+            logger.error("Thermometer enable failed", e);
         }
     }
 
     /*
      * Disable temperature sensor
      */
-    public void disableTermometer() {
-        // Write "00" to disable temperature sensor
+    public void disableThermometer() {
+        // Write "00" to disable thermometer sensor
         byte[] value = { 0x00 };
         try {
             this.gattResources.get(TEMPERATURE).getGattService()
                     .findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_ENABLE).writeValue(value);
         } catch (KuraException e) {
-            logger.error("Termometer disable failed", e);
+            logger.error("Thermometer disable failed", e);
         }
     }
 
@@ -237,7 +237,6 @@ public class TiSensorTag {
      */
     public void enableTemperatureNotifications(Consumer<double[]> callback) {
         Consumer<byte[]> callbackTemp = valueBytes -> callback.accept(calculateTemperature(valueBytes));
-
         try {
             this.gattResources.get(TEMPERATURE).getGattValueCharacteristic().enableValueNotifications(callbackTemp);
         } catch (KuraException e) {
@@ -259,17 +258,17 @@ public class TiSensorTag {
     /*
      * Set sampling period (only for CC2650)
      */
-    public void setTermometerPeriod(int period) {
+    public void setThermometerPeriod(int period) {
         byte[] periodBytes = { ByteBuffer.allocate(4).putInt(period).array()[3] };
         try {
             this.gattResources.get(TEMPERATURE).getGattService()
                     .findCharacteristic(TiSensorTagGatt.UUID_TEMP_SENSOR_PERIOD).writeValue(periodBytes);
         } catch (KuraException e) {
-            logger.error("Termometer period set failed", e);
+            logger.error("Temperature period set failed", e);
         }
     }
 
-    public boolean isTermometerNotifying() {
+    public boolean isThermometerNotifying() {
         return isNotifying(TEMPERATURE);
     }
 

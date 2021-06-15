@@ -79,6 +79,19 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
 
         while (i.hasNext()) {
             GwtEventInfo next = i.next();
+
+            if (next.getTopic().equals(ForwardedEventTopic.CONCURRENT_WRITE_EVENT.toString())) {
+                // ignore concurrency events raised by myself
+                if (getThreadLocalRequest().getSession(false) != null) {
+                    String currentSession = getThreadLocalRequest().getSession().getId();
+                    String eventSession = (String) next.get("session");
+
+                    if (currentSession.equals(eventSession)) {
+                        break;
+                    }
+                }
+            }
+
             if (Long.parseLong(next.getTimestamp()) <= fromTimestamp) {
                 break;
             }

@@ -17,11 +17,14 @@ package org.eclipse.kura.web.client.ui;
 import static org.eclipse.kura.web.client.util.FilterBuilder.not;
 import static org.eclipse.kura.web.client.util.FilterBuilder.or;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
@@ -48,6 +51,7 @@ import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
+import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtUserData;
@@ -1024,6 +1028,21 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             }
         });
 
+        EventService.subscribe(ForwardedEventTopic.CONCURRENT_WRITE_EVENT, this::handleConcurrencyEvent);
+    }
+
+    private static final Logger l = Logger.getLogger("");
+
+    private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
+        // TODO: add proper messages in the correct way
+        // TODO: specify constants for 'session' and 'component' keys in the events
+        // TODO: find a way to retrieve current section display and relation with component
+        String modifiedComp = (String) eventInfo.getProperties().get("component");
+
+        l.log(Level.SEVERE, "received concurrency event for component: " + modifiedComp);
+
+        EntryClassUi.this.alertDialog.show("Another user has modified the configuration for: " + modifiedComp
+                + ". You might see an inconsistent state. Please refresh the page.", (ConfirmListener) null);
     }
 
     private void showStatusPanel() {

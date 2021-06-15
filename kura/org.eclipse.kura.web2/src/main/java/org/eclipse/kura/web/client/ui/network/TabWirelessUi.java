@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -329,7 +329,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         initForm();
         initHelpButtons();
         setPasswordValidation();
-        previousSelection = new GwtWifiChannelModel("", 0, 0, "");
+        this.previousSelection = new GwtWifiChannelModel("", 0, 0, "");
 
         this.tcpTab.status.addChangeHandler(event -> {
             if (TabWirelessUi.this.selectedNetIfConfig != null) {
@@ -461,11 +461,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         if (alChannels != null && !alChannels.isEmpty()) {
             for (int channel : alChannels) {
                 if (channel <= maxIndex) {
-                    previousSelection = this.channelDataProvider.getList().get(channel - 1);
+                    this.previousSelection = this.channelDataProvider.getList().get(channel - 1);
                 }
             }
         } else {
-            previousSelection = null;
+            this.previousSelection = null;
         }
         setValues();
         refreshForm();
@@ -530,8 +530,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
             int selectedChannel = getSelectedChannel(lastChannel);
             logger.fine("Last selected channel=" + lastChannel + ", selected=" + selectedChannel);
-            if (selectedChannel >= 0)
+            if (selectedChannel >= 0) {
                 TabWirelessUi.this.channelList.setSelectedIndex(selectedChannel);
+            }
         } else {
             logger.info("No channels specified, selecting all ...");
             for (int channel = 1; channel <= maxIndex; channel++) {
@@ -873,6 +874,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipPassword()));
             }
         });
+
+        this.password.addBlurHandler(e -> this.password.validate());
         this.password.setAllowBlank(false);
         this.password.addMouseOutHandler(event -> resetHelp());
         this.buttonPassword.addClickHandler(event -> {
@@ -916,6 +919,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             });
         });
         this.password.addKeyUpHandler(event -> {
+            this.password.validate();
+
             if (TabWirelessUi.this.groupVerify.isVisible()
                     && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
                 TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
@@ -1186,7 +1191,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             GwtWifiChannelModel currentSelection = this.selectionModel.getSelectedObject();
             if (currentSelection == null) {
                 setDirty(false);
-            } else if (currentSelection != null && !(previousSelection != null && previousSelection.getName().isEmpty())
+            } else if (currentSelection != null
+                    && !(this.previousSelection != null && this.previousSelection.getName().isEmpty())
                     && !currentSelection.equals(this.previousSelection)) {
                 setDirty(true);
             }
@@ -1246,20 +1252,20 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                             }
 
                         });
-                TabWirelessUi.this.gwtNetworkService.getWifiCountryCode(token,
-                        new AsyncCallback<String>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                logger.info("getWifiCountryCode Failure");
-                            }
+                TabWirelessUi.this.gwtNetworkService.getWifiCountryCode(token, new AsyncCallback<String>() {
 
-                            @Override
-                            public void onSuccess(String countryCode) {
-                                logger.info("getWifiCountryCode Success - " + countryCode);
-                                TabWirelessUi.this.countryCode.setText(countryCode);
-                                TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
-                            }
-                        });
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.info("getWifiCountryCode Failure");
+                    }
+
+                    @Override
+                    public void onSuccess(String countryCode) {
+                        logger.info("getWifiCountryCode Success - " + countryCode);
+                        TabWirelessUi.this.countryCode.setText(countryCode);
+                        TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
+                    }
+                });
             }
         });
 
@@ -1302,6 +1308,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             configUserOptions.allowAnyPassword();
             this.password.setValidatorsFrom(configUserOptions);
         }
+
     }
 
     private void initModal() {
@@ -1428,8 +1435,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 int selectedChannel = getSelectedChannel(wifiHotspotEntry.getChannel());
                 logger.info("SSID Selected channel=" + selectedChannel);
-                if (selectedChannel >= 0)
+                if (selectedChannel >= 0) {
                     TabWirelessUi.this.channelList.setSelectedIndex(selectedChannel);
+                }
             }
         });
     }
@@ -1494,7 +1502,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             String[] values = value.split(" ");
             Integer channel = Integer.valueOf(values[1]);
             Integer frequency = Integer.valueOf(values[3]);
-            return new Integer[] {channel, frequency};
+            return new Integer[] { channel, frequency };
         }
         return new Integer[0];
     }
@@ -1505,8 +1513,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             String[] values = value.split(" ");
             int channel = Integer.parseInt(values[1]);
             if (channel == lastChannel) {
-                   return i;
-                }
+                return i;
+            }
         }
         return -1;
     }
@@ -1558,8 +1566,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         gwtWifiConfig.setChannels(alChannels);
 
-        String freqValue = this .channelList.getSelectedItemText();
-        logger.fine("Selected Frequency="+freqValue);
+        String freqValue = this.channelList.getSelectedItemText();
+        logger.fine("Selected Frequency=" + freqValue);
         Integer[] channelFrequency = getChannelFrequencyFromString(freqValue);
         if (channelFrequency.length > 0) {
             alChannels.clear();
@@ -1684,42 +1692,44 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
                     TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
-                                TabWirelessUi.this.selectedNetIfConfig.getName(),
-                                new AsyncCallback<List<GwtWifiHotspotEntry>>() {
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        logger.info("findFrequencies Failure");
-                                    }
+                            TabWirelessUi.this.selectedNetIfConfig.getName(),
+                            new AsyncCallback<List<GwtWifiHotspotEntry>>() {
 
-                                    @Override
-                                    public void onSuccess(List<GwtWifiHotspotEntry> frequencies) {
-                                        String radioValue = TabWirelessUi.this.radio.getSelectedItemText();
-                                        boolean use5GHz = false;
-                                        if (radioValue.equalsIgnoreCase("802.11a")) {
-                                            use5GHz = true;
-                                        }
-                                        logger.info("findFrequencies Success " + radioValue + " - " + use5GHz);
-                                        TabWirelessUi.this.activeConfig.setChannelsFrequency(frequencies);
-                                        TabWirelessUi.this.channelList.clear();
-                                        for (GwtWifiHotspotEntry freq : frequencies) {
-                                            if ((!use5GHz && (freq.getFrequency() < 5000)) ||
-                                                (use5GHz && (freq.getFrequency() >= 5000)) ||
-                                                (WIFI_MODE_STATION_MESSAGE.equals(TabWirelessUi.this.wireless.getSelectedItemText()))) {
-                                                logger.fine("Found " + freq.getChannel() + " - " + freq.getFrequency() + " MHz");
-                                                TabWirelessUi.this.channelList.addItem("Channel " + freq.getChannel() + " - " + freq.getFrequency() + " MHz");
-                                            }
-                                        }
-                                        int lastChannel = getActiveChannel();
-                                        int selectedChannel = getSelectedChannel(lastChannel);
-                                        logger.info("Last channel=" + lastChannel + ", SelectedChannel=" + selectedChannel);
-                                        if (selectedChannel >= 0) {
-                                            TabWirelessUi.this.channelList.setSelectedIndex(selectedChannel);
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    logger.info("findFrequencies Failure");
+                                }
+
+                                @Override
+                                public void onSuccess(List<GwtWifiHotspotEntry> frequencies) {
+                                    String radioValue = TabWirelessUi.this.radio.getSelectedItemText();
+                                    boolean use5GHz = false;
+                                    if (radioValue.equalsIgnoreCase("802.11a")) {
+                                        use5GHz = true;
+                                    }
+                                    logger.info("findFrequencies Success " + radioValue + " - " + use5GHz);
+                                    TabWirelessUi.this.activeConfig.setChannelsFrequency(frequencies);
+                                    TabWirelessUi.this.channelList.clear();
+                                    for (GwtWifiHotspotEntry freq : frequencies) {
+                                        if (!use5GHz && freq.getFrequency() < 5000
+                                                || use5GHz && freq.getFrequency() >= 5000 || WIFI_MODE_STATION_MESSAGE
+                                                        .equals(TabWirelessUi.this.wireless.getSelectedItemText())) {
+                                            logger.fine("Found " + freq.getChannel() + " - " + freq.getFrequency()
+                                                    + " MHz");
+                                            TabWirelessUi.this.channelList.addItem("Channel " + freq.getChannel()
+                                                    + " - " + freq.getFrequency() + " MHz");
                                         }
                                     }
-                                });
+                                    int lastChannel = getActiveChannel();
+                                    int selectedChannel = getSelectedChannel(lastChannel);
+                                    logger.info("Last channel=" + lastChannel + ", SelectedChannel=" + selectedChannel);
+                                    if (selectedChannel >= 0) {
+                                        TabWirelessUi.this.channelList.setSelectedIndex(selectedChannel);
+                                    }
+                                }
+                            });
                 }
             });
         }
     }
 }
-

@@ -15,7 +15,7 @@ package org.eclipse.kura.net.firewall;
 /**
  * Represents the type of NAT rule
  * 
- * @since 2.2
+ * @since 3.0
  */
 public enum RuleType {
 

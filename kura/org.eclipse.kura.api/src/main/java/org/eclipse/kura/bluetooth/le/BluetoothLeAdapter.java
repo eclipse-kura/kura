@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -109,6 +109,14 @@ public interface BluetoothLeAdapter {
     public void findDevices(long timeout, Consumer<List<BluetoothLeDevice>> consumer);
 
     /**
+     * Starts a BLE discovery.
+     *
+     * @throws KuraBluetoothDiscoveryException
+     * @since 3.0
+     */
+    public void startDiscovery() throws KuraBluetoothDiscoveryException;
+
+    /**
      * Stops a BLE discovery.
      *
      * @throws KuraBluetoothDiscoveryException
@@ -197,8 +205,18 @@ public interface BluetoothLeAdapter {
     /**
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
+     * 
+     * @deprecated since 3.0 use instead {@link setDiscoverableTimeout}
      */
+    @Deprecated
     public void setDiscoverableTimout(long value);
+
+    /**
+     * Sets the discoverable timeout the adapter. A value of 0 disables
+     * the timeout.
+     * @since 3.0
+     */
+    public void setDiscoverableTimeout(long value);
 
     /**
      * Returns the pairable state the adapter.
@@ -278,9 +296,46 @@ public interface BluetoothLeAdapter {
      * @param trasportType
      *            the trasportType (LE or BREDR)
      *
+     * @deprecated use instead {@link setDiscoveryFilter(List<UUID>, int, int, BluetoothTransportType, boolean)}
      * @since 2.0
      */
+    @Deprecated
     public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType);
+
+    /**
+     * Sets a scan filter for this adapter.
+     *
+     * <p>
+     * When a remote device is found that advertises any UUID from UUIDs, it will be reported if:
+     * <ul>
+     * <li>Pathloss and RSSI are both empty.</li>
+     * <li>only Pathloss param is set, device advertise TX power, and computed pathloss is less than Pathloss
+     * param.</li>
+     * <li>only RSSI param is set, and received RSSI is higher than RSSI param.</li>
+     * </ul>
+     * <p>
+     *
+     * <p>
+     * If "auto" transport is requested, scan will use LE, BREDR, or both, depending on what's
+     * currently enabled on the controller.
+     *
+     * To remove the filter, call this method with empty parameters.
+     *
+     * @param uuids
+     *            the uuids advertised by the devices
+     * @param rssi
+     *            the Receiver Signal Strength Indication value
+     * @param pathloss
+     *            the pathloss value
+     * @param trasportType
+     *            the trasportType (LE or BREDR)
+     * @param duplicateData
+     *            whether to filter duplicate data
+     *
+     * @since 3.0
+     */
+    public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType,
+            boolean duplicateData);
 
     /**
      * Set a device discovery filter based on RSSI value. Only devices with rssi greater than the provided value will be

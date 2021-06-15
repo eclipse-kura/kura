@@ -2142,19 +2142,19 @@
                                         <move file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag/.classpath" />
 
-                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag.tinyb Project -->
-                                        <copy todir="${project.build.directory}/staging/tisensortag.tinyb">
-                                            <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag.tinyb" />
+                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag.dbus Project -->
+                                        <copy todir="${project.build.directory}/staging/tisensortag.dbus">
+                                            <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag.dbus" />
                                         </copy>
-                                        <delete file="${project.build.directory}/staging/tisensortag.tinyb/pom.xml" />
-                                        <delete dir="${project.build.directory}/staging/tisensortag.tinyb/bin" />
-                                        <delete dir="${project.build.directory}/staging/tisensortag.tinyb/target" />
-                                        <copy file="src/main/resources/common/classpaths/tisensortag.tinyb.classpath"
-                                            tofile="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath" />
-                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.tinyb.project"
-                                            tofile="${project.build.directory}/staging/tisensortag.tinyb/.project" />
-                                        <move file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
-                                            tofile="${project.build.directory}/staging/tisensortag.tinyb/.classpath" />
+                                        <delete file="${project.build.directory}/staging/tisensortag.dbus/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/tisensortag.dbus/bin" />
+                                        <delete dir="${project.build.directory}/staging/tisensortag.dbus/target" />
+                                        <copy file="src/main/resources/common/classpaths/tisensortag.dbus.classpath"
+                                            tofile="${project.build.directory}/staging/tisensortag.dbus/tisensortag.dbus.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.dbus.project"
+                                            tofile="${project.build.directory}/staging/tisensortag.dbus/.project" />
+                                        <move file="${project.build.directory}/staging/tisensortag.dbus/tisensortag.dbus.classpath"
+                                            tofile="${project.build.directory}/staging/tisensortag.dbus/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/publisher">
@@ -2237,8 +2237,8 @@
                                                 prefix="org.eclipse.kura.example.eddystone.scanner/" />
                                             <zipfileset dir="${project.build.directory}/staging/tisensortag/"
                                                 prefix="org.eclipse.kura.example.ble.tisensortag/" />
-                                            <zipfileset dir="${project.build.directory}/staging/tisensortag.tinyb/"
-                                                prefix="org.eclipse.kura.example.ble.tisensortag.tinyb/" />
+                                            <zipfileset dir="${project.build.directory}/staging/tisensortag.dbus/"
+                                                prefix="org.eclipse.kura.example.ble.tisensortag.dbus/" />
                                             <zipfileset dir="${project.build.directory}/staging/publisher/"
                                                 prefix="org.eclipse.kura.example.publisher/" />
                                             <zipfileset dir="${project.build.directory}/staging/camel_quickstart/"

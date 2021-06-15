@@ -502,14 +502,14 @@ public class ModemConfig implements NetConfig {
     }
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public boolean isDiversityEnabled() {
         return this.diversityEnabled;
     }
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public void setDiversityEnabled(boolean diversityEnabled) {
         this.diversityEnabled = diversityEnabled;

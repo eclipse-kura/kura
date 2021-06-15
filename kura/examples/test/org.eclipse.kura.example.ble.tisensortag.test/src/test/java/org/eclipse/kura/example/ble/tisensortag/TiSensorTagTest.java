@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -190,23 +190,23 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testEnableTermometer() throws Throwable {
-        testWrite(false, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "01", "enableTermometer");
+    public void testEnableThermometer() throws Throwable {
+        testWrite(false, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "01", "enableThermometer");
     }
 
     @Test
-    public void testEnableTermometerCc2650() throws Throwable {
-        testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "01", "enableTermometer");
+    public void testEnableThermometerCc2650() throws Throwable {
+        testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "01", "enableThermometer");
     }
 
     @Test
-    public void testDisableTermometer() throws Throwable {
-        testWrite(false, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "00", "disableTermometer");
+    public void testDisableThermometer() throws Throwable {
+        testWrite(false, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "00", "disableThermometer");
     }
 
     @Test
-    public void testDisableTermometerCc2650() throws Throwable {
-        testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "00", "disableTermometer");
+    public void testDisableThermometerCc2650() throws Throwable {
+        testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "00", "disableThermometer");
     }
 
     @Test
@@ -273,9 +273,9 @@ public class TiSensorTagTest {
     }
 
     @Test
-    public void testSetTermometerPeriod() throws Throwable {
+    public void testSetThermometerPeriod() throws Throwable {
         String period = "1000";
-        testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_PERIOD_2650, period, "setTermometerPeriod", period);
+        testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_PERIOD_2650, period, "setThermometerPeriod", period);
     }
 
     @Test

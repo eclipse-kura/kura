@@ -165,22 +165,22 @@ public interface CellularModem {
     public void disableGps() throws KuraException;
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public boolean hasDiversityAntenna();
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public boolean isDiversityEnabled();
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public void enableDiversity() throws KuraException;
 
     /**
-     * @since 2.2
+     * @since 3.0
      */
     public void disableDiversity() throws KuraException;
 

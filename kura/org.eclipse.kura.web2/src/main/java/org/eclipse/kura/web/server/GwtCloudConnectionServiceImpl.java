@@ -527,7 +527,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
                                 counter--;
                             }
                         } catch (KuraConnectException e) {
-                            logger.warn("Error connecting");
+                            logger.warn("Error connecting", e);
                             gwtKuraException = new GwtKuraException(GwtKuraErrorCode.CONNECTION_FAILURE, e,
                                     "Error connecting. Please review your configuration.");
                         } catch (InterruptedException e) {
@@ -535,7 +535,7 @@ public class GwtCloudConnectionServiceImpl extends OsgiRemoteServiceServlet impl
                             gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e,
                                     "Interrupt Exception");
                         } catch (IllegalStateException e) {
-                            logger.warn("Illegal client state");
+                            logger.warn("Illegal client state", e);
                             gwtKuraException = new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e,
                                     "Illegal client state");
                         }

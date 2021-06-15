@@ -1473,6 +1473,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                 @Override
                                 public void onSuccess(List<GwtWifiHotspotEntry> result) {
+                                    TabWirelessUi.this.ssidDataProvider.getList().clear();
+
                                     for (GwtWifiHotspotEntry pair : result) {
                                         TabWirelessUi.this.ssidDataProvider.getList().add(pair);
                                     }

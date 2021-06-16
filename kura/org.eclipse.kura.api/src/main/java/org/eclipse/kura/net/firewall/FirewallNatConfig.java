@@ -123,7 +123,7 @@ public class FirewallNatConfig implements NetConfig {
 
     /**
      * 
-     * @since 3.0
+     * @since 2.2
      */
     public RuleType getRuleType() {
         return this.type;

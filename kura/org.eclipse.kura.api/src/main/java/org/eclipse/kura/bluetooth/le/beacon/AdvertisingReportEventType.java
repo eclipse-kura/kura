@@ -78,26 +78,44 @@ public enum AdvertisingReportEventType {
         this.eventType = eventType;
     }
 
+    /**
+     * @since 2.2
+     */
     public DataStatus getDataStatus() {
         return this.dataStatus;
     }
 
+    /**
+     * @since 2.2
+     */
     public boolean isConnectable() {
         return connectable;
     }
 
+    /**
+     * @since 2.2
+     */
     public boolean isDirected() {
         return directed;
     }
 
+    /**
+     * @since 2.2
+     */
     public boolean isScannable() {
         return scannable;
     }
 
+    /**
+     * @since 2.2
+     */
     public boolean isScanResponse() {
         return scanResponse;
     }
 
+    /**
+     * @since 2.2
+     */
     public byte getEventTypeCode() {
         return this.eventType;
     }

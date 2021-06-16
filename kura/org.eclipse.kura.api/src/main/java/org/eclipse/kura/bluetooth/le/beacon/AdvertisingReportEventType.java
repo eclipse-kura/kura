@@ -22,90 +22,83 @@ import org.osgi.annotation.versioning.ProviderType;
  * @since 1.3
  */
 @ProviderType
-public class AdvertisingReportEventType {
+public enum AdvertisingReportEventType {
 
-    private static final byte ADV_IND = 0x00;
-    private static final byte ADV_DIRECT_IND = 0x01;
-    private static final byte ADV_SCAN_IND = 0x02;
-    private static final byte ADV_NONCONN_IND = 0x03;
-    private static final byte SCAN_RSP = 0x04;
+    ADV_IND((byte) 0x00),
+    ADV_DIRECT_IND((byte) 0x01),
+    ADV_SCAN_IND((byte) 0x02),
+    ADV_NONCONN_IND((byte) 0x03),
+    SCAN_RSP((byte) 0x04),
 
-    private static final byte ADV_IND_EXT = 0x13;
-    private static final byte ADV_DIRECT_IND_EXT = 0x15;
-    private static final byte ADV_SCAN_IND_EXT = 0x12;
-    private static final byte ADV_NONCONN_IND_EXT = 0x10;
-    private static final byte SCAN_RSP_ADV_IND_EXT = 0x1B;
-    private static final byte SCAN_RSP_ADV_SCAN_IND_EXT = 0x1A;
+    ADV_IND_EXT((byte) 0x13),
+    ADV_DIRECT_IND_EXT((byte) 0x15),
+    ADV_SCAN_IND_EXT((byte) 0x12),
+    ADV_NONCONN_IND_EXT((byte) 0x10),
+    SCAN_RSP_ADV_IND_EXT((byte) 0x1B),
+    SCAN_RSP_ADV_SCAN_IND_EXT((byte) 0x1A),
 
-    private static final byte DATA_STATUS_COMPLETED = 0x00;
-    private static final byte DATA_STATUS_INCOMPLETE_ONGOING = 0x20;
-    private static final byte DATA_STATUS_INCOMPLETE_FINISHED = 0x40;
+    DATA_STATUS_COMPLETED((byte) 0x00),
+    DATA_STATUS_INCOMPLETE_ONGOING((byte) 0x20),
+    DATA_STATUS_INCOMPLETE_FINISHED((byte) 0x40);
 
     private DataStatus dataStatus = DataStatus.UNKNOWN;
     private boolean connectable = false;
     private boolean directed = false;
     private boolean scannable = false;
     private boolean scanResponse = false;
+    private final byte eventType;
+
+    private AdvertisingReportEventType(byte eventType) {
+        this.eventType = eventType;
+    }
 
     public DataStatus getDataStatus() {
         return this.dataStatus;
-    }
-
-    public void setDataStatus(DataStatus status) {
-        this.dataStatus = status;
     }
 
     public boolean isConnectable() {
         return connectable;
     }
 
-    public void setConnectable(boolean connectable) {
-        this.connectable = connectable;
-    }
-
     public boolean isDirected() {
         return directed;
-    }
-
-    public void setDirected(boolean directed) {
-        this.directed = directed;
     }
 
     public boolean isScannable() {
         return scannable;
     }
 
-    public void setScannable(boolean scannable) {
-        this.scannable = scannable;
-    }
-
     public boolean isScanResponse() {
         return scanResponse;
     }
 
-    public void setScanResponse(boolean scanResponse) {
-        this.scanResponse = scanResponse;
+    public byte getEventTypeCode() {
+        return this.eventType;
     }
 
     public static AdvertisingReportEventType valueOf(int event, boolean extendedReport) {
-        AdvertisingReportEventType type = new AdvertisingReportEventType();
+        AdvertisingReportEventType type = null;
 
         // Extended report has scope to use 2 octets but currently only uses 1
         byte eventData = (byte) (event & 0xFF);
 
         if (extendedReport) {
-            getLegacyType(event, type, eventData);
+            type = getLegacyType(event, eventData);
         } else {
-            if (event == ADV_IND) {
-                type.setConnectable(true);
-            } else if (event == ADV_DIRECT_IND) {
-                type.setConnectable(true);
-                type.setDirected(true);
-            } else if (event == ADV_SCAN_IND) {
-                type.setScannable(true);
-            } else if (event == SCAN_RSP) {
-                type.setScanResponse(true);
-            } else if (event != ADV_NONCONN_IND) {
+            if (event == ADV_IND.eventType) {
+                type = ADV_IND;
+                type.connectable = true;
+            } else if (event == ADV_DIRECT_IND.eventType) {
+                type = ADV_DIRECT_IND;
+                type.connectable = true;
+                type.directed = true;
+            } else if (event == ADV_SCAN_IND.eventType) {
+                type = ADV_SCAN_IND;
+                type.scannable = true;
+            } else if (event == SCAN_RSP.eventType) {
+                type = SCAN_RSP;
+                type.scanResponse = true;
+            } else if (event != ADV_NONCONN_IND.eventType) {
                 throw new IllegalArgumentException("Report Event type not recognized");
             }
         }
@@ -113,51 +106,62 @@ public class AdvertisingReportEventType {
         return type;
     }
 
-    private static void getLegacyType(int event, AdvertisingReportEventType type, byte eventData) {
+    private static AdvertisingReportEventType getLegacyType(int event, byte eventData) {
+        AdvertisingReportEventType type = null;
         // Check for legacy advertising PDU
         if ((eventData & 0x10) == 0) {
-            // Connectable Flag
-            type.setConnectable((eventData & 0x01) != 0);
-
-            // Scannable Flag
-            type.setScannable((eventData & 0x02) != 0);
-
-            // Directed Flag
-            type.setDirected((eventData & 0x04) != 0);
-
-            // Scan Response Flag
-            type.setScanResponse((eventData & 0x08) != 0);
-
             // Data Status
             byte status = (byte) (eventData & 0x60);
 
-            if (status == DATA_STATUS_COMPLETED) {
-                type.setDataStatus(DataStatus.COMPLETED);
-            } else if (status == DATA_STATUS_INCOMPLETE_ONGOING) {
-                type.setDataStatus(DataStatus.INCOMPLETE_ONGOING);
-            } else if (status == DATA_STATUS_INCOMPLETE_FINISHED) {
-                type.setDataStatus(DataStatus.INCOMPLETE_FINISHED);
+            if (status == DATA_STATUS_COMPLETED.eventType) {
+                type = DATA_STATUS_COMPLETED;
+                type.dataStatus = DataStatus.COMPLETED;
+            } else if (status == DATA_STATUS_INCOMPLETE_ONGOING.eventType) {
+                type = DATA_STATUS_INCOMPLETE_ONGOING;
+                type.dataStatus = DataStatus.INCOMPLETE_ONGOING;
+            } else if (status == DATA_STATUS_INCOMPLETE_FINISHED.eventType) {
+                type = DATA_STATUS_INCOMPLETE_FINISHED;
+                type.dataStatus = DataStatus.INCOMPLETE_FINISHED;
             } else {
-                type.setDataStatus(DataStatus.UNKNOWN);
+                throw new IllegalArgumentException("Data status type not recognized");
             }
+
+            // Connectable Flag
+            type.connectable = (eventData & 0x01) != 0;
+
+            // Scannable Flag
+            type.scannable = (eventData & 0x02) != 0;
+
+            // Directed Flag
+            type.directed = (eventData & 0x04) != 0;
+
+            // Scan Response Flag
+            type.scanResponse = (eventData & 0x08) != 0;
         } else {
-            if (event == ADV_IND_EXT) {
-                type.setConnectable(true);
-            } else if (event == ADV_DIRECT_IND_EXT) {
-                type.setConnectable(true);
-                type.setDirected(true);
-            } else if (event == ADV_SCAN_IND_EXT) {
-                type.setScannable(true);
-            } else if (event == SCAN_RSP_ADV_IND_EXT) {
-                type.setConnectable(true);
-                type.setScanResponse(true);
-            } else if (event == SCAN_RSP_ADV_SCAN_IND_EXT) {
-                type.setScannable(true);
-                type.setScanResponse(true);
-            } else if (event != ADV_NONCONN_IND_EXT) {
+            if (event == ADV_IND_EXT.eventType) {
+                type = ADV_IND_EXT;
+                type.connectable = true;
+            } else if (event == ADV_DIRECT_IND_EXT.eventType) {
+                type = ADV_DIRECT_IND_EXT;
+                type.connectable = true;
+                type.directed = true;
+            } else if (event == ADV_SCAN_IND_EXT.eventType) {
+                type = ADV_SCAN_IND_EXT;
+                type.scannable = true;
+            } else if (event == SCAN_RSP_ADV_IND_EXT.eventType) {
+                type = SCAN_RSP_ADV_IND_EXT;
+                type.connectable = true;
+                type.scanResponse = true;
+            } else if (event == SCAN_RSP_ADV_SCAN_IND_EXT.eventType) {
+                type = SCAN_RSP_ADV_SCAN_IND_EXT;
+                type.scannable = true;
+                type.scanResponse = true;
+            } else if (event != ADV_NONCONN_IND_EXT.eventType) {
                 throw new IllegalArgumentException("Report Event type not recognized");
             }
         }
+
+        return type;
     }
 
     public enum DataStatus {

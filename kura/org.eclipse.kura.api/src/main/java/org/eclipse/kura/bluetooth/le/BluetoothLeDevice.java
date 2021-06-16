@@ -269,9 +269,22 @@ public interface BluetoothLeDevice {
      * Remove this device from the system. Be aware that after the removing the object representing the device
      * will not be valid anymore and any operation on it will have no effect.
      *
+     * @return TRUE if the device has been removed
+     * @throws BluetKuraBluetoothRemoveExceptionoothException
+     *
+     * @since 2.0
+     * @deprecated since 3.0 use instead {@link removeDevice}
+     */
+    @Deprecated
+    public boolean remove() throws KuraBluetoothRemoveException;
+
+    /**
+     * Remove this device from the system. Be aware that after the removing the object representing the device
+     * will not be valid anymore and any operation on it will have no effect.
+     *
      * @throws BluetKuraBluetoothRemoveExceptionoothException
      *
      * @since 3.0
      */
-    public void remove() throws KuraBluetoothRemoveException;
+    public void removeDevice() throws KuraBluetoothRemoveException;
 }

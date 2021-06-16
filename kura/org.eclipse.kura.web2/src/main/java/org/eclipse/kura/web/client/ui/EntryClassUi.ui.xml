@@ -268,9 +268,6 @@
 										addStyleNames="content-panel">
 										<b:PanelHeader ui:field="contentPanelHeader"
 											addStyleNames="{style.content-panel-header}" />
-										<b:Row>
-											<g:Label ui:field="serviceDescription" />
-										</b:Row>
 										<b:PanelBody ui:field="contentPanelBody"
 											addStyleNames="{style.content-panel-body}">
 										</b:PanelBody>

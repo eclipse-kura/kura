@@ -27,27 +27,27 @@ public class ModemGpsEnabledEvent extends Event {
     public static final String MODEM_EVENT_GPS_ENABLED_TOPIC = "org/eclipse/kura/net/modem/gps/ENABLED";
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public static final String PORT = "port";
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public static final String BAUD_RATE = "baudRate";
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public static final String DATA_BITS = "bitsPerWord";
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public static final String STOP_BITS = "stopBits";
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public static final String PARITY = "parity";
 

@@ -30,15 +30,41 @@ public enum AdvertisingReportEventType {
     ADV_NONCONN_IND((byte) 0x03),
     SCAN_RSP((byte) 0x04),
 
+    /**
+     * @since 2.2
+     */
     ADV_IND_EXT((byte) 0x13),
+    /**
+     * @since 2.2
+     */
     ADV_DIRECT_IND_EXT((byte) 0x15),
+    /**
+     * @since 2.2
+     */
     ADV_SCAN_IND_EXT((byte) 0x12),
+    /**
+     * @since 2.2
+     */
     ADV_NONCONN_IND_EXT((byte) 0x10),
+    /**
+     * @since 2.2
+     */
     SCAN_RSP_ADV_IND_EXT((byte) 0x1B),
+    /**
+     * @since 2.2
+     */
     SCAN_RSP_ADV_SCAN_IND_EXT((byte) 0x1A),
-
+    /**
+     * @since 2.2
+     */
     DATA_STATUS_COMPLETED((byte) 0x00),
+    /**
+     * @since 2.2
+     */
     DATA_STATUS_INCOMPLETE_ONGOING((byte) 0x20),
+    /**
+     * @since 2.2
+     */
     DATA_STATUS_INCOMPLETE_FINISHED((byte) 0x40);
 
     private DataStatus dataStatus = DataStatus.UNKNOWN;
@@ -76,6 +102,9 @@ public enum AdvertisingReportEventType {
         return this.eventType;
     }
 
+    /**
+     * @since 2.2
+     */
     public static AdvertisingReportEventType valueOf(int event, boolean extendedReport) {
         AdvertisingReportEventType type = null;
 
@@ -164,6 +193,18 @@ public enum AdvertisingReportEventType {
         return type;
     }
 
+    /**
+     * 
+     * @deprecated since 2.2 use instead {@link valueOf(int event, boolean extendedReport)}
+     */
+    @Deprecated
+    public static AdvertisingReportEventType valueOf(byte event) {
+        return valueOf(event, false);
+    }
+
+    /**
+     * @since 2.2
+     */
     public enum DataStatus {
         UNKNOWN,
         COMPLETED,

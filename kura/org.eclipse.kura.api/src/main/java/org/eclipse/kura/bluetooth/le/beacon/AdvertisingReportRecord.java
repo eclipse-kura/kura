@@ -64,70 +64,70 @@ public class AdvertisingReportRecord {
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public AdvertisingReportAddressType getDirectAddressType() {
         return this.directAddressType;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setDirectAddressType(int addressType) {
         this.directAddressType = AdvertisingReportAddressType.valueOf((byte) addressType);
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public String getDirectAddress() {
         return this.directAddress;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setDirectAddress(String address) {
         this.directAddress = address;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public AdvertisingReportPhy getPrimaryPhy() {
         return this.primaryPhy;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setPrimaryPhy(int phy) {
         this.primaryPhy = AdvertisingReportPhy.valueOf((byte) phy);
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public AdvertisingReportPhy getSecondaryPhy() {
         return this.secondaryPhy;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setSecondaryPhy(int phy) {
         this.secondaryPhy = AdvertisingReportPhy.valueOf((byte) phy);
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public int getPeriodicAdvertisingInterval() {
         return this.periodicAdvertisingInterval;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setPeriodicAdvertisingInterval(int periodicAdvertisingInterval) {
         this.periodicAdvertisingInterval = periodicAdvertisingInterval;
@@ -150,28 +150,28 @@ public class AdvertisingReportRecord {
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public int getSid() {
         return this.sid;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setSid(int sid) {
         this.sid = sid;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public int getTxPower() {
         return this.txPower;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setTxPower(int txPower) {
         this.txPower = txPower;
@@ -186,14 +186,14 @@ public class AdvertisingReportRecord {
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public boolean isExtendedReport() {
         return this.extended;
     }
 
     /**
-     * @since 3.0
+     * @since 2.2
      */
     public void setExtendedReport(boolean extended) {
         this.extended = extended;

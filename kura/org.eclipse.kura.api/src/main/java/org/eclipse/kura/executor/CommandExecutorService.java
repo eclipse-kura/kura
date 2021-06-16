@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This interface provides methods for running system processes or executing system commands.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public interface CommandExecutorService {

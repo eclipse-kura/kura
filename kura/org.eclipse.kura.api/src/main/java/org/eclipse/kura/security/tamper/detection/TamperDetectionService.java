@@ -24,7 +24,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This service must also generate {@link TamperEvent} EventAdmin events in particular conditions, see the corresponding
  * Javadoc for more details.
  *
- * @since 3.0
+ * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

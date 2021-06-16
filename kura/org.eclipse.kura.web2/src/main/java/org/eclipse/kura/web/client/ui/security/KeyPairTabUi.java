@@ -16,9 +16,9 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.NotEmptyValidator;
-import org.eclipse.kura.web.client.ui.NotInListValidator;
 import org.eclipse.kura.web.client.ui.PEMValidator;
 import org.eclipse.kura.web.client.ui.PKCS8Validator;
+import org.eclipse.kura.web.client.ui.StringNotInListValidator;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
@@ -141,7 +141,7 @@ public class KeyPairTabUi extends Composite implements Tab {
         NotEmptyValidator notEmptyValidator = new NotEmptyValidator(MSGS.formRequiredParameter());
 
         this.storageAliasInput.addValidator(notEmptyValidator);
-        this.storageAliasInput.addValidator(new NotInListValidator<>(usedAliases, MSGS.certificateAliasUsed()));
+        this.storageAliasInput.addValidator(new StringNotInListValidator(usedAliases, MSGS.certificateAliasUsed()));
 
         this.certificateInput.addValidator(notEmptyValidator);
         this.certificateInput.addValidator(new PEMValidator(MSGS.securityCertificateFormat()));

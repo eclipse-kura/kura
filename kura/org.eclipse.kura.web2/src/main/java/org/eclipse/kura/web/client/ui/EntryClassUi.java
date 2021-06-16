@@ -17,7 +17,6 @@ package org.eclipse.kura.web.client.ui;
 import static org.eclipse.kura.web.client.util.FilterBuilder.not;
 import static org.eclipse.kura.web.client.util.FilterBuilder.or;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -85,6 +84,7 @@ import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
+import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -198,6 +198,10 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     Span userNameSmall;
     @UiField
     Row mainContainer;
+    @UiField
+    Row concurrencyNotification;
+    @UiField
+    Text concurrencyNotificationMessage;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -1034,15 +1038,21 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     private static final Logger l = Logger.getLogger("");
 
     private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
-        // TODO: add proper messages in the correct way
-        // TODO: specify constants for 'session' and 'component' keys in the events
-        // TODO: find a way to retrieve current section display and relation with component
         String modifiedComp = (String) eventInfo.getProperties().get("component");
 
         l.log(Level.SEVERE, "received concurrency event for component: " + modifiedComp);
 
-        EntryClassUi.this.alertDialog.show("Another user has modified the configuration for: " + modifiedComp
-                + ". You might see an inconsistent state. Please refresh the page.", (ConfirmListener) null);
+        this.concurrencyNotification.setHeight("30px");
+        this.concurrencyNotificationMessage.setText(MSGS.concurrentWriteNotification(modifiedComp));
+
+        new Timer() {
+
+            @Override
+            public void run() {
+                EntryClassUi.this.concurrencyNotification.setHeight("0px");
+            }
+
+        }.schedule(8000);
     }
 
     private void showStatusPanel() {

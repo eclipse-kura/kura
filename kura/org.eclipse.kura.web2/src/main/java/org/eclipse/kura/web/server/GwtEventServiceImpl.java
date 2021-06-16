@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -80,15 +80,15 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
         while (i.hasNext()) {
             GwtEventInfo next = i.next();
 
-            if (next.getTopic().equals(ForwardedEventTopic.CONCURRENT_WRITE_EVENT.toString())) {
-                // ignore concurrency events raised by myself
-                if (getThreadLocalRequest().getSession(false) != null) {
-                    String currentSession = getThreadLocalRequest().getSession().getId();
-                    String eventSession = (String) next.get("session");
+            // ignore concurrency events raised by myself
+            if (next.getTopic().equals(ForwardedEventTopic.CONCURRENT_WRITE_EVENT.toString())
+                    && getThreadLocalRequest().getSession(false) != null) {
 
-                    if (currentSession.equals(eventSession)) {
-                        break;
-                    }
+                String currentSession = getThreadLocalRequest().getSession().getId();
+                String eventSession = (String) next.get("session");
+
+                if (currentSession.equals(eventSession)) {
+                    break;
                 }
             }
 

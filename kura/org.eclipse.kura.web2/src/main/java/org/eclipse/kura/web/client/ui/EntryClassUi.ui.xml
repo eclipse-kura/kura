@@ -113,10 +113,23 @@
 		white-space:
 		pre-wrap;
 		}
-        
+		
         .panel-footer {
         margin-left: 5vh;
         }
+        
+		.concurrencyNotification {
+		width: 100%;
+		height: 0;  
+		box-sizing: border-box;
+		color: white;
+		background: orange;
+		transition: height 2s;
+		}
+		
+		.centerText {
+		padding: 5px;
+		}
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -266,6 +279,11 @@
 									</g:ScrollPanel>
 								</b:ModalBody>
 							</b:Modal>
+							<b:Row styleName='{style.concurrencyNotification}' ui:field='concurrencyNotification'>
+								<b.html:Paragraph styleName='{style.centerText}'>
+									<b.html:Text ui:field='concurrencyNotificationMessage' />
+								</b.html:Paragraph>
+							</b:Row>
 							<b:Row addStyleNames='content-wrapper'>
 								<b:Column size="MD_10">
 									<b:Panel ui:field="contentPanel"

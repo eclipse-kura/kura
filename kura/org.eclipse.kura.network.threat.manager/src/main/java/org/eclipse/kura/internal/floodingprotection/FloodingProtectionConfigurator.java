@@ -19,11 +19,10 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
 import org.eclipse.kura.security.FloodingProtectionConfigurationService;
 import org.eclipse.kura.security.ThreatManagerService;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.EventAdmin;
+import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,15 +31,16 @@ public class FloodingProtectionConfigurator
 
     private static final Logger logger = LoggerFactory.getLogger(FloodingProtectionConfigurator.class);
     private FloodingProtectionOptions floodingProtectionOptions;
-    private EventAdmin eventAdmin;
 
-    public void setEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = eventAdmin;
+    private FirewallConfigurationService firewallService;
+
+    public synchronized void setFirewallConfigurationService(FirewallConfigurationService firewallService) {
+        this.firewallService = firewallService;
     }
 
-    public void unsetEventAdmin(EventAdmin eventAdmin) {
-        if (this.eventAdmin == eventAdmin) {
-            this.eventAdmin = null;
+    public synchronized void unsetFirewallConfigurationService(FirewallConfigurationService firewallService) {
+        if (this.firewallService == firewallService) {
+            this.firewallService = null;
         }
     }
 
@@ -62,8 +62,11 @@ public class FloodingProtectionConfigurator
     }
 
     private void doUpdate(Map<String, Object> properties) {
+        logger.info("Updating firewall configuration...");
         this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
-        this.eventAdmin.postEvent(new FloodingProtectionConfigurationChangeEvent(properties));
+        this.firewallService
+                .addFloodingProtectionRules(this.floodingProtectionOptions.getFloodingProtectionMangleRules());
+        logger.info("Updating firewall configuration... Done.");
     }
 
     @Override

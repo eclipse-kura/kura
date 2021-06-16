@@ -17,8 +17,7 @@ import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -51,13 +50,10 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
-import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
-import org.eclipse.kura.security.FloodingProtectionConfigurationService;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +67,6 @@ public class FirewallConfigurationServiceImpl
     private ServiceRegistration<?> serviceRegistration;
     private LinuxFirewall firewall;
     private CommandExecutorService executorService;
-    private FloodingProtectionConfigurationService floodingConfiguration;
 
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
@@ -93,29 +88,10 @@ public class FirewallConfigurationServiceImpl
         }
     }
 
-    public void setFloodingProtectionConfigurationService(
-            FloodingProtectionConfigurationService floodingConfiguration) {
-        this.floodingConfiguration = floodingConfiguration;
-    }
-
-    public void unsetFloodingProtectionConfigurationService(
-            FloodingProtectionConfigurationService floodingConfiguration) {
-        if (this.floodingConfiguration == floodingConfiguration) {
-            this.floodingConfiguration = null;
-        }
-    }
-
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("activate()");
 
         this.firewall = getLinuxFirewall();
-
-        Dictionary<String, Object> props = new Hashtable<>();
-        String[] eventTopics = { FloodingProtectionConfigurationChangeEvent.FP_EVENT_CONFIG_CHANGE_TOPIC };
-        props.put(EventConstants.EVENT_TOPIC, eventTopics);
-        this.serviceRegistration = componentContext.getBundleContext().registerService(EventHandler.class.getName(),
-                this, props);
-
         updated(properties);
     }
 
@@ -146,8 +122,6 @@ public class FirewallConfigurationServiceImpl
         } catch (KuraException e) {
             logger.error("Failed to set Firewall NAT Configuration", e);
         }
-
-        setFloodingProtectionConfiguration();
 
         // raise the event because there was a change
         this.eventAdmin.postEvent(new FirewallConfigurationChangeEvent(properties));
@@ -335,9 +309,7 @@ public class FirewallConfigurationServiceImpl
     @Override
     public void handleEvent(Event event) {
         logger.debug("Received event: {}", event.getTopic());
-        if (event.getTopic().equals(FloodingProtectionConfigurationChangeEvent.FP_EVENT_CONFIG_CHANGE_TOPIC)) {
-            setFloodingProtectionConfiguration();
-        }
+        // no events managed
     }
 
     protected void addLocalRules(ArrayList<LocalRule> localRules) throws KuraException {
@@ -434,15 +406,19 @@ public class FirewallConfigurationServiceImpl
         return new NetworkPair(IPAddress.parseHostAddress("0.0.0.0"), (short) 0);
     }
 
-    private void setFloodingProtectionConfiguration() {
-        if (this.floodingConfiguration != null) {
-            try {
-                this.firewall.setAdditionalRules(this.floodingConfiguration.getFloodingProtectionFilterRules(),
-                        this.floodingConfiguration.getFloodingProtectionNatRules(),
-                        this.floodingConfiguration.getFloodingProtectionMangleRules());
-            } catch (KuraException e) {
-                logger.error("Failed to set Firewall Flooding Protection Configuration", e);
-            }
+    @Override
+    public void addFloodingProtectionRules(Set<String> floodingRules) {
+        if (this.firewall instanceof LinuxFirewall) {
+            addIpTablesFloodingProtectionRules(floodingRules);
+        }
+        // other firewall types here
+    }
+
+    private void addIpTablesFloodingProtectionRules(Set<String> floodingMangleRules) {
+        try {
+            this.firewall.setAdditionalRules(new HashSet<String>(), new HashSet<String>(), floodingMangleRules);
+        } catch (KuraException e) {
+            logger.error("Failed to set Firewall Flooding Protection Configuration", e);
         }
     }
 }

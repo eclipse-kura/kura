@@ -19,11 +19,10 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
 import org.eclipse.kura.security.FloodingProtectionConfigurationService;
 import org.eclipse.kura.security.ThreatManagerService;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.event.EventAdmin;
+import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,38 +31,46 @@ public class FloodingProtectionConfigurator
 
     private static final Logger logger = LoggerFactory.getLogger(FloodingProtectionConfigurator.class);
     private FloodingProtectionOptions floodingProtectionOptions;
-    private EventAdmin eventAdmin;
 
-    public void setEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = eventAdmin;
+    private FirewallConfigurationService firewallService;
+
+    public synchronized void setFirewallConfigurationService(FirewallConfigurationService firewallService) {
+        logger.debug("Binding FirewallConfigurationService...");
+        this.firewallService = firewallService;
+        logger.debug("Binding FirewallConfigurationService... Done.");
     }
 
-    public void unsetEventAdmin(EventAdmin eventAdmin) {
-        if (this.eventAdmin == eventAdmin) {
-            this.eventAdmin = null;
+    public synchronized void unsetFirewallConfigurationService(FirewallConfigurationService firewallService) {
+        if (this.firewallService == firewallService) {
+            logger.debug("Unbinding FirewallConfigurationService...");
+            this.firewallService = null;
+            logger.debug("Unbinding FirewallConfigurationService... Done.");
         }
     }
 
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.info("Activating FloodingConfigurator...");
+        logger.debug("Activating FloodingConfigurator...");
         doUpdate(properties);
-        logger.info("Activating FloodingConfigurator... Done.");
+        logger.debug("Activating FloodingConfigurator... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Updating FloodingConfigurator...");
+        logger.debug("Updating FloodingConfigurator...");
         doUpdate(properties);
-        logger.info("Updating FloodingConfigurator... Done.");
+        logger.debug("Updating FloodingConfigurator... Done.");
     }
 
     public void deactivate(ComponentContext componentContext) {
-        logger.info("Deactivating FloodingConfigurator...");
-        logger.info("Deactivating FloodingConfigurator... Done.");
+        logger.debug("Deactivating FloodingConfigurator...");
+        logger.debug("Deactivating FloodingConfigurator... Done.");
     }
 
     private void doUpdate(Map<String, Object> properties) {
+        logger.debug("Updating firewall configuration...");
         this.floodingProtectionOptions = new FloodingProtectionOptions(properties);
-        this.eventAdmin.postEvent(new FloodingProtectionConfigurationChangeEvent(properties));
+        this.firewallService
+                .addFloodingProtectionRules(this.floodingProtectionOptions.getFloodingProtectionMangleRules());
+        logger.debug("Updating firewall configuration... Done.");
     }
 
     @Override

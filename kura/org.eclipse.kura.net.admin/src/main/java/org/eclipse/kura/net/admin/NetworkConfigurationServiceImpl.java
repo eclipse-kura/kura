@@ -15,6 +15,7 @@ package org.eclipse.kura.net.admin;
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.osgi.framework.Constants.SERVICE_PID;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -37,30 +38,16 @@ import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
-import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
-import org.eclipse.kura.core.net.LoopbackInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
-import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
-import org.eclipse.kura.core.net.WifiInterfaceImpl;
-import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
-import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
-import org.eclipse.kura.net.EthernetInterface;
-import org.eclipse.kura.net.LoopbackInterface;
-import org.eclipse.kura.net.NetInterface;
-import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
-import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.visitor.linux.LinuxReadVisitor;
 import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
-import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemManagerService;
-import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.osgi.service.component.ComponentContext;
@@ -77,6 +64,11 @@ public class NetworkConfigurationServiceImpl
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
 
+    private static final String CONFIG_IP4_PREFIX = ".config.ip4.prefix";
+    private static final String CONFIG_IP4_ADDRESS = ".config.ip4.address";
+    private static final String CONFIG_DRIVER = ".config.driver";
+    private static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
+    private static final String CONFIG_MTU = ".config.mtu";
     private static final String[] EVENT_TOPICS = { KuraConfigReadyEvent.KURA_CONFIG_EVENT_READY_TOPIC };
     private static final String NET_INTERFACES = "net.interfaces";
     public static final String UNCONFIGURED_MODEM_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
@@ -105,7 +97,9 @@ public class NetworkConfigurationServiceImpl
     }
 
     public void unsetNetworkService(NetworkService networkService) {
-        this.networkService = null;
+        if (this.networkService.equals(networkService)) {
+            this.networkService = null;
+        }
     }
 
     public void setEventAdmin(EventAdmin eventAdmin) {
@@ -113,7 +107,9 @@ public class NetworkConfigurationServiceImpl
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+        if (this.eventAdmin.equals(eventAdmin)) {
+            this.eventAdmin = null;
+        }
     }
 
     public void setUsbService(UsbService usbService) {
@@ -121,7 +117,9 @@ public class NetworkConfigurationServiceImpl
     }
 
     public void unsetUsbService(UsbService usbService) {
-        this.usbService = null;
+        if (this.usbService.equals(usbService)) {
+            this.usbService = null;
+        }
     }
 
     public void setModemManagerService(ModemManagerService modemManagerService) {
@@ -130,8 +128,10 @@ public class NetworkConfigurationServiceImpl
     }
 
     public void unsetModemManagerService(ModemManagerService modemManagerService) {
-        logger.debug("Unset the modem manager service");
-        this.modemManagerService = null;
+        if (this.modemManagerService.equals(modemManagerService)) {
+            logger.debug("Unset the modem manager service");
+            this.modemManagerService = null;
+        }
     }
 
     public void setExecutorService(CommandExecutorService executorService) {
@@ -139,7 +139,9 @@ public class NetworkConfigurationServiceImpl
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        this.executorService = null;
+        if (this.executorService.equals(executorService)) {
+            this.executorService = null;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -240,23 +242,7 @@ public class NetworkConfigurationServiceImpl
                 logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
 
                 this.properties = properties;
-
-                // dynamically insert the type properties..
-                Map<String, Object> modifiedProps = new HashMap<>();
-                modifiedProps.putAll(this.properties);
-                String interfaces = (String) this.properties.get(NET_INTERFACES);
-                StringTokenizer st = new StringTokenizer(interfaces, ",");
-                while (st.hasMoreTokens()) {
-                    String interfaceName = st.nextToken();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("net.interface.").append(interfaceName).append(".type");
-
-                    NetInterfaceType type = getNetworkType(interfaceName);
-                    type = updateUnknownType(interfaceName, type);
-
-                    modifiedProps.put(sb.toString(), type.toString());
-                }
-
+                Map<String, Object> modifiedProps = modifyProperties();
                 NetworkConfiguration networkConfig = new NetworkConfiguration(modifiedProps);
 
                 for (NetworkConfigurationVisitor visitor : this.writeVisitors) {
@@ -275,6 +261,25 @@ public class NetworkConfigurationServiceImpl
         }
     }
 
+    private Map<String, Object> modifyProperties() throws KuraException {
+        // dynamically insert the type properties..
+        Map<String, Object> modifiedProps = new HashMap<>();
+        modifiedProps.putAll(this.properties);
+        String interfaces = (String) this.properties.get(NET_INTERFACES);
+        StringTokenizer st = new StringTokenizer(interfaces, ",");
+        while (st.hasMoreTokens()) {
+            String interfaceName = st.nextToken();
+            StringBuilder sb = new StringBuilder();
+            sb.append("net.interface.").append(interfaceName).append(".type");
+
+            NetInterfaceType type = getNetworkType(interfaceName);
+            type = updateUnknownType(interfaceName, type);
+
+            modifiedProps.put(sb.toString(), type.toString());
+        }
+        return modifiedProps;
+    }
+
     private NetInterfaceType updateUnknownType(String interfaceName, NetInterfaceType type) {
         NetInterfaceType result = type;
         if (type == NetInterfaceType.UNKNOWN && interfaceName.matches(UNCONFIGURED_MODEM_REGEX)) {
@@ -288,149 +293,159 @@ public class NetworkConfigurationServiceImpl
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
         logger.debug("getConfiguration()");
-        try {
-            Map<String, Object> networkConfigurationProperties = getNetworkConfiguration().getConfigurationProperties();
-            networkConfigurationProperties.put(KURA_SERVICE_PID, PID);
-            networkConfigurationProperties.put(SERVICE_PID, PID);
-            return new ComponentConfigurationImpl(PID, getDefinition(), networkConfigurationProperties);
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-        }
+        Map<String, Object> networkConfigurationProperties = getNetworkConfiguration().getConfigurationProperties();
+        networkConfigurationProperties.put(KURA_SERVICE_PID, PID);
+        networkConfigurationProperties.put(SERVICE_PID, PID);
+        return new ComponentConfigurationImpl(PID, getDefinition(), networkConfigurationProperties);
     }
 
-    // @Override
-    // FIXME:MC Introducing a short lived cache will make startup much faster.
-    @SuppressWarnings("checkstyle:lineLength")
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
-        NetworkConfiguration networkConfiguration = new NetworkConfiguration();
-
-        // Get the current values
-        List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
-                .getNetworkInterfaces();
-        Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<>();
-        Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<>();
-        for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
-            allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
-            if (netInterface.isUp()) {
-                activeNetworkInterfacesMap.put(netInterface.getName(), netInterface);
+        NetworkConfiguration networkConfig = new NetworkConfiguration();
+        if (this.properties != null) {
+            try {
+                networkConfig = new NetworkConfiguration(modifyProperties());
+            } catch (UnknownHostException | KuraException e) {
+                logger.error("Failed to get network configuration", e);
             }
+        } else {
+            logger.debug("properties are null");
         }
-
-        // Create the NetInterfaceConfig objects
-        if (allNetworkInterfacesMap.keySet() != null) {
-            for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfacesMap.values()) {
-
-                String interfaceName = netInterface.getName();
-                try {
-                    // ignore mon interface
-                    if (shouldSkipNetworkConfiguration(interfaceName)) {
-                        continue;
-                    }
-
-                    NetInterfaceType type = netInterface.getType();
-                    type = updateUnknownType(interfaceName, type);
-
-                    logger.debug("Getting config for {} type: {}", interfaceName, type);
-                    switch (type) {
-                    case LOOPBACK:
-                        LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends NetInterfaceAddress>) netInterface;
-                        LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(
-                                activeLoopInterface);
-                        networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
-                        break;
-
-                    case ETHERNET:
-                        EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends NetInterfaceAddress>) netInterface;
-                        EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(
-                                activeEthInterface);
-                        networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
-                        break;
-
-                    case WIFI:
-                        WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-                        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
-                        networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
-                        break;
-
-                    case MODEM:
-                        ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-                        addPropertiesInModemInterface(activeModemInterface);
-                        ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(
-                                activeModemInterface);
-                        networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
-                        break;
-
-                    case UNKNOWN:
-                        logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
-                                interfaceName);
-                        break;
-
-                    default:
-                        logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
-                    }
-                } catch (Exception e) {
-                    logger.warn("Error fetching information for network interface: {}", interfaceName, e);
-                }
-            }
-        }
-
-        // populate the NetInterfaceConfigs
-        for (NetworkConfigurationVisitor visitor : this.readVisitors) {
-            visitor.setExecutorService(this.executorService);
-            networkConfiguration.accept(visitor);
-        }
-
-        return networkConfiguration;
+        return networkConfig;
+        // NetworkConfiguration networkConfiguration = new NetworkConfiguration();
+        //
+        // // Get the current values
+        // List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
+        // .getNetworkInterfaces();
+        // Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<>();
+        // Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<>();
+        // for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
+        // allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
+        // if (netInterface.isUp()) {
+        // activeNetworkInterfacesMap.put(netInterface.getName(), netInterface);
+        // }
+        // }
+        //
+        // // Create the NetInterfaceConfig objects
+        // if (allNetworkInterfacesMap.keySet() != null) {
+        // for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfacesMap.values()) {
+        //
+        // String interfaceName = netInterface.getName();
+        // try {
+        // // ignore mon interface
+        // if (shouldSkipNetworkConfiguration(interfaceName)) {
+        // continue;
+        // }
+        //
+        // NetInterfaceType type = netInterface.getType();
+        // type = updateUnknownType(interfaceName, type);
+        //
+        // logger.debug("Getting config for {} type: {}", interfaceName, type);
+        // switch (type) {
+        // case LOOPBACK:
+        // LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends
+        // NetInterfaceAddress>) netInterface;
+        // LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(
+        // activeLoopInterface);
+        // networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
+        // break;
+        //
+        // case ETHERNET:
+        // EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends
+        // NetInterfaceAddress>) netInterface;
+        // EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(
+        // activeEthInterface);
+        // networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
+        // break;
+        //
+        // case WIFI:
+        // WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends
+        // NetInterfaceAddress>) netInterface;
+        // WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
+        // networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
+        // break;
+        //
+        // case MODEM:
+        // ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends
+        // NetInterfaceAddress>) netInterface;
+        // addPropertiesInModemInterface(activeModemInterface);
+        // ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(
+        // activeModemInterface);
+        // networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
+        // break;
+        //
+        // case UNKNOWN:
+        // logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
+        // interfaceName);
+        // break;
+        //
+        // default:
+        // logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
+        // }
+        // } catch (Exception e) {
+        // logger.warn("Error fetching information for network interface: {}", interfaceName, e);
+        // }
+        // }
+        // }
+        //
+        // // Replace this code to not read from file, but to get the configuration from properties
+        // // populate the NetInterfaceConfigs
+        // for (NetworkConfigurationVisitor visitor : this.readVisitors) {
+        // visitor.setExecutorService(this.executorService);
+        // networkConfiguration.accept(visitor);
+        // }
+        //
+        // this.properties.forEach((key, value) -> logger.info("{} {}", key, value));
+        // return networkConfiguration;
     }
 
-    private boolean shouldSkipNetworkConfiguration(String interfaceName) {
-        boolean result = false;
-
-        // ignore mon and redpine vlan interface
-        if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")) {
-            result = true;
-        }
-
-        return result;
-    }
-
-    private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface)
-            throws KuraException {
-        String interfaceName = modemInterface.getName();
-        if (this.modemManagerService != null) {
-            String modemPort = this.networkService.getModemUsbPort(interfaceName);
-            if (modemPort == null) {
-                modemPort = interfaceName;
-            }
-            this.modemManagerService.withModemService(modemPort, m -> {
-                if (!m.isPresent()) {
-                    return (Void) null;
-                }
-
-                final CellularModem modem = m.get();
-
-                // set modem properties
-                modemInterface.setSerialNumber(modem.getSerialNumber());
-                modemInterface.setModel(modem.getModel());
-                modemInterface.setFirmwareVersion(modem.getRevisionID());
-                modemInterface.setGpsSupported(modem.isGpsSupported());
-
-                // set modem driver
-                UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
-                if (usbModemDevice != null) {
-                    List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
-                            .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
-                    if (drivers != null && !drivers.isEmpty()) {
-                        UsbModemDriver driver = drivers.get(0);
-                        modemInterface.setDriver(driver.getName());
-                    }
-                }
-
-                return (Void) null;
-            });
-        }
-    }
+    // private boolean shouldSkipNetworkConfiguration(String interfaceName) {
+    // boolean result = false;
+    //
+    // // ignore mon and redpine vlan interface
+    // if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")) {
+    // result = true;
+    // }
+    //
+    // return result;
+    // }
+    //
+    // private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface)
+    // throws KuraException {
+    // String interfaceName = modemInterface.getName();
+    // if (this.modemManagerService != null) {
+    // String modemPort = this.networkService.getModemUsbPort(interfaceName);
+    // if (modemPort == null) {
+    // modemPort = interfaceName;
+    // }
+    // this.modemManagerService.withModemService(modemPort, m -> {
+    // if (!m.isPresent()) {
+    // return (Void) null;
+    // }
+    //
+    // final CellularModem modem = m.get();
+    //
+    // // set modem properties
+    // modemInterface.setSerialNumber(modem.getSerialNumber());
+    // modemInterface.setModel(modem.getModel());
+    // modemInterface.setFirmwareVersion(modem.getRevisionID());
+    // modemInterface.setGpsSupported(modem.isGpsSupported());
+    //
+    // // set modem driver
+    // UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
+    // if (usbModemDevice != null) {
+    // List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
+    // .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+    // if (drivers != null && !drivers.isEmpty()) {
+    // UsbModemDriver driver = drivers.get(0);
+    // modemInterface.setDriver(driver.getName());
+    // }
+    // }
+    //
+    // return (Void) null;
+    // });
+    // }
+    // }
 
     @SuppressWarnings("checkstyle:methodLength")
     private Tocd getDefinition() throws KuraException {
@@ -465,8 +480,8 @@ public class NetworkConfigurationServiceImpl
 
                 if (type == NetInterfaceType.LOOPBACK) {
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.mtu").toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.mtu").toString());
+                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_MTU).toString());
+                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_MTU).toString());
                     tad.setType(Tscalar.INTEGER);
                     tad.setCardinality(0);
                     tad.setRequired(true);
@@ -476,10 +491,10 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.autoconnect")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.autoconnect")
-                            .toString());
+                    tad.setId(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
+                    tad.setName(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
                     tad.setType(Tscalar.BOOLEAN);
                     tad.setCardinality(0);
                     tad.setRequired(true);
@@ -489,9 +504,8 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.driver").toString());
-                    tad.setName(
-                            new StringBuffer().append(prefix).append(ifaceName).append(".config.driver").toString());
+                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_DRIVER).toString());
+                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_DRIVER).toString());
                     tad.setType(Tscalar.STRING);
                     tad.setCardinality(0);
                     tad.setRequired(false);
@@ -501,10 +515,10 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.address")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.address")
-                            .toString());
+                    tad.setId(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
+                    tad.setName(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
                     tad.setType(Tscalar.STRING);
                     tad.setCardinality(0);
                     tad.setRequired(false);
@@ -514,10 +528,9 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.prefix")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.prefix")
-                            .toString());
+                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
+                    tad.setName(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
                     tad.setType(Tscalar.SHORT);
                     tad.setCardinality(0);
                     tad.setRequired(false);
@@ -602,8 +615,8 @@ public class NetworkConfigurationServiceImpl
                     }
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.mtu").toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.mtu").toString());
+                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_MTU).toString());
+                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_MTU).toString());
                     tad.setType(Tscalar.INTEGER);
                     tad.setCardinality(0);
                     tad.setRequired(true);
@@ -613,10 +626,10 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.autoconnect")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.autoconnect")
-                            .toString());
+                    tad.setId(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
+                    tad.setName(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
                     tad.setType(Tscalar.BOOLEAN);
                     tad.setCardinality(0);
                     tad.setRequired(true);
@@ -639,10 +652,10 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.address")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.address")
-                            .toString());
+                    tad.setId(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
+                    tad.setName(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
                     tad.setType(Tscalar.STRING);
                     tad.setCardinality(0);
                     tad.setRequired(false);
@@ -652,10 +665,9 @@ public class NetworkConfigurationServiceImpl
                     tocd.addAD(tad);
 
                     tad = objectFactory.createTad();
-                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.prefix")
-                            .toString());
-                    tad.setName(new StringBuffer().append(prefix).append(ifaceName).append(".config.ip4.prefix")
-                            .toString());
+                    tad.setId(new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
+                    tad.setName(
+                            new StringBuffer().append(prefix).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
                     tad.setType(Tscalar.SHORT);
                     tad.setCardinality(0);
                     tad.setRequired(false);

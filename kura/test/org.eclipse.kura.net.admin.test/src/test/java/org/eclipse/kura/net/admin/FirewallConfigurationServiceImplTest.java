@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -43,6 +44,7 @@ import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
@@ -515,16 +517,22 @@ public class FirewallConfigurationServiceImplTest {
         final LinuxFirewall mockFirewall = mock(LinuxFirewall.class);
         
         FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
+            
             @Override
             protected LinuxFirewall getLinuxFirewall() {
                 return mockFirewall;
-            }   
+            }
+            
+            @Override
+            public synchronized void updated(Map<String, Object> properties) {
+                // don't care about the properties in this test
+                // update is not called when adding flooding protection rules,
+                // it is called just during activate
+            }
         };
         
         ComponentContext mockContext = mock(ComponentContext.class);
-        Map<String, Object> floodingProperties = new HashMap<>();
-        floodingProperties.put("test", "test");
-        svc.activate(mockContext, floodingProperties);
+        svc.activate(mockContext, new HashMap<String, Object>());
         
         String[] floodingRules = {
                 "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",

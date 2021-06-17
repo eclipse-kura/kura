@@ -35,13 +35,13 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
             boolean takeSnapshot) throws KuraException {
         audit(() -> super.createFactoryConfiguration(factoryPid, pid, properties, takeSnapshot),
                 "Create factory configuration " + factoryPid + " " + pid);
-        postConfigurationChangedEvent("created " + pid);
+        postConfigurationChangedEvent("created", pid);
     }
 
     @Override
     public synchronized void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws KuraException {
         audit(() -> super.deleteFactoryConfiguration(pid, takeSnapshot), "Delete factory configuration: " + pid);
-        postConfigurationChangedEvent("deleted " + pid);
+        postConfigurationChangedEvent("deleted", pid);
     }
 
     @Override
@@ -62,14 +62,14 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     @Override
     public synchronized void updateConfiguration(String pid, Map<String, Object> properties) throws KuraException {
         audit(() -> super.updateConfiguration(pid, properties), "Update configuration: " + pid);
-        postConfigurationChangedEvent("updated " + pid);
+        postConfigurationChangedEvent("updated", pid);
     }
 
     @Override
     public synchronized void updateConfiguration(String pid, Map<String, Object> properties, boolean takeSnapshot)
             throws KuraException {
         audit(() -> super.updateConfiguration(pid, properties, takeSnapshot), "Update configuration: " + pid);
-        postConfigurationChangedEvent("updated " + pid);
+        postConfigurationChangedEvent("updated", pid);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
     @Override
     public synchronized void rollback(long id) throws KuraException {
         audit(() -> super.rollback(id), "Rollback snapshot: " + id);
-        postConfigurationChangedEvent("made a rollback");
+        postConfigurationChangedEvent("made a", "rollback");
     }
 
     private static <T, E extends Throwable> T audit(final FallibleSupplier<T, E> task, final String message) throws E {
@@ -140,14 +140,15 @@ public class ConfigurationServiceAuditFacade extends ConfigurationServiceImpl {
         public void run() throws E;
     }
 
-    private void postConfigurationChangedEvent(String changedComponentMessage) {
+    private void postConfigurationChangedEvent(String changedComponentMessage, String pid) {
         Optional<AuditContext> auditContext = AuditContext.current();
 
         if (auditContext.isPresent()) {
             String sessionId = auditContext.get().getProperties().get("session.id");
 
             Map<String, String> properties = new HashMap<>();
-            properties.put(ConfigurationChangeEvent.CONF_CHANGE_EVENT_INFO_PROP, changedComponentMessage);
+            properties.put(ConfigurationChangeEvent.CONF_CHANGE_EVENT_INFO_PROP, changedComponentMessage + " " + pid);
+            properties.put(ConfigurationChangeEvent.CONF_CHANGE_EVENT_PID_PROP, pid);
             properties.put(ConfigurationChangeEvent.CONF_CHANGE_EVENT_SESSION_PROP, sessionId);
 
             if (sessionId != null) {

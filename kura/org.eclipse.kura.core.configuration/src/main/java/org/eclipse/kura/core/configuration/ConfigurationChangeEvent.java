@@ -21,6 +21,7 @@ public class ConfigurationChangeEvent extends Event {
     public static final String CONF_CHANGE_EVENT_TOPIC = "org/eclipse/kura/core/configuration/event/CONF_CHANGE_EVENT_TOPIC";
     public static final String CONF_CHANGE_EVENT_SESSION_PROP = "session";
     public static final String CONF_CHANGE_EVENT_INFO_PROP = "info";
+    public static final String CONF_CHANGE_EVENT_PID_PROP = "pid";
 
     public ConfigurationChangeEvent(Map<String, ?> properties) {
         super(CONF_CHANGE_EVENT_TOPIC, properties);

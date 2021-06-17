@@ -93,10 +93,9 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
                 }
             }
 
-            if (Long.parseLong(next.getTimestamp()) <= fromTimestamp) {
-                break;
+            if (Long.parseLong(next.getTimestamp()) > fromTimestamp) {
+                result.push(next);
             }
-            result.push(next);
         }
 
         return result;

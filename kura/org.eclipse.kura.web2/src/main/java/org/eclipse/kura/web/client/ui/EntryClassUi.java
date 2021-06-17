@@ -22,8 +22,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.eclipse.kura.web.client.messages.Messages;
@@ -85,7 +83,6 @@ import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.gwtbootstrap3.client.ui.html.Span;
 import org.gwtbootstrap3.client.ui.html.Strong;
-import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
@@ -1034,15 +1031,10 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         EventService.subscribe(ForwardedEventTopic.CONF_CHANGE_EVENT, this::handleConcurrencyEvent);
     }
 
-    // TODO: removeme
-    private static final Logger l = Logger.getLogger("");
-
     private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
         String infoMessage = (String) eventInfo.getProperties()
                 .get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_INFO_PROP);
-
-        l.log(Level.SEVERE, "received concurrency event for component: " + infoMessage);
-        this.dropdownNotification.show(MSGS.concurrentWriteNotification(infoMessage));
+        this.dropdownNotification.show(MSGS.configurationChangeNotification(infoMessage));
     }
 
     private void showStatusPanel() {

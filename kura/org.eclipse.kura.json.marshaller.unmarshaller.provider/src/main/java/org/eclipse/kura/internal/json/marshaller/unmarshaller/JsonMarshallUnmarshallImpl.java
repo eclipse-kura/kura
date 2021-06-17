@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.core.inventory.resources.SystemPackages;
@@ -22,6 +23,7 @@ import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore.KeystoreEntryInfoMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonEncoder;
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemBundleRefMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemBundlesMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemDeploymentPackagesMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemPackagesMapper;
@@ -65,6 +67,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             return (T) CloudPayloadJsonDecoder.buildFromString(s);
         } else if (EntryInfo.class.isAssignableFrom(clazz)) {
             return (T) KeystoreEntryInfoMapper.unmarshal(s, clazz);
+        } else if (clazz.equals(SystemBundleRef.class)) {
+            return (T) JsonJavaSystemBundleRefMapper.unmarshal(s);
         }
         throw new IllegalArgumentException("Invalid parameter!");
     }

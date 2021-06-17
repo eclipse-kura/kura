@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui;
+package org.eclipse.kura.web.client.ui.validator;
 
 public class PEMValidator extends RegexValidator {
 

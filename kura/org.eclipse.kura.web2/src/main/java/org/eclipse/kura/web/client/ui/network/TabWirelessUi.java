@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
-import org.eclipse.kura.web.client.ui.RegexValidator;
+import org.eclipse.kura.web.client.ui.validator.RegexValidator;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;

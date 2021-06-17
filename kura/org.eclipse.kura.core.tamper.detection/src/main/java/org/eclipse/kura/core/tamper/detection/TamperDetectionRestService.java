@@ -31,7 +31,7 @@ import org.eclipse.kura.core.tamper.detection.util.TamperDetectionRemoteService;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
-@Path("/tamper")
+@Path("/tamper/v1")
 public class TamperDetectionRestService extends TamperDetectionRemoteService {
 
     public void setUserAdmin(final UserAdmin userAdmin) {

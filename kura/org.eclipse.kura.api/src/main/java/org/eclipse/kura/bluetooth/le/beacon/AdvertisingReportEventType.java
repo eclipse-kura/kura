@@ -145,7 +145,9 @@ public enum AdvertisingReportEventType {
             } else if (event == SCAN_RSP.eventType) {
                 type = SCAN_RSP;
                 type.scanResponse = true;
-            } else if (event != ADV_NONCONN_IND.eventType) {
+            } else if (event == ADV_NONCONN_IND.eventType) {
+                type = ADV_NONCONN_IND;
+            } else {
                 throw new IllegalArgumentException("Report Event type not recognized");
             }
         }
@@ -203,7 +205,9 @@ public enum AdvertisingReportEventType {
                 type = SCAN_RSP_ADV_SCAN_IND_EXT;
                 type.scannable = true;
                 type.scanResponse = true;
-            } else if (event != ADV_NONCONN_IND_EXT.eventType) {
+            } else if (event == ADV_NONCONN_IND_EXT.eventType) {
+                type = ADV_NONCONN_IND_EXT;
+            } else {
                 throw new IllegalArgumentException("Report Event type not recognized");
             }
         }

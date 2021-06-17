@@ -15,6 +15,7 @@ package org.eclipse.kura.core.inventory;
 
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -32,6 +33,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
+import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
@@ -39,6 +41,7 @@ import org.eclipse.kura.core.inventory.resources.SystemPackage;
 import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemResourceInfo;
@@ -64,6 +67,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String RESOURCE_BUNDLES = "bundles";
     public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
     public static final String INVENTORY = "inventory";
+    private static final String START = "_start";
+    private static final String STOP = "_stop";
+
+    private static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
+    private static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
@@ -138,23 +146,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
-    @SuppressWarnings("unchecked")
     @Override
     public KuraMessage doGet(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
-        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
-        List<String> resources;
-        if (requestObject instanceof List) {
-            resources = (List<String>) requestObject;
-        } else {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
-        }
-
-        if (resources.isEmpty()) {
-            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
-            logger.error(NONE_RESOURCE_FOUND_MESSAGE);
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
-        }
+        List<String> resources = extractResources(reqMessage);
 
         KuraPayload resPayload;
         if (resources.get(0).equals(INVENTORY)) {
@@ -174,8 +169,45 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         return new KuraMessage(resPayload);
     }
 
+    @SuppressWarnings("unchecked")
+    private List<String> extractResources(KuraMessage reqMessage) throws KuraException {
+        Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
+        List<String> resources;
+        if (requestObject instanceof List) {
+            resources = (List<String>) requestObject;
+        } else {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        if (resources.isEmpty()) {
+            logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
+            logger.error(NONE_RESOURCE_FOUND_MESSAGE);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+        return resources;
+    }
+
     @Override
     public KuraMessage doExec(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
+
+        final List<String> resources = extractResources(reqMessage);
+
+        try {
+            if (START_BUNDLE.equals(resources)) {
+                findFirstMatchingBundle(extractBundleRef(reqMessage)).start();
+                return success();
+            } else if (STOP_BUNDLE.equals(resources)) {
+                findFirstMatchingBundle(extractBundleRef(reqMessage)).stop();
+                return success();
+            }
+        } catch (final KuraException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.debug("unexpected exception dispatcing call", e);
+            // this should result in response code 500
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
+        }
+
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
 
@@ -327,10 +359,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         return respPayload;
     }
 
-    private ServiceReference<Marshaller>[] getJsonMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
+    private <T> ServiceReference<T>[] getJsonMarshallers(final Class<T> classz) {
+        String filterString = String.format("(kura.service.pid=%s)",
                 "org.eclipse.kura.json.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(this.bundleContext, Marshaller.class, filterString);
+        return ServiceUtil.getServiceReferences(this.bundleContext, classz, filterString);
     }
 
     private void ungetServiceReferences(final ServiceReference<?>[] refs) {
@@ -339,7 +371,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     protected String marshal(Object object) {
         String result = null;
-        ServiceReference<Marshaller>[] marshallerSRs = getJsonMarshallers();
+        ServiceReference<Marshaller>[] marshallerSRs = getJsonMarshallers(Marshaller.class);
         try {
             for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
                 Marshaller marshaller = this.bundleContext.getService(marshallerSR);
@@ -354,6 +386,26 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             ungetServiceReferences(marshallerSRs);
         }
         return result;
+    }
+
+    private <T> T unmarshal(final String str, final Class<T> classz) throws KuraException {
+        T result = null;
+        ServiceReference<Unmarshaller>[] unmarshallerSRs = getJsonMarshallers(Unmarshaller.class);
+        try {
+            for (final ServiceReference<Unmarshaller> unmarshallerSR : unmarshallerSRs) {
+                Unmarshaller unmarshaller = this.bundleContext.getService(unmarshallerSR);
+                result = unmarshaller.unmarshal(str, classz);
+                if (result != null) {
+                    return result;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to unmarshal request.");
+        } finally {
+            ungetServiceReferences(unmarshallerSRs);
+        }
+
+        throw new KuraException(KuraErrorCode.BAD_REQUEST);
     }
 
     private String bundleStateToString(int state) {
@@ -389,5 +441,40 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
 
         return stateString;
+    }
+
+    private SystemBundleRef extractBundleRef(final KuraMessage message) throws KuraException {
+        final KuraPayload payload = message.getPayload();
+
+        final byte[] body = payload.getBody();
+
+        if (body == null) {
+            logger.warn("missing message body");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        return unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), SystemBundleRef.class);
+    }
+
+    private Bundle findFirstMatchingBundle(final SystemBundleRef ref) throws KuraException {
+        for (final Bundle bundle : bundleContext.getBundles()) {
+            if (!bundle.getSymbolicName().equals(ref.getName())) {
+                continue;
+            }
+
+            final Optional<String> version = ref.getVersion();
+
+            if (!version.isPresent() || version.get().equals(bundle.getVersion().toString())) {
+                return bundle;
+            }
+        }
+
+        throw new KuraException(KuraErrorCode.NOT_FOUND);
+    }
+
+    private static KuraMessage success() {
+        final KuraPayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        response.setTimestamp(new Date());
+        return new KuraMessage(response);
     }
 }

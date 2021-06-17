@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared;
 
+import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
+
 public enum ForwardedEventTopic {
 
     // This enum defines the subset of events that will be forwarded to the web ui
@@ -41,7 +43,7 @@ public enum ForwardedEventTopic {
 
     TAMPER_EVENT("org/eclipse/kura/security/tamper/detection/TamperEvent/TAMPER_STATUS_CHANGED"),
 
-    CONCURRENT_WRITE_EVENT("org/eclipse/kura/web/client/ui/CONCURRENT_WRITE_EVENT");
+    CONF_CHANGE_EVENT(ConfigurationChangeEvent.CONF_CHANGE_EVENT_TOPIC.toString());
 
     private final String topic;
 

@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
@@ -1030,18 +1031,18 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             }
         });
 
-        EventService.subscribe(ForwardedEventTopic.CONCURRENT_WRITE_EVENT, this::handleConcurrencyEvent);
+        EventService.subscribe(ForwardedEventTopic.CONF_CHANGE_EVENT, this::handleConcurrencyEvent);
     }
 
     // TODO: removeme
     private static final Logger l = Logger.getLogger("");
 
     private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
-        String modifiedComp = (String) eventInfo.getProperties()
-                .get(GwtEventInfo.CONCURRENT_WRITE_EVENT_MODIFIED_COMPONENT);
+        String infoMessage = (String) eventInfo.getProperties()
+                .get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_INFO_PROP);
 
-        l.log(Level.SEVERE, "received concurrency event for component: " + modifiedComp);
-        this.dropdownNotification.show(MSGS.concurrentWriteNotification(modifiedComp));
+        l.log(Level.SEVERE, "received concurrency event for component: " + infoMessage);
+        this.dropdownNotification.show(MSGS.concurrentWriteNotification(infoMessage));
     }
 
     private void showStatusPanel() {

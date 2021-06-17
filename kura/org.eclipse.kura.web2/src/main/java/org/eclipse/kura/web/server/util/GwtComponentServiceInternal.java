@@ -29,7 +29,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -38,7 +37,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -49,13 +47,10 @@ import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.util.service.ServiceUtil;
-import org.eclipse.kura.web.Console;
-import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
-import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
 import org.eclipse.kura.wire.WireHelperService;
@@ -71,8 +66,6 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ReferenceDTO;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -88,8 +81,6 @@ public class GwtComponentServiceInternal {
     private static final String PATTERN_SERVICE_PROVIDE_DRIVER = "provide interface=\"org.eclipse.kura.driver.Driver\"";
 
     private static final int SERVICE_WAIT_TIMEOUT = 60;
-
-    private static final EventAdmin eventAdmin = Console.instance().getEventAdmin();
 
     private GwtComponentServiceInternal() {
     }
@@ -137,9 +128,6 @@ public class GwtComponentServiceInternal {
 
     public static void updateComponentConfiguration(GwtConfigComponent gwtCompConfig) throws GwtKuraException {
 
-        // TODO
-        postConcurrentWriteEvent(gwtCompConfig);
-
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
             ComponentConfiguration componentConfiguration = getComponentConfiguration(cs, gwtCompConfig);
@@ -155,8 +143,6 @@ public class GwtComponentServiceInternal {
         List<ComponentConfiguration> componentConfigurations = new ArrayList<>();
         try {
             for (GwtConfigComponent gwtCompConfig : gwtCompConfigs) {
-                // TODO
-                postConcurrentWriteEvent(gwtCompConfig);
                 componentConfigurations.add(getComponentConfiguration(cs, gwtCompConfig));
             }
             cs.updateConfigurations(componentConfigurations);
@@ -206,8 +192,6 @@ public class GwtComponentServiceInternal {
 
     private static void internalCreateFactoryComponent(String factoryPid, String pid, Map<String, Object> properties)
             throws GwtKuraException {
-        // TODO
-        postConcurrentWriteEvent(factoryPid);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
             cs.createFactoryConfiguration(factoryPid, pid, properties, true);
@@ -229,9 +213,6 @@ public class GwtComponentServiceInternal {
     }
 
     public static void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws GwtKuraException {
-
-        // TODO
-        postConcurrentWriteEvent(pid);
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
 
@@ -729,29 +710,6 @@ public class GwtComponentServiceInternal {
         }
 
         return result;
-    }
-
-    private static void postConcurrentWriteEvent(GwtConfigComponent gwtCompConfig) {
-        // if component is not a factory component, retrieve the componentId (=pid)
-        if (gwtCompConfig.isFactoryComponent()) {
-            postConcurrentWriteEvent(gwtCompConfig.getFactoryId());
-        } else {
-            postConcurrentWriteEvent(gwtCompConfig.getComponentId());
-        }
-    }
-
-    private static void postConcurrentWriteEvent(String modifiedComponent) {
-        Optional<AuditContext> auditContext = AuditContext.current();
-        if (auditContext.isPresent()) {
-            String sessionId = auditContext.get().getProperties().get("session.id");
-
-            Map<String, String> eventProps = new HashMap<>();
-            eventProps.put(GwtEventInfo.CONCURRENT_WRITE_EVENT_SESSION, sessionId);
-            eventProps.put(GwtEventInfo.CONCURRENT_WRITE_EVENT_MODIFIED_COMPONENT, modifiedComponent);
-
-            GwtComponentServiceInternal.eventAdmin
-                    .postEvent(new Event(ForwardedEventTopic.CONCURRENT_WRITE_EVENT.toString(), eventProps));
-        }
     }
 
 }

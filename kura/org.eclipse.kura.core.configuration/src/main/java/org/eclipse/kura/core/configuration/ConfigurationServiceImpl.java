@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -76,6 +76,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.metatype.AttributeDefinition;
 import org.osgi.service.metatype.MetaTypeService;
 import org.osgi.service.metatype.ObjectClassDefinition;
@@ -103,6 +104,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private ServiceComponentRuntime scrService;
     private Marshaller xmlMarshaller;
     private Unmarshaller xmlUnmarshaller;
+    protected EventAdmin eventAdmin;
 
     // contains all the PIDs (aka kura.service.pid) - both of configurable and self configuring components
     private final Set<String> allActivatedPids;
@@ -185,6 +187,16 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     public void unsetXmlUnmarshaller(final Unmarshaller unmarshaller) {
         this.xmlUnmarshaller = null;
+    }
+
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
+    }
+
+    public void unsetEventAdmin(EventAdmin eventAdmin) {
+        if (this.eventAdmin == eventAdmin) {
+            this.eventAdmin = null;
+        }
     }
 
     public ConfigurationServiceImpl() {

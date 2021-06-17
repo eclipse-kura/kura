@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.service.GwtEventService;
@@ -81,11 +82,11 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             GwtEventInfo next = i.next();
 
             // ignore concurrency events raised by myself
-            if (next.getTopic().equals(ForwardedEventTopic.CONCURRENT_WRITE_EVENT.toString())
+            if (next.getTopic().equals(ConfigurationChangeEvent.CONF_CHANGE_EVENT_TOPIC.toString())
                     && getThreadLocalRequest().getSession(false) != null) {
 
                 String currentSession = getThreadLocalRequest().getSession().getId();
-                String eventSession = (String) next.get(GwtEventInfo.CONCURRENT_WRITE_EVENT_SESSION);
+                String eventSession = (String) next.get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_SESSION_PROP);
 
                 if (currentSession.equals(eventSession)) {
                     break;

@@ -77,8 +77,10 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
+import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.Hidden;
 import com.google.gwt.user.client.ui.Widget;
@@ -177,6 +179,8 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
     private HasConfiguration.Listener listener;
 
+    private AsyncCallback<SubmitCompleteEvent> formSubmitCallback;
+
     public AssetConfigurationUi(final AssetModel assetModel, final Widget associatedView) {
         initWidget(uiBinder.createAndBindUi(this));
         this.model = assetModel;
@@ -216,7 +220,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
 
         this.btnUpload.addClickHandler(event -> uploadAndApply());
 
-        this.uploadUpload.addClickHandler(event -> RequestQueue
+        this.uploadUpload.addClickHandler(click -> RequestQueue
                 .submit(context -> this.gwtXSRFService.generateSecurityToken(context.callback(token -> {
                     AssetConfigurationUi.this.xsrfTokenField.setValue(token.getToken());
                     AssetConfigurationUi.this.assetPidField.setValue(AssetConfigurationUi.this.model.getAssetPid());
@@ -226,6 +230,19 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
                             .setValue(AssetConfigurationUi.this.appendCheck.getValue().toString());
                     AssetConfigurationUi.this.uploadForm.submit();
                     AssetConfigurationUi.this.uploadModal.hide();
+                    AssetConfigurationUi.this.formSubmitCallback = context.callback(completeEvent -> {
+                        String htmlResponse = completeEvent.getResults();
+                        if (htmlResponse == null || htmlResponse.isEmpty()) {
+                            AssetConfigurationUi.this.gwtXSRFService.generateSecurityToken(
+                                    context.callback(t -> fetchUploadedChannels(t, appendCheck.getValue(), context)));
+
+                        } else {
+                            EntryClassUi.hideWaitModal();
+                            logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
+                            FailureHandler.handle(new Exception(htmlResponse));
+                        }
+                    });
+
                 }))));
 
         this.uploadCancel.addClickHandler(event -> AssetConfigurationUi.this.uploadModal.hide());
@@ -238,18 +255,7 @@ public class AssetConfigurationUi extends AbstractServicesUi implements HasConfi
         this.selectionModel.addSelectionChangeHandler(event -> AssetConfigurationUi.this.btnRemove
                 .setEnabled(AssetConfigurationUi.this.selectionModel.getSelectedObject() != null));
 
-        this.uploadForm.addSubmitCompleteHandler(event -> {
-            String htmlResponse = event.getResults();
-            if (htmlResponse == null || htmlResponse.isEmpty()) {
-                RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
-                        c.callback(token -> fetchUploadedChannels(token, appendCheck.getValue(), c))));
-
-            } else {
-                EntryClassUi.hideWaitModal();
-                logger.log(Level.SEVERE, MSGS.information() + ": " + MSGS.fileUploadFailure());
-                FailureHandler.handle(new Exception(htmlResponse));
-            }
-        });
+        this.uploadForm.addSubmitCompleteHandler(event -> this.formSubmitCallback.onSuccess(event));
 
         this.filePath.getElement().setAttribute("accept", ".csv");
 

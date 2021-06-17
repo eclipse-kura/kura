@@ -265,6 +265,9 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
             final String newDriverPid = this.driverAndAssetsListUi.getSelectedItem().getPid();
 
             createAsset(pid, newDriverPid);
+
+            // reset pid textbox
+            this.assetName.setValue("");
         });
     }
 

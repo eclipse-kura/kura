@@ -33,7 +33,7 @@ public class RestTransport implements Transport {
     private static final Encoder ENCODER = Base64.getEncoder();
     private static final Logger logger = LoggerFactory.getLogger(RestTransport.class);
 
-    private static final String BASE_URL = "http://localhost:8080/services/tamper/";
+    private static final String BASE_URL = "http://localhost:8080/services/tamper/v1/";
 
     private boolean initialized = false;
 

@@ -225,13 +225,13 @@ public class DriversAndAssetsUi extends Composite implements DriversAndAssetsLis
             }
 
             if (this.driverFactoriesList.getSelectedIndex() == 0) {
-                this.confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ALERT,
+                this.confirmDialog.show(MSGS.driversAssetsInvalidDriverFactory(), AlertDialog.Severity.ERROR,
                         (ConfirmListener) null);
                 return;
             }
 
             if (this.configurations.isPidExisting(pid)) {
-                this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ALERT,
+                this.confirmDialog.show(MSGS.wiresComponentNameAlreadyUsed(pid), AlertDialog.Severity.ERROR,
                         (ConfirmListener) null);
                 return;
             }

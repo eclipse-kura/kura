@@ -327,7 +327,9 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
                 ModalFooter modalFooter = new ModalFooter();
                 modal.setClosable(true);
                 modal.setTitle(MSGS.confirm());
-                modalBody.add(new Span(MSGS.securityUninstallCertificate(selected.getAlias())));
+                Span spanBody = new Span(MSGS.securityUninstallCertificate(selected.getAlias()));
+                spanBody.getElement().getStyle().setProperty("word-break", "break-word");
+                modalBody.add(spanBody);
                 modalFooter.add(new Button(MSGS.noButton(), event11 -> modal.hide()));
                 modalFooter.add(new Button(MSGS.yesButton(), event12 -> {
                     modal.hide();

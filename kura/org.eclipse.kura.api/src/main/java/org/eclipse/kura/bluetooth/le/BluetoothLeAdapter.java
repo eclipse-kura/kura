@@ -206,7 +206,7 @@ public interface BluetoothLeAdapter {
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
      * 
-     * @deprecated since 3.0 use instead {@link setDiscoverableTimeout}
+     * @deprecated since 2.2 use instead {@link setDiscoverableTimeout}
      */
     @Deprecated
     public void setDiscoverableTimout(long value);

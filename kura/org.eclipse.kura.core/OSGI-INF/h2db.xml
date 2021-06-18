@@ -17,6 +17,7 @@
    <implementation class="org.eclipse.kura.core.db.H2DbServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.db.BaseDbService"/>
       <provide interface="org.eclipse.kura.db.H2DbService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.core.db.H2DbService"/>

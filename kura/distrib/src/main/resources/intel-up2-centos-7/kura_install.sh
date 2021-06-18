@@ -103,6 +103,13 @@ if [ ! -d /etc/logrotate.d/ ]; then
 fi
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
+#assigning possible .conf files ownership to kurad
+PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"
+for FILE in $(ls $PATTERN 2>/dev/null)
+do
+  chown kurad:kurad $FILE
+done
+
 # Setup tmpfiles.d
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /usr/lib/tmpfiles.d/kura.conf
 

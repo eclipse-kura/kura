@@ -125,6 +125,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private static final String REGEX_PASS_WPA = "^[ -~]{8,63}$";
     private static final String REGEX_PASS_WEP = "^(?:[\\x00-\\x7F]{5}|[\\x00-\\x7F]{13}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26})$";
+    private static final String REGEX_WIFI_SID = "^[^!#;+\\]/\"\\t][^+\\]/\"\\t]{0,31}$";
     private static final int MAX_WIFI_CHANNEL = 14;
     private static final int MAX_SSID_LENGTH = 32;
 
@@ -808,6 +809,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.labelSsid.setShowRequiredIndicator(true);
         this.ssid.setMaxLength(MAX_SSID_LENGTH);
         this.ssid.setAllowBlank(false);
+        this.ssid.addValidator(new RegexValidator(REGEX_WIFI_SID, MSGS.netWifiWirelessInvalidSSID()));
         this.ssid.setValidateOnBlur(true);
         this.ssid.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.ssid.isEnabled()) {

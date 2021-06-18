@@ -3,15 +3,15 @@
 <!--
 
     Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
-  
+
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
  
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+    Eurotech
 
 -->
 
@@ -22,38 +22,34 @@
 
     <ui:style>
     .important {
-    	font-weight: bold;
+        font-weight: bold;
     }
-    
+
     .center-panel {
-    	font-size: 12px;
-    	font-weight: normal;
+        font-size: 12px;
+        font-weight: normal;
     }
-    
+
     .padding {
-    	margin-bottom: 50px;
+        margin-bottom: 50px;
     }
-    
+
     .help {
-    	height: 300px;
+        height: 300px;
     }
-    
+
     .help-header {
-    	font-size: 14px;
+        font-size: 14px;
     }
-    
-    .help-body {
-    	width: 275px;
-    }
-    
+
     .scrollable {
-		overflow-x: auto;
-	}
+        overflow-x: auto;
+    }
     </ui:style>
 
     <b:Container fluid="true">
 
-	<b:Row>
+    <b:Row>
         <b:Column size="MD_7" addStyleNames="{style.center-panel}">
             <b:Row>
                 <g:ScrollPanel addStyleNames="{style.center-panel}">
@@ -222,8 +218,8 @@
                                     ui:field="labelCountryCode" />
                                 <util:HelpButton ui:field="countryCodeHelp"/>
                                 <g:FlowPanel>
-	                                <b:TextBox b:id="countryCode"
-	                                    ui:field="countryCode" />
+                                    <b:TextBox b:id="countryCode"
+                                        ui:field="countryCode" />
                                 </g:FlowPanel>
                             </b:FormGroup>
 
@@ -247,10 +243,10 @@
 
         <b:Column size="MD_5" addStyleNames="{style.center-panel}" visibleOn="MD_LG">
             <b:Column size="MD_12">
-                <b:Row addStyleNames="affix" b:id="help">
+                <b:Row b:id="help">
                     <b:Panel>
                         <b:PanelHeader addStyleNames="{style.help-header}" ui:field="helpTitle" />
-                        <b:PanelBody addStyleNames="{style.help-body}">
+                        <b:PanelBody>
                             <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
                         </b:PanelBody>
                     </b:Panel>
@@ -259,7 +255,7 @@
         </b:Column>
         </b:Row>
 
-		<!-- WIFI Networks (SSID) Modal -->
+        <!-- WIFI Networks (SSID) Modal -->
         <b:Modal closable="true" dataKeyboard="true" ui:field="ssidModal" b:id="ssidModal">
             <b:ModalBody>
                 <b:Panel>

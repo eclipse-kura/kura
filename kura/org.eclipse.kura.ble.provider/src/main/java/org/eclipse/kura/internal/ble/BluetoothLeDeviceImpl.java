@@ -272,7 +272,13 @@ public class BluetoothLeDeviceImpl implements BluetoothLeDevice {
     }
 
     @Override
-    public void remove() throws KuraBluetoothRemoveException {
+    public boolean remove() throws KuraBluetoothRemoveException {
+        removeDevice();
+        return true;
+    }
+
+    @Override
+    public void removeDevice() throws KuraBluetoothRemoveException {
         try {
             this.device.getAdapter().removeDevice(this.device.getRawDevice());
         } catch (DBusException e) {

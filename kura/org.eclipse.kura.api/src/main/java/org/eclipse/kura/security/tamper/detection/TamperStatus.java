@@ -23,7 +23,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * This includes a boolean flag that indicates if the device has been tampered or not and some properties.
  * The properties indicated in the {@link TamperDetectionProperties} enumeration are well known.
  *
- * @since 3.0
+ * @since 2.2
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType

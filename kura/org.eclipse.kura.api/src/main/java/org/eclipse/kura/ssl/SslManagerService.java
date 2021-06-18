@@ -46,7 +46,7 @@ public interface SslManagerService {
      * If not, no Key store will be specified..<br>
      *
      * @return the SSLContext
-     * @since 3.0
+     * @since 2.2
      */
     public SSLContext getSSLContext() throws GeneralSecurityException, IOException;
 
@@ -63,7 +63,7 @@ public interface SslManagerService {
      * @param keyAlias
      *            alias of the entry in the KeyStore to be used for the returned SSLSocketFactory
      * @return the SSLContext
-     * @since 3.0
+     * @since 2.2
      */
     public SSLContext getSSLContext(String keyAlias) throws GeneralSecurityException, IOException;
 

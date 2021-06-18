@@ -32,7 +32,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Provides a list of APIs useful to manage and abstract key objects and certificates
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public interface KeystoreService {

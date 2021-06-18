@@ -15,7 +15,10 @@ package org.eclipse.kura.internal.ble;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -24,14 +27,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bluez.exceptions.BluezFailedException;
+import org.bluez.exceptions.BluezInvalidArgumentsException;
 import org.eclipse.kura.KuraBluetoothConnectionException;
 import org.eclipse.kura.KuraBluetoothPairException;
+import org.eclipse.kura.KuraBluetoothRemoveException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.freedesktop.dbus.types.UInt16;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.github.hypfvieh.bluetooth.wrapper.BluetoothAdapter;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothDevice;
 import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattService;
 
@@ -39,6 +46,7 @@ public class BluetoothLeDeviceImplTest {
 
     private static BluetoothLeDeviceImpl bluetoothLeDevice;
     private static BluetoothDevice deviceMock;
+    private static BluetoothAdapter adapterMock;
 
     @BeforeClass
     public static void setup() throws DBusException {
@@ -79,6 +87,8 @@ public class BluetoothLeDeviceImplTest {
         when(deviceMock.disconnectProfile("6a5a83dc-8ca7-11eb-8dcd-0242ac130003")).thenReturn(false);
         when(deviceMock.pair()).thenReturn(false);
         when(deviceMock.cancelPairing()).thenReturn(false);
+        adapterMock = mock(BluetoothAdapter.class);
+        when(deviceMock.getAdapter()).thenReturn(adapterMock);
         bluetoothLeDevice = new BluetoothLeDeviceImpl(deviceMock);
     }
 
@@ -155,4 +165,12 @@ public class BluetoothLeDeviceImplTest {
     public void cancelPairTest() throws KuraBluetoothPairException {
         bluetoothLeDevice.cancelPairing();
     }
+
+    @Test
+    public void removeTest() throws KuraBluetoothRemoveException, BluezFailedException, BluezInvalidArgumentsException {
+        bluetoothLeDevice.removeDevice();
+        bluetoothLeDevice.remove();
+        verify(adapterMock, times(2)).removeDevice(anyObject());
+    }
+
 }

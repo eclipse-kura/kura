@@ -18,7 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * Provides some well known audit context properties.
  * 
  * @noextend This class is not intended to be subclassed by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public enum AuditConstants {

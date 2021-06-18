@@ -33,7 +33,7 @@ import org.eclipse.kura.security.keystore.KeystoreInfo;
 import org.osgi.service.useradmin.Role;
 import org.osgi.service.useradmin.UserAdmin;
 
-@Path("/keystores")
+@Path("/keystores/v1")
 public class KeystoreRestService extends KeystoreRemoteService {
 
     private static final String BAD_REQUEST_MESSAGE = "Bad request, ";

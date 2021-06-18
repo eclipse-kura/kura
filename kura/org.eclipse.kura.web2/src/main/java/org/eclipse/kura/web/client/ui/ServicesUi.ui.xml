@@ -50,10 +50,10 @@
     </ui:style>
 
     <b:Container fluid="true">
-		<b:Row>
-            <b.html:Br  />
-			<g:Label ui:field="serviceDescription" />
-		</b:Row>
+        <b:Row>
+            <b.html:Br />
+            <g:Label ui:field="serviceDescription" />
+        </b:Row>
         <b:Row b:id="confirmDialog">
             <b:Panel>
                 <b:ButtonGroup size="SMALL">

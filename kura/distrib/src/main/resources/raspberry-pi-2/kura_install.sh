@@ -99,6 +99,13 @@ fi
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
+#assigning possible .conf files ownership to kurad
+PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"
+for FILE in $(ls $PATTERN 2>/dev/null)
+do
+  chown kurad:kurad $FILE
+done
+
 # execute patch_sysctl.sh from installer install folder
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf

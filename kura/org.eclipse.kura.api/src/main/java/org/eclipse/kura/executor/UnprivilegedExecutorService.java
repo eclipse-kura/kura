@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * that user.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public interface UnprivilegedExecutorService extends CommandExecutorService {

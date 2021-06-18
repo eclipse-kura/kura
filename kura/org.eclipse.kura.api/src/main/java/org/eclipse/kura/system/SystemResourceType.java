@@ -16,7 +16,7 @@ package org.eclipse.kura.system;
  * An enum representing the supported System Resource Types
  *
  * @noextend This class is not intended to be subclassed by clients.
- * @since 3.0
+ * @since 2.2
  */
 public enum SystemResourceType {
 

@@ -20,7 +20,7 @@ import java.security.cert.Certificate;
  * The KuraCertificateEntry represents a {@java.security.KeyStore.TrustedCertificateEntry} stored in a keystore.
  * The entry is identified by an id made with the id of the keystore and the alias.
  *
- * @since 3.0
+ * @since 2.2
  */
 public class KuraCertificateEntry {
 

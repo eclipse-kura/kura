@@ -27,7 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * {@link AuditConstants} enumeration, other custom properties can be added by the entry point implementation.
  * 
  * @noextend This class is not intended to be subclassed by clients.
- * @since 3.0
+ * @since 2.2
  */
 @ProviderType
 public class AuditContext {
@@ -120,7 +120,7 @@ public class AuditContext {
      * See {@link AuditContext#openScope(AuditContext)} for more details.
      * 
      * @noextend This class is not intended to be subclassed by clients.
-     * @since 3.0
+     * @since 2.2
      */
     @ProviderType
     public static class Scope implements AutoCloseable {

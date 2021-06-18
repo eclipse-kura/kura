@@ -112,7 +112,7 @@ public interface BluetoothLeAdapter {
      * Starts a BLE discovery.
      *
      * @throws KuraBluetoothDiscoveryException
-     * @since 3.0
+     * @since 2.2
      */
     public void startDiscovery() throws KuraBluetoothDiscoveryException;
 
@@ -206,7 +206,7 @@ public interface BluetoothLeAdapter {
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
      * 
-     * @deprecated since 3.0 use instead {@link setDiscoverableTimeout}
+     * @deprecated since 2.2 use instead {@link setDiscoverableTimeout}
      */
     @Deprecated
     public void setDiscoverableTimout(long value);
@@ -214,7 +214,8 @@ public interface BluetoothLeAdapter {
     /**
      * Sets the discoverable timeout the adapter. A value of 0 disables
      * the timeout.
-     * @since 3.0
+     * 
+     * @since 2.2
      */
     public void setDiscoverableTimeout(long value);
 
@@ -332,7 +333,7 @@ public interface BluetoothLeAdapter {
      * @param duplicateData
      *            whether to filter duplicate data
      *
-     * @since 3.0
+     * @since 2.2
      */
     public void setDiscoveryFilter(List<UUID> uuids, int rssi, int pathloss, BluetoothTransportType transportType,
             boolean duplicateData);

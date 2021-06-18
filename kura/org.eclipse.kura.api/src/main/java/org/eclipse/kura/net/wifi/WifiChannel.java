@@ -17,7 +17,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wifi channel and Frequency in MHz
- * @since 3.0
+ * @since 2.2
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType

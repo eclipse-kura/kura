@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -60,6 +60,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 public class ServicesUi extends AbstractServicesUi {
@@ -86,6 +87,8 @@ public class ServicesUi extends AbstractServicesUi {
     FormGroup validatedGroup;
     Modal modal;
 
+    @UiField
+    Label serviceDescription;
     @UiField
     Button apply;
     @UiField
@@ -132,6 +135,8 @@ public class ServicesUi extends AbstractServicesUi {
         this.originalConfig = addedItem;
         restoreConfiguration(this.originalConfig);
         this.fields.clear();
+
+        this.serviceDescription.setText(addedItem.getComponentDescription());
 
         this.apply.setText(MSGS.apply());
         this.apply.addClickHandler(event -> apply());
@@ -184,10 +189,10 @@ public class ServicesUi extends AbstractServicesUi {
         if (isDirty()) {
             // Modal
             this.modal = new Modal();
-            modal.setClosable(false);
-            modal.setFade(true);
-            modal.setDataKeyboard(true);
-            modal.setDataBackdrop(ModalBackdrop.STATIC);
+            this.modal.setClosable(false);
+            this.modal.setFade(true);
+            this.modal.setDataKeyboard(true);
+            this.modal.setDataBackdrop(ModalBackdrop.STATIC);
 
             ModalHeader header = new ModalHeader();
             header.setTitle(MSGS.confirm());
@@ -219,7 +224,7 @@ public class ServicesUi extends AbstractServicesUi {
 
                     @Override
                     public void run() {
-                        listener.ifPresent(Listener::onConfigurationChanged);
+                        ServicesUi.this.listener.ifPresent(Listener::onConfigurationChanged);
                     }
                 };
 
@@ -325,20 +330,20 @@ public class ServicesUi extends AbstractServicesUi {
 
                 final List<String> messages;
 
-                if (validator.isPresent()) {
-                    final List<ValidationResult> result = validator.get().validate(this.configurableComponent);
+                if (this.validator.isPresent()) {
+                    final List<ValidationResult> result = this.validator.get().validate(this.configurableComponent);
                     messages = result.stream().map(ValidationResult::getMessage).collect(Collectors.toList());
 
                     if (result.stream().anyMatch(r -> r instanceof ServicesUi.Error)) {
-                        alertDialog.show(MSGS.error(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
-                                null, messages.toArray(new String[messages.size()]));
+                        this.alertDialog.show(MSGS.error(), MSGS.formWithErrorsOrIncomplete(),
+                                AlertDialog.Severity.ERROR, null, messages.toArray(new String[messages.size()]));
                         return;
                     }
                 } else {
                     messages = Collections.emptyList();
                 }
 
-                alertDialog.show(MSGS.confirm(),
+                this.alertDialog.show(MSGS.confirm(),
                         MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName()),
                         AlertDialog.Severity.INFO, ok -> {
                             if (ok) {
@@ -355,7 +360,8 @@ public class ServicesUi extends AbstractServicesUi {
                                                                         ? caught.getLocalizedMessage()
                                                                         : caught.getClass().getName(),
                                                                 caught);
-                                                        onApply.ifPresent(action -> action.accept(Optional.of(caught)));
+                                                        ServicesUi.this.onApply.ifPresent(
+                                                                action -> action.accept(Optional.of(caught)));
                                                     }
 
                                                     @Override
@@ -367,7 +373,8 @@ public class ServicesUi extends AbstractServicesUi {
                                                         ServicesUi.this.originalConfig = ServicesUi.this.configurableComponent;
                                                         context.defer(2000, () -> ServicesUi.this.listener
                                                                 .ifPresent(Listener::onConfigurationChanged));
-                                                        onApply.ifPresent(action -> action.accept(Optional.empty()));
+                                                        ServicesUi.this.onApply
+                                                                .ifPresent(action -> action.accept(Optional.empty()));
                                                     }
                                                 })))));
                             }
@@ -376,7 +383,7 @@ public class ServicesUi extends AbstractServicesUi {
 
         } else {
             errorLogger.log(Level.SEVERE, "Device configuration error!");
-            alertDialog.show(MSGS.warning(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
+            this.alertDialog.show(MSGS.warning(), MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
                     (ConfirmListener) null);
         }
     }
@@ -429,8 +436,9 @@ public class ServicesUi extends AbstractServicesUi {
             this.message = message;
         }
 
+        @Override
         public String getMessage() {
-            return message;
+            return this.message;
         }
     }
 
@@ -442,8 +450,9 @@ public class ServicesUi extends AbstractServicesUi {
             this.message = message;
         }
 
+        @Override
         public String getMessage() {
-            return message;
+            return this.message;
         }
     }
 
@@ -467,13 +476,13 @@ public class ServicesUi extends AbstractServicesUi {
         @Override
         public void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
                 AsyncCallback<Void> callback) {
-            gwtComponentService.updateComponentConfiguration(token, component, callback);
+            this.gwtComponentService.updateComponentConfiguration(token, component, callback);
 
         }
 
         @Override
         public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
-            gwtComponentService.deleteFactoryConfiguration(token, pid, true, callback);
+            this.gwtComponentService.deleteFactoryConfiguration(token, pid, true, callback);
         }
     }
 }

@@ -10,14 +10,12 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.util;
+package org.eclipse.kura.web.client.ui.validator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
-import org.eclipse.kura.web.client.ui.PredicateValidator;
-import org.eclipse.kura.web.client.ui.RegexValidator;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
 

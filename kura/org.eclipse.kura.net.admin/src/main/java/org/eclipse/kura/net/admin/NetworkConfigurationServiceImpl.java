@@ -38,16 +38,30 @@ import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
+import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
+import org.eclipse.kura.core.net.LoopbackInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.core.net.WifiInterfaceImpl;
+import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
+import org.eclipse.kura.net.EthernetInterface;
+import org.eclipse.kura.net.LoopbackInterface;
+import org.eclipse.kura.net.NetInterface;
+import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
+import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.visitor.linux.LinuxReadVisitor;
 import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
+import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemManagerService;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.osgi.service.component.ComponentContext;
@@ -299,153 +313,157 @@ public class NetworkConfigurationServiceImpl
         return new ComponentConfigurationImpl(PID, getDefinition(), networkConfigurationProperties);
     }
 
+    @SuppressWarnings("checkstyle:lineLength")
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
-        NetworkConfiguration networkConfig = new NetworkConfiguration();
+        // get the network configuration from properties
+        NetworkConfiguration networkConfiguration = getConfigurationFromProperties();
+
+        // track the network interfaces not stored in the properties
+        Map<String, NetInterface<? extends NetInterfaceAddress>> untrackedNetworkInterfaces = getUntrackedNetworkInterfaces(
+                networkConfiguration);
+        if (!untrackedNetworkInterfaces.isEmpty()) {
+            NetworkConfiguration untrackedNetworkConfiguration = new NetworkConfiguration();
+            untrackedNetworkInterfaces.values().forEach(netInterface -> {
+
+                String interfaceName = netInterface.getName();
+                try {
+                    // ignore mon interface
+                    if (!shouldSkipNetworkConfiguration(interfaceName)) {
+
+                        NetInterfaceType type = netInterface.getType();
+                        type = updateUnknownType(interfaceName, type);
+
+                        logger.debug("Getting config for {} type: {}", interfaceName, type);
+                        switch (type) {
+                        case LOOPBACK:
+                            LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends NetInterfaceAddress>) netInterface;
+                            LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(
+                                    activeLoopInterface);
+                            untrackedNetworkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
+                            break;
+
+                        case ETHERNET:
+                            EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends NetInterfaceAddress>) netInterface;
+                            EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(
+                                    activeEthInterface);
+                            untrackedNetworkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
+                            break;
+
+                        case WIFI:
+                            WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
+                            WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(
+                                    activeWifiInterface);
+                            untrackedNetworkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
+                            break;
+
+                        case MODEM:
+                            ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
+                            addPropertiesInModemInterface(activeModemInterface);
+                            ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(
+                                    activeModemInterface);
+                            untrackedNetworkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
+                            break;
+
+                        case UNKNOWN:
+                            logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
+                                    interfaceName);
+                            break;
+
+                        default:
+                            logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn("Error fetching information for network interface: {}", interfaceName, e);
+                }
+            });
+            // populate the NetInterfaceConfigs
+            for (NetworkConfigurationVisitor visitor : this.readVisitors) {
+                visitor.setExecutorService(this.executorService);
+                untrackedNetworkConfiguration.accept(visitor);
+            }
+            untrackedNetworkConfiguration.getNetInterfaceConfigs().forEach(networkConfiguration::addNetInterfaceConfig);
+        }
+
+        this.properties.forEach((key, value) -> logger.debug("{} {}", key, value));
+        return networkConfiguration;
+    }
+
+    private boolean shouldSkipNetworkConfiguration(String interfaceName) {
+        boolean result = false;
+
+        // ignore mon and redpine vlan interface
+        if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")) {
+            result = true;
+        }
+
+        return result;
+    }
+
+    private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface)
+            throws KuraException {
+        String interfaceName = modemInterface.getName();
+        if (this.modemManagerService != null) {
+            String modemPort = this.networkService.getModemUsbPort(interfaceName);
+            if (modemPort == null) {
+                modemPort = interfaceName;
+            }
+            this.modemManagerService.withModemService(modemPort, m -> {
+                if (!m.isPresent()) {
+                    return (Void) null;
+                }
+
+                final CellularModem modem = m.get();
+
+                // set modem properties
+                modemInterface.setSerialNumber(modem.getSerialNumber());
+                modemInterface.setModel(modem.getModel());
+                modemInterface.setFirmwareVersion(modem.getRevisionID());
+                modemInterface.setGpsSupported(modem.isGpsSupported());
+
+                // set modem driver
+                UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
+                if (usbModemDevice != null) {
+                    List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
+                            .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+                    if (drivers != null && !drivers.isEmpty()) {
+                        UsbModemDriver driver = drivers.get(0);
+                        modemInterface.setDriver(driver.getName());
+                    }
+                }
+
+                return (Void) null;
+            });
+        }
+    }
+
+    private NetworkConfiguration getConfigurationFromProperties() {
+        NetworkConfiguration networkConfiguration = new NetworkConfiguration();
         if (this.properties != null) {
             try {
-                networkConfig = new NetworkConfiguration(modifyProperties());
+                networkConfiguration = new NetworkConfiguration(modifyProperties());
             } catch (UnknownHostException | KuraException e) {
                 logger.error("Failed to get network configuration", e);
             }
         } else {
             logger.debug("properties are null");
         }
-        return networkConfig;
-        // NetworkConfiguration networkConfiguration = new NetworkConfiguration();
-        //
-        // // Get the current values
-        // List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
-        // .getNetworkInterfaces();
-        // Map<String, NetInterface<? extends NetInterfaceAddress>> allNetworkInterfacesMap = new HashMap<>();
-        // Map<String, NetInterface<? extends NetInterfaceAddress>> activeNetworkInterfacesMap = new HashMap<>();
-        // for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
-        // allNetworkInterfacesMap.put(netInterface.getName(), netInterface);
-        // if (netInterface.isUp()) {
-        // activeNetworkInterfacesMap.put(netInterface.getName(), netInterface);
-        // }
-        // }
-        //
-        // // Create the NetInterfaceConfig objects
-        // if (allNetworkInterfacesMap.keySet() != null) {
-        // for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfacesMap.values()) {
-        //
-        // String interfaceName = netInterface.getName();
-        // try {
-        // // ignore mon interface
-        // if (shouldSkipNetworkConfiguration(interfaceName)) {
-        // continue;
-        // }
-        //
-        // NetInterfaceType type = netInterface.getType();
-        // type = updateUnknownType(interfaceName, type);
-        //
-        // logger.debug("Getting config for {} type: {}", interfaceName, type);
-        // switch (type) {
-        // case LOOPBACK:
-        // LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends
-        // NetInterfaceAddress>) netInterface;
-        // LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(
-        // activeLoopInterface);
-        // networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
-        // break;
-        //
-        // case ETHERNET:
-        // EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends
-        // NetInterfaceAddress>) netInterface;
-        // EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(
-        // activeEthInterface);
-        // networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
-        // break;
-        //
-        // case WIFI:
-        // WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends
-        // NetInterfaceAddress>) netInterface;
-        // WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
-        // networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
-        // break;
-        //
-        // case MODEM:
-        // ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends
-        // NetInterfaceAddress>) netInterface;
-        // addPropertiesInModemInterface(activeModemInterface);
-        // ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(
-        // activeModemInterface);
-        // networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
-        // break;
-        //
-        // case UNKNOWN:
-        // logger.debug("Found interface of unknown type in current configuration: {}. Ignoring it.",
-        // interfaceName);
-        // break;
-        //
-        // default:
-        // logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
-        // }
-        // } catch (Exception e) {
-        // logger.warn("Error fetching information for network interface: {}", interfaceName, e);
-        // }
-        // }
-        // }
-        //
-        // // Replace this code to not read from file, but to get the configuration from properties
-        // // populate the NetInterfaceConfigs
-        // for (NetworkConfigurationVisitor visitor : this.readVisitors) {
-        // visitor.setExecutorService(this.executorService);
-        // networkConfiguration.accept(visitor);
-        // }
-        //
-        // this.properties.forEach((key, value) -> logger.info("{} {}", key, value));
-        // return networkConfiguration;
+
+        return networkConfiguration;
     }
 
-    // private boolean shouldSkipNetworkConfiguration(String interfaceName) {
-    // boolean result = false;
-    //
-    // // ignore mon and redpine vlan interface
-    // if (interfaceName.startsWith("mon.") || interfaceName.startsWith("rpine")) {
-    // result = true;
-    // }
-    //
-    // return result;
-    // }
-    //
-    // private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface)
-    // throws KuraException {
-    // String interfaceName = modemInterface.getName();
-    // if (this.modemManagerService != null) {
-    // String modemPort = this.networkService.getModemUsbPort(interfaceName);
-    // if (modemPort == null) {
-    // modemPort = interfaceName;
-    // }
-    // this.modemManagerService.withModemService(modemPort, m -> {
-    // if (!m.isPresent()) {
-    // return (Void) null;
-    // }
-    //
-    // final CellularModem modem = m.get();
-    //
-    // // set modem properties
-    // modemInterface.setSerialNumber(modem.getSerialNumber());
-    // modemInterface.setModel(modem.getModel());
-    // modemInterface.setFirmwareVersion(modem.getRevisionID());
-    // modemInterface.setGpsSupported(modem.isGpsSupported());
-    //
-    // // set modem driver
-    // UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
-    // if (usbModemDevice != null) {
-    // List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
-    // .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
-    // if (drivers != null && !drivers.isEmpty()) {
-    // UsbModemDriver driver = drivers.get(0);
-    // modemInterface.setDriver(driver.getName());
-    // }
-    // }
-    //
-    // return (Void) null;
-    // });
-    // }
-    // }
+    private Map<String, NetInterface<? extends NetInterfaceAddress>> getUntrackedNetworkInterfaces(
+            NetworkConfiguration networkConfiguration) throws KuraException {
+        List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
+                .getNetworkInterfaces();
+        Map<String, NetInterface<? extends NetInterfaceAddress>> untrackedNetworkInterfacesMap = new HashMap<>();
+        allNetworkInterfaces.stream()
+                .filter(netInterface -> networkConfiguration.getNetInterfaceConfig(netInterface.getName()) == null)
+                .forEach(netInterface -> untrackedNetworkInterfacesMap.put(netInterface.getName(), netInterface));
+
+        return untrackedNetworkInterfacesMap;
+    }
 
     @SuppressWarnings("checkstyle:methodLength")
     private Tocd getDefinition() throws KuraException {

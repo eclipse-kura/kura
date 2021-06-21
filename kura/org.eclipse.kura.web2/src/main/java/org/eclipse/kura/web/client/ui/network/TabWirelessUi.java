@@ -949,6 +949,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             checkPassword();
         });
 
+        this.verify.addKeyUpHandler(event -> {
+            refreshForm();
+            checkPassword();
+        });
+
         // Pairwise ciphers
         this.labelPairwise.setText(MSGS.netWifiWirelessPairwiseCiphers());
         this.pairwise.addMouseOverHandler(event -> {

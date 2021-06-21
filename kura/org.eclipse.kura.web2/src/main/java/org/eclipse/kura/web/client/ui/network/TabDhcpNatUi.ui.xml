@@ -41,10 +41,6 @@
     .help-header {
     	font-size: 14px;
     }
-    
-    .help-body {
-    	width: 275px;
-    }
     </ui:style>
 
     <b:Container fluid="true">
@@ -133,10 +129,10 @@
 
         <b:Column size="MD_5" addStyleNames="{style.center-panel}" visibleOn="MD_LG">
             <b:Column size="MD_12">
-                <b:Row addStyleNames="affix" b:id="help">
+                <b:Row b:id="help">
                     <b:Panel>
                         <b:PanelHeader addStyleNames="{style.help-header}" ui:field="helpTitle" />
-                        <b:PanelBody addStyleNames="{style.help-body}">
+                        <b:PanelBody>
                             <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
                         </b:PanelBody>
                     </b:Panel>

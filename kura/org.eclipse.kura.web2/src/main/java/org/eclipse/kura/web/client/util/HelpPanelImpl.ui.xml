@@ -21,7 +21,7 @@
     <g:HTMLPanel ui:field="helpPanel" addStyleNames="overlay-help-panel z-depth-2">
         <g:HTMLPanel addStyleNames="help-panel">
             <g:HTMLPanel addStyleNames="help-header">
-                <g:Label addStyleNames="help-panel-title">Help</g:Label>
+                <g:Label addStyleNames="help-panel-title">Information</g:Label>
                 <b:Button ui:field="hideButton" addStyleNames="hide-button fa fa-times">Hide</b:Button>
             </g:HTMLPanel>
             <g:HTMLPanel ui:field="helpContent"

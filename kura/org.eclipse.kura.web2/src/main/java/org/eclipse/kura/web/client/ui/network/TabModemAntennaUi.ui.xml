@@ -74,7 +74,7 @@
                 <b:Row>
                     <b:Panel>
                         <b:PanelHeader addStyleNames="{style.help-header}" ui:field="helpTitle" />
-                        <b:PanelBody addStyleNames="{style.help-body}">
+                        <b:PanelBody>
                             <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
                         </b:PanelBody>
                     </b:Panel>

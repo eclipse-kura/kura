@@ -22,29 +22,24 @@
 
     <ui:style>
     .important {
-    	font-weight: bold;
+        font-weight: bold;
     }
-    
+
     .center-panel {
-    	font-size: 12px;
-    	font-weight: normal;
+        font-size: 12px;
+        font-weight: normal;
     }
-    
+
     .padding {
-    	margin-bottom: 10px;
+        margin-bottom: 10px;
     }
-    
+
     .help {
-    	height: 500px;
+        height: 500px;
     }
-    
-    .help-body {
-    	width: 275px;
-    }
-    
     .scrollable {
-		overflow-x: auto;
-	}
+        overflow-x: auto;
+    }
     </ui:style>
 
     <b:Container fluid="true">
@@ -237,19 +232,18 @@
             <b:Column addStyleNames="{style.padding}" size="MD_12">
             </b:Column>
             <b:Column size="MD_12">
-                <b:Row addStyleNames="affix" b:id="modem-help">
+                <b:Row b:id="modem-help">
                     <b:Panel>
                         <b:PanelHeader ui:field="helpTitle" />
-                        <b:PanelBody addStyleNames="{style.help-body}">
-                            <g:ScrollPanel addStyleNames="{style.help}"
-                                ui:field="helpText" />
+                        <b:PanelBody>
+                            <g:ScrollPanel addStyleNames="{style.help}" ui:field="helpText" />
                         </b:PanelBody>
                     </b:Panel>
                 </b:Row>
             </b:Column>
         </b:Column>
 
-		<!-- Modem (PDP) Modal -->
+        <!-- Modem (PDP) Modal -->
         <b:Modal closable="true" dataKeyboard="true" ui:field="pdpModal" b:id="pdpModal">
             <b:ModalBody>
                 <b:Panel>

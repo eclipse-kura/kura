@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#  Copyright (c) 2016, 2020 Red Hat Inc and others
+#  Copyright (c) 2016, 2021 Red Hat Inc and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -52,14 +52,21 @@ rm /etc/resolv.conf
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
-cp ${INSTALL_DIR}/kura/install/iptables.init /etc/sysconfig/iptables
-cp /etc/sysconfig/iptables ${INSTALL_DIR}/kura/.data/iptables
+#set up default firewall configuration
+cp ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/.data/iptables
+chmod 644 ${INSTALL_DIR}/kura/.data/iptables
+cp ${INSTALL_DIR}/kura/.data/iptables /etc/sysconfig/iptables
+cp ${INSTALL_DIR}/kura/install/firewall.init ${INSTALL_DIR}/kura/bin/firewall
+chmod 755 ${INSTALL_DIR}/kura/bin/firewall
 
 # Mask firewalld and enable/start iptables
 systemctl mask firewalld
 systemctl enable iptables
 systemctl stop firewalld
 systemctl start iptables
+
+#copy snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up networking configuration
 mac_addr=$(head /sys/class/net/enp2s0/address | tr '[:lower:]' '[:upper:]')
@@ -83,9 +90,6 @@ cd ${OLD_PATH}
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
-#copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
-
 #set up ifcfg files
 cp ${INSTALL_DIR}/kura/install/ifcfg-enp2s0 /etc/sysconfig/network-scripts/ifcfg-enp2s0
 cp ${INSTALL_DIR}/kura/install/ifcfg-enp2s0 ${INSTALL_DIR}/kura/.data/ifcfg-enp2s0
@@ -96,7 +100,7 @@ cp ${INSTALL_DIR}/kura/install/ifcfg-enp3s0 ${INSTALL_DIR}/kura/.data/ifcfg-enp3
 cp ${INSTALL_DIR}/kura/install/ifcfg-wlp4s0 /etc/sysconfig/network-scripts/ifcfg-wlp4s0
 cp ${INSTALL_DIR}/kura/install/ifcfg-wlp4s0 ${INSTALL_DIR}/kura/.data/ifcfg-wlp4s0
 
-# Set up logrotate
+#set up logrotate
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 if [ ! -d /etc/logrotate.d/ ]; then
     mkdir -p /etc/logrotate.d/

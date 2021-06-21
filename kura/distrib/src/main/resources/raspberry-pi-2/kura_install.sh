@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,7 @@ fi
 #set up users and grant permissions to them
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
-${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i 
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces

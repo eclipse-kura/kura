@@ -17,6 +17,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,6 +49,7 @@ public class KeystoreServiceOptionsTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes(CHANGEIT_PASSWORD.toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn(CHANGEIT_PASSWORD.toCharArray());
+        when(cryptoService.getKeyStorePassword(any(String.class))).thenReturn(CHANGEIT_PASSWORD.toCharArray());
 
         KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
 
@@ -65,6 +67,7 @@ public class KeystoreServiceOptionsTest {
         when(cryptoService.encryptAes("testPassword".toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn("testPassword".toCharArray());
         when(cryptoService.decryptAes("testPassword".toCharArray())).thenReturn("testPassword".toCharArray());
+        when(cryptoService.getKeyStorePassword(any(String.class))).thenReturn("testPassword".toCharArray());
 
         KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
 

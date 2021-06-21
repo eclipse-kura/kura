@@ -20,18 +20,18 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
     
     <ui:style>
-    .dropdownNotification {
-		width: 100%;
-		height: 0;  
-		box-sizing: border-box;
-		color: white;
-		background: orange;
-		transition: height 2s;
-	}
-		
-	.centerText {
-		padding: 5px;
-	}
+	    .dropdownNotification {
+			width: 100%;
+			height: 0;  
+			box-sizing: border-box;
+			color: white;
+			background: orange;
+			transition: height 2s;
+		}
+			
+		.centerText {
+			padding: 5px;
+		}
     </ui:style>
     
     <b:Row styleName='{style.dropdownNotification}' ui:field='dropdownNotification'>

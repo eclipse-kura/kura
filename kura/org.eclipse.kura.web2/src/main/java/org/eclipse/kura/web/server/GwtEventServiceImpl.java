@@ -82,7 +82,7 @@ public class GwtEventServiceImpl extends OsgiRemoteServiceServlet implements Gwt
             GwtEventInfo next = i.next();
 
             // ignore concurrency events raised by myself
-            if (next.getTopic().equals(ConfigurationChangeEvent.CONF_CHANGE_EVENT_TOPIC.toString())
+            if (next.getTopic().equals(ConfigurationChangeEvent.CONF_CHANGE_EVENT_TOPIC)
                     && getThreadLocalRequest().getSession(false) != null) {
 
                 String currentSession = getThreadLocalRequest().getSession().getId();

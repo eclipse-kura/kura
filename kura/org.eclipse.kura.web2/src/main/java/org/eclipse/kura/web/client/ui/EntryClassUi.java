@@ -1032,34 +1032,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
-        String eventOperation = (String) eventInfo.getProperties()
-                .get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_INFO_PROP);
         String eventPid = (String) eventInfo.getProperties().get(ConfigurationChangeEvent.CONF_CHANGE_EVENT_PID_PROP);
-
-        // unfourtunately, the enum in ConfigurationChangeEvent.Operations is not compiled here
-        // so, we need to work with the strings that represent the enum
-        String notificationMessage;
-        switch (eventOperation) {
-        case "ADD":
-            notificationMessage = MSGS.configurationChangeEvent_Created(eventPid);
-            break;
-        case "GENERIC":
-            notificationMessage = MSGS.configurationChangeEvent_Generic();
-            break;
-        case "REMOVE":
-            notificationMessage = MSGS.configurationChangeEvent_Removed(eventPid);
-            break;
-        case "ROLLBACK":
-            notificationMessage = MSGS.configurationChangeEvent_Rollback();
-            break;
-        case "UPDATE":
-            notificationMessage = MSGS.configurationChangeEvent_Updated(eventPid);
-            break;
-        default:
-            notificationMessage = MSGS.configurationChangeEvent_Generic();
-            break;
+        if (eventPid.length() == 0) {
+            this.dropdownNotification.show(MSGS.configurationChangeEventNotificationGeneric());
+        } else {
+            this.dropdownNotification.show(MSGS.configurationChangeEventNotification(eventPid));
         }
-        this.dropdownNotification.show(MSGS.configurationChangeEventNotification(notificationMessage));
     }
 
     private void showStatusPanel() {

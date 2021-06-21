@@ -112,6 +112,11 @@ public interface SystemService {
     public static final String KEY_CPU_VERSION = "cpu.version";
 
     /**
+     * @since 2.2
+     */
+    public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
+
+    /**
      * @deprecated
      */
     @Deprecated
@@ -547,4 +552,13 @@ public interface SystemService {
      *         properties.
      */
     public Optional<ExtendedProperties> getExtendedProperties();
+
+    /**
+     * Returns the configuration for the bluetooth beacon scan.
+     * If true, the legacy "hcitool" is used for beacon scanning.
+     *
+     * @since 2.2
+     * @return if the legacy beacon scan has to be used
+     */
+    public boolean isLegacyBluetoothBeaconScan();
 }

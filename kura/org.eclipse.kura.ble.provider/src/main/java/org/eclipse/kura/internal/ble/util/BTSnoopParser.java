@@ -40,18 +40,23 @@ public class BTSnoopParser {
             this.gotHeader = true;
         }
 
-        readInt();
-        int includedLength = readInt();
-        readInt();
-        readInt();
-        readInt();
-        readInt();
-        byte[] packetData = new byte[includedLength];
+        readInt(); // Original Length
+        int includedLength = readInt(); // Included Length
+        readInt(); // Packet Flags
+        readInt(); // Cumulative Drops
 
-        // bluetooth record
-        IOUtils.readFully(this.is, packetData);
+        // Skip forward to packet data
+        readInt();
+        readInt();
 
-        return packetData;
+        // Packet Data
+        if (includedLength > 0) {
+            byte[] packetData = new byte[includedLength];
+            IOUtils.readFully(this.is, packetData);
+            return packetData;
+        }
+
+        return new byte[0];
     }
 
     private int readInt() throws IOException {

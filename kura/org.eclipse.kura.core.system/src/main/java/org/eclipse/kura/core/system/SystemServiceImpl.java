@@ -1414,4 +1414,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         return "unknown";
     }
+
+    @Override
+    public boolean isLegacyBluetoothBeaconScan() {
+        final Optional<String> override = getProperty(KEY_LEGACY_BT_BEACON_SCAN);
+        if (override.isPresent()) {
+            return Boolean.parseBoolean(override.get());
+        }
+
+        return false;
+    }
 }

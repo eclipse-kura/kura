@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,7 +47,10 @@ public interface BluetoothLeGattService {
      *            The timeout for retrieving the service
      * @return The BluetoothLeGattCharacteristic
      * @throws KuraBluetoothResourceNotFoundException
+     * 
+     * @deprecated since 2.2 use instead {@link findCharacteristic(UUID)}
      */
+    @Deprecated
     public BluetoothLeGattCharacteristic findCharacteristic(UUID uuid, long timeout)
             throws KuraBluetoothResourceNotFoundException;
 

@@ -8,10 +8,10 @@
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
  
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+    Eurotech
 
 -->
 
@@ -20,23 +20,31 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
     xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
 
+    <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages" />
+
     <ui:style>
     .important {
-    	font-weight: bold;
+        font-weight: bold;
     }
-    
+
     .modal-scroll-panel {
-    	max-height: 70vh;
+        max-height: 70vh;
     }
     </ui:style>
 
     <b:Container fluid="true">
         <b:Column size="MD_12">
             <b:Row>
+                <b.html:Paragraph alignment="LEFT">
+                    <b.html:Br  />
+                    <g:HTML HTML="{msgs.securityCertificateListWarning}" />
+                </b.html:Paragraph>
+            </b:Row>
+            <b:Row>
                 <b:Panel>
                     <b:NavPills justified="true">
                         <b:ButtonGroup size="SMALL">
-                        	<b:Button ui:field="add" addStyleNames="fa fa-plus"></b:Button>
+                            <b:Button ui:field="add" addStyleNames="fa fa-plus"></b:Button>
                             <b:Button ui:field="uninstall" addStyleNames="fa fa-minus" enabled="false"></b:Button>
                             <b:Button ui:field="refresh" addStyleNames="fa fa-refresh"></b:Button>
                         </b:ButtonGroup>
@@ -50,17 +58,20 @@
                     ui:field="certificatesGrid" />
             </b:Row>
             <b:Modal title="Add Certificate" fade="true" dataBackdrop="STATIC" dataKeyboard="true" b:id="certAddModal" ui:field="certAddModal" closable="false">
-  				<b:ModalBody b:id="certAddModalBody">
-  				    <g:ScrollPanel ui:field="certAddModalBody" addStyleNames="{style.modal-scroll-panel}"/>
-  				</b:ModalBody>
-  				<b:ModalFooter>
-  					<b:Button dataDismiss="MODAL" b:id="closeModalButton" ui:field="closeModalButton">Close</b:Button>
-  					<b:Button type="PRIMARY" b:id="nextStepButton" ui:field="nextStepButton">Do something</b:Button>
-  				</b:ModalFooter>
-  			</b:Modal>
+                <b:ModalBody b:id="certAddModalBody">
+                    <g:ScrollPanel ui:field="certAddModalBody" addStyleNames="{style.modal-scroll-panel}"/>
+                </b:ModalBody>
+                <b:ModalFooter>
+                    <b:Button dataDismiss="MODAL" b:id="applyModalButton" ui:field="applyModalButton">Apply</b:Button>
+                    <b:Button dataDismiss="MODAL" b:id="resetModalButton" ui:field="resetModalButton">Reset</b:Button>
+                    <b:Button dataDismiss="MODAL" b:id="closeModalButton" ui:field="closeModalButton">Close</b:Button>
+
+                    <b:Button type="PRIMARY" b:id="nextStepButton" ui:field="nextStepButton">Do something</b:Button>
+                </b:ModalFooter>
+            </b:Modal>
         </b:Column>
         <b:PanelFooter ui:field="tablePanelFooter">
         </b:PanelFooter>
         <kura:AlertDialog ui:field="alertDialog"/>
     </b:Container>
-</ui:UiBinder> 
+</ui:UiBinder>

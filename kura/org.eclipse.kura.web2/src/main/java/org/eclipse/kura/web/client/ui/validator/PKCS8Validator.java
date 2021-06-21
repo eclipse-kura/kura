@@ -1,21 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui;
+package org.eclipse.kura.web.client.ui.validator;
 
-public class RegexValidator extends PredicateValidator {
+public class PKCS8Validator extends RegexValidator {
 
-    public RegexValidator(final String pattern, final String message) {
-        super(v -> v.matches(pattern), message);
+    private static final String PKCS8 = "^-{3,}BEGIN \\w+ PRIVATE KEY-{3,}[\\W\\w]*?-{3,}END \\w+ PRIVATE KEY-{3,}$";
+
+    public PKCS8Validator(String message) {
+        super(PKCS8, message);
     }
-
 }

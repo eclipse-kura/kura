@@ -1,20 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui;
+package org.eclipse.kura.web.client.ui.validator;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
@@ -22,13 +21,13 @@ import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
 
-public class PredicateValidator implements Validator<String> {
+public class NotInListValidator<T> implements Validator<T> {
 
-    private final Predicate<String> predicate;
+    private final List<T> values;
     private final String message;
 
-    public PredicateValidator(final Predicate<String> predicate, final String message) {
-        this.predicate = predicate;
+    public NotInListValidator(final List<T> values, final String message) {
+        this.values = values;
         this.message = message;
     }
 
@@ -38,10 +37,10 @@ public class PredicateValidator implements Validator<String> {
     }
 
     @Override
-    public List<EditorError> validate(final Editor<String> editor, final String value) {
-
-        return this.predicate.test(value) ? Collections.emptyList()
-                : Collections.singletonList(new BasicEditorError(editor, value, this.message));
+    public List<EditorError> validate(final Editor<T> editor, final T value) {
+        return this.values.contains(value)
+                ? Collections.singletonList(new BasicEditorError(editor, value, this.message))
+                : Collections.emptyList();
     }
 
 }

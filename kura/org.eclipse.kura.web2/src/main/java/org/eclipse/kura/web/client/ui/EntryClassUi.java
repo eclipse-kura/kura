@@ -179,8 +179,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @UiField
     Panel sidenavOverlay;
     @UiField
-    Label serviceDescription;
-    @UiField
     Button logoutButton;
     @UiField
     Button headerLogoutButton;
@@ -822,7 +820,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private void setHeader(final String title, final String subTitle) {
         this.contentPanelHeader.setText(title);
-        this.serviceDescription.setText(subTitle != null ? subTitle : "");
     }
 
     public void render(GwtConfigComponent item) {

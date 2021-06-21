@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
-import org.eclipse.kura.web.client.util.PasswordStrengthValidators;
+import org.eclipse.kura.web.client.ui.validator.PasswordStrengthValidators;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;

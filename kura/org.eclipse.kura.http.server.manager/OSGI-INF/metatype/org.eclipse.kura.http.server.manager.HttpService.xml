@@ -56,14 +56,14 @@
             default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the HTTPS Keystore.">
         </AD>
-
+      
         <AD id="https.revocation.check.enabled"
             name="Revocation Check Enabled"
             type="Boolean"
             cardinality="0"
             required="false"
             default="false"
-            description="If enabled, the revocation status of client certificates will be ckeched during TLS handshake. If a revoked certificate is detected, handshake will fail. The revocation status will be checked using OCSP, CRLDP or the CRLs cached by the attached KeystoreService instance, depending on the value of the Revocation Check Mode parameter. If not enabled, revocation ckeck will not be performed."/>
+            description="If enabled, the revocation status of client certificates will be checked during TLS handshake. If a revoked certificate is detected, the following handshake will fail. The revocation status will be checked using OCSP, CRLDP, or the CRLs cached by the attached KeystoreService instance, depending on the value of the Revocation Check Mode parameter. If not enabled, the revocation check will not be performed."/>
 
         <AD id="ssl.revocation.mode"
             name="Revocation Check Mode"
@@ -83,8 +83,7 @@
             cardinality="0"
             required="false"
             default="false"
-            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
-
+            description="Specifies whether the revocation soft fail is enabled or not. If it is enabled and the gateway is not able to verify the revocation status of a client certificate (for example due to a connectivity problem), the certificate will be rejected. This parameter is ignored if Revocation Check Enabled is set to false."/>
     </OCD>
 
     <Designate pid="org.eclipse.kura.http.server.manager.HttpService">

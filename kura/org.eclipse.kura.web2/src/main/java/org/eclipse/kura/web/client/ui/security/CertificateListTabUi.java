@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,9 +16,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
@@ -59,7 +57,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class CertificateListTabUi extends Composite implements Tab, CertificateModalListener {
 
     private static CertificateListTabUiUiBinder uiBinder = GWT.create(CertificateListTabUiUiBinder.class);
-    private static final Logger logger = Logger.getLogger(CertificateListTabUi.class.getSimpleName());
 
     interface CertificateListTabUiUiBinder extends UiBinder<Widget, CertificateListTabUi> {
     }
@@ -83,6 +80,10 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     @UiField
     Button nextStepButton;
     @UiField
+    Button applyModalButton;
+    @UiField
+    Button resetModalButton;
+    @UiField
     Button closeModalButton;
     @UiField
     AlertDialog alertDialog;
@@ -101,7 +102,6 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
     private List<String> pids;
 
     public CertificateListTabUi() {
-        logger.log(Level.FINER, "Initiating CertificatesTabUI...");
         initWidget(uiBinder.createAndBindUi(this));
 
         this.pager = new SimplePager(TextLocation.CENTER, false, 0, true) {
@@ -128,6 +128,7 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     @Override
     public void setDirty(boolean flag) {
+        // unused
     }
 
     @Override
@@ -200,25 +201,25 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         };
         col3.setSortable(true);
         this.certificatesGrid.addColumn(col3, MSGS.certificateKeystoreName());
-        
+
         TextColumn<GwtKeystoreEntry> col4 = new TextColumn<GwtKeystoreEntry>() {
-        	
-        	@Override
-        	public String getValue(GwtKeystoreEntry object) {
-        		Date date = object.getValidityStartDate();
-        		return date != null ? DateUtils.formatDateTime(date) : "";
-        	}
+
+            @Override
+            public String getValue(GwtKeystoreEntry object) {
+                Date date = object.getValidityStartDate();
+                return date != null ? DateUtils.formatDateTime(date) : "";
+            }
         };
         this.certificatesGrid.addColumn(col4, MSGS.certificateValidityStart());
         col4.setSortable(true);
-        
+
         TextColumn<GwtKeystoreEntry> col5 = new TextColumn<GwtKeystoreEntry>() {
-        	
-        	@Override
-        	public String getValue(GwtKeystoreEntry object) {
-        		Date date = object.getValidityEndDate();
-        		return date != null ? DateUtils.formatDateTime(date) : "";
-        	}
+
+            @Override
+            public String getValue(GwtKeystoreEntry object) {
+                Date date = object.getValidityEndDate();
+                return date != null ? DateUtils.formatDateTime(date) : "";
+            }
         };
         this.certificatesGrid.addColumn(col5, MSGS.certificateValidityEnd());
         col5.setSortable(true);
@@ -237,70 +238,73 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certificatesGrid.setSelectionModel(this.selectionModel);
     }
 
-    private <U extends Comparable<U>> Comparator<GwtKeystoreEntry> getComparator(Function<GwtKeystoreEntry, U> comparableElementSupplier) {
-    	return new Comparator<GwtKeystoreEntry>() {
+    private <U extends Comparable<U>> Comparator<GwtKeystoreEntry> getComparator(
+            Function<GwtKeystoreEntry, U> comparableElementSupplier) {
+        return (o1, o2) -> {
+            if (o1 == o2) {
+                return 0;
+            }
+            if (o1 == null) {
+                return -1;
+            }
+            if (o2 == null) {
+                return 1;
+            }
 
-			@Override
-			public int compare(GwtKeystoreEntry o1, GwtKeystoreEntry o2) {
-				if(o1 == o2)
-					return 0;
-				if(o1 == null)
-					return -1;
-				if(o2 == null)
-					return 1;
-				
-				U item1 = comparableElementSupplier.apply(o1);
-				U item2 = comparableElementSupplier.apply(o2);
-				
-				if(item1 == item2)
-					return 0;
-				if(item1 == null)
-					return -1;
-				if(item2 == null)
-					return 1;
-				
-				return item1.compareTo(item2);
-			}
-    	};
+            U item1 = comparableElementSupplier.apply(o1);
+            U item2 = comparableElementSupplier.apply(o2);
+
+            if (item1 == item2) {
+                return 0;
+            }
+            if (item1 == null) {
+                return -1;
+            }
+            if (item2 == null) {
+                return 1;
+            }
+
+            return item1.compareTo(item2);
+        };
     }
-    
+
     private ListHandler<GwtKeystoreEntry> getNameSortHandler(TextColumn<GwtKeystoreEntry> col3) {
-        ListHandler<GwtKeystoreEntry> nameSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        ListHandler<GwtKeystoreEntry> nameSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
 
         nameSortHandler.setComparator(col3, getComparator(GwtKeystoreEntry::getKeystoreName));
-        
+
         return nameSortHandler;
     }
 
     private ListHandler<GwtKeystoreEntry> getTypeSortHandler(TextColumn<GwtKeystoreEntry> col2) {
-        ListHandler<GwtKeystoreEntry> typeSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        ListHandler<GwtKeystoreEntry> typeSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
 
         typeSortHandler.setComparator(col2, getComparator(entry -> entry.getKind().name()));
-        
+
         return typeSortHandler;
     }
 
     private ListHandler<GwtKeystoreEntry> getAliasSortHandler(TextColumn<GwtKeystoreEntry> col1) {
-        ListHandler<GwtKeystoreEntry> aliasSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        ListHandler<GwtKeystoreEntry> aliasSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
 
         aliasSortHandler.setComparator(col1, getComparator(GwtKeystoreEntry::getAlias));
-        
+
         return aliasSortHandler;
     }
-    
+
     private ListHandler<GwtKeystoreEntry> getStartDateSortHandler(TextColumn<GwtKeystoreEntry> col4) {
-        ListHandler<GwtKeystoreEntry> startDateSortHandler = new ListHandler<>(certificatesDataProvider.getList());
-        
+        ListHandler<GwtKeystoreEntry> startDateSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
+
         startDateSortHandler.setComparator(col4, getComparator(GwtKeystoreEntry::getValidityStartDate));
- 
+
         return startDateSortHandler;
     }
-    
+
     private ListHandler<GwtKeystoreEntry> getEndDateSortHandler(TextColumn<GwtKeystoreEntry> col5) {
-        ListHandler<GwtKeystoreEntry> endDateSortHandler = new ListHandler<>(certificatesDataProvider.getList());
+        ListHandler<GwtKeystoreEntry> endDateSortHandler = new ListHandler<>(this.certificatesDataProvider.getList());
 
         endDateSortHandler.setComparator(col5, getComparator(GwtKeystoreEntry::getValidityEndDate));
-        
+
         return endDateSortHandler;
     }
 
@@ -323,7 +327,9 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
                 ModalFooter modalFooter = new ModalFooter();
                 modal.setClosable(true);
                 modal.setTitle(MSGS.confirm());
-                modalBody.add(new Span(MSGS.securityUninstallCertificate(selected.getAlias())));
+                Span spanBody = new Span(MSGS.securityUninstallCertificate(selected.getAlias()));
+                spanBody.getElement().getStyle().setProperty("word-break", "break-word");
+                modalBody.add(spanBody);
                 modalFooter.add(new Button(MSGS.noButton(), event11 -> modal.hide()));
                 modalFooter.add(new Button(MSGS.yesButton(), event12 -> {
                     modal.hide();
@@ -349,6 +355,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
         this.closeModalButton.setText(MSGS.closeButton());
         this.nextStepButton.setVisible(true);
+        this.resetModalButton.setVisible(false);
+        this.applyModalButton.setVisible(false);
         this.nextStepButton.setText(MSGS.next());
         this.nextStepButton.addClickHandler(event -> {
             CertType selectedCertType = CertType.fromValue(certType.getSelectedValue());
@@ -362,10 +370,16 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         this.certAddModal.setTitle("Add Certificate");
         this.certAddModalBody.clear();
 
-        final KeyPairTabUi widget = new KeyPairTabUi(selectedCertType.getType(), this.pids, this);
+        List<String> storageAliases = this.certificatesDataProvider.getList().stream().map(GwtKeystoreEntry::getAlias)
+                .collect(Collectors.toList());
+
+        final KeyPairTabUi widget = new KeyPairTabUi(selectedCertType.getType(), this.pids, storageAliases, this,
+                this.resetModalButton, this.applyModalButton);
         this.certAddModalBody.add(widget);
 
         this.nextStepButton.setVisible(false);
+        this.resetModalButton.setVisible(true);
+        this.applyModalButton.setVisible(true);
     }
 
     private void uninstall(final GwtKeystoreEntry selected) {
@@ -408,21 +422,22 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
-
+        // no need to clear
     }
 
     @Override
     public void onApply(final boolean isValid) {
+
         if (isValid) {
             this.certAddModal.hide();
         } else {
-            alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR, (ConfirmListener) null);
+            this.alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
+                    (ConfirmListener) null);
         }
     }
 
     @Override
     public void onKeystoreChanged() {
-        this.refresh();
+        refresh();
     }
 }

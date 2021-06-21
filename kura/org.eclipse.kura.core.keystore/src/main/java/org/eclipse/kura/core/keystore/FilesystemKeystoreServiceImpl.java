@@ -101,6 +101,7 @@ import org.slf4j.LoggerFactory;
 
 public class FilesystemKeystoreServiceImpl implements KeystoreService, ConfigurableComponent {
 
+    private static final String KURA_SERVICE_PID = "kura.service.pid";
     private static final String PEM_CERTIFICATE_REQUEST_TYPE = "CERTIFICATE REQUEST";
     private static final String KURA_HTTPS_KEY_STORE_PASSWORD_KEY = "kura.https.keyStorePassword";
 
@@ -152,7 +153,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     // ----------------------------------------------------------------
 
     public synchronized void activate(ComponentContext context, Map<String, Object> properties) {
-        logger.info("Bundle {} is starting!", this.getClass().getSimpleName());
+        logger.info("Bundle {} is starting!", properties.get(KURA_SERVICE_PID));
         this.componentContext = context;
 
         this.ownPid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
@@ -168,11 +169,11 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         updateCRLManager(this.crlManagerOptions);
 
-        logger.info("Bundle {} has started!", this.getClass().getSimpleName());
+        logger.info("Bundle {} has started!", properties.get(KURA_SERVICE_PID));
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Bundle {} is updating!", this.getClass().getSimpleName());
+        logger.info("Bundle {} is updating!", properties.get(KURA_SERVICE_PID));
         KeystoreServiceOptions newOptions = new KeystoreServiceOptions(properties, this.cryptoService);
 
         if (!this.keystoreServiceOptions.equals(newOptions)) {
@@ -191,11 +192,11 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
             updateCRLManager(newCRLManagerOptions);
         }
 
-        logger.info("Bundle {} has updated!", this.getClass().getSimpleName());
+        logger.info("Bundle {} has updated!", properties.get(KURA_SERVICE_PID));
     }
 
     public void deactivate() {
-        logger.info("Bundle {} is deactivating!", this.getClass().getSimpleName());
+        logger.info("Bundle {} is deactivating!", this.keystoreServiceOptions.getProperties().get(KURA_SERVICE_PID));
 
         if (this.selfUpdaterFuture != null && !this.selfUpdaterFuture.isDone()) {
 
@@ -269,7 +270,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     }
 
     private void updatePasswordInConfigService(char[] newPassword) {
-        // update our configuration with the newly generated password
         final String pid = this.keystoreServiceOptions.getPid();
 
         Map<String, Object> props = new HashMap<>();
@@ -389,6 +389,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
             ks.load(tsReadStream, keystorePassword);
         } catch (GeneralSecurityException | IOException e) {
+            logger.warn("Failed to get the KeyStore {}", this.keystoreServiceOptions.getKeystorePath());
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get the KeyStore");
         }
 
@@ -634,7 +635,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
             }
 
             try {
-                for (final Entry e : this.getEntries().values()) {
+                for (final Entry e : getEntries().values()) {
                     if (!(e instanceof TrustedCertificateEntry)) {
                         continue;
                     }
@@ -713,7 +714,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         final Optional<X509Certificate> certificate = extractCertificate(entry);
         final Optional<CRLManager> currentCrlManager = this.crlManager;
 
-        if (certificate.isPresent() && crlManager.isPresent()) {
+        if (certificate.isPresent() && this.crlManager.isPresent()) {
             return currentCrlManager.get().removeTrustedCertificate(certificate.get());
         } else {
             return false;
@@ -765,6 +766,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     }
 
     private void postChangedEvent() {
-        this.eventAdmin.postEvent(new KeystoreChangedEvent(ownPid));
+        this.eventAdmin.postEvent(new KeystoreChangedEvent(this.ownPid));
     }
 }

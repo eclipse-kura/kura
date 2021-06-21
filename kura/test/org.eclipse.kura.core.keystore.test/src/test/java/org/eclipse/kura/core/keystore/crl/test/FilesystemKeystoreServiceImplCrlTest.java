@@ -436,7 +436,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
 
         Fixture(final Optional<File> keystoreFile) throws Exception {
-            currentPort = jettyPort++;
+            this.currentPort = jettyPort++;
 
             if (keystoreFile.isPresent()) {
                 this.keystoreFile = keystoreFile.get();
@@ -448,34 +448,36 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
             this.options = new Options(this.keystoreFile);
 
-            Mockito.when(cryptoService.encryptAes((char[]) Matchers.any()))
+            Mockito.when(this.cryptoService.encryptAes((char[]) Matchers.any()))
                     .thenAnswer(i -> i.getArgumentAt(0, char[].class));
-            Mockito.when(cryptoService.decryptAes((char[]) Matchers.any()))
+            Mockito.when(this.cryptoService.decryptAes((char[]) Matchers.any()))
                     .thenAnswer(i -> i.getArgumentAt(0, char[].class));
+            Mockito.when(this.cryptoService.getKeyStorePassword(Matchers.any(String.class)))
+            .thenReturn(DEFAULT_KEYSTORE_PASSWORD.toCharArray());
             Mockito.doAnswer(i -> {
-                eventAdminListener.ifPresent(e -> e.accept(i.getArgumentAt(0, Event.class)));
+                this.eventAdminListener.ifPresent(e -> e.accept(i.getArgumentAt(0, Event.class)));
                 return (Void) null;
-            }).when(eventAdmin).postEvent(Mockito.any());
+            }).when(this.eventAdmin).postEvent(Matchers.any());
 
-            keystoreService.setConfigurationService(configurationService);
-            keystoreService.setEventAdmin(eventAdmin);
-            keystoreService.setCryptoService(cryptoService);
+            this.keystoreService.setConfigurationService(this.configurationService);
+            this.keystoreService.setEventAdmin(this.eventAdmin);
+            this.keystoreService.setCryptoService(this.cryptoService);
 
-            this.server = new TestServer(currentPort, Optional.of(s -> {
+            this.server = new TestServer(this.currentPort, Optional.of(s -> {
                 this.downloadListener.ifPresent(l -> l.accept(s));
             }));
         }
 
         public File getKeystoreFile() {
-            return keystoreFile;
+            return this.keystoreFile;
         }
 
         public String getCrlDownloadURL(final String relativeUrl) {
-            return "http://localhost:" + currentPort + relativeUrl;
+            return "http://localhost:" + this.currentPort + relativeUrl;
         }
 
         Options getOptions() {
-            return options;
+            return this.options;
         }
 
         void setCrl(final String relativeURI, final X509CRL crl) throws IOException {
@@ -495,7 +497,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
         }
 
         void activate() {
-            keystoreService.activate(componentContext, options.toProperties());
+            this.keystoreService.activate(this.componentContext, this.options.toProperties());
         }
 
         public void setDownloadListener(final Consumer<String> listener) {
@@ -549,7 +551,7 @@ public class FilesystemKeystoreServiceImplCrlTest {
 
     private static class Options {
 
-        private File keystorePath;
+        private final File keystorePath;
         private String keystorePassword = DEFAULT_KEYSTORE_PASSWORD;
         private boolean crlManagerEnabled = false;
         private long crlUpdateInterval = 1;
@@ -618,17 +620,17 @@ public class FilesystemKeystoreServiceImplCrlTest {
         Map<String, Object> toProperties() {
             final Map<String, Object> result = new HashMap<>();
 
-            result.put("keystore.path", keystorePath.toString());
-            result.put("keystore.password", keystorePassword);
-            result.put("crl.management.enabled", crlManagerEnabled);
-            result.put("crl.update.interval", crlUpdateInterval);
-            result.put("crl.update.interval.time.unit", crlUpdateIntervalTimeUnit.name());
-            result.put("crl.check.interval", crlCheckInterval);
-            result.put("crl.check.interval.time.unit", crlCheckIntervalTimeUnit.name());
-            result.put("crl.urls", crlUrls.toArray(new String[crlUrls.size()]));
-            crlStoreFile.ifPresent(p -> result.put("crl.store.path", p.getAbsolutePath()));
-            result.put("verify.crl", crlVerificationEnabled);
-            result.put(ConfigurationService.KURA_SERVICE_PID, ownPid);
+            result.put("keystore.path", this.keystorePath.toString());
+            result.put("keystore.password", this.keystorePassword);
+            result.put("crl.management.enabled", this.crlManagerEnabled);
+            result.put("crl.update.interval", this.crlUpdateInterval);
+            result.put("crl.update.interval.time.unit", this.crlUpdateIntervalTimeUnit.name());
+            result.put("crl.check.interval", this.crlCheckInterval);
+            result.put("crl.check.interval.time.unit", this.crlCheckIntervalTimeUnit.name());
+            result.put("crl.urls", this.crlUrls.toArray(new String[this.crlUrls.size()]));
+            this.crlStoreFile.ifPresent(p -> result.put("crl.store.path", p.getAbsolutePath()));
+            result.put("verify.crl", this.crlVerificationEnabled);
+            result.put(ConfigurationService.KURA_SERVICE_PID, this.ownPid);
 
             return result;
         }

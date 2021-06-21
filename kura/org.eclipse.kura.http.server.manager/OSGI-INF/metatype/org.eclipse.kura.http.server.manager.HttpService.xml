@@ -63,7 +63,7 @@
             cardinality="0"
             required="false"
             default="false"
-            description="If enabled, the revocation status of client certificates will be checked during TLS handshake. If a revoked certificate is detected, a handshake will fail. The revocation status will be checked using OCSP, CRLDP, or the CRLs cached by the attached KeystoreService instance, depending on the value of the Revocation Check Mode parameter. If not enabled, a revocation check will not be performed."/>
+            description="If enabled, the revocation status of client certificates will be checked during TLS handshake. If a revoked certificate is detected, the following handshake will fail. The revocation status will be checked using OCSP, CRLDP, or the CRLs cached by the attached KeystoreService instance, depending on the value of the Revocation Check Mode parameter. If not enabled, the revocation check will not be performed."/>
 
         <AD id="ssl.revocation.mode"
             name="Revocation Check Mode"

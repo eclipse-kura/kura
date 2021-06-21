@@ -22,7 +22,13 @@
 
     <ui:with field="msgs" type="org.eclipse.kura.web.client.messages.Messages"></ui:with>
 
+    
     <b:Container fluid="true">
+        <b:Column size="MD12">
+            <b:Row>
+                <b.html:Br />
+            </b:Row>
+        </b:Column>
         <b:Column size="MD12">
             <b:Row>
                 <g:HTMLPanel>

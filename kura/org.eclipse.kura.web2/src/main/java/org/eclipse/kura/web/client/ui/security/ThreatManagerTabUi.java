@@ -22,7 +22,6 @@ import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
-import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.FilterBuilder;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
@@ -53,7 +52,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
     interface IdsTabUiUiBinder extends UiBinder<Widget, ThreatManagerTabUi> {
     }
 
-    private static final Logger logger = Logger.getLogger(CloudConnectionsUi.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(ThreatManagerTabUi.class.getSimpleName());
     private static final Messages MSGS = GWT.create(Messages.class);
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -103,7 +102,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
 
         this.apply.setEnabled(false);
         this.reset.setEnabled(false);
-        
+
         logger.info("ready to init modal");
 
         initNotificationModal();
@@ -137,7 +136,7 @@ public class ThreatManagerTabUi extends AbstractServicesUi implements Tab {
         if (isDirty()) {
             this.notificationModalBody.clear();
             this.notificationModalBody
-            .add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
+                    .add(new Span(MSGS.deviceConfigConfirmation(this.configurableComponent.getComponentName())));
             this.notificationModal.show();
             this.cancelButton.setFocus(true);
         }

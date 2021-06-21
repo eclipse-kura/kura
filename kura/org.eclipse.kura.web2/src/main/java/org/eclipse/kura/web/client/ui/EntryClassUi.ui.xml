@@ -113,6 +113,10 @@
 		white-space:
 		pre-wrap;
 		}
+        
+        .panel-footer {
+        margin-left: 5vh;
+        }
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -268,9 +272,6 @@
 										addStyleNames="content-panel">
 										<b:PanelHeader ui:field="contentPanelHeader"
 											addStyleNames="{style.content-panel-header}" />
-										<b:Row>
-											<g:Label ui:field="serviceDescription" />
-										</b:Row>
 										<b:PanelBody ui:field="contentPanelBody"
 											addStyleNames="{style.content-panel-body}">
 										</b:PanelBody>
@@ -287,7 +288,7 @@
 						size="MD_12">
 						<b:Row>
 							<b:Panel>
-								<b:PanelFooter>
+								<b:PanelFooter addStyleNames="{style.panel-footer}">
 									<b:Row>
 										<b:Column size="MD_6,XS_6">
 											<b.html:Paragraph alignment="LEFT">

@@ -1,22 +1,26 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.security;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.ui.validator.NotEmptyValidator;
+import org.eclipse.kura.web.client.ui.validator.PEMValidator;
+import org.eclipse.kura.web.client.ui.validator.PKCS8Validator;
+import org.eclipse.kura.web.client.ui.validator.StringLengthValidator;
+import org.eclipse.kura.web.client.ui.validator.StringNotInListValidator;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
@@ -27,13 +31,9 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextArea;
-import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
-import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -41,6 +41,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class KeyPairTabUi extends Composite implements Tab {
+
+    private static final int ALIAS_MAX_LENGTH = 128;
 
     public enum Type {
         KEY_PAIR,
@@ -75,28 +77,31 @@ public class KeyPairTabUi extends Composite implements Tab {
     TextArea privateKeyInput;
     @UiField
     TextArea certificateInput;
-    @UiField
-    Button reset;
-    @UiField
-    Button apply;
 
-    public KeyPairTabUi(final Type type, final List<String> keyStorePids, final CertificateModalListener listener) {
+    private final Button resetButton;
+
+    private final Button applyButton;
+
+    public KeyPairTabUi(final Type type, final List<String> keyStorePids, final List<String> usedAliases,
+            final CertificateModalListener listener, Button resetButton, Button applyButton) {
         this.listener = listener;
         this.type = type;
 
+        this.applyButton = applyButton;
+        this.resetButton = resetButton;
+
         initWidget(uiBinder.createAndBindUi(this));
-        initForm(keyStorePids);
+        initForm(keyStorePids, usedAliases);
 
         setDirty(false);
-        this.apply.setEnabled(false);
-        this.reset.setEnabled(false);
     }
 
     @Override
     public void setDirty(boolean flag) {
         this.dirty = flag;
-        this.reset.setEnabled(flag);
-        this.apply.setEnabled(flag);
+
+        this.resetButton.setEnabled(flag);
+        this.applyButton.setEnabled(flag);
     }
 
     @Override
@@ -109,6 +114,7 @@ public class KeyPairTabUi extends Composite implements Tab {
         boolean validAlias = this.storageAliasInput.validate();
         boolean validPrivateKey = this.privateKeyInput.validate();
         boolean validDeviceCert = this.certificateInput.validate();
+
         return validAlias && validPrivateKey && validDeviceCert;
     }
 
@@ -120,44 +126,38 @@ public class KeyPairTabUi extends Composite implements Tab {
         }
     }
 
-    private void initForm(final List<String> keyStorePids) {
+    private void initForm(final List<String> keyStorePids, List<String> usedAliases) {
         StringBuilder title = new StringBuilder();
-        title.append("<p>");
-        title.append(type == Type.KEY_PAIR ? MSGS.securityKeyPairDescription() : MSGS.securityCertificateDescription());
+        title.append("<p style=\"margin-right: 5%;\">");
+        title.append(
+                this.type == Type.KEY_PAIR ? MSGS.securityKeyPairDescription() : MSGS.securityCertificateDescription());
         title.append(" ");
         title.append(MSGS.securityCertificateFormat() + " "
-                + (type == Type.KEY_PAIR ? MSGS.securityPrivateKeyFormat() : ""));
+                + (this.type == Type.KEY_PAIR ? MSGS.securityPrivateKeyFormat() : ""));
         title.append("</p>");
         this.description.add(new Span(title.toString()));
-
-        final Validator<String> validator = new Validator<String>() {
-
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-
-            @Override
-            public List<EditorError> validate(Editor<String> editor, String value) {
-                final List<EditorError> result = new ArrayList<>();
-
-                if (value == null || value.isEmpty()) {
-                    result.add(new BasicEditorError(editor, value, MSGS.formRequiredParameter()));
-                }
-
-                return result;
-            }
-        };
 
         for (final String pid : keyStorePids) {
             this.pidListBox.addItem(pid);
         }
 
-        this.storageAliasInput.addValidator(validator);
+        NotEmptyValidator notEmptyValidator = new NotEmptyValidator(MSGS.formRequiredParameter());
 
-        this.certificateInput.addValidator(validator);
+        this.storageAliasInput.addValidator(notEmptyValidator);
+        this.storageAliasInput.addValidator(new StringLengthValidator(ALIAS_MAX_LENGTH,
+                MSGS.certificateAliasMaxLength(String.valueOf(ALIAS_MAX_LENGTH))));
+        this.storageAliasInput.setMaxLength(ALIAS_MAX_LENGTH);
+        this.storageAliasInput.addValidator(new StringNotInListValidator(usedAliases, MSGS.certificateAliasUsed()));
+
+        this.certificateInput.addValidator(notEmptyValidator);
+        this.certificateInput.addValidator(new PEMValidator(MSGS.securityCertificateFormat()));
 
         this.storageAliasInput.addKeyUpHandler(e -> {
+            this.storageAliasInput.validate();
+            setDirty(true);
+        });
+
+        this.storageAliasInput.addBlurHandler(e -> {
             this.storageAliasInput.validate();
             setDirty(true);
         });
@@ -167,35 +167,50 @@ public class KeyPairTabUi extends Composite implements Tab {
             setDirty(true);
         });
 
+        this.certificateInput.addBlurHandler(e -> {
+            this.certificateInput.validate();
+            setDirty(true);
+        });
+
         this.certificateInput.setVisibleLines(20);
 
-        this.reset.setText(MSGS.reset());
-        this.reset.addClickHandler(event -> {
+        this.resetButton.setText(MSGS.reset());
+        this.resetButton.addClickHandler(event -> {
             reset();
             setDirty(false);
         });
 
-        this.apply.setText(MSGS.apply());
+        this.applyButton.setText(MSGS.apply());
 
         this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
         if (this.type == Type.KEY_PAIR) {
-            this.privateKeyInput.addValidator(validator);
+            this.privateKeyInput.addValidator(notEmptyValidator);
+            this.privateKeyInput.addValidator(new PKCS8Validator(MSGS.securityPrivateKeyFormat()));
+
             this.privateKeyInput.addKeyUpHandler(e -> {
                 this.privateKeyInput.validate();
                 setDirty(true);
             });
+
+            this.privateKeyInput.addBlurHandler(e -> {
+                this.privateKeyInput.validate();
+                setDirty(true);
+            });
+
             this.privateKeyInput.setVisibleLines(20);
         }
 
-        this.apply.addClickHandler(event -> {
+        this.applyButton.addClickHandler(event -> {
+
             final boolean isValid = isValid();
-            this.listener.onApply(isValid);
+
             if (isValid) {
                 if (this.type == Type.KEY_PAIR) {
                     storeKeyPair();
                 } else {
                     storeCertificate();
                 }
+                this.listener.onApply(isValid);
             }
         });
     }
@@ -207,7 +222,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                         this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
                             reset();
                             setDirty(false);
-                            listener.onKeystoreChanged();
+                            this.listener.onKeystoreChanged();
                         })))));
     }
 
@@ -217,7 +232,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                         this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
                             reset();
                             setDirty(false);
-                            listener.onKeystoreChanged();
+                            this.listener.onKeystoreChanged();
                         })))));
     }
 
@@ -229,7 +244,8 @@ public class KeyPairTabUi extends Composite implements Tab {
 
     @Override
     public void clear() {
-        // TODO Auto-generated method stub
+        // nothing to clear
 
     }
+
 }

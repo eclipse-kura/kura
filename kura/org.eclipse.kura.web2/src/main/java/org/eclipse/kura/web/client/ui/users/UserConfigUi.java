@@ -20,7 +20,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Picker;
 import org.eclipse.kura.web.client.ui.drivers.assets.BooleanInputCell;
-import org.eclipse.kura.web.client.util.PasswordStrengthValidators;
+import org.eclipse.kura.web.client.ui.validator.PasswordStrengthValidators;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.gwtbootstrap3.client.ui.Button;

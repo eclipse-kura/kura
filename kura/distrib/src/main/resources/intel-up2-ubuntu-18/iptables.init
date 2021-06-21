@@ -2,7 +2,6 @@
 :PREROUTING ACCEPT [0:0]
 :INPUT ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
-:PREROUTING ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
 :input-kura - [0:0]
 :output-kura - [0:0]

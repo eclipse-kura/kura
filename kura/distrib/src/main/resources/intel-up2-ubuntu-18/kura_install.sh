@@ -87,6 +87,17 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/dhcpd
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
+#set up bind/named
+cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
+mkdir -p /var/named
+chown -R bind /var/named
+cp ${INSTALL_DIR}/kura/install/named.ca /var/named/
+cp ${INSTALL_DIR}/kura/install/named.rfc1912.zones /etc/
+cp ${INSTALL_DIR}/kura/install/usr.sbin.named /etc/apparmor.d/
+if [ ! -f "/etc/bind/rndc.key" ] ; then
+    rndc-confgen -r /dev/urandom -a
+fi
+
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura

@@ -117,19 +117,6 @@
         .panel-footer {
         margin-left: 5vh;
         }
-        
-		.concurrencyNotification {
-		width: 100%;
-		height: 0;  
-		box-sizing: border-box;
-		color: white;
-		background: orange;
-		transition: height 2s;
-		}
-		
-		.centerText {
-		padding: 5px;
-		}
 	</ui:style>
 
 	<b:Container fluid="true">

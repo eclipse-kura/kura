@@ -55,6 +55,7 @@ import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter;
+import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.eclipse.kura.web.shared.service.GwtWireGraphService;
 import org.eclipse.kura.wire.WireHelperService;
@@ -137,7 +138,7 @@ public class GwtComponentServiceInternal {
     public static void updateComponentConfiguration(GwtConfigComponent gwtCompConfig) throws GwtKuraException {
 
         // TODO
-        postConcurrencyEvent(gwtCompConfig);
+        postConcurrentWriteEvent(gwtCompConfig);
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
@@ -155,7 +156,7 @@ public class GwtComponentServiceInternal {
         try {
             for (GwtConfigComponent gwtCompConfig : gwtCompConfigs) {
                 // TODO
-                postConcurrencyEvent(gwtCompConfig);
+                postConcurrentWriteEvent(gwtCompConfig);
                 componentConfigurations.add(getComponentConfiguration(cs, gwtCompConfig));
             }
             cs.updateConfigurations(componentConfigurations);
@@ -206,7 +207,7 @@ public class GwtComponentServiceInternal {
     private static void internalCreateFactoryComponent(String factoryPid, String pid, Map<String, Object> properties)
             throws GwtKuraException {
         // TODO
-        postConcurrencyEvent(factoryPid);
+        postConcurrentWriteEvent(factoryPid);
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
         try {
             cs.createFactoryConfiguration(factoryPid, pid, properties, true);
@@ -230,7 +231,7 @@ public class GwtComponentServiceInternal {
     public static void deleteFactoryConfiguration(String pid, boolean takeSnapshot) throws GwtKuraException {
 
         // TODO
-        postConcurrencyEvent(pid);
+        postConcurrentWriteEvent(pid);
 
         ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
 
@@ -730,23 +731,23 @@ public class GwtComponentServiceInternal {
         return result;
     }
 
-    private static void postConcurrencyEvent(GwtConfigComponent gwtCompConfig) {
+    private static void postConcurrentWriteEvent(GwtConfigComponent gwtCompConfig) {
         // if component is not a factory component, retrieve the componentId (=pid)
         if (gwtCompConfig.isFactoryComponent()) {
-            postConcurrencyEvent(gwtCompConfig.getFactoryId());
+            postConcurrentWriteEvent(gwtCompConfig.getFactoryId());
         } else {
-            postConcurrencyEvent(gwtCompConfig.getComponentId());
+            postConcurrentWriteEvent(gwtCompConfig.getComponentId());
         }
     }
 
-    private static void postConcurrencyEvent(String modifiedComponent) {
+    private static void postConcurrentWriteEvent(String modifiedComponent) {
         Optional<AuditContext> auditContext = AuditContext.current();
         if (auditContext.isPresent()) {
             String sessionId = auditContext.get().getProperties().get("session.id");
 
             Map<String, String> eventProps = new HashMap<>();
-            eventProps.put("session", sessionId);
-            eventProps.put("component", modifiedComponent);
+            eventProps.put(GwtEventInfo.CONCURRENT_WRITE_EVENT_SESSION, sessionId);
+            eventProps.put(GwtEventInfo.CONCURRENT_WRITE_EVENT_MODIFIED_COMPONENT, modifiedComponent);
 
             GwtComponentServiceInternal.eventAdmin
                     .postEvent(new Event(ForwardedEventTopic.CONCURRENT_WRITE_EVENT.toString(), eventProps));

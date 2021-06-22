@@ -199,9 +199,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @UiField
     Row mainContainer;
     @UiField
-    Row concurrencyNotification;
-    @UiField
-    Text concurrencyNotificationMessage;
+    DropdownNotification dropdownNotification;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -1035,24 +1033,15 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
         EventService.subscribe(ForwardedEventTopic.CONCURRENT_WRITE_EVENT, this::handleConcurrencyEvent);
     }
 
+    // TODO: removeme
     private static final Logger l = Logger.getLogger("");
 
     private void handleConcurrencyEvent(GwtEventInfo eventInfo) {
-        String modifiedComp = (String) eventInfo.getProperties().get("component");
+        String modifiedComp = (String) eventInfo.getProperties()
+                .get(GwtEventInfo.CONCURRENT_WRITE_EVENT_MODIFIED_COMPONENT);
 
         l.log(Level.SEVERE, "received concurrency event for component: " + modifiedComp);
-
-        this.concurrencyNotification.setHeight("30px");
-        this.concurrencyNotificationMessage.setText(MSGS.concurrentWriteNotification(modifiedComp));
-
-        new Timer() {
-
-            @Override
-            public void run() {
-                EntryClassUi.this.concurrencyNotification.setHeight("0px");
-            }
-
-        }.schedule(8000);
+        this.dropdownNotification.show(MSGS.concurrentWriteNotification(modifiedComp));
     }
 
     private void showStatusPanel() {

@@ -18,6 +18,8 @@ import java.util.Date;
 public class GwtEventInfo extends GwtBaseModel implements Serializable {
 
     private static final long serialVersionUID = 5806274412665387619L;
+    public static final String CONCURRENT_WRITE_EVENT_SESSION = "session";
+    public static final String CONCURRENT_WRITE_EVENT_MODIFIED_COMPONENT = "component";
 
     public GwtEventInfo() {
     }

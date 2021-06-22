@@ -279,11 +279,7 @@
 									</g:ScrollPanel>
 								</b:ModalBody>
 							</b:Modal>
-							<b:Row styleName='{style.concurrencyNotification}' ui:field='concurrencyNotification'>
-								<b.html:Paragraph styleName='{style.centerText}'>
-									<b.html:Text ui:field='concurrencyNotificationMessage' />
-								</b.html:Paragraph>
-							</b:Row>
+							<kura.ui:DropdownNotification ui:field="dropdownNotification" />
 							<b:Row addStyleNames='content-wrapper'>
 								<b:Column size="MD_10">
 									<b:Panel ui:field="contentPanel"

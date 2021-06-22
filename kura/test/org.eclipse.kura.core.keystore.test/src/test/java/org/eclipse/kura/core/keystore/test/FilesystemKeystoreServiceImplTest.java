@@ -161,6 +161,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -184,6 +185,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -204,7 +206,8 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
-
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+        
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -223,6 +226,8 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+        
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -245,7 +250,8 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
-
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+        
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -268,6 +274,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -290,6 +297,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -309,6 +317,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -328,6 +337,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -347,6 +357,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -366,6 +377,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -403,6 +415,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -422,6 +435,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -442,6 +456,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -461,6 +476,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -480,6 +496,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -499,6 +516,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -518,6 +536,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -537,6 +556,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -556,6 +576,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -576,6 +597,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -612,6 +634,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -631,6 +654,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -655,6 +679,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -679,6 +704,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -706,6 +732,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
@@ -748,6 +775,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
         ComponentContext componentContext = mock(ComponentContext.class);
 

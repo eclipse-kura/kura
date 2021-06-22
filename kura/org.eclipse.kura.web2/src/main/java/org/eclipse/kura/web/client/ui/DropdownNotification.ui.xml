@@ -20,17 +20,18 @@
     xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt">
     
     <ui:style>
-	    .dropdownNotification {
-			width: 100%;
-			height: 0;  
+		.dropdownNotification {
+			max-height: 0px;
 			box-sizing: border-box;
 			color: white;
 			background: orange;
-			transition: height 2s;
+			transition: max-height 3s;
 		}
-			
+		
 		.centerText {
-			padding: 5px;
+			max-width: 84%;
+			padding: 10px;
+			vertical-align: middle;
 		}
     </ui:style>
     

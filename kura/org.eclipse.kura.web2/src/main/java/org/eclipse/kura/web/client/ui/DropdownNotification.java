@@ -46,14 +46,14 @@ public class DropdownNotification extends Composite {
     }
 
     public void show(String message, int dismissAfterMs) {
-        this.dropdownNotification.setHeight("30px");
         this.dropdownNotificationMessage.setText(message);
+        this.dropdownNotification.getElement().setAttribute("style", "max-height:120px");
 
         new Timer() {
 
             @Override
             public void run() {
-                DropdownNotification.this.dropdownNotification.setHeight("0px");
+                DropdownNotification.this.dropdownNotification.getElement().setAttribute("style", "max-height:0px");
             }
 
         }.schedule(dismissAfterMs);

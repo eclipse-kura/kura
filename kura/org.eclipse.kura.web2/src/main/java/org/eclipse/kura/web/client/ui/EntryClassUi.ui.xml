@@ -113,7 +113,7 @@
 		white-space:
 		pre-wrap;
 		}
-        
+		
         .panel-footer {
         margin-left: 5vh;
         }
@@ -266,6 +266,7 @@
 									</g:ScrollPanel>
 								</b:ModalBody>
 							</b:Modal>
+							<kura.ui:DropdownNotification ui:field="dropdownNotification" />
 							<b:Row addStyleNames='content-wrapper'>
 								<b:Column size="MD_10">
 									<b:Panel ui:field="contentPanel"

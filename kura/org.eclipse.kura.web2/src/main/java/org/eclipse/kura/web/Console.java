@@ -348,6 +348,10 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         return this.appRoot;
     }
 
+    public EventAdmin getEventAdmin() {
+        return this.eventAdmin;
+    }
+
     public HttpSession createSession(final HttpServletRequest request) {
         final HttpSession session = request.getSession();
 

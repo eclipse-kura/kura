@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared;
 
+import org.eclipse.kura.core.configuration.ConfigurationChangeEvent;
+
 public enum ForwardedEventTopic {
 
     // This enum defines the subset of events that will be forwarded to the web ui
@@ -39,7 +41,9 @@ public enum ForwardedEventTopic {
     ROLE_CHANGED_SHORT("ROLE_CHANGED"),
     ROLE_REMOVED_SHORT("ROLE_REMOVED"),
 
-    TAMPER_EVENT("org/eclipse/kura/security/tamper/detection/TamperEvent/TAMPER_STATUS_CHANGED");
+    TAMPER_EVENT("org/eclipse/kura/security/tamper/detection/TamperEvent/TAMPER_STATUS_CHANGED"),
+
+    CONF_CHANGE_EVENT(ConfigurationChangeEvent.CONF_CHANGE_EVENT_TOPIC.toString());
 
     private final String topic;
 

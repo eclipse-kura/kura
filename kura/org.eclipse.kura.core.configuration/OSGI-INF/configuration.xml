@@ -20,6 +20,7 @@
       <provide interface="org.eclipse.kura.configuration.metatype.OCDService"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.configuration.ConfigurationService"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
    <reference name="ConfigurationAdmin"
               bind="setConfigurationAdmin"
               unbind="unsetConfigurationAdmin"

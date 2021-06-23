@@ -87,9 +87,9 @@ public class KeystoreRestService extends KeystoreRemoteService {
     @RolesAllowed("keystores")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String getCSR(CsrReadRequest csrReadRequest) {
+    public CsrResponse getCSR(CsrReadRequest csrReadRequest) {
         validate(csrReadRequest, BAD_GET_CSR_REQUEST_ERROR_MESSAGE);
-        return getCSRInternal(csrReadRequest);
+        return new CsrResponse(getCSRInternal(csrReadRequest));
     }
 
     @POST

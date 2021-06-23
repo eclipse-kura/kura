@@ -31,13 +31,13 @@ COMMIT
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
 :input-kura - [0:0]
-:forward-kura - [0:0]
 :output-kura - [0:0]
+:forward-kura - [0:0]
 :forward-kura-pf - [0:0]
 :forward-kura-ipf - [0:0]
 -I INPUT -j input-kura
--I OUTPUT -j output-kura
 -I FORWARD -j forward-kura
+-I OUTPUT -j output-kura
 -I forward-kura -j forward-kura-pf
 -I forward-kura -j forward-kura-ipf
 -A input-kura -i enp3s0 -p tcp -m tcp --dport 8000 -j ACCEPT

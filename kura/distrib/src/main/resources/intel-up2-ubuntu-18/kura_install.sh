@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -30,9 +30,6 @@ fi
 
 mkdir -p ${INSTALL_DIR}/kura/data
 
-#copy snapshot_0.xml
-cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
-
 # setup /etc/sysconfig folder for iptables configuration file
 if [ ! -d /etc/sysconfig ]; then
     mkdir /etc/sysconfig
@@ -61,11 +58,19 @@ cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/b
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
 #set up default firewall configuration
-cp /etc/sysconfig/iptables /etc/sysconfig/iptables.esfsave
-cp ${BASE_DIR}/${KURA_SYMLINK}/.data/iptables /etc/sysconfig/iptables
-sed -i "s|/bin/sh KURA_DIR|/bin/bash ${BASE_DIR}/${KURA_SYMLINK}|" /lib/systemd/system/firewall.service
+cp ${INSTALL_DIR}/kura/install/iptables.init ${INSTALL_DIR}/kura/.data/iptables
+chmod 644 ${INSTALL_DIR}/kura/.data/iptables
+cp ${INSTALL_DIR}/kura/.data/iptables /etc/sysconfig/iptables
+cp ${INSTALL_DIR}/kura/install/firewall.init ${INSTALL_DIR}/kura/bin/firewall
+chmod 755 ${INSTALL_DIR}/kura/bin/firewall
+cp ${INSTALL_DIR}/kura/install/firewall.service /lib/systemd/system/firewall.service
+chmod 644 /lib/systemd/system/firewall.service
+sed -i "s|/bin/sh KURA_DIR|/bin/bash ${INSTALL_DIR}/kura|" /lib/systemd/system/firewall.service
 systemctl daemon-reload
 systemctl enable firewall
+
+#copy snapshot_0.xml
+cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up networking configuration
 mac_addr=$(head -1 /sys/class/net/enp2s0/address | tr '[:lower:]' '[:upper:]')
@@ -88,8 +93,9 @@ mkdir -p /var/named
 chown -R bind /var/named
 cp ${INSTALL_DIR}/kura/install/named.ca /var/named/
 cp ${INSTALL_DIR}/kura/install/named.rfc1912.zones /etc/
+cp ${INSTALL_DIR}/kura/install/usr.sbin.named /etc/apparmor.d/
 if [ ! -f "/etc/bind/rndc.key" ] ; then
-	rndc-confgen -r /dev/urandom -a
+    rndc-confgen -r /dev/urandom -a
 fi
 
 #set up logrotate - no need to restart as it is a cronjob

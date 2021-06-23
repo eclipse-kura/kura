@@ -7,7 +7,7 @@ categories: [qa]
 QA Procedure
 ------------
 
-1. Download the desired build from [Hudson CI](https://hudson.eclipse.org/kura/)
+1. Download the desired build from [Eclipse Jenkins](https://ci.eclipse.org/kura/)
 1. Checkout the latest [QA spreadsheet]({{ site.baseurl }}/assets/qa/system-test/qa_kura.ods), make a copy and [name it properly](#file-naming-convention).
 1. Fill-in the details in the first ~20 rows
 1. Execute the tests

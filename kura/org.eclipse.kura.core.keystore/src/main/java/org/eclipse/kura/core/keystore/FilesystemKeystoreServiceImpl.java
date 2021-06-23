@@ -13,6 +13,7 @@
 package org.eclipse.kura.core.keystore;
 
 import static java.util.Objects.isNull;
+import static org.eclipse.kura.core.keystore.KeystoreServiceOptions.KEY_KEYSTORE_PASSWORD;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -93,7 +94,6 @@ import org.eclipse.kura.core.keystore.crl.CRLManagerOptions;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
-import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -103,14 +103,12 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
     private static final String KURA_SERVICE_PID = "kura.service.pid";
     private static final String PEM_CERTIFICATE_REQUEST_TYPE = "CERTIFICATE REQUEST";
-    private static final String KURA_HTTPS_KEY_STORE_PASSWORD_KEY = "kura.https.keyStorePassword";
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemKeystoreServiceImpl.class);
 
     private ComponentContext componentContext;
 
     private CryptoService cryptoService;
-    private SystemService systemService;
     private ConfigurationService configurationService;
     private EventAdmin eventAdmin;
 
@@ -132,10 +130,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
-    }
-
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
     }
 
     public void setConfigurationService(ConfigurationService configurationService) {
@@ -178,10 +172,16 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         if (!this.keystoreServiceOptions.equals(newOptions)) {
             logger.info("Perform update...");
-            this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
-            if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())) {
-                accessKeystore();
+
+            if (!this.keystoreServiceOptions.getKeystorePath().equals(newOptions.getKeystorePath())) {
+                updateKeystorePath(newOptions);
+            } else if (!Arrays.equals(this.keystoreServiceOptions.getKeystorePassword(this.cryptoService),
+                    newOptions.getKeystorePassword(this.cryptoService))) {
+                updateKeystorePassword(this.keystoreServiceOptions, newOptions);
             }
+
+            this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
+
         }
 
         final CRLManagerOptions newCRLManagerOptions = new CRLManagerOptions(properties);
@@ -193,6 +193,16 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
 
         logger.info("Bundle {} has updated!", properties.get(KURA_SERVICE_PID));
+    }
+
+    private void updateKeystorePath(KeystoreServiceOptions newOptions) {
+        if (!keystoreExists(newOptions.getKeystorePath())) {
+            return;
+        }
+
+        if (!isKeyStoreAccessible(newOptions.getKeystorePath(), newOptions.getKeystorePassword(this.cryptoService))) {
+            logger.warn("Keystore {} not accessible!", newOptions.getKeystorePath());
+        }
     }
 
     public void deactivate() {
@@ -217,24 +227,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         return result;
     }
 
-    private void accessKeystore() {
-        String keystorePath = this.keystoreServiceOptions.getKeystorePath();
-        if (!keystoreExists(keystorePath)) {
-            return;
-        }
-
-        char[] oldPassword = getOldKeystorePassword(keystorePath);
-        char[] newPassword = this.keystoreServiceOptions.getKeystorePassword(this.cryptoService);
-
-        if (!Arrays.equals(oldPassword, newPassword)) {
-            updateKeystorePassword(oldPassword, newPassword);
-        }
-    }
-
     private void changeDefaultKeystorePassword() {
 
-        char[] oldPassword = this.systemService.getProperties().getProperty(KURA_HTTPS_KEY_STORE_PASSWORD_KEY)
-                .toCharArray();
+        char[] oldPassword = this.keystoreServiceOptions.getKeystorePassword(this.cryptoService);
 
         if (isDefaultFromCrypto()) {
             oldPassword = this.cryptoService.getKeyStorePassword(this.keystoreServiceOptions.getKeystorePath());
@@ -245,7 +240,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         try {
             changeKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), oldPassword, newPassword);
 
-            this.cryptoService.setKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), newPassword);
+            Map<String, Object> props = new HashMap<>(this.keystoreServiceOptions.getProperties());
+            props.put(KEY_KEYSTORE_PASSWORD, new String(this.cryptoService.encryptAes(newPassword)));
+            this.keystoreServiceOptions = new KeystoreServiceOptions(props, this.cryptoService);
 
             updatePasswordInConfigService(newPassword);
         } catch (Exception e) {
@@ -324,11 +321,13 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         return ks;
     }
 
-    private void updateKeystorePassword(char[] oldPassword, char[] newPassword) {
+    private void updateKeystorePassword(KeystoreServiceOptions oldOptions, KeystoreServiceOptions newOptions) {
         try {
-            changeKeyStorePassword(oldPassword, newPassword);
+            changeKeyStorePassword(oldOptions.getKeystorePassword(this.cryptoService),
+                    newOptions.getKeystorePassword(this.cryptoService));
 
-            this.cryptoService.setKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), newPassword);
+            this.cryptoService.setKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(),
+                    newOptions.getKeystorePassword(this.cryptoService));
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | UnrecoverableEntryException
                 | IOException e) {
             logger.warn("Failed to change keystore password");
@@ -346,24 +345,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         updateKeyEntriesPasswords(keystore, oldPassword, newPassword);
         saveKeystore(keystore, newPassword);
-    }
-
-    private char[] getOldKeystorePassword(String keystorePath) {
-        char[] password = this.cryptoService.getKeyStorePassword(keystorePath);
-        if (password != null && isKeyStoreAccessible()) {
-            return password;
-        }
-
-        return this.keystoreServiceOptions.getKeystorePassword(this.cryptoService);
-    }
-
-    private boolean isKeyStoreAccessible() {
-        try {
-            getKeyStore();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     private static void updateKeyEntriesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)

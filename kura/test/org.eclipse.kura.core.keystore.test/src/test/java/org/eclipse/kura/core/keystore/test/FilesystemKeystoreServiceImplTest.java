@@ -52,7 +52,6 @@ import javax.security.auth.x500.X500Principal;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
@@ -207,7 +206,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -227,7 +226,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -251,7 +250,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -770,9 +769,6 @@ public class FilesystemKeystoreServiceImplTest {
         Properties systemServiceProperties = new Properties();
         systemServiceProperties.putAll(systemServiceMap);
 
-        SystemService systemService = mock(SystemService.class);
-        when(systemService.getProperties()).thenReturn(systemServiceProperties);
-
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
@@ -782,7 +778,6 @@ public class FilesystemKeystoreServiceImplTest {
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.setSystemService(systemService);
         keystoreService.activate(componentContext, properties);
 
         try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {

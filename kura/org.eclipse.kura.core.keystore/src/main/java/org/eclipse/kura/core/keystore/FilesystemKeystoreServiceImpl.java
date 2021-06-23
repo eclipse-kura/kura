@@ -195,16 +195,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         logger.info("Bundle {} has updated!", properties.get(KURA_SERVICE_PID));
     }
 
-    private void updateKeystorePath(KeystoreServiceOptions newOptions) {
-        if (!keystoreExists(newOptions.getKeystorePath())) {
-            return;
-        }
-
-        if (!isKeyStoreAccessible(newOptions.getKeystorePath(), newOptions.getKeystorePassword(this.cryptoService))) {
-            logger.warn("Keystore {} not accessible!", newOptions.getKeystorePath());
-        }
-    }
-
     public void deactivate() {
         logger.info("Bundle {} is deactivating!", this.keystoreServiceOptions.getProperties().get(KURA_SERVICE_PID));
 
@@ -225,6 +215,16 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
             result = true;
         }
         return result;
+    }
+    
+    private void updateKeystorePath(KeystoreServiceOptions newOptions) {
+        if (!keystoreExists(newOptions.getKeystorePath())) {
+            return;
+        }
+
+        if (!isKeyStoreAccessible(newOptions.getKeystorePath(), newOptions.getKeystorePassword(this.cryptoService))) {
+            logger.warn("Keystore {} not accessible!", newOptions.getKeystorePath());
+        }
     }
 
     private void changeDefaultKeystorePassword() {

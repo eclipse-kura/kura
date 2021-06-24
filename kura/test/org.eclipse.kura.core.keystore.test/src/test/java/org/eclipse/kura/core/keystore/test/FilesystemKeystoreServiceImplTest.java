@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -52,9 +51,9 @@ import javax.security.auth.x500.X500Principal;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 
@@ -67,6 +66,7 @@ public class FilesystemKeystoreServiceImplTest {
     private static final String KEY_RANDOMIZE_PASSWORD = "randomize.password";
 
     private static final String STORE_PATH = "target/key.store";
+    private static final String NEW_STORE_PATH = "target/newKey.store";
     private static final String STORE_PASS = "pass";
 
     private KeyStore store;
@@ -207,7 +207,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -227,7 +227,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -251,7 +251,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -765,15 +765,8 @@ public class FilesystemKeystoreServiceImplTest {
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
         properties.put(KEY_RANDOMIZE_PASSWORD, true);
 
-        Map<String, Object> systemServiceMap = new HashMap<>();
-        systemServiceMap.put("kura.https.keyStorePassword", STORE_PASS);
-        Properties systemServiceProperties = new Properties();
-        systemServiceProperties.putAll(systemServiceMap);
-
-        SystemService systemService = mock(SystemService.class);
-        when(systemService.getProperties()).thenReturn(systemServiceProperties);
-
         CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
         when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
         when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
 
@@ -782,13 +775,98 @@ public class FilesystemKeystoreServiceImplTest {
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
-        keystoreService.setSystemService(systemService);
         keystoreService.activate(componentContext, properties);
 
         try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {
             this.store.load(tsReadStream, STORE_PASS.toCharArray());
         }
 
+    }
+
+    @Test
+    public void testUpdatePassword() throws KuraException, GeneralSecurityException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+        properties.put(KEY_RANDOMIZE_PASSWORD, true);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.updated(properties);
+
+        try (InputStream tsReadStream = new FileInputStream(STORE_PATH);) {
+            this.store.load(tsReadStream, STORE_PASS.toCharArray());
+        }
+
+        assertNotNull(keystoreService.getKeyStore());
+    }
+    
+    @Test(expected=KuraException.class)
+    public void testUpdatePathNotExisting() throws KuraException, GeneralSecurityException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+        properties.put(KEY_RANDOMIZE_PASSWORD, true);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        Map<String, Object> newProps = new HashMap<>();
+        newProps.put(KEY_KEYSTORE_PATH, "target/key2.store");
+        newProps.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+        newProps.put(KEY_RANDOMIZE_PASSWORD, false);
+        keystoreService.updated(newProps);
+
+        keystoreService.getKeyStore();
+    }
+    
+    @Test
+    public void testUpdatePathExisting() throws KuraException, GeneralSecurityException, IOException {
+        try (OutputStream os = new FileOutputStream(NEW_STORE_PATH)) {
+            this.store.store(os, STORE_PASS.toCharArray());
+        }
+        
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+        properties.put(KEY_RANDOMIZE_PASSWORD, true);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        Map<String, Object> newProps = new HashMap<>();
+        newProps.put(KEY_KEYSTORE_PATH, NEW_STORE_PATH);
+        newProps.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+        newProps.put(KEY_RANDOMIZE_PASSWORD, false);
+        keystoreService.updated(newProps);
+
+        assertNotNull(keystoreService.getKeyStore());
     }
 
 }

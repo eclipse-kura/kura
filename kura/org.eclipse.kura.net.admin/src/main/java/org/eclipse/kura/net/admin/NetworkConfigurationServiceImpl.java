@@ -26,6 +26,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -53,6 +54,8 @@ import org.eclipse.kura.net.EthernetInterface;
 import org.eclipse.kura.net.LoopbackInterface;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
+import org.eclipse.kura.net.NetInterfaceAddressConfig;
+import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
@@ -383,11 +386,29 @@ public class NetworkConfigurationServiceImpl
                 visitor.setExecutorService(this.executorService);
                 untrackedNetworkConfiguration.accept(visitor);
             }
-            untrackedNetworkConfiguration.getNetInterfaceConfigs().forEach(networkConfiguration::addNetInterfaceConfig);
+            // add untracked network interfaces to the networkConfiguration and replace ppp interfaces if needed
+            untrackedNetworkConfiguration.getNetInterfaceConfigs().forEach(
+                    netInterfaceConfig -> addNetworkInterfaceConfiguration(netInterfaceConfig, networkConfiguration));
         }
+
+        // remove not active interfaces from properties
+        removeNotActiveNetworkInterfaces(networkConfiguration);
 
         this.properties.forEach((key, value) -> logger.debug("{} {}", key, value));
         return networkConfiguration;
+    }
+
+    private void addNetworkInterfaceConfiguration(
+            NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+            NetworkConfiguration networkConfiguration) {
+        if (netInterfaceConfig.getType().equals(NetInterfaceType.MODEM)
+                && !Character.isDigit(netInterfaceConfig.getName().charAt(0))) {
+            // remove unconfigured ppp interfaces
+            String name = netInterfaceConfig.getUsbDevice().getUsbBusNumber() + "-"
+                    + netInterfaceConfig.getUsbDevice().getUsbDevicePath();
+            networkConfiguration.removeNetConfig(name);
+        }
+        networkConfiguration.addNetInterfaceConfig(netInterfaceConfig);
     }
 
     private boolean shouldSkipNetworkConfiguration(String interfaceName) {
@@ -460,9 +481,44 @@ public class NetworkConfigurationServiceImpl
         Map<String, NetInterface<? extends NetInterfaceAddress>> untrackedNetworkInterfacesMap = new HashMap<>();
         allNetworkInterfaces.stream()
                 .filter(netInterface -> networkConfiguration.getNetInterfaceConfig(netInterface.getName()) == null)
-                .forEach(netInterface -> untrackedNetworkInterfacesMap.put(netInterface.getName(), netInterface));
-
+                .forEach(netInterface -> {
+                    if (!Character.isDigit(netInterface.getName().charAt(0))) {
+                        untrackedNetworkInterfacesMap.put(netInterface.getName(), netInterface);
+                    } else {
+                        // Filter ppp interfaces when it is already in the networkConfiguration
+                        if (!isModemTracked(networkConfiguration, netInterface)) {
+                            untrackedNetworkInterfacesMap.put(netInterface.getName(), netInterface);
+                        }
+                    }
+                });
         return untrackedNetworkInterfacesMap;
+    }
+
+    private boolean isModemTracked(NetworkConfiguration networkConfiguration,
+            NetInterface<? extends NetInterfaceAddress> netInterface) {
+        return networkConfiguration.getNetInterfaceConfigs().stream().filter(config -> {
+            if (config.getType().equals(NetInterfaceType.MODEM)) {
+                String name = config.getUsbDevice().getUsbBusNumber() + "-" + config.getUsbDevice().getUsbDevicePath();
+                return netInterface.getName().equals(name);
+            } else {
+                return false;
+            }
+        }).count() != 0;
+    }
+
+    private void removeNotActiveNetworkInterfaces(NetworkConfiguration networkConfiguration) throws KuraException {
+        List<NetInterface<? extends NetInterfaceAddress>> allNetworkInterfaces = this.networkService
+                .getNetworkInterfaces();
+        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> notActiveInterfacesConfigs = networkConfiguration
+                .getNetInterfaceConfigs().stream().filter(config -> {
+                    for (NetInterface<? extends NetInterfaceAddress> netInterface : allNetworkInterfaces) {
+                        if (netInterface.getName().equals(config.getName())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }).collect(Collectors.toList());
+        notActiveInterfacesConfigs.forEach(networkConfiguration::removeNetInterfaceConfig);
     }
 
     @SuppressWarnings("checkstyle:methodLength")

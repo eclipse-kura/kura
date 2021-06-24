@@ -455,6 +455,15 @@ public class NetworkConfiguration {
         return true;
     }
 
+    public void removeNetInterfaceConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        removeNetConfig(netInterfaceConfig.getName());
+    }
+
+    public void removeNetConfig(String interfaceName) {
+        this.netInterfaceConfigs.remove(interfaceName);
+        this.recomputeProperties = true;
+    }
+
     // ---------------------------------------------------------------
     //
     // Private Methods

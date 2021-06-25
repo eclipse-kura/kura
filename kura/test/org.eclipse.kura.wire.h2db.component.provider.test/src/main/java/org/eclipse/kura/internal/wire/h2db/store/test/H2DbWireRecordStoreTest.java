@@ -202,6 +202,10 @@ public class H2DbWireRecordStoreTest {
         resultSet.next();
         int count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", maxSize, count);
+        
+        resultSet = connection.prepareStatement("SELECT ID FROM " + tableName + " ORDER BY ID ASC LIMIT 1").executeQuery();
+        resultSet.next();
+        int oldID = resultSet.getInt(1);
 
         // store a few records
         for (int i = 0; i < 5; i++) {
@@ -218,6 +222,12 @@ public class H2DbWireRecordStoreTest {
         resultSet.next();
         count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", cleanupSize + 5L, count);
+        
+        resultSet = connection.prepareStatement("SELECT ID FROM " + tableName + " ORDER BY ID ASC LIMIT 1").executeQuery();
+        resultSet.next();
+        int newID = resultSet.getInt(1);
+        
+        assertTrue("Cleanup remove failure", newID > oldID);
     }
 
     public void bindDbstore(WireComponent dbstore) {

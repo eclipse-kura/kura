@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -79,7 +79,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
     private static final String SQL_ROW_COUNT_TABLE = "SELECT COUNT(*) FROM {0};";
 
-    private static final String SQL_DELETE_RANGE_TABLE = "DELETE FROM {0} WHERE rownum() <= (SELECT count(*) FROM {0}) - {1};";
+    private static final String SQL_DELETE_RANGE_TABLE = "DELETE FROM {0} WHERE ID IN (SELECT ID FROM {0} ORDER BY ID ASC LIMIT {1});";
 
     private static final String SQL_DROP_COLUMN = "ALTER TABLE {0} DROP COLUMN {1};";
 
@@ -195,6 +195,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     private void truncate(final int noOfRecordsToKeep) {
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
+        final int tableSize = this.wireRecordStoreOptions.getMaximumTableSize();
 
         try {
             this.dbHelper.withConnection(c -> {
@@ -209,7 +210,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                         } else {
                             logger.info("Partially emptying table {}", sqlTableName);
                             this.dbHelper.execute(c, MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
-                                    Integer.toString(noOfRecordsToKeep)));
+                                    Integer.toString(tableSize - noOfRecordsToKeep)));
                         }
                     }
                 }

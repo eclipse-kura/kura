@@ -146,7 +146,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     //
     // ----------------------------------------------------------------
 
-    public synchronized void activate(ComponentContext context, Map<String, Object> properties) {
+    public void activate(ComponentContext context, Map<String, Object> properties) {
         logger.info("Bundle {} is starting!", properties.get(KURA_SERVICE_PID));
         this.componentContext = context;
 
@@ -216,7 +216,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
         return result;
     }
-    
+
     private void updateKeystorePath(KeystoreServiceOptions newOptions) {
         if (!keystoreExists(newOptions.getKeystorePath())) {
             return;
@@ -250,8 +250,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
     }
 
-    private void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword) throws IOException,
-            NoSuchAlgorithmException, CertificateException, KeyStoreException, UnrecoverableEntryException {
+    private synchronized void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
+            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException,
+            UnrecoverableEntryException {
 
         KeyStore keystore = loadKeystore(location, oldPassword);
 
@@ -362,7 +363,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     }
 
     @Override
-    public KeyStore getKeyStore() throws KuraException {
+    public synchronized KeyStore getKeyStore() throws KuraException {
         KeyStore ks = null;
         try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath());) {
             ks = KeyStore.getInstance(KeyStore.getDefaultType());

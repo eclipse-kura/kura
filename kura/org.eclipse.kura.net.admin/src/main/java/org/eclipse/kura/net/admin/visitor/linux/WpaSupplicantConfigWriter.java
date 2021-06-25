@@ -36,7 +36,6 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -124,9 +123,9 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         return s;
     }
 
-    protected void setKuranetProperty(String key, String value) throws IOException, KuraException {
-        KuranetConfig.setProperty(key, value);
-    }
+    // protected void setKuranetProperty(String key, String value) throws IOException, KuraException {
+    // KuranetConfig.setProperty(key, value);
+    // }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
@@ -179,21 +178,21 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         if (wifiMode == WifiMode.INFRA) {
             if (infraConfig != null) {
-                StringBuilder key = new StringBuilder().append("net.interface.").append(interfaceName)
-                        .append(".config.wifi.infra.pingAccessPoint");
-                try {
-                    setKuranetProperty(key.toString(), Boolean.toString(infraConfig.pingAccessPoint()));
-                } catch (IOException e) {
-                    logger.warn("Error setting KuranetConfig property", e);
-                }
-
-                key = new StringBuilder().append("net.interface.").append(interfaceName)
-                        .append(".config.wifi.infra.ignoreSSID");
-                try {
-                    setKuranetProperty(key.toString(), Boolean.toString(infraConfig.ignoreSSID()));
-                } catch (IOException e) {
-                    logger.warn("Error setting KuranetConfig property", e);
-                }
+                // StringBuilder key = new StringBuilder().append("net.interface.").append(interfaceName)
+                // .append(".config.wifi.infra.pingAccessPoint");
+                // try {
+                // setKuranetProperty(key.toString(), Boolean.toString(infraConfig.pingAccessPoint()));
+                // } catch (IOException e) {
+                // logger.warn("Error setting KuranetConfig property", e);
+                // }
+                //
+                // key = new StringBuilder().append("net.interface.").append(interfaceName)
+                // .append(".config.wifi.infra.ignoreSSID");
+                // try {
+                // setKuranetProperty(key.toString(), Boolean.toString(infraConfig.ignoreSSID()));
+                // } catch (IOException e) {
+                // logger.warn("Error setting KuranetConfig property", e);
+                // }
                 wpaSupplicantConfig = infraConfig;
             } else {
                 logger.debug("Not updating wpa_supplicant config - wifi mode is {} but the infra config is null",
@@ -245,12 +244,12 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         logger.debug("Store wifiMode driver: {}", wifiConfig.getDriver());
         StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi."
                 + wifiConfig.getMode().toString().toLowerCase() + ".driver");
-        try {
-            setKuranetProperty(key.toString(), wifiConfig.getDriver());
-        } catch (Exception e) {
-            logger.error("Failed to save kuranet config", e);
-            throw KuraException.internalError(e);
-        }
+        // try {
+        // setKuranetProperty(key.toString(), wifiConfig.getDriver());
+        // } catch (Exception e) {
+        // logger.error("Failed to save kuranet config", e);
+        // throw KuraException.internalError(e);
+        // }
 
         String fileAsString;
         if (wifiConfig.getSecurity() == WifiSecurity.SECURITY_WEP) {

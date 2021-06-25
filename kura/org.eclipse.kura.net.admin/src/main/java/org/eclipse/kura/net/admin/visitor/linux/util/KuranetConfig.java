@@ -13,15 +13,6 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
-
-import org.apache.commons.io.FileUtils;
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -58,98 +49,98 @@ public class KuranetConfig {
             ctx.ungetService(systemServiceRef);
         }
     }
-    
+
     private KuranetConfig() {
-        
+
     }
 
-    public static Properties getProperties() {
-        Properties kuraExtendedProps = new Properties();
-
-        logger.debug("Getting {}", KURANET_FILENAME);
-
-        File kuranetFile = new File(KURANET_FILENAME);
-
-        if (kuranetFile.exists()) {
-            // found our match so load the properties
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(kuranetFile);
-                kuraExtendedProps.load(fis);
-            } catch (Exception e) {
-                logger.error("Could not load {}", KURANET_FILENAME, e);
-            } finally {
-                if (null != fis) {
-                    try {
-                        fis.close();
-                    } catch (IOException e) {
-                        logger.error("Could not load {}", KURANET_FILENAME, e);
-                    }
-                }
-            }
-        } else {
-            logger.debug("File does not exist: {}", KURANET_FILENAME);
-        }
-
-        return kuraExtendedProps;
-    }
-
-    public static String getProperty(String key) {
-        Properties props = KuranetConfig.getProperties();
-        String value = props.getProperty(key);
-        logger.debug("Got property {} :: {}", key, value);
-        return value;
-    }
-
-    public static void storeProperties(Properties props) throws IOException, KuraException {
-        Properties oldProperties = KuranetConfig.getProperties();
-
-        if (!oldProperties.equals(props)) {
-            FileOutputStream fos = null;
-            try {
-                fos = new FileOutputStream(KURANET_TMP_FILENAME);
-                props.store(fos, null);
-                fos.flush();
-                fos.getFD().sync();
-
-                // move the file if we made it this far
-                File tmpFile = new File(KURANET_TMP_FILENAME);
-                File file = new File(KURANET_FILENAME);
-                if (!FileUtils.contentEquals(tmpFile, file)) {
-                    if (tmpFile.renameTo(file)) {
-                        logger.trace("Successfully wrote kuranet props file");
-                    } else {
-                        logger.error("Failed to write kuranet props file");
-                        throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
-                                "error while building up new configuration file for kuranet props");
-                    }
-                } else {
-                    logger.info("Not rewriting kuranet props file because it is the same");
-                }
-            } finally {
-                if (fos != null) {
-                    fos.close();
-                }
-            }
-        }
-    }
-
-    public static void setProperty(String key, String value) throws IOException, KuraException {
-        logger.debug("Setting property " + key + " :: " + value);
-        Properties properties = KuranetConfig.getProperties();
-
-        properties.setProperty(key, value);
-        KuranetConfig.storeProperties(properties);
-    }
-
-    public static void deleteProperty(String key) throws IOException, KuraException {
-        Properties properties = KuranetConfig.getProperties();
-        if (properties.containsKey(key)) {
-            logger.debug("Deleting property {}", key);
-            properties.remove(key);
-            KuranetConfig.storeProperties(properties);
-        } else {
-            logger.debug("Property does not exist {}", key);
-        }
-    }
+    // public static Properties getProperties() {
+    // Properties kuraExtendedProps = new Properties();
+    //
+    // logger.debug("Getting {}", KURANET_FILENAME);
+    //
+    // File kuranetFile = new File(KURANET_FILENAME);
+    //
+    // if (kuranetFile.exists()) {
+    // // found our match so load the properties
+    // FileInputStream fis = null;
+    // try {
+    // fis = new FileInputStream(kuranetFile);
+    // kuraExtendedProps.load(fis);
+    // } catch (Exception e) {
+    // logger.error("Could not load {}", KURANET_FILENAME, e);
+    // } finally {
+    // if (null != fis) {
+    // try {
+    // fis.close();
+    // } catch (IOException e) {
+    // logger.error("Could not load {}", KURANET_FILENAME, e);
+    // }
+    // }
+    // }
+    // } else {
+    // logger.debug("File does not exist: {}", KURANET_FILENAME);
+    // }
+    //
+    // return kuraExtendedProps;
+    // }
+    //
+    // public static String getProperty(String key) {
+    // Properties props = KuranetConfig.getProperties();
+    // String value = props.getProperty(key);
+    // logger.debug("Got property {} :: {}", key, value);
+    // return value;
+    // }
+    //
+    // public static void storeProperties(Properties props) throws IOException, KuraException {
+    // Properties oldProperties = KuranetConfig.getProperties();
+    //
+    // if (!oldProperties.equals(props)) {
+    // FileOutputStream fos = null;
+    // try {
+    // fos = new FileOutputStream(KURANET_TMP_FILENAME);
+    // props.store(fos, null);
+    // fos.flush();
+    // fos.getFD().sync();
+    //
+    // // move the file if we made it this far
+    // File tmpFile = new File(KURANET_TMP_FILENAME);
+    // File file = new File(KURANET_FILENAME);
+    // if (!FileUtils.contentEquals(tmpFile, file)) {
+    // if (tmpFile.renameTo(file)) {
+    // logger.trace("Successfully wrote kuranet props file");
+    // } else {
+    // logger.error("Failed to write kuranet props file");
+    // throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
+    // "error while building up new configuration file for kuranet props");
+    // }
+    // } else {
+    // logger.info("Not rewriting kuranet props file because it is the same");
+    // }
+    // } finally {
+    // if (fos != null) {
+    // fos.close();
+    // }
+    // }
+    // }
+    // }
+    //
+    // public static void setProperty(String key, String value) throws IOException, KuraException {
+    // logger.debug("Setting property " + key + " :: " + value);
+    // Properties properties = KuranetConfig.getProperties();
+    //
+    // properties.setProperty(key, value);
+    // KuranetConfig.storeProperties(properties);
+    // }
+    //
+    // public static void deleteProperty(String key) throws IOException, KuraException {
+    // Properties properties = KuranetConfig.getProperties();
+    // if (properties.containsKey(key)) {
+    // logger.debug("Deleting property {}", key);
+    // properties.remove(key);
+    // KuranetConfig.storeProperties(properties);
+    // } else {
+    // logger.debug("Property does not exist {}", key);
+    // }
+    // }
 }

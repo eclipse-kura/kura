@@ -37,7 +37,6 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -85,7 +84,7 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
 
-        Properties kuraExtendedProps = getKuranetProperties();
+        // Properties kuraExtendedProps = getKuranetProperties();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             String interfaceName = netInterfaceConfig.getName();
@@ -98,10 +97,13 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
             }
 
             Properties kuraProps = netConfigManager.read(interfaceName);
-            kuraExtendedProps.put("net.interface." + interfaceName + ".config.virtual",
+            kuraProps.put("net.interface." + interfaceName + ".config.virtual",
                     String.valueOf(netInterfaceConfig.isVirtual()));
+            // kuraExtendedProps.put("net.interface." + interfaceName + ".config.virtual",
+            // String.valueOf(netInterfaceConfig.isVirtual()));
 
-            IfaceConfig ifaceConfig = getIfaceConfig(interfaceName, kuraProps, kuraExtendedProps);
+            // IfaceConfig ifaceConfig = getIfaceConfig(interfaceName, kuraProps, kuraExtendedProps);
+            IfaceConfig ifaceConfig = getIfaceConfig(interfaceName, kuraProps);
 
             NetInterfaceAddressConfig netInterfaceAddressConfig = netInterfaceConfig.getNetInterfaceAddresses().get(0);
             if (netInterfaceAddressConfig == null) {
@@ -121,15 +123,17 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private IfaceConfig getIfaceConfig(String ifaceName, Properties kuraProps, Properties kuraExtendedProps)
-            throws KuraException {
+    // private IfaceConfig getIfaceConfig(String ifaceName, Properties kuraProps, Properties kuraExtendedProps)
+    // throws KuraException {
+    private IfaceConfig getIfaceConfig(String ifaceName, Properties kuraProps) throws KuraException {
         boolean autoConnect = false;
         boolean dhcp = false;
         IP4Address address = null;
         String prefixString = null;
         String netmask = null;
         String gateway = null;
-        NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(ifaceName, kuraExtendedProps);
+        // NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(ifaceName, kuraExtendedProps);
+        NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(ifaceName, kuraProps);
         if (kuraProps != null) {
             autoConnect = "yes".equals(kuraProps.getProperty(ONBOOT_PROP_NAME));
             boolean defroute = "yes".equals(kuraProps.getProperty(DEFROUTE_PROP_NAME));
@@ -241,17 +245,28 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    private NetInterfaceStatus getNetInterfaceStatus(String ifaceName, Properties kuraExtendedProps) {
+    // private NetInterfaceStatus getNetInterfaceStatus(String ifaceName, Properties kuraExtendedProps) {
+    // NetInterfaceStatus netInterfaceStatus;
+    // StringBuilder sb = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.ip4.status");
+    // if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+    // netInterfaceStatus = NetInterfaceStatus.valueOf(kuraExtendedProps.getProperty(sb.toString()));
+    // } else {
+    // if (isVirtual(ifaceName, kuraExtendedProps)) {
+    // netInterfaceStatus = NetInterfaceStatus.valueOf(systemService.getNetVirtualDevicesConfig());
+    // } else {
+    // netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+    // }
+    // }
+    // logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, ifaceName);
+    // return netInterfaceStatus;
+    // }
+
+    private NetInterfaceStatus getNetInterfaceStatus(String ifaceName, Properties kuraProps) {
         NetInterfaceStatus netInterfaceStatus;
-        StringBuilder sb = new StringBuilder().append("net.interface.").append(ifaceName).append(".config.ip4.status");
-        if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
-            netInterfaceStatus = NetInterfaceStatus.valueOf(kuraExtendedProps.getProperty(sb.toString()));
+        if (isVirtual(ifaceName, kuraProps)) {
+            netInterfaceStatus = NetInterfaceStatus.valueOf(systemService.getNetVirtualDevicesConfig());
         } else {
-            if (isVirtual(ifaceName, kuraExtendedProps)) {
-                netInterfaceStatus = NetInterfaceStatus.valueOf(systemService.getNetVirtualDevicesConfig());
-            } else {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-            }
+            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
         }
         logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, ifaceName);
         return netInterfaceStatus;
@@ -347,9 +362,9 @@ public class IfcfgConfigReader implements NetworkConfigurationVisitor {
         return dnsServers;
     }
 
-    protected Properties getKuranetProperties() {
-        return KuranetConfig.getProperties();
-    }
+    // protected Properties getKuranetProperties() {
+    // return KuranetConfig.getProperties();
+    // }
 
     private class IfaceConfig {
 

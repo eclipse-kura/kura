@@ -15,12 +15,8 @@ package org.eclipse.kura.net.admin.visitor.linux;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
@@ -28,7 +24,6 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
-import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -38,7 +33,6 @@ import org.eclipse.kura.net.admin.modem.PppPeer;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
 import org.eclipse.kura.net.admin.util.LinuxFileUtil;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.usb.UsbDevice;
@@ -108,7 +102,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                 modemNetInterfaceNames.add(netInterfaceConfig.getName());
             }
         }
-        removeKuraExtendedCellularConfig(modemNetInterfaceNames);
+        // removeKuraExtendedCellularConfig(modemNetInterfaceNames);
     }
 
     @SuppressWarnings("checkstyle:methodLength")
@@ -140,7 +134,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         }
 
         // Save the status and priority
-        IfcfgConfigWriter.writeKuraExtendedConfig(modemInterfaceConfig);
+        // IfcfgConfigWriter.writeKuraExtendedConfig(modemInterfaceConfig);
 
         Class<? extends ModemPppConfigGenerator> configClass = null;
         UsbDevice usbDevice = modemInterfaceConfig.getUsbDevice();
@@ -158,53 +152,53 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         String pppLogfile = formPppLogFilename(usbDevice);
         String chatFilename = formChatFilename(usbDevice);
         String disconnectFilename = formDisconnectFilename(usbDevice);
-
-        // Cleanup values associated with the old name if the interface name has changed
-        if (!oldInterfaceName.equals(newInterfaceName)) {
-            try {
-                // Remove the old ppp peers symlink
-                logger.debug("Removing old symlinks to {}", pppPeerFilename);
-                removeSymbolicLinks(pppPeerFilename, OS_PEERS_DIRECTORY);
-
-                // Remove the old modem identifier
-                StringBuilder key = new StringBuilder("net.interface.").append(oldInterfaceName)
-                        .append(".modem.identifier");
-                logger.debug("Removing modem identifier for {}", oldInterfaceName);
-                KuranetConfig.deleteProperty(key.toString());
-
-                // Remove custom dns servers
-                key = new StringBuilder("net.interface.").append(oldInterfaceName).append(".config.dnsServers");
-                logger.debug("Removing dns servers for {}", oldInterfaceName);
-                KuranetConfig.deleteProperty(key.toString());
-
-                // Remove gpsEnabled
-                key = new StringBuilder().append("net.interface.").append(oldInterfaceName)
-                        .append(".config.gpsEnabled");
-                logger.debug("Removing gpsEnabled for {}", oldInterfaceName);
-                KuranetConfig.deleteProperty(key.toString());
-
-                // Remove diversityEnabled
-                key = new StringBuilder().append("net.interface.").append(oldInterfaceName)
-                        .append(".config.diversityEnabled");
-                logger.debug("Removing diversityEnabled for {}", oldInterfaceName);
-                KuranetConfig.deleteProperty(key.toString());
-
-                // Remove apn
-                key = new StringBuilder().append("net.interface.").append(oldInterfaceName).append(".config.apn");
-                logger.debug("Removing apn for {}", oldInterfaceName);
-                KuranetConfig.deleteProperty(key.toString());
-
-                // Remove pdpType
-                key = new StringBuilder().append("net.interface.").append(oldInterfaceName).append(".config.pdpType");
-                logger.debug("Removing pdpType for {}", oldInterfaceName);
-                KuranetConfig.deleteProperty(key.toString());
-
-                // Remove status
-                IfcfgConfigWriter.removeKuraExtendedConfig(oldInterfaceName);
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
-        }
+        //
+        // // Cleanup values associated with the old name if the interface name has changed
+        // if (!oldInterfaceName.equals(newInterfaceName)) {
+        // try {
+        // // Remove the old ppp peers symlink
+        // logger.debug("Removing old symlinks to {}", pppPeerFilename);
+        // removeSymbolicLinks(pppPeerFilename, OS_PEERS_DIRECTORY);
+        //
+        // // Remove the old modem identifier
+        // StringBuilder key = new StringBuilder("net.interface.").append(oldInterfaceName)
+        // .append(".modem.identifier");
+        // logger.debug("Removing modem identifier for {}", oldInterfaceName);
+        // KuranetConfig.deleteProperty(key.toString());
+        //
+        // // Remove custom dns servers
+        // key = new StringBuilder("net.interface.").append(oldInterfaceName).append(".config.dnsServers");
+        // logger.debug("Removing dns servers for {}", oldInterfaceName);
+        // KuranetConfig.deleteProperty(key.toString());
+        //
+        // // Remove gpsEnabled
+        // key = new StringBuilder().append("net.interface.").append(oldInterfaceName)
+        // .append(".config.gpsEnabled");
+        // logger.debug("Removing gpsEnabled for {}", oldInterfaceName);
+        // KuranetConfig.deleteProperty(key.toString());
+        //
+        // // Remove diversityEnabled
+        // key = new StringBuilder().append("net.interface.").append(oldInterfaceName)
+        // .append(".config.diversityEnabled");
+        // logger.debug("Removing diversityEnabled for {}", oldInterfaceName);
+        // KuranetConfig.deleteProperty(key.toString());
+        //
+        // // Remove apn
+        // key = new StringBuilder().append("net.interface.").append(oldInterfaceName).append(".config.apn");
+        // logger.debug("Removing apn for {}", oldInterfaceName);
+        // KuranetConfig.deleteProperty(key.toString());
+        //
+        // // Remove pdpType
+        // key = new StringBuilder().append("net.interface.").append(oldInterfaceName).append(".config.pdpType");
+        // logger.debug("Removing pdpType for {}", oldInterfaceName);
+        // KuranetConfig.deleteProperty(key.toString());
+        //
+        // // Remove status
+        // IfcfgConfigWriter.removeKuraExtendedConfig(oldInterfaceName);
+        // } catch (IOException e) {
+        // throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        // }
+        // }
 
         if (configClass != null) {
             try {
@@ -212,34 +206,37 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
 
                 if (modemConfig != null) {
 
-                    String modemIdentifier = modemInterfaceConfig.getModemIdentifier();
-                    if (modemIdentifier != null) {
-                        StringBuilder key = new StringBuilder("net.interface.").append(modemInterfaceConfig.getName())
-                                .append(".modem.identifier");
-                        logger.debug("Storing modem identifier {} using key: {}", modemIdentifier, key);
-                        KuranetConfig.setProperty(key.toString(), modemIdentifier);
-                    }
-
-                    final StringBuilder gpsEnabledKey = new StringBuilder().append("net.interface.")
-                            .append(newInterfaceName).append(".config.gpsEnabled");
-                    logger.debug("Setting gpsEnabled for {}", newInterfaceName);
-                    KuranetConfig.setProperty(gpsEnabledKey.toString(), Boolean.toString(modemConfig.isGpsEnabled()));
-
-                    final StringBuilder diversityEnabledKey = new StringBuilder().append("net.interface.")
-                            .append(newInterfaceName).append(".config.diversityEnabled");
-                    logger.debug("Setting diversityEnabled for {}", newInterfaceName);
-                    KuranetConfig.setProperty(diversityEnabledKey.toString(),
-                            Boolean.toString(modemConfig.isDiversityEnabled()));
-
-                    final StringBuilder apnKey = new StringBuilder().append("net.interface.").append(newInterfaceName)
-                            .append(".config.apn");
-                    logger.debug("Setting apn for {}", newInterfaceName);
-                    KuranetConfig.setProperty(apnKey.toString(), modemConfig.getApn());
-
-                    final StringBuilder pdpTypeKey = new StringBuilder().append("net.interface.")
-                            .append(newInterfaceName).append(".config.pdpType");
-                    logger.debug("Setting pdpType for {}", newInterfaceName);
-                    KuranetConfig.setProperty(pdpTypeKey.toString(), modemConfig.getPdpType().name());
+                    // String modemIdentifier = modemInterfaceConfig.getModemIdentifier();
+                    // if (modemIdentifier != null) {
+                    // StringBuilder key = new StringBuilder("net.interface.").append(modemInterfaceConfig.getName())
+                    // .append(".modem.identifier");
+                    // logger.debug("Storing modem identifier {} using key: {}", modemIdentifier, key);
+                    // KuranetConfig.setProperty(key.toString(), modemIdentifier);
+                    // }
+                    //
+                    // final StringBuilder gpsEnabledKey = new StringBuilder().append("net.interface.")
+                    // .append(newInterfaceName).append(".config.gpsEnabled");
+                    // logger.debug("Setting gpsEnabled for {}", newInterfaceName);
+                    // KuranetConfig.setProperty(gpsEnabledKey.toString(),
+                    // Boolean.toString(modemConfig.isGpsEnabled()));
+                    //
+                    // final StringBuilder diversityEnabledKey = new StringBuilder().append("net.interface.")
+                    // .append(newInterfaceName).append(".config.diversityEnabled");
+                    // logger.debug("Setting diversityEnabled for {}", newInterfaceName);
+                    // KuranetConfig.setProperty(diversityEnabledKey.toString(),
+                    // Boolean.toString(modemConfig.isDiversityEnabled()));
+                    //
+                    // final StringBuilder apnKey = new
+                    // StringBuilder().append("net.interface.").append(newInterfaceName)
+                    // .append(".config.apn");
+                    // logger.debug("Setting apn for {}", newInterfaceName);
+                    // KuranetConfig.setProperty(apnKey.toString(), modemConfig.getApn());
+                    //
+                    // final StringBuilder pdpTypeKey = new
+                    // StringBuilder().append("net.interface.").append(newInterfaceName)
+                    // .append(".config.pdpType");
+                    // logger.debug("Setting pdpType for {}", newInterfaceName);
+                    // KuranetConfig.setProperty(pdpTypeKey.toString(), modemConfig.getPdpType().name());
 
                     logger.debug("Writing connect scripts for {} using {}", modemInterfaceConfig.getName(),
                             configClass);
@@ -267,33 +264,33 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
                     ModemXchangeScript disconnectScript = scriptGenerator.getDisconnectScript(modemConfig);
                     disconnectScript.writeScript(disconnectFilename);
 
-                    // Custom dns servers
-                    if (netConfigIP4 != null) {
-                        StringBuilder key = new StringBuilder("net.interface.").append(modemInterfaceConfig.getName())
-                                .append(".config.dnsServers");
+                    // // Custom dns servers
+                    // if (netConfigIP4 != null) {
+                    // StringBuilder key = new StringBuilder("net.interface.").append(modemInterfaceConfig.getName())
+                    // .append(".config.dnsServers");
 
-                        List<IP4Address> dnsServers = netConfigIP4.getDnsServers();
-                        if (dnsServers != null && !dnsServers.isEmpty()) {
-                            StringBuilder serversSB = new StringBuilder();
-
-                            Iterator<IP4Address> it = dnsServers.iterator();
-                            serversSB.append(it.next().getHostAddress());
-                            while (it.hasNext()) {
-                                serversSB.append(DNS_DELIM).append(it.next().getHostAddress());
-                            }
-
-                            logger.debug("Storing DNS servers {} using key: {}", serversSB, key);
-                            KuranetConfig.setProperty(key.toString(), serversSB.toString());
-                        } else {
-                            KuranetConfig.deleteProperty(key.toString());
-                        }
-                    }
+                    // List<IP4Address> dnsServers = netConfigIP4.getDnsServers();
+                    // if (dnsServers != null && !dnsServers.isEmpty()) {
+                    // StringBuilder serversSB = new StringBuilder();
+                    //
+                    // Iterator<IP4Address> it = dnsServers.iterator();
+                    // serversSB.append(it.next().getHostAddress());
+                    // while (it.hasNext()) {
+                    // serversSB.append(DNS_DELIM).append(it.next().getHostAddress());
+                    // }
+                    //
+                    // logger.debug("Storing DNS servers {} using key: {}", serversSB, key);
+                    // KuranetConfig.setProperty(key.toString(), serversSB.toString());
+                    // } else {
+                    // KuranetConfig.deleteProperty(key.toString());
+                    // }
+                    // }
 
                     final StringBuilder resetTimeoutKey = new StringBuilder().append("net.interface.")
                             .append(newInterfaceName).append(".config.resetTimeout");
                     logger.debug("Setting modem resetTimeout for {}", newInterfaceName);
-                    KuranetConfig.setProperty(resetTimeoutKey.toString(),
-                            Integer.toString(modemConfig.getResetTimeout()));
+                    // KuranetConfig.setProperty(resetTimeoutKey.toString(),
+                    // Integer.toString(modemConfig.getResetTimeout()));
                 } else {
                     logger.error("Error writing connect scripts - modemConfig is null");
                 }
@@ -397,36 +394,36 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
-    private void removeKuraExtendedCellularConfig(List<String> modemNetInterfaceNames) throws KuraException {
-        Properties props = KuranetConfig.getProperties();
-        if (props.isEmpty()) {
-            return;
-        }
-
-        List<String> keysToRemove = new ArrayList<>();
-        Set<Object> keys = props.keySet();
-        for (Object obj : keys) {
-            String key = (String) obj;
-            boolean matchFound = false;
-            for (String modemNetInterfaceName : modemNetInterfaceNames) {
-                if (key.contains(NET_INTERFACE_PPP) && key.contains(modemNetInterfaceName)) {
-                    matchFound = true;
-                    break;
-                }
-            }
-            if (key.contains(NET_INTERFACE_PPP) && !matchFound) {
-                keysToRemove.add(key);
-            }
-        }
-        if (!keysToRemove.isEmpty()) {
-            for (String key : keysToRemove) {
-                props.remove(key);
-            }
-            try {
-                KuranetConfig.storeProperties(props);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
-        }
-    }
+    // private void removeKuraExtendedCellularConfig(List<String> modemNetInterfaceNames) throws KuraException {
+    // Properties props = KuranetConfig.getProperties();
+    // if (props.isEmpty()) {
+    // return;
+    // }
+    //
+    // List<String> keysToRemove = new ArrayList<>();
+    // Set<Object> keys = props.keySet();
+    // for (Object obj : keys) {
+    // String key = (String) obj;
+    // boolean matchFound = false;
+    // for (String modemNetInterfaceName : modemNetInterfaceNames) {
+    // if (key.contains(NET_INTERFACE_PPP) && key.contains(modemNetInterfaceName)) {
+    // matchFound = true;
+    // break;
+    // }
+    // }
+    // if (key.contains(NET_INTERFACE_PPP) && !matchFound) {
+    // keysToRemove.add(key);
+    // }
+    // }
+    // if (!keysToRemove.isEmpty()) {
+    // for (String key : keysToRemove) {
+    // props.remove(key);
+    // }
+    // try {
+    // KuranetConfig.storeProperties(props);
+    // } catch (Exception e) {
+    // throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+    // }
+    // }
+    // }
 }

@@ -23,7 +23,6 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
@@ -87,16 +86,15 @@ public class WifiConfigReader implements NetworkConfigurationVisitor {
         }
 
         WifiInterfaceAddressConfig wifiInterfaceAddressConfig = wifiInterfaceAddressConfigs.get(0);
-        if (wifiInterfaceAddressConfig != null
-                && wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
+        if (wifiInterfaceAddressConfig instanceof WifiInterfaceAddressConfigImpl) {
             StringBuilder wifiModeKey = new StringBuilder("net.interface.").append(interfaceName)
                     .append(".config.wifi.mode");
 
             WifiMode wifiMode = WifiMode.UNKNOWN;
-            String wifiModeString = KuranetConfig.getProperty(wifiModeKey.toString());
-            if (wifiModeString != null) {
-                wifiMode = WifiMode.valueOf(wifiModeString);
-            }
+            // String wifiModeString = KuranetConfig.getProperty(wifiModeKey.toString());
+            // if (wifiModeString != null) {
+            // wifiMode = WifiMode.valueOf(wifiModeString);
+            // }
 
             logger.debug("Got wifiMode: {}", wifiMode);
             ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setMode(wifiMode);

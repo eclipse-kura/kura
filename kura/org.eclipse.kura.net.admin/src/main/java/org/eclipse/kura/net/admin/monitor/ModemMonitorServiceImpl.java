@@ -62,9 +62,6 @@ import org.eclipse.kura.net.admin.modem.PppFactory;
 import org.eclipse.kura.net.admin.modem.PppState;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo.UsbModemFactoryInfo;
-import org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl.ModemResetTimer;
-import org.eclipse.kura.net.admin.monitor.ModemMonitorServiceImpl.MonitoredModem;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemAddedEvent;
 import org.eclipse.kura.net.modem.ModemConfig;
@@ -73,7 +70,6 @@ import org.eclipse.kura.net.modem.ModemGpsDisabledEvent;
 import org.eclipse.kura.net.modem.ModemGpsEnabledEvent;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemManagerService;
-import org.eclipse.kura.net.modem.ModemManagerService.ModemFunction;
 import org.eclipse.kura.net.modem.ModemMonitorListener;
 import org.eclipse.kura.net.modem.ModemMonitorService;
 import org.eclipse.kura.net.modem.ModemReadyEvent;
@@ -373,7 +369,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                                 && !ifaceName.equals(pppService.getIfaceName())) {
                             StringBuilder key = new StringBuilder().append("net.interface.").append(ifaceName)
                                     .append(".config.ip4.status");
-                            String statusString = KuranetConfig.getProperty(key.toString());
+                            // String statusString = KuranetConfig.getProperty(key.toString());
+                            String statusString = (String) this.netConfigService.getNetworkConfiguration()
+                                    .getConfigurationProperties().get(key.toString());
                             NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
                             if (statusString != null && !statusString.isEmpty()) {
                                 netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);

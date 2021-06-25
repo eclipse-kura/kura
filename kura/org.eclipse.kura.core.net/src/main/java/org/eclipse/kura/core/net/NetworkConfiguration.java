@@ -77,6 +77,8 @@ import org.slf4j.LoggerFactory;
 public class NetworkConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfiguration.class);
+    private static final String NET_INTERFACES = "net.interfaces";
+    private static final String NET_INTERFACE = "net.interface.";
 
     private final Map<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs;
     private Map<String, Object> properties;
@@ -105,11 +107,11 @@ public class NetworkConfiguration {
         String[] availableInterfaces = null;
 
         try {
-            availableInterfaces = (String[]) properties.get("net.interfaces");
+            availableInterfaces = (String[]) properties.get(NET_INTERFACES);
         } catch (ClassCastException e) {
             // this means this configuration came from GWT - so convert the comma separated
             // list
-            String interfaces = (String) properties.get("net.interfaces");
+            String interfaces = (String) properties.get(NET_INTERFACES);
             StringTokenizer st = new StringTokenizer(interfaces, ",");
 
             List<String> interfacesArray = new ArrayList<>();
@@ -123,7 +125,7 @@ public class NetworkConfiguration {
             logger.debug("There are {} interfaces to add to the new configuration", availableInterfaces.length);
             for (String currentNetInterface : availableInterfaces) {
                 StringBuilder keyBuffer = new StringBuilder();
-                keyBuffer.append("net.interface.").append(currentNetInterface).append(".type");
+                keyBuffer.append(NET_INTERFACE).append(currentNetInterface).append(".type");
                 NetInterfaceType type = NetInterfaceType.UNKNOWN;
                 if (properties.get(keyBuffer.toString()) != null) {
                     type = NetInterfaceType.valueOf((String) properties.get(keyBuffer.toString()));
@@ -505,7 +507,7 @@ public class NetworkConfiguration {
             sbInterfaces.append(netInterfaceConfig.getName());
 
             // build the prefixes for all the properties associated with this interface
-            sbPrefix = new StringBuilder("net.interface.").append(netInterfaceConfig.getName()).append(".");
+            sbPrefix = new StringBuilder(NET_INTERFACE).append(netInterfaceConfig.getName()).append(".");
             netIfReadOnlyPrefix = sbPrefix.toString();
             netIfPrefix = sbPrefix.append("config.").toString();
             netIfConfigPrefix = sbPrefix.toString();
@@ -730,7 +732,7 @@ public class NetworkConfiguration {
                 }
             }
         }
-        newNetworkProperties.put("net.interfaces", sbInterfaces.toString());
+        newNetworkProperties.put(NET_INTERFACES, sbInterfaces.toString());
 
         this.properties = newNetworkProperties;
     }
@@ -1559,13 +1561,13 @@ public class NetworkConfiguration {
         String interfaceName = netInterfaceConfig.getName();
 
         StringBuilder keyBuffer = new StringBuilder();
-        keyBuffer.append("net.interface.").append(interfaceName).append(".type");
+        keyBuffer.append(NET_INTERFACE).append(interfaceName).append(".type");
         NetInterfaceType interfaceType = NetInterfaceType.valueOf((String) props.get(keyBuffer.toString()));
         logger.trace("Populating interface: {} of type {}", interfaceName, interfaceType);
 
         // build the prefixes for all the properties associated with this interface
         StringBuilder sbPrefix = new StringBuilder();
-        sbPrefix.append("net.interface.").append(interfaceName).append(".");
+        sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
 
         String netIfReadOnlyPrefix = sbPrefix.toString();
         String netIfPrefix = sbPrefix.append("config.").toString();
@@ -1795,7 +1797,7 @@ public class NetworkConfiguration {
 
         // Status
         String configStatus4 = null;
-        String configStatus4Key = "net.interface." + interfaceName + ".config.ip4.status";
+        String configStatus4Key = NET_INTERFACE + interfaceName + ".config.ip4.status";
         if (props.containsKey(configStatus4Key)) {
             configStatus4 = (String) props.get(configStatus4Key);
         }
@@ -1805,7 +1807,7 @@ public class NetworkConfiguration {
         logger.trace("Status Ipv4? {}", configStatus4);
 
         String configStatus6 = null;
-        String configStatus6Key = "net.interface." + interfaceName + ".config.ip6.status";
+        String configStatus6Key = NET_INTERFACE + interfaceName + ".config.ip6.status";
         if (props.containsKey(configStatus6Key)) {
             configStatus6 = (String) props.get(configStatus6Key);
         }
@@ -1833,21 +1835,21 @@ public class NetworkConfiguration {
                 String addressType = ".ip4"; // FIXME: determine dynamically
 
                 // populate current address status
-                String key = "net.interface." + interfaceName + addressType + ".address";
+                String key = NET_INTERFACE + interfaceName + addressType + ".address";
                 if (props.containsKey(key)) {
                     IPAddress address = IPAddress.parseHostAddress((String) props.get(key));
                     logger.trace("got {}: {}", key, address);
                     netInterfaceAddressImpl.setAddress(address);
                 }
 
-                key = "net.interface." + interfaceName + addressType + ".broadcast";
+                key = NET_INTERFACE + interfaceName + addressType + ".broadcast";
                 if (props.containsKey(key)) {
                     IPAddress broadcast = IPAddress.parseHostAddress((String) props.get(key));
                     logger.trace("got {}: {}", key, broadcast);
                     netInterfaceAddressImpl.setBroadcast(broadcast);
                 }
 
-                key = "net.interface." + interfaceName + addressType + ".dnsServers";
+                key = NET_INTERFACE + interfaceName + addressType + ".dnsServers";
                 if (props.containsKey(key)) {
                     List<IPAddress> dnsServers = new ArrayList<>();
                     String dnsServersString = (String) props.get(key);
@@ -1858,7 +1860,7 @@ public class NetworkConfiguration {
                     netInterfaceAddressImpl.setDnsServers(dnsServers);
                 }
 
-                key = "net.interface." + interfaceName + addressType + ".gateway";
+                key = NET_INTERFACE + interfaceName + addressType + ".gateway";
                 if (props.containsKey(key)) {
                     if (props.get(key) != null && !((String) props.get(key)).trim().equals("")) {
                         IPAddress gateway = IPAddress.parseHostAddress((String) props.get(key));
@@ -1870,14 +1872,14 @@ public class NetworkConfiguration {
                     }
                 }
 
-                key = "net.interface." + interfaceName + addressType + ".netmask";
+                key = NET_INTERFACE + interfaceName + addressType + ".netmask";
                 if (props.containsKey(key)) {
                     IPAddress netmask = IPAddress.parseHostAddress((String) props.get(key));
                     logger.trace("got {}: {}", key, netmask);
                     netInterfaceAddressImpl.setBroadcast(netmask);
                 }
 
-                key = "net.interface." + interfaceName + addressType + ".prefix";
+                key = NET_INTERFACE + interfaceName + addressType + ".prefix";
                 if (props.containsKey(key)) {
                     Short prefix = (Short) props.get(key);
                     logger.trace("got {}: {}", key, prefix);
@@ -1939,7 +1941,7 @@ public class NetworkConfiguration {
 
             // POPULATE NetConfigs
             // dhcp4
-            String configDhcp4 = "net.interface." + interfaceName + ".config.dhcpClient4.enabled";
+            String configDhcp4 = NET_INTERFACE + interfaceName + ".config.dhcpClient4.enabled";
             NetConfigIP4 netConfigIP4;
             boolean dhcpEnabled = false;
             if (props.containsKey(configDhcp4)) {
@@ -1954,7 +1956,7 @@ public class NetworkConfiguration {
                 netConfigIP4.setDhcp(true);
             } else {
                 // NetConfigIP4
-                String configIp4 = "net.interface." + interfaceName + ".config.ip4.address";
+                String configIp4 = NET_INTERFACE + interfaceName + ".config.ip4.address";
                 if (props.containsKey(configIp4)) {
                     logger.trace("got {}: {}", configIp4, props.get(configIp4));
 
@@ -1967,7 +1969,7 @@ public class NetworkConfiguration {
                     }
 
                     // prefix
-                    String configIp4Prefix = "net.interface." + interfaceName + ".config.ip4.prefix";
+                    String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
                     short networkPrefixLength = -1;
                     if (props.containsKey(configIp4Prefix)) {
                         if (props.get(configIp4Prefix) instanceof Short) {
@@ -1984,7 +1986,7 @@ public class NetworkConfiguration {
                     }
 
                     // gateway
-                    String configIp4Gateway = "net.interface." + interfaceName + ".config.ip4.gateway";
+                    String configIp4Gateway = NET_INTERFACE + interfaceName + ".config.ip4.gateway";
                     if (props.containsKey(configIp4Gateway)) {
 
                         String gatewayIp4 = (String) props.get(configIp4Gateway);
@@ -1998,7 +2000,7 @@ public class NetworkConfiguration {
             }
 
             // dns servers
-            String configDNSs = "net.interface." + interfaceName + ".config.ip4.dnsServers";
+            String configDNSs = NET_INTERFACE + interfaceName + ".config.ip4.dnsServers";
             if (props.containsKey(configDNSs)) {
 
                 List<IP4Address> dnsIPs = new ArrayList<>();
@@ -2015,7 +2017,7 @@ public class NetworkConfiguration {
             }
 
             // win servers
-            String configWINSs = "net.interface." + interfaceName + ".config.ip4.winsServers";
+            String configWINSs = NET_INTERFACE + interfaceName + ".config.ip4.winsServers";
             if (props.containsKey(configWINSs)) {
 
                 List<IP4Address> winsIPs = new ArrayList<>();
@@ -2030,7 +2032,7 @@ public class NetworkConfiguration {
             }
 
             // domains
-            String configDomains = "net.interface." + interfaceName + ".config.ip4.domains";
+            String configDomains = NET_INTERFACE + interfaceName + ".config.ip4.domains";
             if (props.containsKey(configDomains)) {
 
                 List<String> domainNames = new ArrayList<>();
@@ -2044,7 +2046,7 @@ public class NetworkConfiguration {
             }
 
             // FirewallNatConfig - see if NAT is enabled
-            String configNatEnabled = "net.interface." + interfaceName + ".config.nat.enabled";
+            String configNatEnabled = NET_INTERFACE + interfaceName + ".config.nat.enabled";
             if (props.containsKey(configNatEnabled)) {
                 boolean natEnabled = (Boolean) props.get(configNatEnabled);
                 logger.trace("NAT enabled? {}", natEnabled);
@@ -2056,7 +2058,7 @@ public class NetworkConfiguration {
             }
 
             // DhcpServerConfigIP4 - see if there is a DHCP 4 Server
-            String configDhcpServerEnabled = "net.interface." + interfaceName + ".config.dhcpServer4.enabled";
+            String configDhcpServerEnabled = NET_INTERFACE + interfaceName + ".config.dhcpServer4.enabled";
             if (props.containsKey(configDhcpServerEnabled)) {
                 boolean dhcpServerEnabled = (Boolean) props.get(configDhcpServerEnabled);
                 logger.trace("DHCP Server 4 enabled? {}", dhcpServerEnabled);
@@ -2074,7 +2076,7 @@ public class NetworkConfiguration {
                 List<IP4Address> dnServers = new ArrayList<>();
 
                 // prefix
-                String configDhcpServerPrefix = "net.interface." + interfaceName + ".config.dhcpServer4.prefix";
+                String configDhcpServerPrefix = NET_INTERFACE + interfaceName + ".config.dhcpServer4.prefix";
                 if (props.containsKey(configDhcpServerPrefix)) {
                     if (props.get(configDhcpServerPrefix) instanceof Short) {
                         prefix = (Short) props.get(configDhcpServerPrefix);
@@ -2085,7 +2087,7 @@ public class NetworkConfiguration {
                 }
 
                 // rangeStart
-                String configDhcpServerRangeStart = "net.interface." + interfaceName + ".config.dhcpServer4.rangeStart";
+                String configDhcpServerRangeStart = NET_INTERFACE + interfaceName + ".config.dhcpServer4.rangeStart";
                 if (props.containsKey(configDhcpServerRangeStart)) {
                     String dhcpServerRangeStart = (String) props.get(configDhcpServerRangeStart);
                     logger.trace("DHCP Server Range Start: {}", dhcpServerRangeStart);
@@ -2095,7 +2097,7 @@ public class NetworkConfiguration {
                 }
 
                 // rangeEnd
-                String configDhcpServerRangeEnd = "net.interface." + interfaceName + ".config.dhcpServer4.rangeEnd";
+                String configDhcpServerRangeEnd = NET_INTERFACE + interfaceName + ".config.dhcpServer4.rangeEnd";
                 if (props.containsKey(configDhcpServerRangeEnd)) {
                     String dhcpServerRangeEnd = (String) props.get(configDhcpServerRangeEnd);
                     logger.trace("DHCP Server Range End: {}", dhcpServerRangeEnd);
@@ -2105,7 +2107,7 @@ public class NetworkConfiguration {
                 }
 
                 // default lease time
-                String configDhcpServerDefaultLeaseTime = "net.interface." + interfaceName
+                String configDhcpServerDefaultLeaseTime = NET_INTERFACE + interfaceName
                         + ".config.dhcpServer4.defaultLeaseTime";
                 if (props.containsKey(configDhcpServerDefaultLeaseTime)) {
                     if (props.get(configDhcpServerDefaultLeaseTime) instanceof Integer) {
@@ -2117,7 +2119,7 @@ public class NetworkConfiguration {
                 }
 
                 // max lease time
-                String configDhcpServerMaxLeaseTime = "net.interface." + interfaceName
+                String configDhcpServerMaxLeaseTime = NET_INTERFACE + interfaceName
                         + ".config.dhcpServer4.maxLeaseTime";
                 if (props.containsKey(configDhcpServerMaxLeaseTime)) {
                     if (props.get(configDhcpServerMaxLeaseTime) instanceof Integer) {
@@ -2129,7 +2131,7 @@ public class NetworkConfiguration {
                 }
 
                 // passDns
-                String configDhcpServerPassDns = "net.interface." + interfaceName + ".config.dhcpServer4.passDns";
+                String configDhcpServerPassDns = NET_INTERFACE + interfaceName + ".config.dhcpServer4.passDns";
                 if (props.containsKey(configDhcpServerPassDns)) {
                     if (props.get(configDhcpServerPassDns) instanceof Boolean) {
                         passDns = (Boolean) props.get(configDhcpServerPassDns);
@@ -2173,7 +2175,7 @@ public class NetworkConfiguration {
             }
 
             // dhcp6
-            String configDhcp6 = "net.interface." + interfaceName + ".config.dhcpClient6.enabled";
+            String configDhcp6 = NET_INTERFACE + interfaceName + ".config.dhcpClient6.enabled";
             NetConfigIP6 netConfigIP6 = null;
             boolean dhcp6Enabled = false;
             if (props.containsKey(configDhcp6)) {
@@ -2186,7 +2188,7 @@ public class NetworkConfiguration {
                 netConfigIP6 = new NetConfigIP6(NetInterfaceStatus.valueOf(configStatus6), autoConnect, dhcp6Enabled);
                 netConfigs.add(netConfigIP6);
 
-                String configIp6 = "net.interface." + interfaceName + ".config.ip6.address";
+                String configIp6 = NET_INTERFACE + interfaceName + ".config.ip6.address";
                 if (props.containsKey(configIp6)) {
                     // FIXME: netConfigIP6 == null
 
@@ -2199,7 +2201,7 @@ public class NetworkConfiguration {
                     }
 
                     // dns servers
-                    String configDNSs6 = "net.interface." + interfaceName + ".config.ip6.dnsServers";
+                    String configDNSs6 = NET_INTERFACE + interfaceName + ".config.ip6.dnsServers";
                     if (props.containsKey(configDNSs6)) {
 
                         List<IP6Address> dnsIPs = new ArrayList<>();
@@ -2214,7 +2216,7 @@ public class NetworkConfiguration {
                     }
 
                     // domains
-                    String configDomains6 = "net.interface." + interfaceName + ".config.ip6.domains";
+                    String configDomains6 = NET_INTERFACE + interfaceName + ".config.ip6.domains";
                     if (props.containsKey(configDomains6)) {
 
                         List<String> domainNames = new ArrayList<>();

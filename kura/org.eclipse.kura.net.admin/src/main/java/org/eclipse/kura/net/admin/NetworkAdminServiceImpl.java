@@ -60,7 +60,6 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.monitor.InterfaceStateBuilder;
 import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
@@ -69,12 +68,12 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiChannel;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -1424,8 +1423,11 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
-        StringBuilder key = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
-        String driver = KuranetConfig.getProperty(key.toString());
+        // StringBuilder key = new
+        // StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
+        // String driver = KuranetConfig.getProperty(key.toString());
+        String driver = this.networkConfigurationService.getNetworkConfiguration().getNetInterfaceConfig(ifaceName)
+                .getDriver();
         this.wpaSupplicantManager.startTemp(ifaceName, driver);
         wifiModeWait(ifaceName, WifiMode.INFRA, 10);
     }

@@ -22,9 +22,7 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
-import org.eclipse.kura.net.wifi.WifiMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,15 +82,15 @@ public class WifiConfigWriter implements NetworkConfigurationVisitor {
         WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) (wifiInterfaceConfig)
                 .getNetInterfaceAddressConfig();
 
-        // Store the selected wifi mode
-        WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
-        logger.debug("Store wifiMode: {}", wifiMode);
-        StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
-        try {
-            KuranetConfig.setProperty(key.toString(), wifiMode.toString());
-        } catch (Exception e) {
-            logger.error("Failed to save kuranet config", e);
-            throw KuraException.internalError(e);
-        }
+        // // Store the selected wifi mode
+        // WifiMode wifiMode = wifiInterfaceAddressConfig.getMode();
+        // logger.debug("Store wifiMode: {}", wifiMode);
+        // StringBuilder key = new StringBuilder("net.interface." + interfaceName + ".config.wifi.mode");
+        // try {
+        // KuranetConfig.setProperty(key.toString(), wifiMode.toString());
+        // } catch (Exception e) {
+        // logger.error("Failed to save kuranet config", e);
+        // throw KuraException.internalError(e);
+        // }
     }
 }

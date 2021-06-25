@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,7 +35,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
             if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                     || netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
                 writeConfig(netInterfaceConfig);
-                writeKuraExtendedConfig(netInterfaceConfig, getKuranetProperties());
+                // writeKuraExtendedConfig(netInterfaceConfig, getKuranetProperties());
             }
         }
     }
@@ -77,13 +76,13 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         return DhcpServerManager.getConfigFilename(interfaceName);
     }
 
-    protected Properties getKuranetProperties() {
-        return KuranetConfig.getProperties();
-    }
-
-    protected void storeKuranetProperties(Properties kuraExtendedProps) throws IOException, KuraException {
-        KuranetConfig.storeProperties(kuraExtendedProps);
-    }
+    // protected Properties getKuranetProperties() {
+    // return KuranetConfig.getProperties();
+    // }
+    //
+    // protected void storeKuranetProperties(Properties kuraExtendedProps) throws IOException, KuraException {
+    // KuranetConfig.storeProperties(kuraExtendedProps);
+    // }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
@@ -219,14 +218,14 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                 .append(".config.dhcpServer4.passDns");
         kuraExtendedProps.put(sb.toString(), Boolean.toString(passDns));
 
-        // write it
-        if (kuraExtendedProps != null && !kuraExtendedProps.isEmpty()) {
-            try {
-                storeKuranetProperties(kuraExtendedProps);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
-        }
+        // // write it
+        // if (kuraExtendedProps != null && !kuraExtendedProps.isEmpty()) {
+        // try {
+        // storeKuranetProperties(kuraExtendedProps);
+        // } catch (Exception e) {
+        // throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        // }
+        // }
     }
 
     private int ip2int(IPAddress ip) {

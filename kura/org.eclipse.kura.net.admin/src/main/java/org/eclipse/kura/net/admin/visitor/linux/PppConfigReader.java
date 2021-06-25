@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,12 +16,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -30,12 +28,10 @@ import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
-import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.dns.LinuxDns;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemInfo;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
-import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -45,7 +41,6 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.NetworkConfigurationServiceImpl;
 import org.eclipse.kura.net.admin.visitor.linux.util.ChapLinux;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangePair;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.admin.visitor.linux.util.PapLinux;
@@ -103,9 +98,9 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         }
     }
 
-    protected String getKuranetProperty(String key) {
-        return KuranetConfig.getProperty(key);
-    }
+    // protected String getKuranetProperty(String key) {
+    // return KuranetConfig.getProperty(key);
+    // }
 
     private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
@@ -113,15 +108,15 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
         String interfaceName = netInterfaceConfig.getName();
         logger.debug("Getting ppp config for {}", interfaceName);
 
-        if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
-            StringBuilder key = new StringBuilder(NET_INTERFACE + netInterfaceConfig.getName() + ".modem.identifier");
-            String modemId = getKuranetProperty(key.toString());
-            logger.debug("Getting modem identifier using key {} : {}", key, modemId);
-
-            if (modemId != null) {
-                ((ModemInterfaceConfigImpl) netInterfaceConfig).setModemIdentifier(modemId);
-            }
-        }
+        // if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
+        // StringBuilder key = new StringBuilder(NET_INTERFACE + netInterfaceConfig.getName() + ".modem.identifier");
+        // String modemId = getKuranetProperty(key.toString());
+        // logger.debug("Getting modem identifier using key {} : {}", key, modemId);
+        //
+        // if (modemId != null) {
+        // ((ModemInterfaceConfigImpl) netInterfaceConfig).setModemIdentifier(modemId);
+        // }
+        // }
 
         NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
                 .getNetInterfaceAddressConfig();
@@ -365,22 +360,23 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
 
     private int getResetTimeout(String ifaceName) {
         int resetTout = 5;
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.resetTimeout");
-        String statusString = getKuranetProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            resetTout = Integer.parseInt(statusString);
-        }
+        // StringBuilder key = new
+        // StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.resetTimeout");
+        // String statusString = getKuranetProperty(key.toString());
+        // if (statusString != null && !statusString.isEmpty()) {
+        // resetTout = Integer.parseInt(statusString);
+        // }
         return resetTout;
     }
 
     private boolean isGpsEnabled(String ifaceName) {
         boolean gpsEnabled = false;
 
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.gpsEnabled");
-        String statusString = getKuranetProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            gpsEnabled = Boolean.parseBoolean(statusString);
-        }
+        // StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.gpsEnabled");
+        // String statusString = getKuranetProperty(key.toString());
+        // if (statusString != null && !statusString.isEmpty()) {
+        // gpsEnabled = Boolean.parseBoolean(statusString);
+        // }
 
         return gpsEnabled;
     }
@@ -388,26 +384,28 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
     private boolean isDiversityEnabled(String ifaceName) {
         boolean diversityEnabled = false;
 
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName)
-                .append(".config.diversityEnabled");
-        String statusString = getKuranetProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            diversityEnabled = Boolean.parseBoolean(statusString);
-        }
+        // StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName)
+        // .append(".config.diversityEnabled");
+        // String statusString = getKuranetProperty(key.toString());
+        // if (statusString != null && !statusString.isEmpty()) {
+        // diversityEnabled = Boolean.parseBoolean(statusString);
+        // }
 
         return diversityEnabled;
     }
 
     private String getPdpType(String ifaceName) {
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.pdpType");
-        String pdpType = getKuranetProperty(key.toString());
-        return Objects.toString(pdpType, ModemConfig.PdpType.UNKNOWN.name());
+        // StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.pdpType");
+        // String pdpType = getKuranetProperty(key.toString());
+        // return Objects.toString(pdpType, ModemConfig.PdpType.UNKNOWN.name());
+        return ModemConfig.PdpType.UNKNOWN.name();
     }
 
     private String getApn(String ifaceName) {
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.apn");
-        String apn = getKuranetProperty(key.toString());
-        return Objects.toString(apn, "");
+        // StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.apn");
+        // String apn = getKuranetProperty(key.toString());
+        // return Objects.toString(apn, "");
+        return "";
     }
 
     private String checkIsPeerSymlink(String defaultModel, File peerFile) {
@@ -459,31 +457,31 @@ public class PppConfigReader implements NetworkConfigurationVisitor {
     private NetConfigIP4 getNetConfigIP4(String interfaceName) throws KuraException {
         NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
 
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
-                .append(".config.ip4.status");
-        String statusString = getKuranetProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
-        }
+        // StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
+        // .append(".config.ip4.status");
+        // String statusString = getKuranetProperty(key.toString());
+        // if (statusString != null && !statusString.isEmpty()) {
+        // netInterfaceStatus = NetInterfaceStatus.valueOf(statusString);
+        // }
         logger.debug("Setting NetInterfaceStatus to {} for {}", netInterfaceStatus, interfaceName);
 
         NetConfigIP4 netConfigIP4 = new NetConfigIP4(netInterfaceStatus, true, true);
 
-        key = new StringBuilder(NET_INTERFACE).append(interfaceName).append(".config.dnsServers");
-        String dnsServersStr = getKuranetProperty(key.toString());
-        List<IP4Address> dnsServersList = new ArrayList<>();
-
-        if (dnsServersStr != null && !dnsServersStr.isEmpty()) {
-            String[] serversArr = dnsServersStr.split(PppConfigWriter.DNS_DELIM);
-            for (String server : serversArr) {
-                try {
-                    dnsServersList.add((IP4Address) IPAddress.parseHostAddress(server));
-                } catch (UnknownHostException e) {
-                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-                }
-            }
-            netConfigIP4.setDnsServers(dnsServersList);
-        }
+        // key = new StringBuilder(NET_INTERFACE).append(interfaceName).append(".config.dnsServers");
+        // String dnsServersStr = getKuranetProperty(key.toString());
+        // List<IP4Address> dnsServersList = new ArrayList<>();
+        //
+        // if (dnsServersStr != null && !dnsServersStr.isEmpty()) {
+        // String[] serversArr = dnsServersStr.split(PppConfigWriter.DNS_DELIM);
+        // for (String server : serversArr) {
+        // try {
+        // dnsServersList.add((IP4Address) IPAddress.parseHostAddress(server));
+        // } catch (UnknownHostException e) {
+        // throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        // }
+        // }
+        // netConfigIP4.setDnsServers(dnsServersList);
+        // }
 
         return netConfigIP4;
     }

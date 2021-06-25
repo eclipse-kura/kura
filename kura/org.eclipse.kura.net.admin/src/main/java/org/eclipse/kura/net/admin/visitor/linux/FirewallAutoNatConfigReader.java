@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.net.admin.visitor.linux;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -32,7 +31,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +51,7 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         return instance;
     }
 
+    // SIMPLIFY THIS FILE!!!!
     @Override
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -67,7 +66,8 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            getConfig(netInterfaceConfig, getKuranetProperties());
+            // getConfig(netInterfaceConfig, getKuranetProperties());
+            getConfig(netInterfaceConfig);
         }
 
         // After every visit, unset the executorService. This must be set before every call.
@@ -79,65 +79,67 @@ public class FirewallAutoNatConfigReader implements NetworkConfigurationVisitor 
         return firewall.getAutoNatRules();
     }
 
-    protected Properties getKuranetProperties() {
-        return KuranetConfig.getProperties();
-    }
+    // protected Properties getKuranetProperties() {
+    // return KuranetConfig.getProperties();
+    // }
 
-    private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            Properties kuraProps) throws KuraException {
+    // private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+    // Properties kuraProps) throws KuraException {
+    private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+            throws KuraException {
 
         String interfaceName = netInterfaceConfig.getName();
 
         NetInterfaceType type = netInterfaceConfig.getType();
         if (type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI) {
             logger.debug("Getting NAT config for {}", interfaceName);
-            if (kuraProps != null) {
-                getRulesFromConfig(netInterfaceConfig, kuraProps, interfaceName);
-            } else {
-                getRulesFromFile(netInterfaceConfig, interfaceName);
-            }
+            // if (kuraProps != null) {
+            // getRulesFromConfig(netInterfaceConfig, kuraProps, interfaceName);
+            // } else {
+            getRulesFromFile(netInterfaceConfig, interfaceName);
+            // }
         }
     }
 
-    private void getRulesFromConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            Properties kuraProps, String interfaceName) throws KuraException {
-
-        logger.debug("Getting NAT config from kuraProps");
-
-        boolean natEnabled = false;
-        boolean useMasquerade = false;
-        String srcIface = null;
-        String dstIface = null;
-        String prop;
-        StringBuilder sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
-                .append(".config.nat.enabled");
-        prop = kuraProps.getProperty(sb.toString());
-        if (prop != null) {
-            natEnabled = Boolean.parseBoolean(prop);
-        }
-
-        sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.masquerade");
-        prop = kuraProps.getProperty(sb.toString());
-        if (prop != null) {
-            useMasquerade = Boolean.parseBoolean(prop);
-        }
-
-        sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.src.interface");
-        prop = kuraProps.getProperty(sb.toString());
-        if (prop != null) {
-            srcIface = prop;
-        }
-
-        sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.dst.interface");
-        prop = kuraProps.getProperty(sb.toString());
-        if (prop != null) {
-            dstIface = prop;
-        }
-
-        if (natEnabled) {
-            addNatConfig(netInterfaceConfig, srcIface, dstIface, useMasquerade);
-        }
-    }
+    // private void getRulesFromConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+    // Properties kuraProps, String interfaceName) throws KuraException {
+    //
+    // logger.debug("Getting NAT config from kuraProps");
+    //
+    // boolean natEnabled = false;
+    // boolean useMasquerade = false;
+    // String srcIface = null;
+    // String dstIface = null;
+    // String prop;
+    // StringBuilder sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName)
+    // .append(".config.nat.enabled");
+    // prop = kuraProps.getProperty(sb.toString());
+    // if (prop != null) {
+    // natEnabled = Boolean.parseBoolean(prop);
+    // }
+    //
+    // sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.masquerade");
+    // prop = kuraProps.getProperty(sb.toString());
+    // if (prop != null) {
+    // useMasquerade = Boolean.parseBoolean(prop);
+    // }
+    //
+    // sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.src.interface");
+    // prop = kuraProps.getProperty(sb.toString());
+    // if (prop != null) {
+    // srcIface = prop;
+    // }
+    //
+    // sb = new StringBuilder().append(NET_INTERFACE).append(interfaceName).append(".config.nat.dst.interface");
+    // prop = kuraProps.getProperty(sb.toString());
+    // if (prop != null) {
+    // dstIface = prop;
+    // }
+    //
+    // if (natEnabled) {
+    // addNatConfig(netInterfaceConfig, srcIface, dstIface, useMasquerade);
+    // }
+    // }
 
     private void addNatConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
             String srcIface, String dstIface, boolean useMasquerade) throws KuraException {

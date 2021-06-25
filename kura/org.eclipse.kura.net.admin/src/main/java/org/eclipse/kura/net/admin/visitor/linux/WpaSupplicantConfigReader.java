@@ -23,7 +23,6 @@ import java.util.Properties;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiCiphers;
@@ -66,29 +65,30 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
         // Get self-stored properties
 
         boolean pingAP = false;
-        StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName)
-                .append(".config.wifi.infra.pingAccessPoint");
-        String statusString = getKuranetProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            pingAP = Boolean.parseBoolean(statusString);
-        }
+        // StringBuilder key = new StringBuilder().append(NET_INTERFACE).append(ifaceName)
+        // .append(".config.wifi.infra.pingAccessPoint");
+        // String statusString = getKuranetProperty(key.toString());
+        // if (statusString != null && !statusString.isEmpty()) {
+        // pingAP = Boolean.parseBoolean(statusString);
+        // }
         wifiConfig.setPingAccessPoint(pingAP);
 
         boolean ignoreSSID = false;
-        key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.wifi.infra.ignoreSSID");
-        statusString = getKuranetProperty(key.toString());
-        if (statusString != null && !statusString.isEmpty()) {
-            ignoreSSID = Boolean.parseBoolean(statusString);
-        }
+        // key = new StringBuilder().append(NET_INTERFACE).append(ifaceName).append(".config.wifi.infra.ignoreSSID");
+        // statusString = getKuranetProperty(key.toString());
+        // if (statusString != null && !statusString.isEmpty()) {
+        // ignoreSSID = Boolean.parseBoolean(statusString);
+        // }
         wifiConfig.setIgnoreSSID(ignoreSSID);
 
-        StringBuilder infraDriverKey = new StringBuilder(NET_INTERFACE).append(ifaceName)
-                .append(".config.wifi.infra.driver");
-        String wifiDriver = getKuranetProperty(infraDriverKey.toString());
-        if (wifiDriver == null || wifiDriver.isEmpty()) {
-            wifiDriver = "nl80211";
-        }
-        wifiConfig.setDriver(wifiDriver);
+        // StringBuilder infraDriverKey = new StringBuilder(NET_INTERFACE).append(ifaceName)
+        // .append(".config.wifi.infra.driver");
+        // String wifiDriver = getKuranetProperty(infraDriverKey.toString());
+        // if (wifiDriver == null || wifiDriver.isEmpty()) {
+        // wifiDriver = "nl80211";
+        // }
+        // wifiConfig.setDriver(wifiDriver);
+        wifiConfig.setDriver("nl80211");
 
         return wifiConfig;
     }
@@ -152,9 +152,9 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
         return channels;
     }
 
-    protected String getKuranetProperty(String key) {
-        return KuranetConfig.getProperty(key);
-    }
+    // protected String getKuranetProperty(String key) {
+    // return KuranetConfig.getProperty(key);
+    // }
 
     private Properties parseConfigFile(String ifaceName) throws KuraException {
 

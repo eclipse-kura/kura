@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,7 +18,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -38,7 +37,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
@@ -70,10 +68,11 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
                 .getNetInterfaceConfigs();
 
-        Properties kuraExtendedProps = getKuranetProperties();
+        // Properties kuraExtendedProps = getKuranetProperties();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            getConfig(netInterfaceConfig, kuraExtendedProps);
+            // getConfig(netInterfaceConfig, kuraExtendedProps);
+            getConfig(netInterfaceConfig);
         }
     }
 
@@ -81,12 +80,15 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         return DhcpServerManager.getConfigFilename(interfaceName);
     }
 
-    protected Properties getKuranetProperties() {
-        return KuranetConfig.getProperties();
-    }
+    // protected Properties getKuranetProperties() {
+    // return KuranetConfig.getProperties();
+    // }
 
-    private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            Properties kuraExtendedProps) throws KuraException {
+    // private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+    // Properties kuraExtendedProps) throws KuraException {
+
+    private void getConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+            throws KuraException {
 
         NetInterfaceType type = netInterfaceConfig.getType();
         if (!(type == NetInterfaceType.ETHERNET || type == NetInterfaceType.WIFI)) {
@@ -102,7 +104,8 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
             return;
         }
 
-        DhcpServerConfig4 dhcpServerConfig4 = populateConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+        // DhcpServerConfig4 dhcpServerConfig4 = populateConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+        DhcpServerConfig4 dhcpServerConfig4 = populateConfig(interfaceName, dhcpConfigFile);
         if (dhcpServerConfig4 == null) {
             return;
         }
@@ -122,24 +125,26 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         netConfigs.add(dhcpServerConfig4);
     }
 
-    private DhcpServerConfig4 populateConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps)
-            throws KuraException {
+    // private DhcpServerConfig4 populateConfig(String interfaceName, File dhcpConfigFile, Properties kuraExtendedProps)
+    // throws KuraException {
+    private DhcpServerConfig4 populateConfig(String interfaceName, File dhcpConfigFile) throws KuraException {
         DhcpServerConfig4 dhcpServerConfig4 = null;
         DhcpServerTool dhcpServerTool = DhcpServerManager.getTool();
         if (dhcpServerTool == DhcpServerTool.DHCPD) {
-            dhcpServerConfig4 = populateDhcpdConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+            // dhcpServerConfig4 = populateDhcpdConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+            dhcpServerConfig4 = populateDhcpdConfig(interfaceName, dhcpConfigFile);
         } else if (dhcpServerTool == DhcpServerTool.UDHCPD) {
-            dhcpServerConfig4 = populateUdhcpdConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+            // dhcpServerConfig4 = populateUdhcpdConfig(interfaceName, dhcpConfigFile, kuraExtendedProps);
+            dhcpServerConfig4 = populateUdhcpdConfig(interfaceName, dhcpConfigFile);
         }
         return dhcpServerConfig4;
     }
 
-    private DhcpServerConfig4 populateDhcpdConfig(String interfaceName, File dhcpConfigFile,
-            Properties kuraExtendedProps) throws KuraException {
+    private DhcpServerConfig4 populateDhcpdConfig(String interfaceName, File dhcpConfigFile) throws KuraException {
         DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
 
         try (BufferedReader br = new BufferedReader(new FileReader(dhcpConfigFile))) {
-            boolean enabled = false;
+            // boolean enabled = false;
             IP4Address subnet = null;
             IP4Address netmask = null;
             IP4Address router = null;
@@ -202,19 +207,22 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
                 }
             }
 
-            StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                    .append(".config.dhcpServer4.enabled");
-            if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
-                enabled = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
-            } else {
-                // the file is present and the flag is not - so assume enabled is true
-                enabled = true;
-            }
-            sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                    .append(".config.dhcpServer4.passDns");
-            if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
-                passDns = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
-            }
+            // Set default values for missing properties
+            boolean enabled = false;
+
+            // StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
+            // .append(".config.dhcpServer4.enabled");
+            // if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+            // enabled = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
+            // } else {
+            // // the file is present and the flag is not - so assume enabled is true
+            // enabled = true;
+            // }
+            // sb = new StringBuilder().append("net.interface.").append(interfaceName)
+            // .append(".config.dhcpServer4.passDns");
+            // if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+            // passDns = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
+            // }
 
             short prefix = NetworkUtil.getNetmaskShortForm(netmask.getHostAddress());
 
@@ -241,13 +249,14 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
         return dhcpServerConfigIP4;
     }
 
-    private DhcpServerConfig4 populateUdhcpdConfig(String interfaceName, File dhcpConfigFile,
-            Properties kuraExtendedProps) throws KuraException {
+    // private DhcpServerConfig4 populateUdhcpdConfig(String interfaceName, File dhcpConfigFile,
+    // Properties kuraExtendedProps) throws KuraException {
+    private DhcpServerConfig4 populateUdhcpdConfig(String interfaceName, File dhcpConfigFile) throws KuraException {
 
         DhcpServerConfigIP4 dhcpServerConfigIP4 = null;
 
         try (BufferedReader br = new BufferedReader(new FileReader(dhcpConfigFile))) {
-            boolean enabled = false;
+            // boolean enabled = false;
             IP4Address subnet = null;
             IP4Address netmask = null;
             IP4Address router = null;
@@ -255,7 +264,7 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
             int maxLeaseTime = -1;
             IP4Address rangeStart = null;
             IP4Address rangeEnd = null;
-            boolean passDns = true;
+            // boolean passDns = true;
             ArrayList<IP4Address> dnsList = new ArrayList<>();
 
             String line = null;
@@ -284,19 +293,23 @@ public class DhcpConfigReader implements NetworkConfigurationVisitor {
             subnet = (IP4Address) IPAddress
                     .parseHostAddress(NetworkUtil.calculateNetwork(router.getHostAddress(), netmask.getHostAddress()));
 
-            StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                    .append(".config.dhcpServer4.enabled");
-            if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
-                enabled = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
-            } else {
-                // the file is present and the flag is not - so assume enabled is true
-                enabled = true;
-            }
-            sb = new StringBuilder().append("net.interface.").append(interfaceName)
-                    .append(".config.dhcpServer4.passDns");
-            if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
-                passDns = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
-            }
+            // Set default values for missing properties
+            boolean enabled = false;
+            boolean passDns = true;
+
+            // StringBuilder sb = new StringBuilder().append("net.interface.").append(interfaceName)
+            // .append(".config.dhcpServer4.enabled");
+            // if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+            // enabled = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
+            // } else {
+            // // the file is present and the flag is not - so assume enabled is true
+            // enabled = true;
+            // }
+            // sb = new StringBuilder().append("net.interface.").append(interfaceName)
+            // .append(".config.dhcpServer4.passDns");
+            // if (kuraExtendedProps != null && kuraExtendedProps.getProperty(sb.toString()) != null) {
+            // passDns = Boolean.parseBoolean(kuraExtendedProps.getProperty(sb.toString()));
+            // }
 
             short prefix = NetworkUtil.getNetmaskShortForm(netmask.getHostAddress());
 

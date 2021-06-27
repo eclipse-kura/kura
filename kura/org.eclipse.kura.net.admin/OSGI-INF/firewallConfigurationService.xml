@@ -28,5 +28,4 @@
    </service>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
    <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
-   <reference bind="setFloodingProtectionConfigurationService" cardinality="0..1" interface="org.eclipse.kura.security.FloodingProtectionConfigurationService" name="FloodingProtectionConfigurationService" policy="static" unbind="unsetFloodingProtectionConfigurationService"/>
 </scr:component>

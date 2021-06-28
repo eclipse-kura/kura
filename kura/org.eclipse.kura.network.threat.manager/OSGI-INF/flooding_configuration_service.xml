@@ -23,5 +23,5 @@
       <provide interface="org.eclipse.kura.security.FloodingProtectionConfigurationService"/>
    </service>
    <property name="kura.ui.service.hide" type="Boolean" value="true"/>
-   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
+   <reference bind="setFirewallConfigurationService" unbind="unsetFirewallConfigurationService" cardinality="1..1" interface="org.eclipse.kura.net.admin.FirewallConfigurationService" name="FirewallConfigurationService" policy="static"/> 
 </scr:component>

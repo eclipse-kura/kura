@@ -24,11 +24,13 @@ import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -42,6 +44,7 @@ import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.admin.event.FirewallConfigurationChangeEvent;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
@@ -507,6 +510,55 @@ public class FirewallConfigurationServiceImplTest {
 
         svc.setFirewallOpenPortConfiguration(firewallConfiguration);
 
+    }
+    
+    @Test
+    public void addFloodingProtectionRulesTest() {
+        final LinuxFirewall mockFirewall = mock(LinuxFirewall.class);
+        
+        FirewallConfigurationServiceImpl svc = new FirewallConfigurationServiceImpl() {
+            
+            @Override
+            protected LinuxFirewall getLinuxFirewall() {
+                return mockFirewall;
+            }
+            
+            @Override
+            public synchronized void updated(Map<String, Object> properties) {
+                // don't care about the properties in this test
+                // update is not called when adding flooding protection rules,
+                // it is called just during activate
+            }
+        };
+        
+        ComponentContext mockContext = mock(ComponentContext.class);
+        svc.activate(mockContext, new HashMap<String, Object>());
+        
+        String[] floodingRules = {
+                "-A prerouting-kura -m conntrack --ctstate INVALID -j DROP",
+                "-A prerouting-kura -p tcp ! --syn -m conntrack --ctstate NEW -j DROP",
+                "-A prerouting-kura -p tcp -m conntrack --ctstate NEW -m tcpmss ! --mss 536:65535 -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,SYN FIN,SYN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags SYN,RST SYN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,RST FIN,RST -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags FIN,ACK FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,URG URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,FIN FIN -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ACK,PSH PSH -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL ALL -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL NONE -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,FIN,PSH,URG -j DROP",
+                "-A prerouting-kura -p tcp --tcp-flags ALL SYN,RST,ACK,FIN,URG -j DROP",
+                "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
+        
+        svc.addFloodingProtectionRules(new HashSet<>(Arrays.asList(floodingRules)));
+        
+        try {
+            verify(mockFirewall, times(1)).setAdditionalRules(anyObject(), anyObject(), anyObject());
+        } catch(KuraException e) {
+            assert(false);
+        }
     }
 
 }

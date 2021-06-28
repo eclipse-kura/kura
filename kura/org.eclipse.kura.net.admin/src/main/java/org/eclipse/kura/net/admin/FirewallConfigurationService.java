@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.net.admin;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.FirewallConfiguration;
@@ -61,5 +62,13 @@ public interface FirewallConfigurationService {
      * @throws KuraException
      */
     public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException;
+
+    /**
+     * Adds flooding protection rules to the firewall configuration.
+     * 
+     * @param floodingRules
+     *            Set of rules specified as Strings to protect against flooding attacks
+     */
+    public void addFloodingProtectionRules(Set<String> floodingRules);
 
 }

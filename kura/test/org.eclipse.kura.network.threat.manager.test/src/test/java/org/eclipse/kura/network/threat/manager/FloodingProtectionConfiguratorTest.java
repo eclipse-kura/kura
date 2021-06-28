@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyObject;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,10 +28,11 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.internal.floodingprotection.FloodingProtectionConfigurator;
+import org.eclipse.kura.net.admin.FirewallConfigurationService;
 import org.eclipse.kura.security.FloodingProtectionConfigurationChangeEvent;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.service.event.EventAdmin;
+import org.osgi.service.component.ComponentContext;
 
 public class FloodingProtectionConfiguratorTest {
 
@@ -53,21 +55,15 @@ public class FloodingProtectionConfiguratorTest {
             "-A prerouting-kura -p icmp -j DROP", "-A prerouting-kura -f -j DROP" };
 
     private FloodingProtectionConfigurator floodingProtectionConfigurator;
-    private EventAdmin eaMock;
+    private FirewallConfigurationService mockFirewallService;
     private final Map<String, Object> properties = new HashMap<>();
 
     @Before
     public void setupTests() {
-        this.eaMock = mock(EventAdmin.class);
         this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
-        this.floodingProtectionConfigurator.setEventAdmin(this.eaMock);
+        this.mockFirewallService = mock(FirewallConfigurationService.class);
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(this.mockFirewallService);
         this.properties.put("flooding.protection.enabled", true);
-    }
-
-    @Test
-    public void activateTest() throws KuraException, NoSuchFieldException {
-        this.floodingProtectionConfigurator.activate(null, this.properties);
-        verify(this.eaMock, times(1)).postEvent(new FloodingProtectionConfigurationChangeEvent(this.properties));
     }
 
     @Test
@@ -103,5 +99,25 @@ public class FloodingProtectionConfiguratorTest {
         assertTrue(this.floodingProtectionConfigurator.getFloodingProtectionMangleRules()
                 .containsAll(Arrays.asList(FLOODING_PROTECTION_MANGLE_RULES)));
     }
-
+    
+    @Test(expected = NullPointerException.class)
+    public void addFloodingRulesTest() {
+        this.floodingProtectionConfigurator = new FloodingProtectionConfigurator();
+        this.floodingProtectionConfigurator.setFirewallConfigurationService(mockFirewallService);
+        
+        ComponentContext mockContext = mock(ComponentContext.class);
+        this.properties.put("flooding.protection.enabled", false);
+        this.floodingProtectionConfigurator.activate(mockContext, this.properties);
+        
+        this.properties.put("flooding.protection.enabled", true);
+        this.floodingProtectionConfigurator.updated(this.properties);
+        
+        verify(this.mockFirewallService, times(2)).addFloodingProtectionRules(anyObject());
+        
+        this.floodingProtectionConfigurator.deactivate(mockContext);
+        
+        this.floodingProtectionConfigurator.unsetFirewallConfigurationService(mockFirewallService);
+        
+        this.floodingProtectionConfigurator.updated(this.properties);
+    }
 }

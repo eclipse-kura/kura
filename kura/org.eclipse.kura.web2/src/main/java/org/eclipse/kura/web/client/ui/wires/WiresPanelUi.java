@@ -169,6 +169,7 @@ public class WiresPanelUi extends Composite
             this.confirmDialog.show(MSGS.wiresSave(),
                     () -> WiresRPC.updateWiresConfiguration(getGwtWireGraphConfiguration(),
                             getModifiedDriverConfigurations(), result -> clearDirtyState()));
+            WiresPanelUi.this.wireComposer.fitContent(true);
         });
         this.btnReset.addClickHandler(
                 event -> WiresPanelUi.this.confirmDialog.show(MSGS.deviceConfigDirty(), WiresPanelUi.this::load));

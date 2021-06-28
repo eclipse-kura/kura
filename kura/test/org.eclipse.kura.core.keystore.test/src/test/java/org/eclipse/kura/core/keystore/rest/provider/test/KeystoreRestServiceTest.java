@@ -38,6 +38,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.keystore.rest.provider.CsrReadRequest;
+import org.eclipse.kura.core.keystore.rest.provider.CsrResponse;
 import org.eclipse.kura.core.keystore.rest.provider.DeleteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.KeyPairWriteRequest;
 import org.eclipse.kura.core.keystore.rest.provider.KeystoreRestService;
@@ -247,7 +248,7 @@ public class KeystoreRestServiceTest {
 
             @Override
             public void activate(ComponentContext componentContext) {
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -273,7 +274,7 @@ public class KeystoreRestServiceTest {
             @Override
             public void activate(ComponentContext componentContext) {
 
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -299,7 +300,7 @@ public class KeystoreRestServiceTest {
             @Override
             public void activate(ComponentContext componentContext) {
 
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -331,7 +332,7 @@ public class KeystoreRestServiceTest {
             @Override
             public void activate(ComponentContext componentContext) {
 
-                keystoreServices.put("MyKeystore", ksMock);
+                this.keystoreServices.put("MyKeystore", ksMock);
             }
         };
         krs.activate(null);
@@ -350,8 +351,8 @@ public class KeystoreRestServiceTest {
         TestUtil.setFieldValue(readRequest, "signatureAlgorithm", "SHA256WithRSA");
         TestUtil.setFieldValue(readRequest, "attributes", "CN=Kura, OU=IoT, O=Eclipse, C=US");
 
-        String csr = krs.getCSR(readRequest);
+        CsrResponse csr = krs.getCSR(readRequest);
         assertNotNull(csr);
-        assertTrue(csr.startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
+        assertTrue(csr.getSigningRequest().startsWith("-----BEGIN CERTIFICATE REQUEST-----"));
     }
 }

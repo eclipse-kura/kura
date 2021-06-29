@@ -16,5 +16,7 @@ public interface CertificateModalListener {
 
     public void onApply(final boolean isConfigurationValid);
 
+    public void onClose();
+
     public void onKeystoreChanged();
 }

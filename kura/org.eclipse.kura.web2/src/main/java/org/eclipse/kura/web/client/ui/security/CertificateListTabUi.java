@@ -101,6 +101,8 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
 
     private List<String> pids;
 
+    private KeyPairTabUi keyPairTabUi;
+
     public CertificateListTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -373,9 +375,9 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
         List<String> storageAliases = this.certificatesDataProvider.getList().stream().map(GwtKeystoreEntry::getAlias)
                 .collect(Collectors.toList());
 
-        final KeyPairTabUi widget = new KeyPairTabUi(selectedCertType.getType(), this.pids, storageAliases, this,
-                this.resetModalButton, this.applyModalButton);
-        this.certAddModalBody.add(widget);
+        this.keyPairTabUi = new KeyPairTabUi(selectedCertType.getType(), this.pids, storageAliases, this,
+                this.resetModalButton, this.applyModalButton, this.closeModalButton);
+        this.certAddModalBody.add(keyPairTabUi);
 
         this.nextStepButton.setVisible(false);
         this.resetModalButton.setVisible(true);
@@ -434,6 +436,13 @@ public class CertificateListTabUi extends Composite implements Tab, CertificateM
             this.alertDialog.show(MSGS.formWithErrorsOrIncomplete(), AlertDialog.Severity.ERROR,
                     (ConfirmListener) null);
         }
+
+        this.certAddModalBody.remove(this.keyPairTabUi);
+    }
+
+    @Override
+    public void onClose() {
+        this.certAddModalBody.remove(this.keyPairTabUi);
     }
 
     @Override

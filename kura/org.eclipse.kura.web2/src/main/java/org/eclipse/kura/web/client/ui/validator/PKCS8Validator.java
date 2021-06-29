@@ -14,7 +14,7 @@ package org.eclipse.kura.web.client.ui.validator;
 
 public class PKCS8Validator extends RegexValidator {
 
-    private static final String PKCS8 = "^-{3,}BEGIN \\w+ PRIVATE KEY-{3,}[\\W\\w]*?-{3,}END \\w+ PRIVATE KEY-{3,}$";
+    private static final String PKCS8 = "^-{3,}BEGIN (?!ENCRYPTED)\\w* ?PRIVATE KEY-{3,}[\\W\\w]*?-{3,}END \\w* ?PRIVATE KEY-{3,}$";
 
     public PKCS8Validator(String message) {
         super(PKCS8, message);

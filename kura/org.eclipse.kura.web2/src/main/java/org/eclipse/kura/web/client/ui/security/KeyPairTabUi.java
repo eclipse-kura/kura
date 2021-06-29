@@ -21,6 +21,7 @@ import org.eclipse.kura.web.client.ui.validator.PEMValidator;
 import org.eclipse.kura.web.client.ui.validator.PKCS8Validator;
 import org.eclipse.kura.web.client.ui.validator.StringLengthValidator;
 import org.eclipse.kura.web.client.ui.validator.StringNotInListValidator;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
@@ -34,8 +35,10 @@ import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -64,6 +67,8 @@ public class KeyPairTabUi extends Composite implements Tab {
     private boolean dirty;
 
     private final Type type;
+
+    private HandlerRegistration applyHandler;
 
     @UiField
     HTMLPanel description;
@@ -200,7 +205,7 @@ public class KeyPairTabUi extends Composite implements Tab {
             this.privateKeyInput.setVisibleLines(20);
         }
 
-        this.applyButton.addClickHandler(event -> {
+        this.applyHandler = this.applyButton.addClickHandler(event -> {
 
             final boolean isValid = isValid();
 
@@ -211,6 +216,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                     storeCertificate();
                 }
                 this.listener.onApply(isValid);
+                this.applyHandler.removeHandler();
             }
         });
     }
@@ -219,21 +225,42 @@ public class KeyPairTabUi extends Composite implements Tab {
         RequestQueue.submit(c -> this.gwtXSRFService
                 .generateSecurityToken(c.callback(token -> this.gwtCertificatesService.storeKeyPair(token,
                         this.pidListBox.getSelectedValue(), this.privateKeyInput.getValue(),
-                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
-                            reset();
-                            setDirty(false);
-                            this.listener.onKeystoreChanged();
-                        })))));
+                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                reset();
+                                setDirty(false);
+                                KeyPairTabUi.this.listener.onKeystoreChanged();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                caught.printStackTrace();
+                                FailureHandler.handle(caught);
+                            }
+                        }))));
     }
 
     private void storeCertificate() {
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(
                 token -> this.gwtCertificatesService.storeCertificate(token, this.pidListBox.getSelectedValue(),
-                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
-                            reset();
-                            setDirty(false);
-                            this.listener.onKeystoreChanged();
-                        })))));
+                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                reset();
+                                setDirty(false);
+                                KeyPairTabUi.this.listener.onKeystoreChanged();
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                caught.printStackTrace();
+                                FailureHandler.handle(caught);
+                            }
+
+                        }))));
     }
 
     private void reset() {

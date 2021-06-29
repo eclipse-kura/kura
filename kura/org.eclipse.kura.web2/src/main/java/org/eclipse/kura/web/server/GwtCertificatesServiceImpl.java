@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -23,9 +23,9 @@ import java.security.KeyStore.TrustedCertificateEntry;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Date;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +77,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 }
             }
 
-        } catch (GeneralSecurityException | IOException | KuraException e) {
+        } catch (GeneralSecurityException | IOException | KuraException | IllegalStateException
+                | IllegalArgumentException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
@@ -101,7 +102,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 }
             }
 
-        } catch (CertificateException | KuraException e) {
+        } catch (CertificateException | KuraException | IllegalStateException | IllegalArgumentException e) {
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }

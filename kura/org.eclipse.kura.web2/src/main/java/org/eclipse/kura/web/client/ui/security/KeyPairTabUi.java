@@ -21,7 +21,6 @@ import org.eclipse.kura.web.client.ui.validator.PEMValidator;
 import org.eclipse.kura.web.client.ui.validator.PKCS8Validator;
 import org.eclipse.kura.web.client.ui.validator.StringLengthValidator;
 import org.eclipse.kura.web.client.ui.validator.StringNotInListValidator;
-import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
@@ -38,7 +37,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -69,6 +67,7 @@ public class KeyPairTabUi extends Composite implements Tab {
     private final Type type;
 
     private HandlerRegistration applyHandler;
+    private HandlerRegistration closeHandler;
 
     @UiField
     HTMLPanel description;
@@ -86,14 +85,16 @@ public class KeyPairTabUi extends Composite implements Tab {
     private final Button resetButton;
 
     private final Button applyButton;
+    private final Button closeButton;
 
     public KeyPairTabUi(final Type type, final List<String> keyStorePids, final List<String> usedAliases,
-            final CertificateModalListener listener, Button resetButton, Button applyButton) {
+            final CertificateModalListener listener, Button resetButton, Button applyButton, Button closeButton) {
         this.listener = listener;
         this.type = type;
 
         this.applyButton = applyButton;
         this.resetButton = resetButton;
+        this.closeButton = closeButton;
 
         initWidget(uiBinder.createAndBindUi(this));
         initForm(keyStorePids, usedAliases);
@@ -215,9 +216,15 @@ public class KeyPairTabUi extends Composite implements Tab {
                 } else {
                     storeCertificate();
                 }
-                this.listener.onApply(isValid);
-                this.applyHandler.removeHandler();
             }
+            this.applyHandler.removeHandler();
+            this.listener.onApply(isValid);
+        });
+
+        this.closeHandler = this.closeButton.addClickHandler(event -> {
+            this.applyHandler.removeHandler();
+            this.closeHandler.removeHandler();
+            this.listener.onClose();
         });
     }
 
@@ -225,42 +232,21 @@ public class KeyPairTabUi extends Composite implements Tab {
         RequestQueue.submit(c -> this.gwtXSRFService
                 .generateSecurityToken(c.callback(token -> this.gwtCertificatesService.storeKeyPair(token,
                         this.pidListBox.getSelectedValue(), this.privateKeyInput.getValue(),
-                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                reset();
-                                setDirty(false);
-                                KeyPairTabUi.this.listener.onKeystoreChanged();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                caught.printStackTrace();
-                                FailureHandler.handle(caught);
-                            }
-                        }))));
+                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
+                            reset();
+                            setDirty(false);
+                            KeyPairTabUi.this.listener.onKeystoreChanged();
+                        })))));
     }
 
     private void storeCertificate() {
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(c.callback(
                 token -> this.gwtCertificatesService.storeCertificate(token, this.pidListBox.getSelectedValue(),
-                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), new AsyncCallback<Void>() {
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                reset();
-                                setDirty(false);
-                                KeyPairTabUi.this.listener.onKeystoreChanged();
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                caught.printStackTrace();
-                                FailureHandler.handle(caught);
-                            }
-
-                        }))));
+                        this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
+                            reset();
+                            setDirty(false);
+                            KeyPairTabUi.this.listener.onKeystoreChanged();
+                        })))));
     }
 
     private void reset() {
@@ -272,7 +258,6 @@ public class KeyPairTabUi extends Composite implements Tab {
     @Override
     public void clear() {
         // nothing to clear
-
     }
 
 }

@@ -115,7 +115,7 @@
 		}
 		
         .panel-footer {
-        margin-left: 5vh;
+        margin-left: 20vh;
         }
 	</ui:style>
 

@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.core.net;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -184,52 +185,53 @@ public class FirewallConfiguration {
         try {
             String[] sa = sop.split(",");
             if (sa.length == 8 && "#".equals(sa[7])) {
-                NetProtocol protocol = NetProtocol.valueOf(sa[1]);
-                String permittedNetwork = null;
-                short permittedNetworkMask = 0;
-                if (!sa[2].isEmpty()) {
-                    permittedNetwork = sa[2].split("/")[0];
-                    permittedNetworkMask = Short.parseShort(sa[2].split("/")[1]);
-                } else {
-                    permittedNetwork = "0.0.0.0";
-                }
-                String permittedIface = null;
-                if (!sa[3].isEmpty()) {
-                    permittedIface = sa[3];
-                }
-                String unpermittedIface = null;
-                if (!sa[4].isEmpty()) {
-                    unpermittedIface = sa[4];
-                }
-                String permittedMAC = null;
-                if (!sa[5].isEmpty()) {
-                    permittedMAC = sa[5];
-                }
-                String sourcePortRange = null;
-                if (!sa[6].isEmpty()) {
-                    sourcePortRange = sa[6];
-                }
-                int port = 0;
-                String portRange = null;
-                FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry = null;
-                if (sa[0].contains(":")) {
-                    portRange = sa[0];
-                    openPortEntry = new FirewallOpenPortConfigIP4(portRange, protocol,
-                            new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
-                                    permittedNetworkMask),
-                            permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
-                } else {
-                    port = Integer.parseInt(sa[0]);
-                    openPortEntry = new FirewallOpenPortConfigIP4(port, protocol,
-                            new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork),
-                                    permittedNetworkMask),
-                            permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
-                }
-                this.openPortConfigs.add(openPortEntry);
+                this.openPortConfigs.add(buildOpenPortConfigIP(sa));
             }
         } catch (Exception e) {
             logger.error("Failed to parse Open Port Entry", e);
         }
+    }
+
+    private FirewallOpenPortConfigIP<? extends IPAddress> buildOpenPortConfigIP(String[] sa)
+            throws UnknownHostException {
+        FirewallOpenPortConfigIP<? extends IPAddress> openPortEntry = null;
+        NetProtocol protocol = NetProtocol.valueOf(sa[1]);
+        String permittedNetwork = "0.0.0.0";
+        short permittedNetworkMask = 0;
+        if (!sa[2].isEmpty()) {
+            permittedNetwork = sa[2].split("/")[0];
+            permittedNetworkMask = Short.parseShort(sa[2].split("/")[1]);
+        }
+        String permittedIface = null;
+        if (!sa[3].isEmpty()) {
+            permittedIface = sa[3];
+        }
+        String unpermittedIface = null;
+        if (!sa[4].isEmpty()) {
+            unpermittedIface = sa[4];
+        }
+        String permittedMAC = null;
+        if (!sa[5].isEmpty()) {
+            permittedMAC = sa[5];
+        }
+        String sourcePortRange = null;
+        if (!sa[6].isEmpty()) {
+            sourcePortRange = sa[6];
+        }
+        int port = 0;
+        String portRange = null;
+        if (sa[0].contains(":")) {
+            portRange = sa[0];
+            openPortEntry = new FirewallOpenPortConfigIP4(portRange, protocol,
+                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask),
+                    permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
+        } else {
+            port = Integer.parseInt(sa[0]);
+            openPortEntry = new FirewallOpenPortConfigIP4(port, protocol,
+                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress(permittedNetwork), permittedNetworkMask),
+                    permittedIface, unpermittedIface, permittedMAC, sourcePortRange);
+        }
+        return openPortEntry;
     }
 
     public void addConfig(NetConfig netConfig) {

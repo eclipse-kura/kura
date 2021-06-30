@@ -58,6 +58,8 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServletContextHandler servletContextHandler = (ServletContextHandler) context;
 
+        servletContextHandler.getServer().setErrorHandler(new KuraErrorHandler());
+
         final GzipHandler gzipHandler = new GzipHandler();
         gzipHandler.setCompressionLevel(9);
 
@@ -186,13 +188,20 @@ public class KuraJettyCustomizer extends JettyCustomizer {
 
         final ServerConnector connector = new ServerConnector(server,
                 new SslConnectionFactory(sslContextFactory, "http/1.1"), new HttpConnectionFactory(httpsConfig));
-        connector.setPort(port);
+        customizeConnector(connector, port);
 
         return Optional.of(connector);
     }
 
     private void customizeConnector(final ServerConnector serverConnector, final int port) {
         serverConnector.setPort(port);
+        for (final ConnectionFactory factory : serverConnector.getConnectionFactories()) {
+            if (!(factory instanceof HttpConnectionFactory)) {
+                continue;
+            }
+
+            ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
+        }
         addCustomizer(serverConnector, new ForwardedRequestCustomizer());
     }
 

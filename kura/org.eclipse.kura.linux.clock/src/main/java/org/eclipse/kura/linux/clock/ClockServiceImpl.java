@@ -159,11 +159,20 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     private void startClockSyncProvider() throws KuraException {
         stopClockSyncProvider();
         String sprovider = (String) this.properties.get(PROP_CLOCK_PROVIDER);
-        if ("java-ntp".equals(sprovider)) {
+
+        switch (ClockProviderType.valueOf(sprovider)) {
+        case JAVA_NTP:
             this.provider = new JavaNtpClockSyncProvider();
-        } else if ("ntpd".equals(sprovider)) {
+            break;
+
+        case NTPD:
             this.provider = new NtpdClockSyncProvider(this.executorService);
+            break;
+        case NTS:
+            this.provider = new NtsClockSyncProvider(this.executorService);
+            break;
         }
+
         if (this.provider != null) {
             this.provider.init(this.properties, this);
             this.provider.start();

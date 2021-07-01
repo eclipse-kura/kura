@@ -43,8 +43,10 @@
             required="true"
             default="java-ntp" 
             description="Source for setting the system clock">
-           <Option label="java-ntp" value="java-ntp"/>
-           <Option label="ntpd"     value="ntpd"/>
+            
+               <Option label="java-ntp" value="java-ntp"/>
+               <Option label="ntpd"     value="ntpd"/>
+               <Option label="nts"      value="nts"/>
         </AD>
 
         <AD id="clock.ntp.host"  
@@ -107,6 +109,13 @@
             required="true"
             default="/dev/rtc0" 
             description="The RTC File Name. It defaults to /dev/rtc0."/>
+            
+        <AD id="nts.config"
+            name="NTS Configuration"
+            type="String"
+            cardinality="1"
+            required="false"
+            description="chrony configuration file.|TextArea" />
 
     </OCD>
     <Designate pid="org.eclipse.kura.clock.ClockService">

@@ -34,6 +34,7 @@ import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -65,6 +66,9 @@ public class KeyPairTabUi extends Composite implements Tab {
 
     private final Type type;
 
+    private HandlerRegistration applyHandler;
+    private HandlerRegistration closeHandler;
+
     @UiField
     HTMLPanel description;
     @UiField
@@ -81,14 +85,16 @@ public class KeyPairTabUi extends Composite implements Tab {
     private final Button resetButton;
 
     private final Button applyButton;
+    private final Button closeButton;
 
     public KeyPairTabUi(final Type type, final List<String> keyStorePids, final List<String> usedAliases,
-            final CertificateModalListener listener, Button resetButton, Button applyButton) {
+            final CertificateModalListener listener, Button resetButton, Button applyButton, Button closeButton) {
         this.listener = listener;
         this.type = type;
 
         this.applyButton = applyButton;
         this.resetButton = resetButton;
+        this.closeButton = closeButton;
 
         initWidget(uiBinder.createAndBindUi(this));
         initForm(keyStorePids, usedAliases);
@@ -200,7 +206,7 @@ public class KeyPairTabUi extends Composite implements Tab {
             this.privateKeyInput.setVisibleLines(20);
         }
 
-        this.applyButton.addClickHandler(event -> {
+        this.applyHandler = this.applyButton.addClickHandler(event -> {
 
             final boolean isValid = isValid();
 
@@ -210,8 +216,15 @@ public class KeyPairTabUi extends Composite implements Tab {
                 } else {
                     storeCertificate();
                 }
-                this.listener.onApply(isValid);
             }
+            this.applyHandler.removeHandler();
+            this.listener.onApply(isValid);
+        });
+
+        this.closeHandler = this.closeButton.addClickHandler(event -> {
+            this.applyHandler.removeHandler();
+            this.closeHandler.removeHandler();
+            this.listener.onClose();
         });
     }
 
@@ -222,7 +235,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                         this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
                             reset();
                             setDirty(false);
-                            this.listener.onKeystoreChanged();
+                            KeyPairTabUi.this.listener.onKeystoreChanged();
                         })))));
     }
 
@@ -232,7 +245,7 @@ public class KeyPairTabUi extends Composite implements Tab {
                         this.certificateInput.getValue(), this.storageAliasInput.getValue(), c.callback(ok -> {
                             reset();
                             setDirty(false);
-                            this.listener.onKeystoreChanged();
+                            KeyPairTabUi.this.listener.onKeystoreChanged();
                         })))));
     }
 
@@ -245,7 +258,6 @@ public class KeyPairTabUi extends Composite implements Tab {
     @Override
     public void clear() {
         // nothing to clear
-
     }
 
 }

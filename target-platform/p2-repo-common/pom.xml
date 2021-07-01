@@ -583,7 +583,7 @@
                                 <move file="target/source/plugins/jakarta.annotation-api.jar" tofile="target/source/plugins/jakarta.annotation-api_${jakarta.annotation-api.version}.jar"/>
                                 <move file="target/source/plugins/jaxb-osgi.jar" tofile="target/source/plugins/jaxb-osgi_${jaxb-osgi.version}.jar"/>
                                 <move file="target/source/plugins/osgi-resource-locator.jar" tofile="target/source/plugins/osgi-resource-locator_${osgi-resource-locator.version}.jar"/>
-                                <move file="target/source/plugins/bluez-dbus-osgi.jar" tofile="target/source/plugins/bluez-dbus-osgi_${com.github.hypfvieh.bluez-dbus-osgi.version}.jar"/>
+                                <move file="target/source/plugins/bluez-dbus-osgi.jar" tofile="target/source/plugins/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar"/>
                                 <!-- Artemis Broker -->
                                 <move file="target/source/plugins/guava.jar" tofile="target/source/plugins/guava_${guava.version}.jar"/>
                                 <move file="target/source/plugins/artemis-mqtt-protocol.jar" tofile="target/source/plugins/artemis-mqtt-protocol_${org.apache.activemq.artemis.upstream.version}.jar"/>

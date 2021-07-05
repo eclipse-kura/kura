@@ -4,7 +4,7 @@ This is a Docker image running Eclipse Kura™.
 
 Use the following command to run it:
 
-    docker run -d -p 8080:8080 -t eclipse/kura
+    docker run -d -p 8443:443 -t eclipse/kura
 
 Once the image is started you can navigate your browser to http://localhost:8080 and log in using the credentials `admin` : `admin`.
 
@@ -18,7 +18,7 @@ This image includes [Apache Felix FileInstall](https://felix.apache.org/document
 File Install loads bundles from `/load` which is also defined as a Docker volume,
 so that you can link this up with your container host:
 
-    docker run -ti -p 8080:8080 -v /home/user/path/to/bundles:/load:z eclipse/kura
+    docker run -ti -p 8443:443 -v /home/user/path/to/bundles:/load:z eclipse/kura
 
 Now you can access `/home/user/path/to/bundles` on your host machine and bundles will be loaded
 by Kura inside the Docker container.
@@ -33,13 +33,13 @@ Running with JMX or debugging enabled can sometimes be quite helpful. However it
 
 If you want to run the image with JMX enabled use the following command on Linux:
 
-    docker run -ti -eJAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xdebug -Xrunjdwp:transport=dt_socket,address=9011,server=y,suspend=n" -p 8080:8080 --expose 9010 --expose 9011 -p 9010:9010 -p 9011:9011 eclipse/kura
+    docker run -ti -eJAVA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xdebug -Xrunjdwp:transport=dt_socket,address=9011,server=y,suspend=n" -p 8443:443 --expose 9010 --expose 9011 -p 9010:9010 -p 9011:9011 eclipse/kura
 
 ### On Windows
 
 If you want to run the image with JMX enabled use the following command on Windows: 
 
-    docker run -ti -eJAVA_OPTS="-Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=<IP> -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xdebug -Xrunjdwp:transport=dt_socket,address=9011,server=y,suspend=n" -p 8080:8080 --expose 9010 --expose 9011 -p 9010:9010 -p 9011:9011 eclipse/kura
+    docker run -ti -eJAVA_OPTS="-Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=<IP> -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.rmi.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Xdebug -Xrunjdwp:transport=dt_socket,address=9011,server=y,suspend=n" -p 8443:443 --expose 9010 --expose 9011 -p 9010:9010 -p 9011:9011 eclipse/kura
 
 Where *<IP>* is the Docker address, you can find it by using *ipconfig* and search for *DockerNAT* address, for instance:
 
@@ -53,11 +53,11 @@ The JMX port defined is 9010 and the Remote debug port is 9011. Both ports are n
 
 ## Re-Building
 
-This Docker container is being built by re-using the Intel UP² CentOS 7 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
+This Docker container is being built by re-using the Intel UP² UBI 8 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
 There is also the possibility to build the Docker container starting from a lightweight Alpine Linux base image, in order to shrink the image to a little more than 200MB.
 
-If you want to re-build this image, check out this repository, move to one of the child directories "kura_alpine" or "kura_centOS" and simply issue a:
-`docker build -t kura_centos .` if you intend to re-build the CentOS Docker image.
+If you want to re-build this image, check out this repository, move to one of the child directories "kura_alpine" or "kura_ubi8" and simply issue a:
+`docker build -t kura_ubi8 .` if you intend to re-build the UBI8 container image.
 `docker build -t kura_alpine .` if you intend to re-build the Alpine Linux Docker image.
 
 Usage of tags (-t argument) is not necessary for the build, but is required if you intend to build both the images on the same system.

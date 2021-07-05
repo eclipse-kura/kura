@@ -79,6 +79,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 
         } catch (GeneralSecurityException | IOException | KuraException | IllegalStateException
                 | IllegalArgumentException e) {
+            logger.error(e.getMessage());
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }
@@ -103,6 +104,7 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
             }
 
         } catch (CertificateException | KuraException | IllegalStateException | IllegalArgumentException e) {
+            logger.error(e.getMessage());
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,6 +26,7 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
+import org.eclipse.kura.net.admin.util.SerialUtil;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
@@ -627,19 +628,10 @@ public abstract class TelitModem {
 
     protected CommConnection openSerialPort(String port) throws KuraException {
 
-        CommConnection connection = null;
         if (this.connectionFactory != null) {
-            String uri = new CommURI.Builder(port).withBaudRate(115200).withDataBits(8).withStopBits(1).withParity(0)
-                    .withTimeout(2000).build().toString();
-
-            try {
-                connection = (CommConnection) this.connectionFactory.createConnection(uri, 1, false);
-            } catch (Exception e) {
-                logger.debug("Exception creating connection: " + e);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e, "Connection Failed");
-            }
+            return SerialUtil.openSerialPort(this.connectionFactory, port);
         }
-        return connection;
+        return null;
     }
 
     protected void closeSerialPort(CommConnection connection) throws KuraException {

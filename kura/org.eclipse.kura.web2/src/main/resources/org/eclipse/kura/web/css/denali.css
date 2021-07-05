@@ -614,6 +614,10 @@ Navbar START
 
 .nav-tabs {
 	border-bottom: solid 1px;
+	overflow-x: auto !important;
+	overflow-y: hidden !important;
+	text-overflow: ellipsis !important;
+	white-space: nowrap !important;
 }
 
 .nav-tabs  a {
@@ -622,12 +626,16 @@ Navbar START
 }
 
 .nav-tabs li {
+	float: none !important;
 	border: none;
 	background-color: inherit;
+	display: inline-block !important;
 }
 
 .nav-tabs li.active {
+	float: none !important;
 	border-bottom: solid 0.1cm #2860A6;
+	display: inline-block !important;
 }
 
 /**********************

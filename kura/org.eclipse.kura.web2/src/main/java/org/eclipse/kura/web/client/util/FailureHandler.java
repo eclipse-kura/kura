@@ -79,17 +79,25 @@ public class FailureHandler {
 
             GwtKuraException gee = (GwtKuraException) caught;
             GwtKuraErrorCode code = gee.getCode();
-
-            if (code == GwtKuraErrorCode.DUPLICATE_NAME) {
-                errorMessageBuilder.append(MSGS.duplicateNameError());
-            } else if (code == GwtKuraErrorCode.CONNECTION_FAILURE) {
-                errorMessageBuilder.append(MSGS.connectionFailure());
-            } else if (code == GwtKuraErrorCode.ILLEGAL_ARGUMENT) {
-                errorMessageBuilder.append(MSGS.illegalArgumentError());
-            } else if (code == GwtKuraErrorCode.ILLEGAL_NULL_ARGUMENT) {
-                errorMessageBuilder.append(MSGS.illegalNullArgumentError());
-            } else {
-                errorMessageBuilder.append(MSGS.genericError());
+            
+            switch(code) {
+                case DUPLICATE_NAME:
+                    errorMessageBuilder.append(MSGS.duplicateNameError());
+                    break;
+                case CONNECTION_FAILURE:
+                    errorMessageBuilder.append(MSGS.connectionFailure());
+                    break;
+                case ILLEGAL_ARGUMENT:
+                    errorMessageBuilder.append(MSGS.illegalArgumentError());
+                    break;
+                case ILLEGAL_NULL_ARGUMENT:
+                    errorMessageBuilder.append(MSGS.illegalNullArgumentError());
+                    break;
+                case CERTIFICATE_PARSE_FAILURE:
+                    errorMessageBuilder.append(MSGS.certificateParseFailure());
+                    break;
+                default:
+                    errorMessageBuilder.append(MSGS.genericError());
             }
 
         } else if (caught instanceof StatusCodeException && ((StatusCodeException) caught).getStatusCode() == 0) {

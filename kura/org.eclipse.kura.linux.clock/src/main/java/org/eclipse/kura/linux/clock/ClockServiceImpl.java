@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -160,17 +160,19 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         stopClockSyncProvider();
         String sprovider = (String) this.properties.get(PROP_CLOCK_PROVIDER);
 
-        switch (ClockProviderType.valueOf(sprovider)) {
+        switch (ClockProviderType.fromValue(sprovider)) {
         case JAVA_NTP:
             this.provider = new JavaNtpClockSyncProvider();
             break;
-
         case NTPD:
             this.provider = new NtpdClockSyncProvider(this.executorService);
             break;
         case NTS:
             this.provider = new NtsClockSyncProvider(this.executorService);
             break;
+
+        default:
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
         }
 
         if (this.provider != null) {

@@ -8,7 +8,9 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.commons.net;version="3.1.0",
+Import-Package: com.google.gson;version="2.7.0",
+ com.google.gson.annotations;version="2.7.0",
+ org.apache.commons.net;version="3.1.0",
  org.apache.commons.net.ntp;version="3.1.0",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.clock;version="[1.0,1.1)",

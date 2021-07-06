@@ -14,7 +14,7 @@ package org.eclipse.kura.web.client.ui.validator;
 
 public class PEMValidator extends RegexValidator {
 
-    private static final String PEM_REGEX = "^-{3,}BEGIN CERTIFICATE-{3,}[\\W\\w]*?-{3,}END CERTIFICATE-{3,}$";
+    private static final String PEM_REGEX = "^-{5}BEGIN CERTIFICATE-{5}\n[\\W\\w]*?-{5}END CERTIFICATE-{5}$";
 
     public PEMValidator(String message) {
         super(PEM_REGEX, message);

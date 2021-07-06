@@ -91,7 +91,7 @@ public class ClockServiceImplTest {
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("enabled", true);
-        properties.put("clock.provider", "nts");
+        properties.put("clock.provider", ClockProviderType.CHRONY_ADVANCED.getValue());
 
         clockService.activate(properties);
 
@@ -117,8 +117,8 @@ public class ClockServiceImplTest {
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("enabled", true);
-        properties.put("clock.provider", "nts");
-        properties.put("clock.nts.config", IOUtil.readResource("chrony.conf"));
+        properties.put("clock.provider", ClockProviderType.CHRONY_ADVANCED.getValue());
+        properties.put("chrony.advanced.config", IOUtil.readResource("chrony.conf"));
 
         clockService.activate(properties);
 

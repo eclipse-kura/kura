@@ -167,7 +167,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         case NTPD:
             this.provider = new NtpdClockSyncProvider(this.executorService);
             break;
-        case NTS:
+        case CHRONY_ADVANCED:
             this.provider = new NtsClockSyncProvider(this.executorService);
             break;
 

@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
 import static org.junit.Assert.assertEquals;
@@ -46,20 +58,16 @@ public class NtsClockSyncProviderTest {
 
         NtsClockSyncProvider ntsClockSyncProvider = new NtsClockSyncProvider(serviceMock);
         AtomicBoolean invoked = new AtomicBoolean(false);
-        ClockSyncListener listener = new ClockSyncListener() {
+        ClockSyncListener listener = offset -> {
+            assertEquals(0, offset);
 
-            @Override
-            public void onClockUpdate(long offset) {
-                assertEquals(0, offset);
-
-                invoked.set(true);
-            }
+            invoked.set(true);
         };
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("clock.provider", "nts");
-        properties.put("clock.nts.config.location", "placeholder_path");
+        properties.put("chrony.advanced.configlocation", "placeholder_path");
 
         ntsClockSyncProvider.init(properties, listener);
 

@@ -103,7 +103,10 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 }
             }
 
-        } catch (CertificateException | KuraException | IllegalStateException | IllegalArgumentException e) {
+        } catch (CertificateException parseException) {
+            logger.error(parseException.getMessage());
+            throw new GwtKuraException(GwtKuraErrorCode.CERTIFICATE_PARSE_FAILURE, parseException);
+        } catch (KuraException | IllegalStateException | IllegalArgumentException e) {
             logger.error(e.getMessage());
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
         }

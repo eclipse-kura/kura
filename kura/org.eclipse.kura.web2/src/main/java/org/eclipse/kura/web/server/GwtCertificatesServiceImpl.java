@@ -79,8 +79,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
 
         } catch (GeneralSecurityException | IOException | KuraException | IllegalStateException
                 | IllegalArgumentException e) {
-            logger.error(e.getMessage());
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+            logger.error("Error storing keypair with alias: {} in keystore: {}", alias, keyStorePid, e);
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
     }
 
@@ -103,12 +103,13 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 }
             }
 
-        } catch (CertificateException parseException) {
-            logger.error(parseException.getMessage());
-            throw new GwtKuraException(GwtKuraErrorCode.CERTIFICATE_PARSE_FAILURE, parseException);
+        } catch (CertificateException e) {
+            logger.error("Error parsing certificate with alias: {} in keystore: {}", alias, keyStorePid, e);
+            throw new GwtKuraException(GwtKuraErrorCode.CERTIFICATE_PARSE_FAILURE);
         } catch (KuraException | IllegalStateException | IllegalArgumentException e) {
-            logger.error(e.getMessage());
-            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT, e);
+            logger.error("Error storing certificate with alias: {} in keystore: {}. Illegal argument provided.", alias,
+                    keyStorePid, e);
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
     }
 
@@ -187,8 +188,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                             validityEndDate));
                 }
             } catch (KuraException keystoreException) {
-                logger.error("Error while accessing keystore file of Keystore Service '" + (String) kuraServicePid
-                        + "': " + keystoreException.getMessage(), keystoreException);
+                logger.error("Error while accessing keystore file of Keystore Service {}: {}", (String) kuraServicePid,
+                        keystoreException.getMessage(), keystoreException);
             } finally {
                 context.ungetService(ref);
             }
@@ -218,7 +219,8 @@ public class GwtCertificatesServiceImpl extends OsgiRemoteServiceServlet impleme
                 try {
                     service.deleteEntry(entry.getAlias());
                 } catch (Exception e) {
-                    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+                    logger.error("Error deleting keystore entry: {}", entry.getAlias(), e);
+                    throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                 }
             } finally {
                 ServiceLocator.getInstance().ungetService(ref);

@@ -90,8 +90,9 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
                 }
             }
 
-            if (chronyConfigLocation == null)
+            if (chronyConfigLocation == null) {
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+            }
 
             try {
 

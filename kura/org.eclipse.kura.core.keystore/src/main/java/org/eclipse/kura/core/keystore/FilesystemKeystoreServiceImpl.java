@@ -485,14 +485,16 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
         final Optional<Entry> currentEntry = Optional.ofNullable(getEntry(alias));
 
+        if (!currentEntry.isPresent()) {
+            return;
+        }
+
         KeyStore ks = getKeyStore();
         try {
             ks.deleteEntry(alias);
             saveKeystore(ks);
             boolean crlStoreChanged = false;
-            if (currentEntry.isPresent()) {
-                crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());
-            }
+            crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());
             if (!crlStoreChanged) {
                 postChangedEvent();
             }

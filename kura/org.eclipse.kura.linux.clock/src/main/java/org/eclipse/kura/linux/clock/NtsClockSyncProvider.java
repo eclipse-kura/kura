@@ -178,7 +178,8 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
             if (journalEntry.getTime() > this.lastSyncTime) {
 
                 this.lastSyncTime = journalEntry.getTime();
-                this.lastSyncValue = new Date();
+                this.lastSyncValue = new Date(
+                        TimeUnit.MILLISECONDS.convert(journalEntry.getTime(), TimeUnit.MICROSECONDS));
 
                 this.lastOffset = parseOffset(journalEntry.getMessage());
                 this.listener.onClockUpdate(this.lastOffset);

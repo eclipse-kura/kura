@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -112,7 +114,7 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
 
     }
 
-    private boolean syncClock() {
+    protected boolean syncClock() {
 
         logger.info("Forcing clock syncronization...");
 
@@ -130,25 +132,32 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
 
     private void readAndUpdateSyncInfo() {
 
+        logger.info("Starting read the journal for clock updates...");
+
         // check either chronyd or chrony unit because both are used in journal alternatively
         Command journalClockUpdateRead = new Command(
                 new String[] { "journalctl", "-r", "-n", "1", "-u", NTS_PROVIDER, "-u", "chrony", "-b", "-o", "json",
                         "-S", "today", "--output-fields", "MESSAGE", "-g", "'System clock was stepped by'" });
 
+        journalClockUpdateRead.setOutputStream(new ByteArrayOutputStream());
         CommandStatus journalClockUpdateReadStatus = this.executorService.execute(journalClockUpdateRead);
-
-        ByteArrayOutputStream commandOutputStream = (ByteArrayOutputStream) journalClockUpdateReadStatus
+        ByteArrayOutputStream journalClockUpdateReadStatusStream = (ByteArrayOutputStream) journalClockUpdateReadStatus
                 .getOutputStream();
 
-        if (journalClockUpdateReadStatus.getExitStatus().isSuccessful() && commandOutputStream.size() > 0) {
+        if (journalClockUpdateReadStatus.getExitStatus().isSuccessful()
+                && journalClockUpdateReadStatusStream.size() > 0) {
 
             JournalChronyEntry journalEntry = this.gson.fromJson(
-                    new String(commandOutputStream.toByteArray(), StandardCharsets.UTF_8), JournalChronyEntry.class);
+                    new String(journalClockUpdateReadStatusStream.toByteArray(), StandardCharsets.UTF_8),
+                    JournalChronyEntry.class);
 
-            this.lastSyncValue = new Date();
+            logger.info("Journal successfully readed. Last event was at: {}",
+                    Instant.EPOCH.plus(journalEntry.getTime(), ChronoUnit.MICROS));
+
             if (journalEntry.getTime() > this.lastSyncTime) {
 
                 this.lastSyncTime = journalEntry.getTime();
+                this.lastSyncValue = new Date();
 
                 this.lastOffset = parseOffset(journalEntry.getMessage());
                 this.listener.onClockUpdate(this.lastOffset);
@@ -160,11 +169,10 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
     }
 
     private long parseOffset(String message) {
-        // "System clock was stepped by 0.000215 seconds"
         String secondsString = message.split(" ")[5];
-        Float asd = Float.valueOf(secondsString) * 1_000_000;
+        Float microseconds = Float.valueOf(secondsString) * 1_000_000;
 
-        return TimeUnit.MICROSECONDS.convert(asd.longValue(), TimeUnit.SECONDS);
+        return TimeUnit.SECONDS.convert(microseconds.longValue(), TimeUnit.MICROSECONDS);
     }
 
     @Override

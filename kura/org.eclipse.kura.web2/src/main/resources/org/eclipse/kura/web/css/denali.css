@@ -616,7 +616,6 @@ Navbar START
 	border-bottom: solid 1px;
 	overflow-x: auto !important;
 	overflow-y: hidden !important;
-	text-overflow: ellipsis !important;
 	white-space: nowrap !important;
 }
 

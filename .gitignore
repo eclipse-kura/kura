@@ -31,7 +31,7 @@ www-test
 .gwt
 *.cache.*
 manifests
-
+bin/
 +# IntelliJ Idea
 .idea/
 *.iml

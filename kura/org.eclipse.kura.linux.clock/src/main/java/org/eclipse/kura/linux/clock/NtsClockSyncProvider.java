@@ -156,9 +156,9 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
         logger.info("Starting read the journal for clock updates...");
 
         // check either chronyd or chrony unit because both are used in journal alternatively
-        Command journalClockUpdateRead = new Command(
-                new String[] { "journalctl", "-r", "-n", "1", "-u", NTS_PROVIDER, "-u", "chrony", "-b", "-o", "json",
-                        "-S", "today", "--output-fields", "MESSAGE", "-g", "'System clock was stepped by'" });
+        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", NTS_PROVIDER, "-u",
+                "chrony", "-b", "-o", "json", "-S", "today", "--output-fields", "MESSAGE", "|", "grep",
+                "'System clock was stepped by'", "-m", "1" });
 
         journalClockUpdateRead.setOutputStream(new ByteArrayOutputStream());
         CommandStatus journalClockUpdateReadStatus = this.executorService.execute(journalClockUpdateRead);

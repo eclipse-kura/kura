@@ -54,6 +54,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
+import org.mockito.Mockito;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 
@@ -264,6 +265,60 @@ public class FilesystemKeystoreServiceImplTest {
         Map<String, Entry> entries = keystoreService.getEntries();
         assertNotNull(entries);
         assertTrue(entries.isEmpty());
+    }
+
+    @Test
+    public void testDeleteEntryEvent() throws GeneralSecurityException, IOException, KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+        keystoreService.setEventAdmin(eventAdmin);
+
+        keystoreService.deleteEntry(DEFAULT_KEY_ALIAS);
+
+        Map<String, Entry> entries = keystoreService.getEntries();
+        assertNotNull(entries);
+        assertTrue(entries.isEmpty());
+        Mockito.verify(eventAdmin, Mockito.times(1)).postEvent(Mockito.anyObject());
+    }
+
+    @Test
+    public void testDeleteEntryNonExistingEntryNoEvent() throws GeneralSecurityException, IOException, KuraException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        EventAdmin eventAdmin = Mockito.mock(EventAdmin.class);
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+        keystoreService.setEventAdmin(eventAdmin);
+
+        keystoreService.deleteEntry("nonexistingalias");
+
+        Map<String, Entry> entries = keystoreService.getEntries();
+        assertNotNull(entries);
+        assertFalse(entries.isEmpty());
+        Mockito.verify(eventAdmin, Mockito.times(0)).postEvent(Mockito.anyObject());
     }
 
     @Test
@@ -810,8 +865,8 @@ public class FilesystemKeystoreServiceImplTest {
 
         assertNotNull(keystoreService.getKeyStore());
     }
-    
-    @Test(expected=KuraException.class)
+
+    @Test(expected = KuraException.class)
     public void testUpdatePathNotExisting() throws KuraException, GeneralSecurityException, IOException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -821,7 +876,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
         when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
@@ -837,13 +892,13 @@ public class FilesystemKeystoreServiceImplTest {
 
         keystoreService.getKeyStore();
     }
-    
+
     @Test
     public void testUpdatePathExisting() throws KuraException, GeneralSecurityException, IOException {
         try (OutputStream os = new FileOutputStream(NEW_STORE_PATH)) {
             this.store.store(os, STORE_PASS.toCharArray());
         }
-        
+
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -852,7 +907,7 @@ public class FilesystemKeystoreServiceImplTest {
         CryptoService cryptoService = mock(CryptoService.class);
         when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
         when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
-        
+
         ComponentContext componentContext = mock(ComponentContext.class);
 
         FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();

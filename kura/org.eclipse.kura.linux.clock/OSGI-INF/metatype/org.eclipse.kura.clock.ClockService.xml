@@ -46,7 +46,7 @@
             
                <Option label="java-ntp" value="java-ntp"/>
                <Option label="ntpd"     value="ntpd"/>
-               <Option label="chrony-avanced"	value="chrony-avanced"/>
+               <Option label="chrony-advanced"	value="chrony-advanced"/>
         </AD>
 
         <AD id="clock.ntp.host"  

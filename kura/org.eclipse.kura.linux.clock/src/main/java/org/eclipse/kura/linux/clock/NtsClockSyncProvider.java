@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -62,8 +64,11 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
     private final Path[] chronyConfigLocations = new Path[] { Paths.get("/etc/chrony.conf"),
             Paths.get("/etc/chrony/chrony.conf") };
 
-    public NtsClockSyncProvider(CommandExecutorService service) {
-        this.executorService = service;
+    private CryptoService cryptoService;
+
+    public NtsClockSyncProvider(CommandExecutorService commandExecutorService, CryptoService cryptoService) {
+        this.executorService = commandExecutorService;
+        this.cryptoService = cryptoService;
     }
 
     @Override
@@ -95,6 +100,15 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
             }
 
             try {
+                String chronyConfigLocationContent = new String(Files.readAllBytes(chronyConfigLocation),
+                        StandardCharsets.UTF_8);
+
+                if (this.cryptoService.sha256Hash(chronyConfig)
+                        .equals(this.cryptoService.sha256Hash(chronyConfigLocationContent))) {
+
+                    logger.debug("chrony configuration not changed");
+                    return;
+                }
 
                 String chronyConfigLocationBackup = chronyConfigLocation.toString() + ".bak";
 
@@ -103,7 +117,9 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
                         StandardCopyOption.REPLACE_EXISTING);
                 Files.write(chronyConfigLocation, this.chronyConfig.getBytes());
             } catch (IOException e) {
-                logger.error("Unable to write chrony configuration file at {}", chronyConfigLocation);
+                logger.error("Unable to write chrony configuration file at {}", chronyConfigLocation, e);
+            } catch (NoSuchAlgorithmException e) {
+                logger.error("Unable to get files hash", e);
             }
         }
 
@@ -160,6 +176,8 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
                 "chrony", "-b", "-o", "json", "-S", "today", "--output-fields", "MESSAGE", "|", "grep",
                 "'System clock was stepped by'", "-m", "1" });
 
+        journalClockUpdateRead.setExecuteInAShell(true);
+        journalClockUpdateRead.setErrorStream(new ByteArrayOutputStream());
         journalClockUpdateRead.setOutputStream(new ByteArrayOutputStream());
         CommandStatus journalClockUpdateReadStatus = this.executorService.execute(journalClockUpdateRead);
         ByteArrayOutputStream journalClockUpdateReadStatusStream = (ByteArrayOutputStream) journalClockUpdateReadStatus
@@ -185,7 +203,8 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
                 this.listener.onClockUpdate(this.lastOffset);
             }
         } else {
-            logger.warn("Unable to get system clock status from system journal");
+            logger.warn("Unable to get system clock status from system journal. {}",
+                    journalClockUpdateRead.getErrorStream());
         }
 
     }

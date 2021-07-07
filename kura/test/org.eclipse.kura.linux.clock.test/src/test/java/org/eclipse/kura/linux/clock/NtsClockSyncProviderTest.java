@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,6 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.util.IOUtil;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -41,7 +43,7 @@ import org.junit.Test;
 public class NtsClockSyncProviderTest {
 
     @Test
-    public void testSynch() throws NoSuchFieldException, IOException, KuraException {
+    public void testSynch() throws NoSuchFieldException, IOException, KuraException, NoSuchAlgorithmException {
 
         assumeTrue("Only run this test on Linux", System.getProperty("os.name").matches("[Ll]inux"));
 
@@ -53,10 +55,13 @@ public class NtsClockSyncProviderTest {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         status.setOutputStream(statusOutputStream);
 
-        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
-        when(serviceMock.execute(anyObject())).thenReturn(status);
+        CommandExecutorService commandExecutorMock = mock(CommandExecutorService.class);
+        when(commandExecutorMock.execute(anyObject())).thenReturn(status);
 
-        NtsClockSyncProvider ntsClockSyncProvider = new NtsClockSyncProvider(serviceMock);
+        CryptoService cryptoServiceMock = mock(CryptoService.class);
+        when(cryptoServiceMock.sha256Hash(anyObject())).thenReturn("");
+
+        NtsClockSyncProvider ntsClockSyncProvider = new NtsClockSyncProvider(commandExecutorMock, cryptoServiceMock);
         AtomicBoolean invoked = new AtomicBoolean(false);
         ClockSyncListener listener = offset -> {
             assertEquals(0, offset);

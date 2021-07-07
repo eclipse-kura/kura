@@ -19,7 +19,7 @@ public enum ClockProviderType {
 
     JAVA_NTP("java-ntp"),
     NTPD("ntpd"),
-    CHRONY_ADVANCED("chrony-avanced");
+    CHRONY_ADVANCED("chrony-advanced");
 
     private static Map<String, ClockProviderType> valuesMap = new HashMap<>();
 

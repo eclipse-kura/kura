@@ -42,7 +42,7 @@
             cardinality="0" 
             required="true"
             default="java-ntp" 
-            description="Source for setting the system clock">
+            description="Source for setting the system clock. Verify the availabiliy of the selected provider before activate it.">
             
                <Option label="java-ntp" value="java-ntp"/>
                <Option label="ntpd"     value="ntpd"/>

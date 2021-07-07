@@ -924,7 +924,7 @@
                 <plugin>
                     <groupId>de.dentrassi.maven</groupId>
                     <artifactId>rpm</artifactId>
-                    <version>0.10.2</version>
+                    <version>1.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.eclipse.tycho</groupId>
@@ -1070,6 +1070,7 @@
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
                     wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
+                <project.raspbian.dependencies.optional>chrony (>=4.0)</project.raspbian.dependencies.optional>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1164,6 +1165,7 @@
             <id>raspberry-pi-2-3-nn</id>
             <properties>
                 <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn.optional>chrony (>=4.0)</project.raspbian.dependencies.nn.optional>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1258,6 +1260,7 @@
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
                     wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
+                <project.raspbian.dependencies.optional>chrony (>=4.0)</project.raspbian.dependencies.optional>    
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1460,6 +1463,9 @@
                                         <require>dos2unix</require>
                                         <require>net-tools</require>
                                     </requires>
+                                    <suggests>
+                                    	<suggest>chrony &gt;= 4.0</suggest>
+                                    </suggests>  
                                     <entries>
                                         <entry>
                                             <name>/tmp/kura_${project.version}_installer.sh</name>
@@ -1601,6 +1607,9 @@
                                         <require>dos2unix</require>
                                         <require>net-tools</require>
                                     </requires>
+                                    <suggests>
+                                    	<suggest>chrony &gt;= 4.0</suggest>
+                                    </suggests>                                    
                                     <entries>
                                         <entry>
                                             <name>/tmp/kura_${project.version}_installer.sh</name>
@@ -1646,6 +1655,7 @@
             <id>rock960-ubuntu-16-nn</id>
             <properties>
                 <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn.optional>chrony (>=4.0)</project.raspbian.dependencies.nn.optional>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>

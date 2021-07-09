@@ -4,6 +4,8 @@
    <service>
       <provide interface="org.eclipse.kura.cloud.factory.CloudServiceFactory"/>
    </service>
+   <property name="kura.ui.csf.pid.default" type="String" value="org.eclipse.kura.camel.cloud.factory.CamelFactory"/>
+   <property name="kura.ui.csf.pid.regex" type="String" value="^org.eclipse.kura.camel.cloud.factory.CamelFactory(\-[a-zA-Z0-9]+)?$"/>   
    <property name="service.pid" type="String" value="org.eclipse.kura.camel.cloud.factory.CamelManager"/>
    <reference bind="setConfigurationService" cardinality="1..1" interface="org.eclipse.kura.configuration.ConfigurationService" name="ConfigurationService" policy="static"/>
 </scr:component>

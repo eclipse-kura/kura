@@ -102,7 +102,9 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     public synchronized void bindDbService(H2DbService dbService) {
         this.dbService = dbService;
         this.dbHelper = H2DbServiceHelper.of(dbService);
-        reconcileDB(this.wireRecordStoreOptions.getTableName());
+        if (nonNull(this.dbService) && nonNull(this.wireRecordStoreOptions)) {
+            reconcileDB(this.wireRecordStoreOptions.getTableName());
+        }
     }
 
     public synchronized void unbindDbService(H2DbService dbService) {

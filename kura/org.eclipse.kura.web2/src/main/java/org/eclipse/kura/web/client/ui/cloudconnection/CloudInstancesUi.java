@@ -626,16 +626,18 @@ public class CloudInstancesUi extends Composite {
             }
 
             if (result != null) {
-                pidTextBox.setValidators(new RegExValidator(result, validationMessage));
-
                 List<String> factoyPidList = this.cloudServicesDataProvider.getList().stream()
                         .map(GwtCloudEntry::getPid).collect(Collectors.toList());
 
-                pidTextBox
-                        .setValidators(new StringNotInListValidator(factoyPidList, MSGS.newConnectionServicePIDUsed()));
+                pidTextBox.setValidators(new RegExValidator(result, validationMessage),
+                        new StringNotInListValidator(factoyPidList, MSGS.newConnectionServicePIDUsed()));
+
             } else {
                 pidTextBox.setValidators();
             }
+
+            pidTextBox.addKeyUpHandler(event -> pidTextBox.validate());
+
             pidTextBox.setPlaceholder(placeholder);
             pidTextBox.setEnabled(true);
             this.cloudConnectionPidSpinner.setVisible(false);
@@ -669,9 +671,6 @@ public class CloudInstancesUi extends Composite {
                 } else {
                     pidTextBox.setValidators();
                 }
-                pidTextBox.addKeyUpHandler(event -> {
-                    pidTextBox.validate();
-                });
 
                 pidTextBox.setPlaceholder(placeholder);
                 pidTextBox.setEnabled(true);

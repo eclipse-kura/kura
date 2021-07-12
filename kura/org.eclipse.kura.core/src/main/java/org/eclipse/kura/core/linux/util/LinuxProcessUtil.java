@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,11 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated since {@link org.eclipse.kura.core.util} version 1.3 in favor of
+ *             {@link org.eclipse.kura.executor.CommandExecutorService}
+ */
+@Deprecated
 public class LinuxProcessUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxProcessUtil.class);

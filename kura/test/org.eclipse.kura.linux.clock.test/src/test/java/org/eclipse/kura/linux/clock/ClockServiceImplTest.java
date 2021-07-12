@@ -80,7 +80,7 @@ public class ClockServiceImplTest {
     }
 
     @Test
-    public void testActivateDeactivateNtsProvider() throws NoSuchFieldException {
+    public void testActivateDeactivateChronyProvider() throws NoSuchFieldException {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
@@ -97,7 +97,7 @@ public class ClockServiceImplTest {
 
         Object provider = TestUtil.getFieldValue(clockService, "provider");
         assertNotNull(provider);
-        assertTrue(provider instanceof NtsClockSyncProvider);
+        assertTrue(provider instanceof ChronyClockSyncProvider);
 
         clockService.deactivate();
 
@@ -106,7 +106,7 @@ public class ClockServiceImplTest {
     }
 
     @Test
-    public void testActivateDeactivateNtsProviderWithConfiguration() throws NoSuchFieldException, IOException {
+    public void testActivateDeactivateChronyProviderWithConfiguration() throws NoSuchFieldException, IOException {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         CommandExecutorService serviceMock = mock(CommandExecutorService.class);
         when(serviceMock.execute(anyObject())).thenReturn(status);
@@ -124,7 +124,7 @@ public class ClockServiceImplTest {
 
         Object provider = TestUtil.getFieldValue(clockService, "provider");
         assertNotNull(provider);
-        assertTrue(provider instanceof NtsClockSyncProvider);
+        assertTrue(provider instanceof ChronyClockSyncProvider);
 
         clockService.deactivate();
 

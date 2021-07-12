@@ -40,11 +40,11 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
-public class NtsClockSyncProvider implements ClockSyncProvider {
+public class ChronyClockSyncProvider implements ClockSyncProvider {
 
-    private static final String NTS_PROVIDER = "chronyd";
+    private static final String CHRONY_DAEMON = "chronyd";
 
-    private static final Logger logger = LoggerFactory.getLogger(NtsClockSyncProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChronyClockSyncProvider.class);
 
     private final CommandExecutorService executorService;
     private ScheduledExecutorService schedulerExecutor;
@@ -66,7 +66,7 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
 
     private CryptoService cryptoService;
 
-    public NtsClockSyncProvider(CommandExecutorService commandExecutorService, CryptoService cryptoService) {
+    public ChronyClockSyncProvider(CommandExecutorService commandExecutorService, CryptoService cryptoService) {
         this.executorService = commandExecutorService;
         this.cryptoService = cryptoService;
     }
@@ -172,7 +172,7 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
         logger.info("Starting read the journal for clock updates...");
 
         // check either chronyd or chrony unit because both are used in journal alternatively
-        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", NTS_PROVIDER, "-u",
+        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", CHRONY_DAEMON, "-u",
                 "chrony", "-b", "-o", "json", "-S", "today", "--output-fields", "MESSAGE", "|", "grep",
                 "'System clock was stepped by'", "-m", "1" });
 
@@ -241,14 +241,14 @@ public class NtsClockSyncProvider implements ClockSyncProvider {
 
         logger.info("Checking chrony deamon status...");
 
-        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", NTS_PROVIDER });
+        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", CHRONY_DAEMON });
         CommandStatus chronyStatus = this.executorService.execute(checkChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
     }
 
     private boolean controlChronyd(String command) {
-        Command startChronyStatus = new Command(new String[] { "systemctl", command, NTS_PROVIDER });
+        Command startChronyStatus = new Command(new String[] { "systemctl", command, CHRONY_DAEMON });
         CommandStatus chronyStatus = this.executorService.execute(startChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();

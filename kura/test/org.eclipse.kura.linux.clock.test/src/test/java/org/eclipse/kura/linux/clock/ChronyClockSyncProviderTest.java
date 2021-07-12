@@ -40,7 +40,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.junit.Test;
 
-public class NtsClockSyncProviderTest {
+public class ChronyClockSyncProviderTest {
 
     @Test
     public void testSynch() throws NoSuchFieldException, IOException, KuraException, NoSuchAlgorithmException {
@@ -61,7 +61,8 @@ public class NtsClockSyncProviderTest {
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         when(cryptoServiceMock.sha256Hash(anyObject())).thenReturn("");
 
-        NtsClockSyncProvider ntsClockSyncProvider = new NtsClockSyncProvider(commandExecutorMock, cryptoServiceMock);
+        ChronyClockSyncProvider ntsClockSyncProvider = new ChronyClockSyncProvider(commandExecutorMock,
+                cryptoServiceMock);
         AtomicBoolean invoked = new AtomicBoolean(false);
         ClockSyncListener listener = offset -> {
             assertEquals(0, offset);
@@ -71,7 +72,7 @@ public class NtsClockSyncProviderTest {
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
-        properties.put("clock.provider", "nts");
+        properties.put("clock.provider", "chrony-advanced");
         properties.put("chrony.advanced.configlocation", "placeholder_path");
 
         ntsClockSyncProvider.init(properties, listener);

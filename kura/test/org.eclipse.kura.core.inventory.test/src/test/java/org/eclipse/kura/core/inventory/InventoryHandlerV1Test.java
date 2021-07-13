@@ -15,19 +15,25 @@ package org.eclipse.kura.core.inventory;
 import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageConstants.ARGS_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
+import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
@@ -36,15 +42,22 @@ import org.eclipse.kura.core.inventory.resources.SystemPackage;
 import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
+import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.deploymentadmin.BundleInfo;
 import org.osgi.service.deploymentadmin.DeploymentAdmin;
 import org.osgi.service.deploymentadmin.DeploymentPackage;
@@ -760,4 +773,187 @@ public class InventoryHandlerV1Test {
         handler.doExec(null, message);
     }
 
+    @Test
+    public void testBundleStartStopNotFound() throws BundleException {
+        final List<Bundle> bundles = Arrays.asList(mockBundle("foo", "1.0"), mockBundle("bar", "2.0"));
+
+        InventoryHandlerV1 handler = new InventoryHandlerV1();
+        handler.activate(mockComponentContext(bundles));
+
+        try {
+            handler.doExec(mock(RequestHandlerContext.class),
+                    requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"baz\"}"));
+            fail("should have failed");
+        } catch (final KuraException e) {
+            assertEquals(KuraErrorCode.NOT_FOUND, e.getCode());
+        }
+
+        try {
+            handler.doExec(mock(RequestHandlerContext.class),
+                    requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"baz\"}"));
+            fail("should have failed");
+        } catch (final KuraException e) {
+            assertEquals(KuraErrorCode.NOT_FOUND, e.getCode());
+        }
+
+        try {
+            handler.doExec(mock(RequestHandlerContext.class),
+                    requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"baz\",\"version\":\"1.0\"}"));
+            fail("should have failed");
+        } catch (final KuraException e) {
+            assertEquals(KuraErrorCode.NOT_FOUND, e.getCode());
+        }
+
+        try {
+            handler.doExec(mock(RequestHandlerContext.class),
+                    requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"baz\",\"version\":\"1.0\"}"));
+            fail("should have failed");
+        } catch (final KuraException e) {
+            assertEquals(KuraErrorCode.NOT_FOUND, e.getCode());
+        }
+
+        try {
+            handler.doExec(mock(RequestHandlerContext.class),
+                    requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"foo\",\"version\":\"2.0\"}"));
+            fail("should have failed");
+        } catch (final KuraException e) {
+            assertEquals(KuraErrorCode.NOT_FOUND, e.getCode());
+        }
+
+        try {
+            handler.doExec(mock(RequestHandlerContext.class),
+                    requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"bar\",\"version\":\"3.0\"}"));
+            fail("should have failed");
+        } catch (final KuraException e) {
+            assertEquals(KuraErrorCode.NOT_FOUND, e.getCode());
+        }
+
+        for (final Bundle bundle : bundles) {
+            Mockito.verify(bundle, times(0)).start();
+            Mockito.verify(bundle, times(0)).stop();
+        }
+    }
+
+    @Test
+    public void testStartBundleWithVersion() throws BundleException, KuraException {
+        final Bundle foo = mockBundle("foo", "1.0");
+        final Bundle bar = mockBundle("bar", "2.0");
+
+        InventoryHandlerV1 handler = new InventoryHandlerV1();
+        handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
+
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+                requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"foo\",\"version\":\"1.0.0\"}"));
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
+                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+
+        Mockito.verify(foo, times(1)).start();
+        Mockito.verify(foo, times(0)).stop();
+        Mockito.verify(bar, times(0)).start();
+        Mockito.verify(bar, times(0)).stop();
+    }
+
+    @Test
+    public void testStartBundleWithoutVersion() throws BundleException, KuraException {
+        final Bundle foo = mockBundle("foo", "1.0");
+        final Bundle bar = mockBundle("bar", "2.0");
+
+        InventoryHandlerV1 handler = new InventoryHandlerV1();
+        handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
+
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+                requestMessage(Arrays.asList("bundles", "_start"), "{\"name\":\"foo\"}"));
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
+                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+
+        Mockito.verify(foo, times(1)).start();
+        Mockito.verify(foo, times(0)).stop();
+        Mockito.verify(bar, times(0)).start();
+        Mockito.verify(bar, times(0)).stop();
+    }
+
+    @Test
+    public void testStopBundleWithVersion() throws BundleException, KuraException {
+        final Bundle foo = mockBundle("foo", "1.0");
+        final Bundle bar = mockBundle("bar", "2.0");
+
+        InventoryHandlerV1 handler = new InventoryHandlerV1();
+        handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
+
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+                requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"foo\",\"version\":\"1.0.0\"}"));
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
+                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+
+        Mockito.verify(foo, times(0)).start();
+        Mockito.verify(foo, times(1)).stop();
+        Mockito.verify(bar, times(0)).start();
+        Mockito.verify(bar, times(0)).stop();
+    }
+
+    @Test
+    public void testStopBundleWithoutVersion() throws BundleException, KuraException {
+        final Bundle foo = mockBundle("foo", "1.0");
+        final Bundle bar = mockBundle("bar", "2.0");
+
+        InventoryHandlerV1 handler = new InventoryHandlerV1();
+        handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
+
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
+                requestMessage(Arrays.asList("bundles", "_stop"), "{\"name\":\"foo\"}"));
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
+                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+
+        Mockito.verify(foo, times(0)).start();
+        Mockito.verify(foo, times(1)).stop();
+        Mockito.verify(bar, times(0)).start();
+        Mockito.verify(bar, times(0)).stop();
+    }
+
+    private KuraMessage requestMessage(final List<String> resources, final String body) {
+
+        KuraRequestPayload reqPayload = new KuraRequestPayload();
+        reqPayload.setBody(body.getBytes(StandardCharsets.UTF_8));
+        KuraMessage message = new KuraMessage(reqPayload, Collections.singletonMap(ARGS_KEY.value(), resources));
+
+        return message;
+    }
+
+    @SuppressWarnings("unchecked")
+    private ComponentContext mockComponentContext(final List<Bundle> bundles) {
+        final Bundle[] asArray = bundles.toArray(new Bundle[bundles.size()]);
+
+        final BundleContext bundleContext = mock(BundleContext.class);
+        when(bundleContext.getBundles()).thenReturn(asArray);
+
+        final JsonMarshallUnmarshallImpl jsonMarshaller = new JsonMarshallUnmarshallImpl();
+
+        final ServiceReference<Unmarshaller> ref = Mockito.mock(ServiceReference.class);
+
+        when(bundleContext.getService(ref)).thenReturn(jsonMarshaller);
+        try {
+            when(bundleContext.getServiceReferences(Mockito.eq(Unmarshaller.class), Mockito.anyString()))
+                    .thenReturn(Arrays.asList(ref));
+        } catch (InvalidSyntaxException e) {
+            throw new IllegalStateException(e);
+        }
+
+        final ComponentContext componentContext = mock(ComponentContext.class);
+        when(componentContext.getBundleContext()).thenReturn(bundleContext);
+
+        return componentContext;
+    }
+
+    private Bundle mockBundle(final String symbolicName, final String version) {
+        final Bundle result = mock(Bundle.class);
+
+        when(result.getSymbolicName()).thenReturn(symbolicName);
+        when(result.getVersion()).thenReturn(new Version(version));
+
+        return result;
+    }
 }

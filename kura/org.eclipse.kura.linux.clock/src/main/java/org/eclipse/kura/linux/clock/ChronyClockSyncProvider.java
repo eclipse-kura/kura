@@ -169,7 +169,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     private void readAndUpdateSyncInfo() {
 
-        logger.info("Starting read the journal for clock updates...");
+        logger.debug("Starting read the journal for clock updates...");
 
         // check either chronyd or chrony unit because both are used in journal alternatively
         Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", CHRONY_DAEMON, "-u",
@@ -183,24 +183,28 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         ByteArrayOutputStream journalClockUpdateReadStatusStream = (ByteArrayOutputStream) journalClockUpdateReadStatus
                 .getOutputStream();
 
-        if (journalClockUpdateReadStatus.getExitStatus().isSuccessful()
-                && journalClockUpdateReadStatusStream.size() > 0) {
+        if (journalClockUpdateReadStatus.getExitStatus().isSuccessful()) {
 
-            JournalChronyEntry journalEntry = this.gson.fromJson(
-                    new String(journalClockUpdateReadStatusStream.toByteArray(), StandardCharsets.UTF_8),
-                    JournalChronyEntry.class);
+            if (journalClockUpdateReadStatusStream.size() > 0) {
 
-            logger.info("Journal successfully readed. Last event was at: {}",
-                    Instant.EPOCH.plus(journalEntry.getTime(), ChronoUnit.MICROS));
+                JournalChronyEntry journalEntry = this.gson.fromJson(
+                        new String(journalClockUpdateReadStatusStream.toByteArray(), StandardCharsets.UTF_8),
+                        JournalChronyEntry.class);
 
-            if (journalEntry.getTime() > this.lastSyncTime) {
+                logger.info("Journal successfully readed. Last clock stepping event was at: {}",
+                        Instant.EPOCH.plus(journalEntry.getTime(), ChronoUnit.MICROS));
 
-                this.lastSyncTime = journalEntry.getTime();
-                this.lastSyncValue = new Date(
-                        TimeUnit.MILLISECONDS.convert(journalEntry.getTime(), TimeUnit.MICROSECONDS));
+                if (journalEntry.getTime() > this.lastSyncTime) {
 
-                this.lastOffset = parseOffset(journalEntry.getMessage());
-                this.listener.onClockUpdate(this.lastOffset);
+                    this.lastSyncTime = journalEntry.getTime();
+                    this.lastSyncValue = new Date(
+                            TimeUnit.MILLISECONDS.convert(journalEntry.getTime(), TimeUnit.MICROSECONDS));
+
+                    this.lastOffset = parseOffset(journalEntry.getMessage());
+                    this.listener.onClockUpdate(this.lastOffset);
+                }
+            } else {
+                logger.debug("No new clock stepping event");
             }
         } else {
             logger.warn("Unable to get system clock status from system journal. {}",

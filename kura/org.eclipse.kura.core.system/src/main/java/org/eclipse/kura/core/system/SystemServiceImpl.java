@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -1194,6 +1194,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public List<SystemResourceInfo> getSystemPackages() throws KuraProcessExecutionErrorException {
+
         List<SystemResourceInfo> packagesInfo = new ArrayList<>();
         CommandStatus debStatus = execute(new String[] { "dpkg-query", "-W" });
         if (debStatus.getExitStatus().isSuccessful()
@@ -1208,7 +1209,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             parseSystemPackages(packagesInfo, rpmStatus, SystemResourceType.RPM);
         }
 
-        if (!debStatus.getExitStatus().isSuccessful() && !rpmStatus.getExitStatus().isSuccessful()) {
+        CommandStatus apkStatus = execute(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
+        if (apkStatus.getExitStatus().isSuccessful()
+                && ((ByteArrayOutputStream) apkStatus.getOutputStream()).size() > 0) {
+            parseSystemPackages(packagesInfo, apkStatus, SystemResourceType.APK);
+        }
+
+        if (!debStatus.getExitStatus().isSuccessful() && !rpmStatus.getExitStatus().isSuccessful()
+                && !apkStatus.getExitStatus().isSuccessful()) {
             throw new KuraProcessExecutionErrorException("Failed to retrieve system packages.");
         }
         return packagesInfo;
@@ -1368,7 +1376,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         final String externalProvider = this.kuraProperties.getProperty(key + PROPERTY_PROVIDER_SUFFIX);
 
         if (externalProvider != null) {
-            final String result = processCommandOutput(runSystemCommand(externalProvider, true, executorService));
+            final String result = processCommandOutput(runSystemCommand(externalProvider, true, this.executorService));
 
             if (result != null && !result.isEmpty()) {
                 return Optional.of(result);

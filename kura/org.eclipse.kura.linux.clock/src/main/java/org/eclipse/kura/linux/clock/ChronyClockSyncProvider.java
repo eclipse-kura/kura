@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -34,7 +35,6 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
@@ -191,10 +191,10 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
                         new String(journalClockUpdateReadStatusStream.toByteArray(), StandardCharsets.UTF_8),
                         JournalChronyEntry.class);
 
-                logger.info("Journal successfully readed. Last clock stepping event was at: {}",
-                        Instant.EPOCH.plus(journalEntry.getTime(), ChronoUnit.MICROS));
-
                 if (journalEntry.getTime() > this.lastSyncTime) {
+
+                    logger.info("Journal successfully readed. Last clock stepping event was at: {}",
+                            Instant.EPOCH.plus(journalEntry.getTime(), ChronoUnit.MICROS));
 
                     this.lastSyncTime = journalEntry.getTime();
                     this.lastSyncValue = new Date(

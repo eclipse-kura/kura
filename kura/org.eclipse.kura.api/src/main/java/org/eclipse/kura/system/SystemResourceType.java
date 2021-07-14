@@ -25,5 +25,6 @@ public enum SystemResourceType {
     RPM,
     DEB,
     DOCKER,
+    APK,
     UNKNOWN;
 }

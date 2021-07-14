@@ -288,11 +288,13 @@ public class SystemServiceTest {
     @Test
     public void testgGetSystemPackages() throws IOException, KuraProcessExecutionErrorException {
         CommandExecutorService cesMock = mock(CommandExecutorService.class);
+
         Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
         dpkgCommand.setExecuteInAShell(true);
         CommandStatus dpkgSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(0));
         dpkgSuccessfulStatus.setOutputStream(writeToOutputStream("package1 1.0.0\npackage2"));
         when(cesMock.execute(dpkgCommand)).thenReturn(dpkgSuccessfulStatus);
+
         Command rpmCommand = new Command(
                 new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
         rpmCommand.setExecuteInAShell(true);
@@ -300,12 +302,18 @@ public class SystemServiceTest {
         rpmSuccessfulStatus.setOutputStream(writeToOutputStream("package3 2.0.0\npackage4"));
         when(cesMock.execute(rpmCommand)).thenReturn(rpmSuccessfulStatus);
 
+        Command apkCommand = new Command(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
+        apkCommand.setExecuteInAShell(true);
+        CommandStatus apkSuccessfulStatus = new CommandStatus(apkCommand, new LinuxExitStatus(0));
+        apkSuccessfulStatus.setOutputStream(writeToOutputStream("dos2unix-7.4.1-r0"));
+        when(cesMock.execute(apkCommand)).thenReturn(apkSuccessfulStatus);
+
         SystemServiceImpl systemService = new SystemServiceImpl();
         systemService.setExecutorService(cesMock);
 
         List<SystemResourceInfo> packages = systemService.getSystemPackages();
         assertFalse(packages.isEmpty());
-        assertEquals(4, packages.size());
+        assertEquals(5, packages.size());
         assertEquals("package1", packages.get(0).getName());
         assertEquals("1.0.0", packages.get(0).getVersion());
         assertEquals(SystemResourceType.DEB, packages.get(0).getType());
@@ -316,23 +324,33 @@ public class SystemServiceTest {
         assertEquals(SystemResourceType.RPM, packages.get(2).getType());
         assertEquals("package4", packages.get(3).getName());
         assertEquals(SystemResourceType.RPM, packages.get(3).getType());
+        assertEquals(SystemResourceType.APK, packages.get(4).getType());
+        assertEquals("dos2unix-7.4.1-r0", packages.get(4).getName());
     }
 
     @Test(expected = KuraProcessExecutionErrorException.class)
     public void testgGetSystemPackagesFailed() throws KuraProcessExecutionErrorException {
+
         CommandExecutorService cesMock = mock(CommandExecutorService.class);
+
         Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
         dpkgCommand.setExecuteInAShell(true);
         CommandStatus unSuccessfulStatus = new CommandStatus(dpkgCommand, new LinuxExitStatus(1));
         when(cesMock.execute(dpkgCommand)).thenReturn(unSuccessfulStatus);
+
         Command rpmCommand = new Command(
                 new String[] { "rpm", "-qa", "--queryformat", "'%{NAME} %{VERSION}-%{RELEASE}\n'" });
         rpmCommand.setExecuteInAShell(true);
         when(cesMock.execute(rpmCommand)).thenReturn(unSuccessfulStatus);
 
+        Command apkCommand = new Command(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
+        apkCommand.setExecuteInAShell(true);
+        when(cesMock.execute(apkCommand)).thenReturn(unSuccessfulStatus);
+
         SystemServiceImpl systemService = new SystemServiceImpl();
         systemService.setExecutorService(cesMock);
 
+        @SuppressWarnings("unused")
         List<SystemResourceInfo> packages = systemService.getSystemPackages();
     }
 

@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -35,6 +34,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
@@ -55,7 +55,6 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     private String chronyConfig;
 
     private Date lastSyncValue;
-    private long lastOffset;
 
     private Gson gson;
 
@@ -64,7 +63,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     private final Path[] chronyConfigLocations = new Path[] { Paths.get("/etc/chrony.conf"),
             Paths.get("/etc/chrony/chrony.conf") };
 
-    private CryptoService cryptoService;
+    private final CryptoService cryptoService;
 
     public ChronyClockSyncProvider(CommandExecutorService commandExecutorService, CryptoService cryptoService) {
         this.executorService = commandExecutorService;
@@ -88,7 +87,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
             Path chronyConfigLocation = null;
 
-            for (Path loc : chronyConfigLocations) {
+            for (Path loc : this.chronyConfigLocations) {
                 if (Files.exists(loc)) {
                     chronyConfigLocation = loc;
                     break;
@@ -103,7 +102,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
                 String chronyConfigLocationContent = new String(Files.readAllBytes(chronyConfigLocation),
                         StandardCharsets.UTF_8);
 
-                if (this.cryptoService.sha256Hash(chronyConfig)
+                if (this.cryptoService.sha256Hash(this.chronyConfig)
                         .equals(this.cryptoService.sha256Hash(chronyConfigLocationContent))) {
 
                     logger.debug("chrony configuration not changed");
@@ -200,8 +199,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
                     this.lastSyncValue = new Date(
                             TimeUnit.MILLISECONDS.convert(journalEntry.getTime(), TimeUnit.MICROSECONDS));
 
-                    this.lastOffset = parseOffset(journalEntry.getMessage());
-                    this.listener.onClockUpdate(this.lastOffset);
+                    this.listener.onClockUpdate(parseOffset(journalEntry.getMessage()));
                 }
             } else {
                 logger.debug("No new clock stepping event");
@@ -258,7 +256,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         return chronyStatus.getExitStatus().isSuccessful();
     }
 
-    private void readProperties() throws KuraException {
+    private void readProperties() {
         this.chronyConfig = (String) this.properties.get("chrony.advanced.config");
         if (this.chronyConfig == null || this.chronyConfig.isEmpty()) {
             logger.info("No Chrony configuration provided. Using system configuration.");

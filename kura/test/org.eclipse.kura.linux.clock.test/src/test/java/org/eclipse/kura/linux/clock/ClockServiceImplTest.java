@@ -26,6 +26,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -74,6 +76,59 @@ public class ClockServiceImplTest {
         svc.deactivate();
 
         provider = TestUtil.getFieldValue(svc, "provider");
+        assertNull(provider);
+    }
+
+    @Test
+    public void testActivateDeactivateChronyProvider() throws NoSuchFieldException {
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
+
+        ClockServiceImpl clockService = new ClockServiceImpl();
+        clockService.setExecutorService(serviceMock);
+
+        Map<String, Object> properties = new HashMap<>();
+
+        properties.put("enabled", true);
+        properties.put("clock.provider", ClockProviderType.CHRONY_ADVANCED.getValue());
+
+        clockService.activate(properties);
+
+        Object provider = TestUtil.getFieldValue(clockService, "provider");
+        assertNotNull(provider);
+        assertTrue(provider instanceof ChronyClockSyncProvider);
+
+        clockService.deactivate();
+
+        provider = TestUtil.getFieldValue(clockService, "provider");
+        assertNull(provider);
+    }
+
+    @Test
+    public void testActivateDeactivateChronyProviderWithConfiguration() throws NoSuchFieldException, IOException {
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandExecutorService serviceMock = mock(CommandExecutorService.class);
+        when(serviceMock.execute(anyObject())).thenReturn(status);
+
+        ClockServiceImpl clockService = new ClockServiceImpl();
+        clockService.setExecutorService(serviceMock);
+
+        Map<String, Object> properties = new HashMap<>();
+
+        properties.put("enabled", true);
+        properties.put("clock.provider", ClockProviderType.CHRONY_ADVANCED.getValue());
+        properties.put("chrony.advanced.config", IOUtil.readResource("chrony.conf"));
+
+        clockService.activate(properties);
+
+        Object provider = TestUtil.getFieldValue(clockService, "provider");
+        assertNotNull(provider);
+        assertTrue(provider instanceof ChronyClockSyncProvider);
+
+        clockService.deactivate();
+
+        provider = TestUtil.getFieldValue(clockService, "provider");
         assertNull(provider);
     }
 

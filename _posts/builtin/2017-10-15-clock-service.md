@@ -31,3 +31,47 @@ The ClockService provides the following configuration parameters:
 - **clock.ntp.refresh-interval** - defines the frequency (in seconds) at which the service tries to sync the clock. Note that at the start of ESF, when the ClockService is enabled, it tries to sync the clock every minute until it is successful. After a successful sync, this operation is performed at the frequency defined by this parameter. If the value is less than zero, there is no update. If the value is equal to zero, syncs only once at startup.
 
 - **chrony.advanced.config** - specifies the content of the chrony configuration file. If this field is left blank, the default system configuration will be used. For further information: [chrony website](https://chrony.tuxfamily.org/doc/4.1/chrony.conf.html)
+
+Two example configuration are shown below:
+
+NTS Secure configuration example[^1]
+
+```
+server time.cloudflare.com iburst nts
+server nts.sth1.ntp.se iburst nts
+server nts.sth2.ntp.se iburst nts
+
+sourcedir /etc/chrony/sources.d
+
+driftfile /var/lib/chrony/chrony.drift
+
+logdir /var/log/chrony
+
+maxupdateskew 100.0
+
+rtcsync
+
+makestep 1 3
+
+leapsectz right/UTC
+```
+
+Simple configuration example[^2]
+
+```
+# Use public NTP servers from the pool.ntp.org project.
+pool pool.ntp.org iburst
+
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
+
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
+
+# Enable kernel synchronization of the real-time clock (RTC).
+rtcsync
+```
+
+[^1]: https://fedoramagazine.org/secure-ntp-with-nts
+[^2]: https://git.tuxfamily.org/chrony/chrony.git/tree/examples/chrony.conf.example1

@@ -24,6 +24,9 @@
 	
 	.center-panel { height: 100%; padding: 0px; border: none; }
 
+	div#statusTable td {
+		word-break: break-word;
+	}
 	</ui:style>
 	
 	<b:Container fluid="true">

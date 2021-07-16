@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -22,6 +22,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.clock.ClockEvent;
 import org.eclipse.kura.clock.ClockService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -42,6 +43,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     private EventAdmin eventAdmin;
     private CommandExecutorService executorService;
+    private CryptoService cryptoService;
     private Map<String, Object> properties;
     private ClockSyncProvider provider;
     private boolean configEnabled;
@@ -66,6 +68,10 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     public void unsetExecutorService(CommandExecutorService executorService) {
         this.executorService = null;
+    }
+
+    public void setCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
     }
 
     // ----------------------------------------------------------------
@@ -159,11 +165,22 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     private void startClockSyncProvider() throws KuraException {
         stopClockSyncProvider();
         String sprovider = (String) this.properties.get(PROP_CLOCK_PROVIDER);
-        if ("java-ntp".equals(sprovider)) {
+
+        switch (ClockProviderType.fromValue(sprovider)) {
+        case JAVA_NTP:
             this.provider = new JavaNtpClockSyncProvider();
-        } else if ("ntpd".equals(sprovider)) {
+            break;
+        case NTPD:
             this.provider = new NtpdClockSyncProvider(this.executorService);
+            break;
+        case CHRONY_ADVANCED:
+            this.provider = new ChronyClockSyncProvider(this.executorService, this.cryptoService);
+            break;
+
+        default:
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
         }
+
         if (this.provider != null) {
             this.provider.init(this.properties, this);
             this.provider.start();

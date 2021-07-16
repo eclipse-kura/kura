@@ -56,6 +56,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     private static final String COMMAND_PRIVILEGED = "privileged.command.service.enable";
 
     public static final String APP_ID = "CMD-V1";
+    public static final String RESOURCE_COMMAND = "command";
 
     private Map<String, Object> properties;
 
@@ -66,9 +67,6 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
 
     private PrivilegedExecutorService privilegedExecutorService;
     private UnprivilegedExecutorService unprivilegedExecutorService;
-
-    /* EXEC */
-    public static final String RESOURCE_COMMAND = "command";
 
     // ----------------------------------------------------------------
     //
@@ -84,7 +82,9 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     }
 
     public void unsetCryptoService(CryptoService cryptoService) {
-        this.cryptoService = null;
+        if (this.cryptoService == cryptoService) {
+            this.cryptoService = null;
+        }
     }
 
     public void setRequestHandlerRegistry(RequestHandlerRegistry requestHandlerRegistry) {
@@ -174,7 +174,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     public KuraMessage doExec(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
         if (!this.currentStatus) {
-            throw new KuraException(KuraErrorCode.NOT_FOUND);
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "The command service is not enabled");
         }
 
         Object requestObject = reqMessage.getProperties().get(ARGS_KEY.value());
@@ -258,8 +258,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
 
     @Override
     public String execute(String cmd, String password) throws KuraException {
-        boolean verificationEnabled = (Boolean) this.properties.get(COMMAND_ENABLED_ID);
-        if (verificationEnabled) {
+        if (this.currentStatus) {
 
             Password commandPassword = (Password) this.properties.get(COMMAND_PASSWORD_ID);
             if (verifyPasswords(commandPassword, password)) {
@@ -281,7 +280,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                 throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
             }
         } else {
-            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "command");
+            throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, RESOURCE_COMMAND);
         }
     }
 

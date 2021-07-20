@@ -113,10 +113,6 @@
 		white-space:
 		pre-wrap;
 		}
-		
-        .panel-footer {
-        margin-left: 20vh;
-        }
 	</ui:style>
 
 	<b:Container fluid="true">
@@ -289,7 +285,7 @@
 						size="MD_12">
 						<b:Row>
 							<b:Panel>
-								<b:PanelFooter addStyleNames="{style.panel-footer}">
+								<b:PanelFooter addStyleNames="panel-footer">
 									<b:Row>
 										<b:Column size="MD_6,XS_6">
 											<b.html:Paragraph alignment="LEFT">

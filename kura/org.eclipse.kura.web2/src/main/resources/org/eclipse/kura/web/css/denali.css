@@ -442,17 +442,19 @@ Sidenav START
 	.no-sidenav .sidenav {
 		display: none;
 	}
-	
-	.no-sidenav .footer {
-		left: 0 !important;
+
+	/*
+	.no-sidenav .panel-footer {
+		margin-left: 0;
 	}
+	*/
 	
 	.main-container:not(.no-sidenav) .no-sidenav-logo {
 		display: none;
 	}
 	
-	.footer {
-		left: 16.66666667%;
+	.main-container:not(.no-sidenav) .panel-footer {
+		margin-left: 16.66666667%;
 	}
 	
 	.sidenav-overlay {
@@ -495,6 +497,10 @@ Sidenav START
 	
 	.no-sidenav-logo {
 		display: none;
+	}
+	
+	.panel-footer {
+		margin-left: 0;
 	}
 }
 

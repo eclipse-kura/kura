@@ -442,12 +442,6 @@ Sidenav START
 	.no-sidenav .sidenav {
 		display: none;
 	}
-
-	/*
-	.no-sidenav .panel-footer {
-		margin-left: 0;
-	}
-	*/
 	
 	.main-container:not(.no-sidenav) .no-sidenav-logo {
 		display: none;

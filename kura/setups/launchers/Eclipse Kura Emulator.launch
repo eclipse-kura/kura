@@ -80,7 +80,7 @@
 <setEntry value="org.eclipse.equinox.console@default:default"/>
 <setEntry value="org.eclipse.equinox.ds@1:true"/>
 <setEntry value="org.eclipse.equinox.event@default:default"/>
-<setEntry value="org.eclipse.equinox.http.jetty@default:default"/>
+<setEntry value="org.eclipse.equinox.http.jetty@default:false"/>
 <setEntry value="org.eclipse.equinox.http.servlet@default:default"/>
 <setEntry value="org.eclipse.equinox.io@default:default"/>
 <setEntry value="org.eclipse.equinox.metatype@default:default"/>

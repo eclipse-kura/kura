@@ -32,9 +32,6 @@
       <choice
           value="developer"
           label="Developer"/>
-      <choice
-          value="user"
-          label="User"/>
       <description>Select which type of developer for Kura you are</description>
     </setupTask>
     <setupTask

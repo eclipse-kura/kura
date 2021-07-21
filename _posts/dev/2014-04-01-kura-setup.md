@@ -105,20 +105,29 @@ Click the arrow next to the *target-definition* project in the workspace and dou
 
 In the Target Definition window, click the link **Set as Target Platform**. Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported. At this point, you are ready to begin developing Kura-based applications for your target platform.
 
-## Oomph installer
+## Eclipse Oomph installer
 
+The Eclipse Oomph installer is an easy way to install and configure the Eclipse IDE to start developing on Kura.
 Download the latest Eclipse Installer appropriate for your platform from [Eclipse Downloads](https://www.eclipse.org/downloads/eclipse-packages/)
 
 * Start the Eclipse Installer
-* Switch to advanced mode (in simple mode you cannot add the custom installer)
-* Select "Eclipse for Committers" and select a JRE 1.8+ -> Next
-* Add a new installer by URL: https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup -> Check and next
-* Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name) -> Next
-* Leave all Bootstrap Tasks selected -> Finish
-* Accept the licenses and unsigned content
-* Wait for the installation to finish, a few additional plugins will be installed
-* At first startup Eclipse IDE will checkout the code and perform a full build
+* Switch to advanced mode (in simple mode you cannot add a custom installer)
+* Select "Eclipse IDE for Eclipse Committers", select the latest "Product Version" and select a Java 11+ VM. Then click the Next button.
 
-The result will be installed Eclipse IDE with all the recommended plug-ins already available, code will be checked out and built, workspace will be set up, a few Working Sets will be prepared with most projects building without errors
+![Image 8]({{ site.baseurl }}/assets/images/kura_setup/image008.png)
+
+* Select "Eclipse Kura" project under the "Eclipse Projects" menu. If it isn't available, add a new installer by URL: https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup under the "Github Projects" menu. Then click the Next button.
+
+![Image 9]({{ site.baseurl }}/assets/images/kura_setup/image009.png)
+
+* Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). Then click the Next button.
+* Leave all Bootstrap Tasks selected and press the Finish button.
+* Accept the licenses and unsigned content.
+* Wait for the installation to finish, a few additional plugins will be installed.
+* At first startup Eclipse IDE will checkout the code and perform a full build.
+
+The result will be an Eclipse IDE with all the recommended plug-ins already available, code will be checked out and built, workspace will be set up, a few Working Sets will be prepared with most projects building without errors
 
 The next step is to get the rest of the projects to build, for which you might need to build them in the console with specific profiles available e.g. can.
+
+To start the Kura emulator, select the "Eclipse Kura Emulator.launch" profile from "Other Projects" -> "setups" -> "launchers" and run it.

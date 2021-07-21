@@ -56,6 +56,10 @@ makestep 1 3
 leapsectz right/UTC
 ```
 
+If the system clock is wrong there is the possibility of a synchronization failure due the inability to verify the server certificate. To temporary disable the certificate verification the directive nocerttimecheck could be used with a value greater then 0.[^3]
+
+Eg: `nocerttimecheck 1`
+
 Simple configuration example[^2]
 
 ```
@@ -75,3 +79,4 @@ rtcsync
 
 [^1]: https://fedoramagazine.org/secure-ntp-with-nts
 [^2]: https://git.tuxfamily.org/chrony/chrony.git/tree/examples/chrony.conf.example1
+[^3]: https://chrony.tuxfamily.org/faq.html#_using_nts

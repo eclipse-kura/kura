@@ -53,7 +53,7 @@ public class NtpdClockSyncProvider extends AbstractNtpClockSyncProvider {
 
                 // Call update method with 0 offset to ensure the clock event gets fired and the HW clock
                 // is updated if desired.
-                this.listener.onClockUpdate(0);
+                this.listener.onClockUpdate(0, true);
                 ret = true;
             } else {
                 logger.warn(

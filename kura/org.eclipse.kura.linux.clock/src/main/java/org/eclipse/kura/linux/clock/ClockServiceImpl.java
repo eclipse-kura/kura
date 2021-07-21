@@ -198,13 +198,13 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
      * Called by the current ClockSyncProvider after each Clock synchronization
      */
     @Override
-    public void onClockUpdate(long offset) {
+    public void onClockUpdate(long offset, boolean changeSystemClock) {
 
         logger.info("Clock update. Offset: {}", offset);
 
         // set system clock if necessary
         boolean bClockUpToDate = false;
-        if (offset != 0) {
+        if (offset != 0 && changeSystemClock) {
             long time = System.currentTimeMillis() + offset;
             Command command = new Command(new String[] { "date", "-s", "@" + Long.toString(time / 1000) });
             command.setTimeout(60);
@@ -229,7 +229,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
         String path = (String) this.properties.getOrDefault(PROP_RTC_FILENAME, "/dev/rtc0");
 
-        if (updateHwClock) {
+        if (updateHwClock && changeSystemClock) {
             Command command = new Command(new String[] { "hwclock", "--utc", "--systohc", "-f", path });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);

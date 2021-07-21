@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.linux.clock;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.anyObject;
@@ -28,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraException;
@@ -63,23 +61,16 @@ public class ChronyClockSyncProviderTest {
 
         ChronyClockSyncProvider ntsClockSyncProvider = new ChronyClockSyncProvider(commandExecutorMock,
                 cryptoServiceMock);
-        AtomicBoolean invoked = new AtomicBoolean(false);
-        ClockSyncListener listener = offset -> {
-            assertEquals(0, offset);
-
-            invoked.set(true);
-        };
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("clock.provider", "chrony-advanced");
         properties.put("chrony.advanced.configlocation", "placeholder_path");
 
-        ntsClockSyncProvider.init(properties, listener);
+        ntsClockSyncProvider.init(properties, null);
 
         boolean synched = ntsClockSyncProvider.syncClock();
 
         assertTrue(synched);
-        assertTrue(invoked.get());
     }
 }

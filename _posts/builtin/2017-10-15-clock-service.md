@@ -17,6 +17,7 @@ The ClockService provides the following configuration parameters:
 - **clock.set.hwclock** - defines if the hardware clock of the gateway must be synced after the system time is set. If enabled, the service calls the Linux command "hwclock --utc --systohc".
 
 - **clock.provider** - specifies one among Java NTP client (java-ntp), Linux chrony command (chrony), Linux ntpdate command (ntpd). (Required field.)
+If chrony-advanced is used, Kura will not change system and/or hardware clock directly, delegating these operations to chrony.
 
 - **clock.ntp.host** - sets a valid NTP server host address.
 
@@ -30,7 +31,9 @@ The ClockService provides the following configuration parameters:
 
 - **clock.ntp.refresh-interval** - defines the frequency (in seconds) at which the service tries to sync the clock. Note that at the start of ESF, when the ClockService is enabled, it tries to sync the clock every minute until it is successful. After a successful sync, this operation is performed at the frequency defined by this parameter. If the value is less than zero, there is no update. If the value is equal to zero, syncs only once at startup.
 
-- **chrony.advanced.config** - specifies the content of the chrony configuration file. If this field is left blank, the default system configuration will be used. For further information: [chrony website](https://chrony.tuxfamily.org/doc/4.1/chrony.conf.html)
+- **chrony.advanced.config** - specifies the content of the chrony configuration file. If this field is left blank, the default system configuration will be used. 
+To obtain the hardware clock synchronization the directive rtcsync could be used. The rtcsync directive provides the hardware clock synchronization made by the linux kernel every 11 minutes.
+For further information: [chrony website](https://chrony.tuxfamily.org/doc/4.1/chrony.conf.html)
 
 Two example configuration are shown below:
 

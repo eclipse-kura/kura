@@ -786,22 +786,6 @@ Help panel START
 Help panel END
 ***********************/
 
-/**********************
-Modem Help Fix START
-***********************/
-
-#modem-help {
-	max-width: 20%;
-}
-
-#modem-help * {
-	max-width 100%;
-}
-
-/**********************
-Modem Help Fix END
-***********************/
-
 /** Most GWT widgets already have a style name defined */
 .gwt-DialogBox {
 	width: 400px;

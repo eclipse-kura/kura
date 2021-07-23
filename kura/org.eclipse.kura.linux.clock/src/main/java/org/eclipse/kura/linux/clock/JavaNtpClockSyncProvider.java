@@ -48,9 +48,9 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
             TimeInfo info = ntpClient.getTime(ntpHostAddr, this.ntpPort);
             this.lastSync = new Date();
             info.computeDetails();
+            info.getComments().forEach(comment -> logger.debug("Clock sync compute comment: {}", comment));
             List<String> computeErrors = info.getComments().stream().filter(comment -> comment.contains("Error:"))
                     .collect(Collectors.toList());
-            computeErrors.forEach(error -> logger.debug("Clock sync compute error: {}", error));
             Long delayValue = info.getDelay();
             if (delayValue != null && delayValue.longValue() < 1000 && computeErrors.isEmpty()) {
                 this.listener.onClockUpdate(info.getOffset());

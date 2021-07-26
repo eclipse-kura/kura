@@ -53,12 +53,11 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
                     .collect(Collectors.toList());
             Long delayValue = info.getDelay();
             if (delayValue != null && delayValue.longValue() < 1000 && computeErrors.isEmpty()) {
-                this.listener.onClockUpdate(info.getOffset());
+                this.listener.onClockUpdate(info.getOffset(), true);
                 ret = true;
             } else {
                 logger.error("Incorrect clock sync. Delay value({}), clock will not be updated", info.getDelay());
             }
-
         } catch (IOException e) {
             logger.warn(
                     "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",

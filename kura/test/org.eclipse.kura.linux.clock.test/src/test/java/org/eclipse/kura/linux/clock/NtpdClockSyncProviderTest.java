@@ -43,7 +43,7 @@ public class NtpdClockSyncProviderTest {
         ClockSyncListener listener = new ClockSyncListener() {
 
             @Override
-            public void onClockUpdate(long offset) {
+            public void onClockUpdate(long offset, boolean update) {
                 assertEquals(0, offset);
 
                 invoked.set(true);
@@ -69,7 +69,7 @@ public class NtpdClockSyncProviderTest {
         ClockSyncListener listener = new ClockSyncListener() {
 
             @Override
-            public void onClockUpdate(long offset) {
+            public void onClockUpdate(long offset, boolean update) {
                 invoked.set(true);
             }
         };

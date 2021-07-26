@@ -64,7 +64,7 @@ public class ChronyClockSyncProviderTest {
         ChronyClockSyncProvider ntsClockSyncProvider = new ChronyClockSyncProvider(commandExecutorMock,
                 cryptoServiceMock);
         AtomicBoolean invoked = new AtomicBoolean(false);
-        ClockSyncListener listener = offset -> {
+        ClockSyncListener listener = (offset, update) -> {
             assertEquals(0, offset);
 
             invoked.set(true);

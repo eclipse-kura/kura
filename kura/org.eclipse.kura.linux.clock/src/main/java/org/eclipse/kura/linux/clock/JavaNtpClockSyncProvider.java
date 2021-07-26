@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,8 @@ package org.eclipse.kura.linux.clock;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
@@ -42,23 +44,25 @@ public class JavaNtpClockSyncProvider extends AbstractNtpClockSyncProvider {
         ntpClient.setDefaultTimeout(this.ntpTimeout);
         try {
             ntpClient.open();
-            try {
-                InetAddress ntpHostAddr = InetAddress.getByName(this.ntpHost);
-                TimeInfo info = ntpClient.getTime(ntpHostAddr, this.ntpPort);
-                this.lastSync = new Date();
-                info.computeDetails();
-                Long delayValue = info.getDelay();
-                if (delayValue != null && delayValue.longValue() < 1000) {
-                    this.listener.onClockUpdate(info.getOffset());
-                    ret = true;
-                } else {
-                    logger.error("Incorrect delay value({}), clock will not be updated", info.getDelay());
-                }
-            } catch (IOException e) {
-                logger.warn(
-                        "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
-                        this.ntpHost);
+            InetAddress ntpHostAddr = InetAddress.getByName(this.ntpHost);
+            TimeInfo info = ntpClient.getTime(ntpHostAddr, this.ntpPort);
+            this.lastSync = new Date();
+            info.computeDetails();
+            info.getComments().forEach(comment -> logger.debug("Clock sync compute comment: {}", comment));
+            List<String> computeErrors = info.getComments().stream().filter(comment -> comment.contains("Error:"))
+                    .collect(Collectors.toList());
+            Long delayValue = info.getDelay();
+            if (delayValue != null && delayValue.longValue() < 1000 && computeErrors.isEmpty()) {
+                this.listener.onClockUpdate(info.getOffset());
+                ret = true;
+            } else {
+                logger.error("Incorrect clock sync. Delay value({}), clock will not be updated", info.getDelay());
             }
+
+        } catch (IOException e) {
+            logger.warn(
+                    "Error while synchronizing System Clock with NTP host {}. Please verify network connectivity ...",
+                    this.ntpHost);
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
         } finally {

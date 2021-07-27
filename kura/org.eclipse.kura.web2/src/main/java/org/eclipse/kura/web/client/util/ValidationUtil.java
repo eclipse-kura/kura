@@ -160,7 +160,7 @@ public final class ValidationUtil {
     private static void validateChar(final String value, final GwtConfigParameter param,
             final ValidationErrorConsumer consumer) {
         if (value.length() > 1) {
-            consumer.addError(MessageUtils.get(Integer.toString(value.length()), value));
+            consumer.addError(MessageUtils.get(INVALID_VALUE, value));
         }
         if (param.getMin() != null && param.getMin().charAt(0) > value.charAt(0)) {
             consumer.addError(MessageUtils.get(CONFIG_MIN_VALUE, param.getMin().charAt(0)));

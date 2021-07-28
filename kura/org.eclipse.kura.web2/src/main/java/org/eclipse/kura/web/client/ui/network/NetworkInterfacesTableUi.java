@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -60,7 +60,6 @@ public class NetworkInterfacesTableUi extends Composite {
     @UiField
     Alert notification;
     @UiField
-
     CellTable<GwtNetInterfaceConfig> interfacesGrid = new CellTable<>();
 
     private final ListDataProvider<GwtNetInterfaceConfig> interfacesProvider = new ListDataProvider<>();
@@ -247,38 +246,46 @@ public class NetworkInterfacesTableUi extends Composite {
     }
 
     private int compareFromName(String name1, String name2) {
-        int result = 1;
-        if (name1.equals(name2)) {
-            result = 0;
+
+        if (name1.equals("lo")) {
+            return -1;
         }
-        if ("lo".equals(name1)) {
-            result = -1;
+        if (name2.equals("lo")) {
+            return 1;
         }
-        if (name1.startsWith("eth") && !"lo".equals(name2)) {
-            if (name2.startsWith("eth")) {
-                // compare eths
-                result = name1.compareTo(name2);
-            } else {
-                result = -1;
-            }
+
+        if (name1.length() > 2 && name2.length() > 2 && name1.startsWith(name2.substring(0, 2))) {
+            return name1.compareTo(name2);
         }
-        if (name1.startsWith("wlan") && !name2.startsWith("lo") && !name2.startsWith("eth")) {
-            if (name2.startsWith("wlan")) {
-                // compare wlans
-                result = name1.compareTo(name2);
-            } else {
-                result = -1;
-            }
+
+        if (name1.startsWith("et") || name1.startsWith("en")) {
+            return -1;
         }
-        if (name1.startsWith("ppp") && !name2.startsWith("wlan") && !name2.startsWith("lo")
-                && !name2.startsWith("eth")) {
-            if (name2.startsWith("ppp")) {
-                // compare ppps
-                result = name1.compareTo(name2);
-            } else {
-                result = -1;
-            }
+        if (name2.startsWith("et") || name2.startsWith("en")) {
+            return 1;
         }
-        return result;
+
+        if (name1.startsWith("wl")) {
+            return -1;
+        }
+        if (name2.startsWith("wl")) {
+            return 1;
+        }
+
+        if (name1.startsWith("pp")) {
+            return -1;
+        }
+        if (name2.startsWith("pp")) {
+            return 1;
+        }
+
+        if (name1.startsWith("ww")) {
+            return -1;
+        }
+        if (name2.startsWith("ww")) {
+            return 1;
+        }
+
+        return name1.compareTo(name2);
     }
 }

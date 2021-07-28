@@ -10,23 +10,17 @@ categories: [dev]
 
 [Prepare the Embedded Device](#prepare-the-embedded-device)
 
-[SensorTag Communication via Command Line](#sensortag-command-line)
+[SensorTag Communication via Command Line](#sensortag-communication-via-command-line)
 
-[BLE Bundle for TI SensorTag](#bundle-sensortag)
+[BLE Bundle for TI SensorTag](#ble-bundle-for-ti-sensortag)
 
 *  [Develop the BLE Bundle](#develop-the-ble-bundle)
-
-    *  [OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File](#OSGI-INF/metatype)
-
-    *  [org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File](#BluetoothLe)
-
-    *  [org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File](#TiSensorTag)
 
 *  [Deploy and Validate the Bundle](#deploy-and-validate-the-bundle)
 
 ## Overview
 
-This section provides an example of how to develop a simple bundle that discovers and connects to a Smart device (BLE), retrieves data from it, and publishes the results to the cloud. This example uses the TI SensorTag based on CC2541 or CC2650. For more information about this device, refer to <http://www.ti.com/tool/cc2541dk-sensor> and <http://www.ti.com/ww/en/wireless_connectivity/sensortag2015/index.html>.
+This section provides an example of how to develop a simple bundle that discovers and connects to a Smart device (BLE), retrieves data from it, and publishes the results to the cloud. This example uses the TI SensorTag based on CC2541 or CC2650. For more information about this device, refer to <http://www.ti.com/tool/cc2541dk-sensor> and <https://www.ti.com/tool/TIDC-CC2650STK-SENSORTAG>.
 
 You will learn how to perform the following functions:
 
@@ -79,6 +73,8 @@ sudo mv /usr/local/sbin/hciconfig /usr/sbin
 sudo mv /usr/local/bin/gatttool /usr/sbin
 ```
 
+{% include alerts.html message="Both _bluez_ 4.101 and 5.XX are supported." %}
+
 ## SensorTag Communication via Command Line
 
 Once configured, you can scan and connect with a Smart device. A TI SensorTag is used in the example that follows.
@@ -123,12 +119,7 @@ cd bluez-4.101/mgmt
 sudo ./btmgmt le on
 ```
 
-In order to read the sensor values from the SensorTag, you need to write some registers on the device. For details, please refer to the CC2541 user guide:  <http://processors.wiki.ti.com/index.php/SensorTag_User_Guide>. Note that the reported BLE handles are not up-to-date on this page.
-
-Also refer to this updated attribute table: <http://processors.wiki.ti.com/images/archive/a/a8/20130111154127!BLE_SensorTag_GATT_Server.pdf>.
-For the CC2650 please refer to <http://www.ti.com/ww/en/wireless_connectivity/sensortag2015/tearDown.html#main>.
-
-The example that follows shows the procedure for retrieving the temperature value from the SensorTag based on the CC2541.
+In order to read the sensor values from the SensorTag, you need to write some registers on the device. The example that follows shows the procedure for retrieving the temperature value from the SensorTag based on the CC2541.
 
 Once connected with gatttool, the IR temperature sensor is enabled to write the value 01 to the handle 0x0029:
 
@@ -167,6 +158,9 @@ Notification handle = 0x0025 value: 9e fe 3c 0d
 Notification handle = 0x0025 value: a3 fe 3c 0d
 [CON][BC:6A:29:AE:CC:96][LE]>
 ```
+
+{% include alerts.html message="_bluez_ 5.XX comes with the _bluetoothctl_ tool that can be used in place of _hcitool_ and _gatttool_. Please refer to the man page and help for more details." %}
+
 ## BLE Bundle for TI SensorTag
 
 The BLE bundle performs the following operations:
@@ -179,7 +173,7 @@ The BLE bundle performs the following operations:
 
 * Reads data from all the sensors onboard and writes the values in the log file
 
-{% include alerts.html message="The Legacy Bluetooth LE Example doesn't support TI SensorTag firmware version above 1.20" %}
+{% include alerts.html message="The Legacy Bluetooth LE Example supports TI SensorTag CC2541 (all firmware versions) and CC2650 (firmware version above 1.20)" %}
 
 ## Develop the BLE Bundle
 
@@ -231,122 +225,105 @@ The OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml f
 
 ### org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File
 
-The org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java file contains the activate and deactivate methods for this bundle. The activate method gets the _BluetoothAdapter_ and defines a _ScheduledExecutorService_, which schedules the execution of the _checkScan_ method every second. The following code sample shows part of the activate method:
+The org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java file contains the activate, deactivate and updated methods for this bundle. The activate and update methods gets the _BluetoothAdapter_ and schedules the execution of the _performScan_ method every second and _readTiSensorTags_ every user defined period. The following code sample shows part of the code:
 
 ```java
-m_tiSensorTagList = new ArrayList<TiSensorTag>();
-m_worker = Executors.newSingleThreadScheduledExecutor();
-
-try {
-	m_cloudClient = m_cloudService.newCloudClient(APP_ID);
-	m_cloudClient.addCloudClientListener(this);
+this.options = new BluetoothLeOptions(properties);
+this.startTime = 0;
+if (this.options.isEnableScan()) {
+	// re-create the worker
+	this.worker = Executors.newScheduledThreadPool(2);
 
 	// Get Bluetooth adapter and ensure it is enabled
-	m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(iname);
-	if (m_bluetoothAdapter != null) {
-		s_logger.info("Bluetooth adapter interface => " + iname);
-		s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-		s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
-
-		if (!m_bluetoothAdapter.isEnabled()) {
-			s_logger.info("Enabling bluetooth adapter...");
-			m_bluetoothAdapter.enable();
-			s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
+	this.bluetoothAdapter = this.bluetoothService.getBluetoothAdapter(this.options.getIname());
+	if (this.bluetoothAdapter != null) {
+		logger.info("Bluetooth adapter interface => {}", this.options.getIname());
+		if (!this.bluetoothAdapter.isEnabled()) {
+			logger.info("Enabling bluetooth adapter...");
+			this.bluetoothAdapter.enable();
 		}
-		m_startTime = 0;
-		m_connected = false;
-		m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
-			@Override
-			public void run() {
-				checkScan();
-			}
-		}, 0, 1, TimeUnit.SECONDS);
+		logger.info("Bluetooth adapter address => {}", this.bluetoothAdapter.getAddress());
+
+		this.scanHandle = this.worker.scheduleAtFixedRate(this::performScan, 0, 1, TimeUnit.SECONDS);
+		this.readHandle = this.worker.scheduleAtFixedRate(this::readTiSensorTags, 0, this.options.getPeriod(),
+				TimeUnit.SECONDS);
+	} else {
+		logger.info("Bluetooth adapter {} not found.", this.options.getIname());
 	}
-	else s_logger.warn("No Bluetooth adapter found ...");
-} catch (Exception e) {
-	s_logger.error("Error starting component", e);
-	throw new ComponentException(e);
 }
 ```
 
-The _checkScan_ method manages the start and stop of the scanning procedure as shown below.
+The _performScan_ method manages the start and stop of the scanning procedure as shown below.
 
 ```java
-void checkScan() {
+void performScan() {
 
 	// Scan for devices
-	if(m_bluetoothAdapter.isScanning()) {
-		s_logger.info("m_bluetoothAdapter.isScanning");
-		if((System.currentTimeMillis() - m_startTime) >= (m_scantime * 1000)) {
-			m_bluetoothAdapter.killLeScan();
+	if (this.bluetoothAdapter.isScanning()) {
+		logger.info("bluetoothAdapter.isScanning");
+		if (System.currentTimeMillis() - this.startTime >= this.options.getScantime() * 1000) {
+			this.bluetoothAdapter.killLeScan();
 		}
-	}
-	else {
-		if((System.currentTimeMillis() - m_startTime) >= (m_period * 1000)) {
-			s_logger.info("startLeScan");
-			m_bluetoothAdapter.startLeScan(this);
-			m_startTime = System.currentTimeMillis();
+	} else {
+		if (System.currentTimeMillis() - this.startTime >= this.options.getPeriod() * 1000) {
+			logger.info("startLeScan");
+			this.bluetoothAdapter.startLeScan(this);
+			this.startTime = System.currentTimeMillis();
 		}
 	}
 
 }
 ```
 
-The _BluetoothLe_ class implements the _org.eclipse.kura.bluetooth.BluetoothLeScanListener_ interface and the _onScanResults_ method is called when the scan procedure ends. The method filters the scan results and stores the SensorTag devices in a list. For each device in the list a connection is opened and the selected sensors are read. Part of the _onScanResults_ method is shown below.
+The _BluetoothLe_ class implements the _org.eclipse.kura.bluetooth.BluetoothLeScanListener_ interface and the _onScanResults_ method is called when the scan procedure ends.
+The method filters the scan results and stores the SensorTag devices in a list. Part of the _onScanResults_ method is shown below.
 
 ```java
-public void onScanResults(List<BluetoothDevice> scanResults) {
+    @Override
+    public void onScanResults(List<BluetoothDevice> scanResults) {
 
-	// Scan for TI SensorTag
-	for (BluetoothDevice bluetoothDevice : scanResults) {
-		s_logger.info("Address " + bluetoothDevice.getAdress() + " Name " + bluetoothDevice.getName());
+        // Scan for TI SensorTag
+        for (BluetoothDevice bluetoothDevice : scanResults) {
+            logger.info("Address {} Name {}", bluetoothDevice.getAdress(), bluetoothDevice.getName());
 
-		if (bluetoothDevice.getName().contains("SensorTag")) {
-			s_logger.info("TI SensorTag " + bluetoothDevice.getAdress() + " found.");
-			if (!searchSensorTagList(bluetoothDevice.getAdress())){
-				TiSensorTag tiSensorTag = new TiSensorTag(bluetoothDevice);
-				m_tiSensorTagList.add(tiSensorTag);
-			}
-		}
-		else {
-			s_logger.info("Found device = " + bluetoothDevice.getAdress());
-		}
-	}
+            if (bluetoothDevice.getName().contains("SensorTag") && !isSensorTagInList(bluetoothDevice.getAdress())) {
+                this.tiSensorTagList.add(new TiSensorTag(bluetoothDevice));
+            }
+        }
 
+    }
+```
+
+The _readTiSensorTags_ is responsible to read the sensors for all the SensorTags contained in the list and publish the resulting data.
+
+```java
+private void readTiSensorTags() {
 	// connect to TiSensorTags
-	for (TiSensorTag myTiSensorTag : m_tiSensorTagList) {
+	this.tiSensorTagList.forEach(myTiSensorTag -> {
+		connect(myTiSensorTag);
 
-		if (!myTiSensorTag.isConnected()) {
-			s_logger.info("Connecting to TiSensorTag...");
-			m_connected = myTiSensorTag.connect();
-		}
-		else {
-			s_logger.info("TiSensorTag already connected!");
-			m_connected = true;
-		}
+		if (myTiSensorTag.isConnected()) {
+			...
 
-		if (m_connected) {
-
-			myTiSensorTag.setFirmwareRevision(myTiSensorTag.firmwareRevision());
-
-			if (enableTemp) {
-				myTiSensorTag.enableTermometer();
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				KuraPayload payload = new KuraPayload();
+				payload.setTimestamp(new Date());
+				payload.addMetric("Firmware", myTiSensorTag.getFirmwareRevision());
+				if (myTiSensorTag.isCC2650()) {
+					payload.addMetric("Type", "CC2650");
+				} else {
+					payload.addMetric("Type", "CC2541");
 				}
-				double[] temperatures = myTiSensorTag.readTemperature();
+				readServicesAndCharacteristics(myTiSensorTag);
+				readSensors(myTiSensorTag, payload);
+				myTiSensorTag.enableIOService();
 
-				s_logger.info("Ambient: " + temperatures[0] + " Target: " + temperatures[1]);
-			}
+				publishData(myTiSensorTag, payload);
 
-      ...
-
-  }
-  else {
-    s_logger.info("Cannot connect to TI SensorTag " + myTiSensorTag.getBluetoothDevice().getAdress() + ".");
-  }
+			...
+		} else {
+			logger.warn("Cannot connect to TI SensorTag {}.", myTiSensorTag.getBluetoothDevice().getAdress());
+		}
+	});
 
 }
 ```
@@ -355,23 +332,28 @@ Since it is not possible to poll the status of the buttons on the SensorTag, the
 
 ### org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File
 
-The org.eclipse.kura.example.ble.sensortag.TiSensorTag.java file is used to connect and disconnect to the SensorTag. It also contains the methods to configure and read data from the sensor. The connection method uses the BluetoothGatt Service as shown below:
+The _org.eclipse.kura.example.ble.sensortag.TiSensorTag.java_ file is used to connect and disconnect to the SensorTag. It also contains the methods to configure and read data from the sensor. The connection method uses the BluetoothGatt Service as shown below:
 
 ```java
-public boolean connect() {
-    m_bluetoothGatt = m_device.getBluetoothGatt();
-    boolean connected = m_bluetoothGatt.connect();
-    if(connected) {
-        m_bluetoothGatt.setBluetoothLeNotificationListener(this);
-        m_connected = true;
-        return true;
-    }
-    else {
-    	// If connect command is not executed, close gatttool
-    	m_bluetoothGatt.disconnect();
-    	m_connected = false;
-        return false;
-    }
+public boolean connect(String adapterName) {
+	this.bluetoothGatt = this.device.getBluetoothGatt();
+	boolean connected = false;
+	try {
+		connected = this.bluetoothGatt.connect(adapterName);
+	} catch (KuraException e) {
+		logger.error(e.toString());
+	}
+	if (connected) {
+		this.bluetoothGatt.setBluetoothLeNotificationListener(this);
+		setFirmwareRevision();
+		this.isConnected = true;
+		return true;
+	} else {
+		// If connect command is not executed, close gatttool
+		this.bluetoothGatt.disconnect();
+		this.isConnected = false;
+		return false;
+	}
 }
 ```
 
@@ -379,131 +361,168 @@ A set of methods for _reading from_ and _writing to_ the internal register of th
 
 ```java
 /*
- * Enable temperature sensor
- */
-public void enableTermometer() {
-	// Write "01" to enable temperature sensor
-	if (CC2650)
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "01");
-	else
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "01");
+* Enable temperature sensor
+*/
+public void enableThermometer() {
+	// Write "01" to enable thermometer sensor
+	if (this.cc2650) {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "01");
+	} else {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "01");
+	}
 }
 
 /*
- * Disable temperature sensor
- */
-public void disableTermometer() {
-	// Write "00" disable temperature sensor
-	if (CC2650)
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "00");
-	else
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "00");
+* Disable temperature sensor
+*/
+public void disableThermometer() {
+	// Write "00" disable thermometer sensor
+	if (this.cc2650) {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2650, "00");
+	} else {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_ENABLE_2541, "00");
+	}
 }
 
 /*
- * Read temperature sensor
- */
+* Read temperature sensor
+*/
 public double[] readTemperature() {
+	double[] temperatures = new double[2];
 	// Read value
-	if (CC2650)
-		return calculateTemperature(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2650));
-	else
-		return calculateTemperature(m_bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2541));
+	try {
+		if (this.cc2650) {
+			temperatures = calculateTemperature(
+					this.bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2650));
+		} else {
+			temperatures = calculateTemperature(
+					this.bluetoothGatt.readCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2541));
+		}
+	} catch (KuraException e) {
+		logger.error(e.toString());
+	}
+	return temperatures;
 }
 
 /*
- * Read temperature sensor by UUID
- */
+* Read temperature sensor by UUID
+*/
 public double[] readTemperatureByUuid() {
-	return calculateTemperature(m_bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE));
+	double[] temperatures = new double[2];
+	try {
+		temperatures = calculateTemperature(
+				this.bluetoothGatt.readCharacteristicValueByUuid(TiSensorTagGatt.UUID_TEMP_SENSOR_VALUE));
+	} catch (KuraException e) {
+		logger.error(e.toString());
+	}
+	return temperatures;
 }
 
 /*
- * Enable temperature notifications
- */
-public void enableTemperatureNotifications() {
+* Enable temperature notifications
+*/
+public void enableTemperatureNotifications(TiSensorTagNotificationListener listener) {
+	setListener(listener);
 	// Write "01:00 to enable notifications
-	if (CC2650)
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2650, "01:00");
-	else
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2541, "01:00");
+	if (this.cc2650) {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2650,
+				ENABLE_NOTIFICATIONS);
+	} else {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2541,
+				ENABLE_NOTIFICATIONS);
+	}
 }
 
 /*
- * Disable temperature notifications
- */
+* Disable temperature notifications
+*/
 public void disableTemperatureNotifications() {
+	unsetListener();
 	// Write "00:00 to enable notifications
-	if (CC2650)
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2650, "00:00");
-	else
-		m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2541, "00:00");
+	if (this.cc2650) {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2650,
+				DISABLE_NOTIFICATIONS);
+	} else {
+		this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2541,
+				DISABLE_NOTIFICATIONS);
+	}
 }
 
 /*
- * Set sampling period (only for CC2650)
- */
-public void setTermometerPeriod(String period) {
-	m_bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_PERIOD_2650, period);
+	* Set sampling period (only for CC2650)
+	*/
+public void setThermometerPeriod(String period) {
+	this.bluetoothGatt.writeCharacteristicValue(TiSensorTagGatt.HANDLE_TEMP_SENSOR_PERIOD_2650, period);
 }
 
 /*
- * Calculate temperature
- */
+* Calculate temperature
+*/
 private double[] calculateTemperature(String value) {
 
-	s_logger.info("Received temperature value: " + value);
+	logger.info("Received temperature value: {}", value);
 
 	double[] temperatures = new double[2];
 
-	String[] tmp = value.split("\\s");
-	int lsbObj = Integer.parseInt(tmp[0], 16);
-	int msbObj = Integer.parseInt(tmp[1], 16);
-	int lsbAmb = Integer.parseInt(tmp[2], 16);
-	int msbAmb = Integer.parseInt(tmp[3], 16);
+	byte[] valueByte = hexStringToByteArray(value.replace(" ", ""));
 
-	int objT = (unsignedToSigned(msbObj) << 8) + lsbObj;
-	int ambT = (msbAmb << 8) + lsbAmb;
-
-	temperatures[0] = ambT / 128.0;
-
-	if (CC2650) {
-		temperatures[1] = objT / 128.0;
+	if (this.cc2650) {
+		int ambT = shortUnsignedAtOffset(valueByte, 2);
+		int objT = shortUnsignedAtOffset(valueByte, 0);
+		temperatures[0] = (ambT >> 2) * 0.03125;
+		temperatures[1] = (objT >> 2) * 0.03125;
 	} else {
-		double Vobj2 = objT;
-		Vobj2 *= 0.00000015625;
 
-		double Tdie = (ambT / 128.0) + 273.15;
+		int ambT = shortUnsignedAtOffset(valueByte, 2);
+		int objT = shortSignedAtOffset(valueByte, 0);
+		temperatures[0] = ambT / 128.0;
 
-		double S0 = 5.593E-14;	// Calibration factor
+		double vobj2 = objT;
+		vobj2 *= 0.00000015625;
+
+		double tdie = ambT / 128.0 + 273.15;
+
+		double s0 = 5.593E-14; // Calibration factor
 		double a1 = 1.75E-3;
 		double a2 = -1.678E-5;
 		double b0 = -2.94E-5;
 		double b1 = -5.7E-7;
 		double b2 = 4.63E-9;
 		double c2 = 13.4;
-		double Tref = 298.15;
-		double S = S0*(1+a1*(Tdie - Tref)+a2*Math.pow((Tdie - Tref),2));
-		double Vos = b0 + b1*(Tdie - Tref) + b2*Math.pow((Tdie - Tref),2);
-		double fObj = (Vobj2 - Vos) + c2*Math.pow((Vobj2 - Vos),2);
-		double tObj = Math.pow(Math.pow(Tdie,4) + (fObj/S),.25);
+		double tref = 298.15;
+		double s = s0 * (1 + a1 * (tdie - tref) + a2 * Math.pow(tdie - tref, 2));
+		double vos = b0 + b1 * (tdie - tref) + b2 * Math.pow(tdie - tref, 2);
+		double fObj = vobj2 - vos + c2 * Math.pow(vobj2 - vos, 2);
+		double tObj = Math.pow(Math.pow(tdie, 4) + fObj / s, .25);
 
 		temperatures[1] = tObj - 273.15;
 	}
 
-    return temperatures;
+	return temperatures;
 }
 ```
 
-The _TiSensorTag_ class implements the org.eclipse.kura.bluetooth.BluetoothLeNotificationListener interface and the method _onDataReceived_ is called when a BLE notification is received. In this example the notifications are used only for the buttons. The method is shown below.
+The _TiSensorTag_ class implements the _org.eclipse.kura.bluetooth.BluetoothLeNotificationListener_ interface and the method _onDataReceived_ is called when a BLE notification is received. In this example the notifications are used only for the buttons. The method is shown below.
 
 ```java
 public void onDataReceived(String handle, String value) {
 
-	if (handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS_2541) || handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS_2650)) {
-		s_logger.info("Received keys value: " + value);
-		if (!value.equals("00"))
-			BluetoothLe.doPublishKeys(m_device.getAdress(), Integer.parseInt(value) );
+	if (this.notificationListener != null) {
+		Map<String, Object> values = new HashMap<>();
+		if (handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS_2541)
+				|| handle.equals(TiSensorTagGatt.HANDLE_KEYS_STATUS_2650)) {
+			logger.info("Received keys value: {}", value);
+			if (!value.equals("00")) {
+				values.put("Keys", Integer.parseInt(value));
+				this.notificationListener.notify(this.device.getAdress(), values);
+			}
+		} else if (handle.equals(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2541)
+				|| handle.equals(TiSensorTagGatt.HANDLE_TEMP_SENSOR_VALUE_2650)) {
+			double[] temperatures = calculateTemperature(value);
+			values.put("Ambient", temperatures[0]);
+			values.put("Target", temperatures[1]);
+			this.notificationListener.notify(this.device.getAdress(), values);
+		}
 	}
 
 }

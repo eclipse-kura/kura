@@ -4,25 +4,25 @@ title:  "Legacy Bluetooth LE Example"
 categories: [dev]
 ---
 
-[Overview](#overview_1)
+[Overview](#overview)
 
 *  [Prerequisites](#prerequisites)
 
-[Prepare the Embedded Device](#prepare_the_embedded_device_1)
+[Prepare the Embedded Device](#prepare_the_embedded_device)
 
-[SensorTag Communication via Command Line](#sensortag_command_line_1)
+[SensorTag Communication via Command Line](#sensortag_command_line)
 
-[BLE Bundle for TI SensorTag](#bundle_sensortag_1)
+[BLE Bundle for TI SensorTag](#bundle_sensortag)
 
-*  [Develop the BLE Bundle](#develop_the_ble_bundle_1)
+*  [Develop the BLE Bundle](#develop_the_ble_bundle)
 
-    *  [OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File](#OSGI-INF/metatype_1)
+    *  [OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File](#OSGI-INF/metatype)
 
-    *  [org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File](#BluetoothLe_1)
+    *  [org.eclipse.kura.example.ble.tisensortag.BluetoothLe.java File](#BluetoothLe)
 
-    *  [org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File](#TiSensorTag_1)
+    *  [org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File](#TiSensorTag)
 
-*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
+*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle)
 
 ## Overview
 
@@ -178,6 +178,8 @@ The BLE bundle performs the following operations:
 * Connects to the discovered SensorTags and discovers their capabilities
 
 * Reads data from all the sensors onboard and writes the values in the log file
+
+{% include alerts.html message="The Legacy Bluetooth LE Example doesn't support TI SensorTag firmware version above 1.20" %}
 
 ## Develop the BLE Bundle
 

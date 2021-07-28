@@ -12,7 +12,7 @@ categories: [dev]
 
 [How to use the Kura BLE API](#how-to-use-the-kura-ble-api)
 
-[Configure Bluez and TinyB on the Raspberry Pi](#configure-bluez-and-tinyb-on-the-raspberry-pi)
+[Configure Bluez on the Raspberry Pi](#configure-bluez-on-the-raspberry-pi)
 
 ## Overview
 
@@ -40,7 +40,7 @@ More information about the APIs can be found in [API Reference](../ref/api-ref.h
 
 ## How to use the Kura BLE API
 
-This section briefly presents how to use the Kura BLE APIs, providing several code snippets to explain how to perform common bluetooth operations. For a complete example, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag.tinyb" about="_blank">SensorTag application</a>.
+This section briefly presents how to use the Kura BLE APIs, providing several code snippets to explain how to perform common bluetooth operations. For a complete example, please refer to the new <a href="https://github.com/eclipse/kura/tree/develop/kura/examples/org.eclipse.kura.example.ble.tisensortag.dbus" about="_blank">SensorTag application</a>.
 
 An application that wants to use the Kura BLE APIs should bind the **BluetoothLeService** OSGI service, as shown in the following Java snippet:
 
@@ -166,11 +166,9 @@ try {
 }
 ```
 
-## Configure Bluez and TinyB on the Raspberry Pi
+## Configure Bluez on the Raspberry Pi
 
-Eclipse Kura provides the TinyB library already compiled for the Raspberry Pi (Raspbian). However, TinyB uses Bluez through DBUS under the hood and the latter library should be installed on the system. Moreover, the minimum supported version of Bluez is 5.42.
-
-The Raspbian Stretch OS comes with Bluez 5.43, but older OS couldn't have an updated Bluez version. In this case, it is possible to compile and install Bluez from sources using a Raspberry Pi. The Bluez sources can be found <a href="http://www.bluez.org/download/" about="_blank">here</a>. Proceed as follows:
+The minimum version of Bluez supported by Kura Bluetooth LE APIs is 5.42. The Raspbian Stretch OS comes with Bluez 5.43, but older OS couldn't have an updated Bluez version. In this case, it is possible to compile and install Bluez from sources using a Raspberry Pi. The Bluez sources can be found <a href="http://www.bluez.org/download/" about="_blank">here</a>. Proceed as follows:
 
 * Install the packages needed for compile Bluez: 
 

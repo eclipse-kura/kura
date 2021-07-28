@@ -8,13 +8,13 @@ categories: [dev]
 
 *  [Prerequisites](#prerequisites)
 
-[Prepare the Embedded Device](#prepare_the_embedded_device)
+[Prepare the Embedded Device](#prepare-the-embedded-device)
 
-[SensorTag Communication via Command Line](#sensortag_command_line)
+[SensorTag Communication via Command Line](#sensortag-command-line)
 
-[BLE Bundle for TI SensorTag](#bundle_sensortag)
+[BLE Bundle for TI SensorTag](#bundle-sensortag)
 
-*  [Develop the BLE Bundle](#develop_the_ble_bundle)
+*  [Develop the BLE Bundle](#develop-the-ble-bundle)
 
     *  [OSGI-INF/metatype/org.eclipse.kura.example.ble.tisensortag.BluetoothLe.xml File](#OSGI-INF/metatype)
 
@@ -22,7 +22,7 @@ categories: [dev]
 
     *  [org.eclipse.kura.example.ble.sensortag.TiSensorTag.java File](#TiSensorTag)
 
-*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle)
+*  [Deploy and Validate the Bundle](#deploy-and-validate-the-bundle)
 
 ## Overview
 

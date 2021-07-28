@@ -4,21 +4,17 @@ title:  "Legacy BLE Beacon Example"
 categories: [dev]
 ---
 
-[Overview](#overview_1)
+[Overview](#overview)
 
 [Prerequisites](#prerequisites)
 
-[Beacon Advertising with *hcitool*](#beacon_advertising_with_hcitool_1)
+[Beacon Advertising with *hcitool*](#beacon-advertising-with-hcitool)
 
-[Beacon Advertising with ESF](#beacon_advertising_with_esf_1)
+[Beacon Advertising with Kura](#beacon-advertising-with-kura)
 
-*  [Develop the Beacon Bundle](#develop_the_beacon_bundle_1)
+*  [Develop the Beacon Bundle](#develop-the-beacon-bundle)
 
-    *  [OSGI-INF/metatype/org.eclipse.kura.example.beacon.BeaconExample.xml File](#OSGI-INF/metatype_1)
-
-    *  [org.eclipse.kura.example.beacon.BeaconExample.java File](#BluetoothExample_1)
-
-*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
+*  [Deploy and Validate the Bundle](#deploy-and-validate-the-bundle)
 
 ## Overview
 
@@ -40,7 +36,7 @@ The advertising packet has a fixed format and is broadcasted periodically. The i
 
 * Hardware
 
-  * Embedded device running ESF with Bluetooth 4.0 (LE) capabilities.
+  * Embedded device running Kura with Bluetooth 4.0 (LE) capabilities.
 
   * bluez_ packet must be installed on the embedded device. Follow the installation instructions in [How to Use Bluetooth LE](bluetooth-le-example.html).
 
@@ -90,7 +86,7 @@ To stop the advertising, write 0 to the register 0x000a as shown in the followin
 sudo hcitool -i hci0 cmd 0x08 0x000a 00
 ```
 
-## Beacon Advertising with ESF
+## Beacon Advertising with Kura
 
 The Beacon bundle is a simple example that allows you to configure the advertising packet, the time interval, and to start/stop the advertising.
 
@@ -154,25 +150,23 @@ The OSGI-INF/metatype/org.eclipse.kura.example.beacon.beaconExample.xml file des
 The com.eurotech.example.beacon.BeaconExample.java file contains the activate and deactivate methods for this bundle. The activate method gets the _BluetoothAdapter_, enables the interface if needed, and executes the _configureBeacon_ method that configures the device according to the properties. The following code sample shows part of the activate method:
 
 ```java
-try {
-	// Get Bluetooth adapter with Beacon capabilities and ensure it is enabled
-	m_bluetoothAdapter = m_bluetoothService.getBluetoothAdapter(m_iname, this);
-	if (m_bluetoothAdapter != null) {
-		s_logger.info("Bluetooth adapter interface => " + m_iname);
-		s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-		s_logger.info("Bluetooth adapter le enabled => " + m_bluetoothAdapter.isLeReady());
+// Get Bluetooth adapter with Beacon capabilities and ensure it is enabled
+this.bluetoothAdapter = this.bluetoothService.getBluetoothAdapter(this.name, this);
+if (this.bluetoothAdapter != null) {
+	logger.info("Bluetooth adapter interface => {}", this.name);
+	logger.info("Bluetooth adapter address => {}", this.bluetoothAdapter.getAddress());
+	logger.info("Bluetooth adapter le enabled => {}", this.bluetoothAdapter.isLeReady());
 
-		if (!m_bluetoothAdapter.isEnabled()) {
-			s_logger.info("Enabling bluetooth adapter...");
-			m_bluetoothAdapter.enable();
-			s_logger.info("Bluetooth adapter address => " + m_bluetoothAdapter.getAddress());
-		}
-
-		configureBeacon();
-
+	if (!this.bluetoothAdapter.isEnabled()) {
+		logger.info("Enabling bluetooth adapter...");
+		this.bluetoothAdapter.enable();
+		logger.info("Bluetooth adapter address => {}", this.bluetoothAdapter.getAddress());
 	}
-	else
-		s_logger.warn("No Bluetooth adapter found ...");
+
+	configureBeacon();
+
+} else {
+	logger.warn("No Bluetooth adapter found ...");
 }
 ```
 
@@ -181,21 +175,21 @@ The _configureBeacon_ (shown below) is a private method:
 ```java
 private void configureBeacon() {
 
-	if (m_enable) {
+	if (this.enable) {
 
-		if (m_minInterval != null && m_maxInterval != null) {
-			m_bluetoothAdapter.setBeaconAdvertisingInterval(m_minInterval, m_maxInterval);
+		if (this.minInterval != null && this.maxInterval != null) {
+			this.bluetoothAdapter.setBeaconAdvertisingInterval(this.minInterval, this.maxInterval);
 		}
-
-		if (m_uuid != null && m_major != null && m_minor != null && m_companyCode != null && m_txPower != null) {
-			m_bluetoothAdapter.setBeaconAdvertisingData(m_uuid, m_major, m_minor, m_companyCode, m_txPower, m_LELimited, (m_LELimited) ? false : true,
-					m_BRSupported, m_BRController, m_BRHost);
+		this.bluetoothAdapter.startBeaconAdvertising();
+		if (this.uuid != null && this.major != null && this.minor != null && this.companyCode != null
+				&& this.txPower != null) {
+			this.bluetoothAdapter.setBeaconAdvertisingData(this.uuid, this.major, this.minor, this.companyCode,
+					this.txPower, this.leLimited, this.leLimited ? false : true, this.brSupported,
+					this.brController, this.brHost);
 		}
-
-		m_bluetoothAdapter.startBeaconAdvertising();
+	} else {
+		this.bluetoothAdapter.stopBeaconAdvertising();
 	}
-	else
-		m_bluetoothAdapter.stopBeaconAdvertising();
 }
 ```
 
@@ -203,7 +197,7 @@ private void configureBeacon() {
 
 In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](deploying-bundles.html#_Install_Single_Bundle).  When the installation is complete, the bundle starts automatically.
 
-In the ESF Gateway Administration Console, the BeaconExample tab appears on the left and enables the beacon to be configured for advertising.
+In the Kura Gateway Administration Console, the BeaconExample tab appears on the left and enables the beacon to be configured for advertising.
 
 You should see a message similar to the one below from **/var/log/kura.log** indicating that the bundle was successfully installed and configured.
 

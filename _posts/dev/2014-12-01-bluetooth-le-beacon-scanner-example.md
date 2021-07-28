@@ -4,19 +4,15 @@ title:  "Legacy BLE Beacon Scanner Example"
 categories: [dev]
 ---
 
-[Overview](#overview_1)
+[Overview](#overview)
 
 [Prerequisites](#prerequisites)
 
-[Beacon Scanning with ESF](#beacon_scanning_with_esf_1)
+[Beacon Scanning with Kura](#beacon-scanning-with-kura)
 
-*  [Develop the Beacon Bundle](#develop_the_beacon_bundle_1)
+*  [Develop the Beacon Scanner Bundle](#develop-the-beacon-scanner-bundle)
 
-    *  [OSGI-INF/metatype/org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.xml File](#OSGI-INF/metatype_1)
-
-    *  [org.eclipse.kura.example.beacon.scanner.BeaconScannerExample.java File](#BluetoothScannerExample_1)
-
-*  [Deploy and Validate the Bundle](#deploy_and_validate_the_bundle_1)
+*  [Deploy and Validate the Bundle](#deploy-and-validate-the-bundle)
 
 ## Overview
 
@@ -40,13 +36,13 @@ For further information about the Beacons, please refer to the [BLE Beacon Examp
 
 * Hardware
 
-  * Embedded device running ESF with Bluetooth 4.0 (LE) capabilities.
+  * Embedded device running Kura with Bluetooth 4.0 (LE) capabilities.
 
   * bluez_ packet must be installed on the embedded device. Follow the installation instructions in [How to Use Bluetooth LE](bluetooth-le-example.html).
 
 For this tutorial a Raspberry Pi Type B with a LMTechnologies LM506 Bluetooth 4.0 <http://lm-technologies.com/wireless-adapters/lm506-class-1-bluetooth-4-0-usb-adapter/> dongle is used.
 
-## Beacon Scanning with ESF
+## Beacon Scanning with Kura
 
 The Beacon Scanner bundle is a Kura example that allows you to configure the Company Code for the Beacon filtering and to start/stop the scanner procedure.
 
@@ -93,10 +89,12 @@ The following code sample shows the _setup_ method:
 ```java
 private void setup() {
 
-	bluetoothAdapter = bluetoothService.getBluetoothAdapter(adapterName);
-	if(bluetoothAdapter != null) {
-		bluetoothAdapter.startBeaconScan(companyCode, this);
-	}
+    this.publishTimes = new HashMap<String, Long>();
+
+    this.bluetoothAdapter = this.bluetoothService.getBluetoothAdapter(this.adapterName);
+    if (this.bluetoothAdapter != null) {
+        this.bluetoothAdapter.startBeaconScan(this.companyCode, this);
+    }
 
 }
 ```
@@ -118,19 +116,42 @@ Since _BeaconScannerExample_ implements _BluetoothBeaconScanListener_, the _onBe
 The following code is an implementation of _onBeaconDataReceived_ that logs the _BluetoothBeaconData_ fields:
 
 ```java
-@Override
 public void onBeaconDataReceived(BluetoothBeaconData beaconData) {
 
-	logger.debug("Beacon from {} detected.", beaconData.address);
+    logger.debug("Beacon from {} detected.", beaconData.address);
+    long now = System.nanoTime();
 
-  logger.info("UUID : {}", beaconData.uuid);
-  logger.info("TxPower : {}", beaconData.txpower);
-  logger.info("RSSI : {}", beaconData.rssi);
-  logger.info("Major : {}", beaconData.major);
-  logger.info("Minor : {}", beaconData.minor);
-  logger.info("Address : {}", beaconData.address);
+    Long lastPublishTime = this.publishTimes.get(beaconData.address);
 
-	}
+    // If this beacon is new, or it last published more than 'rateLimit' ms ago
+    if (lastPublishTime == null || (now - lastPublishTime) / 1000000L > this.rateLimit) {
+
+        // Store the publish time against the address
+        this.publishTimes.put(beaconData.address, now);
+        if (this.cloudPublisher == null) {
+            logger.info("No cloud publisher selected. Cannot publish!");
+            return;
+        }
+
+        // Publish the beacon data to the beacon's topic
+        KuraPayload kp = new KuraPayload();
+        kp.setTimestamp(new Date());
+        kp.addMetric("uuid", beaconData.uuid);
+        kp.addMetric("txpower", beaconData.txpower);
+        kp.addMetric("rssi", beaconData.rssi);
+        kp.addMetric("major", beaconData.major);
+        kp.addMetric("minor", beaconData.minor);
+        kp.addMetric("distance", calculateDistance(beaconData.rssi, beaconData.txpower));
+
+        Map<String, Object> properties = new HashMap<String, Object>();
+        properties.put("address", beaconData.address);
+        KuraMessage message = new KuraMessage(kp, properties);
+        try {
+            this.cloudPublisher.publish(message);
+        } catch (KuraException e) {
+            logger.error("Unable to publish", e);
+        }
+    }
 }
 ```
 
@@ -139,21 +160,21 @@ Finally, the Beacon Scanner is able to roughly estimate the distance of the dete
 ```java
 private double calculateDistance(int rssi, int txpower) {
 
-  double distance;
+    double distance;
 
-  int ratioDB = txpower - rssi;
-  double ratioLinear = Math.pow(10, (double) ratioDB/10);
-  distance = Math.sqrt(ratioLinear);
+    int ratioDB = txpower - rssi;
+    double ratioLinear = Math.pow(10, (double) ratioDB / 10);
+    distance = Math.sqrt(ratioLinear);
 
-  return distance;
+    return distance;
 }
 ```
 
-## <span id="deploy_and_validate_the_bundle" class="anchor"><span id="deploy_and_validate_the_bundle_1" class="anchor"></span></span>Deploy and Validate the Bundle
+## <span id="deploy_and_validate_the_bundle" class="anchor"><span id="deploy-and-validate-the-bundle" class="anchor"></span></span>Deploy and Validate the Bundle
 
 In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](deploying-bundles.html#_Install_Single_Bundle).  When the installation is complete, the bundle starts automatically.
 
-In the ESF Gateway Administration Console, the BeaconScannerExample tab appears on the left and enables the device to be configured for scanning.
+In the Kura Gateway Administration Console, the BeaconScannerExample tab appears on the left and enables the device to be configured for scanning.
 
 You should see a message similar to the one below from **/var/log/kura.log** indicating that the bundle was successfully installed and configured.
 
@@ -162,17 +183,17 @@ You should see a message similar to the one below from **/var/log/kura.log** ind
 2016-08-08 14:39:48,353 [Component Resolve Thread (Bundle 6)] INFO  o.e.k.e.b.s.BeaconScannerExample - Activating Bluetooth Beacon Scanner example...Done
 2016-08-08 14:39:48,373 [Component Resolve Thread (Bundle 6)] INFO  o.e.k.c.c.ConfigurableComponentTracker - Adding ConfigurableComponent with pid org.eclipse.kura.example.beacon.scanner.BeaconScannerExample, service pid org.eclipse.kura.example.beacon.scanner.BeaconScannerExample and factory pid null
 2016-08-08 14:39:48,373 [Component Resolve Thread (Bundle 6)] INFO  o.e.k.c.c.ConfigurationServiceImpl - Registration of ConfigurableComponent org.eclipse.kura.example.beacon.scanner.BeaconScannerExample by org.eclipse.kura.core.configuration.ConfigurationServiceImpl@1197c95...
-2016-08-08 14:40:40,186 [qtp23115489-40] WARN  o.e.k.w.s.s.SkinServlet - Resource File /opt/eurotech/esf/console/skin/skin.js does not exist
+2016-08-08 14:40:40,186 [qtp23115489-40] WARN  o.e.k.w.s.s.SkinServlet - Resource File /opt/eclipse/kura/console/skin/skin.js does not exist
 2016-08-08 14:40:56,996 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Loading init configurations from: 1470667042563...
 2016-08-08 14:40:57,679 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Merging configuration for pid: org.eclipse.kura.example.beacon.scanner.BeaconScannerExample
 2016-08-08 14:40:57,687 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Updating Configuration of ConfigurableComponent org.eclipse.kura.example.beacon.scanner.BeaconScannerExample ... Done.
-2016-08-08 14:40:57,689 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Writing snapshot - Saving /opt/eurotech/esf/data/snapshots/snapshot_1470667257688.xml...
-2016-08-08 14:40:57,914 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Writing snapshot - Saving /opt/eurotech/esf/data/snapshots/snapshot_1470667257688.xml... Done.
-2016-08-08 14:40:57,916 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Snapshots Garbage Collector. Deleting /opt/eurotech/esf/data/snapshots/snapshot_1470651681077.xml
+2016-08-08 14:40:57,689 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Writing snapshot - Saving /opt/eclipse/kura/data/snapshots/snapshot_1470667257688.xml...
+2016-08-08 14:40:57,914 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Writing snapshot - Saving /opt/eclipse/kura/data/snapshots/snapshot_1470667257688.xml... Done.
+2016-08-08 14:40:57,916 [qtp23115489-42] INFO  o.e.k.c.c.ConfigurationServiceImpl - Snapshots Garbage Collector. Deleting /opt/eclipse/kura/data/snapshots/snapshot_1470651681077.xml
 2016-08-08 14:40:58,013 [Component Resolve Thread (Bundle 6)] INFO  o.e.k.l.b.l.BluetoothLeScanner - Starting bluetooth le beacon scan...
 ```
 
-Using a device equipped with ESF acting as a Beacon (see [BLE Beacon Example](bluetooth-le-example.html)), the following lines appear on the log file when the device is detected:
+Using a device equipped with Kura acting as a Beacon (see [BLE Beacon Example](bluetooth-le-example.html)), the following lines appear on the log file when the device is detected:
 
 ```
 2016-08-08 14:49:03,487 [BluetoothProcess BTSnoop Gobbler] INFO  o.e.k.e.b.s.BeaconScannerExample - UUID : AAAAAAAABBBBCCCCDDDDEEEEEEEEEEEE

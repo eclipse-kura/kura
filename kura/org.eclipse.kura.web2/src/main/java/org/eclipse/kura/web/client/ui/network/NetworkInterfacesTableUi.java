@@ -254,28 +254,35 @@ public class NetworkInterfacesTableUi extends Composite {
             return 1;
         }
 
-        if (name1.length() > 3 && name2.length() > 3 && name1.startsWith(name2.substring(0, 3))) {
+        if (name1.length() > 2 && name2.length() > 2 && name1.startsWith(name2.substring(0, 2))) {
             return name1.compareTo(name2);
         }
 
-        if (name1.startsWith("eth") || name1.startsWith("enp")) {
+        if (name1.startsWith("et") || name1.startsWith("en")) {
             return -1;
         }
-        if (name2.startsWith("eth") || name2.startsWith("enp")) {
+        if (name2.startsWith("et") || name2.startsWith("en")) {
             return 1;
         }
 
-        if (name1.startsWith("wlan") || name1.startsWith("wlp")) {
+        if (name1.startsWith("wl")) {
             return -1;
         }
-        if (name2.startsWith("wlan") || name2.startsWith("wlp")) {
+        if (name2.startsWith("wl")) {
             return 1;
         }
 
-        if (name1.startsWith("ppp")) {
+        if (name1.startsWith("pp")) {
             return -1;
         }
-        if (name2.startsWith("ppp")) {
+        if (name2.startsWith("pp")) {
+            return 1;
+        }
+
+        if (name1.startsWith("ww")) {
+            return -1;
+        }
+        if (name2.startsWith("ww")) {
             return 1;
         }
 

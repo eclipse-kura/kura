@@ -254,7 +254,7 @@ public class NetworkInterfacesTableUi extends Composite {
             return 1;
         }
 
-        if (name1.length() > 3 && name2.length() > 3 && name1.startsWith(name2.substring(0, 4))) {
+        if (name1.length() > 3 && name2.length() > 3 && name1.startsWith(name2.substring(0, 3))) {
             return name1.compareTo(name2);
         }
 

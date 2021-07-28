@@ -786,7 +786,7 @@ public class LinuxNetworkUtil {
                     Double rate = Double.parseDouble(bitRateToken);
                     String unit = st.nextToken();
                     return getWifiBitrateParseGetBitRate(rate, unit);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     logger.error("Unable to parse the bitrate value. Found {}", bitRateToken);
                     break;
                 }

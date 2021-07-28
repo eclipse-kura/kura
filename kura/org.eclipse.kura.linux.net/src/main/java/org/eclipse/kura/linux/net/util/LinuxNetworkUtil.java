@@ -781,9 +781,15 @@ public class LinuxNetworkUtil {
                 StringTokenizer st = new StringTokenizer(line.substring(index));
                 st.nextToken(); // skip 'tx'
                 st.nextToken(); // skip 'bitrate:'
-                Double rate = Double.parseDouble(st.nextToken());
-                String unit = st.nextToken();
-                return getWifiBitrateParseGetBitRate(rate, unit);
+                String bitRateToken = st.nextToken();
+                try {
+                    Double rate = Double.parseDouble(bitRateToken);
+                    String unit = st.nextToken();
+                    return getWifiBitrateParseGetBitRate(rate, unit);
+                }catch (Exception e) {
+                    logger.error("Unable to parse the bitrate value. Found {}", bitRateToken);
+                    break;
+                }
             }
         }
         return bitRate;

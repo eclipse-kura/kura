@@ -185,7 +185,7 @@ public class ClockServiceImplTest {
         ClockServiceImpl svc = new ClockServiceImpl() {
 
             @Override
-            public void onClockUpdate(long offset) {
+            public void onClockUpdate(long offset, boolean update) {
                 synchronized (lock) {
                     lock.notifyAll();
                 }
@@ -230,7 +230,7 @@ public class ClockServiceImplTest {
         properties.put("clock.set.hwclock", false);
         TestUtil.setFieldValue(svc, "properties", properties);
 
-        svc.onClockUpdate(0); // 0 offset => don't perform sys clock update
+        svc.onClockUpdate(0, false); // 0 offset => don't perform sys clock update
 
         verify(eaMock, times(1)).postEvent(isA(ClockEvent.class));
     }
@@ -256,7 +256,7 @@ public class ClockServiceImplTest {
         properties.put("clock.set.hwclock", true);
         TestUtil.setFieldValue(svc, "properties", properties);
 
-        svc.onClockUpdate(1);
+        svc.onClockUpdate(1, true);
 
         verify(eaMock, times(1)).postEvent(isA(ClockEvent.class)); // sys clock updated successfully
     }
@@ -279,7 +279,7 @@ public class ClockServiceImplTest {
         properties.put("clock.set.hwclock", true);
         TestUtil.setFieldValue(svc, "properties", properties);
 
-        svc.onClockUpdate(1);
+        svc.onClockUpdate(1, true);
 
         verify(eaMock, times(0)).postEvent(isA(ClockEvent.class)); // sys clock not updated
     }
@@ -302,7 +302,7 @@ public class ClockServiceImplTest {
         properties.put("clock.set.hwclock", true);
         TestUtil.setFieldValue(svc, "properties", properties);
 
-        svc.onClockUpdate(1);
+        svc.onClockUpdate(1, true);
 
         verify(eaMock, times(1)).postEvent(isA(ClockEvent.class)); // sys clock updated successfully
     }

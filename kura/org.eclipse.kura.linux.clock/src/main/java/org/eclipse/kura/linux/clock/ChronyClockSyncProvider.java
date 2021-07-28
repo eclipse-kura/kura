@@ -199,7 +199,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
                     this.lastSyncValue = new Date(
                             TimeUnit.MILLISECONDS.convert(journalEntry.getTime(), TimeUnit.MICROSECONDS));
 
-                    this.listener.onClockUpdate(parseOffset(journalEntry.getMessage()));
+                    this.listener.onClockUpdate(0, false);
                 }
             } else {
                 logger.debug("No new clock stepping event");
@@ -209,13 +209,6 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
                     journalClockUpdateRead.getErrorStream());
         }
 
-    }
-
-    private long parseOffset(String message) {
-        String secondsString = message.split(" ")[5];
-        Float microseconds = Float.valueOf(secondsString) * 1_000_000;
-
-        return TimeUnit.SECONDS.convert(microseconds.longValue(), TimeUnit.MICROSECONDS);
     }
 
     @Override
@@ -268,22 +261,15 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
         @SerializedName("__REALTIME_TIMESTAMP")
         private final long time;
-        @SerializedName("MESSAGE")
-        private final String message;
 
         @SuppressWarnings("unused")
-        public JournalChronyEntry(long time, String message) {
+        public JournalChronyEntry(long time) {
             super();
             this.time = time;
-            this.message = message;
         }
 
         public long getTime() {
             return this.time;
-        }
-
-        public String getMessage() {
-            return this.message;
         }
 
     }

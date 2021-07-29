@@ -37,9 +37,9 @@ A detailed description of this tab is presented in the [Command Service](../buil
 ## System Logs
 The **System Logs** tab allows to download a compressed file containing all the relevant log files from the gateway. In particular the following items will be added to the compressed file:
 
-    all the files in /var/log or the the content of the folder defined by the kura.log.download.sources property;
-    the content of the journal for the Kura process (kura-journal.log);
-    the content of the journal for the whole system (system-journal.log).
+- all the files in /var/log or the the content of the folder defined by the kura.log.download.sources property;
+- the content of the journal for the Kura process (kura-journal.log);
+- the content of the journal for the whole system (system-journal.log).
 
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceSystemLogs.png)

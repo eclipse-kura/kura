@@ -227,7 +227,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.linux.clock</artifactId>
-                                    <version>1.0.600</version>
+                                    <version>1.1.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
@@ -327,7 +327,7 @@
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.h2db.component.provider</artifactId>
-                                    <version>1.0.400</version>
+                                    <version>2.0.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>

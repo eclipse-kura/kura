@@ -67,26 +67,6 @@
                                     <version>${com.codeminders.hidapi.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>tinyb</artifactId>
-                                    <version>${tinyb.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>tinyb.armv6hf</artifactId>
-                                    <version>${tinyb.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>tinyb.x86_64</artifactId>
-                                    <version>${tinyb.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>tinyb.aarch64</artifactId>
-                                    <version>${tinyb.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>org.apache</groupId>
                                     <artifactId>org.apache.commons.net</artifactId>
                                     <version>${org.apache.commons.net.version}</version>
@@ -355,6 +335,11 @@
                                     <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.google.gson</artifactId>
                                     <version>${com.google.gson.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.github.hypfvieh</groupId>
+                                    <artifactId>bluez-dbus-osgi</artifactId>
+                                    <version>${bluez-dbus-osgi.version}</version>
                                 </artifactItem>
                                 <!-- Artemis Broker -->
                                 <artifactItem>

@@ -14,11 +14,12 @@ The project is now EPL-2.0 compatible.
 Changes:
   * Enhancements
     * Added support for new Quectel EC25, BG96 and ZTE modems
-    * Multi-modem support: the framewor is now capable to manage multiple modems connected to the gateway
+    * Multi-modem support: the framework is now capable to manage multiple modems connected to the gateway
     * Custom Firewall chains for Kura
     * New Audit framework for auditing security-related actions in a specific audit file
     * Support for Web UI certificate login
     * Support for REST APIs certificate login
+    * Support for REST APIs endpoint in a different port than the Web UI
     * Support for Web UI multiple identities and related permissions
     * Support for user customizable Web UI entry point 
     * Privileged and unprivileged command execution
@@ -43,6 +44,8 @@ Changes:
     * Clock service update with new chrony support
     * Clock Service Java NTP implementation update with an improved error management
     * New Alpine linux based Docker container
+    * Bluetooth 5 LE support
+    * Extended Certificates support with new APIs, Request Handlers and REST APIs
 
   * Features Preview
     * Web UI extendibility APIs and examples
@@ -133,7 +136,7 @@ Target Environments:
   * Kura is also available as a pre-built Docker container for Centos 7 and Alpine  
 
 
-Know Issues :
+Known Issues :
   * The implementation of the CryptoService performs encryption using a
     password that is hardcoded and published.
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.

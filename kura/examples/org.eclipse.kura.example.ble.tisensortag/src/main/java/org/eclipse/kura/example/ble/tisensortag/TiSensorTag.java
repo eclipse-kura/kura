@@ -148,7 +148,7 @@ public class TiSensorTag implements BluetoothLeNotificationListener {
         this.cc2650 = cc2650;
     }
 
-    public String getFirmareRevision() {
+    public String getFirmwareRevision() {
         return this.firmwareRevision;
     }
 

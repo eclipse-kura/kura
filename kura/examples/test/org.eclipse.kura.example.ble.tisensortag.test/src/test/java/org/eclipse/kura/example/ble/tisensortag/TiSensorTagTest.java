@@ -96,7 +96,7 @@ public class TiSensorTagTest {
         TiSensorTag tag = builder.build(true);
 
         assertFalse(tag.isCC2650());
-        assertEquals("1.4", tag.getFirmareRevision());
+        assertEquals("1.4", tag.getFirmwareRevision());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class TiSensorTagTest {
         TiSensorTag tag = builder.build(true);
 
         assertTrue(tag.isCC2650());
-        assertEquals("1.40", tag.getFirmareRevision());
+        assertEquals("1.40", tag.getFirmwareRevision());
         assertTrue(tag.isConnected());
     }
 
@@ -127,7 +127,7 @@ public class TiSensorTagTest {
 
         tag.setFirmwareRevision();
 
-        assertNull(tag.getFirmareRevision());
+        assertNull(tag.getFirmwareRevision());
     }
 
     @Test
@@ -242,8 +242,7 @@ public class TiSensorTagTest {
         TiSensorTagNotificationListener listener = mock(TiSensorTagNotificationListener.class);
 
         TiSensorTagBuilder builder = testWrite(true, TiSensorTagGatt.HANDLE_TEMP_SENSOR_NOTIFICATION_2650, "01:00",
-                "enableTemperatureNotifications",
-                listener);
+                "enableTemperatureNotifications", listener);
 
         TiSensorTag tag = builder.getTag();
 

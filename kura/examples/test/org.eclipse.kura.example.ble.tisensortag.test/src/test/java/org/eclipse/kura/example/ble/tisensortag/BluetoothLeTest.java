@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -144,6 +145,7 @@ public class BluetoothLeTest {
         tiSensorTagList.add(tistMock);
         when(tistMock.isConnected()).thenReturn(true);
         when(tistMock.isCC2650()).thenReturn(true);
+        when(tistMock.getFirmwareRevision()).thenReturn("1.2");
 
         tiSensorTagList.add(tistMock);
 
@@ -206,6 +208,91 @@ public class BluetoothLeTest {
     }
 
     @Test
+    public void testUpdateWithNewFirmwareRevision()
+            throws NoSuchFieldException, KuraException, InterruptedException, ExecutionException {
+        String interfaceName = "hci0";
+
+        BluetoothLe svc = new BluetoothLe();
+
+        BluetoothService bleMock = mock(BluetoothService.class);
+        BluetoothAdapter adapterMock = mock(BluetoothAdapter.class);
+        when(adapterMock.getAddress()).thenReturn("12:34:56:78:90:AB");
+        doAnswer(inv -> {
+            synchronized (adapterMock) {
+                adapterMock.notifyAll(); // stop waiting after connect is called in readSensorTags
+            }
+
+            return null;
+        }).when(adapterMock).startLeScan(svc);
+        when(bleMock.getBluetoothAdapter(interfaceName)).thenReturn(adapterMock);
+        svc.setBluetoothService(bleMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("iname", interfaceName);
+        properties.put("scan_enable", true);
+        properties.put("period", 4);
+        properties.put("scan_time", 2);
+        properties.put("publishTopic", "testTopic");
+        properties.put("discoverServicesAndCharacteristics", true);
+        properties.put("enableThermometer", true);
+        properties.put("enableAccelerometer", true);
+        properties.put("enableHygrometer", true);
+        properties.put("enableMagnetometer", true);
+        properties.put("enableBarometer", true);
+        properties.put("enableGyroscope", true);
+        properties.put("enableLuxometer", true);
+        properties.put("enableButtons", true);
+        properties.put("switchOnRedLed", true);
+        properties.put("switchOnGreenLed", true);
+        properties.put("switchOnBuzzer", true);
+
+        svc.activate(null, properties);
+
+        synchronized (adapterMock) {
+            adapterMock.wait(900); // wait < 1 s
+        }
+
+        assertNotNull(TestUtil.getFieldValue(svc, "worker"));
+        assertNotNull(TestUtil.getFieldValue(svc, "scanHandle"));
+        assertNotNull(TestUtil.getFieldValue(svc, "readHandle"));
+
+        List<TiSensorTag> tiSensorTagList = (List<TiSensorTag>) TestUtil.getFieldValue(svc, "tiSensorTagList");
+        assertNotNull(tiSensorTagList);
+        assertEquals(0, tiSensorTagList.size());
+
+        verify(adapterMock, times(1)).enable();
+
+        // test read sensors from TiSensorTag
+        TiSensorTag tistMock = mock(TiSensorTag.class);
+        tiSensorTagList.add(tistMock);
+        when(tistMock.isConnected()).thenReturn(true);
+        when(tistMock.isCC2650()).thenReturn(true);
+        when(tistMock.getFirmwareRevision()).thenReturn("1.5");
+
+        tiSensorTagList.add(tistMock);
+
+        BluetoothDevice bldMock = mock(BluetoothDevice.class);
+        when(bldMock.getAdress()).thenReturn("12:34:56:78:90:AC");
+        when(bldMock.getName()).thenReturn("CC2650 SensorTag");
+        when(tistMock.getBluetoothDevice()).thenReturn(bldMock);
+
+        Thread.sleep(13000);
+
+        verify(tistMock, never()).enableThermometer();
+        verify(tistMock, never()).enableAccelerometer("3802");
+        verify(tistMock, never()).enableLuxometer();
+        verify(tistMock, never()).enableHygrometer();
+        verify(tistMock, never()).enableMagnetometer("4000");
+        verify(tistMock, never()).enableBarometer();
+        verify(tistMock, never()).enableGyroscope("0700");
+        verify(tistMock, never()).enableKeysNotifications(svc);
+        verify(tistMock, never()).switchOnRedLed();
+        verify(tistMock, never()).switchOnGreenLed();
+        verify(tistMock, never()).switchOnBuzzer();
+        verify(tistMock, never()).enableIOService();
+    }
+
+    @Test
     public void testOnScanResults() throws Throwable {
         BluetoothLe svc = new BluetoothLe();
 
@@ -225,7 +312,7 @@ public class BluetoothLeTest {
         scanResults.add(bldMock);
         svc.onScanResults(scanResults);
 
-        assertTrue(tiSensorTagList.size() == 1);
+        assertEquals(1, tiSensorTagList.size());
     }
 
 }

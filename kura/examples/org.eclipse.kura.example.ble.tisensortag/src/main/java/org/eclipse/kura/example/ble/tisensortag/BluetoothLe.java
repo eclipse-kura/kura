@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -63,7 +64,9 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
     }
 
     public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
-        this.cloudPublisher = null;
+        if (this.cloudPublisher == cloudPublisher) {
+            this.cloudPublisher = null;
+        }
     }
 
     public void setBluetoothService(BluetoothService bluetoothService) {
@@ -71,7 +74,9 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
     }
 
     public void unsetBluetoothService(BluetoothService bluetoothService) {
-        this.bluetoothService = null;
+        if (this.bluetoothService == bluetoothService) {
+            this.bluetoothService = null;
+        }
     }
 
     // --------------------------------------------------------------------
@@ -269,103 +274,131 @@ public class BluetoothLe implements ConfigurableComponent, BluetoothLeScanListen
 
     private void readTiSensorTags() {
         // connect to TiSensorTags
-        for (TiSensorTag myTiSensorTag : this.tiSensorTagList) {
-            if (!myTiSensorTag.isConnected()) {
-                logger.info("Connecting to TiSensorTag {}...", myTiSensorTag.getBluetoothDevice().getAdress());
-                myTiSensorTag.connect(this.options.getIname());
-            }
+        this.tiSensorTagList.forEach(myTiSensorTag -> {
+            connect(myTiSensorTag);
 
             if (myTiSensorTag.isConnected()) {
-                KuraPayload payload = new KuraPayload();
-                payload.setTimestamp(new Date());
-                if (myTiSensorTag.isCC2650()) {
-                    payload.addMetric("Type", "CC2650");
-                } else {
-                    payload.addMetric("Type", "CC2541");
-                }
-
-                if (this.options.isEnableServicesDiscovery()) {
-                    doServicesDiscovery(myTiSensorTag);
-                    doCharacteristicsDiscovery(myTiSensorTag);
-                }
-
-                payload.addMetric("Firmware", myTiSensorTag.getFirmareRevision());
-
-                if (this.options.isEnableTemp()) {
-                    readTemperature(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnableAcc()) {
-                    readAcceleration(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnableHum()) {
-                    readHumidity(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnableMag()) {
-                    readMagneticField(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnablePres()) {
-                    readPressure(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnableGyro()) {
-                    readOrientation(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnableOpto()) {
-                    readLight(myTiSensorTag, payload);
-                }
-
-                if (this.options.isEnableButtons()) {
-                    // For buttons only enable notifications
-                    myTiSensorTag.enableKeysNotifications(this);
-                } else {
-                    myTiSensorTag.disableKeysNotifications();
-                }
-
-                if (this.options.isEnableRedLed()) {
-                    myTiSensorTag.switchOnRedLed();
-                } else {
-                    myTiSensorTag.switchOffRedLed();
-                }
-
-                if (this.options.isEnableGreenLed()) {
-                    myTiSensorTag.switchOnGreenLed();
-                } else {
-                    myTiSensorTag.switchOffGreenLed();
-                }
-
-                if (this.options.isEnableBuzzer()) {
-                    myTiSensorTag.switchOnBuzzer();
-                } else {
-                    myTiSensorTag.switchOffBuzzer();
-                }
-
-                myTiSensorTag.enableIOService();
-
-                // Publish only if there are metrics to be published!
-                if (!payload.metricNames().isEmpty() && this.cloudPublisher != null) {
-                    Map<String, Object> properties = new HashMap<>();
-                    properties.put(ADDRESS_MESSAGE_PROP_KEY, myTiSensorTag.getBluetoothDevice().getAdress());
-
-                    KuraMessage message = new KuraMessage(payload, properties);
-
-                    try {
-                        this.cloudPublisher.publish(message);
-                    } catch (KuraException e) {
-                        logger.error("Publish message failed", e);
+                Optional<Float> fwVersion = getFirmwareRevisionFloat(myTiSensorTag);
+                if (fwVersion.isPresent() && fwVersion.get() <= 1.2F) {
+                    KuraPayload payload = new KuraPayload();
+                    payload.setTimestamp(new Date());
+                    payload.addMetric("Firmware", myTiSensorTag.getFirmwareRevision());
+                    if (myTiSensorTag.isCC2650()) {
+                        payload.addMetric("Type", "CC2650");
+                    } else {
+                        payload.addMetric("Type", "CC2541");
                     }
-                }
+                    readServicesAndCharacteristics(myTiSensorTag);
+                    readSensors(myTiSensorTag, payload);
+                    myTiSensorTag.enableIOService();
 
+                    publishData(myTiSensorTag, payload);
+
+                } else {
+                    logger.warn("TI SensorTags with firmware version above 1.2 are not supported.");
+                }
             } else {
                 logger.warn("Cannot connect to TI SensorTag {}.", myTiSensorTag.getBluetoothDevice().getAdress());
             }
+        });
 
+    }
+
+    private void readServicesAndCharacteristics(TiSensorTag myTiSensorTag) {
+        if (this.options.isEnableServicesDiscovery()) {
+            doServicesDiscovery(myTiSensorTag);
+            doCharacteristicsDiscovery(myTiSensorTag);
+        }
+    }
+
+    private void publishData(TiSensorTag myTiSensorTag, KuraPayload payload) {
+        // Publish only if there are metrics to be published!
+        if (!payload.metricNames().isEmpty() && this.cloudPublisher != null) {
+            Map<String, Object> properties = new HashMap<>();
+            properties.put(ADDRESS_MESSAGE_PROP_KEY, myTiSensorTag.getBluetoothDevice().getAdress());
+
+            KuraMessage message = new KuraMessage(payload, properties);
+
+            try {
+                this.cloudPublisher.publish(message);
+            } catch (KuraException e) {
+                logger.error("Publish message failed", e);
+            }
+        }
+    }
+
+    private Optional<Float> getFirmwareRevisionFloat(TiSensorTag myTiSensorTag) {
+        Optional<Float> fwVersion = Optional.empty();
+        try {
+            fwVersion = Optional.of(Float.parseFloat(myTiSensorTag.getFirmwareRevision().substring(0, 3)));
+        } catch (NumberFormatException e) {
+            logger.warn(
+                    "Cannot read firmware version for TI SensorTag " + myTiSensorTag.getBluetoothDevice().getAdress(),
+                    e);
+        }
+        return fwVersion;
+    }
+
+    private void connect(TiSensorTag myTiSensorTag) {
+        if (!myTiSensorTag.isConnected()) {
+            logger.info("Connecting to TiSensorTag {}...", myTiSensorTag.getBluetoothDevice().getAdress());
+            myTiSensorTag.connect(this.options.getIname());
+        }
+    }
+
+    private void readSensors(TiSensorTag myTiSensorTag, KuraPayload payload) {
+        if (this.options.isEnableTemp()) {
+            readTemperature(myTiSensorTag, payload);
         }
 
+        if (this.options.isEnableAcc()) {
+            readAcceleration(myTiSensorTag, payload);
+        }
+
+        if (this.options.isEnableHum()) {
+            readHumidity(myTiSensorTag, payload);
+        }
+
+        if (this.options.isEnableMag()) {
+            readMagneticField(myTiSensorTag, payload);
+        }
+
+        if (this.options.isEnablePres()) {
+            readPressure(myTiSensorTag, payload);
+        }
+
+        if (this.options.isEnableGyro()) {
+            readOrientation(myTiSensorTag, payload);
+        }
+
+        if (this.options.isEnableOpto()) {
+            readLight(myTiSensorTag, payload);
+        }
+
+        if (this.options.isEnableButtons()) {
+            // For buttons only enable notifications
+            myTiSensorTag.enableKeysNotifications(this);
+        } else {
+            myTiSensorTag.disableKeysNotifications();
+        }
+
+        if (this.options.isEnableRedLed()) {
+            myTiSensorTag.switchOnRedLed();
+        } else {
+            myTiSensorTag.switchOffRedLed();
+        }
+
+        if (this.options.isEnableGreenLed()) {
+            myTiSensorTag.switchOnGreenLed();
+        } else {
+            myTiSensorTag.switchOffGreenLed();
+        }
+
+        if (this.options.isEnableBuzzer()) {
+            myTiSensorTag.switchOnBuzzer();
+        } else {
+            myTiSensorTag.switchOffBuzzer();
+        }
     }
 
     private void readLight(TiSensorTag myTiSensorTag, KuraPayload payload) {

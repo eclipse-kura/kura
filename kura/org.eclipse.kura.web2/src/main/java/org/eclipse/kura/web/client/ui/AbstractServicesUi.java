@@ -407,7 +407,7 @@ public abstract class AbstractServicesUi extends Composite {
             public List<EditorError> validate(Editor editor, Object value) {
 
                 List<EditorError> result = new ArrayList<>();
-                if ((input.getText() == null || "".equals(input.getText().trim())) && param.isRequired()) {
+                if ((input.getText() == null || "".equals(input.getText())) && param.isRequired()) {
                     // null in required field
                     result.add(new BasicEditorError(input, input.getText(), MSGS.formRequiredParameter()));
                     AbstractServicesUi.this.valid.put(param.getId(), false);

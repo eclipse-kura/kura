@@ -54,9 +54,7 @@ public final class ValidationUtil {
             }
         }
 
-        String trimmedValue = value.trim();
-
-        if (param.isRequired() && trimmedValue.isEmpty()) {
+        if (param.isRequired() && value.isEmpty()) {
             consumer.addError(MSGS.formRequiredParameter());
             return;
         }
@@ -64,31 +62,31 @@ public final class ValidationUtil {
         try {
             switch (param.getType()) {
             case BOOLEAN:
-                validateBoolean(trimmedValue, param, consumer);
+                validateBoolean(value, param, consumer);
                 break;
             case CHAR:
-                validateChar(trimmedValue, param, consumer);
+                validateChar(value, param, consumer);
                 break;
             case STRING:
-                validateString(trimmedValue, param, consumer);
+                validateString(value, param, consumer);
                 break;
             case FLOAT:
-                validateFloat(trimmedValue, param, consumer);
+                validateFloat(value, param, consumer);
                 break;
             case INTEGER:
-                validateInteger(trimmedValue, param, consumer);
+                validateInteger(value, param, consumer);
                 break;
             case SHORT:
-                validateShort(trimmedValue, param, consumer);
+                validateShort(value, param, consumer);
                 break;
             case BYTE:
-                validateByte(trimmedValue, param, consumer);
+                validateByte(value, param, consumer);
                 break;
             case LONG:
-                validateLong(trimmedValue, param, consumer);
+                validateLong(value, param, consumer);
                 break;
             case DOUBLE:
-                validateDouble(trimmedValue, param, consumer);
+                validateDouble(value, param, consumer);
                 break;
             case PASSWORD:
                 break;
@@ -97,7 +95,7 @@ public final class ValidationUtil {
                 break;
             }
         } catch (NumberFormatException e) {
-            consumer.addError(MessageUtils.get(INVALID_VALUE, trimmedValue));
+            consumer.addError(MessageUtils.get(INVALID_VALUE, value));
         }
 
     }

@@ -12,7 +12,7 @@ ARG PACKED=false
 
 ENV \
   GIT_REPO=${GIT_REPO:-https://github.com/eclipse/kura.git} \
-  GIT_BRANCH=${GIT_BRANCH:-develop} \
+  GIT_BRANCH=${GIT_BRANCH:-release-5.0.0} \
   JAVA_HOME=/usr/lib/jvm/default-jvm \
   MAVEN_PROPS=-DskipTests \
   KURA_DIR=/opt/eclipse/kura \

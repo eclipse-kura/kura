@@ -97,6 +97,8 @@ cp ${INSTALL_DIR}/kura/install/usr.sbin.named /etc/apparmor.d/
 if [ ! -f "/etc/bind/rndc.key" ] ; then
     rndc-confgen -r /dev/urandom -a
 fi
+chown bind:bind /etc/bind/rndc.key
+chmod 600 /etc/bind/rndc.key
 
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf

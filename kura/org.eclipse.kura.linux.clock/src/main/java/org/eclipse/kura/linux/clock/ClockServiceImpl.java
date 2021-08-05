@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -34,19 +34,14 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     private static final ClockEvent EMPTY_EVENT = new ClockEvent(Collections.<String, Object>emptyMap());
 
-    private static final String PROP_CLOCK_PROVIDER = "clock.provider";
-    private static final String PROP_CLOCK_SET_HWCLOCK = "clock.set.hwclock";
-    private static final String PROP_RTC_FILENAME = "rtc.filename";
-    private static final String PROP_ENABLED = "enabled";
-
     private static final Logger logger = LoggerFactory.getLogger(ClockServiceImpl.class);
 
     private EventAdmin eventAdmin;
     private CommandExecutorService executorService;
     private CryptoService cryptoService;
-    private Map<String, Object> properties;
     private ClockSyncProvider provider;
-    private boolean configEnabled;
+
+    private ClockServiceConfig clockServiceConfig;
 
     // ----------------------------------------------------------------
     //
@@ -82,23 +77,17 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     protected void activate(Map<String, Object> properties) {
         // save the properties
-        this.properties = properties;
+        this.clockServiceConfig = new ClockServiceConfig(properties);
 
         logger.info("Activate. Current Time: {}", new Date());
 
-        try {
-            if (this.properties.get(PROP_ENABLED) != null) {
-                this.configEnabled = (Boolean) this.properties.get(PROP_ENABLED);
-            } else {
-                this.configEnabled = false;
-            }
-
-            if (this.configEnabled) {
-                // start the provider
+        if (this.clockServiceConfig.isEnabled()) {
+            // start the provider
+            try {
                 startClockSyncProvider();
+            } catch (Throwable t) {
+                logger.error("Error updating ClockService Configuration", t);
             }
-        } catch (Throwable t) {
-            logger.error("Error updating ClockService Configuration", t);
         }
     }
 
@@ -114,30 +103,27 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     public void updated(Map<String, Object> properties) {
         logger.info("Updated...");
 
-        try {
-            // save the properties
-            this.properties = properties;
+        // save the properties
+        ClockServiceConfig newClockServiceConfig = new ClockServiceConfig(properties);
+        if (newClockServiceConfig.equals(this.clockServiceConfig)) {
+            return;
+        }
+        this.clockServiceConfig = newClockServiceConfig;
 
-            if (this.properties.get(PROP_ENABLED) != null) {
-                this.configEnabled = (Boolean) this.properties.get(PROP_ENABLED);
-            } else {
-                this.configEnabled = false;
-                return;
-            }
-
-            if (this.configEnabled) {
+        if (this.clockServiceConfig.isEnabled()) {
+            try {
                 // start the provider
                 startClockSyncProvider();
-            } else {
-                // stop the provider if it was running
-                try {
-                    stopClockSyncProvider();
-                } catch (Throwable t) {
-                    logger.error("Error deactivate ClockService", t);
-                }
+            } catch (Throwable t) {
+                logger.error("Error updating ClockService Configuration", t);
             }
-        } catch (Throwable t) {
-            logger.error("Error updating ClockService Configuration", t);
+        } else {
+            // stop the provider if it was running
+            try {
+                stopClockSyncProvider();
+            } catch (Throwable t) {
+                logger.error("Error deactivate ClockService", t);
+            }
         }
     }
 
@@ -164,7 +150,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
 
     private void startClockSyncProvider() throws KuraException {
         stopClockSyncProvider();
-        String sprovider = (String) this.properties.get(PROP_CLOCK_PROVIDER);
+        String sprovider = this.clockServiceConfig.getClockProvider();
 
         switch (ClockProviderType.fromValue(sprovider)) {
         case JAVA_NTP:
@@ -181,10 +167,8 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
         }
 
-        if (this.provider != null) {
-            this.provider.init(this.properties, this);
-            this.provider.start();
-        }
+        this.provider.init(this.clockServiceConfig, this);
+        this.provider.start();
     }
 
     private void stopClockSyncProvider() throws KuraException {
@@ -221,16 +205,9 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             bClockUpToDate = true;
         }
 
-        // set hardware clock
-        boolean updateHwClock = false;
-        if (this.properties.containsKey(PROP_CLOCK_SET_HWCLOCK)) {
-            updateHwClock = (Boolean) this.properties.get(PROP_CLOCK_SET_HWCLOCK);
-        }
-
-        String path = (String) this.properties.getOrDefault(PROP_RTC_FILENAME, "/dev/rtc0");
-
-        if (updateHwClock && changeSystemClock) {
-            Command command = new Command(new String[] { "hwclock", "--utc", "--systohc", "-f", path });
+        if (this.clockServiceConfig.isHwclockEnabled() && changeSystemClock) {
+            Command command = new Command(
+                    new String[] { "hwclock", "--utc", "--systohc", "-f", this.clockServiceConfig.getRtcFilename() });
             command.setTimeout(60);
             CommandStatus status = this.executorService.execute(command);
             if (status.getExitStatus().isSuccessful()) {

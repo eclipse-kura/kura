@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,13 +13,12 @@
 package org.eclipse.kura.linux.clock;
 
 import java.util.Date;
-import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 
 public interface ClockSyncProvider {
 
-    public void init(Map<String, Object> properties, ClockSyncListener listener) throws KuraException;
+    public void init(ClockServiceConfig clockServiceConfig, ClockSyncListener listener) throws KuraException;
 
     public void start() throws KuraException;
 

@@ -23,7 +23,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +48,6 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     private final CommandExecutorService executorService;
     private ScheduledExecutorService schedulerExecutor;
 
-    private Map<String, Object> properties;
     private ClockSyncListener listener;
 
     private String chronyConfig;
@@ -71,13 +69,12 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     }
 
     @Override
-    public void init(Map<String, Object> properties, ClockSyncListener listener) throws KuraException {
-        this.properties = properties;
+    public void init(ClockServiceConfig clockServiceConfig, ClockSyncListener listener) throws KuraException {
         this.listener = listener;
 
         this.gson = new Gson();
+        this.chronyConfig = clockServiceConfig.getChronyAdvancedConfig();
 
-        readProperties();
         writeConfiguration();
     }
 
@@ -247,14 +244,6 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         CommandStatus chronyStatus = this.executorService.execute(startChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
-    }
-
-    private void readProperties() {
-        this.chronyConfig = (String) this.properties.get("chrony.advanced.config");
-        if (this.chronyConfig == null || this.chronyConfig.isEmpty()) {
-            logger.info("No Chrony configuration provided. Using system configuration.");
-        }
-
     }
 
     private class JournalChronyEntry {

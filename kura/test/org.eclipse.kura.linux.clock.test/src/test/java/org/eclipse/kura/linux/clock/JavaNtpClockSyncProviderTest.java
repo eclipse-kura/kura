@@ -74,8 +74,10 @@ public class JavaNtpClockSyncProviderTest {
         properties.put("clock.ntp.retry.interval", 1);
         properties.put("clock.ntp.refresh-interval", 1);
         properties.put("clock.ntp.max-retry", 1);
+        
+        ClockServiceConfig clockServiceConfig = new ClockServiceConfig(properties);
 
-        provider.init(properties, null);
+        provider.init(clockServiceConfig, null);
     }
 
     @Test

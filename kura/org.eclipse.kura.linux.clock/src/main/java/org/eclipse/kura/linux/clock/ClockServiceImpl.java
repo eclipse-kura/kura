@@ -16,6 +16,9 @@ package org.eclipse.kura.linux.clock;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -42,6 +45,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     private ClockSyncProvider provider;
 
     private ClockServiceConfig clockServiceConfig;
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     // ----------------------------------------------------------------
     //
@@ -76,16 +80,16 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
     // ----------------------------------------------------------------
 
     protected void activate(Map<String, Object> properties) {
+        logger.info("Activate. Current Time: {}", new Date());
+
         // save the properties
         this.clockServiceConfig = new ClockServiceConfig(properties);
-
-        logger.info("Activate. Current Time: {}", new Date());
 
         if (this.clockServiceConfig.isEnabled()) {
             // start the provider
             try {
                 startClockSyncProvider();
-            } catch (Throwable t) {
+            } catch (KuraException t) {
                 logger.error("Error updating ClockService Configuration", t);
             }
         }
@@ -95,8 +99,18 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         logger.info("Deactivate...");
         try {
             stopClockSyncProvider();
-        } catch (Throwable t) {
-            logger.error("Error deactivate ClockService", t);
+        } catch (KuraException t) {
+            logger.error("Error deactivating ClockSyncProvider", t);
+        }
+        this.scheduler.shutdown();
+        try {
+            if (!this.scheduler.awaitTermination(1, TimeUnit.SECONDS)) {
+                this.scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            logger.warn("Interrupted clock service scheduler shutdown!", e);
+            this.scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -108,20 +122,21 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
         if (newClockServiceConfig.equals(this.clockServiceConfig)) {
             return;
         }
+        logger.info("New configuration for Clock Service");
         this.clockServiceConfig = newClockServiceConfig;
 
         if (this.clockServiceConfig.isEnabled()) {
             try {
                 // start the provider
                 startClockSyncProvider();
-            } catch (Throwable t) {
+            } catch (KuraException t) {
                 logger.error("Error updating ClockService Configuration", t);
             }
         } else {
             // stop the provider if it was running
             try {
                 stopClockSyncProvider();
-            } catch (Throwable t) {
+            } catch (KuraException t) {
                 logger.error("Error deactivate ClockService", t);
             }
         }
@@ -167,7 +182,7 @@ public class ClockServiceImpl implements ConfigurableComponent, ClockService, Cl
             throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
         }
 
-        this.provider.init(this.clockServiceConfig, this);
+        this.provider.init(this.clockServiceConfig, this.scheduler, this);
         this.provider.start();
     }
 

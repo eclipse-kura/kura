@@ -18,6 +18,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -76,8 +78,9 @@ public class JavaNtpClockSyncProviderTest {
         properties.put("clock.ntp.max-retry", 1);
         
         ClockServiceConfig clockServiceConfig = new ClockServiceConfig(properties);
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        provider.init(clockServiceConfig, null);
+        provider.init(clockServiceConfig, scheduler, null);
     }
 
     @Test

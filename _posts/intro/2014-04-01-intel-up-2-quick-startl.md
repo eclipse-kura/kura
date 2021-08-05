@@ -6,8 +6,6 @@ categories: [intro]
 
 [Overview](#overview)
 
-[Enable SSH Access](#enable-ssh-access)
-
 [Eclipse Kura&trade; Installation](#eclipse-kuratrade-installation)
 
 [Development Environment Installation](#development-environment-installation)
@@ -48,9 +46,21 @@ following steps:
 
 3. Assign a static ip to the primary ethernet network interface:
    
-   <pre></pre>
+   <pre>nano /etc/netplan/00-installer-config.yaml
    
-5. Make sure that Java 8 is installed with
+   network:
+     ethernets:
+       enp2s0:
+         dhcp4: no
+         addresses:
+           - 172.16.0.1/24
+       enp3s0:
+         dhcp4: true
+     version: 2
+   
+   </pre>
+   
+4. Make sure that Java 8 is installed with
 
     <pre>java -version</pre>
 
@@ -58,23 +68,23 @@ following steps:
 
     <pre>sudo apt-get install openjdk-8-jre-headless</pre>
 
-6. Download the Kura package with:
+5. Download the Kura package with:
 
     <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_intel-up2-ubuntu-18_installer.deb</pre>
 
     Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 5.0.0).
 
-8. Install Kura with: 
+6. Install Kura with: 
 
     <pre>apt install kura_&lt;version&gt;_intel-up2-ubuntu-18_installer.deb</pre>
 
-10. Reboot the Intel Up² with:
+7. Reboot the Intel Up² with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-11. Kura setups a local web ui that is available using a browser via:
+8. Kura setups a local web ui that is available using a browser via:
 
       <pre>https://&lt;device-ip&gt;</pre>
 

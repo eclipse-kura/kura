@@ -23,9 +23,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -48,8 +47,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     private final CommandExecutorService executorService;
     private ScheduledExecutorService schedulerExecutor;
+    private ScheduledFuture<?> future;
 
-    private Map<String, Object> properties;
     private ClockSyncListener listener;
 
     private String chronyConfig;
@@ -71,13 +70,14 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     }
 
     @Override
-    public void init(Map<String, Object> properties, ClockSyncListener listener) throws KuraException {
-        this.properties = properties;
+    public void init(ClockServiceConfig clockServiceConfig, ScheduledExecutorService scheduler,
+            ClockSyncListener listener) throws KuraException {
         this.listener = listener;
+        this.schedulerExecutor = scheduler;
 
         this.gson = new Gson();
+        this.chronyConfig = clockServiceConfig.getChronyAdvancedConfig();
 
-        readProperties();
         writeConfiguration();
     }
 
@@ -144,9 +144,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
             logger.info("Clock not synced");
         }
 
-        this.schedulerExecutor = Executors.newSingleThreadScheduledExecutor();
-
-        this.schedulerExecutor.scheduleAtFixedRate(this::readAndUpdateSyncInfo, 0, 60, TimeUnit.SECONDS);
+        this.future = this.schedulerExecutor.scheduleAtFixedRate(this::readAndUpdateSyncInfo, 0, 60, TimeUnit.SECONDS);
 
     }
 
@@ -179,10 +177,11 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         journalClockUpdateRead.setErrorStream(new ByteArrayOutputStream());
         journalClockUpdateRead.setOutputStream(new ByteArrayOutputStream());
         CommandStatus journalClockUpdateReadStatus = this.executorService.execute(journalClockUpdateRead);
-        ByteArrayOutputStream journalClockUpdateReadStatusStream = (ByteArrayOutputStream) journalClockUpdateReadStatus
-                .getOutputStream();
 
-        if (journalClockUpdateReadStatus.getExitStatus().isSuccessful()) {
+        if (journalClockUpdateReadStatus.getExitStatus().isSuccessful()
+                && journalClockUpdateReadStatus.getOutputStream() instanceof ByteArrayOutputStream) {
+            ByteArrayOutputStream journalClockUpdateReadStatusStream = (ByteArrayOutputStream) journalClockUpdateReadStatus
+                    .getOutputStream();
 
             if (journalClockUpdateReadStatusStream.size() > 0) {
 
@@ -221,9 +220,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
             logger.warn("Unable to stop chronyd");
         }
 
-        if (this.schedulerExecutor != null) {
-            this.schedulerExecutor.shutdown();
-            this.schedulerExecutor = null;
+        if (this.future != null) {
+            this.future.cancel(true);
         }
     }
 
@@ -247,14 +245,6 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         CommandStatus chronyStatus = this.executorService.execute(startChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
-    }
-
-    private void readProperties() {
-        this.chronyConfig = (String) this.properties.get("chrony.advanced.config");
-        if (this.chronyConfig == null || this.chronyConfig.isEmpty()) {
-            logger.info("No Chrony configuration provided. Using system configuration.");
-        }
-
     }
 
     private class JournalChronyEntry {

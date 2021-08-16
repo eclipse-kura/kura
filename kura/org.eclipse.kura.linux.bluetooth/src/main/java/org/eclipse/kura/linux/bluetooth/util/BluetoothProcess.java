@@ -88,21 +88,13 @@ public class BluetoothProcess {
         // process the input stream
         this.futureInputGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess Input Stream Gobbler");
-            try {
-                readInputStreamFully(this.readOutputStream, listener);
-            } catch (IOException e) {
-                logger.warn(INPUT_STREAM_MESSAGE, e);
-            }
+            readInputStreamFully(this.readOutputStream, listener);
         });
 
         // process the error stream
         this.futureErrorGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess ErrorStream Gobbler");
-            try {
-                readErrorStreamFully(this.readErrorStream, listener);
-            } catch (IOException e) {
-                logger.warn(ERROR_STREAM_MESSAGE, e);
-            }
+            readErrorStreamFully(this.readErrorStream, listener);
         });
     }
 
@@ -124,21 +116,13 @@ public class BluetoothProcess {
 
         this.futureInputGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess BTSnoop Gobbler");
-            try {
-                readBTSnoopStreamFully(this.readOutputStream, listener);
-            } catch (IOException e) {
-                logger.warn(ERROR_STREAM_MESSAGE, e);
-            }
+            readBTSnoopStreamFully(this.readOutputStream, listener);
         });
 
         // process the error stream
         this.futureErrorGobbler = STREAM_GOBBLERS.submit(() -> {
             Thread.currentThread().setName("BluetoothProcess BTSnoop ErrorStream Gobbler");
-            try {
-                readBTErrorStreamFully(this.readErrorStream, listener);
-            } catch (IOException e) {
-                logger.warn(ERROR_STREAM_MESSAGE, e);
-            }
+            readBTErrorStreamFully(this.readErrorStream, listener);
         });
 
     }
@@ -152,68 +136,79 @@ public class BluetoothProcess {
         closeStreams();
     }
 
-    private void readInputStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
+    private void readInputStreamFully(InputStream is, BluetoothProcessListener listener) {
         int ch;
         String line;
 
         if (listener instanceof BluetoothGatt) {
-            BufferedReader br = null;
-            br = new BufferedReader(new InputStreamReader(is));
-            while ((ch = br.read()) != -1) {
-                listener.processInputStream((char) ch);
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+                while ((ch = br.read()) != -1) {
+                    listener.processInputStream((char) ch);
+                }
+            } catch (IOException e) {
+                logger.warn(INPUT_STREAM_MESSAGE, e);
             }
             logger.debug(END_OF_STREAM_MESSAGE);
         } else {
             StringBuilder stringBuilder = new StringBuilder();
 
-            BufferedReader br = null;
-            br = new BufferedReader(new InputStreamReader(is));
-
-            while ((line = br.readLine()) != null) {
-                stringBuilder.append(line + "\n");
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+                while ((line = br.readLine()) != null) {
+                    stringBuilder.append(line + "\n");
+                }
+            } catch (IOException e) {
+                logger.warn(INPUT_STREAM_MESSAGE, e);
             }
             listener.processInputStream(stringBuilder.toString());
             logger.debug(END_OF_STREAM_MESSAGE);
         }
     }
 
-    private void readBTSnoopStreamFully(InputStream is, BTSnoopListener listener) throws IOException {
+    private void readBTSnoopStreamFully(InputStream is, BTSnoopListener listener) {
 
         this.parser.setInputStream(is);
 
-        while (this.btSnoopReady) {
-            if (is != null) {
-                byte[] packet = this.parser.readRecord();
-                listener.processBTSnoopRecord(packet);
+        try {
+            while (this.btSnoopReady) {
+                if (is != null) {
+                    byte[] packet = this.parser.readRecord();
+                    listener.processBTSnoopRecord(packet);
+                }
             }
+        } catch (IOException e) {
+            logger.warn(INPUT_STREAM_MESSAGE, e);
         }
 
         logger.debug(END_OF_STREAM_MESSAGE);
     }
 
-    private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener) throws IOException {
+    private void readErrorStreamFully(InputStream is, BluetoothProcessListener listener) {
         int ch;
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        BufferedReader br = null;
-        br = new BufferedReader(new InputStreamReader(is));
-        while ((ch = br.read()) != -1) {
-            stringBuilder.append((char) ch);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+            while ((ch = br.read()) != -1) {
+                stringBuilder.append((char) ch);
+            }
+        } catch (IOException e) {
+            logger.warn(ERROR_STREAM_MESSAGE, e);
         }
         listener.processErrorStream(stringBuilder.toString());
         logger.debug(END_OF_STREAM_MESSAGE);
     }
 
-    private void readBTErrorStreamFully(InputStream is, BTSnoopListener listener) throws IOException {
+    private void readBTErrorStreamFully(InputStream is, BTSnoopListener listener) {
         int ch;
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        BufferedReader br = null;
-        br = new BufferedReader(new InputStreamReader(is));
-        while ((ch = br.read()) != -1) {
-            stringBuilder.append((char) ch);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
+            while ((ch = br.read()) != -1) {
+                stringBuilder.append((char) ch);
+            }
+        } catch (IOException e) {
+            logger.warn(ERROR_STREAM_MESSAGE, e);
         }
         listener.processErrorStream(stringBuilder.toString());
         logger.debug(END_OF_STREAM_MESSAGE);
@@ -226,10 +221,10 @@ public class BluetoothProcess {
         closeQuietly(this.readOutputStream);
         closeQuietly(this.readErrorStream);
         if (this.futureInputGobbler != null) {
-            this.futureInputGobbler.cancel(true);
+            logger.info("Is futureInputGobbler closed? " + this.futureInputGobbler.cancel(true));
         }
         if (this.futureErrorGobbler != null) {
-            this.futureErrorGobbler.cancel(true);
+            logger.info("Is futureErrorGobbler closed? " + this.futureErrorGobbler.cancel(true));
         }
     }
 

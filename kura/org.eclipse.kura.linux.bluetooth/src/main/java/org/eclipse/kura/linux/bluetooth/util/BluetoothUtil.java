@@ -504,7 +504,7 @@ public class BluetoothUtil {
         killCommand.add(HCITOOL);
         killCommand.add("-i");
         killCommand.add(interfaceName);
-        Arrays.asList(params).stream().forEach(s -> killCommand.add(s));
+        Arrays.asList(params).stream().forEach(killCommand::add);
         return executorService.kill(killCommand.toArray(new String[0]), LinuxSignal.SIGINT);
     }
 

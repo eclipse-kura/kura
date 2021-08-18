@@ -143,10 +143,10 @@ public class ExecutorUtil {
         String pidString = ((Integer) pid.getPid()).toString();
         String psCommand = "ps -p " + pidString;
         CommandLine commandLine = CommandLine.parse(psCommand);
-        DefaultExecutor executor = new DefaultExecutor();
+        Executor executor = getExecutor();
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ByteArrayOutputStream err = new ByteArrayOutputStream();
+        final ByteArrayOutputStream out = createStream();
+        final ByteArrayOutputStream err = createStream();
         final PumpStreamHandler handler = new PumpStreamHandler(out, err);
 
         executor.setStreamHandler(handler);
@@ -172,10 +172,10 @@ public class ExecutorUtil {
         Map<String, Pid> pids = new HashMap<>();
         CommandLine psCommandLine = new CommandLine("ps");
         psCommandLine.addArgument("-ax");
-        DefaultExecutor executor = new DefaultExecutor();
+        Executor executor = getExecutor();
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ByteArrayOutputStream err = new ByteArrayOutputStream();
+        final ByteArrayOutputStream out = createStream();
+        final ByteArrayOutputStream err = createStream();
         final PumpStreamHandler handler = new PumpStreamHandler(out, err);
 
         executor.setStreamHandler(handler);
@@ -379,5 +379,9 @@ public class ExecutorUtil {
             }
         }
         return commandLine;
+    }
+
+    protected ByteArrayOutputStream createStream() {
+        return new ByteArrayOutputStream();
     }
 }

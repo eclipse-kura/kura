@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
 package org.eclipse.kura.core.linux.executor;
 
 import static org.junit.Assert.assertFalse;
@@ -9,8 +21,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
-import org.eclipse.kura.core.linux.executor.LinuxPid;
-import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.core.linux.executor.privileged.PrivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.linux.executor.unprivileged.UnprivilegedExecutorServiceImpl;
 import org.eclipse.kura.core.testutil.TestUtil;

@@ -66,6 +66,7 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     public void execute(Command command, Consumer<CommandStatus> callback) {
         if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
             callback.accept(buildErrorStatus(command));
+            return;
         }
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);

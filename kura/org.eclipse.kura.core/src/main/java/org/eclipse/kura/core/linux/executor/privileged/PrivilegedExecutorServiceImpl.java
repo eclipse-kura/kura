@@ -40,13 +40,13 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
 
-    protected void activate(ComponentContext componentContext) {
+    public void activate(ComponentContext componentContext) {
         logger.info("activate...");
         this.ctx = componentContext;
         this.executorUtil = new ExecutorUtil();
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    public void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.ctx = null;
     }

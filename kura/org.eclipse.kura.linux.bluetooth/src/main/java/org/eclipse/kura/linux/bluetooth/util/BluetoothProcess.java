@@ -225,8 +225,6 @@ public class BluetoothProcess {
         closeQuietly(this.errorStream);
         closeQuietly(this.readOutputStream);
         closeQuietly(this.readErrorStream);
-        closeQuietly(inputStream);
-        closeQuietly(writeInputStream);
         if (this.futureInputGobbler != null) {
             this.futureInputGobbler.cancel(true);
         }

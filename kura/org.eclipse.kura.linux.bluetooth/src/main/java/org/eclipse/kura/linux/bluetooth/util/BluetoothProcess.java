@@ -220,11 +220,13 @@ public class BluetoothProcess {
         closeQuietly(this.errorStream);
         closeQuietly(this.readOutputStream);
         closeQuietly(this.readErrorStream);
+        closeQuietly(this.inputStream);
+        closeQuietly(this.writeInputStream);
         if (this.futureInputGobbler != null) {
-            logger.info("Is futureInputGobbler closed? " + this.futureInputGobbler.cancel(true));
+            this.futureInputGobbler.cancel(true);
         }
         if (this.futureErrorGobbler != null) {
-            logger.info("Is futureErrorGobbler closed? " + this.futureErrorGobbler.cancel(true));
+            this.futureErrorGobbler.cancel(true);
         }
     }
 

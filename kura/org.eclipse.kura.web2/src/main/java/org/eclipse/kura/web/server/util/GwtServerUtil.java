@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -123,82 +124,85 @@ public final class GwtServerUtil {
     public static Object[] getObjectValues(GwtConfigParameter param, String[] defaultValues) {
         final List<Object> values = new ArrayList<>();
         final GwtConfigParameterType type = param.getType();
+
+        List<String> trimmedValues = Stream.of(defaultValues).map(String::trim).collect(Collectors.toList());
+
         switch (type) {
         case BOOLEAN:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Boolean.valueOf(value));
                 }
             }
             return values.toArray(new Boolean[] {});
 
         case BYTE:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Byte.valueOf(value));
                 }
             }
             return values.toArray(new Byte[] {});
 
         case CHAR:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(new Character(value.charAt(0)));
                 }
             }
             return values.toArray(new Character[] {});
 
         case DOUBLE:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Double.valueOf(value));
                 }
             }
             return values.toArray(new Double[] {});
 
         case FLOAT:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Float.valueOf(value));
                 }
             }
             return values.toArray(new Float[] {});
 
         case INTEGER:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Integer.valueOf(value));
                 }
             }
             return values.toArray(new Integer[] {});
 
         case LONG:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Long.valueOf(value));
                 }
             }
             return values.toArray(new Long[] {});
 
         case SHORT:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(Short.valueOf(value));
                 }
             }
             return values.toArray(new Short[] {});
 
         case PASSWORD:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(new Password(value));
                 }
             }
             return values.toArray(new Password[] {});
 
         case STRING:
-            for (String value : defaultValues) {
-                if (!value.trim().isEmpty()) {
+            for (String value : trimmedValues) {
+                if (!value.isEmpty()) {
                     values.add(value);
                 }
             }

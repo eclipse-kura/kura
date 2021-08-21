@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -504,7 +504,7 @@ public class BluetoothUtil {
         killCommand.add(HCITOOL);
         killCommand.add("-i");
         killCommand.add(interfaceName);
-        Arrays.asList(params).stream().forEach(s -> killCommand.add(s));
+        Arrays.asList(params).stream().forEach(killCommand::add);
         return executorService.kill(killCommand.toArray(new String[0]), LinuxSignal.SIGINT);
     }
 

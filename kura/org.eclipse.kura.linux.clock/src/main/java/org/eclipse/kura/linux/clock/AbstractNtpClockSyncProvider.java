@@ -13,21 +13,18 @@
 package org.eclipse.kura.linux.clock;
 
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(AbstractNtpClockSyncProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractNtpClockSyncProvider.class);
 
-    protected Map<String, Object> properties;
     protected ClockSyncListener listener;
 
     protected String ntpHost;
@@ -42,12 +39,19 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
     protected boolean isSynced;
     protected int syncCount;
 
-    @Override
-    public void init(Map<String, Object> properties, ClockSyncListener listener) throws KuraException {
-        this.properties = properties;
-        this.listener = listener;
+    private ScheduledFuture<?> future;
 
-        readProperties();
+    @Override
+    public void init(ClockServiceConfig clockServiceConfig, ScheduledExecutorService scheduler,
+            ClockSyncListener listener) throws KuraException {
+        this.scheduler = scheduler;
+        this.listener = listener;
+        this.ntpHost = clockServiceConfig.getNtpHost();
+        this.ntpPort = clockServiceConfig.getNtpPort();
+        this.ntpTimeout = clockServiceConfig.getNtpTimeout();
+        this.retryInterval = clockServiceConfig.getNtpRetryInterval();
+        this.refreshInterval = clockServiceConfig.getNtpRefreshInterval();
+        this.maxRetry = clockServiceConfig.getNtpMaxRetries();
     }
 
     @Override
@@ -56,19 +60,12 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
         this.numRetry = 0;
         if (this.refreshInterval < 0) {
             // Never do any update. So Nothing to do.
-            s_logger.info("No clock update required");
-            if (this.scheduler != null) {
-                this.scheduler.shutdown();
-                this.scheduler = null;
-            }
+            logger.info("No clock update required");
+            stop();
         } else if (this.refreshInterval == 0) {
             // Perform one clock update - but in a thread.
-            s_logger.info("Perform clock update just once");
-            if (this.scheduler != null) {
-                this.scheduler.shutdown();
-                this.scheduler = null;
-            }
-            this.scheduler = Executors.newSingleThreadScheduledExecutor();
+            logger.info("Perform clock update just once");
+            stop();
 
             // call recursive retry method for setting the clock
             scheduleOnce();
@@ -80,38 +77,33 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
                 retryInt = this.retryInterval;
             }
             // Perform periodic clock updates.
-            s_logger.info("Perform periodic clock updates every {} sec", this.refreshInterval);
-            if (this.scheduler != null) {
-                this.scheduler.shutdown();
-                this.scheduler = null;
-            }
-            this.scheduler = Executors.newSingleThreadScheduledExecutor();
-            this.scheduler.scheduleAtFixedRate(() -> {
+            logger.info("Perform periodic clock updates every {} sec", this.refreshInterval);
+            stop();
+
+            this.future = this.scheduler.scheduleAtFixedRate(() -> {
                 Thread.currentThread().setName("AbstractNtpClockSyncProvider:schedule");
                 if (!AbstractNtpClockSyncProvider.this.isSynced) {
                     AbstractNtpClockSyncProvider.this.syncCount = 0;
                     try {
-                        s_logger.info("Try to sync clock ({})", AbstractNtpClockSyncProvider.this.numRetry);
+                        logger.info("Try to sync clock ({})", AbstractNtpClockSyncProvider.this.numRetry);
                         if (syncClock()) {
-                            s_logger.info("Clock synced");
+                            logger.info("Clock synced");
                             AbstractNtpClockSyncProvider.this.isSynced = true;
                             AbstractNtpClockSyncProvider.this.numRetry = 0;
                         } else {
                             AbstractNtpClockSyncProvider.this.numRetry++;
                             if (AbstractNtpClockSyncProvider.this.maxRetry > 0
                                     && AbstractNtpClockSyncProvider.this.numRetry >= AbstractNtpClockSyncProvider.this.maxRetry) {
-                                s_logger.error(
-                                        "Failed to synchronize System Clock. Exhausted retry attempts, giving up");
+                                logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
                                 AbstractNtpClockSyncProvider.this.isSynced = true;
                             }
                         }
                     } catch (KuraException e) {
                         AbstractNtpClockSyncProvider.this.numRetry++;
-                        s_logger.error("Error Synchronizing Clock", e);
+                        logger.error("Error Synchronizing Clock", e);
                         if (AbstractNtpClockSyncProvider.this.maxRetry > 0
                                 && AbstractNtpClockSyncProvider.this.numRetry >= AbstractNtpClockSyncProvider.this.maxRetry) {
-                            s_logger.error(
-                                    "Failed to synchronize System Clock. Exhausted retry attempts, giving up");
+                            logger.error("Failed to synchronize System Clock. Exhausted retry attempts, giving up");
                             AbstractNtpClockSyncProvider.this.isSynced = true;
                         }
                     }
@@ -128,24 +120,21 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
     }
 
     private void scheduleOnce() {
-        if (this.scheduler != null) {
-            this.scheduler.schedule(() -> {
-                Thread.currentThread().setName("AbstractNtpClockSyncProvider:scheduleOnce");
-                try {
-                    syncClock();
-                } catch (KuraException e) {
-                    s_logger.error("Error Synchronizing Clock - retrying", e);
-                    scheduleOnce();
-                }
-            }, 1, TimeUnit.SECONDS);
-        }
+        this.future = this.scheduler.schedule(() -> {
+            Thread.currentThread().setName("AbstractNtpClockSyncProvider:scheduleOnce");
+            try {
+                syncClock();
+            } catch (KuraException e) {
+                logger.error("Error Synchronizing Clock - retrying", e);
+                scheduleOnce();
+            }
+        }, 1, TimeUnit.SECONDS);
     }
 
     @Override
     public void stop() throws KuraException {
-        if (this.scheduler != null) {
-            this.scheduler.shutdown();
-            this.scheduler = null;
+        if (this.future != null) {
+            this.future.cancel(true);
         }
     }
 
@@ -159,38 +148,5 @@ public abstract class AbstractNtpClockSyncProvider implements ClockSyncProvider 
     // Private/Protected Methods
     //
     // ----------------------------------------------------------------
-
-    private void readProperties() throws KuraException {
-        this.ntpHost = (String) this.properties.get("clock.ntp.host");
-        if (this.ntpHost == null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, "clock.ntp.host");
-        }
-
-        this.ntpPort = 123;
-        if (this.properties.containsKey("clock.ntp.port")) {
-            this.ntpPort = (Integer) this.properties.get("clock.ntp.port");
-        }
-
-        this.ntpTimeout = 10000;
-        if (this.properties.containsKey("clock.ntp.timeout")) {
-            this.ntpTimeout = (Integer) this.properties.get("clock.ntp.timeout");
-        }
-
-        this.retryInterval = 0;
-        if (this.properties.containsKey("clock.ntp.retry.interval")) {
-            this.retryInterval = (Integer) this.properties.get("clock.ntp.retry.interval");
-        }
-
-        this.refreshInterval = 0;
-        if (this.properties.containsKey("clock.ntp.refresh-interval")) {
-            this.refreshInterval = (Integer) this.properties.get("clock.ntp.refresh-interval");
-        }
-
-        this.maxRetry = 0;
-        if (this.properties.containsKey("clock.ntp.max-retry")) {
-            this.maxRetry = (Integer) this.properties.get("clock.ntp.max-retry");
-        }
-    }
-
     protected abstract boolean syncClock() throws KuraException;
 }

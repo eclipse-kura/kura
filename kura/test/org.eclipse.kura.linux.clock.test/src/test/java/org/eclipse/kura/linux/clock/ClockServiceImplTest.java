@@ -147,7 +147,7 @@ public class ClockServiceImplTest {
 
         svc.updated(properties);
 
-        assertNotEquals(provider, TestUtil.getFieldValue(svc, "provider"));
+        assertEquals(provider, TestUtil.getFieldValue(svc, "provider"));
 
         // disable it
         properties.put("enabled", false);
@@ -155,25 +155,6 @@ public class ClockServiceImplTest {
         svc.updated(properties);
 
         assertNull(TestUtil.getFieldValue(svc, "provider"));
-    }
-
-    @Test
-    public void testStartProviderMissingParams() throws Throwable {
-        // exception due to missing mandatory parameter(s)
-
-        ClockServiceImpl svc = new ClockServiceImpl();
-
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("enabled", true);
-        properties.put("clock.provider", "java-ntp");
-        TestUtil.setFieldValue(svc, "properties", properties);
-
-        try {
-            TestUtil.invokePrivate(svc, "startClockSyncProvider");
-            fail("Exception expected.");
-        } catch (KuraException e) {
-            assertEquals(KuraErrorCode.CONFIGURATION_REQUIRED_ATTRIBUTE_MISSING, e.getCode());
-        }
     }
 
     @Test
@@ -201,7 +182,7 @@ public class ClockServiceImplTest {
         properties.put("clock.ntp.retry.interval", 1);
         properties.put("clock.ntp.refresh-interval", 0);
         properties.put("clock.ntp.max-retry", 1);
-        TestUtil.setFieldValue(svc, "properties", properties);
+        svc.activate(properties);
 
         TestUtil.invokePrivate(svc, "startClockSyncProvider");
 
@@ -228,7 +209,7 @@ public class ClockServiceImplTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("clock.set.hwclock", false);
-        TestUtil.setFieldValue(svc, "properties", properties);
+        svc.activate(properties);
 
         svc.onClockUpdate(0, false); // 0 offset => don't perform sys clock update
 
@@ -277,7 +258,7 @@ public class ClockServiceImplTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("clock.set.hwclock", true);
-        TestUtil.setFieldValue(svc, "properties", properties);
+        svc.activate(properties);
 
         svc.onClockUpdate(1, true);
 
@@ -300,7 +281,7 @@ public class ClockServiceImplTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("enabled", true);
         properties.put("clock.set.hwclock", true);
-        TestUtil.setFieldValue(svc, "properties", properties);
+        svc.activate(properties);
 
         svc.onClockUpdate(1, true);
 

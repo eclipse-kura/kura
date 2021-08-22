@@ -74,8 +74,9 @@ public class ChronyClockSyncProviderTest {
         properties.put("enabled", true);
         properties.put("clock.provider", "chrony-advanced");
         properties.put("chrony.advanced.configlocation", "placeholder_path");
+        ClockServiceConfig clockServiceConfig = new ClockServiceConfig(properties);
 
-        ntsClockSyncProvider.init(properties, listener);
+        ntsClockSyncProvider.init(clockServiceConfig, null, listener);
 
         boolean synched = ntsClockSyncProvider.syncClock();
 

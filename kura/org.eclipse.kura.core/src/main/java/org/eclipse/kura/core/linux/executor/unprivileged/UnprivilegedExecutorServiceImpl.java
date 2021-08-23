@@ -35,6 +35,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
     private SystemService systemService;
+    private ExecutorUtil executorUtil;
 
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
@@ -50,7 +51,11 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         logger.info("activate...");
 
         String user = this.systemService.getCommandUser();
-        ExecutorUtil.setCommandUsername(user.equals("unknown") ? "kura" : user);
+        if (user == null || user.equals("unknown")) {
+            this.executorUtil = new ExecutorUtil();
+        } else {
+            this.executorUtil = new ExecutorUtil(user);
+        }
     }
 
     protected void deactivate() {
@@ -65,27 +70,28 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        return ExecutorUtil.executeUnprivileged(command);
+        return this.executorUtil.executeUnprivileged(command);
     }
 
     @Override
     public void execute(Command command, Consumer<CommandStatus> callback) {
         if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
             callback.accept(buildErrorStatus(command));
+            return;
         }
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        ExecutorUtil.executeUnprivileged(command, callback);
+        this.executorUtil.executeUnprivileged(command, callback);
     }
 
     @Override
     public boolean stop(Pid pid, Signal signal) {
         boolean isStopped = false;
         if (signal == null) {
-            isStopped = ExecutorUtil.stopUnprivileged(pid, DEFAULT_SIGNAL);
+            isStopped = this.executorUtil.stopUnprivileged(pid, DEFAULT_SIGNAL);
         } else {
-            isStopped = ExecutorUtil.stopUnprivileged(pid, signal);
+            isStopped = this.executorUtil.stopUnprivileged(pid, signal);
         }
         return isStopped;
     }
@@ -94,26 +100,26 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     public boolean kill(String[] commandLine, Signal signal) {
         boolean isKilled = false;
         if (signal == null) {
-            isKilled = ExecutorUtil.killUnprivileged(commandLine, DEFAULT_SIGNAL);
+            isKilled = this.executorUtil.killUnprivileged(commandLine, DEFAULT_SIGNAL);
         } else {
-            isKilled = ExecutorUtil.killUnprivileged(commandLine, signal);
+            isKilled = this.executorUtil.killUnprivileged(commandLine, signal);
         }
         return isKilled;
     }
 
     @Override
     public boolean isRunning(Pid pid) {
-        return ExecutorUtil.isRunning(pid);
+        return this.executorUtil.isRunning(pid);
     }
 
     @Override
     public boolean isRunning(String[] commandLine) {
-        return ExecutorUtil.isRunning(commandLine);
+        return this.executorUtil.isRunning(commandLine);
     }
 
     @Override
     public Map<String, Pid> getPids(String[] commandLine) {
-        return ExecutorUtil.getPids(commandLine);
+        return this.executorUtil.getPids(commandLine);
     }
 
     private CommandStatus buildErrorStatus(Command command) {

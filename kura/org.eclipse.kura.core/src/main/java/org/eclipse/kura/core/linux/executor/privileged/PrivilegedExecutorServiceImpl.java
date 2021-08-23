@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -35,15 +35,18 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);
     private static final LinuxSignal DEFAULT_SIGNAL = LinuxSignal.SIGTERM;
 
+    private ExecutorUtil executorUtil;
+
     @SuppressWarnings("unused")
     private ComponentContext ctx;
 
-    protected void activate(ComponentContext componentContext) {
+    public void activate(ComponentContext componentContext) {
         logger.info("activate...");
         this.ctx = componentContext;
+        this.executorUtil = new ExecutorUtil();
     }
 
-    protected void deactivate(ComponentContext componentContext) {
+    public void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.ctx = null;
     }
@@ -56,27 +59,28 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        return ExecutorUtil.executePrivileged(command);
+        return this.executorUtil.executePrivileged(command);
     }
 
     @Override
     public void execute(Command command, Consumer<CommandStatus> callback) {
         if (command.getCommandLine() == null || command.getCommandLine().length == 0) {
             callback.accept(buildErrorStatus(command));
+            return;
         }
         if (command.getSignal() == null) {
             command.setSignal(DEFAULT_SIGNAL);
         }
-        ExecutorUtil.executePrivileged(command, callback);
+        this.executorUtil.executePrivileged(command, callback);
     }
 
     @Override
     public boolean stop(Pid pid, Signal signal) {
         boolean isStopped = false;
         if (signal == null) {
-            isStopped = ExecutorUtil.stopPrivileged(pid, DEFAULT_SIGNAL);
+            isStopped = this.executorUtil.stopPrivileged(pid, DEFAULT_SIGNAL);
         } else {
-            isStopped = ExecutorUtil.stopPrivileged(pid, signal);
+            isStopped = this.executorUtil.stopPrivileged(pid, signal);
         }
         return isStopped;
     }
@@ -85,26 +89,26 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     public boolean kill(String[] commandLine, Signal signal) {
         boolean isKilled = false;
         if (signal == null) {
-            isKilled = ExecutorUtil.killPrivileged(commandLine, DEFAULT_SIGNAL);
+            isKilled = this.executorUtil.killPrivileged(commandLine, DEFAULT_SIGNAL);
         } else {
-            isKilled = ExecutorUtil.killPrivileged(commandLine, signal);
+            isKilled = this.executorUtil.killPrivileged(commandLine, signal);
         }
         return isKilled;
     }
 
     @Override
     public boolean isRunning(Pid pid) {
-        return ExecutorUtil.isRunning(pid);
+        return this.executorUtil.isRunning(pid);
     }
 
     @Override
     public boolean isRunning(String[] commandLine) {
-        return ExecutorUtil.isRunning(commandLine);
+        return this.executorUtil.isRunning(commandLine);
     }
 
     @Override
     public Map<String, Pid> getPids(String[] commandLine) {
-        return ExecutorUtil.getPids(commandLine);
+        return this.executorUtil.getPids(commandLine);
     }
 
     private CommandStatus buildErrorStatus(Command command) {

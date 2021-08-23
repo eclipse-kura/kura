@@ -447,7 +447,7 @@ Sidenav START
 		display: none;
 	}
 	
-	.main-container:not(.no-sidenav) .panel-footer {
+	.main-container:not(.no-sidenav) .panel-footer#kura-info {
 		margin-left: 16.66666667%;
 	}
 	

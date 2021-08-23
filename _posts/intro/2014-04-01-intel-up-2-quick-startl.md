@@ -102,30 +102,3 @@ following steps:
       and the default **password** is:
 
       <pre>admin</pre>
-
-## Development Environment Installation
-
-### User Workspace
-
-To set up the development environment for Eclipse Kura, perform the
-following steps:
-
-1. Download and install JDK SE 8 as appropriate for your OS (if it is not already installed). For Windows and Linux users, the JDK can be
-downloaded from Java SE 8 Downloads. Use the latest version of Java SE Development Kit.
-2. Download and install the Eclipse IDE for Java EE Developers from the <a href="http://www.eclipse.org/downloads/" target="_blank">Eclipse download site</a>.
-3.  Download the Kura user workspace archive from the <a href="https://www.eclipse.org/kura/downloads.php" target="_blank">Eclipse Kura download site</a>.
-4.  Import the Kura workspace zip file into the new Eclipse project development environment.
-5.  Begin developing Kura-based applications for your target platform.
-
-### Oomph Installer
-
-1. Start the Eclipse Installer
-1. Switch to advanced mode (in simple mode you cannot add the custom installer)
-1. Select "Eclipse for Committers" and select a JRE 1.8+ -> Next
-1. Add a new installer by URL: https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup -> Check and next
-1. Update Eclipse Kura Git repository's username (HTTPS, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name) -> Next
-1. Leave all Bootstrap Tasks selected -> Finish
-1. Accept the licenses and unsigned content
-1. Wait for the installation to finish, a few additional plugins will be installed
-1. At first startup Eclipse IDE will checkout the code and perform a full build
-1. A few Working Sets will be prepared

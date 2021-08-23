@@ -35,6 +35,7 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.exec.environment.EnvironmentUtils;
 import org.apache.commons.io.output.NullOutputStream;
@@ -55,42 +56,47 @@ public class ExecutorUtil {
     private static final String COMMAND_MESSAGE = "Command ";
     private static final String FAILED_TO_GET_PID_MESSAGE = "Failed to get pid for command '{}'";
     private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
+    private static final String DEFAULT_COMMAND_USERNAME = "kura";
 
-    private static String commandUsername = "kura";
+    private String commandUsername;
 
-    private ExecutorUtil() {
-        // Empty private constructor
+    public ExecutorUtil() {
+        this.commandUsername = DEFAULT_COMMAND_USERNAME;
     }
 
-    public static String getCommandUsername() {
+    public ExecutorUtil(String commandUsername) {
+        this.commandUsername = commandUsername;
+    }
+
+    public String getCommandUsername() {
         return commandUsername;
     }
 
-    public static void setCommandUsername(String commandUsername) {
-        ExecutorUtil.commandUsername = commandUsername;
+    public void setCommandUsername(String commandUsername) {
+        this.commandUsername = commandUsername;
     }
 
-    public static CommandStatus executeUnprivileged(Command command) {
+    public CommandStatus executeUnprivileged(Command command) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
         return executeSync(command, commandLine);
     }
 
-    public static void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
+    public void executeUnprivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildUnprivilegedCommand(command);
         executeAsync(command, commandLine, callback);
     }
 
-    public static CommandStatus executePrivileged(Command command) {
+    public CommandStatus executePrivileged(Command command) {
         CommandLine commandLine = buildPrivilegedCommand(command);
         return executeSync(command, commandLine);
     }
 
-    public static void executePrivileged(Command command, Consumer<CommandStatus> callback) {
+    public void executePrivileged(Command command, Consumer<CommandStatus> callback) {
         CommandLine commandLine = buildPrivilegedCommand(command);
         executeAsync(command, commandLine, callback);
     }
 
-    public static boolean stopUnprivileged(Pid pid, Signal signal) {
+    public boolean stopUnprivileged(Pid pid, Signal signal) {
         boolean isStopped = true;
         if (isRunning(pid)) {
             Command killCommand = new Command(buildKillCommand(pid, signal));
@@ -102,7 +108,7 @@ public class ExecutorUtil {
         return isStopped;
     }
 
-    public static boolean killUnprivileged(String[] commandLine, Signal signal) {
+    public boolean killUnprivileged(String[] commandLine, Signal signal) {
         boolean isKilled = true;
         Map<String, Pid> pids = getPids(commandLine);
         for (Pid pid : pids.values()) {
@@ -111,7 +117,7 @@ public class ExecutorUtil {
         return isKilled;
     }
 
-    public static boolean stopPrivileged(Pid pid, Signal signal) {
+    public boolean stopPrivileged(Pid pid, Signal signal) {
         boolean isStopped = true;
         if (isRunning(pid)) {
             Command killCommand = new Command(buildKillCommand(pid, signal));
@@ -123,7 +129,7 @@ public class ExecutorUtil {
         return isStopped;
     }
 
-    public static boolean killPrivileged(String[] commandLine, Signal signal) {
+    public boolean killPrivileged(String[] commandLine, Signal signal) {
         boolean isKilled = true;
         Map<String, Pid> pids = getPids(commandLine);
         for (Pid pid : pids.values()) {
@@ -132,15 +138,15 @@ public class ExecutorUtil {
         return isKilled;
     }
 
-    public static boolean isRunning(Pid pid) {
+    public boolean isRunning(Pid pid) {
         boolean isRunning = false;
         String pidString = ((Integer) pid.getPid()).toString();
         String psCommand = "ps -p " + pidString;
         CommandLine commandLine = CommandLine.parse(psCommand);
-        DefaultExecutor executor = new DefaultExecutor();
+        Executor executor = getExecutor();
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ByteArrayOutputStream err = new ByteArrayOutputStream();
+        final ByteArrayOutputStream out = createStream();
+        final ByteArrayOutputStream err = createStream();
         final PumpStreamHandler handler = new PumpStreamHandler(out, err);
 
         executor.setStreamHandler(handler);
@@ -158,18 +164,18 @@ public class ExecutorUtil {
         return isRunning;
     }
 
-    public static boolean isRunning(String[] commandLine) {
+    public boolean isRunning(String[] commandLine) {
         return !getPids(commandLine).isEmpty();
     }
 
-    public static Map<String, Pid> getPids(String[] commandLine) {
+    public Map<String, Pid> getPids(String[] commandLine) {
         Map<String, Pid> pids = new HashMap<>();
         CommandLine psCommandLine = new CommandLine("ps");
         psCommandLine.addArgument("-ax");
-        DefaultExecutor executor = new DefaultExecutor();
+        Executor executor = getExecutor();
 
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        final ByteArrayOutputStream err = new ByteArrayOutputStream();
+        final ByteArrayOutputStream out = createStream();
+        final ByteArrayOutputStream err = createStream();
         final PumpStreamHandler handler = new PumpStreamHandler(out, err);
 
         executor.setStreamHandler(handler);
@@ -187,7 +193,17 @@ public class ExecutorUtil {
         return pids;
     }
 
-    private static Map<String, Pid> parsePids(ByteArrayOutputStream out, String[] commandLine) {
+    public static void stopStreamHandler(Executor executor) {
+        try {
+            if (executor.getStreamHandler() != null) {
+                executor.getStreamHandler().stop();
+            }
+        } catch (IOException e) {
+            logger.warn("Failed to stop stream handlers", e);
+        }
+    }
+
+    private Map<String, Pid> parsePids(ByteArrayOutputStream out, String[] commandLine) {
         Map<String, Integer> pids = new HashMap<>();
         String pid;
         String[] output = new String(out.toByteArray(), UTF_8).split("\n");
@@ -210,17 +226,17 @@ public class ExecutorUtil {
                         LinkedHashMap::new));
     }
 
-    private static boolean checkLine(String line, String[] tokens) {
+    private boolean checkLine(String line, String[] tokens) {
         return Arrays.stream(tokens).parallel().allMatch(line::contains);
     }
 
-    private static CommandStatus executeSync(Command command, CommandLine commandLine) {
+    private CommandStatus executeSync(Command command, CommandLine commandLine) {
         CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
 
-        DefaultExecutor executor = configureExecutor(command);
+        Executor executor = configureExecutor(command);
 
         int exitStatus = 0;
         logger.debug("Executing: {}", commandLine);
@@ -240,6 +256,7 @@ public class ExecutorUtil {
             exitStatus = 1;
             logger.error(COMMAND_MESSAGE + " {} failed", commandLine, e);
         } finally {
+            stopStreamHandler(executor);
             commandStatus.setExitStatus(new LinuxExitStatus(exitStatus));
             commandStatus.setTimedout(executor.getWatchdog().killedProcess());
         }
@@ -247,8 +264,8 @@ public class ExecutorUtil {
         return commandStatus;
     }
 
-    private static DefaultExecutor configureExecutor(Command command) {
-        DefaultExecutor executor = new DefaultExecutor();
+    private Executor configureExecutor(Command command) {
+        Executor executor = getExecutor();
         int timeout = command.getTimeout();
         ExecuteWatchdog watchdog = timeout <= 0 ? new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT)
                 : new ExecuteWatchdog(timeout * 1000L);
@@ -278,15 +295,19 @@ public class ExecutorUtil {
         return executor;
     }
 
-    private static void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
+    protected Executor getExecutor() {
+        return new DefaultExecutor();
+    }
+
+    private void executeAsync(Command command, CommandLine commandLine, Consumer<CommandStatus> callback) {
         CommandStatus commandStatus = new CommandStatus(command, new LinuxExitStatus(0));
         commandStatus.setOutputStream(command.getOutputStream());
         commandStatus.setErrorStream(command.getErrorStream());
         commandStatus.setInputStream(command.getInputStream());
 
-        DefaultExecutor executor = configureExecutor(command);
+        Executor executor = configureExecutor(command);
 
-        LinuxResultHandler resultHandler = new LinuxResultHandler(callback);
+        LinuxResultHandler resultHandler = new LinuxResultHandler(callback, executor);
         resultHandler.setStatus(commandStatus);
 
         logger.debug("Executing: {}", commandLine);
@@ -300,12 +321,13 @@ public class ExecutorUtil {
                 executor.execute(commandLine, resultHandler);
             }
         } catch (IOException e) {
+            stopStreamHandler(executor);
             commandStatus.setExitStatus(new LinuxExitStatus(1));
             logger.error(COMMAND_MESSAGE + commandLine + " failed", e);
         }
     }
 
-    private static String[] buildKillCommand(Pid pid, Signal signal) {
+    private String[] buildKillCommand(Pid pid, Signal signal) {
         Integer pidNumber = pid.getPid();
         if (logger.isInfoEnabled()) {
             logger.info("Attempting to send {} to process with pid {}", ((LinuxSignal) signal).name(), pidNumber);
@@ -313,14 +335,14 @@ public class ExecutorUtil {
         return new String[] { "kill", "-" + signal.getSignalNumber(), String.valueOf(pidNumber) };
     }
 
-    private static CommandLine buildUnprivilegedCommand(Command command) {
+    private CommandLine buildUnprivilegedCommand(Command command) {
         // Build the command as follows:
         // su <command_user> -c "VARS... timeout -s <signal> <timeout> <command>"
         // or su <command_user> c "VARS... sh -c <command>"
         // The timeout command is added because the commons-exec doesn't allow to set the signal to send for killing a
         // process after a timeout
         CommandLine commandLine = new CommandLine("su");
-        commandLine.addArgument(ExecutorUtil.commandUsername);
+        commandLine.addArgument(this.commandUsername);
         commandLine.addArgument("-c");
 
         List<String> c = new ArrayList<>();
@@ -343,7 +365,7 @@ public class ExecutorUtil {
         return commandLine;
     }
 
-    private static CommandLine buildPrivilegedCommand(Command command) {
+    private CommandLine buildPrivilegedCommand(Command command) {
         CommandLine commandLine;
         if (command.isExecutedInAShell()) {
             commandLine = new CommandLine("/bin/sh");
@@ -357,5 +379,9 @@ public class ExecutorUtil {
             }
         }
         return commandLine;
+    }
+
+    protected ByteArrayOutputStream createStream() {
+        return new ByteArrayOutputStream();
     }
 }

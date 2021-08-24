@@ -51,15 +51,17 @@ Changes:
     * Web UI extendibility APIs and examples
 
   * Deprecated APIs
-    * CommandService
-    * DriverService
-    * SSLManagerService (Partial)
-    * CertificateService (Partial)
-    * DhcpServerConfigIP4 (Partial)
-    * DhcpServerConfigIP6 (Partial)
-    * FirewallNatConfig (Partial)
-    * ModemGpsEnabledEvent (Partial)
-    * ModemManagerService (Partial)
+    * org.eclipse.kura.command.CommandService
+    * org.eclipse.kura.driver.DriverService
+    * org.eclipse.kura.ssl.SSLManagerService (Partial)
+    * org.eclipse.kura.certificate.CertificateService (Partial)
+    * org.eclipse.kura.net.dhcp.DhcpServerConfigIP4 (Partial)
+    * org.eclipse.kura.net.dhcp.DhcpServerConfigIP6 (Partial)
+    * org.eclipse.kura.net.firewall.FirewallNatConfig (Partial)
+    * org.eclipse.kura.net.modem.ModemGpsEnabledEvent (Partial)
+    * org.eclipse.kura.net.modem.ModemManagerService (Partial)
+    * org.eclipse.kura.linux.bluetooth.util
+    * org.eclipse.kura.linux.bluetooth.le.beacon
 
   * Target Platform Updates
     * org.apache.felix.gogo.command 1.0.2.v20170914-1324 

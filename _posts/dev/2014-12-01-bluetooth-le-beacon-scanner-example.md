@@ -14,6 +14,8 @@ categories: [dev]
 
 *  [Deploy and Validate the Bundle](#deploy-and-validate-the-bundle)
 
+{% include alerts.html message="This guide uses the deprecated Kura Bluetooth APIs. Please consider to use the new [ones](beacon-apis)." %}
+
 ## Overview
 
 The Bluetooth Beacon Scanner example is a bundle for Eclipse Kura that uses the Bluetooth LE service to search for near Beacon devices. A Beacon device is a Bluetooth Low Energy device that broadcasts its identity to nearby devices. It uses a specific BLE packet, called beacon or advertising packet, that contains the following information:

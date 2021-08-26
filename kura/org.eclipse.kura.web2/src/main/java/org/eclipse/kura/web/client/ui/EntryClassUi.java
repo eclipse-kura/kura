@@ -526,7 +526,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 setHeader(MSGS.users(), null);
                 EntryClassUi.this.contentPanelBody.clear();
                 EntryClassUi.this.contentPanelBody.add(EntryClassUi.this.usersBinder);
-                EntryClassUi.this.usersBinder.setSession(EntryClassUi.this.currentSession);
                 EntryClassUi.this.usersBinder.refresh();
             });
         });

@@ -23,7 +23,6 @@ import org.eclipse.kura.web.client.ui.Picker;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.KuraPermission;
-import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
@@ -83,8 +82,6 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
     private final GwtSecurityTokenServiceAsync gwtXsrfService = GWT.create(GwtSecurityTokenService.class);
     private final GwtUserServiceAsync gwtUserService = GWT.create(GwtUserService.class);
 
-    private GwtSession session;
-
     private final SingleSelectionModel<GwtUserConfig> selectionModel = new SingleSelectionModel<>();
     private final ListDataProvider<GwtUserConfig> dataProvider = new ListDataProvider<>();
 
@@ -118,10 +115,6 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
 
         initTable();
         initInterfaceButtons();
-    }
-
-    public void setSession(GwtSession session) {
-        this.session = session;
     }
 
     private void initTable() {
@@ -278,13 +271,8 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                     list.addAll(result);
                     ColumnSortEvent.fire(this.userTable, this.userTable.getColumnSortList());
                 })))));
-        RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(
-                c.callback(token -> this.gwtUserService.getDefinedPermissions(token, c.callback(result -> {
-                    this.definedPermissions = result;
-                    if (!this.session.isNetAdminAvailable()) {
-                        this.definedPermissions.remove(KuraPermission.NETWORK_ADMIN);
-                    }
-                })))));
+        RequestQueue.submit(c -> this.gwtXsrfService.generateSecurityToken(c.callback(token -> this.gwtUserService
+                .getDefinedPermissions(token, c.callback(result -> this.definedPermissions = result)))));
 
         setDirty(false);
     }

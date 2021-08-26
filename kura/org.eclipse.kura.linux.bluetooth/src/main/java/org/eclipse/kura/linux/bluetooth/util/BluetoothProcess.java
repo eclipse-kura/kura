@@ -35,6 +35,10 @@ import org.eclipse.kura.linux.bluetooth.le.beacon.BTSnoopParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated since {@link org.eclipse.kura.linux.bluetooth.util} version 1.0.600
+ */
+@Deprecated
 public class BluetoothProcess {
 
     private static final String END_OF_STREAM_MESSAGE = "End of stream!";

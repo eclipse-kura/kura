@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,7 +19,10 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * Parses a btsnoop stream into btsnoop records
+ * 
+ * @deprecated since {@link org.eclipse.kura.linux.bluetooth.le.beacon} version 1.0.600
  */
+@Deprecated
 public class BTSnoopParser {
 
     private InputStream is;

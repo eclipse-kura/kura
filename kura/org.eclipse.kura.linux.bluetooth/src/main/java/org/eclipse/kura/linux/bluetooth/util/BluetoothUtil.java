@@ -42,6 +42,10 @@ import org.eclipse.kura.executor.Signal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated since {@link org.eclipse.kura.linux.bluetooth.util} version 1.0.600
+ */
+@Deprecated
 public class BluetoothUtil {
 
     private static final String ERROR_EXECUTING_COMMAND_MESSAGE = "Error executing command: {}";

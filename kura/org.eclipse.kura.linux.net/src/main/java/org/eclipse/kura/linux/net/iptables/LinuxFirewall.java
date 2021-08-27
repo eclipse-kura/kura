@@ -52,7 +52,6 @@ public class LinuxFirewall {
     private Set<NATRule> autoNatRules = new LinkedHashSet<>();
     private Set<NATRule> natRules = new LinkedHashSet<>();
     private boolean allowIcmp = false;
-    private boolean allowForwarding = false;
     private final Set<String> additionalFilterRules = new HashSet<>();
     private final Set<String> additionalNatRules = new HashSet<>();
     private final Set<String> additionalMangleRules = new HashSet<>();
@@ -97,7 +96,6 @@ public class LinuxFirewall {
         this.autoNatRules = this.iptables.getAutoNatRules();
         this.natRules = this.iptables.getNatRules();
         this.allowIcmp = true;
-        this.allowForwarding = false;
         logger.debug("initialize() :: Parsing current firewall configuration");
     }
 
@@ -193,7 +191,6 @@ public class LinuxFirewall {
             }
         }
         if (doUpdate) {
-            this.allowForwarding = true;
             update();
         }
     }
@@ -282,7 +279,6 @@ public class LinuxFirewall {
             }
         }
         if (doUpdate) {
-            this.allowForwarding = true;
             update();
         }
     }
@@ -313,11 +309,6 @@ public class LinuxFirewall {
             return;
         }
         this.portForwardRules.remove(rule);
-        if (this.autoNatRules != null && this.autoNatRules.isEmpty() && this.natRules != null && this.natRules.isEmpty()
-                && this.portForwardRules.isEmpty()) {
-
-            this.allowForwarding = false;
-        }
         update();
     }
 
@@ -326,11 +317,6 @@ public class LinuxFirewall {
             return;
         }
         this.autoNatRules.remove(rule);
-        if (this.autoNatRules.isEmpty() && this.natRules != null && this.natRules.isEmpty()
-                && this.portForwardRules != null && this.portForwardRules.isEmpty()) {
-
-            this.allowForwarding = false;
-        }
         update();
     }
 
@@ -341,42 +327,21 @@ public class LinuxFirewall {
 
     public void deleteAllPortForwardRules() throws KuraException {
         this.portForwardRules.clear();
-        if (this.autoNatRules != null && this.autoNatRules.isEmpty() && this.natRules != null
-                && this.natRules.isEmpty()) {
-
-            this.allowForwarding = false;
-        }
         update();
     }
 
     public void replaceAllNatRules(Set<NATRule> newNatRules) throws KuraException {
         this.autoNatRules = newNatRules;
-        if (this.autoNatRules != null && !this.autoNatRules.isEmpty()
-                || this.natRules != null && !this.natRules.isEmpty()
-                || this.portForwardRules != null && !this.portForwardRules.isEmpty()) {
-            this.allowForwarding = true;
-        } else {
-            this.allowForwarding = false;
-        }
         update();
     }
 
     public void deleteAllAutoNatRules() throws KuraException {
         this.autoNatRules.clear();
-        if (this.natRules != null && this.natRules.isEmpty() && this.portForwardRules != null
-                && this.portForwardRules.isEmpty()) {
-
-            this.allowForwarding = false;
-        }
         update();
     }
 
     public void deleteAllNatRules() throws KuraException {
         this.natRules.clear();
-        if (this.autoNatRules != null && this.autoNatRules.isEmpty() && this.portForwardRules != null
-                && this.portForwardRules.isEmpty()) {
-            this.allowForwarding = false;
-        }
         update();
     }
 
@@ -399,23 +364,14 @@ public class LinuxFirewall {
         if (this.portForwardRules != null && !this.portForwardRules.isEmpty()
                 || this.autoNatRules != null && !this.autoNatRules.isEmpty()
                 || this.natRules != null && !this.natRules.isEmpty()) {
-            this.allowForwarding = true;
+
+            try (FileWriter fw = new FileWriter(IP_FORWARD_FILE_NAME)) {
+                fw.write('1');
+            } catch (IOException e) {
+                throw new KuraIOException(e, "Failed to enable ip forwarding");
+            }
         }
         this.iptables.applyRules();
-        logger.debug("Managing port forwarding...");
-        enableForwarding(this.allowForwarding);
-    }
-
-    private static void enableForwarding(boolean allow) throws KuraException {
-        try (FileWriter fw = new FileWriter(IP_FORWARD_FILE_NAME)) {
-            if (allow) {
-                fw.write('1');
-            } else {
-                fw.write('0');
-            }
-        } catch (IOException e) {
-            throw new KuraIOException(e, "Failed to enable/disable forwarding");
-        }
     }
 
     public void enable() throws KuraException {
@@ -432,14 +388,6 @@ public class LinuxFirewall {
 
     public void disableIcmp() {
         this.allowIcmp = false;
-    }
-
-    public void enableForwarding() {
-        this.allowForwarding = true;
-    }
-
-    public void disableForwarding() {
-        this.allowForwarding = false;
     }
 
     public void setAdditionalRules(Set<String> filterRules, Set<String> natRules, Set<String> mangleRules)

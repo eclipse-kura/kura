@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.server.RequiredPermissions;
+import org.eclipse.kura.web.server.RequiredPermissions.Mode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.DEVICE)
 public interface GwtDeviceService extends RemoteService {
 
+    @RequiredPermissions(mode = Mode.ANY, value = { KuraPermission.DEVICE, KuraPermission.NETWORK_ADMIN })
     public List<GwtGroupedNVPair> findDeviceConfiguration(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public List<GwtGroupedNVPair> findBundles(GwtXSRFToken xsrfToken) throws GwtKuraException;

@@ -285,7 +285,7 @@
 						size="MD_12">
 						<b:Row>
 							<b:Panel>
-								<b:PanelFooter addStyleNames="panel-footer">
+								<b:PanelFooter addStyleNames="panel-footer" b:id="kura-info">
 									<b:Row>
 										<b:Column size="MD_6,XS_6">
 											<b.html:Paragraph alignment="LEFT">

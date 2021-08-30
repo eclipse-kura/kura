@@ -361,6 +361,7 @@ public class LinuxFirewall {
     }
 
     private void applyRules() throws KuraException {
+        this.iptables.applyRules();
         if (this.portForwardRules != null && !this.portForwardRules.isEmpty()
                 || this.autoNatRules != null && !this.autoNatRules.isEmpty()
                 || this.natRules != null && !this.natRules.isEmpty()) {
@@ -371,7 +372,6 @@ public class LinuxFirewall {
                 throw new KuraIOException(e, "Failed to enable ip forwarding");
             }
         }
-        this.iptables.applyRules();
     }
 
     public void enable() throws KuraException {

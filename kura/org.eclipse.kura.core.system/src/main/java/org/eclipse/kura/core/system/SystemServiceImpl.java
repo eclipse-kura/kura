@@ -1227,11 +1227,26 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
                 .split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
-            String[] fields = p.split("\\s+");
+            String[] fields = p.split("\\s+"); // this works for dpkg and rpm where separator for version and name is a
+                                               // sequence of spaces
             if (fields.length >= 2) {
                 packagesInfo.add(new SystemResourceInfo(fields[0], fields[1], type));
             } else {
-                packagesInfo.add(new SystemResourceInfo(fields[0], "", type));
+                // apk case: name and version themselves might contain the same separator '-' used to separate name from
+                // version
+                // removing all character sequence that might represent a package name (might contain digits but must
+                // have words)
+                String version = fields[0].replaceAll("((([0-9]+)?[a-z]+([0-9]+)?)+-)+", "");
+                // removing the version from the full name
+                String name = fields[0].replace(version, "");
+                if (name.length() > 1) {
+                    // removing trailing '-'
+                    name = name.substring(0, name.length() - 1);
+                } else {
+                    name = fields[0];
+                    version = "";
+                }
+                packagesInfo.add(new SystemResourceInfo(name, version, type));
             }
         });
     }

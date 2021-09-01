@@ -66,16 +66,15 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
-import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
@@ -95,7 +94,6 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
-import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
@@ -1007,7 +1005,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
+
         List<GwtWifiHotspotEntry> gwtWifiHotspotsEntries = new ArrayList<>();
 
         try {
@@ -1018,8 +1016,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     // if(!ssid.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
                     // ssid= null;
                     // }
-                    if (wifiHotspotInfo.getChannel() <= systemService.getKuraWifiTopChannel() && ssid != null
-                            && !ssid.equals(wirelessSsid)) {
+                    if (ssid != null && !ssid.equals(wirelessSsid)) {
                         GwtWifiHotspotEntry gwtWifiHotspotEntry = new GwtWifiHotspotEntry();
                         gwtWifiHotspotEntry.setMacAddress(wifiHotspotInfo.getMacAddress());
                         gwtWifiHotspotEntry.setSSID(ssid);

@@ -27,8 +27,8 @@ public final class KuraPermission {
     public static final String WIRES_ADMIN = "kura.wires.admin";
     public static final String MAINTENANCE = "kura.maintenance";
 
-    public static final Set<String> DEFAULT_PERMISSIONS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(ADMIN,
-            NETWORK_ADMIN, PACKAGES_ADMIN, DEVICE, CLOUD_CONNECTION_ADMIN, WIRES_ADMIN, MAINTENANCE)));
+    public static final Set<String> DEFAULT_PERMISSIONS = Collections.unmodifiableSet(new HashSet<>(
+            Arrays.asList(ADMIN, PACKAGES_ADMIN, DEVICE, CLOUD_CONNECTION_ADMIN, WIRES_ADMIN, MAINTENANCE)));
 
     private KuraPermission() {
     }

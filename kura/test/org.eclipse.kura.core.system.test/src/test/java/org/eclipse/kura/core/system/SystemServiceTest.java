@@ -286,7 +286,7 @@ public class SystemServiceTest {
     }
 
     @Test
-    public void testgGetSystemPackages() throws IOException, KuraProcessExecutionErrorException {
+    public void testGetSystemPackages() throws IOException, KuraProcessExecutionErrorException {
         CommandExecutorService cesMock = mock(CommandExecutorService.class);
 
         Command dpkgCommand = new Command(new String[] { "dpkg-query", "-W" });
@@ -325,7 +325,8 @@ public class SystemServiceTest {
         assertEquals("package4", packages.get(3).getName());
         assertEquals(SystemResourceType.RPM, packages.get(3).getType());
         assertEquals(SystemResourceType.APK, packages.get(4).getType());
-        assertEquals("dos2unix-7.4.1-r0", packages.get(4).getName());
+        assertEquals("dos2unix", packages.get(4).getName());
+        assertEquals("7.4.1-r0", packages.get(4).getVersion());
     }
 
     @Test(expected = KuraProcessExecutionErrorException.class)

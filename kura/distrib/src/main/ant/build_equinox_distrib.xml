@@ -1526,14 +1526,6 @@ fi]]>
 		</propertyfile>
 	</target>
 
-	<target name="threat-management-config" unless="is.nn">
-		<propertyfile
-			file="${project.build.directory}/${build.output.name}/config.ini">
-			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar@4:start" />
-		</propertyfile>
-	</target>
-
 	<target name="linux-sysv-config" if="is.sysv" depends="linux-config">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
@@ -1709,6 +1701,13 @@ fi]]>
 		</zip>
 	</target>
 
+	<target name="threat-management-config" unless="is.nn">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar@4:start" />
+		</propertyfile>
+	</target>
 	<target name="threat-management-jar" unless="is.nn">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
 			update="true">

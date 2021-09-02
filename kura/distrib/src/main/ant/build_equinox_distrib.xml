@@ -170,6 +170,7 @@
 		<!-- Populate config.ini with correct Kura bundles -->
 		<antcall target="api-config" />
 		<antcall target="core-config" />
+		<antcall target="core.extendedproperties-config" />
 		<antcall target="core.system-config" />
 		<antcall target="core.certificates-config" />
 		<antcall target="core.cloud-config" />
@@ -621,6 +622,9 @@ fi]]>
 				file="${project.build.directory}/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.core.extendedproperties_${org.eclipse.kura.core.extendedproperties.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
@@ -959,6 +963,14 @@ fi]]>
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+
+	<target name="core.extendedproperties-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.extendedproperties_${org.eclipse.kura.core.extendedproperties.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 

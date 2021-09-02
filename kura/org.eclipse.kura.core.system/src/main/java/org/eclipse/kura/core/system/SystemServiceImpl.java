@@ -10,6 +10,7 @@
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
+ *  WinWinIt
  *******************************************************************************/
 package org.eclipse.kura.core.system;
 
@@ -54,6 +55,7 @@ import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkService;
 import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.ExtendedPropertiesService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
 import org.eclipse.kura.system.SystemService;
@@ -93,6 +95,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private NetworkService networkService;
     private CommandExecutorService executorService;
 
+    private ExtendedPropertiesService extendedPropertiesService;
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -112,6 +116,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     public void unsetExecutorService(CommandExecutorService executorService) {
         this.executorService = null;
+    }
+
+    public void setExtendedPropertiesService(ExtendedPropertiesService service) {
+        this.extendedPropertiesService = service;
+    }
+
+    public void unsetExtendedPropertiesService(ExtendedPropertiesService service) {
+        this.extendedPropertiesService = null;
     }
 
     // ----------------------------------------------------------------
@@ -645,7 +657,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
      * Returns ip of the first interface name of which begins with <code>prefix</code>.
      *
      * @param prefix
-     *            network interface name prefix e.g. eth, wlan
+     *                   network interface name prefix e.g. eth, wlan
      * @return ip of the first interface name of which begins with prefix; null if none found with ip
      * @throws SocketException
      */
@@ -1253,7 +1265,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
      * Assumptions are that the fullName starts with the package name and ends with the version.
      *
      * @param fullName
-     *            of the APK software package, e.g. "busybox-extras-1.31.1-r10"
+     *                     of the APK software package, e.g. "busybox-extras-1.31.1-r10"
      * @return String array with name in position 0 and version in position 1
      */
     private String[] getApkNameAndVersion(String fullName) {
@@ -1461,7 +1473,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
     @Override
     public Optional<ExtendedProperties> getExtendedProperties() {
+
+        // Get the extended properties
+        if (extendedPropertiesService != null) {
+            try {
+                return extendedPropertiesService.getExtendedProperties();
+            } catch (Exception e) {
+                logger.error("Could not get extended properties", e);
+            }
+        }
+
+        // Fallback to empty properties
         return Optional.empty();
+
     }
 
     @Override

@@ -11,6 +11,7 @@
 	
 	Contributors:
 	 Eurotech
+     WinWinIt
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" deactivate="deactivate" immediate="true" modified="updated" name="org.eclipse.kura.system.SystemService">
@@ -26,4 +27,10 @@
               cardinality="1..1" 
               policy="static"/>
    <reference bind="setExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" unbind="unsetExecutorService"/>
+   <reference name="ExtendedPropertiesService"
+              interface="org.eclipse.kura.system.ExtendedPropertiesService"
+              bind="setExtendedPropertiesService"
+              unbind="unsetExtendedPropertiesService"
+              cardinality="0..1"
+              policy="dynamic"/>
 </scr:component>

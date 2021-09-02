@@ -85,6 +85,7 @@ import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionService;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperEvent;
+import org.eclipse.kura.system.ExtendedPropertiesEvent;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.Bundle;
@@ -293,7 +294,8 @@ public class CloudServiceImpl
         // install event listener for GPS locked event
         Dictionary<String, Object> props = new Hashtable<>();
         String[] eventTopics = { PositionLockedEvent.POSITION_LOCKED_EVENT_TOPIC,
-                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC };
+                ModemReadyEvent.MODEM_EVENT_READY_TOPIC, TamperEvent.TAMPER_EVENT_TOPIC,
+                ExtendedPropertiesEvent.EXTENDED_PROPERTIES_EVENT_TOPIC };
         props.put(EventConstants.EVENT_TOPIC, eventTopics);
         this.cloudServiceRegistration = this.ctx.getBundleContext().registerService(EventHandler.class.getName(), this,
                 props);
@@ -374,6 +376,9 @@ public class CloudServiceImpl
             handleModemReadyEvent(event);
         } else if (TamperEvent.TAMPER_EVENT_TOPIC.equals(event.getTopic()) && this.dataService.isConnected()
                 && this.options.getRepubBirthCertOnTamperEvent()) {
+            tryPublishBirthCertificate();
+        } else if (ExtendedPropertiesEvent.EXTENDED_PROPERTIES_EVENT_TOPIC.equals(event.getTopic())
+                && this.dataService.isConnected()) {
             tryPublishBirthCertificate();
         }
     }

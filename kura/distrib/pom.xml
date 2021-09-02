@@ -183,6 +183,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.core.extendedproperties</artifactId>
+                                    <version>${org.eclipse.kura.core.extendedproperties.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.core.system</artifactId>
                                     <version>${org.eclipse.kura.core.system.version}</version>
                                 </artifactItem>
@@ -632,6 +637,8 @@
                                     tofile="target/plugins/org.eclipse.kura.camel.xml_${org.eclipse.kura.camel.xml.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.jar"
                                     tofile="target/plugins/org.eclipse.kura.core_${org.eclipse.kura.core.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.core.extendedproperties.jar"
+                                    tofile="target/plugins/org.eclipse.kura.core.extendedproperties_${org.eclipse.kura.core.extendedproperties.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.system.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.certificates.jar"
@@ -1971,6 +1978,9 @@
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.net_${org.eclipse.kura.core.net.version}.jar"
+                                            todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy
+                                            file="${project.build.directory}/plugins/org.eclipse.kura.core.extendedproperties_${org.eclipse.kura.core.extendedproperties.version}.jar"
                                             todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy
                                             file="${project.build.directory}/plugins/org.eclipse.kura.core.system_${org.eclipse.kura.core.system.version}.jar"

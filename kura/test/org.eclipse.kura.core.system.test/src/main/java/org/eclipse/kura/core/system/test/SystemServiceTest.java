@@ -22,6 +22,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,9 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.system.ExtendedProperties;
+import org.eclipse.kura.system.ExtendedPropertiesHolder;
+import org.eclipse.kura.system.ExtendedPropertyGroup;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.test.annotation.TestTarget;
 import org.junit.BeforeClass;
@@ -356,4 +360,52 @@ public class SystemServiceTest {
             assertEquals(UNKNOWN, serialNumber);
         }
     }
+
+    /**
+     * <p>
+     * Tests that the {@link SystemService#getExtendedProperties()} correctly returns properties obtained from the
+     * registered {@link ExtendedPropertiesHolder} classes.
+     * </p>
+     * <p>
+     * This test works together with the {@link MockExtendedPropertiesHolder} service, which is an
+     * {@link ExtendedPropertiesHolder} which returns static known data.<br>
+     * This test will check that the {@link SystemService#getExtendedProperties()} method returns those properties.
+     * </p>
+     */
+    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    @Test
+    public void getExtendedProperties() {
+
+        // Get extended properties
+        ExtendedProperties extendedProperties = systemService.getExtendedProperties().orElse(null);
+        assertNotNull(extendedProperties);
+
+        // Get extended properties groups
+        List<ExtendedPropertyGroup> groups = extendedProperties.getPropertyGroups();
+        assertNotNull(groups);
+
+        // Test that group 1 has been found
+        ExtendedPropertyGroup group1 = groups.stream()
+                .filter(g -> MockExtendedPropertiesHolder.GROUP1.equals(g.getName())).findFirst().orElse(null);
+        assertNotNull(group1);
+
+        // Test that group 2 has been found
+        ExtendedPropertyGroup group2 = groups.stream()
+                .filter(g -> MockExtendedPropertiesHolder.GROUP2.equals(g.getName())).findFirst().orElse(null);
+        assertNotNull(group2);
+
+        // Test that property 1 of group 1 has the expected value
+        String g1p1 = group1.getProperties().get(MockExtendedPropertiesHolder.PROPERTY1);
+        assertEquals(MockExtendedPropertiesHolder.VALUE1, g1p1);
+
+        // Test that property 2 of group 1 has the expected value
+        String g1p2 = group1.getProperties().get(MockExtendedPropertiesHolder.PROPERTY2);
+        assertEquals(MockExtendedPropertiesHolder.VALUE2, g1p2);
+
+        // Test that property 1 of group 2 has the expected value
+        String g2p1 = group2.getProperties().get(MockExtendedPropertiesHolder.PROPERTY1);
+        assertEquals(MockExtendedPropertiesHolder.VALUE1, g2p1);
+
+    }
+
 }

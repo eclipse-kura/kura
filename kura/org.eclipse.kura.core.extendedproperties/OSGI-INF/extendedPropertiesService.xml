@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+   Copyright (c) 2011, 2021 WinWinIt and others
+  
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+     WinWinIt
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" immediate="false" name="org.eclipse.kura.system.ExtendedPropertiesService">
+   <implementation class="org.eclipse.kura.core.extendedproperties.ExtendedPropertiesServiceImpl"/>
+   <service>
+      <provide interface="org.eclipse.kura.system.ExtendedPropertiesService"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.system.ExtendedPropertiesService"/>
+   <reference name="EventAdmin"
+              cardinality="1..1"
+              policy="static"
+              bind="setEventAdmin"
+              unbind="unsetEventAdmin"
+              interface="org.osgi.service.event.EventAdmin"/>
+   <reference name="ExtendedPropertiesHolder"
+              interface="org.eclipse.kura.system.ExtendedPropertiesHolder"
+              bind="addExtendedPropertiesHolder"
+              unbind="removeExtendedPropertiesHolder"
+              cardinality="0..n"
+              policy="dynamic"/>
+</scr:component>

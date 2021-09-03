@@ -108,6 +108,42 @@
 				<equals arg1="${kura.osgi}" arg2="equinox" />
 			</or>
 		</condition>
+		<condition property="is.nn">
+			<contains string="${build.name}" substring="-nn" />
+		</condition>
+		<condition property="is.sysv">
+			<and>
+				<contains string="${service.manager}" substring="sysv" />
+				<not>
+					<contains string="${build.name}" substring="-nn" />
+				</not>
+			</and>
+		</condition>
+		<condition property="is.systemd">
+			<and>
+				<contains string="${service.manager}" substring="systemd" />
+				<not>
+					<contains string="${build.name}" substring="-nn" />
+				</not>
+			</and>
+		</condition>
+
+		<condition property="is.debian">
+			<and>
+				<contains string="${os.base}" substring="debian" />
+				<not>
+					<contains string="${build.name}" substring="-nn" />
+				</not>
+			</and>
+		</condition>
+		<condition property="is.redhat">
+			<and>
+				<contains string="${os.base}" substring="redhat" />
+				<not>
+					<contains string="${build.name}" substring="-nn" />
+				</not>
+			</and>
+		</condition>
 
 		<copy file="src/main/resources/${build.name}/snapshot_0.xml"
 			tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
@@ -198,44 +234,6 @@
 			property="linux.gpio.jar.present" />
 		<antcall target="gpio-config" />
 		<antcall target="emulator-gpio-config" />
-
-
-		<condition property="is.nn">
-			<contains string="${build.name}" substring="-nn" />
-		</condition>
-		<condition property="is.sysv">
-			<and>
-				<contains string="${service.manager}" substring="sysv" />
-				<not>
-					<contains string="${build.name}" substring="-nn" />
-				</not>
-			</and>
-		</condition>
-		<condition property="is.systemd">
-			<and>
-				<contains string="${service.manager}" substring="systemd" />
-				<not>
-					<contains string="${build.name}" substring="-nn" />
-				</not>
-			</and>
-		</condition>
-
-		<condition property="is.debian">
-			<and>
-				<contains string="${os.base}" substring="debian" />
-				<not>
-					<contains string="${build.name}" substring="-nn" />
-				</not>
-			</and>
-		</condition>
-		<condition property="is.redhat">
-			<and>
-				<contains string="${os.base}" substring="redhat" />
-				<not>
-					<contains string="${build.name}" substring="-nn" />
-				</not>
-			</and>
-		</condition>
 		<antcall target="emulator-config" />
 		<antcall target="linux-sysv-config" />
 		<antcall target="linux-debian-config" />
@@ -249,8 +247,6 @@
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar@5:start" />
 		</propertyfile>
-
-
 
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/dpa.properties">

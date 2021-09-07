@@ -80,7 +80,7 @@ public interface SystemService {
     public static final String KEY_KURA_HAVE_NET_ADMIN = "kura.have.net.admin";
     public static final String KEY_KURA_HAVE_WEB_INTER = "kura.have.web.inter";
     public static final String KEY_KURA_STYLE_DIR = "kura.style.dir";
-    public static final String KEY_KURA_WIFI_TOP_CHANNEL = "kura.wifi.top.channel";
+    public static final String KEY_KURA_WIFI_REGION = "kura.wifi.region";
     public static final String KEY_KURA_KEY_STORE_PWD = "kura.ssl.keyStorePassword";
     public static final String KEY_KURA_TRUST_STORE_PWD = "kura.ssl.trustStorePassword";
     public static final String KEY_FILE_COMMAND_ZIP_MAX_SIZE = "file.command.zip.max.size";
@@ -115,6 +115,13 @@ public interface SystemService {
      * @since 2.2
      */
     public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
+
+    /**
+     * @since 7.0.0
+     * @deprecated
+     */
+    @Deprecated
+    public static final String KEY_KURA_WIFI_TOP_CHANNEL = "kura.wifi.top.channel";
 
     /**
      * @deprecated
@@ -419,8 +426,17 @@ public interface SystemService {
      * 11. In most of Europe this should be 13.
      *
      * @return The last wifi channel allowed for this device (usually 11 or 13)
+     * @deprecated
      */
+    @Deprecated
     public int getKuraWifiTopChannel();
+
+    /**
+     * Get the Wi-Fi region to set on this device.
+     * 
+     * @return The Wi-Fi region to set on this device
+     */
+    public String getKuraWifiRegion();
 
     public String getKuraWebEnabled();
 

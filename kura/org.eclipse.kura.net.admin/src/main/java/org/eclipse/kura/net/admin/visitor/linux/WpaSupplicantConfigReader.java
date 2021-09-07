@@ -178,8 +178,15 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
     }
 
     private Properties getProperties(StringBuilder sb) throws IOException {
-        Properties props = null;
+        Properties props = new Properties();
         String newConfig = null;
+
+        int beginCountryCode = sb.toString().indexOf("country=");
+        if (beginCountryCode > -1) {
+            int endCountryCode = sb.toString().indexOf("\n", beginCountryCode);
+            props.setProperty("country", sb.toString().substring(beginCountryCode, endCountryCode).replace("\"", ""));
+        }
+
         int beginIndex = sb.toString().indexOf("network");
         int endIndex = sb.toString().indexOf('}');
         if (beginIndex >= 0 && endIndex > beginIndex) {
@@ -187,7 +194,6 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
             beginIndex = newConfig.indexOf('{');
             if (beginIndex >= 0) {
                 newConfig = newConfig.substring(beginIndex + 1);
-                props = new Properties();
                 props.load(new StringReader(newConfig));
                 Enumeration<Object> keys = props.keys();
                 while (keys.hasMoreElements()) {
@@ -212,6 +218,7 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
         // Populate the wifi config with default values
         wifiConfig.setMode(WifiMode.INFRA);
         wifiConfig.setSSID("");
+        wifiConfig.setWifiCountryCode(null);
         wifiConfig.setSecurity(WifiSecurity.NONE);
         wifiConfig.setPasskey("");
         wifiConfig.setHardwareMode("");
@@ -224,6 +231,9 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
     }
 
     private void buildWifiConfig(WifiConfig wifiConfig, Properties props) {
+
+        wifiConfig.setWifiCountryCode(props.getProperty("country"));
+
         String ssid = props.getProperty("ssid");
         if (ssid == null) {
             logger.warn("WPA in client mode is not configured");

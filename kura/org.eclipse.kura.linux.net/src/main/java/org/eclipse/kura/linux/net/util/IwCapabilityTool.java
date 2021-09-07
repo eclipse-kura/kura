@@ -47,7 +47,8 @@ public class IwCapabilityTool {
     private static final Pattern CHIPHER_CAPABILITY_PATTERN = Pattern.compile("^\\t\\t\\* ([\\w-\\d]+).*$");
     private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\tDevice supports RSN.*$");
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
-    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(".*\\* ([0-9]+) MHz \\[([0-9]*)\\] \\((.*) dBm\\)$");
+    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
+            .compile(".*\\* ([0-9]+) MHz \\[([0-9]*)\\] \\((.*) dBm\\)$");
 
     private enum ParseState {
         HAS_RSN,
@@ -56,9 +57,9 @@ public class IwCapabilityTool {
     }
 
     private static final EnumSet<ParseState> DONE = EnumSet.of(ParseState.HAS_RSN, ParseState.HAS_CHIPHERS);
-    
+
     protected IwCapabilityTool() {
-        
+
     }
 
     private static Optional<Matcher> skipTo(final BufferedReader reader, final Pattern pattern) throws IOException {
@@ -175,6 +176,7 @@ public class IwCapabilityTool {
 
     /**
      * Get the list of Wifi channels and frequencies
+     * 
      * @since 2.2
      **/
     public static List<WifiChannel> probeChannels(String ifaceName, CommandExecutorService executorService)
@@ -184,7 +186,7 @@ public class IwCapabilityTool {
 
             // ignore logical interfaces like "1-1.2"
             if (Character.isDigit(ifaceName.charAt(0))) {
-               return channels;
+                return channels;
             }
 
             final int phy = parseWiphyIndex(exec(new String[] { "iw", ifaceName, "info" }, executorService))
@@ -200,8 +202,7 @@ public class IwCapabilityTool {
     }
 
     private static void parseWifiChannelFrequency(final InputStream in, List<WifiChannel> channels) {
-        String result = new BufferedReader(new InputStreamReader(in))
-               .lines().collect(Collectors.joining("\n"));
+        String result = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
         for (String line : result.split("\n")) {
             logger.debug(line);
             Matcher m = FREQUENCY_CHANNEL_PATTERN.matcher(line);
@@ -217,22 +218,22 @@ public class IwCapabilityTool {
 
     /**
      * Get the Wifi Country Code
+     * 
      * @since 2.2
      */
-    public static String getWifiCountryCode(CommandExecutorService executorService)
-        throws KuraException {
-        String[] cmd = { "iw", "reg", "get"};
+    public static String getWifiCountryCode(CommandExecutorService executorService) throws KuraException {
+        String[] cmd = { "iw", "reg", "get" };
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
         int exitValue = status.getExitStatus().getExitCode();
         if (!status.getExitStatus().isSuccessful()) {
-           logger.warn("error executing command --- iw reg get --- exit value = {}", exitValue);
-           throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
+            logger.warn("error executing command --- iw reg get --- exit value = {}", exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
         String commandOutput = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());
-        for (String line:commandOutput.split("\n")) {
+        for (String line : commandOutput.split("\n")) {
             logger.info("Get Wifi Country Code Output = {}", line);
             Matcher m = COUNTRY_PATTERN.matcher(line);
             if (m.matches()) {
@@ -242,5 +243,26 @@ public class IwCapabilityTool {
             }
         }
         return "Unknown";
+    }
+
+    /**
+     * Set the Wifi Country Code
+     * 
+     * @since 7.0.0
+     */
+    public static void setWifiRegion(CommandExecutorService executorService, String countryCoude) {
+
+        Command command = new Command(new String[] { "iw", "set", "reg", countryCoude });
+        command.setTimeout(60);
+        command.setOutputStream(new ByteArrayOutputStream());
+        command.setErrorStream(new ByteArrayOutputStream());
+        CommandStatus status = executorService.execute(command);
+        if (status.getExitStatus().isSuccessful()) {
+            logger.info("Wi-Fi country code set to {}", countryCoude);
+        } else {
+            if (logger.isWarnEnabled()) {
+                logger.warn("Unable to set Wi-Fi country code.");
+            }
+        }
     }
 }

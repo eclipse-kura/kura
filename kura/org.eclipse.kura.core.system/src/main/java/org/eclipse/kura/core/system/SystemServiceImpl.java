@@ -353,8 +353,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             if (System.getProperty(KEY_KURA_STYLE_DIR) != null) {
                 this.kuraProperties.put(KEY_KURA_STYLE_DIR, System.getProperty(KEY_KURA_STYLE_DIR));
             }
-            if (System.getProperty(KEY_KURA_WIFI_TOP_CHANNEL) != null) {
-                this.kuraProperties.put(KEY_KURA_WIFI_TOP_CHANNEL, System.getProperty(KEY_KURA_WIFI_TOP_CHANNEL));
+            if (System.getProperty(KEY_KURA_WIFI_REGION) != null) {
+                this.kuraProperties.put(KEY_KURA_WIFI_REGION, System.getProperty(KEY_KURA_WIFI_REGION));
             }
             if (System.getProperty(KEY_KURA_KEY_STORE_PWD) != null) {
                 this.kuraProperties.put(KEY_KURA_KEY_STORE_PWD, System.getProperty(KEY_KURA_KEY_STORE_PWD));
@@ -931,14 +931,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     @Override
+    @Deprecated
     public int getKuraWifiTopChannel() {
-        final Optional<String> topWifiChannel = getProperty(KEY_KURA_WIFI_TOP_CHANNEL);
-        if (topWifiChannel.isPresent() && topWifiChannel.get().trim().length() > 0) {
-            return Integer.parseInt(topWifiChannel.get());
-        }
+        return -1;
+    }
 
-        logger.warn("The last wifi channel is not defined for this system - setting to lowest common value of 11");
-        return 11;
+    @Override
+    public String getKuraWifiRegion() {
+        final Optional<String> wifiRegion = getProperty(KEY_KURA_WIFI_REGION);
+
+        return wifiRegion.orElseGet(() -> {
+            logger.warn("No Wi-Fi region selected. World Wide Region will be used.");
+            return "WWR";
+        });
     }
 
     @Override

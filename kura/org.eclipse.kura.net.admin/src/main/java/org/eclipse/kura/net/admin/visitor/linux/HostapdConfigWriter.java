@@ -57,6 +57,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private static final String KURA_IEEE80211N = "KURA_IEEE80211N";
     private static final String KURA_WME_ENABLED = "KURA_WME_ENABLED";
     private static final String KURA_HW_MODE = "KURA_HW_MODE";
+    private static final String KURA_COUNTRY_CODE = "KURA_COUNTRY_CODE";
     private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 
     private static HostapdConfigWriter instance;
@@ -198,6 +199,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateIgnoreBroadcastSsid(wifiConfig, fileAsString);
 
+        fileAsString = updateCountryCode(wifiConfig.getWifiCountryCode(), fileAsString);
+
         File outputFile = getTemporaryFile();
 
         // everything is set and we haven't failed - write the file
@@ -205,6 +208,20 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         // move the file if we made it this far
         moveFile(interfaceName);
+    }
+
+    private String updateCountryCode(String wifiCountryCode, String fileAsString) {
+
+        String result = fileAsString;
+
+        if (wifiCountryCode != null) {
+            if (!wifiCountryCode.equalsIgnoreCase("WWR"))
+                result = fileAsString.replaceFirst(KURA_COUNTRY_CODE, wifiCountryCode);
+            else
+                result = fileAsString.replaceFirst(KURA_COUNTRY_CODE, "");
+        }
+
+        return result;
     }
 
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {

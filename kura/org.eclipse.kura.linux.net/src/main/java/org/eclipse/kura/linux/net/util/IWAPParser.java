@@ -35,6 +35,7 @@ class IWAPParser {
     private String ssid = null;
     private List<Long> bitrate = null;
     private long frequency = -1;
+    private int channel = -1;
     private byte[] hardwareAddress = null;
     private int strength = -1;
     private List<String> capabilities = null;
@@ -54,6 +55,7 @@ class IWAPParser {
         WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(this.ssid);
         wifiAccessPoint.setBitrate(this.bitrate);
         wifiAccessPoint.setFrequency(this.frequency);
+        wifiAccessPoint.setChannel(this.channel);
         wifiAccessPoint.setHardwareAddress(this.hardwareAddress);
         wifiAccessPoint.setMode(WifiMode.MASTER); // FIME - is this right? - always MASTER - or maybe
         // AD-HOC too?
@@ -139,6 +141,9 @@ class IWAPParser {
             while (st.hasMoreTokens()) {
                 this.capabilities.add(st.nextToken());
             }
+        } else if (propLine.startsWith("DS Parameter set:")) {
+            final String[] parts = propLine.split(" ");
+            this.channel = Integer.parseInt(parts[parts.length - 1]);
         } else {
             logger.debug("Ignoring line in scan result: {}", propLine);
         }

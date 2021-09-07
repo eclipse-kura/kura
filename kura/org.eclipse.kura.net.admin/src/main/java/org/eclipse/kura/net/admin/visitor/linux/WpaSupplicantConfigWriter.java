@@ -99,10 +99,11 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         }
     }
 
-    public void generateTempWpaSupplicantConf() throws KuraException {
+    public void generateTempWpaSupplicantConf(String countryCode) throws KuraException {
 
         try {
             String fileAsString = readResource(WPA_SUPPLICANT_CONF_RESOURCE);
+            fileAsString = updateCountryCode(countryCode, fileAsString);
             copyFile(fileAsString, Paths.get(TMP_WPA_CONFIG_FILE));
         } catch (Exception e) {
             throw KuraException.internalError("Failed to generate wpa_supplicant.conf");
@@ -287,8 +288,24 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ", getScanFrequenciesMHz(wifiConfig.getChannels()));
 
+        fileAsString = updateCountryCode(wifiConfig.getWifiCountryCode(), fileAsString);
+
         // everything is set and we haven't failed - write the file
         copyFile(fileAsString, Paths.get(configFile));
+    }
+
+    private String updateCountryCode(String wifiCountryCode, String fileAsString) {
+
+        String result = fileAsString;
+
+        if (wifiCountryCode != null) {
+            if (!wifiCountryCode.equalsIgnoreCase("WWR"))
+                result = fileAsString.replaceFirst("KURA_COUNTRY_CODE", wifiCountryCode);
+            else
+                result = fileAsString.replaceFirst("KURA_COUNTRY_CODE", "");
+        }
+
+        return result;
     }
 
     private String getAndUpdateModeContent(WifiConfig wifiConfig, String infraResource, String adhocResource,

@@ -351,4 +351,9 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
     public String getModemPppPort(ModemDevice modemDevice) throws KuraException {
         return null;
     }
+
+    @Override
+    public String getWifiRegion() {
+        return "WWR";
+    }
 }

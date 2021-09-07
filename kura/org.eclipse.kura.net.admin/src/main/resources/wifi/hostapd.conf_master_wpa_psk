@@ -20,6 +20,9 @@ ht_capab=KURA_HTCAPAB
 #example: 1
 channel=KURA_CHANNEL
 
+# the country code
+country_code="KURA_COUNTRY_CODE"
+
 # Logging and debugging settings: more of this in original config file
 logger_syslog=-1
 logger_syslog_level=2

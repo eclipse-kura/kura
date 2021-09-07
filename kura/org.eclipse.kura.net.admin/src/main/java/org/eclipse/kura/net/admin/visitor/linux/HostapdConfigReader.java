@@ -90,6 +90,7 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
                     wifiConfig.setSecurity(security);
                     wifiConfig.setPairwiseCiphers(pairwise);
                     wifiConfig.setRadioMode(wifiRadioMode);
+                    wifiConfig.setWifiCountryCode(hostapdProps.getProperty("country_code"));
 
                     if (ignoreSSID == 0) {
                         wifiConfig.setIgnoreSSID(false);
@@ -114,6 +115,7 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
                 wifiConfig.setIgnoreSSID(false);
                 wifiConfig.setBroadcast(true);
                 wifiConfig.setHardwareMode("b");
+                wifiConfig.setWifiCountryCode(null);
             }
             return wifiConfig;
         } catch (KuraException | IOException e) {

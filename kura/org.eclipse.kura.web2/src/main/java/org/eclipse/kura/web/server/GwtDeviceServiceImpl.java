@@ -79,8 +79,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             pairs.add(new GwtGroupedNVPair(DEV_INFO, "devDisplayName", systemService.getDeviceName()));
             pairs.add(new GwtGroupedNVPair(DEV_INFO, "devUptime",
                     formatUptime(Long.parseLong(systemAdminService.getUptime()))));
-            pairs.add(new GwtGroupedNVPair(DEV_INFO, "devLastWifiChannel",
-                    String.valueOf(systemService.getKuraWifiTopChannel())));
+            pairs.add(new GwtGroupedNVPair(DEV_INFO, "devWifiRegion", systemService.getKuraWifiRegion()));
 
             pairs.add(new GwtGroupedNVPair(DEV_HW, "devModelName", systemService.getModelName()));
             pairs.add(new GwtGroupedNVPair(DEV_HW, "devModelId", systemService.getModelId()));

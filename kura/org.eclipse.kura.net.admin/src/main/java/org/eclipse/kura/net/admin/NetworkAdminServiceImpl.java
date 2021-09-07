@@ -69,12 +69,12 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiChannel;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -1195,7 +1195,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         WifiMode wifiMode = getWifiMode(ifaceName);
         try {
             if (wifiMode == WifiMode.MASTER) {
-                startTemporaryWpaSupplicant(ifaceName);
+                startTemporaryWpaSupplicant(ifaceName, this.getWifiCountryCode());
             }
 
             logger.info("getWifiHotspots() :: scanning for available access points ...");
@@ -1203,7 +1203,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             List<WifiAccessPoint> wifiAccessPoints = getWifiAccessPoints(ifaceName);
             for (WifiAccessPoint wap : wifiAccessPoints) {
                 int frequency = (int) wap.getFrequency();
-                int channel = frequencyMhz2Channel(frequency);
+                int channel = wap.getChannel();
 
                 if (wap.getSSID() == null || wap.getSSID().length() == 0
                         || isHotspotInList(channel, wap.getSSID(), wifiHotspotInfoList)) {
@@ -1406,10 +1406,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
     }
 
-    private int frequencyMhz2Channel(int frequency) {
-        return (frequency - 2407) / 5;
-    }
-
     private void stopTemporaryWpaSupplicant(String ifaceName) throws KuraException {
         if (this.wpaSupplicantManager.isTempRunning()) {
             logger.debug("getWifiHotspots() :: stoping temporary instance of wpa_supplicant");
@@ -1418,10 +1414,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         reloadKernelModule(ifaceName, WifiMode.MASTER);
     }
 
-    private void startTemporaryWpaSupplicant(String ifaceName) throws KuraException {
+    private void startTemporaryWpaSupplicant(String ifaceName, String countryCode) throws KuraException {
         reloadKernelModule(ifaceName, WifiMode.INFRA);
         WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
-        wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
+        wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(countryCode);
 
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
         StringBuilder key = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -51,6 +51,7 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModems;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.IScanTool;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
@@ -74,6 +75,7 @@ import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.AbstractUsbDevice;
 import org.eclipse.kura.usb.UsbBlockDevice;
 import org.eclipse.kura.usb.UsbDevice;
@@ -119,6 +121,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     private EventAdmin eventAdmin;
     private UsbService usbService;
     private CommandExecutorService executorService;
+    private SystemService systemService;
 
     private SerialModemDevice serialModem;
     private LinuxNetworkUtil linuxNetworkUtil;
@@ -152,6 +155,14 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         this.executorService = null;
     }
 
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        this.systemService = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -169,6 +180,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
         this.executor.execute(() -> {
             try {
+
+                // setting region for all wifi network interfaces.
+                IwCapabilityTool.setWifiRegion(this.executorService, this.systemService.getKuraWifiRegion());
+
                 SupportedUsbModems.installModemDrivers(this.executorService);
 
                 // Add tty devices
@@ -275,10 +290,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         // FIXME - this method needs some work
 
         // see if we have global access by trying to ping - maybe there is a better way?
-        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1)) {
-            return NetworkState.CONNECTED_GLOBAL;
-        }
-        if (this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
+        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1) || this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
             return NetworkState.CONNECTED_GLOBAL;
         }
 
@@ -619,13 +631,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         String topic = event.getTopic();
         if (topic.equals(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC)) {
             // validate mandatory properties
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
+            if ((event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null)
+                    || (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null)
+                    || (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null)) {
                 return;
             }
             if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null
@@ -723,13 +731,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             }
         } else if (topic.equals(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC)) {
             // validate mandatory properties
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
+            if ((event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null)
+                    || (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null)
+                    || (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null)) {
                 return;
             }
 
@@ -1164,5 +1168,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    @Override
+    public String getWifiRegion() throws KuraException {
+        return IwCapabilityTool.getWifiCountryCode(this.executorService);
     }
 }

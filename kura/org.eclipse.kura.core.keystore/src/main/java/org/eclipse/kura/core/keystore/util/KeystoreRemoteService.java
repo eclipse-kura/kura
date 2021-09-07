@@ -108,8 +108,11 @@ public class KeystoreRemoteService {
         PrivateKey privkey = null;
         if (object instanceof org.bouncycastle.asn1.pkcs.PrivateKeyInfo) {
             privkey = converter.getPrivateKey((org.bouncycastle.asn1.pkcs.PrivateKeyInfo) object);
+        } else if (object instanceof org.bouncycastle.openssl.PEMKeyPair) {
+            privkey = converter.getKeyPair((org.bouncycastle.openssl.PEMKeyPair) object).getPrivate();
+        } else {
+            throw new IOException("PrivateKey not recognized.");
         }
-
         return new PrivateKeyEntry(privkey, certs);
     }
 

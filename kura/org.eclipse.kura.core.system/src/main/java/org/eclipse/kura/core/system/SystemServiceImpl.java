@@ -1232,13 +1232,54 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         String[] packages = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(), Charsets.UTF_8)
                 .split("\n");
         Arrays.asList(packages).stream().forEach(p -> {
-            String[] fields = p.split("\\s+");
+            String[] fields = p.split("\\s+"); // this works for dpkg and rpm where separator for version and name is a
+                                               // sequence of spaces
             if (fields.length >= 2) {
                 packagesInfo.add(new SystemResourceInfo(fields[0], fields[1], type));
             } else {
-                packagesInfo.add(new SystemResourceInfo(fields[0], "", type));
+                // apk case: need more complex parsing
+                String[] nameAndVersion = getApkNameAndVersion(fields[0]);
+                packagesInfo.add(new SystemResourceInfo(nameAndVersion[0], nameAndVersion[1], type));
             }
         });
+    }
+
+    /**
+     * An APK package name consists of the name and the version separated by "-".
+     * The name and the version itself can contain "-".
+     * Assumptions are that the fullName starts with the package name and ends with the version.
+     * 
+     * @param fullName
+     *            of the APK software package, e.g. "busybox-extras-1.31.1-r10"
+     * @return String array with name in position 0 and version in position 1
+     */
+    private String[] getApkNameAndVersion(String fullName) {
+        String[] split = fullName.split("-");
+        String name = "";
+        String version = "";
+        int matchIndex = 1000;
+
+        for (int i = 0; i < split.length; i++) {
+            String s = split[i];
+
+            if (i > 0 && i < matchIndex) {
+                // version is never at the beginning
+                if (s.matches("\\d+.(\\w+(.)?)+")) {
+                    version += s;
+                    matchIndex = i;
+                } else {
+                    name += "-" + s;
+                }
+            }
+            if (i > matchIndex) {
+                // everything else after match is version
+                version += "-" + s;
+            }
+        }
+        // assuming the first part belongs to the name
+        name = split[0] + name;
+
+        return new String[] { name, version };
     }
 
     private CommandStatus execute(String[] commandLine) {

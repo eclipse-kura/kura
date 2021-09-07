@@ -79,6 +79,8 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.useradmin.Role;
+import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +170,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     public void unsetExecutorService(CommandExecutorService executorService) {
         this.executorService = null;
+    }
+
+    public void setUserAdmin(final UserAdmin userAdmin) {
+        userAdmin.createRole("kura.network.admin", Role.GROUP);
     }
 
     // ----------------------------------------------------------------

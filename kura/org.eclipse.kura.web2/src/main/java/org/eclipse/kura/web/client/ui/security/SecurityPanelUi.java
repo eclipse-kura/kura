@@ -213,12 +213,6 @@ public class SecurityPanelUi extends Composite {
         } else if (this.tamperDetection.isActive()) {
             this.tamperDetectionPanel.refresh();
         }
-
-        if (!this.session.isNetAdminAvailable()) {
-            this.threatManager.setVisible(false);
-            this.threatManagerPanel.setVisible(false);
-            this.threatManager.removeFromParent();
-        }
     }
 
     public void setSession(GwtSession currentSession) {

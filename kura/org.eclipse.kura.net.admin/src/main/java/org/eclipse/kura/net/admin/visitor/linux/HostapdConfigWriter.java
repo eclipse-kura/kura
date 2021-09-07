@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -215,10 +215,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         String result = fileAsString;
 
         if (wifiCountryCode != null) {
-            if (!wifiCountryCode.equalsIgnoreCase("WWR"))
+            if (!wifiCountryCode.equalsIgnoreCase("WWR")) {
                 result = fileAsString.replaceFirst(KURA_COUNTRY_CODE, wifiCountryCode);
-            else
+            } else {
                 result = fileAsString.replaceFirst(KURA_COUNTRY_CODE, "");
+            }
         }
 
         return result;

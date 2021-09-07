@@ -72,8 +72,7 @@ public interface GwtNetworkService extends RemoteService {
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Get Wifi Country Code")
-    public String getWifiCountryCode(GwtXSRFToken xsrfToken)
-            throws GwtKuraException;
+    public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Verify Wifi credentials")
     public boolean verifyWifiCredentials(GwtXSRFToken xsrfToken, String interfaceName, GwtWifiConfig gwtWifiConfig)

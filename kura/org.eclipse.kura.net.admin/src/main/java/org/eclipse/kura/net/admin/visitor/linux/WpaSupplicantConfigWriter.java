@@ -299,10 +299,11 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String result = fileAsString;
 
         if (wifiCountryCode != null) {
-            if (!wifiCountryCode.equalsIgnoreCase("WWR"))
+            if (!wifiCountryCode.equalsIgnoreCase("WWR")) {
                 result = fileAsString.replaceFirst("KURA_COUNTRY_CODE", wifiCountryCode);
-            else
+            } else {
                 result = fileAsString.replaceFirst("KURA_COUNTRY_CODE", "");
+            }
         }
 
         return result;

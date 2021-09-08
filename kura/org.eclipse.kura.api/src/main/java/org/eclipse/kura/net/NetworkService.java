@@ -89,7 +89,7 @@ public interface NetworkService {
     /**
      * Returns the Wi-Fi region for all wi-fi network interfaces.
      * 
-     * @return the country code of the region or WWR for the Word Wide Region.
+     * @return the country code of the region or 00 for the Word Wide Region.
      */
 
     public String getWifiRegion() throws KuraException;

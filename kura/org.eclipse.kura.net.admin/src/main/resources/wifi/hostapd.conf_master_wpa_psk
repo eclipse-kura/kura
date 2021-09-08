@@ -21,7 +21,7 @@ ht_capab=KURA_HTCAPAB
 channel=KURA_CHANNEL
 
 # the country code
-country_code="KURA_COUNTRY_CODE"
+country_code=KURA_COUNTRY_CODE
 
 # Logging and debugging settings: more of this in original config file
 logger_syslog=-1

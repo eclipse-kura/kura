@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -252,7 +253,7 @@ public class IwCapabilityTool {
      */
     public static void setWifiRegion(CommandExecutorService executorService, String countryCoude) {
 
-        Command command = new Command(new String[] { "iw", "set", "reg", countryCoude });
+        Command command = new Command(new String[] { "iw", "reg", "set", countryCoude });
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
@@ -261,7 +262,9 @@ public class IwCapabilityTool {
             logger.info("Wi-Fi country code set to {}", countryCoude);
         } else {
             if (logger.isWarnEnabled()) {
-                logger.warn("Unable to set Wi-Fi country code.");
+                String errorOutput = new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(),
+                        StandardCharsets.UTF_8);
+                logger.warn("Unable to set Wi-Fi country code. {} ", errorOutput);
             }
         }
     }

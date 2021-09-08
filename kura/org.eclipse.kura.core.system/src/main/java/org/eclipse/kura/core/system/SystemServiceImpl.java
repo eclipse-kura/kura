@@ -942,7 +942,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         return wifiRegion.orElseGet(() -> {
             logger.warn("No Wi-Fi region selected. World Wide Region will be used.");
-            return "WWR";
+            return "00";
         });
     }
 

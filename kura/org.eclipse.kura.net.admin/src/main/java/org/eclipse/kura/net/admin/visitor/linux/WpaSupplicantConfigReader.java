@@ -183,8 +183,16 @@ public class WpaSupplicantConfigReader extends WifiConfigReaderHelper implements
 
         int beginCountryCode = sb.toString().indexOf("country=");
         if (beginCountryCode > -1) {
+            String countryCode = "";
+
             int endCountryCode = sb.toString().indexOf("\n", beginCountryCode);
-            props.setProperty("country", sb.toString().substring(beginCountryCode, endCountryCode).replace("\"", ""));
+            String[] countryCodeLine = sb.toString().substring(beginCountryCode, endCountryCode).split("=");
+
+            if (countryCodeLine.length > 1) {
+                countryCode = countryCodeLine[1];
+            }
+
+            props.setProperty("country", countryCode);
         }
 
         int beginIndex = sb.toString().indexOf("network");

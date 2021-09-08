@@ -7,7 +7,7 @@ ctrl_interface_group=wheel
 # Country code
 # The ISO/IEC alpha2 country code for the country in which this device is
 # currently operating.
-country="KURA_COUNTRY_CODE"
+country=KURA_COUNTRY_CODE
 
 network={
 	mode=KURA_MODE

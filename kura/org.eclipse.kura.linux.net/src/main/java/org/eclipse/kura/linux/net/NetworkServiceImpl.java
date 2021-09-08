@@ -75,7 +75,6 @@ import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.AbstractUsbDevice;
 import org.eclipse.kura.usb.UsbBlockDevice;
 import org.eclipse.kura.usb.UsbDevice;
@@ -121,7 +120,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     private EventAdmin eventAdmin;
     private UsbService usbService;
     private CommandExecutorService executorService;
-    private SystemService systemService;
 
     private SerialModemDevice serialModem;
     private LinuxNetworkUtil linuxNetworkUtil;
@@ -155,14 +153,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         this.executorService = null;
     }
 
-    public void setSystemService(SystemService systemService) {
-        this.systemService = systemService;
-    }
-
-    public void unsetSystemService(SystemService systemService) {
-        this.systemService = null;
-    }
-
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -180,9 +170,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
         this.executor.execute(() -> {
             try {
-
-                // setting region for all wifi network interfaces.
-                IwCapabilityTool.setWifiRegion(this.executorService, this.systemService.getKuraWifiRegion());
 
                 SupportedUsbModems.installModemDrivers(this.executorService);
 

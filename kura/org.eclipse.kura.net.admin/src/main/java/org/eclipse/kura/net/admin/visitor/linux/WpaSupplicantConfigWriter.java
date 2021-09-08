@@ -296,17 +296,12 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
     private String updateCountryCode(String wifiCountryCode, String fileAsString) {
 
-        String result = fileAsString;
-
-        if (wifiCountryCode != null) {
-            if (!wifiCountryCode.equalsIgnoreCase("WWR")) {
-                result = fileAsString.replaceFirst("KURA_COUNTRY_CODE", wifiCountryCode);
-            } else {
-                result = fileAsString.replaceFirst("KURA_COUNTRY_CODE", "");
-            }
+        if (wifiCountryCode != null && !wifiCountryCode.equalsIgnoreCase("00")) {
+            return fileAsString.replaceFirst("KURA_COUNTRY_CODE", wifiCountryCode);
+        } else {
+            return fileAsString.replaceFirst("KURA_COUNTRY_CODE", "");
         }
 
-        return result;
     }
 
     private String getAndUpdateModeContent(WifiConfig wifiConfig, String infraResource, String adhocResource,

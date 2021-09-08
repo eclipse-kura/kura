@@ -1257,7 +1257,7 @@
             <id>intel-up2-ubuntu-18</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, chrony, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>   
+                    wireless-tools, chrony, ifupdown, wpa_supplicant, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>   
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1460,6 +1460,8 @@
                                         <require>dos2unix</require>
                                         <require>net-tools</require>
                                         <require>chrony</require>
+                                        <require>ifupdown</require>
+                                        <require>wpa_supplicant</require>
                                     </requires>
                                     <entries>
                                         <entry>

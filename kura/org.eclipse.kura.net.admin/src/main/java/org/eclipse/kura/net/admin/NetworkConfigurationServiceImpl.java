@@ -44,6 +44,7 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.EthernetInterface;
 import org.eclipse.kura.net.LoopbackInterface;
@@ -57,6 +58,7 @@ import org.eclipse.kura.net.admin.visitor.linux.LinuxReadVisitor;
 import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemManagerService;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
@@ -83,6 +85,7 @@ public class NetworkConfigurationServiceImpl
     private UsbService usbService;
     private ModemManagerService modemManagerService;
     private CommandExecutorService executorService;
+    private SystemService systemService;
 
     private List<NetworkConfigurationVisitor> readVisitors;
     private List<NetworkConfigurationVisitor> writeVisitors;
@@ -138,6 +141,14 @@ public class NetworkConfigurationServiceImpl
         this.executorService = null;
     }
 
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService executorService) {
+        this.systemService = null;
+    }
+
     // ----------------------------------------------------------------
     //
     // Activation APIs
@@ -155,10 +166,14 @@ public class NetworkConfigurationServiceImpl
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
+        IwCapabilityTool.setWifiRegion(this.executorService, this.systemService.getKuraWifiRegion());
+
         this.executorUtil = Executors.newSingleThreadScheduledExecutor();
 
         this.executorUtil.schedule(() -> {
             // make sure we don't miss the setting of firstConfig
+            // setting region for all wifi network interfaces.
+
             NetworkConfigurationServiceImpl.this.firstConfig = false;
         }, 3, TimeUnit.MINUTES);
 

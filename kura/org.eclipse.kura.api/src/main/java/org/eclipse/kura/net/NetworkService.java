@@ -85,12 +85,4 @@ public interface NetworkService {
     public String getModemUsbPort(String interfaceName);
 
     public String getModemPppPort(ModemDevice modemDevice) throws KuraException;
-
-    /**
-     * Returns the Wi-Fi region for all wi-fi network interfaces.
-     * 
-     * @return the country code of the region or 00 for the Word Wide Region.
-     */
-
-    public String getWifiRegion() throws KuraException;
 }

@@ -94,6 +94,8 @@ public class NetworkConfigurationServiceImpl
     private boolean firstConfig = true;
     private LinuxNetworkUtil linuxNetworkUtil;
 
+    private static final String GLOBAL_WIFI_COUNTRY_CODE_SETTING = "net.interface.wifi.countryCode";
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -166,13 +168,10 @@ public class NetworkConfigurationServiceImpl
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
         componentContext.getBundleContext().registerService(EventHandler.class.getName(), this, d);
 
-        IwCapabilityTool.setWifiRegion(this.executorService, this.systemService.getKuraWifiRegion());
-
         this.executorUtil = Executors.newSingleThreadScheduledExecutor();
 
         this.executorUtil.schedule(() -> {
             // make sure we don't miss the setting of firstConfig
-            // setting region for all wifi network interfaces.
 
             NetworkConfigurationServiceImpl.this.firstConfig = false;
         }, 3, TimeUnit.MINUTES);
@@ -186,6 +185,23 @@ public class NetworkConfigurationServiceImpl
         } else {
             logger.debug("Props...{}", properties);
         }
+    }
+
+    private void checkAndUpdateWifiCountryCodeProp(Map<String, Object> properties) {
+
+        String countryCode = null;
+
+        // setting region for all wifi network interfaces.
+        try {
+            countryCode = this.systemService.getKuraWifiRegion();
+            if (!getWifiRegion().equals(countryCode)) {
+                IwCapabilityTool.setWifiCountryCode(this.executorService, countryCode);
+            }
+        } catch (KuraException e) {
+            logger.warn("Unable to set wi-fi country code");
+        }
+
+        properties.put(GLOBAL_WIFI_COUNTRY_CODE_SETTING, countryCode);
     }
 
     protected void initVisitors() {
@@ -242,6 +258,9 @@ public class NetworkConfigurationServiceImpl
 
         try {
             if (properties != null) {
+
+                checkAndUpdateWifiCountryCodeProp(properties);
+
                 logger.debug("new properties - updating");
                 logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
 
@@ -1045,5 +1064,15 @@ public class NetworkConfigurationServiceImpl
         }
 
         return tocd;
+    }
+
+    @Override
+    public String getWifiRegion() throws KuraException {
+        return IwCapabilityTool.getWifiCountryCode(this.executorService);
+    }
+
+    @Override
+    public void setWifiRegion(String countryCode) throws KuraException {
+        IwCapabilityTool.setWifiCountryCode(this.executorService, countryCode);
     }
 }

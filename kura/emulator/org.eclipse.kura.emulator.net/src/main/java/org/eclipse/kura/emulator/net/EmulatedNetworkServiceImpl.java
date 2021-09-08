@@ -352,8 +352,4 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
         return null;
     }
 
-    @Override
-    public String getWifiRegion() {
-        return "00";
-    }
 }

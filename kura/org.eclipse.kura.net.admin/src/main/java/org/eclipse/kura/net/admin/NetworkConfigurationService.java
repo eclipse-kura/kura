@@ -23,4 +23,22 @@ public interface NetworkConfigurationService {
 
     public NetworkConfiguration getNetworkConfiguration() throws KuraException;
 
+    /**
+     * Returns the Wi-Fi region for all Wi-Fi network interfaces.
+     * 
+     * @return the country code of the region or 00 for the Word Wide Region.
+     */
+
+    public String getWifiRegion() throws KuraException;
+
+    /**
+     * Set the Country Code for all Wi-fi network interfaces.
+     * 
+     * @param countryCode
+     *            Country code in ISO 3166-1 alpha-2 format.
+     * 
+     */
+
+    public void setWifiRegion(String countryCode) throws KuraException;
+
 }

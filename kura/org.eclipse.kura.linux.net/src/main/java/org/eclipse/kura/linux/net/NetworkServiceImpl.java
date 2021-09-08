@@ -51,7 +51,6 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModems;
 import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.IScanTool;
-import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
@@ -1157,8 +1156,4 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         }
     }
 
-    @Override
-    public String getWifiRegion() throws KuraException {
-        return IwCapabilityTool.getWifiCountryCode(this.executorService);
-    }
 }

@@ -19,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -249,23 +248,24 @@ public class IwCapabilityTool {
     /**
      * Set the Wifi Country Code
      * 
+     * @throws KuraException
+     * 
      * @since 7.0.0
      */
-    public static void setWifiRegion(CommandExecutorService executorService, String countryCoude) {
-
-        Command command = new Command(new String[] { "iw", "reg", "set", countryCoude });
+    public static void setWifiCountryCode(CommandExecutorService executorService, String countryCode) throws KuraException {
+        String[] cmd = new String[] { "iw", "reg", "set", countryCode };
+        Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
         if (status.getExitStatus().isSuccessful()) {
-            logger.info("Wi-Fi country code set to {}", countryCoude);
+            logger.info("Wi-Fi country code set to {}", countryCode);
         } else {
-            if (logger.isWarnEnabled()) {
-                String errorOutput = new String(((ByteArrayOutputStream) status.getErrorStream()).toByteArray(),
-                        StandardCharsets.UTF_8);
-                logger.warn("Unable to set Wi-Fi country code. {} ", errorOutput);
-            }
+            logger.warn("error executing command --- iw reg set {}--- exit value = {}", countryCode,
+                    status.getExitStatus().getExitCode());
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd),
+                    status.getExitStatus().getExitCode());
         }
     }
 }

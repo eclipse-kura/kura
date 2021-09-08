@@ -78,6 +78,8 @@ public class NetworkConfiguration {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfiguration.class);
 
+    private static final String GLOBAL_WIFI_COUNTRY_CODE_SETTING = "net.interface.wifi.countryCode";
+
     private final Map<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs;
     private Map<String, Object> properties;
     private boolean recomputeProperties;
@@ -791,6 +793,9 @@ public class NetworkConfiguration {
         properties.put(prefix + ".pingAccessPoint", wifiConfig.pingAccessPoint());
 
         properties.put(prefix + ".ignoreSSID", wifiConfig.ignoreSSID());
+
+        // We are skipping Wi-Fi Country Code because we don't waint it in the snapshot.
+        // properties.put(GLOBAL_WIFI_COUNTRY_CODE_SETTING, wifiConfig.getWifiCountryCode());
     }
 
     private static WifiConfig getWifiConfig(String netIfConfigPrefix, WifiMode mode, Map<String, Object> properties)
@@ -813,6 +818,15 @@ public class NetworkConfiguration {
         }
         logger.trace("SSID is {}", ssid);
         wifiConfig.setSSID(ssid);
+
+        // countryCode
+        key = GLOBAL_WIFI_COUNTRY_CODE_SETTING;
+        String countryCode = (String) properties.get(key);
+        if (countryCode == null) {
+            countryCode = "";
+        }
+        logger.trace("CountryCode is {}", countryCode);
+        wifiConfig.setWifiCountryCode(countryCode);
 
         // driver
         key = prefix + ".driver";

@@ -25,7 +25,7 @@
 
     <artifactId>org.apache.activemq.artemis</artifactId>
     <version>2.6.100-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <description>ActiveMQ Artemis dependencies for Eclipse Kura</description>
 

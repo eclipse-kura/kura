@@ -8,7 +8,7 @@
     </parent>
     <artifactId>usb4java-javax</artifactId>
     <version>1.2.600-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>usb4java-javax</name>
     <description>javax.usb 1.0.2 API using usb4java</description>
     <properties>

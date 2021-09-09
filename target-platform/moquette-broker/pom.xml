@@ -24,7 +24,7 @@
     </parent>
 
     <artifactId>moquette-broker</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>

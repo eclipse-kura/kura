@@ -26,7 +26,7 @@
 	
 	<artifactId>jdk.dio.armv6hf</artifactId>
 	
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<build>
 		<plugins>

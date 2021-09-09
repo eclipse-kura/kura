@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>com.codeminders.hidapi.x86_64</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <name>Native libraries for 'com.codeminders.hidapi' on x86_64</name>
 

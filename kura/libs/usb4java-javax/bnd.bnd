@@ -1,0 +1,8 @@
+Export-Package: \
+	javax.usb;version="1.0.2",\
+	javax.usb.event;version="1.0.2",\
+	javax.usb.util;version="1.0.2"
+	
+-includeresource.lib: \
+	src/lib/usb4java-javax-1.2.0.jar;lib:=true,\
+	@src/lib/usb-api-1.0.2.jar!/*

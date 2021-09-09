@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>com.codeminders.hidapi</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <name>Java API for working with Human Interface USB Devices (HID)</name>
     <description>JNI wrapper around C/C++ HIDAPI library providing simple java API to work with devices such as USB gamepads, joysticks, keyboards etc.</description>

@@ -24,7 +24,7 @@
 
     <artifactId>org.eclipse.kura.jetty.customizer</artifactId>
     <version>1.0.200-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <properties>
       <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/kura/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>

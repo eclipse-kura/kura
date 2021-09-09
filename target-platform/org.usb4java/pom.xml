@@ -8,7 +8,7 @@
     </parent>
     <artifactId>org.usb4java</artifactId>
     <version>1.2.600-SNAPSHOT</version>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
     <name>usb4java</name>
     <description>usb4java libraries using libusb</description>
     <url>usb4java.org/</url>

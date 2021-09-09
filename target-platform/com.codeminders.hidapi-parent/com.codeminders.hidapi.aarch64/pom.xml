@@ -27,7 +27,7 @@
     </parent>
 
     <artifactId>com.codeminders.hidapi.aarch64</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <name>Native libraries for 'com.codeminders.hidapi' on ARM 64 bits</name>
 

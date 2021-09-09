@@ -25,7 +25,7 @@
     </parent>
 	
 	<artifactId>jdk.dio</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 	
 	<build>
 		<plugins>

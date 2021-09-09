@@ -1,0 +1,3 @@
+Import-Package: \
+	javax.microedition.io;resolution:=optional,\
+	*

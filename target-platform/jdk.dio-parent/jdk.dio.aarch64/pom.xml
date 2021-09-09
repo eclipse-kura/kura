@@ -27,7 +27,7 @@
 	
 	<artifactId>jdk.dio.aarch64</artifactId>
 	
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<build>
 		<plugins>

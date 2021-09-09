@@ -26,7 +26,7 @@
     </parent>
 
     <artifactId>org.eclipse.soda.dk.comm.x86_64</artifactId>
-    <packaging>bundle</packaging>
+    <packaging>jar</packaging>
 
     <name>Native libraries for 'org.eclipse.soda.dk.comm' on x86_64</name>
 

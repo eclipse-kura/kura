@@ -12,7 +12,7 @@
 	<artifactId>com.gwt.user</artifactId>
 	<version>1.1.200-SNAPSHOT</version>
 
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<name>gwt-user</name>
 	<description>GWT User Library</description>

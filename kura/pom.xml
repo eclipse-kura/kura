@@ -26,6 +26,7 @@
 
 	<modules>
 		<module>target-definition</module>
+		<module>libs</module>
 		<module>org.eclipse.kura.api</module>
 
 		<module>org.eclipse.kura.asset.cloudlet.provider</module>
@@ -166,6 +167,7 @@
 		<org.osgi.service.wireadmin.version>1.0.1</org.osgi.service.wireadmin.version>
 		
 		<log4j.version>2.14.1</log4j.version>
+		<slf4j.api.version>1.7.25</slf4j.api.version>
 	</properties>
 
 	<distributionManagement>
@@ -614,9 +616,10 @@
 							<configuration>
 								<bnd><![CDATA[
 Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v2.0
 -contract: *
 -includeresource.about: -about.html,\
-						-about_files/.*
+						 about_files/=-about_files/
 -verbose: true
 							]]></bnd>
 							</configuration>
@@ -632,6 +635,7 @@ Bundle-Vendor: Eclipse Kura
 								<artifactFragment>true</artifactFragment>
 								<bnd><![CDATA[
 Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v2.0
 -contract: *
 -includeresource.about: -about.html,\
 						-about_files/.*
@@ -848,6 +852,13 @@ Bundle-Vendor: Eclipse Kura
 				<version>${org.osgi.service.wireadmin.version}</version>
 			</dependency>
 			
+			<!-- microedition.io -->
+			<dependency>
+				<groupId>org.eclipse.platform</groupId>
+				<artifactId>org.eclipse.equinox.io</artifactId>
+				<version>1.1.300</version>
+			</dependency>
+			
 			<!-- Logging -->
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
@@ -858,6 +869,11 @@ Bundle-Vendor: Eclipse Kura
 				<groupId>org.apache.logging.log4j</groupId>
 				<artifactId>log4j</artifactId>
 				<version>${log4j.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.api.version}</version>
 			</dependency>
 
 		</dependencies>

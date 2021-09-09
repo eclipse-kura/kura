@@ -16,6 +16,7 @@ package org.eclipse.kura.linux.net.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
@@ -31,10 +32,13 @@ class IWAPParser {
 
     private static final Logger logger = LoggerFactory.getLogger(IWAPParser.class);
 
+    private static final Pattern CHANNEL_PATTERN = Pattern.compile("(?<=^\\s+\\*\\sprimary channel: )\\d+");
+
     // Top-level properties we'll be picking up
     private String ssid = null;
     private List<Long> bitrate = null;
     private long frequency = -1;
+    private int channel = -1;
     private byte[] hardwareAddress = null;
     private int strength = -1;
     private List<String> capabilities = null;
@@ -54,6 +58,7 @@ class IWAPParser {
         WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(this.ssid);
         wifiAccessPoint.setBitrate(this.bitrate);
         wifiAccessPoint.setFrequency(this.frequency);
+        wifiAccessPoint.setChannel(this.channel);
         wifiAccessPoint.setHardwareAddress(this.hardwareAddress);
         wifiAccessPoint.setMode(WifiMode.MASTER); // FIME - is this right? - always MASTER - or maybe
         // AD-HOC too?
@@ -139,6 +144,9 @@ class IWAPParser {
             while (st.hasMoreTokens()) {
                 this.capabilities.add(st.nextToken());
             }
+        } else if (propLine.contains("primary channel")) {
+            String channelString = CHANNEL_PATTERN.matcher(propLine).group();
+            this.channel = Integer.parseInt(channelString);
         } else {
             logger.debug("Ignoring line in scan result: {}", propLine);
         }

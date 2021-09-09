@@ -15,6 +15,7 @@ package org.eclipse.kura.core.net;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
@@ -26,6 +27,7 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
     private final String ssid;
     private byte[] hardwareAddress;
     private long frequency;
+    private int channel;
     private WifiMode mode;
     private List<Long> bitrate;
     private int strength;
@@ -58,6 +60,14 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
 
     public void setFrequency(long frequency) {
         this.frequency = frequency;
+    }
+
+    public int getChannel() {
+        return channel;
+    }
+
+    public void setChannel(int channel) {
+        this.channel = channel;
     }
 
     @Override
@@ -121,7 +131,8 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
         if (this.hardwareAddress != null && this.hardwareAddress.length == 6) {
             sb.append(" :: hardwareAddress=").append(NetworkUtil.macToString(this.hardwareAddress));
         }
-        sb.append(" :: frequency=").append(this.frequency).append(" :: mode=").append(this.mode);
+        sb.append(" :: frequency=").append(this.frequency).append(" :: channel=").append(this.channel)
+                .append(" :: mode=").append(this.mode);
         if (this.bitrate != null && this.bitrate.size() > 0) {
             sb.append(" :: bitrate=");
             for (Long rate : this.bitrate) {
@@ -148,77 +159,26 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.bitrate == null ? 0 : this.bitrate.hashCode());
-        result = prime * result + (this.capabilities == null ? 0 : this.capabilities.hashCode());
-        result = prime * result + (int) (this.frequency ^ this.frequency >>> 32);
-        result = prime * result + Arrays.hashCode(this.hardwareAddress);
-        result = prime * result + (this.mode == null ? 0 : this.mode.hashCode());
-        result = prime * result + (this.rsnSecurity == null ? 0 : this.rsnSecurity.hashCode());
-        result = prime * result + (this.ssid == null ? 0 : this.ssid.hashCode());
-        result = prime * result + this.strength;
-        result = prime * result + (this.wpaSecurity == null ? 0 : this.wpaSecurity.hashCode());
+        result = prime * result + Arrays.hashCode(hardwareAddress);
+        result = prime * result + Objects.hash(bitrate, capabilities, channel, frequency, mode, rsnSecurity, ssid,
+                strength, wpaSecurity);
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null) {
+        if (obj == null)
             return false;
-        }
-        if (!(obj instanceof WifiAccessPointImpl)) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         WifiAccessPointImpl other = (WifiAccessPointImpl) obj;
-        if (this.bitrate == null) {
-            if (other.bitrate != null) {
-                return false;
-            }
-        } else if (!this.bitrate.equals(other.bitrate)) {
-            return false;
-        }
-        if (this.capabilities == null) {
-            if (other.capabilities != null) {
-                return false;
-            }
-        } else if (!this.capabilities.equals(other.capabilities)) {
-            return false;
-        }
-        if (this.frequency != other.frequency) {
-            return false;
-        }
-        if (!Arrays.equals(this.hardwareAddress, other.hardwareAddress)) {
-            return false;
-        }
-        if (this.mode != other.mode) {
-            return false;
-        }
-        if (this.rsnSecurity == null) {
-            if (other.rsnSecurity != null) {
-                return false;
-            }
-        } else if (!this.rsnSecurity.equals(other.rsnSecurity)) {
-            return false;
-        }
-        if (this.ssid == null) {
-            if (other.ssid != null) {
-                return false;
-            }
-        } else if (!this.ssid.equals(other.ssid)) {
-            return false;
-        }
-        if (this.strength != other.strength) {
-            return false;
-        }
-        if (this.wpaSecurity == null) {
-            if (other.wpaSecurity != null) {
-                return false;
-            }
-        } else if (!this.wpaSecurity.equals(other.wpaSecurity)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(bitrate, other.bitrate) && Objects.equals(capabilities, other.capabilities)
+                && channel == other.channel && frequency == other.frequency
+                && Arrays.equals(hardwareAddress, other.hardwareAddress) && mode == other.mode
+                && Objects.equals(rsnSecurity, other.rsnSecurity) && Objects.equals(ssid, other.ssid)
+                && strength == other.strength && Objects.equals(wpaSecurity, other.wpaSecurity);
     }
+
 }

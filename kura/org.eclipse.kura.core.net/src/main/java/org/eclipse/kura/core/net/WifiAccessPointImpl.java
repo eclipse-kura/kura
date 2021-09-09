@@ -173,9 +173,8 @@ public class WifiAccessPointImpl implements WifiAccessPoint {
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (getClass() != obj.getClass())
             return false;
-        }
         WifiAccessPointImpl other = (WifiAccessPointImpl) obj;
         return Objects.equals(bitrate, other.bitrate) && Objects.equals(capabilities, other.capabilities)
                 && channel == other.channel && frequency == other.frequency

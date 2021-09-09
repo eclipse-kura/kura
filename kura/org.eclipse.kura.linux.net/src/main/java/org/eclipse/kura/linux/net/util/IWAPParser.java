@@ -16,6 +16,7 @@ package org.eclipse.kura.linux.net.util;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.core.net.WifiAccessPointImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
@@ -30,6 +31,8 @@ import org.slf4j.LoggerFactory;
 class IWAPParser {
 
     private static final Logger logger = LoggerFactory.getLogger(IWAPParser.class);
+
+    private static final Pattern CHANNEL_PATTERN = Pattern.compile("(?<=^\\s+\\*\\sprimary channel: )\\d+");
 
     // Top-level properties we'll be picking up
     private String ssid = null;
@@ -142,10 +145,8 @@ class IWAPParser {
                 this.capabilities.add(st.nextToken());
             }
         } else if (propLine.contains("primary channel")) {
-            String[] tokens = propLine.split(" ");
-            if (tokens.length > 1) {
-                this.channel = Integer.parseInt(tokens[tokens.length - 1]);
-            }
+            String channelString = CHANNEL_PATTERN.matcher(propLine).group();
+            this.channel = Integer.parseInt(channelString);
         } else {
             logger.debug("Ignoring line in scan result: {}", propLine);
         }

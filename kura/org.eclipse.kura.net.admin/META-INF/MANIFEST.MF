@@ -48,7 +48,7 @@ Import-Package: javax.microedition.io,
  org.osgi.service.io;version="1.0.0",
  org.osgi.service.useradmin;version="1.0.0",
  org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.6.4"
+ org.slf4j;version="1.7.25"
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy

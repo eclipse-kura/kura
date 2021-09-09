@@ -50,7 +50,6 @@ import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -61,7 +60,6 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
     private static final Logger logger = LoggerFactory.getLogger(FirewallConfigurationServiceImpl.class);
 
     private EventAdmin eventAdmin;
-    private ServiceRegistration<?> serviceRegistration;
     private LinuxFirewall firewall;
     private CommandExecutorService executorService;
 
@@ -86,15 +84,17 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
     }
 
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
-        logger.debug("activate()");
+        logger.info("Activating FirewallConfigurationService...");
 
         this.firewall = getLinuxFirewall();
         updated(properties);
+
+        logger.info("Activating FirewallConfigurationService... Done.");
     }
 
     protected void deactivate(ComponentContext componentContext) {
-        logger.debug("deactivate()");
-        this.serviceRegistration.unregister();
+        logger.info("Deactivating FirewallConfigurationService...");
+        logger.info("Deactivating FirewallConfigurationService... Done.");
     }
 
     public synchronized void updated(Map<String, Object> properties) {

@@ -937,8 +937,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return Integer.parseInt(topWifiChannel.get());
         }
 
-        logger.warn("The last wifi channel is not defined for this system - setting to lowest common value of 11");
-        return 11;
+        logger.warn("The last wifi channel is not defined for this system - setting fake value.");
+        return Integer.MAX_VALUE;
     }
 
     @Override

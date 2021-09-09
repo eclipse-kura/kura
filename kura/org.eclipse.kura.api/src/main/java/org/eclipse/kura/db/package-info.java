@@ -17,4 +17,6 @@
  * Provides APIs to acquire and use a JDBC Connection to the embedded SQL database running in the framework.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("2.0.0")
 package org.eclipse.kura.db;

@@ -14,4 +14,6 @@
  * Provides services for managing requests and response between the gateway and the remote cloud platform.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
 package org.eclipse.kura.cloudconnection.request;

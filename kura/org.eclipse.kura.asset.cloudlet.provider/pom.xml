@@ -23,7 +23,7 @@
 
 	<artifactId>org.eclipse.kura.asset.cloudlet.provider</artifactId>
 	<version>1.0.500-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 	
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

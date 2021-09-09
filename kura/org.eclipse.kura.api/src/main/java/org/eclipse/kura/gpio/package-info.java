@@ -17,4 +17,6 @@
  * Provides APIs to acquire and use GPIO resources available on the system.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.1.0")
 package org.eclipse.kura.gpio;

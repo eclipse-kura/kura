@@ -17,4 +17,6 @@
  * Contains interface to execute shell commands.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.2.0")
 package org.eclipse.kura.command;

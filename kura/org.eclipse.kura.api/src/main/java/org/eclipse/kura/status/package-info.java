@@ -17,4 +17,7 @@
  * Provides service to notify the status of the connection to the cloud.
  *
  */
+
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.2")
 package org.eclipse.kura.status;

@@ -15,4 +15,6 @@
  *
  * @since 1.4
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.2.0")
 package org.eclipse.kura.wire.multiport;

@@ -17,4 +17,6 @@
  * Provides APIs to manage connections to Bluetooth LE devices.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.3.0")
 package org.eclipse.kura.bluetooth.le;

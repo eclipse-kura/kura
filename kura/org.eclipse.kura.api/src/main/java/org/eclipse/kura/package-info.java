@@ -15,4 +15,6 @@
 /**
  * Contains the necessary classes for the framework related exceptions and error codes
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.6.0")
 package org.eclipse.kura;

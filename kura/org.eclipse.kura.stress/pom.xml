@@ -25,7 +25,7 @@
 
 	<artifactId>org.eclipse.kura.stress</artifactId>
 	<version>1.0.400-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

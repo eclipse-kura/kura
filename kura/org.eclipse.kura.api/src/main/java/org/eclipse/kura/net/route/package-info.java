@@ -17,4 +17,6 @@
  * Provides services to manage interfaces and their priorities in the static routing table.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.2")
 package org.eclipse.kura.net.route;

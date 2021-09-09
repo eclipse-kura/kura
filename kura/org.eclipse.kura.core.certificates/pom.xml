@@ -25,7 +25,7 @@
 
 	<artifactId>org.eclipse.kura.core.certificates</artifactId>
 	<version>1.0.600-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

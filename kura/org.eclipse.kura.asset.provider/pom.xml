@@ -23,7 +23,7 @@
 
 	<artifactId>org.eclipse.kura.asset.provider</artifactId>
 	<version>2.0.300-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 	
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

@@ -17,4 +17,6 @@
  * Defines the recommended payload structure for the messages sent a remote cloud platform.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.4.0")
 package org.eclipse.kura.message;

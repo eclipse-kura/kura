@@ -17,4 +17,6 @@
  * Provides services and interfaces for finding and managing USB devices within the system.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.3.0")
 package org.eclipse.kura.usb;

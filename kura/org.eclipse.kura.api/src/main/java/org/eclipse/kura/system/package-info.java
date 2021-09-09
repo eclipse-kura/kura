@@ -17,4 +17,6 @@
  * Contains services to get system information and perform basic system tasks.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.5.0")
 package org.eclipse.kura.system;

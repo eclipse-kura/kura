@@ -13,4 +13,6 @@
 /**
  * Provides interfaces to listen to notifications from the Data Service.
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.1")
 package org.eclipse.kura.data.listener;

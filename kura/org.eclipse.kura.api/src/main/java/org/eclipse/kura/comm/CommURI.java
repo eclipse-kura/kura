@@ -14,8 +14,6 @@ package org.eclipse.kura.comm;
 
 import java.net.URISyntaxException;
 
-import javax.comm.SerialPort;
-
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,26 +24,92 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class CommURI {
 
-    public static final int DATABITS_5 = SerialPort.DATABITS_5;
-    public static final int DATABITS_6 = SerialPort.DATABITS_6;
-    public static final int DATABITS_7 = SerialPort.DATABITS_7;
-    public static final int DATABITS_8 = SerialPort.DATABITS_8;
+	// As defined in javax.comm.SerialPort;
+	/**
+	 * Define the databits5 (int) constant.
+	 */
+	public static final int DATABITS_5 = 5;
 
-    public static final int PARITY_EVEN = SerialPort.PARITY_EVEN;
-    public static final int PARITY_MARK = SerialPort.PARITY_MARK;
-    public static final int PARITY_NONE = SerialPort.PARITY_NONE;
-    public static final int PARITY_ODD = SerialPort.PARITY_ODD;
-    public static final int PARITY_SPACE = SerialPort.PARITY_SPACE;
+	/**
+	 * Define the databits6 (int) constant.
+	 */
+	public static final int DATABITS_6 = 6;
 
-    public static final int STOPBITS_1 = SerialPort.STOPBITS_1;
-    public static final int STOPBITS_1_5 = SerialPort.STOPBITS_1_5;
-    public static final int STOPBITS_2 = SerialPort.STOPBITS_2;
+	/**
+	 * Define the databits7 (int) constant.
+	 */
+	public static final int DATABITS_7 = 7;
 
-    public static final int FLOWCONTROL_NONE = SerialPort.FLOWCONTROL_NONE;
-    public static final int FLOWCONTROL_RTSCTS_IN = SerialPort.FLOWCONTROL_RTSCTS_IN;
-    public static final int FLOWCONTROL_RTSCTS_OUT = SerialPort.FLOWCONTROL_RTSCTS_OUT;
-    public static final int FLOWCONTROL_XONXOFF_IN = SerialPort.FLOWCONTROL_XONXOFF_IN;
-    public static final int FLOWCONTROL_XONXOFF_OUT = SerialPort.FLOWCONTROL_XONXOFF_OUT;
+	/**
+	 * Define the databits8 (int) constant.
+	 */
+	public static final int DATABITS_8 = 8;
+
+	/**
+	 * Define the stopbits1 (int) constant.
+	 */
+	public static final int STOPBITS_1 = 1;
+
+	/**
+	 * Define the stopbits2 (int) constant.
+	 */
+	public static final int STOPBITS_2 = 2;
+
+	/**
+	 * Define the stopbits15 (int) constant.
+	 */
+	public static final int STOPBITS_1_5 = 3;
+
+	/**
+	 * Define the parity none (int) constant.
+	 */
+	public static final int PARITY_NONE = 0;
+
+	/**
+	 * Define the parity odd (int) constant.
+	 */
+	public static final int PARITY_ODD = 1;
+
+	/**
+	 * Define the parity even (int) constant.
+	 */
+	public static final int PARITY_EVEN = 2;
+
+	/**
+	 * Define the parity mark (int) constant.
+	 */
+	public static final int PARITY_MARK = 3;
+
+	/**
+	 * Define the parity space (int) constant.
+	 */
+	public static final int PARITY_SPACE = 4;
+
+	/**
+	 * Define the flowcontrol none (int) constant.
+	 */
+	public static final int FLOWCONTROL_NONE = 0;
+
+	/**
+	 * Define the flowcontrol rtscts in (int) constant.
+	 */
+	public static final int FLOWCONTROL_RTSCTS_IN = 1;
+
+	/**
+	 * Define the flowcontrol rtscts out (int) constant.
+	 */
+	public static final int FLOWCONTROL_RTSCTS_OUT = 2;
+
+	/**
+	 * Define the flowcontrol xonxoff in (int) constant.
+	 */
+	public static final int FLOWCONTROL_XONXOFF_IN = 4;
+
+	/**
+	 * Define the flowcontrol xonxoff out (int) constant.
+	 */
+	public static final int FLOWCONTROL_XONXOFF_OUT = 8;
+
 
     private final String port;
     private final int baudRate;

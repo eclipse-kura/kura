@@ -14,4 +14,6 @@
  * Provides services for subscribing to remote servers and allows to invoke local applications.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
 package org.eclipse.kura.cloudconnection.subscriber;

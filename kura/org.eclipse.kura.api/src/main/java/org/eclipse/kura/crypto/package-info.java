@@ -17,4 +17,6 @@
  * Contains interfaces to cryptographic functions and used to abstract the effective implementation.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.3.0")
 package org.eclipse.kura.crypto;

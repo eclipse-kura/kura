@@ -17,4 +17,6 @@
  * Provides services for connecting and communicating with a MQTT broker.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.1.2")
 package org.eclipse.kura.data;

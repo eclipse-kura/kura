@@ -17,8 +17,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.apache.commons.io.output.NullOutputStream;
-
 /**
  *
  * The Command class includes the informations needed by the {@link CommandExecutorService} to run a system command.
@@ -58,8 +56,8 @@ public class Command {
 
     public Command(String[] commandLine) {
         this.commandLine = commandLine;
-        this.out = new NullOutputStream();
-        this.err = new NullOutputStream();
+        this.out = OutputStream.nullOutputStream();
+        this.err = OutputStream.nullOutputStream();
     }
 
     public String[] getCommandLine() {

@@ -17,4 +17,6 @@
  * Provides APIs to manage USB devices attached to the system.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.1")
 package org.eclipse.kura.linux.udev;

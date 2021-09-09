@@ -24,7 +24,7 @@
 
 	<artifactId>org.eclipse.kura.util</artifactId>
 	<version>1.1.200-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 	
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

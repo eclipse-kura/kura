@@ -17,4 +17,6 @@
  * Provides service for controlling hardware watchdog timer.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.2")
 package org.eclipse.kura.watchdog;

@@ -5,7 +5,7 @@
     <groupId>${groupId}</groupId>
 	<artifactId>${artifactId}</artifactId>
     <version>${version}</version>
-    <packaging>eclipse-plugin</packaging>
+    <packaging>jar</packaging>
 
     <repositories>
         <repository>

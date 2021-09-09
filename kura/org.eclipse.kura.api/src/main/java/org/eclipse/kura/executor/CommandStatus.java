@@ -15,8 +15,6 @@ package org.eclipse.kura.executor;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.io.output.NullOutputStream;
-
 /**
  *
  * The CommandStatus object is returned by the {@link CommandExecutorService} after the execution of a command.
@@ -48,8 +46,8 @@ public class CommandStatus {
     public CommandStatus(Command command, ExitStatus exitStatus) {
         this.command = command;
         this.exitStatus = exitStatus;
-        this.outputStream = new NullOutputStream();
-        this.errorStream = new NullOutputStream();
+        this.outputStream = OutputStream.nullOutputStream();
+        this.errorStream = OutputStream.nullOutputStream();
         this.isTimedout = false;
     }
 

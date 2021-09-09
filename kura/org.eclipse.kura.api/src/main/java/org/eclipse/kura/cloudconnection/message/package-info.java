@@ -14,4 +14,6 @@
  * Defines the recommended structure for the messages produced by an application that need to be sent to a remote cloud
  * platform.
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
 package org.eclipse.kura.cloudconnection.message;

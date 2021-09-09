@@ -17,4 +17,6 @@
  * Interfaces for all DHCP server instances.
  *
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.1.0")
 package org.eclipse.kura.net.dhcp;

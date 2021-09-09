@@ -30,5 +30,5 @@
 
 	<artifactId>org.eclipse.kura.rest.asset.provider</artifactId>
 	<version>1.0.400-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 </project>

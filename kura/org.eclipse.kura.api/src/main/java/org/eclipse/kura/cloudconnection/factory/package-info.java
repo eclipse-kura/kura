@@ -13,4 +13,6 @@
 /**
  * Contains interfaces to manage the construction of Cloud Connection Services.
  */
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
 package org.eclipse.kura.cloudconnection.factory;

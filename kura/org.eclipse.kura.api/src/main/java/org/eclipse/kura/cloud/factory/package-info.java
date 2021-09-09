@@ -14,4 +14,6 @@
  * Contains interfaces to manage the construction of Cloud Services.
  */
 @Deprecated
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.1")
 package org.eclipse.kura.cloud.factory;

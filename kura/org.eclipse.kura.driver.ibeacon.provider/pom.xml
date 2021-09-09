@@ -24,7 +24,7 @@
 
 	<artifactId>org.eclipse.kura.driver.ibeacon.provider</artifactId>
 	<version>1.0.200-SNAPSHOT</version>
-	<packaging>eclipse-plugin</packaging>
+	<packaging>jar</packaging>
 	
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>

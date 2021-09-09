@@ -937,10 +937,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             return Integer.parseInt(topWifiChannel.get());
         }
 
-        if (logger.isDebugEnabled()) {
-            logger.debug("The last wifi channel is not defined for this system - setting fake value.");
-        }
-
+        logger.warn("The last wifi channel is not defined for this system - setting fake value.");
         return Integer.MAX_VALUE;
     }
 

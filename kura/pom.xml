@@ -168,6 +168,25 @@
 		
 		<log4j.version>2.14.1</log4j.version>
 		<slf4j.api.version>1.7.25</slf4j.api.version>
+		<slf4j.simple.version>1.7.25</slf4j.simple.version>
+		
+		<!-- Frameworks -->
+		<org.apache.felix.framework.version>7.0.1</org.apache.felix.framework.version>
+		<org.eclipse.osgi.version>3.16.300</org.eclipse.osgi.version>
+		<!-- Tests -->
+		<servicemix.junit.version>4.13.2_1</servicemix.junit.version>
+		<junit.version>4.13</junit.version>
+		<jsonassert.version>1.5.0</jsonassert.version>
+		<com.h2database.version>1.4.200</com.h2database.version>
+		<com.puppycrawl.tools.checkstyle.version>8.28</com.puppycrawl.tools.checkstyle.version>
+		<powermock-api-mockito.version>1.7.4</powermock-api-mockito.version>
+		<powermock-module-junit4.version>1.7.4</powermock-module-junit4.version>
+		<junit-jupiter.compile.version>5.6.0</junit-jupiter.compile.version>
+		<junit-platform.compile.version>1.6.0</junit-platform.compile.version>
+		<junit-jupiter.version>5.7.2</junit-jupiter.version>
+		<junit-platform.version>1.7.2</junit-platform.version>
+		<assertj.version>3.20.2</assertj.version>
+		<osgi.test.version>1.0.1</osgi.test.version>
 	</properties>
 
 	<distributionManagement>
@@ -437,6 +456,14 @@
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-baseline-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-resolver-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-testing-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -650,7 +677,7 @@ Bundle-License: Eclipse Public License v2.0
 				<plugin>
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-testing-maven-plugin</artifactId>
-					<version>${bnd-maven-plugin.version}</version>
+					<version>${bnd.version}</version>
 					<executions>
 						<!-- OSGi integration tests execution -->
 						<execution>
@@ -683,7 +710,7 @@ Bundle-License: Eclipse Public License v2.0
 				<plugin>
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-resolver-maven-plugin</artifactId>
-					<version>${bnd-maven-plugin.version}</version>
+					<version>${bnd.version}</version>
 					<executions>
 						<!-- Integration Test Configuration -->
 						<execution>
@@ -875,7 +902,184 @@ Bundle-License: Eclipse Public License v2.0
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.api.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-simple</artifactId>
+				<version>${slf4j.simple.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<!-- Tests -->
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.common</artifactId>
+				<version>${osgi.test.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.assertj.framework</artifactId>
+				<version>${osgi.test.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.assertj.promise</artifactId>
+				<version>${osgi.test.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.junit4</artifactId>
+				<version>${osgi.test.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.junit5</artifactId>
+				<version>${osgi.test.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.junit5.cm</artifactId>
+				<version>${osgi.test.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-commons</artifactId>
+				<version>${junit-platform.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-params</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-engine</artifactId>
+				<version>${junit-platform.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-launcher</artifactId>
+				<version>${junit-platform.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.platform</groupId>
+				<artifactId>junit-platform-testkit</artifactId>
+				<version>${junit-platform.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>${assertj.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>3.11.2</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.junit</artifactId>
+				<version>${servicemix.junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>biz.aQute.tester.junit-platform</artifactId>
+				<version>5.3.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+			<!-- Frameworks -->
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.framework</artifactId>
+				<version>${org.apache.felix.framework.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.platform</groupId>
+				<artifactId>org.eclipse.osgi</artifactId>
+				<version>${org.eclipse.osgi.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-commons</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.common</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.assertj.framework</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.assertj.promise</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.junit5</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.junit5.cm</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 </project>

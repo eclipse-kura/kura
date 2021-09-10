@@ -162,8 +162,7 @@ public abstract class RouteConfigIP<T extends IPAddress> implements RouteConfig 
 
     @Override
     public boolean isValid() {
-        if (this.destination == null || this.gateway == null || this.netmask == null
-                || this.interfaceName == null) {
+        if (this.destination == null || this.gateway == null || this.netmask == null || this.interfaceName == null) {
             return false;
         }
 

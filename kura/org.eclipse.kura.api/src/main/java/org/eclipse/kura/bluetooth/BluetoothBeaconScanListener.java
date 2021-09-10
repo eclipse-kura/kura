@@ -18,7 +18,8 @@ import org.osgi.annotation.versioning.ConsumerType;
  * BluetoothBeaconScanListener must be implemented by any class
  * wishing to receive BLE beacon data
  *
- * @deprecated This class is deprecated in favor of {@link org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener}
+ * @deprecated This class is deprecated in favor of
+ *             {@link org.eclipse.kura.bluetooth.le.beacon.listener.BluetoothLeBeaconListener}
  *
  */
 @ConsumerType

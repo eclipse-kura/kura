@@ -43,7 +43,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * an implementation of CloudServiceFactory could create new configurations
  * for all the stack layers thus constructing a new whole stack instance.
  * <br>
- * The Kura {@link org.eclipse.kura.cloud.CloudService}/{@link org.eclipse.kura.data.DataService}/{@link org.eclipse.kura.data.DataTransportService}
+ * The Kura
+ * {@link org.eclipse.kura.cloud.CloudService}/{@link org.eclipse.kura.data.DataService}/{@link org.eclipse.kura.data.DataTransportService}
  * cloud stack represents an example of the above architecture
  * and can serve as a reference implementation for alternative Cloud stacks.
  * <br>
@@ -79,16 +80,19 @@ public interface CloudServiceFactory {
     String getFactoryPid();
 
     /**
-     * Creates a {@link org.eclipse.kura.cloud.CloudService} instance and initializes its configuration with the defaults
+     * Creates a {@link org.eclipse.kura.cloud.CloudService} instance and initializes its configuration with the
+     * defaults
      * expressed in the Metatype of the target component factory providing the CloudService.
      * <br>
-     * Implementation will normally rely on {@link org.eclipse.kura.configuration.ConfigurationService#createFactoryConfiguration}
+     * Implementation will normally rely on
+     * {@link org.eclipse.kura.configuration.ConfigurationService#createFactoryConfiguration}
      * to perform the actual creation of the component instance and the persistence of the component configuration.
      * <br>
      * The created CloudService instance will have its <i>kura.service.pid</i> property
      * set to the value provided in the <i>pid</i> parameter.
      * <br>
-     * Kura apps can look up the created CloudService instance through {@link org.osgi.service.component.ComponentContext#locateServices}
+     * Kura apps can look up the created CloudService instance through
+     * {@link org.osgi.service.component.ComponentContext#locateServices}
      * by filtering on the <i>kura.service.pid</i> property.
      * <br>
      * Likely, Kura apps will rely on OSGi Declarative Services to have their CloudService dependencies satisfied based
@@ -142,7 +146,8 @@ public interface CloudServiceFactory {
     List<String> getStackComponentsPids(String pid) throws KuraException;
 
     /**
-     * Deletes a previously created configuration deactivating the associated {@link org.eclipse.kura.cloud.CloudService} instance.
+     * Deletes a previously created configuration deactivating the associated
+     * {@link org.eclipse.kura.cloud.CloudService} instance.
      *
      * @param pid
      *            the Kura persistent identifier, <i>kura.service.pid</i>, of the factory component configuration.

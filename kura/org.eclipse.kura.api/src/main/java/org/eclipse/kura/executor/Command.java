@@ -17,6 +17,8 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.kura.executor.internal.NullOutputStream;
+
 /**
  *
  * The Command class includes the informations needed by the {@link CommandExecutorService} to run a system command.
@@ -56,8 +58,8 @@ public class Command {
 
     public Command(String[] commandLine) {
         this.commandLine = commandLine;
-        this.out = OutputStream.nullOutputStream();
-        this.err = OutputStream.nullOutputStream();
+        this.out = new NullOutputStream();
+        this.err = new NullOutputStream();
     }
 
     public String[] getCommandLine() {

@@ -71,7 +71,8 @@ public interface CloudCallService {
             throws KuraConnectException, KuraTimeoutException, KuraStoreException, KuraException;
 
     /**
-     * Returns true if the underlying {@link org.eclipse.kura.data.DataService} is currently connected to the remote server.
+     * Returns true if the underlying {@link org.eclipse.kura.data.DataService} is currently connected to the remote
+     * server.
      *
      * @return
      */

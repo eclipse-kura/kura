@@ -25,10 +25,11 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>target-definition</module>
 		<module>libs</module>
 		<module>org.eclipse.kura.api</module>
-
+		<module>org.eclipse.kura.util</module>
+<!-- 		<module>target-definition</module> -->
+<!--
 		<module>org.eclipse.kura.asset.cloudlet.provider</module>
 		<module>org.eclipse.kura.asset.provider</module>
 		<module>org.eclipse.kura.asset.helper.provider</module>
@@ -84,7 +85,7 @@
 		<module>org.eclipse.kura.net.admin</module>
 		<module>org.eclipse.kura.protocol.modbus</module>
 		<module>org.eclipse.kura.stress</module>
-		<module>org.eclipse.kura.util</module>
+
 		<module>org.eclipse.kura.wire.camel</module>
 		<module>org.eclipse.kura.wire.script.filter.provider</module>
 		<module>org.eclipse.kura.wire.h2db.component.provider</module>
@@ -121,10 +122,10 @@
 		<module>features</module>
 		<module>emulator</module>
 
-		<!-- final p2 repository -->
 		<module>org.eclipse.kura-p2</module>
 
 		<module>test-util</module>
+-->
 	</modules>
 
 	<properties>
@@ -233,17 +234,6 @@
 				<module>tools</module>
 			</modules>
 		</profile>
-		<profile>
-			<id>tests</id>
-			<activation>
-				<property>
-					<name>!skipTests</name>
-				</property>
-			</activation>
-			<modules>
-				<module>test</module>
-			</modules>
-		</profile>
 
 		<profile>
 			<id>web</id>
@@ -257,8 +247,8 @@
 				</property>
 			</activation>
 			<modules>
-				<module>org.eclipse.kura.web2</module>
-				<module>org.eclipse.kura.web2.ext</module>
+<!-- 				<module>org.eclipse.kura.web2</module> -->
+<!-- 				<module>org.eclipse.kura.web2.ext</module> -->
 			</modules>
 		</profile>
 		<profile>
@@ -267,9 +257,115 @@
 				<check.plugins.exist.remote>true</check.plugins.exist.remote>
 			</properties>
 		</profile>
+		<profile>
+			<id>osgitest</id>
+			<activation>
+				<file>
+					<exists>tests.bndrun</exists>
+				</file>
+
+			</activation>
+			<build>
+				<pluginManagement>
+					<plugins>				<!-- This dynamically calculates all the things we need to run our code. -->
+						<plugin>
+							<groupId>biz.aQute.bnd</groupId>
+							<artifactId>bnd-testing-maven-plugin</artifactId>
+							<version>${bnd.version}</version>
+							<executions>
+								<!-- OSGi integration tests execution -->
+								<execution>
+									<id>testing</id>
+									<goals>
+										<goal>testing</goal>
+									</goals>
+									<configuration>
+										<bndruns>
+											<bndrun>tests.bndrun</bndrun>
+										</bndruns>
+										<bundles>
+											<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+										</bundles>
+										<failOnChanges>false</failOnChanges>
+										<includeDependencyManagement>true</includeDependencyManagement>
+										<useMavenDependencies>true</useMavenDependencies>
+										<resolve>true</resolve>
+										<scopes>
+											<scope>compile</scope>
+											<scope>runtime</scope>
+											<scope>test</scope>
+											<scope>provided</scope>
+										</scopes>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
+						<!-- This dynamically calculates all the things we need to run our 
+							code. -->
+						<plugin>
+							<groupId>biz.aQute.bnd</groupId>
+							<artifactId>bnd-resolver-maven-plugin</artifactId>
+							<version>${bnd.version}</version>
+							<executions>
+								<!-- Integration Test Configuration -->
+								<execution>
+									<goals>
+										<goal>resolve</goal>
+									</goals>
+								</execution>
+								<execution>
+									<id>resolve-test</id>
+									<phase>pre-integration-test</phase>
+									<goals>
+										<goal>resolve</goal>
+									</goals>
+									<configuration>
+										<bndruns>
+											<bndrun>tests.bndrun</bndrun>
+										</bndruns>
+										<bundles>
+											<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+										</bundles>
+										<failOnChanges>false</failOnChanges>
+										<includeDependencyManagement>true</includeDependencyManagement>
+										<useMavenDependencies>true</useMavenDependencies>
+										<reportOptional>false</reportOptional>
+										<scopes>
+											<scope>compile</scope>
+											<scope>runtime</scope>
+											<scope>test</scope>
+											<scope>provided</scope>
+										</scopes>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.22.2</version>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-resolver-maven-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-testing-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 	<repositories>
+	<!--
 		<repository>
 			<id>license-feature</id>
 			<url>http://download.eclipse.org/cbi/updates/license/</url>
@@ -285,6 +381,7 @@
 			<layout>p2</layout>
 			<url>file:///${kura.basedir}/target-definition/test-deps/repository/</url>
 		</repository>
+		 -->
 		<repository>
 			<id>kura_addons</id>
 			<name>Eclipse Kura Addons Maven Repository</name>
@@ -455,14 +552,6 @@
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-baseline-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-resolver-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-testing-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 		<pluginManagement>
@@ -673,78 +762,7 @@ Bundle-License: Eclipse Public License v2.0
 						</execution>
 					</executions>
 				</plugin>
-				<!-- This dynamically calculates all the things we need to run our code. -->
-				<plugin>
-					<groupId>biz.aQute.bnd</groupId>
-					<artifactId>bnd-testing-maven-plugin</artifactId>
-					<version>${bnd.version}</version>
-					<executions>
-						<!-- OSGi integration tests execution -->
-						<execution>
-							<id>testing</id>
-							<goals>
-								<goal>testing</goal>
-							</goals>
-							<configuration>
-								<bndruns>
-									<bndrun>tests.bndrun</bndrun>
-								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
-								<failOnChanges>false</failOnChanges>
-								<includeDependencyManagement>true</includeDependencyManagement>
-								<useMavenDependencies>true</useMavenDependencies>
-								<resolve>true</resolve>
-								<scopes>
-									<scope>compile</scope>
-									<scope>runtime</scope>
-									<scope>test</scope>
-									<scope>provided</scope>
-								</scopes>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<!-- This dynamically calculates all the things we need to run our code. -->
-				<plugin>
-					<groupId>biz.aQute.bnd</groupId>
-					<artifactId>bnd-resolver-maven-plugin</artifactId>
-					<version>${bnd.version}</version>
-					<executions>
-						<!-- Integration Test Configuration -->
-						<execution>
-							<goals>
-								<goal>resolve</goal>
-							</goals>
-						</execution>
-						<execution>
-							<id>resolve-test</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-								<goal>resolve</goal>
-							</goals>
-							<configuration>
-								<bndruns>
-									<bndrun>tests.bndrun</bndrun>
-								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
-								<failOnChanges>false</failOnChanges>
-								<includeDependencyManagement>true</includeDependencyManagement>
-								<useMavenDependencies>true</useMavenDependencies>
-								<reportOptional>false</reportOptional>
-								<scopes>
-									<scope>compile</scope>
-									<scope>runtime</scope>
-									<scope>test</scope>
-									<scope>provided</scope>
-								</scopes>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
+
 				<plugin>
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-baseline-maven-plugin</artifactId>

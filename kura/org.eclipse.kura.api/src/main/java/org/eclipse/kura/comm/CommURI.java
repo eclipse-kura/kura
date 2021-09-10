@@ -24,92 +24,91 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class CommURI {
 
-	// As defined in javax.comm.SerialPort;
-	/**
-	 * Define the databits5 (int) constant.
-	 */
-	public static final int DATABITS_5 = 5;
+    // As defined in javax.comm.SerialPort;
+    /**
+     * Define the databits5 (int) constant.
+     */
+    public static final int DATABITS_5 = 5;
 
-	/**
-	 * Define the databits6 (int) constant.
-	 */
-	public static final int DATABITS_6 = 6;
+    /**
+     * Define the databits6 (int) constant.
+     */
+    public static final int DATABITS_6 = 6;
 
-	/**
-	 * Define the databits7 (int) constant.
-	 */
-	public static final int DATABITS_7 = 7;
+    /**
+     * Define the databits7 (int) constant.
+     */
+    public static final int DATABITS_7 = 7;
 
-	/**
-	 * Define the databits8 (int) constant.
-	 */
-	public static final int DATABITS_8 = 8;
+    /**
+     * Define the databits8 (int) constant.
+     */
+    public static final int DATABITS_8 = 8;
 
-	/**
-	 * Define the stopbits1 (int) constant.
-	 */
-	public static final int STOPBITS_1 = 1;
+    /**
+     * Define the stopbits1 (int) constant.
+     */
+    public static final int STOPBITS_1 = 1;
 
-	/**
-	 * Define the stopbits2 (int) constant.
-	 */
-	public static final int STOPBITS_2 = 2;
+    /**
+     * Define the stopbits2 (int) constant.
+     */
+    public static final int STOPBITS_2 = 2;
 
-	/**
-	 * Define the stopbits15 (int) constant.
-	 */
-	public static final int STOPBITS_1_5 = 3;
+    /**
+     * Define the stopbits15 (int) constant.
+     */
+    public static final int STOPBITS_1_5 = 3;
 
-	/**
-	 * Define the parity none (int) constant.
-	 */
-	public static final int PARITY_NONE = 0;
+    /**
+     * Define the parity none (int) constant.
+     */
+    public static final int PARITY_NONE = 0;
 
-	/**
-	 * Define the parity odd (int) constant.
-	 */
-	public static final int PARITY_ODD = 1;
+    /**
+     * Define the parity odd (int) constant.
+     */
+    public static final int PARITY_ODD = 1;
 
-	/**
-	 * Define the parity even (int) constant.
-	 */
-	public static final int PARITY_EVEN = 2;
+    /**
+     * Define the parity even (int) constant.
+     */
+    public static final int PARITY_EVEN = 2;
 
-	/**
-	 * Define the parity mark (int) constant.
-	 */
-	public static final int PARITY_MARK = 3;
+    /**
+     * Define the parity mark (int) constant.
+     */
+    public static final int PARITY_MARK = 3;
 
-	/**
-	 * Define the parity space (int) constant.
-	 */
-	public static final int PARITY_SPACE = 4;
+    /**
+     * Define the parity space (int) constant.
+     */
+    public static final int PARITY_SPACE = 4;
 
-	/**
-	 * Define the flowcontrol none (int) constant.
-	 */
-	public static final int FLOWCONTROL_NONE = 0;
+    /**
+     * Define the flowcontrol none (int) constant.
+     */
+    public static final int FLOWCONTROL_NONE = 0;
 
-	/**
-	 * Define the flowcontrol rtscts in (int) constant.
-	 */
-	public static final int FLOWCONTROL_RTSCTS_IN = 1;
+    /**
+     * Define the flowcontrol rtscts in (int) constant.
+     */
+    public static final int FLOWCONTROL_RTSCTS_IN = 1;
 
-	/**
-	 * Define the flowcontrol rtscts out (int) constant.
-	 */
-	public static final int FLOWCONTROL_RTSCTS_OUT = 2;
+    /**
+     * Define the flowcontrol rtscts out (int) constant.
+     */
+    public static final int FLOWCONTROL_RTSCTS_OUT = 2;
 
-	/**
-	 * Define the flowcontrol xonxoff in (int) constant.
-	 */
-	public static final int FLOWCONTROL_XONXOFF_IN = 4;
+    /**
+     * Define the flowcontrol xonxoff in (int) constant.
+     */
+    public static final int FLOWCONTROL_XONXOFF_IN = 4;
 
-	/**
-	 * Define the flowcontrol xonxoff out (int) constant.
-	 */
-	public static final int FLOWCONTROL_XONXOFF_OUT = 8;
-
+    /**
+     * Define the flowcontrol xonxoff out (int) constant.
+     */
+    public static final int FLOWCONTROL_XONXOFF_OUT = 8;
 
     private final String port;
     private final int baudRate;
@@ -230,9 +229,9 @@ public class CommURI {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("comm:").append(this.port).append(";baudrate=").append(this.baudRate).append(";databits=")
-                .append(this.dataBits).append(";stopbits=").append(this.stopBits).append(";parity=")
-                .append(this.parity).append(";flowcontrol=").append(this.flowControl).append(";timeout=")
-                .append(this.openTimeout).append(";receivetimeout=").append(this.receiveTimeout);
+                .append(this.dataBits).append(";stopbits=").append(this.stopBits).append(";parity=").append(this.parity)
+                .append(";flowcontrol=").append(this.flowControl).append(";timeout=").append(this.openTimeout)
+                .append(";receivetimeout=").append(this.receiveTimeout);
         return sb.toString();
     }
 

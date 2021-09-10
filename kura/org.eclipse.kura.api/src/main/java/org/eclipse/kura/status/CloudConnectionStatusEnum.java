@@ -17,6 +17,7 @@ package org.eclipse.kura.status;
  *
  */
 public enum CloudConnectionStatusEnum {
+
     OFF,
     FAST_BLINKING,
     SLOW_BLINKING,

@@ -77,8 +77,8 @@ import org.osgi.annotation.versioning.ProviderType;
  * to specific applications running on specific devices.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher} and 
- * {@link org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber}
+ * @deprecated Please consider using {@link org.eclipse.kura.cloudconnection.publisher.CloudPublisher} and
+ *             {@link org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber}
  */
 @ProviderType
 @Deprecated
@@ -101,7 +101,8 @@ public interface CloudClient {
     /**
      * Returns an indication of whether the connection to the remote server is established.
      * If your application needs to manage the connection directly, it can use the
-     * {@link org.eclipse.kura.data.DataService#connect} and {@link org.eclipse.kura.data.DataService#disconnect} methods.
+     * {@link org.eclipse.kura.data.DataService#connect} and {@link org.eclipse.kura.data.DataService#disconnect}
+     * methods.
      *
      * @return boolean, whether connection to broker is established.
      */

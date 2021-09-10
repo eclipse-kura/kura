@@ -18,6 +18,7 @@ package org.eclipse.kura.cloud;
  * @since 1.2
  */
 public enum CloudPayloadEncoding {
+
     KURA_PROTOBUF("kura-protobuf"),
     SIMPLE_JSON("simple-json");
 

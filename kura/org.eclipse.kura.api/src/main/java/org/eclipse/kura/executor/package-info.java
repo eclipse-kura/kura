@@ -8,10 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  * 
  * Contributors:
- *  Stefan Bischof
+ * Stefan Bischof
  ******************************************************************************/
-
-
 
 @org.osgi.annotation.bundle.Export
 @org.osgi.annotation.versioning.Version("1.0.0")

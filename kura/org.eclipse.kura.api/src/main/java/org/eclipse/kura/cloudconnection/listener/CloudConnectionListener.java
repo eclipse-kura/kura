@@ -17,7 +17,8 @@ import org.osgi.annotation.versioning.ConsumerType;
 /**
  * The CloudConnectionListener interface is implemented by applications that want to be notified on connection
  * status changes.
- * To be notified, the implementor needs to register itself to a specific {@link org.eclipse.kura.cloudconnection.CloudConnectionManager}.
+ * To be notified, the implementor needs to register itself to a specific
+ * {@link org.eclipse.kura.cloudconnection.CloudConnectionManager}.
  *
  * @since 2.0
  */

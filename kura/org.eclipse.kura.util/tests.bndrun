@@ -14,8 +14,8 @@
 	junit-platform-commons;version='[1.7.2,1.7.3)',\
 	junit-platform-engine;version='[1.7.2,1.7.3)',\
 	junit-platform-launcher;version='[1.7.2,1.7.3)',\
-	org.eclipse.kura.util;version='[1.1.200,1.1.201)',\
-	org.eclipse.kura.util-tests;version='[1.1.200,1.1.201)',\
+	org.eclipse.kura.util;version='[1.2.0,1.2.1)',\
+	org.eclipse.kura.util-tests;version='[1.2.0,1.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.test.common;version='[1.0.1,1.0.2)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\

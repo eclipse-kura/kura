@@ -152,6 +152,7 @@
 		<org.osgi.core.version>8.0.0</org.osgi.core.version>
 		<org.osgi.annotation.version>7.0.0</org.osgi.annotation.version>
 		<org.osgi.namespace.extender.version>1.0.1</org.osgi.namespace.extender.version>
+		<org.osgi.service.deploymentadmin.version>1.1.0</org.osgi.service.deploymentadmin.version>
 		<org.osgi.service.cm.version>1.6.0</org.osgi.service.cm.version>
 		<org.osgi.service.component.version>1.4.0</org.osgi.service.component.version>
 		<org.osgi.service.io.version>1.0.0</org.osgi.service.io.version>
@@ -838,6 +839,17 @@ Bundle-License: Eclipse Public License v2.0
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.component.annotations</artifactId>
+				<version>${org.osgi.service.component.version}</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.deploymentadmin</artifactId>
+				<version>${org.osgi.service.deploymentadmin.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.event</artifactId>
 				<version>${org.osgi.service.event.version}</version>
 			</dependency>
@@ -854,6 +866,11 @@ Bundle-License: Eclipse Public License v2.0
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.metatype</artifactId>
+				<version>${org.osgi.service.metatype.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.metatype.annotations</artifactId>
 				<version>${org.osgi.service.metatype.version}</version>
 			</dependency>
 			<dependency>

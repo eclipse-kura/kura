@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 
 public class CommURITest extends TestCase {
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testSyntax() throws Exception {
         CommURI commUri = new CommURI.Builder("/dev/ttyUSB0").withBaudRate(4800).build();

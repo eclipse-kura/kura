@@ -14,10 +14,11 @@ package org.eclipse.kura.core.linux.executor.privileged;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.apache.commons.io.Charsets;
+import org.eclipse.kura.annotation.ServicePid;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
@@ -27,9 +28,13 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.executor.Signal;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ServicePid("org.eclipse.kura.executor.PrivilegedExecutorService")
+@Component(service = PrivilegedExecutorService.class, name = "org.eclipse.kura.executor.PrivilegedExecutorService", configurationPid = "org.eclipse.kura.executor.PrivilegedExecutorService", immediate = true)
 public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(PrivilegedExecutorServiceImpl.class);
@@ -40,12 +45,14 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
     @SuppressWarnings("unused")
     private ComponentContext ctx;
 
+    @Activate
     public void activate(ComponentContext componentContext) {
         logger.info("activate...");
         this.ctx = componentContext;
         this.executorUtil = new ExecutorUtil();
     }
 
+    @Deprecated
     public void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.ctx = null;
@@ -115,7 +122,7 @@ public class PrivilegedExecutorServiceImpl implements PrivilegedExecutorService 
         CommandStatus status = new CommandStatus(command, new LinuxExitStatus(1));
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         try {
-            err.write("The commandLine cannot be empty or not defined".getBytes(Charsets.UTF_8));
+            err.write("The commandLine cannot be empty or not defined".getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             logger.error("Cannot write to error stream", e);
         }

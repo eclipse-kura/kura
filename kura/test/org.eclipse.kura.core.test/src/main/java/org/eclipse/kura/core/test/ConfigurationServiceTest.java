@@ -119,7 +119,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         ConfigurationServiceTest.dataService = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(ConfigurationServiceTest.configService);
@@ -150,7 +150,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testLocalConfiguration() throws Exception {
         String pid = "org.eclipse.kura.core.test.IConfigurationServiceTest";
@@ -275,7 +275,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRemoteConfiguration() throws Exception {
         if (!dataService.isConnected()) {
@@ -405,7 +405,7 @@ public class ConfigurationServiceTest extends TestCase implements IConfiguration
         assertDefaultValues(s_properties);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testSnapshotsMaxCount() throws Exception {
         int maxCount = ConfigurationServiceTest.systemService.getKuraSnapshotsCount();

@@ -89,7 +89,7 @@ public class DataServiceTest implements DataServiceListener {
         s_dataService = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testConnect() throws KuraConnectException {
         if (!s_dataService.isConnected()) {
@@ -97,7 +97,7 @@ public class DataServiceTest implements DataServiceListener {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testDisconnect() throws KuraConnectException, InterruptedException {
         if (!s_dataService.isConnected()) {
@@ -131,7 +131,7 @@ public class DataServiceTest implements DataServiceListener {
         s_lock.unlock();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testPublish() throws KuraConnectException, InterruptedException {
         if (!s_dataService.isConnected()) {
@@ -290,7 +290,7 @@ public class DataServiceTest implements DataServiceListener {
         assertTrue(allConfirmed);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testSubscribe() throws KuraException, InterruptedException {
         if (!s_dataService.isConnected()) {

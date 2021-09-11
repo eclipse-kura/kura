@@ -63,7 +63,7 @@ public class ConnectionSslOptions {
 
     public void setTrustStore(String trustStore) {
 
-            this.trustStore = trustStore;
+        this.trustStore = trustStore;
     }
 
     public String getKeyStore() {
@@ -71,7 +71,7 @@ public class ConnectionSslOptions {
     }
 
     public void setKeyStore(String keyStore) {
-            this.keyStore = keyStore;
+        this.keyStore = keyStore;
     }
 
     public char[] getKeyStorePassword() {

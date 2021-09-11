@@ -61,6 +61,8 @@ import javax.net.ssl.X509TrustManager;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraRuntimeException;
+import org.eclipse.kura.annotation.KuraUiFactoryHide;
+import org.eclipse.kura.annotation.KuraUiServiceHide;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.ssl.SslManagerServiceOptions.RevocationCheckMode;
@@ -69,12 +71,28 @@ import org.eclipse.kura.security.keystore.KeystoreService;
 import org.eclipse.kura.ssl.SslManagerService;
 import org.eclipse.kura.ssl.SslServiceListener;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.event.propertytypes.EventTopics;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Designate(ocd = SslManagerServiceConfig.class,factory = true)
+@KuraUiServiceHide
+@KuraUiFactoryHide
+@EventTopics(KeystoreChangedEvent.EVENT_TOPIC)
+@Component(service = { SslManagerService.class, ConfigurableComponent.class,
+        EventHandler.class }, configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true, name = "org.eclipse.kura.ssl.SslManagerService")
 public class SslManagerServiceImpl implements SslManagerService, ConfigurableComponent, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(SslManagerServiceImpl.class);
@@ -95,6 +113,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     //
     // ----------------------------------------------------------------
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC)
     public void setKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
         this.keystoreService = keystoreService;
         this.keystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
@@ -118,6 +137,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     //
     // ----------------------------------------------------------------
 
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.info("activate...");
 
@@ -134,6 +154,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.sslServiceListeners = new SslServiceListeners(listenersTracker);
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         logger.info("updated...");
 
@@ -144,6 +165,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.sslServiceListeners.onConfigurationUpdated();
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("deactivate...");
         this.sslServiceListeners.close();

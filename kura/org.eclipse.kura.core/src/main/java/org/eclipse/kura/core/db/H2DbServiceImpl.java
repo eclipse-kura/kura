@@ -36,17 +36,32 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.annotation.ServicePid;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.db.H2DbService;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.DeleteDbFiles;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Designate(ocd = H2DbServiceConfig.class, factory = true)
+@ServicePid("org.eclipse.kura.core.db.H2DbService")
+@Component(service = { ConfigurableComponent.class, BaseDbService.class,
+        H2DbService.class }, name = "org.eclipse.kura.core.db.H2DbService", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
@@ -98,7 +113,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     // Dependencies
     //
     // ----------------------------------------------------------------
-
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
@@ -113,6 +128,7 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     //
     // ----------------------------------------------------------------
 
+    @Activate
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
 
@@ -135,11 +151,13 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
         logger.info("activating...done");
     }
 
+    @Modified
     public void updated(Map<String, Object> properties) {
         this.pendingUpdates.incrementAndGet();
         this.executor.submit(() -> updateInternal(properties));
     }
 
+    @Deactivate
     public void deactivate() {
         logger.info("deactivate...");
         this.executor.shutdown();

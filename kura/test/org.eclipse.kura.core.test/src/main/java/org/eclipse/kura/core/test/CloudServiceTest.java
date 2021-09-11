@@ -62,13 +62,13 @@ public class CloudServiceTest extends TestCase implements CloudClientListener {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(CloudServiceTest.cloudService);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testService() throws Exception {
         this.publishArrived = false;

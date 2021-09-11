@@ -35,6 +35,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraNotConnectedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.KuraTooManyInflightMessagesException;
+import org.eclipse.kura.annotation.KuraUiServiceHide;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.core.data.store.DbDataStore;
@@ -57,11 +58,24 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.metatype.annotations.Designate;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Designate(ocd = DataServiceConfig.class,factory = true)
+@KuraUiServiceHide
+@Component(service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
+        org.eclipse.kura.data.DataService.class }, configurationPolicy = ConfigurationPolicy.REQUIRE, name = "org.eclipse.kura.data.DataService")
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
         CloudConnectionStatusComponent, CriticalComponent {
 
@@ -111,7 +125,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     // Activation APIs
     //
     // ----------------------------------------------------------------
-
+    @Activate
     protected void activate(ComponentContext componentContext, Map<String, Object> properties) {
         String pid = (String) properties.get(ConfigurationService.KURA_SERVICE_PID);
         logger.info("Activating {}...", pid);
@@ -216,6 +230,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         }
     }
 
+    @Modified
     public synchronized void updated(Map<String, Object> properties) {
         logger.info("Updating {}...", properties.get(ConfigurationService.KURA_SERVICE_PID));
 
@@ -243,6 +258,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         }
     }
 
+    @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         logger.info("Deactivating {}...", this.dataServiceOptions.getKuraServicePid());
 
@@ -279,7 +295,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     // Dependencies
     //
     // ----------------------------------------------------------------
-
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
     public void setDataTransportService(DataTransportService dataTransportService) {
         this.dataTransportService = dataTransportService;
     }
@@ -287,6 +303,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public void unsetDataTransportService(DataTransportService dataTransportService) {
         this.dataTransportService = null;
     }
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
 
     public synchronized void setH2DbService(H2DbService dbService) {
         this.dbService = dbService;
@@ -299,6 +317,8 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         disconnect();
         this.store.stop();
     }
+
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
 
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
         this.cloudConnectionStatusService = cloudConnectionStatusService;
@@ -316,6 +336,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
         this.watchdogService = null;
     }
 
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     @Override
     public void addDataServiceListener(DataServiceListener listener) {
         this.dataServiceListeners.add(listener);
@@ -526,7 +547,7 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     public int publish(String topic, byte[] payload, int qos, boolean retain, int priority) throws KuraStoreException {
 
         logger.info("Storing message on topic: {}, priority: {}", topic, priority);
-        
+
         DataMessage dataMsg = this.store.store(topic, payload, qos, retain, priority);
         logger.info("Stored message on topic: {}, priority: {}", topic, priority);
 

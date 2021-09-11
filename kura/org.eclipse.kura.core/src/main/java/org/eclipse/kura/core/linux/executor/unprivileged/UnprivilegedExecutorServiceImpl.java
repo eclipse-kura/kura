@@ -14,10 +14,11 @@ package org.eclipse.kura.core.linux.executor.unprivileged;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import org.apache.commons.io.Charsets;
+import org.eclipse.kura.annotation.ServicePid;
 import org.eclipse.kura.core.internal.linux.executor.ExecutorUtil;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
@@ -27,9 +28,17 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.eclipse.kura.executor.UnprivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ServicePid("org.eclipse.kura.executor.UnprivilegedExecutorService")
+@Component(service = UnprivilegedExecutorService.class, immediate = true, name = "org.eclipse.kura.executor.UnprivilegedExecutorService")
 public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorService {
 
     private static final Logger logger = LoggerFactory.getLogger(UnprivilegedExecutorServiceImpl.class);
@@ -37,6 +46,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
     private SystemService systemService;
     private ExecutorUtil executorUtil;
 
+    @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
     public void setSystemService(SystemService systemService) {
         this.systemService = systemService;
     }
@@ -47,6 +57,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         }
     }
 
+    @Activate
     protected void activate() {
         logger.info("activate...");
 
@@ -58,6 +69,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         }
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("deactivate...");
     }
@@ -126,7 +138,7 @@ public class UnprivilegedExecutorServiceImpl implements UnprivilegedExecutorServ
         CommandStatus status = new CommandStatus(command, new LinuxExitStatus(1));
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         try {
-            err.write("The commandLine cannot be empty or not defined".getBytes(Charsets.UTF_8));
+            err.write("The commandLine cannot be empty or not defined".getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             logger.error("Cannot write to error stream", e);
         }

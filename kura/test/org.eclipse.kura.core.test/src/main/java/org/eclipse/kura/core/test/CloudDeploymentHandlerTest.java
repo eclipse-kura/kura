@@ -125,7 +125,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         CloudDeploymentHandlerTest.s_deploymentAdmin = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testExecInstallDeploymentPackage() throws Exception {
         assertTrue(s_cloudCallService.isConnected());
@@ -152,7 +152,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resp.getResponseCode());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     @Ignore
     public void testGetPackages() throws Exception {
@@ -197,7 +197,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         assertEquals(LOCAL_BUNDLE_VERSION, bundleInfos[0].getVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetBundles() throws Exception {
 
@@ -237,7 +237,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         assertEquals(LOCAL_BUNDLE_VERSION, bundle.getVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testExecStartStop() throws Exception {
 
@@ -279,7 +279,7 @@ public class CloudDeploymentHandlerTest extends TestCase {
         assertEquals(Bundle.ACTIVE, bundle.getState());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testExecUninstallDeploymentPackage() throws Exception {
 

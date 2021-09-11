@@ -54,13 +54,13 @@ public class NetworkServiceTest extends TestCase {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(NetworkServiceTest.networkService);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testInterfaceNamesList() throws Exception {
         List<String> interfaces = networkService.getAllNetworkInterfaceNames();
@@ -72,7 +72,7 @@ public class NetworkServiceTest extends TestCase {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testAllInterfaces() throws Exception {
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = networkService.getNetworkInterfaces();
@@ -100,7 +100,7 @@ public class NetworkServiceTest extends TestCase {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testActiveInterfaces() throws Exception {
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = networkService.getActiveNetworkInterfaces();

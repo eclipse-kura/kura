@@ -179,7 +179,7 @@ public class CloudServiceTest {
         dependencyLatch.countDown();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(CloudServiceTest.cfgSvc);
@@ -187,7 +187,7 @@ public class CloudServiceTest {
         assertNotNull(CloudServiceTest.cloudServiceImpl);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test(expected = KuraException.class)
     public void testConnectCannotConnect()
             throws KuraException, InterruptedException, ExecutionException, TimeoutException, InvalidSyntaxException {
@@ -204,13 +204,13 @@ public class CloudServiceTest {
         cloudServiceImpl.connect();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testDisconnect() throws KuraException {
         cloudServiceImpl.disconnect();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetConnectionInfo() {
         Map<String, String> connectionProps = cloudServiceImpl.getInfo();
@@ -223,7 +223,7 @@ public class CloudServiceTest {
         assertNotNull(connectionProps.get("Client ID"));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetNotificationPublisherPid() {
         String pid = cloudServiceImpl.getNotificationPublisherPid();

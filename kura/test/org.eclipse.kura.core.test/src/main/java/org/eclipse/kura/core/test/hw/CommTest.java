@@ -46,7 +46,7 @@ public class CommTest extends TestCase {
         dependencyLatch.countDown();
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(CommTest.connectionFactory);

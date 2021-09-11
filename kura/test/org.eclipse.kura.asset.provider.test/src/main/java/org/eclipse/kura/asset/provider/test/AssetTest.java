@@ -168,7 +168,7 @@ public final class AssetTest {
     /**
      * Test generic asset properties.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testBasicProperties() {
         final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
@@ -180,7 +180,7 @@ public final class AssetTest {
     /**
      * Test sample channel properties.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testChannelProperties() {
         final AssetConfiguration assetConfiguration = asset.getAssetConfiguration();
@@ -208,7 +208,7 @@ public final class AssetTest {
     /**
      * Test listening operation.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testListen() throws KuraException {
 
@@ -233,7 +233,7 @@ public final class AssetTest {
     /**
      * Listeners should be removed from the driver when it is detached from the asset and added when it is attached.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testListenerAttachOnDriverChange() throws KuraException {
         final Driver driver = ((BaseAsset) asset).getDriver();
@@ -269,7 +269,7 @@ public final class AssetTest {
      * It should be possible to add listeners to an asset even if the driver is not attached, the asset should attach
      * them later on when the driver is tracked
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testAttachListenerWhitoutDriver() throws KuraException {
         final Driver driver = ((BaseAsset) asset).getDriver();
@@ -307,7 +307,7 @@ public final class AssetTest {
     /**
      * The same channel listener should not be attached multiple times.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testShouldNotReattachSameListener() throws KuraException {
 
@@ -345,7 +345,7 @@ public final class AssetTest {
     /**
      * Test listener unregistration.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testUnlisten() throws KuraException {
         AtomicInteger invoked = new AtomicInteger(0);
@@ -381,7 +381,7 @@ public final class AssetTest {
     /**
      * Test exception during listener unregistration.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testUnlistenDriverException() throws KuraException {
         AtomicInteger invoked = new AtomicInteger(0);
@@ -423,7 +423,7 @@ public final class AssetTest {
     /**
      * Test reading operation.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testRead() throws KuraException {
         final List<ChannelRecord> records = asset.read(new HashSet(Arrays.asList("1.CH")));
@@ -436,7 +436,7 @@ public final class AssetTest {
     /**
      * Tests the condition in case the channel type is not readable
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelNotReadable() throws KuraException {
         List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("2.CH")));
@@ -449,7 +449,7 @@ public final class AssetTest {
     /**
      * Test reading operation on all channels.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadAllChannels() throws KuraException {
         final List<ChannelRecord> records = asset.readAllChannels();
@@ -462,7 +462,7 @@ public final class AssetTest {
     /**
      * Test writing operation.
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testWrite() throws KuraException {
         ChannelRecord channelRecord = ChannelRecord.createWriteRecord("2.CH", TypedValues.newBooleanValue(true));
@@ -479,7 +479,7 @@ public final class AssetTest {
     /**
      * Tests the condition in case the channel type is not writable
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testWriteChannelNotWritable() throws KuraException {
         ChannelRecord channelRecord = ChannelRecord.createWriteRecord("1.CH", TypedValues.newLongValue(1L));
@@ -492,7 +492,7 @@ public final class AssetTest {
         assertEquals(ChannelFlag.FAILURE, channelRecord.getChannelStatus().getChannelFlag());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetConfiguration() throws KuraException {
         assumeTrue(asset instanceof BaseAsset);
@@ -526,7 +526,7 @@ public final class AssetTest {
     /**
      * Tests reading disabled channel
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testReadChannelDisabled() throws KuraException {
         List<ChannelRecord> result = asset.read(new HashSet(Arrays.asList("3.CH")));
@@ -539,7 +539,7 @@ public final class AssetTest {
     /**
      * Tests writing disabled channel
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testWriteChannelDisabled() throws KuraException {
         ChannelRecord channelRecord = ChannelRecord.createWriteRecord("4.CH", TypedValues.newLongValue(1L));
@@ -556,7 +556,7 @@ public final class AssetTest {
      * It should be possible to attach listeners on disabled channels, but listener should not be forwarded to the
      * driver in this case driver
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testListenerAttachOnDisabledChannel() throws KuraException {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
@@ -582,7 +582,7 @@ public final class AssetTest {
      * Listeners attached to a channel should be detached from the driver if the channel is disabled and reattached if
      * the channel is enabled again
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testEnableDisableChannelWithListener() throws KuraException {
         final ArrayList<Boolean> attachSequence = new ArrayList<>();
@@ -637,7 +637,7 @@ public final class AssetTest {
      * Listeners attached to a channel should be detached from the driver if the channel is disabled and reattached if
      * the channel is enabled again
      */
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testCompleteConfigWithDefaults() throws KuraException {
 

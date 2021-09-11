@@ -96,7 +96,7 @@ public class InventoryHandlerTest extends TestCase {
         InventoryHandlerTest.deploymentAdmin = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetPackages() throws Exception {
         StringBuilder sb = init();
@@ -110,7 +110,7 @@ public class InventoryHandlerTest extends TestCase {
                 "{\"deploymentPackages\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetBundles() throws Exception {
         StringBuilder sb = init();
@@ -123,7 +123,7 @@ public class InventoryHandlerTest extends TestCase {
         assertTrue(body.contains("{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\""));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetInventory() throws Exception {
         StringBuilder sb = init();
@@ -138,7 +138,7 @@ public class InventoryHandlerTest extends TestCase {
                 "{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0.201407161421\",\"type\":\"BUNDLE\"},{\"name\":\"org.eclipse.kura.test.helloworld\",\"version\":\"1.0.0\",\"type\":\"DP\"}"));
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetSystemPackages() throws Exception {
         StringBuilder sb = init();

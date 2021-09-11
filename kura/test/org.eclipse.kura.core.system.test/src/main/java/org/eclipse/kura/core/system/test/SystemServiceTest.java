@@ -75,13 +75,13 @@ public class SystemServiceTest {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(systemService);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetPrimaryMacAddress() {
 
@@ -96,7 +96,7 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetPlatform() {
         String[] expected = { "dynacor",   					// emulated
@@ -118,7 +118,7 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsDistro() {
         String[] expected = { "DevOsDitribution",   			// emulated
@@ -138,7 +138,7 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsDistroVersion() {
         String[] expected = { "DevOsDitributionVersion",   	// emulated
@@ -159,7 +159,7 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsArch() {
         String expected = System.getProperty("os.arch");
@@ -169,7 +169,7 @@ public class SystemServiceTest {
         assertEquals("getOsArch() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsName() {
         String expected = System.getProperty("os.name");
@@ -183,7 +183,7 @@ public class SystemServiceTest {
         assertEquals("getOsName() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetOsVersion() throws IOException {
         String osVersion = System.getProperty("os.version");
@@ -211,7 +211,7 @@ public class SystemServiceTest {
         assertEquals("getOsVersion() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetJavaVersion() {
         String expected = System.getProperty("java.runtime.version");
@@ -221,7 +221,7 @@ public class SystemServiceTest {
         assertEquals("getJavaVersion() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetJavaVmName() {
         String expected = System.getProperty("java.vm.name");
@@ -231,7 +231,7 @@ public class SystemServiceTest {
         assertEquals("getJavaVmName() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetJavaVmVersion() {
         String expected = System.getProperty("java.vm.version");
@@ -241,7 +241,7 @@ public class SystemServiceTest {
         assertEquals("getJavaVmVersion() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetFileSeparator() {
         String expected = System.getProperty("file.separator");
@@ -251,50 +251,50 @@ public class SystemServiceTest {
         assertEquals("getFileSeparator() value", expected, actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testJavaHome() {
         String actual = systemService.getJavaHome();
         assertNotNull("getJavaHome() not null", actual);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetProductVersion() {
         assertTrue(true);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testKuraTemporaryConfigDirectory() {
         assertNotNull(systemService.getKuraTemporaryConfigDirectory());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetBiosVersion() {
         assertNotNull(systemService.getBiosVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void getDeviceName() {
         assertNotNull(systemService.getDeviceName());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void getFirmwareVersion() {
         assertNotNull(systemService.getFirmwareVersion());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void getModelId() {
         assertNotNull(systemService.getModelId());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void getModelName() throws NoSuchFieldException {
         // remove the default value so that the command is run
@@ -323,13 +323,13 @@ public class SystemServiceTest {
         }
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void getPartNumber() {
         assertNotNull(systemService.getPartNumber());
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void getSerialNumber() throws NoSuchFieldException {
         // remove the default value so that the command is run

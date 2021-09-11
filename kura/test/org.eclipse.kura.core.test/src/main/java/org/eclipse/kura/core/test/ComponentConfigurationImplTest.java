@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 
 public class ComponentConfigurationImplTest extends TestCase {
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testSplitDefaultValues() throws Exception {
         String defaultString = "abc, def, 124  , qwer\\, ty , ed, \\ \\ spa ce\\ , 789";
@@ -42,7 +42,7 @@ public class ComponentConfigurationImplTest extends TestCase {
         assertEquals(expected, joined);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testSplitDefaultValues2() throws Exception {
         String defaultString = "  a\\,b,b\\,c,\\ c\\\\,d   ";

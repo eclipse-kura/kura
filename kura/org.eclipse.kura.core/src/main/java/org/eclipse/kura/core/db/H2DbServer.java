@@ -15,11 +15,21 @@ package org.eclipse.kura.core.db;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.eclipse.kura.annotation.ServicePid;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.h2.tools.Server;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
+import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Designate(ocd = H2DbServerConfig.class,factory = true)
+@ServicePid("org.eclipse.kura.core.db.H2DbServer")
+@Component(service = ConfigurableComponent.class, configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true, name = "org.eclipse.kura.core.db.H2DbServer")
 public class H2DbServer implements ConfigurableComponent {
 
     enum ServerType {
@@ -31,18 +41,21 @@ public class H2DbServer implements ConfigurableComponent {
     private static final Logger logger = LoggerFactory.getLogger(H2DbServer.class);
     private Server server;
 
+    @Activate
     protected void activate(Map<String, Object> properties) {
         logger.info("activating...");
         updated(properties);
         logger.info("activating...done");
     }
 
+    @Modified
     protected void updated(Map<String, Object> properties) {
         logger.info("updating...");
         restartServer(new H2DbServerOptions(properties));
         logger.info("updating...done");
     }
 
+    @Deactivate
     protected void deactivate() {
         logger.info("deactivating...");
         shutdownServer();

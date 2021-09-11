@@ -98,7 +98,7 @@ public class CloudPublisherImplTest {
         CloudPublisherImplTest.cloudPublisher = null;
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testServiceExists() {
         assertNotNull(CloudPublisherImplTest.cfgSvc);
@@ -107,13 +107,13 @@ public class CloudPublisherImplTest {
         assertNotNull(CloudPublisherImplTest.cloudPublisher);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test(expected = IllegalArgumentException.class)
     public void testPublishNullMessage() throws KuraException {
         cloudPublisher.publish(null);
     }
 
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testPublishQos0() throws KuraException {
         KuraPayload payload = new KuraPayload();
@@ -123,7 +123,7 @@ public class CloudPublisherImplTest {
         assertNull(result);
     }
     
-    @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testPublishQos1() throws KuraException {
         KuraPayload payload = new KuraPayload();

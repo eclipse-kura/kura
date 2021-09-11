@@ -15,9 +15,13 @@ package org.eclipse.kura.core.db;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.db.H2DbService;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(immediate = true, name = "org.eclipse.kura.core.db.H2DbHelper")
 public class H2DbHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(H2DbHelper.class);
@@ -58,12 +62,15 @@ public class H2DbHelper {
         }
     }
 
+    @Activate
     protected void activate() {
         logger.info("activating...");
         startDefaultDbServiceInstance();
         logger.info("activating...done");
     }
 
+    // TODO: was not in original component xml
+    @Deactivate
     protected void deactivate() {
         stopDefaultDbServiceInstance();
     }

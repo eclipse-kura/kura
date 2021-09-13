@@ -1573,7 +1573,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                     if (TabWirelessUi.this.channelList.getItemCount() > 0) {
                                         TabWirelessUi.this.noChannels.setVisible(false);
-                                        setValues();
                                     } else {
                                         TabWirelessUi.this.noChannels.setVisible(true);
                                     }

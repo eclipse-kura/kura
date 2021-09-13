@@ -66,12 +66,12 @@ import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
-import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiClientMonitorService;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -95,6 +95,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
@@ -1666,7 +1667,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException {
-        logger.debug("Find Frequency Network Service impl");
+        logger.info("Find Frequency Network Service impl");
         List<GwtWifiHotspotEntry> channels = new ArrayList<GwtWifiHotspotEntry>();
 
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);

@@ -572,8 +572,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 this.groupVerify.setVisible(false);
                 this.channelList.setEnabled(false);
 
-                logger.severe("In " + WIFI_MODE_STATION_MESSAGE + " mode");
-
             } else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 // access point mode
                 // disable access point when TCP/IP is set to WAN
@@ -584,7 +582,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 this.groupVerify.setVisible(true);
                 this.channelList.setEnabled(true);
 
-                logger.severe("In " + WIFI_MODE_ACCESS_POINT_MESSAGE + " mode");
             }
 
             // disable Password if security is none
@@ -1282,8 +1279,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 this.lastSelectedChannel = wifiHotspotEntry.getChannel();
                 int selectedChannedListIndex = getSelectedChannelIndex(this.lastSelectedChannel);
-
-                logger.severe("selectedChannedListIndex:" + selectedChannedListIndex);
 
                 TabWirelessUi.this.ssidModal.hide();
 

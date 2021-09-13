@@ -18,6 +18,8 @@ categories: [dev]
 
 *  [Deploy and Validate the Bundle](#deploy-and-validate-the-bundle)
 
+{% include alerts.html message="This guide uses the deprecated Kura Bluetooth APIs. Please consider to use the new [ones](bluetooth-le-apis)." %}
+
 ## Overview
 
 This section provides an example of how to develop a simple bundle that discovers and connects to a Smart device (BLE), retrieves data from it, and publishes the results to the cloud. This example uses the TI SensorTag based on CC2541 or CC2650. For more information about this device, refer to <http://www.ti.com/tool/cc2541dk-sensor> and <https://www.ti.com/tool/TIDC-CC2650STK-SENSORTAG>.

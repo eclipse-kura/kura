@@ -83,13 +83,15 @@ following steps:
 
     <pre>sudo rfkill unblock wlan</pre>
 
-9. Reboot the Raspberry Pi with:
+9. Set the right Wi-Fi regulatory domain based on your current world region following the instructions <a href="https://www.raspberrypi.org/documentation/computers/configuration.html#using-the-desktop" target="_blank">here</a> In case of problems, you could try to edit the <pre>/etc/default/crda</pre> adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2" target="_blank">ISO 3166-1 alpha-2</a> code of your region
+
+10. Reboot the Raspberry Pi with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-10. Kura setups a local web ui that is available using a browser via:
+11. Kura setups a local web ui that is available using a browser via:
 
      <pre>https://&lt;device-ip&gt;</pre>
 

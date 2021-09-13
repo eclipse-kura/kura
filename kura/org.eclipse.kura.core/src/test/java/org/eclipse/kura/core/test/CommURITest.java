@@ -12,13 +12,12 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.eclipse.kura.comm.CommURI;
-import org.eclipse.kura.test.annotation.TestTarget;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
-
-public class CommURITest extends TestCase {
+public class CommURITest  {
 
     //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test

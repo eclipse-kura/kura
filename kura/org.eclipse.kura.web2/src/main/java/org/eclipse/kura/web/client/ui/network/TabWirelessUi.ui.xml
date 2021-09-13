@@ -224,10 +224,6 @@
                             </b:FormGroup>
 
                             <b:FormGroup>
-                                <gwt:CellTable bordered="true"
-                                    condensed="true" striped="true"
-                                    hover="true" height="100%" width="100%"
-                                    ui:field="channelGrid" />
                                 <b:Alert type="WARNING"
                                     ui:field="noChannels">
                                     <b.html:Text ui:field="noChannelsText" />

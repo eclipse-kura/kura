@@ -1073,6 +1073,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // Country Code
         this.labelCountryCode.setText(MSGS.netWifiCountryCodeLabel());
+
+        this.noChannelsText.setText(MSGS.netWifiAlertNoChannels());
     }
 
     private Validator<String> newBgScanValidator(TextBox field) {
@@ -1135,14 +1137,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 });
             }
         });
-
-        this.noChannelsText.setText(MSGS.netWifiAlertNoChannels());
-        if (this.channelList.getItemCount() > 0) {
-            this.noChannels.setVisible(false);
-            setValues();
-        } else {
-            this.noChannels.setVisible(true);
-        }
     }
 
     private void setPasswordValidation() {
@@ -1575,6 +1569,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                     if (selectedChannelIndex >= 0) {
                                         TabWirelessUi.this.channelList.setSelectedIndex(selectedChannelIndex);
+                                    }
+
+                                    if (TabWirelessUi.this.channelList.getItemCount() > 0) {
+                                        TabWirelessUi.this.noChannels.setVisible(false);
+                                        setValues();
+                                    } else {
+                                        TabWirelessUi.this.noChannels.setVisible(true);
                                     }
                                 }
                             });

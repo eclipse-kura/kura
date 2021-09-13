@@ -1574,19 +1574,6 @@ public class NetworkAdminServiceImplTest {
     }
 
     @Test
-    public void testFrequencyToChannel() throws Throwable {
-        NetworkAdminServiceImpl svc = new NetworkAdminServiceImpl();
-
-        int[] freqs = { 0, 2412, 2417, 2422, 2427, 2432, 2437, 2442, 2447, 2452, 2457, 2462 };
-
-        for (int i = 1; i < freqs.length; i++) {
-            int result = (int) TestUtil.invokePrivate(svc, "frequencyMhz2Channel", freqs[i]);
-
-            assertEquals(i, result);
-        }
-    }
-
-    @Test
     public void testGetWifiHotspotListException() throws KuraException {
         // tests retrieval of available hotspots - exception case
 

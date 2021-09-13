@@ -1,2 +1,7 @@
 -includeresource: \
 	lib/org.eclipse.paho.client.mqttv3-1.2.1.k2.jar;lib:=true
+	
+
+Import-Package: \
+	com.bugsnag*;'resolution:'=optional,\
+	*

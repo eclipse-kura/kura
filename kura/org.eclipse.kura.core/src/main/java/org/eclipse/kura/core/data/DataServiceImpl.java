@@ -72,7 +72,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Designate(ocd = DataServiceConfig.class,factory = true)
+@Designate(ocd = DataServiceConfig.class, factory = true)
 @KuraUiServiceHide
 @Component(service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
         org.eclipse.kura.data.DataService.class }, configurationPolicy = ConfigurationPolicy.REQUIRE, name = "org.eclipse.kura.data.DataService")

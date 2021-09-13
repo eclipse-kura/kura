@@ -1,3 +1,7 @@
+#for mockito
+-runproperties.mock: \
+	org.osgi.framework.bootdelegation=sun.reflect
+	
 -tester: biz.aQute.tester.junit-platform
 -runee: JavaSE-1.8
 -runfw: org.eclipse.osgi
@@ -13,8 +17,44 @@
 	junit-platform-engine;version='[1.7.2,1.7.3)',\
 	junit-platform-launcher;version='[1.7.2,1.7.3)',\
 	log4j;version='[1.2.17,1.2.18)',\
-	org.eclipse.kura.core;version='[1.0.600,1.0.601)',\
-	org.eclipse.kura.core-tests;version='[1.0.600,1.0.601)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	slf4j.api;version='[1.7.25,1.7.26)',\
-	slf4j.simple;version='[1.7.25,1.7.26)'
+	slf4j.simple;version='[1.7.25,1.7.26)',\
+	org.apache.commons.commons-io;version='[2.11.0,2.11.1)',\
+	org.apache.commons.exec;version='[1.3.0,1.3.1)',\
+	org.apache.commons.lang3;version='[3.12.0,3.12.1)',\
+	org.apache.felix.eventadmin;version='[1.6.2,1.6.3)',\
+	org.apache.felix.scr;version='[2.1.30,2.1.31)',\
+	org.apache.logging.log4j.api;version='[2.14.1,2.14.2)',\
+	org.eclipse.kura.api;version='[2.2.0,2.2.1)',\
+	org.eclipse.kura.util;version='[1.2.0,1.2.1)',\
+	org.h2;version='[1.4.192,1.4.193)',\
+	org.osgi.service.wireadmin;version='[1.0.1,1.0.2)',\
+	org.osgi.util.function;version='[1.1.0,1.1.1)',\
+	org.osgi.util.measurement;version='[1.0.2,1.0.3)',\
+	org.osgi.util.position;version='[1.0.1,1.0.2)',\
+	org.osgi.util.promise;version='[1.1.1,1.1.2)',\
+	usb4java-javax;version='[1.2.600,1.2.601)',\
+	com.h2database.mvstore;version='[1.4.199,1.4.200)',\
+	com.zaxxer.HikariCP;version='[2.4.7,2.4.8)',\
+	io.dropwizard.metrics.core;version='[3.2.2,3.2.3)',\
+	io.netty.buffer;version='[4.1.59,4.1.60)',\
+	io.netty.codec;version='[4.1.59,4.1.60)',\
+	io.netty.codec-http;version='[4.1.59,4.1.60)',\
+	io.netty.codec-mqtt;version='[4.1.59,4.1.60)',\
+	io.netty.common;version='[4.1.59,4.1.60)',\
+	io.netty.handler;version='[4.1.59,4.1.60)',\
+	io.netty.resolver;version='[4.1.59,4.1.60)',\
+	io.netty.transport;version='[4.1.59,4.1.60)',\
+	io.netty.transport-native-epoll;version='[4.1.59,4.1.60)',\
+	io.netty.transport-native-unix-common;version='[4.1.59,4.1.60)',\
+	junit-jupiter-params;version='[5.7.2,5.7.3)',\
+	net.bytebuddy.byte-buddy;version='[1.11.3,1.11.4)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.11.3,1.11.4)',\
+	org.apache.commons.codec;version='[1.10.0,1.10.1)',\
+	org.mockito.mockito-core;version='[3.11.2,3.11.3)',\
+	org.objenesis;version='[3.2.0,3.2.1)',\
+	org.osgi.test.common;version='[1.0.1,1.0.2)',\
+	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
+	org.eclipse.kura.core;version='[2.0.0,2.0.1)',\
+	org.eclipse.kura.core-tests;version='[2.0.0,2.0.1)'

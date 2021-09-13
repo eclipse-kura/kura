@@ -1,0 +1,7 @@
+Import-Package: \
+	!com.bugsnag*,\
+	!com.librato*,\
+	*
+	
+-conditionalpackage: io.moquette.*
+

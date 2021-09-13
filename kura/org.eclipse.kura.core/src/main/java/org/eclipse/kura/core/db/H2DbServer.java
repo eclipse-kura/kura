@@ -27,9 +27,13 @@ import org.osgi.service.metatype.annotations.Designate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Designate(ocd = H2DbServerConfig.class,factory = true)
+@Designate(ocd = H2DbServerConfig.class, factory = true)
 @ServicePid("org.eclipse.kura.core.db.H2DbServer")
-@Component(service = ConfigurableComponent.class, configurationPolicy = ConfigurationPolicy.REQUIRE, immediate = true, name = "org.eclipse.kura.core.db.H2DbServer")
+@Component(
+        service = ConfigurableComponent.class,
+        configurationPolicy = ConfigurationPolicy.REQUIRE,
+        immediate = true,
+        name = "org.eclipse.kura.core.db.H2DbServer")
 public class H2DbServer implements ConfigurableComponent {
 
     enum ServerType {

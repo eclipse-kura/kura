@@ -28,6 +28,7 @@
 		<module>libs</module>
 		<module>org.eclipse.kura.api</module>
 		<module>org.eclipse.kura.util</module>
+				<module>org.eclipse.kura.core</module>
 <!-- 		<module>target-definition</module> -->
 <!--
 		<module>org.eclipse.kura.asset.cloudlet.provider</module>
@@ -189,6 +190,10 @@
 		<junit-platform.version>1.7.2</junit-platform.version>
 		<assertj.version>3.20.2</assertj.version>
 		<osgi.test.version>1.0.1</osgi.test.version>
+		<org.apache.felix.configadmin.version>1.9.22</org.apache.felix.configadmin.version>
+		<org.apache.felix.scr.version>2.1.30</org.apache.felix.scr.version>
+		<org.apache.felix.eventadmin.version>1.6.2</org.apache.felix.eventadmin.version>
+		<commons-lang3.version>3.12.0</commons-lang3.version>
 	</properties>
 
 	<distributionManagement>
@@ -750,6 +755,7 @@ Bundle-License: Eclipse Public License v2.0
 							<configuration>
 								<bndfile>tests.bnd</bndfile>
 								<artifactFragment>true</artifactFragment>
+<bndfile>tests.bnd</bndfile>
 								<bnd><![CDATA[
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
@@ -918,7 +924,7 @@ Bundle-License: Eclipse Public License v2.0
 			<dependency>
 				<groupId>org.eclipse.platform</groupId>
 				<artifactId>org.eclipse.equinox.io</artifactId>
-				<version>1.1.300</version>
+				<version>1.1.200</version>
 			</dependency>
 			
 			<!-- Logging -->
@@ -1062,6 +1068,27 @@ Bundle-License: Eclipse Public License v2.0
 				<artifactId>org.eclipse.osgi</artifactId>
 				<version>${org.eclipse.osgi.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.scr</artifactId>
+				<version>${org.apache.felix.scr.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.configadmin</artifactId>
+				<version>${org.apache.felix.configadmin.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.eventadmin</artifactId>
+				<version>${org.apache.felix.eventadmin.version}</version>
+			</dependency>
+			
+			<dependency>
+    <groupId>org.apache.commons</groupId>
+    <artifactId>commons-lang3</artifactId>
+    <version>${commons-lang3.version}</version>
+</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>

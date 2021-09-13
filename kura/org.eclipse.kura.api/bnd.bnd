@@ -1,3 +1,4 @@
 Import-Package: \
 	javax.microedition.io;resolution:=optional,\
+	org.osgi.service.io;resolution:=optional,\
 	*

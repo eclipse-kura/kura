@@ -87,7 +87,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Designate(ocd = SslManagerServiceConfig.class,factory = true)
+@Designate(ocd = SslManagerServiceConfig.class, factory = true)
 @KuraUiServiceHide
 @KuraUiFactoryHide
 @EventTopics(KeystoreChangedEvent.EVENT_TOPIC)

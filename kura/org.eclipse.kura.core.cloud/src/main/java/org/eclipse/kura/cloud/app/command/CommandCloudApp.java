@@ -140,7 +140,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
     }
 
     public void updated(Map<String, Object> properties) {
-        logger.info("Request handler {} updated...");
+        logger.info("Request handler {} updated...", APP_ID);
 
         this.currentStatus = (Boolean) properties.getOrDefault(COMMAND_ENABLED_ID, false);
         this.isPrivileged = (Boolean) properties.getOrDefault(COMMAND_PRIVILEGED, false);
@@ -162,7 +162,7 @@ public class CommandCloudApp implements ConfigurableComponent, PasswordCommandSe
                 this.properties.put(key, value);
             }
         }
-        logger.info("Request handler {} updated... Done.");
+        logger.info("Request handler {} updated... Done.", APP_ID);
     }
 
     protected void deactivate(ComponentContext componentContext) {

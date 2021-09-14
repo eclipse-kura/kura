@@ -78,7 +78,7 @@ following steps:
 
     <pre>apt install kura_&lt;version&gt;_intel-up2-ubuntu-18_installer.deb</pre>
 
-7. Updated the Wi-Fi Regulatory Domain in the file:
+7. Update the Wi-Fi Regulatory Domain editing the file:
     <pre>/etc/default/crda</pre>
 
 8. Reboot the Intel Up² with:
@@ -87,10 +87,7 @@ following steps:
 
     Kura starts on the target platform after reboot.
 
-9. Make sure that Wi-Fi regulatory domain is based on your current world region:
-    <pre> iw reg get </pre>    
-
-10. Kura setups a local web ui that is available using a browser via:
+9. Kura setups a local web ui that is available using a browser via:
 
       <pre>https://&lt;device-ip&gt;</pre>
 

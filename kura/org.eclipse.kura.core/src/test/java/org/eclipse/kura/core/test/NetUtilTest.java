@@ -12,15 +12,15 @@
  *******************************************************************************/
 package org.eclipse.kura.core.test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.eclipse.kura.core.util.NetUtil;
-import org.eclipse.kura.test.annotation.TestTarget;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+public class NetUtilTest {
 
-public class NetUtilTest extends TestCase {
-
-    //@TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
+    // @TestTarget(targetPlatforms = { TestTarget.PLATFORM_ALL })
     @Test
     public void testGetPrimaryMacAddress() {
         assertNotNull(NetUtil.getPrimaryMacAddress());

@@ -22,7 +22,6 @@ public @interface DataServiceConfig {
     @AttributeDefinition(
             name = "Connect Auto-on-startup",
             cardinality = 0,
-            required = true,
             description = "Enable automatic connect of the Data Publishers on startup and after a disconnection.")
     boolean connect_auto$_$on$_$startup() default false;
 

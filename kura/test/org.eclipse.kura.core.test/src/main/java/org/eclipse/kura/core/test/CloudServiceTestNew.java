@@ -32,7 +32,7 @@ import org.osgi.test.junit5.service.ServiceExtension;
 //TODO: move to org.eclipse.kura.core.cloud project
 @ExtendWith(BundleContextExtension.class)
 @ExtendWith(ServiceExtension.class)
-public class CloudServiceTest {
+public class CloudServiceTestNew {
 
     @InjectService
     CloudService cloudService;

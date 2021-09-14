@@ -23,41 +23,41 @@ import org.eclipse.kura.db.H2DbService;
 
 public class DataServiceOptions {
 
-    private static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
-    private static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
-    private static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
-    private static final String STORE_DB_SERVICE_INSTANCE_PROP_NAME = "store.db.service.pid";
-    private static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
-    private static final String STORE_PURGE_AGE_PROP_NAME = "store.purge-age";
-    private static final String STORE_CAPACITY_PROP_NAME = "store.capacity";
-    private static final String REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.republish-on-new-session";
-    private static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
-    private static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
-    private static final String RATE_LIMIT_ENABLE_PROP_NAME = "enable.rate.limit";
-    private static final String RATE_LIMIT_AVERAGE_RATE_PROP_NAME = "rate.limit.average";
-    private static final String RATE_LIMIT_TIME_UNIT_PROP_NAME = "rate.limit.time.unit";
-    private static final String RATE_LIMIT_BURST_SIZE_PROP_NAME = "rate.limit.burst.size";
-    private static final String RECOVERY_ENABLE_PROP_NAME = "enable.recovery.on.connection.failure";
-    private static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
+    public static final String AUTOCONNECT_PROP_NAME = "connect.auto-on-startup";
+    public static final String CONNECT_DELAY_PROP_NAME = "connect.retry-interval";
+    public static final String DISCONNECT_DELAY_PROP_NAME = "disconnect.quiesce-timeout";
+    public static final String STORE_DB_SERVICE_INSTANCE_PROP_NAME = "store.db.service.pid";
+    public static final String STORE_HOUSEKEEPER_INTERVAL_PROP_NAME = "store.housekeeper-interval";
+    public static final String STORE_PURGE_AGE_PROP_NAME = "store.purge-age";
+    public static final String STORE_CAPACITY_PROP_NAME = "store.capacity";
+    public static final String REPUBLISH_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.republish-on-new-session";
+    public static final String MAX_IN_FLIGHT_MSGS_PROP_NAME = "in-flight-messages.max-number";
+    public static final String IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_PROP_NAME = "in-flight-messages.congestion-timeout";
+    public static final String RATE_LIMIT_ENABLE_PROP_NAME = "enable.rate.limit";
+    public static final String RATE_LIMIT_AVERAGE_RATE_PROP_NAME = "rate.limit.average";
+    public static final String RATE_LIMIT_TIME_UNIT_PROP_NAME = "rate.limit.time.unit";
+    public static final String RATE_LIMIT_BURST_SIZE_PROP_NAME = "rate.limit.burst.size";
+    public static final String RECOVERY_ENABLE_PROP_NAME = "enable.recovery.on.connection.failure";
+    public static final String RECOVERY_MAX_FAILURES_PROP_NAME = "connection.recovery.max.failures";
 
-    private static final boolean AUTOCONNECT_PROP_DEFAULT = false;
-    private static final int CONNECT_DELAY_DEFAULT = 60;
-    private static final int DISCONNECT_DELAY_DEFAULT = 10;
-    private static final String DB_SERVICE_INSTANCE_DEFAULT = H2DbService.DEFAULT_INSTANCE_PID;
-    private static final int STORE_HOUSEKEEPER_INTERVAL_DEFAULT = 900;
-    private static final int STORE_PURGE_AGE_DEFAULT = 60;
-    private static final int STORE_CAPACITY_DEFAULT = 10000;
-    private static final boolean REPUBLISH_IN_FLIGHT_MSGS_DEFAULT = true;
-    private static final int MAX_IN_FLIGHT_MSGS_DEFAULT = 9;
-    private static final int IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT = 0;
-    private static final boolean RATE_LIMIT_ENABLE_DEFAULT = true;
-    private static final int RATE_LIMIT_AVERAGE_RATE_DEFAULT = 1;
-    private static final String RATE_LIMIT_TIME_UNIT_DEFAULT = "SECONDS";
-    private static final int RATE_LIMIT_BURST_SIZE_DEFAULT = 1;
-    private static final boolean RECOVERY_ENABLE_DEFAULT = true;
-    private static final int RECOVERY_MAX_FAILURES_DEFAULT = 10;
+    public static final boolean AUTOCONNECT_PROP_DEFAULT = false;
+    public static final int CONNECT_DELAY_DEFAULT = 60;
+    public static final int DISCONNECT_DELAY_DEFAULT = 10;
+    public static final String DB_SERVICE_INSTANCE_DEFAULT = H2DbService.DEFAULT_INSTANCE_PID;
+    public static final int STORE_HOUSEKEEPER_INTERVAL_DEFAULT = 900;
+    public static final int STORE_PURGE_AGE_DEFAULT = 60;
+    public static final int STORE_CAPACITY_DEFAULT = 10000;
+    public static final boolean REPUBLISH_IN_FLIGHT_MSGS_DEFAULT = true;
+    public static final int MAX_IN_FLIGHT_MSGS_DEFAULT = 9;
+    public static final int IN_FLIGHT_MSGS_CONGESTION_TIMEOUT_DEFAULT = 0;
+    public static final boolean RATE_LIMIT_ENABLE_DEFAULT = true;
+    public static final int RATE_LIMIT_AVERAGE_RATE_DEFAULT = 1;
+    public static final String RATE_LIMIT_TIME_UNIT_DEFAULT = "SECONDS";
+    public static final int RATE_LIMIT_BURST_SIZE_DEFAULT = 1;
+    public static final boolean RECOVERY_ENABLE_DEFAULT = true;
+    public static final int RECOVERY_MAX_FAILURES_DEFAULT = 10;
 
-    private static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 5000;
+    public static final int CONNECT_CRITICAL_COMPONENT_TIMEOUT_MULTIPLIER = 5000;
 
     private final Map<String, Object> properties;
 

@@ -57,4 +57,6 @@
 	org.osgi.test.common;version='[1.0.1,1.0.2)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
 	org.eclipse.kura.core;version='[2.0.0,2.0.1)',\
-	org.eclipse.kura.core-tests;version='[2.0.0,2.0.1)'
+	org.eclipse.kura.core-tests;version='[2.0.0,2.0.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
+	org.apache.felix.configadmin;version='[1.9.22,1.9.23)'

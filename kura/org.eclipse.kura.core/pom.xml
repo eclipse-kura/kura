@@ -97,10 +97,14 @@
 			<version>2.11.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>io.moquette</groupId>
-		    <artifactId>moquette-broker</artifactId>
-		    <version>0.15</version>
-		    <scope>test</scope>
+			<groupId>io.moquette</groupId>
+			<artifactId>moquette-broker</artifactId>
+			<version>0.15</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.configadmin</artifactId>
 		</dependency>
 
 

@@ -75,10 +75,12 @@ import org.slf4j.LoggerFactory;
 @Designate(ocd = DataServiceConfig.class, factory = true)
 @KuraUiServiceHide
 @Component(service = { org.eclipse.kura.configuration.ConfigurableComponent.class,
-        org.eclipse.kura.data.DataService.class }, configurationPolicy = ConfigurationPolicy.REQUIRE, name = "org.eclipse.kura.data.DataService")
+        org.eclipse.kura.data.DataService.class }, configurationPolicy = ConfigurationPolicy.REQUIRE, name =  DataServiceImpl.NAME)
 public class DataServiceImpl implements DataService, DataTransportListener, ConfigurableComponent,
         CloudConnectionStatusComponent, CriticalComponent {
 
+    public static final String NAME=    "org.eclipse.kura.data.DataService";
+    public static final String PID=    NAME;
     private static final Logger logger = LoggerFactory.getLogger(DataServiceImpl.class);
 
     private static final int TRANSPORT_TASK_TIMEOUT = 1; // In seconds
@@ -305,7 +307,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
-
     public synchronized void setH2DbService(H2DbService dbService) {
         this.dbService = dbService;
         startDbStore();
@@ -319,7 +320,6 @@ public class DataServiceImpl implements DataService, DataTransportListener, Conf
     }
 
     @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
-
     public void setCloudConnectionStatusService(CloudConnectionStatusService cloudConnectionStatusService) {
         this.cloudConnectionStatusService = cloudConnectionStatusService;
     }

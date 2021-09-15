@@ -270,10 +270,6 @@ public class NetworkConfigurationServiceImpl
                         } else {
                             modifiedProps.put(prop.getKey(), value);
                         }
-                        logger.info("------------------- DECRYPTING PASSWORDS -------------------");
-                        logger.info(prop.getKey() + ": " + value);
-                        logger.info("Decrypted: " + modifiedProps.get(prop.getKey()));
-                        logger.info("------------------------------------------------------------");
                     }
                 }
 

@@ -224,7 +224,7 @@ public class WifiConfig implements NetConfig {
      * Set the Wifi Country Code
      * 
      * @param wifiCountryCode
-     * @since 1.1.0
+     * @since 2.2
      */
     public void setWifiCountryCode(String wifiCountryCode) {
         this.wifiCountryCode = wifiCountryCode;

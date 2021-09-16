@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,6 +29,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.KuraConfigReadyEvent;
 import org.eclipse.kura.configuration.KuraNetConfigReadyEvent;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
 import org.eclipse.kura.core.configuration.metatype.ObjectFactory;
@@ -42,6 +44,7 @@ import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
@@ -83,6 +86,7 @@ public class NetworkConfigurationServiceImpl
     private UsbService usbService;
     private ModemManagerService modemManagerService;
     private CommandExecutorService executorService;
+    private CryptoService cryptoService;
 
     private List<NetworkConfigurationVisitor> readVisitors;
     private List<NetworkConfigurationVisitor> writeVisitors;
@@ -136,6 +140,14 @@ public class NetworkConfigurationServiceImpl
 
     public void unsetExecutorService(CommandExecutorService executorService) {
         this.executorService = null;
+    }
+
+    public void setCryptoService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
+
+    public void unsetCryptoService(CryptoService cryptoService) {
+        this.cryptoService = null;
     }
 
     // ----------------------------------------------------------------
@@ -246,6 +258,8 @@ public class NetworkConfigurationServiceImpl
                     modifiedProps.put(sb.toString(), type.toString());
                 }
 
+                decryptPasswordProperties(modifiedProps);
+
                 NetworkConfiguration networkConfig = new NetworkConfiguration(modifiedProps);
 
                 for (NetworkConfigurationVisitor visitor : this.writeVisitors) {
@@ -261,6 +275,44 @@ public class NetworkConfigurationServiceImpl
         } catch (Exception e) {
             // TODO - would still want an event if partially successful?
             logger.error("Error updating the configuration", e);
+        }
+    }
+
+    private boolean isEncrypted(String password) {
+        try {
+            this.cryptoService.decryptAes(password.toCharArray());
+            return true;
+        } catch (Exception unableToDecryptAes) {
+            return false;
+        }
+    }
+
+    private String decryptPassword(String password) throws KuraException {
+        if (password.isEmpty()) {
+            return "";
+        }
+
+        if (isEncrypted(password)) {
+            return new String(this.cryptoService.decryptAes(password.toCharArray()));
+        } else {
+            return password;
+        }
+    }
+
+    private void decryptPasswordProperties(Map<String, Object> modifiedProps) throws KuraException {
+        for (Entry<String, Object> prop : modifiedProps.entrySet()) {
+            if (prop.getKey().contains("passphrase") || prop.getKey().contains("password")) {
+
+                Object value = prop.getValue();
+
+                if (value instanceof Password) {
+                    modifiedProps.put(prop.getKey(), decryptPassword(((Password) value).toString()));
+                } else if (value instanceof String) {
+                    modifiedProps.put(prop.getKey(), decryptPassword(value.toString()));
+                } else {
+                    modifiedProps.put(prop.getKey(), value);
+                }
+            }
         }
     }
 

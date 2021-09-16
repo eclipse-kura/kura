@@ -258,20 +258,7 @@ public class NetworkConfigurationServiceImpl
                     modifiedProps.put(sb.toString(), type.toString());
                 }
 
-                for (Entry<String, Object> prop : modifiedProps.entrySet()) {
-                    if (prop.getKey().contains("passphrase") || prop.getKey().contains("password")) {
-
-                        Object value = prop.getValue();
-
-                        if (value instanceof Password) {
-                            modifiedProps.put(prop.getKey(), decryptPassword(((Password) value).toString()));
-                        } else if (value instanceof String) {
-                            modifiedProps.put(prop.getKey(), decryptPassword(value.toString()));
-                        } else {
-                            modifiedProps.put(prop.getKey(), value);
-                        }
-                    }
-                }
+                decryptPasswordProperties(modifiedProps);
 
                 NetworkConfiguration networkConfig = new NetworkConfiguration(modifiedProps);
 
@@ -309,6 +296,23 @@ public class NetworkConfigurationServiceImpl
             return new String(this.cryptoService.decryptAes(password.toCharArray()));
         } else {
             return password;
+        }
+    }
+
+    private void decryptPasswordProperties(Map<String, Object> modifiedProps) throws KuraException {
+        for (Entry<String, Object> prop : modifiedProps.entrySet()) {
+            if (prop.getKey().contains("passphrase") || prop.getKey().contains("password")) {
+
+                Object value = prop.getValue();
+
+                if (value instanceof Password) {
+                    modifiedProps.put(prop.getKey(), decryptPassword(((Password) value).toString()));
+                } else if (value instanceof String) {
+                    modifiedProps.put(prop.getKey(), decryptPassword(value.toString()));
+                } else {
+                    modifiedProps.put(prop.getKey(), value);
+                }
+            }
         }
     }
 

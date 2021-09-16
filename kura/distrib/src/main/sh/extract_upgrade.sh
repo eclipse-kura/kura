@@ -90,6 +90,7 @@ function run_kura_upgrade {
             if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
                 echo "The installation process is not responding. It'll be stopped."
                 kill -9 $PID >> /dev/null 2>&1
+                exit 2
             fi
             sleep $REFRESH_TIME
         done
@@ -104,6 +105,7 @@ function run_kura_upgrade {
             if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
                 echo "The installation process is not responding. It'll be stopped."
                 kill -9 $PID >> /dev/null 2>&1
+                exit 2
             fi
             sleep $REFRESH_TIME
         done
@@ -124,6 +126,7 @@ function run_cleanup {
             if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
                 echo "The installation process is not responding. It'll be stopped."
                 kill -9 $PID >> /dev/null 2>&1
+                exit 2
             fi
             sleep $REFRESH_TIME
         done
@@ -138,6 +141,7 @@ function run_cleanup {
             if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
                 echo "The installation process is not responding. It'll be stopped."
                 kill -9 $PID >> /dev/null 2>&1
+                exit 2
             fi
             sleep $REFRESH_TIME
         done

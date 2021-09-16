@@ -1483,6 +1483,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
         mergedProperties.putAll(properties);
 
+        if (!mergedProperties.containsKey(ConfigurationService.KURA_SERVICE_PID)) {
+            mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
+        }
+
         try {
             updateComponentConfiguration(pid, mergedProperties, snapshotOnConfirmation);
             logger.info("Updating Configuration of ConfigurableComponent {} ... Done.", pid);

@@ -1742,7 +1742,7 @@
             <id>nvidia-jetson-nano</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, chrony, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
+                    wireless-tools, chrony, dmidecode, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1806,18 +1806,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-2-3-deb</id>
+                                <id>nvidia-jetson-nano-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_nvidia-jetson-nano_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-2.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_nvidia-jetson-nano.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

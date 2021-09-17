@@ -70,15 +70,8 @@ systemctl enable firewall
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
 #set up networking configuration
-mac_addr=$(head -1 /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')
-sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlan0.conf
-cp /etc/hostapd-wlan0.conf ${INSTALL_DIR}/kura/.data/hostapd-wlan0.conf
-
 cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf ${INSTALL_DIR}/kura/.data/dhcpd-eth0.conf
-
-cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
-cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlan0.conf
 
 #set up kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
@@ -102,7 +95,7 @@ cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
 #assigning possible .conf files ownership to kurad
-PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"
+PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)
 do
   chown kurad:kurad $FILE

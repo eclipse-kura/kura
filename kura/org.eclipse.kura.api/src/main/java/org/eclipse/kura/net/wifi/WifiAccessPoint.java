@@ -47,6 +47,18 @@ public interface WifiAccessPoint {
     public long getFrequency();
 
     /**
+     * 
+     *
+     * The Wi-Fi channel number in use by the access point.
+     * 
+     * @return Wi-Fi channel number
+     * @since 2.2
+     */
+    public int getChannel();
+
+    /**
+     * 
+     * 
      * Describes the operating mode of the access point.
      *
      * @return

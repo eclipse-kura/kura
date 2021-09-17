@@ -69,12 +69,12 @@ import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
+import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiChannel;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -1209,7 +1209,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             List<WifiAccessPoint> wifiAccessPoints = getWifiAccessPoints(ifaceName);
             for (WifiAccessPoint wap : wifiAccessPoints) {
                 int frequency = (int) wap.getFrequency();
-                int channel = frequencyMhz2Channel(frequency);
+                int channel = wap.getChannel();
 
                 if (wap.getSSID() == null || wap.getSSID().length() == 0
                         || isHotspotInList(channel, wap.getSSID(), wifiHotspotInfoList)) {
@@ -1410,10 +1410,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             logger.warn("Did not receive a network configuration change event");
             this.pendingNetworkConfigurationChange = false;
         }
-    }
-
-    private int frequencyMhz2Channel(int frequency) {
-        return (frequency - 2407) / 5;
     }
 
     private void stopTemporaryWpaSupplicant(String ifaceName) throws KuraException {

@@ -21,9 +21,10 @@ The **Wireless** tab contains the following configuration parameters:
 
 
 - **Radio Mode** - defines 802.11 mode.
-  - 802.11n/g/b
-  - 802.11g/b
-  - 802.11b
+  - 802.11n/g/b (2.4Ghz only)
+  - 802.11g/b (2.4Ghz only)
+  - 802.11b (2.4Ghz only)
+  - 802.11a (either in 2.4Ghz or 5Ghz depending on the choosen channel. )
 
 
 - **Wireless Security** - sets the security protocol for the wireless network.

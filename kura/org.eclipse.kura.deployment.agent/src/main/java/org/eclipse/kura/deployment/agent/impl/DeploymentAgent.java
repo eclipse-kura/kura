@@ -19,6 +19,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -35,6 +36,9 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.deployment.agent.DeploymentAgentService;
 import org.eclipse.kura.ssl.SslManagerService;
@@ -397,11 +401,26 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
         File dpFile = File.createTempFile("dpa", null);
         dpFile.deleteOnExit();
 
+        HttpURLConnection.setFollowRedirects(false);
+
         URLConnection urlConnection = url.openConnection();
         urlConnection.setConnectTimeout(this.connTimeout);
         urlConnection.setReadTimeout(this.readTimeout);
+
         if (urlConnection instanceof HttpsURLConnection) {
             ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
+        }
+
+        // handle redirect
+        int responseCode = ((HttpURLConnection) urlConnection).getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                || responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+            String newLocation = urlConnection.getHeaderField("Location");
+            if (StringUtils.isNotEmpty(newLocation)) {
+                return getFileFromRemote(new URL(newLocation));
+            } else {
+                throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER);
+            }
         }
 
         try (InputStream is = urlConnection.getInputStream();) {

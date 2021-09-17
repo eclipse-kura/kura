@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.core.net;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -168,7 +171,7 @@ public class WifiAccessPointImplTest {
 	public void testToStringJustSSID() {
 		WifiAccessPointImpl ap = new WifiAccessPointImpl("ssid");
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=0";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -181,7 +184,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setHardwareAddress(mac);
 
-		String expected = "ssid=ssid :: hardwareAddress=12:34:56:78:90:AB :: frequency=0 :: mode=null :: strength=0";
+		String expected = "ssid=ssid :: hardwareAddress=12:34:56:78:90:AB :: frequency=0 :: channel=0 :: mode=null :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -192,7 +195,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setFrequency(42);
 
-		String expected = "ssid=ssid :: frequency=42 :: mode=null :: strength=0";
+		String expected = "ssid=ssid :: frequency=42 :: channel=0 :: mode=null :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -203,7 +206,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setMode(WifiMode.ADHOC);
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=ADHOC :: strength=0";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=ADHOC :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -212,13 +215,13 @@ public class WifiAccessPointImplTest {
 	public void testToStringWithBitrate() {
 		WifiAccessPointImpl ap = new WifiAccessPointImpl("ssid");
 
-		ArrayList<Long> bitrate = new ArrayList<Long>();
+		ArrayList<Long> bitrate = new ArrayList<>();
 		bitrate.add((long) 1);
 		bitrate.add((long) 2);
 
 		ap.setBitrate(bitrate);
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: bitrate=1 2  :: strength=0";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: bitrate=1 2  :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -230,7 +233,7 @@ public class WifiAccessPointImplTest {
 		ArrayList<Long> bitrate = new ArrayList<>();
 		ap.setBitrate(bitrate);
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=0";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -241,7 +244,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setStrength(42);
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=42";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=42";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -252,7 +255,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setWpaSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.GROUP_TKIP));
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=0 :: wpaSecurity=GROUP_TKIP GROUP_CCMP ";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=0 :: wpaSecurity=GROUP_TKIP GROUP_CCMP ";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -263,7 +266,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setWpaSecurity(EnumSet.noneOf(WifiSecurity.class));
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=0";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -274,7 +277,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setRsnSecurity(EnumSet.of(WifiSecurity.GROUP_CCMP, WifiSecurity.GROUP_TKIP));
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=0 :: rsnSecurity=GROUP_TKIP GROUP_CCMP ";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=0 :: rsnSecurity=GROUP_TKIP GROUP_CCMP ";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -285,7 +288,7 @@ public class WifiAccessPointImplTest {
 
 		ap.setRsnSecurity(EnumSet.noneOf(WifiSecurity.class));
 
-		String expected = "ssid=ssid :: frequency=0 :: mode=null :: strength=0";
+		String expected = "ssid=ssid :: frequency=0 :: channel=0 :: mode=null :: strength=0";
 
 		assertEquals(expected, ap.toString());
 	}
@@ -294,7 +297,7 @@ public class WifiAccessPointImplTest {
 	public void testToStringWithAllFields() {
 		WifiAccessPointImpl ap = createWifiAccessPoint();
 
-		String expected = "ssid=ssid :: hardwareAddress=12:34:56:78:90:AB :: frequency=42 :: mode=ADHOC"
+		String expected = "ssid=ssid :: hardwareAddress=12:34:56:78:90:AB :: frequency=42 :: channel=0 :: mode=ADHOC"
 				+ " :: bitrate=1 2  :: strength=42 :: wpaSecurity=GROUP_TKIP GROUP_CCMP "
 				+ " :: rsnSecurity=GROUP_TKIP GROUP_CCMP ";
 

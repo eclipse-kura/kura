@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,25 +12,35 @@
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class GwtWifiChannelModel extends GwtBaseModel {
 
     private static final long serialVersionUID = -1471520645150788770L;
+
     private static final String BAND2400MHZ = "2.4 GHz";
+    private static final String BAND5000MHZ = "5.0 GHz";
+
     private static final int FIRST_2400MHZ_CHANNEL = 1;
     private static final int LAST_2400MHZ_CHANNEL = 14;
+
+    private static final int FIRST_5000MHZ_CHANNEL = 32;
 
     public GwtWifiChannelModel() {
 
     }
 
-    public GwtWifiChannelModel(String name, int channel, int frequency, String band) {
+    public GwtWifiChannelModel(int channel, int frequency) {
 
-        set("name", name);
+        set("name", formChannelName(channel));
         set("channel", channel);
         set("frequency", frequency);
+
+        String band = null;
+
+        if (channel >= FIRST_2400MHZ_CHANNEL && channel <= LAST_2400MHZ_CHANNEL)
+            band = BAND2400MHZ;
+        else if (channel >= FIRST_5000MHZ_CHANNEL)
+            band = BAND5000MHZ;
+
         set("band", band);
     }
 
@@ -56,15 +66,6 @@ public class GwtWifiChannelModel extends GwtBaseModel {
         set("band", band);
     }
 
-    public static List<GwtWifiChannelModel> getChannels() {
-
-        List<GwtWifiChannelModel> alCannels = new ArrayList<>();
-        for (int i = FIRST_2400MHZ_CHANNEL; i <= LAST_2400MHZ_CHANNEL; i++) {
-            alCannels.add(new GwtWifiChannelModel(formChannelName(i), i, getCannelFrequencyMHz(i), BAND2400MHZ));
-        }
-        return alCannels;
-    }
-
     @Override
     public String toString() {
         return getName();
@@ -72,21 +73,10 @@ public class GwtWifiChannelModel extends GwtBaseModel {
 
     private static String formChannelName(int channel) {
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("Channel ");
         sb.append(channel);
         return sb.toString();
     }
 
-    private static int getCannelFrequencyMHz(int channel) {
-
-        int frequency = -1;
-        if (channel >= 1 && channel <= 13) {
-            frequency = 2407 + channel * 5;
-        }
-        if (channel == 14) {
-            frequency = 2484;
-        }
-        return frequency;
-    }
 }

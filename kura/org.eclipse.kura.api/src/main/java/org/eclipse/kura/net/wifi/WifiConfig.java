@@ -211,9 +211,9 @@ public class WifiConfig implements NetConfig {
     }
 
     /**
-     * Get the Wifi Country Code
+     * Get the Wi-Fi country code
      * 
-     * @return wifi country code
+     * @return Wi-Fi country code in ISO 3166-1 alpha-2
      * @since 2.2
      */
     public String getWifiCountryCode() {
@@ -221,9 +221,10 @@ public class WifiConfig implements NetConfig {
     }
 
     /**
-     * Set the Wifi Country Code
+     * Set the Wi-Fi country code
      * 
      * @param wifiCountryCode
+     *            Wi-Fi Country code in ISO 3166-1 alpha-2 format
      * @since 2.2
      */
     public void setWifiCountryCode(String wifiCountryCode) {
@@ -231,9 +232,9 @@ public class WifiConfig implements NetConfig {
     }
 
     /**
-     * Get the list of Wifi channels and frequencies
+     * Get the list of Wi-Fi channels and frequencies
      * 
-     * @return List of wifi channels and frequencies
+     * @return List of Wi-Fi channels and frequencies
      * @since 2.2
      */
     public List<WifiChannel> getChannelFrequencies() {
@@ -243,6 +244,8 @@ public class WifiConfig implements NetConfig {
     /**
      * Set the list of channel frequencies
      * 
+     * @param channelFrequencies
+     *            list of Wi-Fi channels and relative frequencies
      * @since 2.2
      */
     public void setChannelFrequencies(List<WifiChannel> channelFrequencies) {

@@ -49,6 +49,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
 
+    private static final int FIRST_5000MHZ_CHANNEL = 32;
+
     private static final String HEXES = "0123456789ABCDEF";
     private static final String KURA_SECURITY = "KURA_SECURITY";
     private static final String KURA_PAIRWISE_CIPHER = "KURA_PAIRWISE_CIPHER";
@@ -352,7 +354,13 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         if (radioMode == WifiRadioMode.RADIO_MODE_80211a) {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
+
+            if (wifiConfig.getChannels().length >= 1 && wifiConfig.getChannels()[0] >= FIRST_5000MHZ_CHANNEL) {
+                fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            } else {
+                fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
+            }
+
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
         } else if (radioMode == WifiRadioMode.RADIO_MODE_80211b) {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "b");

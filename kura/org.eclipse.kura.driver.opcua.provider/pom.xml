@@ -32,7 +32,7 @@
     <properties>
         <kura.basedir>${project.basedir}/..</kura.basedir>
         <com.google.guava.version>25.0-jre</com.google.guava.version>
-        <io.netty.version>4.0.36.Final</io.netty.version>
+        <io.netty.version>4.1.68.Final</io.netty.version>
         <org.eclipse.milo.version>0.2.4</org.eclipse.milo.version>
         <org.jooq.jool.version>0.9.10</org.jooq.jool.version>
         <com.google.code.findbugs.jsr305.version>3.0.1</com.google.code.findbugs.jsr305.version>

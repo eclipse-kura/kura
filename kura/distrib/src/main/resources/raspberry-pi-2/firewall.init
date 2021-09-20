@@ -17,16 +17,16 @@ create_filter_chains() {
 	done
 	custom_filter_chains=(forward-kura-pf forward-kura-ipf)
 	for custom_chain in ${custom_filter_chains[@]}; do
-	    iptables -C forward -j $custom_chain -t filter > /dev/null 2>&1
+	    iptables -C forward-kura -j $custom_chain -t filter > /dev/null 2>&1
 	    if [[ $? -ne 0 ]]; then
 	        iptables -N $custom_chain -t filter > /dev/null 2>&1
-	        iptables -I forward -t filter -j $custom_chain > /dev/null 2>&1
+	        iptables -I forward-kura -t filter -j $custom_chain > /dev/null 2>&1
 	    fi
 	done
 }
 
 create_nat_chains() {
-	custom_nat_chains=(prerouting-kura prerouting-kura-pf postrouting-kura postrouting-kura-pf postrouting-kura-ipf input-kura output-kura)
+	custom_nat_chains=(prerouting-kura postrouting-kura input-kura output-kura)
 	for custom_chain in ${custom_nat_chains[@]}; do
 	    chain=(${custom_chain//-/ }[0])
 	    iptables -C ${chain[0]^^} -j $custom_chain -t nat > /dev/null 2>&1

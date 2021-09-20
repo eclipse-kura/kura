@@ -11,7 +11,7 @@ JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMem
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/var/log/kura-heapdump.hprof"
 JAVA_INT_OPTS="$JAVA_INT_OPTS -XX:ErrorFile=/var/log/kura-error.log"
-JAVA_INT_OPTS="$JAVA_INT_OPTS --add-modules=java.sql,java.xml,java.xml.bind"
+JAVA_INT_OPTS="$JAVA_INT_OPTS --add-modules=ALL-SYSTEM"
 
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.os.version=centos"
 JAVA_INT_OPTS="$JAVA_INT_OPTS -Dkura.arch=intel-up2-centos-7"

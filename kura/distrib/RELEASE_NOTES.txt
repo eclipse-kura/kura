@@ -98,6 +98,7 @@ Changes:
     * org.eclipse.jetty.servlet 9.4.41.v20210516
     * org.eclipse.jetty.util 9.4.41.v20210516
     * org.eclipse.jetty.util.ajax 9.4.41.v20210516
+    * io.netty.version=4.1.68.Final
     * Google Protobuf 3.8.0
     * com.eclipsesource-json 0.9.5
     * org.apache.felix.useradmin 1.0.4.k1
@@ -186,6 +187,18 @@ Known Issues :
 
 
 Changelog :
+  * b488518a8 - Fixed double ipf/pf forwarding chains (#3590) (#3591) (github-actions[bot])
+  * 2938d91a8 - Align with changes from #2620 (#3586) (#3589) (github-actions[bot])
+  * 1f756af50 - Wifi 5ghz support (#3568) (#3585) (github-actions[bot])
+  * 79da01ff9 - Upgraded Netty to 4.1.68.Final (#3581) (#3584) (github-actions[bot])
+  * 6cd86f54a - Added http redirect handling. (#3580) (#3583) (github-actions[bot])
+  * 9a168c870 - When running into a timeout, report an error (#3573) (#3579) (github-actions[bot])
+  * eec6ce8e0 - Added kura.service.pid if missing during configuration update (#3572) (#3575) (github-actions[bot])
+  * 5208ce80c - Added Eclipse Marketplace certificate in cacerts.ks (#3576) (#3578) (github-actions[bot])
+  * 9980ac740 - Added password decryption in NetworkConfigurationService (#3574) (#3577) (github-actions[bot])
+  * e22999273 - Removed logging of properties on CommandCloudApp update (#3569) (#3571) (github-actions[bot])
+  * 99da7fba2 - Removed unnecessary ServiceRegistration and updated slf4j version (#3565) (#3566) (github-actions[bot])
+  * abb6be5a0 - Threat manager bundle not included in NN profiles (#3562) (#3563) (github-actions[bot])
   * 22c60d345 - Added support for PEMKeyPair object (#3559) (#3560) (github-actions[bot])
   * 1be90e8fa - Removed netadmin role from NN profiles (#3539) (#3557) (github-actions[bot])
   * f999a7a6e - Fixed system packages parsing on APK package manager (#3554) (#3556) (github-actions[bot])

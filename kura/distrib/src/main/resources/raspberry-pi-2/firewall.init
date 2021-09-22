@@ -4,67 +4,106 @@ iptables_config_file=/etc/sysconfig/iptables
 ipforward_file=/proc/sys/net/ipv4/ip_forward
 enable_ipforwarding=false;
 
+create_filter_chains() {
+	# create custom chains if needed
+	custom_filter_chains=(input-kura output-kura forward-kura)
+	for custom_chain in ${custom_filter_chains[@]}; do
+	    chain=(${custom_chain//-/ })
+	    iptables -C ${chain[0]^^} -j $custom_chain -t filter > /dev/null 2>&1
+	    if [[ $? -ne 0 ]]; then
+	        iptables -N $custom_chain -t filter > /dev/null 2>&1
+	        iptables -I ${chain[0]^^} -t filter -j $custom_chain > /dev/null 2>&1
+	    fi
+	done
+	custom_filter_chains=(forward-kura-pf forward-kura-ipf)
+	for custom_chain in ${custom_filter_chains[@]}; do
+	    iptables -C forward-kura -j $custom_chain -t filter > /dev/null 2>&1
+	    if [[ $? -ne 0 ]]; then
+	        iptables -N $custom_chain -t filter > /dev/null 2>&1
+	        iptables -I forward-kura -t filter -j $custom_chain > /dev/null 2>&1
+	    fi
+	done
+}
+
+create_nat_chains() {
+	custom_nat_chains=(prerouting-kura postrouting-kura input-kura output-kura)
+	for custom_chain in ${custom_nat_chains[@]}; do
+	    chain=(${custom_chain//-/ }[0])
+	    iptables -C ${chain[0]^^} -j $custom_chain -t nat > /dev/null 2>&1
+	    if [[ $? -ne 0 ]]; then
+	        iptables -N $custom_chain -t nat > /dev/null 2>&1
+	        iptables -I ${chain[0]^^} -t nat -j $custom_chain > /dev/null 2>&1
+	    fi
+	done
+	iptables -C prerouting-kura -j prerouting-kura-pf -t nat > /dev/null 2>&1
+	if [[ $? -ne 0 ]]; then
+	    iptables -N prerouting-kura-pf -t nat > /dev/null 2>&1
+	    iptables -I prerouting-kura -t nat -j prerouting-kura-pf > /dev/null 2>&1
+	fi
+	custom_nat_chains=(postrouting-kura-pf postrouting-kura-ipf)
+	for custom_chain in ${custom_nat_chains[@]}; do
+	    iptables -C postrouting-kura -j $custom_chain -t nat > /dev/null 2>&1
+	    if [[ $? -ne 0 ]]; then
+	        iptables -N $custom_chain -t nat > /dev/null 2>&1
+	        iptables -I postrouting-kura -t nat -j $custom_chain > /dev/null 2>&1
+	    fi
+	done
+}
+
+create_mangle_chains() {
+	custom_mangle_chains=(prerouting-kura postrouting-kura input-kura output-kura forward-kura)
+	for custom_chain in ${custom_mangle_chains[@]}; do
+	    chain=(${custom_chain//-/ }[0])
+	    iptables -C ${chain[0]^^} -j $custom_chain -t mangle > /dev/null 2>&1
+	    if [[ $? -ne 0 ]]; then
+	        iptables -N $custom_chain -t mangle > /dev/null 2>&1
+	        iptables -I ${chain[0]^^} -t mangle -j $custom_chain > /dev/null 2>&1
+	    fi
+	done
+}
+
+configure_policies() {
+	# configure policies for standard chains
+	policy=$(iptables -nL -t filter | grep policy | grep INPUT)
+	if [[ "$policy" == *ACCEPT* ]]; then
+		iptables -P INPUT DROP
+	fi
+	policy=$(iptables -nL -t filter | grep policy | grep OUTPUT)
+	if [[ "$policy" == *DROP* ]]; then
+		iptables -P OUTPUT ACCEPT
+	fi
+	policy=$(iptables -nL -t filter | grep policy | grep FORWARD)
+	if [[ "$policy" == *ACCEPT* ]]; then
+		iptables -P FORWARD DROP
+	fi
+}
+
+configure_ip_forwarding() {
+	# enable ip forwarding if needed
+	if [ -f $iptables_config_file ]; then
+		while IFS='' read -r line || [[ -n "$line" ]]; do
+		    if [[ $line =~ "-A forward-kura" ]]; then
+		        enable_ipforwarding=true
+		        break
+		    fi
+		done < $iptables_config_file
+	fi
+	if [ $enable_ipforwarding = true ]; then
+	    echo "1" > $ipforward_file
+	else
+	    echo "0" > $ipforward_file
+	fi
+}
+
 if [ -f $iptables_config_file ]; then
 	iptables-restore < $iptables_config_file
 fi
 
-# create custom chains if needed
-custom_filter_chains=(input-kura output-kura forward-kura forward-kura-pf forward-kura-ipf)
-for custom_chain in ${custom_filter_chains[@]}; do
-    chain=(${custom_chain//-/ })
-    iptables -C ${chain[0]^^} -j $custom_chain -t filter > /dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        iptables -N $custom_chain -t filter > /dev/null 2>&1
-        iptables -I ${chain[0]^^} -t filter -j $custom_chain > /dev/null 2>&1
-    fi
-done
-custom_nat_chains=(prerouting-kura prerouting-kura-pf postrouting-kura postrouting-kura-pf postrouting-kura-ipf input-kura output-kura)
-for custom_chain in ${custom_nat_chains[@]}; do
-    chain=(${custom_chain//-/ }[0])
-    iptables -C ${chain[0]^^} -j $custom_chain -t nat > /dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        iptables -N $custom_chain -t nat > /dev/null 2>&1
-        iptables -I ${chain[0]^^} -t nat -j $custom_chain > /dev/null 2>&1
-    fi
-done
-custom_mangle_chains=(prerouting-kura postrouting-kura input-kura output-kura forward-kura)
-for custom_chain in ${custom_mangle_chains[@]}; do
-    chain=(${custom_chain//-/ }[0])
-    iptables -C ${chain[0]^^} -j $custom_chain -t mangle > /dev/null 2>&1
-    if [[ $? -ne 0 ]]; then
-        iptables -N $custom_chain -t mangle > /dev/null 2>&1
-        iptables -I ${chain[0]^^} -t mangle -j $custom_chain > /dev/null 2>&1
-    fi
-done
-
-# configure policies for standard chains
-policy=$(iptables -nL -t filter | grep policy | grep INPUT)
-if [[ "$policy" == *ACCEPT* ]]; then
-	iptables -P INPUT DROP
-fi
-policy=$(iptables -nL -t filter | grep policy | grep OUTPUT)
-if [[ "$policy" == *DROP* ]]; then
-	iptables -P OUTPUT ACCEPT
-fi
-policy=$(iptables -nL -t filter | grep policy | grep FORWARD)
-if [[ "$policy" == *ACCEPT* ]]; then
-	iptables -P FORWARD DROP
-fi
-
-# enable ip forwarding if needed
-if [ -f $iptables_config_file ]; then
-	while IFS='' read -r line || [[ -n "$line" ]]; do
-	    if [[ $line =~ "-A forward-kura" ]]; then
-	        enable_ipforwarding=true
-	        break
-	    fi
-	done < $iptables_config_file
-fi
-if [ $enable_ipforwarding = true ]; then
-    echo "1" > $ipforward_file
-else
-    echo "0" > $ipforward_file
-fi
+create_filter_chains()
+create_nat_chains()
+create_mangle_chains()
+configure_policies()
+configure_ip_forwarding()
 
 # source a custom firewall script
 if [ -f /etc/init.d/firewall_cust ]; then

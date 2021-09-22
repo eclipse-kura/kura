@@ -87,6 +87,10 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/dhcpd
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
+#assigning kuranet.conf files ownership to kurad
+chown kurad:kurad ${INSTALL_DIR}/kura/user/kuranet.conf
+chown kurad:kurad ${INSTALL_DIR}/kura/.data/kuranet.conf
+
 #set up bind/named
 cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
 mkdir -p /var/named

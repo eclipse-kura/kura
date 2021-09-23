@@ -105,6 +105,12 @@ Click the arrow next to the *target-definition* project in the workspace and dou
 
 In the Target Definition window, click the link **Set as Target Platform**. Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported. At this point, you are ready to begin developing Kura-based applications for your target platform.
 
+### Run the Eclipse Kura Emulator
+
+To start the Eclipse Kura emulator, select the "Kura_Emulator_Linux.launch" or "Kura_Emulator_OSX.launch" profile from "org.eclipse.kura.emulator" project -> "launch_configs" -> "Kura_Emulator_[OSX | Linux].launch" and run it with "Run as".
+
+The Eclipse Kura Web UI will be available at the following URL: `http://127.0.0.1:8080` with username and password **admin**.
+
 ## Eclipse Oomph installer
 
 The Eclipse Oomph installer is an easy way to install and configure the Eclipse IDE to start developing on Kura.
@@ -126,14 +132,18 @@ Download the latest Eclipse Installer appropriate for your platform from [Eclips
 * Wait for the installation to finish, a few additional plugins will be installed.
 * At first startup Eclipse IDE will checkout the code and perform a full build.
 
-The result will be an Eclipse IDE with all the recommended plug-ins already available, code will be checked out and built, workspace will be set up, a few Working Sets will be prepared with most projects building without errors
+The result will be an Eclipse IDE with all the recommended plug-ins already available, code will be checked out and built, workspace will be set up, a few Working Sets will be prepared with most projects building without errors.
 
-The next step is to get the rest of the projects to build, for which you might need to build them in the console with specific profiles available e.g. can.
+The next step is to get the rest of the projects to build, for which you might need to build them in the console with specific profiles available e.g. the CAN bundle.
 
-To start the Kura emulator, select the "Eclipse Kura Emulator.launch" profile from "Other Projects" -> "setups" -> "launchers" and open it with "Run as" -> "Run Configurations...". Then click on the "Arguments" tab and update the "VM arguments" as follows to adapt the paths to the folder structure created by the Oomph installer:
+### Run the Eclipse Kura Emulator
+
+To start the Eclipse Kura emulator, select the "Eclipse Kura Emulator.launch" profile from "Other Projects" -> "setups" -> "launchers" and open it with "Run as" -> "Run Configurations...". Then click on the "Arguments" tab and update the "VM arguments" as follows to adapt the paths to the folder structure created by the Oomph installer:
 
 ```
 -Dkura.have.net.admin=false -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dosgi.noShutdown=true -Declipse.ignoreApp=true  -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties -Dlog4j.configurationFile=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml -Dkura.data=${workspace_loc}/kura/data -Dkura.snapshots=${workspace_loc}/kura/user/snapshots -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
 ```
 
 ![Image 10]({{ site.baseurl }}/assets/images/kura_setup/image010.png)
+
+The Eclipse Kura Web UI will be available at the following URL: `http://127.0.0.1:8080` with username and password **admin**.

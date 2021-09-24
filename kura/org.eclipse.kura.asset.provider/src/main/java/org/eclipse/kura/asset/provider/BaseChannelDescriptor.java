@@ -17,6 +17,7 @@ package org.eclipse.kura.asset.provider;
 import static org.eclipse.kura.asset.provider.AssetConstants.NAME;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.FACTOR;
 
 import java.util.List;
 
@@ -39,6 +40,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
  * <li>name</li> denotes the name of the channel
  * <li>type</li>
  * <li>value.type</li>
+ * <li>factor</li> scale factor for the numeric values
  * </ul>
  *
  * The <b><i>type</i></b> would be one of the following:
@@ -129,6 +131,17 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         addOptions(valueType, DataType.values());
 
         this.defaultElements.add(valueType);
+
+        final Tad factor = new Tad();
+        factor.setId(AssetConstants.FACTOR.value());
+        factor.setName(AssetConstants.FACTOR.value().substring(1));
+        factor.setType(Tscalar.DOUBLE);
+        factor.setDefault("1.0");
+        factor.setDescription("Scale factor for the numeric values read and written");
+        factor.setCardinality(0);
+        factor.setRequired(true);
+
+        this.defaultElements.add(factor);
     }
 
     /** {@inheritDoc} */

@@ -133,8 +133,8 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         this.defaultElements.add(valueType);
 
         final Tad factor = new Tad();
-        factor.setId(AssetConstants.FACTOR.value());
-        factor.setName(AssetConstants.FACTOR.value().substring(1));
+        factor.setId(FACTOR.value());
+        factor.setName(FACTOR.value().substring(1));
         factor.setType(Tscalar.DOUBLE);
         factor.setDefault("1.0");
         factor.setDescription("Scale factor for the numeric values read and written");

@@ -1260,9 +1260,9 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         for (int i = 0; i < split.length; i++) {
             String s = split[i];
 
+            // version is never at the beginning
             if (i > 0 && i < matchIndex) {
-                // version is never at the beginning
-                if (s.matches("\\d+.(\\w+(.)?)+")) {
+                if (s.matches("^(\\d+.)")) {
                     version += s;
                     matchIndex = i;
                 } else {

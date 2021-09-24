@@ -99,6 +99,8 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         this.keystoreService = keystoreService;
         this.keystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
 
+        this.clearSslContexCache();
+
         if (this.sslServiceListeners != null) {
             // Notify listeners that service has been updated
             this.sslServiceListeners.onConfigurationUpdated();
@@ -107,6 +109,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
     public void unsetKeystoreService(KeystoreService keystoreService) {
         if (this.keystoreService == keystoreService) {
+
+            this.clearSslContexCache();
+
+            if (this.sslServiceListeners != null) {
+                // Notify listeners that service has been updated
+                this.sslServiceListeners.onConfigurationUpdated();
+            }
+
             this.keystoreService = null;
             this.keystoreServicePid = Optional.empty();
         }
@@ -537,7 +547,14 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
         final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
 
         if (this.keystoreServicePid.equals(Optional.of(keystoreChangedEvent.getSenderPid()))) {
+            this.clearSslContexCache();
             this.sslServiceListeners.onConfigurationUpdated();
+        }
+    }
+
+    private void clearSslContexCache() {
+        if (sslContexts != null) {
+            this.sslContexts.clear();
         }
     }
 

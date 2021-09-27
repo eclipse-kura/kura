@@ -46,7 +46,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
-        if (!startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
+        if (!startBluetoothSuppressed() && !startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
             startBluetoothDaemon();
         }
         try {
@@ -108,6 +108,11 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         } else {
             return false;
         }
+    }
+
+    private boolean startBluetoothSuppressed() {
+        // Allow to disable the bluetooth service start, e.g. when running inside a container
+        return Boolean.getBoolean("kura.ble.suppressBluetoothDaemonStart");
     }
 
     private boolean execute(String commandLine) {

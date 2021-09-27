@@ -18,24 +18,35 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.core.util.IOUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceStatus;
@@ -567,7 +578,7 @@ public class WpaSupplicantConfigTest {
         assertTrue(configFileContents.contains("mode=1\n"));
         assertTrue(configFileContents.contains("ssid=\"testSSID\"\n"));
         assertTrue(configFileContents.contains("key_mgmt=WPA-NONE\n"));
-        assertTrue(configFileContents.contains("psk=\"" + encodedPass + "\"\n"));
+        assertTrue(configFileContents.contains("psk=" + encodedPass + "\n"));
         assertTrue(configFileContents.contains("frequency=2412\n"));
         assertTrue(configFileContents.contains("group=TKIP\n"));
         assertTrue(configFileContents.contains("pairwise=NONE\n"));
@@ -655,7 +666,7 @@ public class WpaSupplicantConfigTest {
         assertTrue(configFileContents.contains("mode=0\n"));
         assertTrue(configFileContents.contains("ssid=\"testSSIDi\"\n"));
         assertTrue(configFileContents.contains("key_mgmt=WPA-PSK\n"));
-        assertTrue(configFileContents.contains("psk=\"" + encodedPass + "\"\n"));
+        assertTrue(configFileContents.contains("psk=" + encodedPass + "\n"));
         assertTrue(configFileContents.contains("scan_freq=2417\n"));
         assertTrue(configFileContents.contains("proto=WPA RSN\n"));
         assertTrue(configFileContents.contains("pairwise=CCMP\n"));
@@ -971,6 +982,25 @@ public class WpaSupplicantConfigTest {
                 map.put(key, value);
             }
         };
+
+        CommandExecutorService esMock = mock(CommandExecutorService.class);
+        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        status.setOutputStream(new ByteArrayOutputStream());
+        String networkConfig = "network={\n" + "        ssid=\"testSSID\"\n"
+                + "        #psk=\"12345678901234567890123456789012\"\n"
+                + "        psk=3a859f5abdd14de95f99e572c31bc94650a0fd499b01a6d46056ea3bc18dc879\n" + "}";
+
+        Writer networkConfigwriter = new OutputStreamWriter(status.getOutputStream(), StandardCharsets.UTF_8);
+        try {
+            networkConfigwriter.write(networkConfig);
+            networkConfigwriter.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        when(esMock.execute(anyObject())).thenReturn(status);
+
+        writer.setExecutorService(esMock);
 
         return writer;
     }

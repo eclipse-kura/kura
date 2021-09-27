@@ -51,7 +51,9 @@ import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.security.keystore.KeystoreChangedEvent;
 import org.eclipse.kura.security.keystore.KeystoreService;
+import org.eclipse.kura.ssl.SslServiceListener;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -164,6 +166,144 @@ public class SslManagerServiceImplTest {
         Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
                 .getFieldValue(svc, "sslContexts");
         assertNotNull(updatedSslContexts);
+        assertEquals(0, updatedSslContexts.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSSLSocketFactoryCacheCleanedAfterSet()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        // test preparation of an SslSocketFactory
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        SslServiceListener listener = () -> {
+        };
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.hostname.verification", "true");
+
+        KeystoreService keystoreService = mock(KeystoreService.class);
+        when(keystoreService.getKeyStore()).thenReturn(store);
+
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
+        svc.activate(ccMock, properties);
+
+        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+
+        SSLSocketFactory factory = svc.getSSLSocketFactory();
+
+        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+
+        assertNotNull(factory);
+        assertEquals(1, sslContexts.size());
+        assertEquals(factory, sslContexts.values().iterator().next().getSocketFactory());
+
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
+
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+
+        assertEquals(0, updatedSslContexts.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSSLSocketFactoryCacheCleanedAfterUnset()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        // test preparation of an SslSocketFactory
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        SslServiceListener listener = () -> {
+        };
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.hostname.verification", "true");
+
+        KeystoreService keystoreService = mock(KeystoreService.class);
+        when(keystoreService.getKeyStore()).thenReturn(store);
+
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
+        svc.activate(ccMock, properties);
+
+        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+
+        SSLSocketFactory factory = svc.getSSLSocketFactory();
+
+        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+
+        assertNotNull(factory);
+        assertEquals(1, sslContexts.size());
+        assertEquals(factory, sslContexts.values().iterator().next().getSocketFactory());
+
+        svc.unsetKeystoreService(keystoreService);
+
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+
+        assertEquals(0, updatedSslContexts.size());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSSLSocketFactoryCacheCleanedAfterEvent()
+            throws KuraException, NoSuchFieldException, GeneralSecurityException, IOException {
+        // test preparation of an SslSocketFactory
+        setupDefaultKeystore();
+
+        SslManagerServiceImpl svc = new SslManagerServiceImpl();
+
+        SslServiceListener listener = () -> {
+        };
+
+        ComponentContext ccMock = mock(ComponentContext.class);
+
+        BundleContext bcMock = mock(BundleContext.class);
+        when(ccMock.getBundleContext()).thenReturn(bcMock);
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("ssl.default.protocol", "TLSv1");
+        properties.put("ssl.hostname.verification", "true");
+
+        KeystoreService keystoreService = mock(KeystoreService.class);
+        when(keystoreService.getKeyStore()).thenReturn(store);
+
+        svc.setKeystoreService(keystoreService, Collections.singletonMap("kura.service.pid", "foo"));
+        svc.activate(ccMock, properties);
+
+        TestUtil.setFieldValue(svc, "sslServiceListeners", listener);
+
+        SSLSocketFactory factory = svc.getSSLSocketFactory();
+
+        Map<ConnectionSslOptions, SSLContext> sslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+
+        assertNotNull(factory);
+        assertEquals(1, sslContexts.size());
+        assertEquals(factory, sslContexts.values().iterator().next().getSocketFactory());
+
+        svc.handleEvent(new KeystoreChangedEvent("foo"));
+
+        Map<ConnectionSslOptions, SSLContext> updatedSslContexts = (Map<ConnectionSslOptions, SSLContext>) TestUtil
+                .getFieldValue(svc, "sslContexts");
+
         assertEquals(0, updatedSslContexts.size());
     }
 

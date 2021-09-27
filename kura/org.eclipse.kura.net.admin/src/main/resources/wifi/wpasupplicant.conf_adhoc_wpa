@@ -11,6 +11,6 @@ network={
     key_mgmt=WPA-NONE
     group=TKIP
     frequency=KURA_FREQUENCY
-    psk="KURA_PASSPHRASE"
+    psk=KURA_PASSPHRASE
     pairwise=KURA_PAIRWISE
 }

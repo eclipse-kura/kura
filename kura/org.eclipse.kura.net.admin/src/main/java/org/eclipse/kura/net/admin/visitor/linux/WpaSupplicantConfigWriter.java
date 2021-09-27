@@ -15,12 +15,14 @@ package org.eclipse.kura.net.admin.visitor.linux;
 
 import static org.eclipse.kura.net.admin.visitor.linux.WriterHelper.copyFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
@@ -28,7 +30,9 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
+import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -51,6 +55,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(WpaSupplicantConfigWriter.class);
 
+    private static final String WPA_PASSPHRASE_COMMAND = "wpa_passphrase";
+
     private static final String WPA_TMP_CONFIG_FILE = "/etc/wpa_supplicant.conf.tmp";
     private static final String TMP_WPA_CONFIG_FILE = "/tmp/wpa_supplicant.conf";
     private static final String WPA_SUPPLICANT_CONF_RESOURCE = "/src/main/resources/wifi/wpasupplicant.conf";
@@ -58,6 +64,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     private static final String HEXES = "0123456789ABCDEF";
 
     private static WpaSupplicantConfigWriter instance;
+    private CommandExecutorService executorService;
 
     public static WpaSupplicantConfigWriter getInstance() {
         if (instance == null) {
@@ -69,7 +76,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
     @Override
     public void setExecutorService(CommandExecutorService executorService) {
-        // Not needed
+        this.executorService = executorService;
     }
 
     @Override
@@ -322,7 +329,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                         "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
                                 + passKey);
             } else {
-                result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(passKey.trim()));
+                String encodedPasskey = encodePassword(wifiConfig.getSSID(), passKey);
+                result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(encodedPasskey.trim()));
             }
         } else {
             throw KuraException.internalError("the passwd can not be null");
@@ -385,6 +393,47 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         }
 
         return result;
+    }
+
+    /**
+     * 
+     * @param password
+     *            the plaintext password
+     * @param ssid
+     *            the wi-fi network ssid
+     * @return a 256-bit PSK
+     * @throws KuraException
+     */
+
+    private String encodePassword(String ssid, String password) throws KuraException {
+        String[] wpaPassphraseCommand = new String[] { WPA_PASSPHRASE_COMMAND, ssid, password };
+
+        Command command = new Command(wpaPassphraseCommand);
+        command.setOutputStream(new ByteArrayOutputStream());
+        command.setErrorStream(new ByteArrayOutputStream());
+        command.setTimeout(60);
+
+        CommandStatus status = this.executorService.execute(command);
+        if (status.getExitStatus().isSuccessful()) {
+            String networkConfig = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
+                    Charsets.UTF_8);
+
+            String[] networkConfigLines = networkConfig.split("\n");
+
+            String encodedPsk = "";
+            for (String line : networkConfigLines) {
+                String trimmedLine = line.trim();
+                if (trimmedLine.startsWith("psk=")) {
+                    encodedPsk = trimmedLine.split("=")[1];
+                    break;
+                }
+            }
+
+            return encodedPsk;
+        } else {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+        }
+
     }
 
     private String updateWepPassKey(WifiConfig wifiConfig, String fileAsString) throws KuraException {

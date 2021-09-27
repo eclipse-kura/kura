@@ -305,7 +305,7 @@ public class SystemServiceTest {
         Command apkCommand = new Command(new String[] { "apk", "list", "-I", "|", "awk", "'{ print $1 }'" });
         apkCommand.setExecuteInAShell(true);
         CommandStatus apkSuccessfulStatus = new CommandStatus(apkCommand, new LinuxExitStatus(0));
-        apkSuccessfulStatus.setOutputStream(writeToOutputStream("dos2unix-7.4.1-r0"));
+        apkSuccessfulStatus.setOutputStream(writeToOutputStream("dos2unix-7.4.1-r0\nkmod-26-r0"));
         when(cesMock.execute(apkCommand)).thenReturn(apkSuccessfulStatus);
 
         SystemServiceImpl systemService = new SystemServiceImpl();
@@ -313,7 +313,7 @@ public class SystemServiceTest {
 
         List<SystemResourceInfo> packages = systemService.getSystemPackages();
         assertFalse(packages.isEmpty());
-        assertEquals(5, packages.size());
+        assertEquals(6, packages.size());
         assertEquals("package1", packages.get(0).getName());
         assertEquals("1.0.0", packages.get(0).getVersion());
         assertEquals(SystemResourceType.DEB, packages.get(0).getType());
@@ -327,6 +327,8 @@ public class SystemServiceTest {
         assertEquals(SystemResourceType.APK, packages.get(4).getType());
         assertEquals("dos2unix", packages.get(4).getName());
         assertEquals("7.4.1-r0", packages.get(4).getVersion());
+        assertEquals("kmod", packages.get(5).getName());
+        assertEquals("26-r0", packages.get(5).getVersion());
     }
 
     @Test(expected = KuraProcessExecutionErrorException.class)

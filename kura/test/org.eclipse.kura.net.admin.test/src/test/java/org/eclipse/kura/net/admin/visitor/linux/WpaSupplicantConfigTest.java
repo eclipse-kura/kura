@@ -57,7 +57,8 @@ public class WpaSupplicantConfigTest {
         new File(dir).mkdirs();
 
         String intfName = "testinterface";
-        String pass = "Pa$&wrd";
+        // 12345678901234567890123456789012
+        String pass = "3a859f5abdd14de95f99e572c31bc94650a0fd499b01a6d46056ea3bc18dc879";
         String ssid = "ID WITH SPACE";
 
         WpaSupplicantConfigReader reader = new WpaSupplicantConfigReader() {
@@ -497,6 +498,7 @@ public class WpaSupplicantConfigTest {
 
         String intfName = "testinterface";
         String pass = "12345678901234567890123456789012";
+        String encodedPass = "3a859f5abdd14de95f99e572c31bc94650a0fd499b01a6d46056ea3bc18dc879";
 
         WpaSupplicantConfigWriter writer = getWriter(dir);
 
@@ -565,7 +567,7 @@ public class WpaSupplicantConfigTest {
         assertTrue(configFileContents.contains("mode=1\n"));
         assertTrue(configFileContents.contains("ssid=\"testSSID\"\n"));
         assertTrue(configFileContents.contains("key_mgmt=WPA-NONE\n"));
-        assertTrue(configFileContents.contains("psk=\"" + pass + "\"\n"));
+        assertTrue(configFileContents.contains("psk=\"" + encodedPass + "\"\n"));
         assertTrue(configFileContents.contains("frequency=2412\n"));
         assertTrue(configFileContents.contains("group=TKIP\n"));
         assertTrue(configFileContents.contains("pairwise=NONE\n"));
@@ -581,6 +583,7 @@ public class WpaSupplicantConfigTest {
 
         String intfName = "testinterface";
         String pass = "12345678901234567890123456789012";
+        String encodedPass = "3a859f5abdd14de95f99e572c31bc94650a0fd499b01a6d46056ea3bc18dc879";
 
         WpaSupplicantConfigWriter writer = getWriter(dir);
 
@@ -652,7 +655,7 @@ public class WpaSupplicantConfigTest {
         assertTrue(configFileContents.contains("mode=0\n"));
         assertTrue(configFileContents.contains("ssid=\"testSSIDi\"\n"));
         assertTrue(configFileContents.contains("key_mgmt=WPA-PSK\n"));
-        assertTrue(configFileContents.contains("psk=\"" + pass + "\"\n"));
+        assertTrue(configFileContents.contains("psk=\"" + encodedPass + "\"\n"));
         assertTrue(configFileContents.contains("scan_freq=2417\n"));
         assertTrue(configFileContents.contains("proto=WPA RSN\n"));
         assertTrue(configFileContents.contains("pairwise=CCMP\n"));

@@ -110,15 +110,15 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     public void unsetKeystoreService(KeystoreService keystoreService) {
         if (this.keystoreService == keystoreService) {
 
+            this.keystoreService = null;
+            this.keystoreServicePid = Optional.empty();
+
             this.clearSslContexCache();
 
             if (this.sslServiceListeners != null) {
                 // Notify listeners that service has been updated
                 this.sslServiceListeners.onConfigurationUpdated();
             }
-
-            this.keystoreService = null;
-            this.keystoreServicePid = Optional.empty();
         }
     }
 

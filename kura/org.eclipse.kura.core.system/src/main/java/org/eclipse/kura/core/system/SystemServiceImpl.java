@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.StringJoiner;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -1253,31 +1254,33 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
      */
     private String[] getApkNameAndVersion(String fullName) {
         String[] split = fullName.split("-");
-        String name = "";
-        String version = "";
+        StringBuilder name = new StringBuilder();
+        StringBuilder version = new StringBuilder();
         int matchIndex = 1000;
+        Pattern pattern = Pattern.compile("^([0-9]+.?)");
 
         for (int i = 0; i < split.length; i++) {
             String s = split[i];
 
+            // version is never at the beginning
             if (i > 0 && i < matchIndex) {
-                // version is never at the beginning
-                if (s.matches("\\d+.(\\w+(.)?)+")) {
-                    version += s;
+                if (pattern.matcher(s).lookingAt()) {
+                    version.append(s);
                     matchIndex = i;
                 } else {
-                    name += "-" + s;
+                    name.append("-");
+                    name.append(s);
                 }
             }
+            
+            // everything else after match is version
             if (i > matchIndex) {
-                // everything else after match is version
-                version += "-" + s;
+                version.append("-");
+                version.append(s);
             }
         }
-        // assuming the first part belongs to the name
-        name = split[0] + name;
 
-        return new String[] { name, version };
+        return new String[] { split[0] + name.toString(), version.toString() };
     }
 
     private CommandStatus execute(String[] commandLine) {

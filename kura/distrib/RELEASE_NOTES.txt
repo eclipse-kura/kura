@@ -142,6 +142,8 @@ Target Environments:
 
 Known Issues :
   * The intel-up2-centos-7, intel-up2-ubuntu-18 and rock960-ubuntu-16 don't support the Unprivileged Command Service (see #3598)
+  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
+    The issue impact is limited, if the dataservice reconnect option is enabled.  
   * The implementation of the CryptoService performs encryption using a
     password that is hardcoded and published.
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.

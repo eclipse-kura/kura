@@ -2345,6 +2345,12 @@
                             <version>${org.eclipse.kura.driver.gpio.version}</version>
                             <type>dp</type>
                           </artifactItem>
+                          <artifactItem>
+                            <groupId>org.eclipse.kura.feature</groupId>
+                            <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
+                            <version>${org.eclipse.kura.driver.ble.xdk.version}</version>
+                            <type>dp</type>
+                          </artifactItem>
                         </artifactItems>
                         <outputDirectory>${project.build.directory}</outputDirectory>
                       </configuration>

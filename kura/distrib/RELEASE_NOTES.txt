@@ -46,6 +46,7 @@ Changes:
     * New Alpine linux based Docker container
     * Bluetooth 5 LE support
     * Extended Certificates support with new APIs, Request Handlers and REST APIs
+    * New Bosch XDK Driver for Kura
 
   * Features Preview
     * Web UI extendibility APIs and examples
@@ -188,6 +189,13 @@ Known Issues :
 
 
 Changelog :
+  * 358e7d34d - XDK driver is now in distrib (#3611) (#3612) (Matteo Maiero)
+  * a39d88ba5 - Now SslContext cache is cleaned when KeystoreService in SSLManager is… (#3606) (#3610) (github-actions[bot])
+  * 161b28849 - Used safer regex to match the beginning of the version string (#3604) (#3608) (github-actions[bot])
+  * 0a3640056 - Update default configuration for the command service (#3602) (Pierantonio Merlino)
+  * 07a63f65c - Updated certificate in cacerts.ks for Eclipse mqtt broker (#3594) (#3596) (github-actions[bot])
+  * 3c93d9bac - Now kurad is the owner of kuranet.conf (#3593) (#3595) (github-actions[bot])
+  * 77fb0181f - Updated release notes (Maiero)
   * b488518a8 - Fixed double ipf/pf forwarding chains (#3590) (#3591) (github-actions[bot])
   * 2938d91a8 - Align with changes from #2620 (#3586) (#3589) (github-actions[bot])
   * 1f756af50 - Wifi 5ghz support (#3568) (#3585) (github-actions[bot])

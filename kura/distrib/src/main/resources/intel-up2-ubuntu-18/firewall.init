@@ -99,11 +99,11 @@ if [ -f $iptables_config_file ]; then
 	iptables-restore < $iptables_config_file
 fi
 
-create_filter_chains()
-create_nat_chains()
-create_mangle_chains()
-configure_policies()
-configure_ip_forwarding()
+create_filter_chains
+create_nat_chains
+create_mangle_chains
+configure_policies
+configure_ip_forwarding
 
 # source a custom firewall script
 if [ -f /etc/init.d/firewall_cust ]; then

@@ -191,6 +191,11 @@ Known Issues :
 
 
 Changelog :
+  * 9c8055f4ad - Added ntpdate dependency. (#3620) (#3621) (github-actions[bot])
+  * 74768edb13 - Disabled dhcpcd service at install. (#3616) (#3619) (github-actions[bot])
+  * 019531e440 - Updated release notes with a new known issue. (#3618) (Matteo Maiero)
+  * 452c093f9f - Fixed typos in firewall.init (#3614) (#3615) (github-actions[bot])
+  * 39eb7d9a77 - Updated release notes (Maiero)
   * 358e7d34d - XDK driver is now in distrib (#3611) (#3612) (Matteo Maiero)
   * a39d88ba5 - Now SslContext cache is cleaned when KeystoreService in SSLManager is… (#3606) (#3610) (github-actions[bot])
   * 161b28849 - Used safer regex to match the beginning of the version string (#3604) (#3608) (github-actions[bot])

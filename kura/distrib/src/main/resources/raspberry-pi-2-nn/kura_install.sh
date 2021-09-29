@@ -38,6 +38,12 @@ ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i -nn
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+#disable NTP service
+if command -v timedatectl > /dev/null ;
+  then
+    timedatectl set-ntp false
+fi
+
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura

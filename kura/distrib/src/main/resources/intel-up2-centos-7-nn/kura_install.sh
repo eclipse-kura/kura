@@ -45,6 +45,12 @@ mkdir -p ${INSTALL_DIR}/kura/data
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+#disable NTP service
+if command -v timedatectl > /dev/null ;
+  then
+    timedatectl set-ntp false
+fi
+
 # Set up logrotate
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 if [ ! -d /etc/logrotate.d/ ]; then

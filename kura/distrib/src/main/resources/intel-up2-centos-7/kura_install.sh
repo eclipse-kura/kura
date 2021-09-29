@@ -116,6 +116,10 @@ if [ ! -d /etc/logrotate.d/ ]; then
 fi
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
+# disable dhcpcd service - kura is the network manager
+systemctl stop dhcpcd
+systemctl disable dhcpcd
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

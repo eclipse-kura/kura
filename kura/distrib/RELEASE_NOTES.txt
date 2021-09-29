@@ -156,7 +156,8 @@ Known Issues :
     AccessPoint WiFi mode not working for Broadcom chipset.
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
+    in the WEB UI if the user attempts to enable more than one WAN interface.
+  * During Kura shutdown, an error stacktrace is shown in the log from the Jetty server. This does not affect the success of the procedure.  
   * #3176: Modem interface number management
   * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
   * #2843: Access Banner Content All in One Line

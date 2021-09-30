@@ -21,6 +21,7 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.system.SystemService;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.osgi.service.component.ComponentContext;
 
@@ -33,6 +34,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     private DeviceManager deviceManager;
     private CommandExecutorService executorService;
+    private SystemService systemService;
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -41,6 +43,16 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     public void unsetExecutorService(CommandExecutorService executorService) {
         if (this.executorService == executorService) {
             this.executorService = null;
+        }
+    }
+
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        if (this.systemService != systemService) {
+            this.systemService = null;
         }
     }
 
@@ -112,7 +124,8 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     private boolean startBluetoothSuppressed() {
         // Allow to disable the bluetooth service start, e.g. when running inside a container
-        return Boolean.getBoolean("kura.ble.suppressBluetoothDaemonStart");
+        String value = this.systemService.getProperties().getProperty("kura.ble.suppressBluetoothDaemonStart");
+        return Boolean.parseBoolean(value);
     }
 
     private boolean execute(String commandLine) {

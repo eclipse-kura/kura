@@ -20,11 +20,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.system.SystemService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -54,6 +56,12 @@ public class BluetoothLeServiceImplTest {
         };
     }
 
+    protected SystemService mockSystemService() {
+        SystemService systemMock = mock(SystemService.class);
+        when(systemMock.getProperties()).thenReturn(new Properties());
+        return systemMock;
+    }
+
     @Test
     public void activateSystemdTest() {
         CommandExecutorService executorMock = mock(CommandExecutorService.class);
@@ -61,6 +69,7 @@ public class BluetoothLeServiceImplTest {
         CommandStatus status = new CommandStatus(command, new LinuxExitStatus(0));
         when(executorMock.execute(command)).thenReturn(status);
         bluetoothLeService.setExecutorService(executorMock);
+        bluetoothLeService.setSystemService(mockSystemService());
         bluetoothLeService.activate(null);
 
         verify(executorMock, times(1)).execute(command);
@@ -76,6 +85,7 @@ public class BluetoothLeServiceImplTest {
         CommandStatus statusSysV = new CommandStatus(commandSysV, new LinuxExitStatus(0));
         when(executorMock.execute(commandSysV)).thenReturn(statusSysV);
         bluetoothLeService.setExecutorService(executorMock);
+        bluetoothLeService.setSystemService(mockSystemService());
         bluetoothLeService.activate(null);
 
         verify(executorMock, times(1)).execute(commandSystemd);
@@ -95,6 +105,7 @@ public class BluetoothLeServiceImplTest {
         CommandStatus statusBTService = new CommandStatus(commandBTService, new LinuxExitStatus(0));
         when(executorMock.execute(commandBTService)).thenReturn(statusBTService);
         bluetoothLeService.setExecutorService(executorMock);
+        bluetoothLeService.setSystemService(mockSystemService());
         bluetoothLeService.activate(null);
 
         verify(executorMock, times(1)).execute(commandSystemd);
@@ -109,6 +120,7 @@ public class BluetoothLeServiceImplTest {
         CommandStatus status = new CommandStatus(command, new LinuxExitStatus(0));
         when(executorMock.execute(command)).thenReturn(status);
         bluetoothLeService.setExecutorService(executorMock);
+        bluetoothLeService.setSystemService(mockSystemService());
         bluetoothLeService.activate(null);
         assertEquals("AA:BB:CC:DD:EE:FF", bluetoothLeService.getAdapter("hci0").getAddress());
     }
@@ -120,6 +132,7 @@ public class BluetoothLeServiceImplTest {
         CommandStatus status = new CommandStatus(command, new LinuxExitStatus(0));
         when(executorMock.execute(command)).thenReturn(status);
         bluetoothLeService.setExecutorService(executorMock);
+        bluetoothLeService.setSystemService(mockSystemService());
         bluetoothLeService.activate(null);
         assertEquals("AA:BB:CC:DD:EE:FF", bluetoothLeService.getAdapters().get(0).getAddress());
     }

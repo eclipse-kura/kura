@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.validator;
+package org.eclipse.kura.web.shared.validator;
 
 import java.util.function.Predicate;
 
@@ -21,10 +21,4 @@ public class NotEmptyValidator extends PredicateValidator {
     public NotEmptyValidator(String message) {
         super(notEmptyPredicat, message);
     }
-
-    @Override
-    public int getPriority() {
-        return Priority.HIGHEST;
-    }
-
 }

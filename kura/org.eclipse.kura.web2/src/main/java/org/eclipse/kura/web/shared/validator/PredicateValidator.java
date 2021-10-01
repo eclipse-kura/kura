@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,17 +10,10 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.validator;
+package org.eclipse.kura.web.shared.validator;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
-import org.gwtbootstrap3.client.ui.form.validator.Validator;
-
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.EditorError;
 
 public class PredicateValidator implements Validator<String> {
 
@@ -33,15 +26,11 @@ public class PredicateValidator implements Validator<String> {
     }
 
     @Override
-    public int getPriority() {
-        return Priority.MEDIUM;
-    }
+    public void validate(final String value, final Consumer<String> errorMessageConsumer) {
 
-    @Override
-    public List<EditorError> validate(final Editor<String> editor, final String value) {
-
-        return this.predicate.test(value) ? Collections.emptyList()
-                : Collections.singletonList(new BasicEditorError(editor, value, this.message));
+        if (!this.predicate.test(value)) {
+            errorMessageConsumer.accept(this.message);
+        }
     }
 
 }

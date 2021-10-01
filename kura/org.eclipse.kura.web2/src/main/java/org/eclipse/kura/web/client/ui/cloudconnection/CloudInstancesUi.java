@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
-import org.eclipse.kura.web.client.ui.validator.StringNotInListValidator;
+import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.PidTextBox;
 import org.eclipse.kura.web.client.util.request.RequestContext;
@@ -630,7 +630,7 @@ public class CloudInstancesUi extends Composite {
                         .map(GwtCloudEntry::getPid).collect(Collectors.toList());
 
                 pidTextBox.setValidators(new RegExValidator(result, validationMessage),
-                        new StringNotInListValidator(factoyPidList, MSGS.newConnectionServicePIDUsed()));
+                        GwtValidators.notInList(factoyPidList, MSGS.newConnectionServicePIDUsed()));
 
             } else {
                 pidTextBox.setValidators();

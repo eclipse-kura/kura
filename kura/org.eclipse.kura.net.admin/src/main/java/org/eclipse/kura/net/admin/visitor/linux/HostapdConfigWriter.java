@@ -52,6 +52,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private static final int FIRST_5000MHZ_CHANNEL = 32;
 
     private static final String HEXES = "0123456789ABCDEF";
+
     private static final String KURA_SECURITY = "KURA_SECURITY";
     private static final String KURA_PAIRWISE_CIPHER = "KURA_PAIRWISE_CIPHER";
     private static final String KURA_HTCAPAB = "KURA_HTCAPAB";
@@ -59,6 +60,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private static final String KURA_IEEE80211N = "KURA_IEEE80211N";
     private static final String KURA_WME_ENABLED = "KURA_WME_ENABLED";
     private static final String KURA_HW_MODE = "KURA_HW_MODE";
+    private static final String KURA_COUNTRY_CODE = "KURA_COUNTRY_CODE";
+    private static final String KURA_IEEE80211D = "KURA_IEEE80211D";
+    private static final String KURA_IEEE80211H = "KURA_IEEE80211H";
+    private static final String KURA_IEEE80211AC = "KURA_IEEE80211AC";
+
     private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 
     private static HostapdConfigWriter instance;

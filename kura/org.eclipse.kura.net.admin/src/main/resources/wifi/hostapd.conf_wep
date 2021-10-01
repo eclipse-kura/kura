@@ -13,6 +13,19 @@ ssid=KURA_ESSID
 #example: g
 hw_mode=KURA_HW_MODE
 
+# the country code
+country_code=KURA_COUNTRY_CODE
+
+# limit the frequencies used to those allowed in the country
+ieee80211d=KURA_IEEE80211D
+
+# Enable IEEE 802.11h. This enables radar detection and DFS support if
+# available.
+ieee80211h=KURA_IEEE80211H
+
+# 802.11ac support
+ieee80211ac=KURA_IEEE80211AC
+
 wme_enabled=KURA_WME_ENABLED
 ieee80211n=KURA_IEEE80211N
 ht_capab=KURA_HTCAPAB

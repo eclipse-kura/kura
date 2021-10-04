@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
+import static java.util.Objects.isNull;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -157,8 +159,23 @@ public class LogServlet extends AuditServlet {
     private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile,
             String unit) {
 
-        Command command = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", unit, "-o", "verbose",
-                "--output-fields=" + outputFields, ">", outputFile });
+        List<String> commandSequence = new ArrayList<>();
+
+        commandSequence.add(JOURNALCTL_CMD);
+        commandSequence.add("--no-pager");
+        
+        if (isNull(unit)) {
+            commandSequence.add("-u");
+            commandSequence.add(unit);
+        }
+
+        commandSequence.add("-o");
+        commandSequence.add("verbose");
+        commandSequence.add("--output-fields=" + outputFields);
+        commandSequence.add(">");
+        commandSequence.add(outputFile);
+
+        Command command = new Command(commandSequence.toArray(new String[commandSequence.size()]));
         command.setExecuteInAShell(true);
         CommandStatus status = pes.execute(command);
 

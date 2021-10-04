@@ -49,7 +49,7 @@
               unbind="unsetNetworkService"
               interface="org.eclipse.kura.net.NetworkService"/>
    <reference name="PositionService" 
-              cardinality="0..1" 
+              cardinality="1..1" 
               bind="setPositionService" 
               interface="org.eclipse.kura.position.PositionService" 
               policy="static" 

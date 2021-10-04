@@ -92,10 +92,16 @@ public class LogServlet extends AuditServlet {
             }
         });
 
-        if (writeJournalLog(pes, ss)) {
+        String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
+                "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
+
+        if (writeJournalLog(pes, outputFields, KURA_JOURNAL_LOG_FILE, "kura")) {
             fileList.add(new File(KURA_JOURNAL_LOG_FILE));
+        }
+        if (writeJournalLog(pes, outputFields, SYSTEM_JOURNAL_LOG_FILE)) {
             fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
         }
+
         createReply(httpServletResponse, fileList);
         removeTmpFiles();
     }
@@ -144,21 +150,19 @@ public class LogServlet extends AuditServlet {
         }
     }
 
-    private boolean writeJournalLog(PrivilegedExecutorService pes, SystemService ss) {
-        String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
-                "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
+    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile) {
+        return writeJournalLog(pes, outputFields, outputFile, null);
+    }
 
-        Command commandKura = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", "kura", "-o", "verbose",
-                "--output-fields=" + outputFields, ">", KURA_JOURNAL_LOG_FILE });
-        commandKura.setExecuteInAShell(true);
-        CommandStatus statusKura = pes.execute(commandKura);
+    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile,
+            String unit) {
 
-        Command commandSystem = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-o", "verbose",
-                "--output-fields=" + outputFields, ">", SYSTEM_JOURNAL_LOG_FILE });
-        commandSystem.setExecuteInAShell(true);
-        CommandStatus statusSystem = pes.execute(commandSystem);
+        Command command = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", unit, "-o", "verbose",
+                "--output-fields=" + outputFields, ">", outputFile });
+        command.setExecuteInAShell(true);
+        CommandStatus status = pes.execute(command);
 
-        return statusKura.getExitStatus().isSuccessful() && statusSystem.getExitStatus().isSuccessful();
+        return status.getExitStatus().isSuccessful();
     }
 
     private void removeTmpFiles() {

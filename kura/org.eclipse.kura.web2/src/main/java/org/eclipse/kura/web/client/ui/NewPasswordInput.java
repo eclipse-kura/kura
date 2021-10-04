@@ -13,6 +13,8 @@
 package org.eclipse.kura.web.client.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.kura.web.client.ui.validator.GwtValidators;
@@ -25,19 +27,17 @@ import com.google.gwt.editor.client.EditorError;
 
 public class NewPasswordInput extends Input {
 
-    public NewPasswordInput() {
-        super();
+    private static final String PLACEHOLDER = "Placeholder";
+    private final List<Validator<String>> validators = new ArrayList<>();
 
+    public NewPasswordInput() {
         setValidatorsFrom(EntryClassUi.getUserOptions());
+        setAllowPlaceholder(false);
     }
 
     @SuppressWarnings("unchecked")
-    public void setValidatorsFrom(final GwtConsoleUserOptions userOptions) {
-        setValidators();
-
-        final List<Validator<String>> validators = GwtValidators.passwordStrength(userOptions);
-
-        addValidator(new Validator<String>() {
+    public void setAllowPlaceholder(final boolean allowPlaceholder) {
+        super.setValidators(new Validator<String>() {
 
             @Override
             public int getPriority() {
@@ -45,7 +45,11 @@ public class NewPasswordInput extends Input {
             }
 
             @Override
-            public List<EditorError> validate(Editor<String> editor, String value) {
+            public List<EditorError> validate(final Editor<String> editor, final String value) {
+                if (allowPlaceholder && PLACEHOLDER.equals(value)) {
+                    return Collections.emptyList();
+                }
+
                 final List<EditorError> result = new ArrayList<>();
 
                 for (final Validator<String> validator : validators) {
@@ -54,8 +58,26 @@ public class NewPasswordInput extends Input {
 
                 return result;
             }
-
         });
+    }
 
+    public void setValidatorsFrom(final GwtConsoleUserOptions userOptions) {
+        this.validators.clear();
+
+        for (final Validator<String> validator : GwtValidators.passwordStrength(userOptions)) {
+            this.validators.add(validator);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void setValidators(final Validator<String>... validators) {
+        this.validators.clear();
+        this.validators.addAll(Arrays.asList(validators));
+    }
+
+    @Override
+    public void addValidator(final Validator<String> validator) {
+        this.validators.add(validator);
     }
 }

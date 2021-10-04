@@ -79,6 +79,13 @@ if command -v timedatectl > /dev/null ;
     timedatectl set-ntp false
 fi
 
+# Prevent time sync services from starting
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+# Prevent time sync with chrony from starting. Will be handled by ESF
+systemctl stop chrony
+systemctl disable chrony
+
 #set up networking configuration
 mac_addr=$(head /sys/class/net/enp2s0/address | tr '[:lower:]' '[:upper:]')
 sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlp4s0.conf

@@ -49,6 +49,13 @@ if command -v timedatectl > /dev/null ;
     timedatectl set-ntp false
 fi
 
+# Prevent time sync services from starting
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+# Prevent time sync with chrony from starting. Will be handled by ESF
+systemctl stop chrony
+systemctl disable chrony
+
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh

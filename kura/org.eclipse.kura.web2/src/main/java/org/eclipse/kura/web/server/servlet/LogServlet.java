@@ -90,7 +90,7 @@ public class LogServlet extends AuditServlet {
                 fileList.addAll(kuraLogDirStream.filter(filePath -> filePath.toFile().isFile()).map(Path::toFile)
                         .collect(Collectors.toList()));
             } catch (IOException e) {
-                logger.warn("Unable to fetch log files");
+                logger.warn("Unable to fetch log files for {}", path);
             }
         });
 
@@ -99,9 +99,14 @@ public class LogServlet extends AuditServlet {
 
         if (writeJournalLog(pes, outputFields, KURA_JOURNAL_LOG_FILE, "kura")) {
             fileList.add(new File(KURA_JOURNAL_LOG_FILE));
+        } else {
+            logger.warn("Error producing: {}", KURA_JOURNAL_LOG_FILE);
         }
+
         if (writeJournalLog(pes, outputFields, SYSTEM_JOURNAL_LOG_FILE)) {
             fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
+        } else {
+            logger.warn("Error producing: {}", SYSTEM_JOURNAL_LOG_FILE);
         }
 
         createReply(httpServletResponse, fileList);
@@ -163,7 +168,7 @@ public class LogServlet extends AuditServlet {
 
         commandSequence.add(JOURNALCTL_CMD);
         commandSequence.add("--no-pager");
-        
+
         if (!isNull(unit)) {
             commandSequence.add("-u");
             commandSequence.add(unit);
@@ -176,6 +181,9 @@ public class LogServlet extends AuditServlet {
         commandSequence.add(outputFile);
 
         Command command = new Command(commandSequence.toArray(new String[commandSequence.size()]));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing command: {}", String.join(" ", command.getCommandLine()));
+        }
         command.setExecuteInAShell(true);
         CommandStatus status = pes.execute(command);
 

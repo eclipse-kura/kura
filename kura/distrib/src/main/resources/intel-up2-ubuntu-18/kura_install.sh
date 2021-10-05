@@ -81,7 +81,7 @@ fi
 # Prevent time sync services from starting
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
-# Prevent time sync with chrony from starting. Will be handled by ESF
+# Prevent time sync with chrony from starting.
 systemctl stop chrony
 systemctl disable chrony
 

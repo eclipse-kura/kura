@@ -1,0 +1,10 @@
+# /etc/network/interfaces -- configuration file for ifup(8), ifdown(8)
+ 
+# The loopback interface
+auto lo
+iface lo inet loopback
+
+# Wired or wireless interfaces
+auto eth0
+iface eth0 inet dhcp
+

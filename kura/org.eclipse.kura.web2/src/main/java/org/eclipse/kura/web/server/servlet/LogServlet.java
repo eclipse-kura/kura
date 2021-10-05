@@ -164,7 +164,7 @@ public class LogServlet extends AuditServlet {
         commandSequence.add(JOURNALCTL_CMD);
         commandSequence.add("--no-pager");
         
-        if (isNull(unit)) {
+        if (!isNull(unit)) {
             commandSequence.add("-u");
             commandSequence.add(unit);
         }

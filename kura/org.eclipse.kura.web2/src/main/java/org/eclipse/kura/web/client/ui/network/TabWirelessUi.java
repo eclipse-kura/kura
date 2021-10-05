@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
-import org.eclipse.kura.web.client.ui.validator.RegexValidator;
+import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
@@ -378,6 +378,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @Override
     public boolean isValid() {
         boolean result = this.form.validate();
+        result &= checkPassword();
 
         result = result && !this.groupWireless.getValidationState().equals(ValidationState.ERROR)
                 && !this.groupPassword.getValidationState().equals(ValidationState.ERROR)
@@ -778,7 +779,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.labelSsid.setShowRequiredIndicator(true);
         this.ssid.setMaxLength(MAX_SSID_LENGTH);
         this.ssid.setAllowBlank(false);
-        this.ssid.addValidator(new RegexValidator(REGEX_WIFI_SID, MSGS.netWifiWirelessInvalidSSID()));
+        this.ssid.addValidator(GwtValidators.regex(REGEX_WIFI_SID, MSGS.netWifiWirelessInvalidSSID()));
         this.ssid.setValidateOnBlur(true);
         this.ssid.addMouseOverHandler(event -> {
             if (TabWirelessUi.this.ssid.isEnabled()) {
@@ -1171,16 +1172,15 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             this.password.setValidatorsFrom(configUserOptions);
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 63));
-            this.password.addValidator(new RegexValidator(REGEX_PASS_WPA, MSGS.netWifiWirelessInvalidWPAPassword()) {
-            });
+
+            this.password.addValidator(GwtValidators.regex(REGEX_PASS_WPA, MSGS.netWifiWirelessInvalidWPAPassword()));
 
         } else if (this.security.getSelectedItemText().equals(WIFI_SECURITY_WEP_MESSAGE)) {
 
             configUserOptions.setPasswordRequireSpecialChars(false);
             configUserOptions.setPasswordMinimumLength(Math.min(configUserOptions.getPasswordMinimumLength(), 26));
             this.password.setValidatorsFrom(configUserOptions);
-            this.password.addValidator(new RegexValidator(REGEX_PASS_WEP, MSGS.netWifiWirelessInvalidWEPPassword()) {
-            });
+            this.password.addValidator(GwtValidators.regex(REGEX_PASS_WEP, MSGS.netWifiWirelessInvalidWEPPassword()));
         } else {
             configUserOptions.allowAnyPassword();
             this.password.setValidatorsFrom(configUserOptions);
@@ -1513,9 +1513,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.countryCode.setEnabled(false);
     }
 
-    private void checkPassword() {
+    private boolean checkPassword() {
+        boolean result = true;
+
         if (!this.password.validate() && this.password.isEnabled()) {
             this.groupPassword.setValidationState(ValidationState.ERROR);
+            result = false;
         } else {
             this.groupPassword.setValidationState(ValidationState.NONE);
         }
@@ -1524,10 +1527,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 && !TabWirelessUi.this.verify.getText().equals(TabWirelessUi.this.password.getText())) {
             TabWirelessUi.this.helpVerify.setText(MSGS.netWifiWirelessPasswordDoesNotMatch());
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.ERROR);
+            result = false;
         } else {
             TabWirelessUi.this.helpVerify.setText("");
             TabWirelessUi.this.groupVerify.setValidationState(ValidationState.NONE);
         }
+
+        return result;
     }
 
     private void showPasswordVerificationStatus(String statusMessage) {

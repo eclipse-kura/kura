@@ -77,6 +77,7 @@ import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDevice;
+import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.server.util.KuraExceptionHandler;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
@@ -104,6 +105,8 @@ import org.eclipse.kura.web.shared.model.GwtWifiSecurity;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.validator.PasswordStrengthValidators;
+import org.eclipse.kura.web.shared.validator.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -860,6 +863,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     }
                                 }
                             }
+                        } else if (passKey != null && wifiConfig.getMode() == WifiMode.MASTER) {
+                            validateUserPassword(passKey);
                         }
 
                         netConfigs.add(wifiConfig);
@@ -1696,6 +1701,22 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         } catch (KuraException e) {
             logger.error("Get Wifi Country Code exception");
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    private void validateUserPassword(final String password) throws GwtKuraException {
+        final List<Validator<String>> validators = PasswordStrengthValidators
+                .fromConfig(Console.getConsoleOptions().getUserOptions());
+
+        final List<String> errors = new ArrayList<>();
+
+        for (final Validator<String> validator : validators) {
+            validator.validate(password, errors::add);
+        }
+
+        if (!errors.isEmpty()) {
+            logger.warn("password strenght requirements not satisfied: {}", errors);
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
     }
 }

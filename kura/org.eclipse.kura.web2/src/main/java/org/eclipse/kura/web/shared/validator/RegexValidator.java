@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,12 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.validator;
+package org.eclipse.kura.web.shared.validator;
 
-public class PKCS8Validator extends RegexValidator {
+public class RegexValidator extends PredicateValidator {
 
-    private static final String PKCS8 = "^-{3,}BEGIN (?!ENCRYPTED)\\w* ?PRIVATE KEY-{3,}[\\W\\w]*?-{3,}END \\w* ?PRIVATE KEY-{3,}$";
-
-    public PKCS8Validator(String message) {
-        super(PKCS8, message);
+    public RegexValidator(final String pattern, final String message) {
+        super(v -> v.matches(pattern), message);
     }
+
 }

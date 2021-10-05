@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server.servlet;
 
+import static java.util.Objects.isNull;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -88,14 +90,25 @@ public class LogServlet extends AuditServlet {
                 fileList.addAll(kuraLogDirStream.filter(filePath -> filePath.toFile().isFile()).map(Path::toFile)
                         .collect(Collectors.toList()));
             } catch (IOException e) {
-                logger.warn("Unable to fetch log files");
+                logger.warn("Unable to fetch log files for {}", path);
             }
         });
 
-        if (writeJournalLog(pes, ss)) {
+        String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
+                "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
+
+        if (writeJournalLog(pes, outputFields, KURA_JOURNAL_LOG_FILE, "kura")) {
             fileList.add(new File(KURA_JOURNAL_LOG_FILE));
-            fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
+        } else {
+            logger.warn("Error producing: {}", KURA_JOURNAL_LOG_FILE);
         }
+
+        if (writeJournalLog(pes, outputFields, SYSTEM_JOURNAL_LOG_FILE)) {
+            fileList.add(new File(SYSTEM_JOURNAL_LOG_FILE));
+        } else {
+            logger.warn("Error producing: {}", SYSTEM_JOURNAL_LOG_FILE);
+        }
+
         createReply(httpServletResponse, fileList);
         removeTmpFiles();
     }
@@ -144,21 +157,37 @@ public class LogServlet extends AuditServlet {
         }
     }
 
-    private boolean writeJournalLog(PrivilegedExecutorService pes, SystemService ss) {
-        String outputFields = ss.getProperties().getProperty("kura.log.download.journal.fields",
-                "SYSLOG_IDENTIFIER,PRIORITY,MESSAGE,STACKTRACE");
+    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile) {
+        return writeJournalLog(pes, outputFields, outputFile, null);
+    }
 
-        Command commandKura = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-u", "kura", "-o", "verbose",
-                "--output-fields=" + outputFields, ">", KURA_JOURNAL_LOG_FILE });
-        commandKura.setExecuteInAShell(true);
-        CommandStatus statusKura = pes.execute(commandKura);
+    private boolean writeJournalLog(PrivilegedExecutorService pes, String outputFields, String outputFile,
+            String unit) {
 
-        Command commandSystem = new Command(new String[] { JOURNALCTL_CMD, "--no-pager", "-o", "verbose",
-                "--output-fields=" + outputFields, ">", SYSTEM_JOURNAL_LOG_FILE });
-        commandSystem.setExecuteInAShell(true);
-        CommandStatus statusSystem = pes.execute(commandSystem);
+        List<String> commandSequence = new ArrayList<>();
 
-        return statusKura.getExitStatus().isSuccessful() && statusSystem.getExitStatus().isSuccessful();
+        commandSequence.add(JOURNALCTL_CMD);
+        commandSequence.add("--no-pager");
+
+        if (!isNull(unit)) {
+            commandSequence.add("-u");
+            commandSequence.add(unit);
+        }
+
+        commandSequence.add("-o");
+        commandSequence.add("verbose");
+        commandSequence.add("--output-fields=" + outputFields);
+        commandSequence.add(">");
+        commandSequence.add(outputFile);
+
+        Command command = new Command(commandSequence.toArray(new String[commandSequence.size()]));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Executing command: {}", String.join(" ", command.getCommandLine()));
+        }
+        command.setExecuteInAShell(true);
+        CommandStatus status = pes.execute(command);
+
+        return status.getExitStatus().isSuccessful();
     }
 
     private void removeTmpFiles() {

@@ -1172,7 +1172,12 @@ public class CloudServiceImpl
     }
 
     private boolean isFrameworkStopping() {
-        return FrameworkUtil.getBundle(CloudServiceImpl.class).getBundleContext().getBundle(0)
-                .getState() == Bundle.STOPPING;
+        final Bundle ownBundle = FrameworkUtil.getBundle(CloudServiceImpl.class);
+
+        if (ownBundle == null) {
+            return false; // not running in an OSGi framework? e.g. unit test
+        }
+
+        return ownBundle.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
     }
 }

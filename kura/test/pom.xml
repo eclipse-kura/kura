@@ -238,6 +238,10 @@
 	                            <type>p2-installable-unit</type>
 	                            <artifactId>org.apache.felix.deploymentadmin</artifactId>
 	                        </dependency>
+                            <dependency>
+                              <type>p2-installable-unit</type>
+                              <artifactId>org.eclipse.kura.emulator.position</artifactId>
+                          </dependency>
                         </dependencies>
                         <bundleStartLevel>
 	                        <bundle>
@@ -560,6 +564,11 @@
 	                            <level>4</level>
 	                            <autoStart>true</autoStart>
 	                        </bundle>
+                          <bundle>
+	                            <id>org.eclipse.kura.emulator.position</id>
+	                            <level>4</level>
+	                            <autoStart>true</autoStart>
+	                        </bundle>
                         </bundleStartLevel>
                     </configuration>
                 </plugin>
@@ -795,6 +804,11 @@
                                 <requirement>
                                     <type>eclipse-plugin</type>
                                     <id>org.eclipse.kura.core.keystore</id>
+                                    <versionRange>0.0.0</versionRange>
+                                </requirement>
+                                <requirement>
+                                    <type>eclipse-plugin</type>
+                                    <id>org.eclipse.kura.emulator.position</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                             </extraRequirements>

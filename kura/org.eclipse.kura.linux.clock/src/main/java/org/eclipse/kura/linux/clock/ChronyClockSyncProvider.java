@@ -41,9 +41,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class ChronyClockSyncProvider implements ClockSyncProvider {
 
-    private static final String CHRONY_DAEMON = "chronyd";
+    private static final String[] CHRONY_DAEMON = new String[] { "chronyd", "chrony" };
 
     private static final Logger logger = LoggerFactory.getLogger(ChronyClockSyncProvider.class);
+
+    private static final int SERVICE_STATUS_UNKNOWN = 4;
 
     private final CommandExecutorService executorService;
     private ScheduledExecutorService schedulerExecutor;
@@ -52,6 +54,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     private ClockSyncListener listener;
 
     private String chronyConfig;
+
+    private String chronyDaemon;
 
     private Date lastSyncValue;
 
@@ -77,6 +81,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
         this.gson = new Gson();
         this.chronyConfig = clockServiceConfig.getChronyAdvancedConfig();
+
+        this.chronyDaemon = findChronyService();
 
         writeConfiguration();
     }
@@ -169,7 +175,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         logger.debug("Starting read the journal for clock updates...");
 
         // check either chronyd or chrony unit because both are used in journal alternatively
-        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", CHRONY_DAEMON, "-u",
+        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", chronyDaemon, "-u",
                 "chrony", "-b", "-o", "json", "-S", "today", "--output-fields", "MESSAGE", "|", "grep",
                 "'System clock was stepped by'", "-m", "1" });
 
@@ -234,17 +240,38 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
         logger.info("Checking chrony deamon status...");
 
-        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", CHRONY_DAEMON });
+        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", chronyDaemon });
         CommandStatus chronyStatus = this.executorService.execute(checkChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
     }
 
     private boolean controlChronyd(String command) {
-        Command startChronyStatus = new Command(new String[] { "systemctl", command, CHRONY_DAEMON });
+        Command startChronyStatus = new Command(new String[] { "systemctl", command, chronyDaemon });
         CommandStatus chronyStatus = this.executorService.execute(startChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
+    }
+
+    private String findChronyService() throws KuraException {
+
+        String foundChronyDaemon = "";
+
+        for (String chronyServiceName : CHRONY_DAEMON) {
+            Command startChronyStatus = new Command(new String[] { "systemctl", "status", chronyServiceName });
+            startChronyStatus.setExecuteInAShell(true);
+            int exitCode = this.executorService.execute(startChronyStatus).getExitStatus().getExitCode();
+            if (exitCode > 0 && exitCode != SERVICE_STATUS_UNKNOWN) {
+                foundChronyDaemon = chronyServiceName;
+                break;
+            }
+        }
+
+        if (foundChronyDaemon.isEmpty()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+        }
+
+        return foundChronyDaemon;
     }
 
     private class JournalChronyEntry {

@@ -258,12 +258,12 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
         String foundChronyDaemon = "";
 
-        for (String chronyServiceName : CHRONY_SERVICE_NAMES) {
-            Command startChronyStatus = new Command(new String[] { "systemctl", "status", chronyServiceName });
+        for (String chronyServiceNameItem : CHRONY_SERVICE_NAMES) {
+            Command startChronyStatus = new Command(new String[] { "systemctl", "status", chronyServiceNameItem });
             startChronyStatus.setExecuteInAShell(true);
             int exitCode = this.executorService.execute(startChronyStatus).getExitStatus().getExitCode();
             if (exitCode >= 0 && exitCode != SERVICE_STATUS_UNKNOWN) {
-                foundChronyDaemon = chronyServiceName;
+                foundChronyDaemon = chronyServiceNameItem;
                 break;
             }
         }

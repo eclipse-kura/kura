@@ -35,6 +35,8 @@ If chrony-advanced is used, Kura will not change system and/or hardware clock di
 To obtain the hardware clock synchronization the directive rtcsync could be used. The rtcsync directive provides the hardware clock synchronization made by the linux kernel every 11 minutes.
 For further information: [chrony website](https://chrony.tuxfamily.org/doc/4.1/chrony.conf.html)
 
+{% include alerts.html message='Chrony is not available for Rock960 board.' %}
+
 Two example configuration are shown below:
 
 NTS Secure configuration example[^1]

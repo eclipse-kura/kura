@@ -10,13 +10,11 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.validator;
+package org.eclipse.kura.web.shared.validator;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.EditorError;
 
 public class StringNotInListValidator extends NotInListValidator<String> {
 
@@ -25,8 +23,8 @@ public class StringNotInListValidator extends NotInListValidator<String> {
     }
 
     @Override
-    public List<EditorError> validate(Editor<String> editor, String value) {
-        return super.validate(editor, value.trim());
+    public void validate(final String value, final Consumer<String> errorMessageConsumer) {
+        super.validate(value.trim(), errorMessageConsumer);
     }
 
 }

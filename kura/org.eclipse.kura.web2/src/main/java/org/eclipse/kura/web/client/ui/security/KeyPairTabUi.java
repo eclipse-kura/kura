@@ -16,11 +16,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
-import org.eclipse.kura.web.client.ui.validator.NotEmptyValidator;
-import org.eclipse.kura.web.client.ui.validator.PEMValidator;
-import org.eclipse.kura.web.client.ui.validator.PKCS8Validator;
-import org.eclipse.kura.web.client.ui.validator.StringLengthValidator;
-import org.eclipse.kura.web.client.ui.validator.StringNotInListValidator;
+import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.service.GwtCertificatesService;
 import org.eclipse.kura.web.shared.service.GwtCertificatesServiceAsync;
@@ -31,6 +27,7 @@ import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextArea;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
@@ -147,16 +144,16 @@ public class KeyPairTabUi extends Composite implements Tab {
             this.pidListBox.addItem(pid);
         }
 
-        NotEmptyValidator notEmptyValidator = new NotEmptyValidator(MSGS.formRequiredParameter());
+        Validator<String> notEmptyValidator = GwtValidators.nonEmpty(MSGS.formRequiredParameter());
 
         this.storageAliasInput.addValidator(notEmptyValidator);
-        this.storageAliasInput.addValidator(new StringLengthValidator(ALIAS_MAX_LENGTH,
+        this.storageAliasInput.addValidator(GwtValidators.stringLength(ALIAS_MAX_LENGTH,
                 MSGS.certificateAliasMaxLength(String.valueOf(ALIAS_MAX_LENGTH))));
         this.storageAliasInput.setMaxLength(ALIAS_MAX_LENGTH);
-        this.storageAliasInput.addValidator(new StringNotInListValidator(usedAliases, MSGS.certificateAliasUsed()));
+        this.storageAliasInput.addValidator(GwtValidators.stringNotInList(usedAliases, MSGS.certificateAliasUsed()));
 
         this.certificateInput.addValidator(notEmptyValidator);
-        this.certificateInput.addValidator(new PEMValidator(MSGS.securityCertificateFormat()));
+        this.certificateInput.addValidator(GwtValidators.pem(MSGS.securityCertificateFormat()));
 
         this.storageAliasInput.addKeyUpHandler(e -> {
             this.storageAliasInput.validate();
@@ -191,7 +188,7 @@ public class KeyPairTabUi extends Composite implements Tab {
         this.privateKeyInputForm.setVisible(this.type == Type.KEY_PAIR);
         if (this.type == Type.KEY_PAIR) {
             this.privateKeyInput.addValidator(notEmptyValidator);
-            this.privateKeyInput.addValidator(new PKCS8Validator(MSGS.securityPrivateKeyFormat()));
+            this.privateKeyInput.addValidator(GwtValidators.pkcs8(MSGS.securityPrivateKeyFormat()));
 
             this.privateKeyInput.addKeyUpHandler(e -> {
                 this.privateKeyInput.validate();

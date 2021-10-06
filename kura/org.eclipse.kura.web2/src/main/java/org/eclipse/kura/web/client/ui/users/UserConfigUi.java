@@ -20,7 +20,7 @@ import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Picker;
 import org.eclipse.kura.web.client.ui.drivers.assets.BooleanInputCell;
-import org.eclipse.kura.web.client.ui.validator.PasswordStrengthValidators;
+import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.gwtbootstrap3.client.ui.Button;
@@ -70,7 +70,7 @@ public class UserConfigUi extends Composite {
         this.listener = listener;
         this.userData = userData;
         this.hasPassword = userData.isPasswordAuthEnabled();
-        this.passwordStrengthValidators = PasswordStrengthValidators.fromConfig(EntryClassUi.getUserOptions());
+        this.passwordStrengthValidators = GwtValidators.passwordStrength(EntryClassUi.getUserOptions());
         initWidget(uiBinder.createAndBindUi(this));
         initTable(userData, definedPermissions);
         initPasswordWidgets();

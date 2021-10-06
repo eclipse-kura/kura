@@ -10,16 +10,10 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.web.client.ui.validator;
+package org.eclipse.kura.web.shared.validator;
 
-import java.util.Collections;
 import java.util.List;
-
-import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
-import org.gwtbootstrap3.client.ui.form.validator.Validator;
-
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.EditorError;
+import java.util.function.Consumer;
 
 public class NotInListValidator<T> implements Validator<T> {
 
@@ -32,15 +26,10 @@ public class NotInListValidator<T> implements Validator<T> {
     }
 
     @Override
-    public int getPriority() {
-        return Priority.MEDIUM;
-    }
-
-    @Override
-    public List<EditorError> validate(final Editor<T> editor, final T value) {
-        return this.values.contains(value)
-                ? Collections.singletonList(new BasicEditorError(editor, value, this.message))
-                : Collections.emptyList();
+    public void validate(T value, Consumer<String> errorMessageConsumer) {
+        if (this.values.contains(value)) {
+            errorMessageConsumer.accept(this.message);
+        }
     }
 
 }

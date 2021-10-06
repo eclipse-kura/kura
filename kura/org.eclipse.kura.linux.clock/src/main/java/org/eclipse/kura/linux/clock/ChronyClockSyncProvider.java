@@ -101,7 +101,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
             }
 
             if (chronyConfigLocation == null) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "chrony configuration");
             }
 
             try {

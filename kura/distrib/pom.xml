@@ -1649,7 +1649,7 @@
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>

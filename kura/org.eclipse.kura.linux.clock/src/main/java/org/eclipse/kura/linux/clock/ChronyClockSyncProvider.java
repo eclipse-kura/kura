@@ -101,7 +101,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
             }
 
             if (chronyConfigLocation == null) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "chrony configuration");
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "chrony configuration", "....");
             }
 
             try {
@@ -259,10 +259,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         String foundChronyDaemon = "";
 
         for (String chronyServiceNameItem : CHRONY_SERVICE_NAMES) {
-            Command startChronyStatus = new Command(new String[] { "systemctl", "status", chronyServiceNameItem });
-            startChronyStatus.setExecuteInAShell(true);
-            int exitCode = this.executorService.execute(startChronyStatus).getExitStatus().getExitCode();
-            if (exitCode >= 0 && exitCode != SERVICE_STATUS_UNKNOWN) {
+            if (findWithSystemd(chronyServiceNameItem) || findWithSystemV(chronyServiceNameItem)) {
                 foundChronyDaemon = chronyServiceNameItem;
                 break;
             }
@@ -273,6 +270,24 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         }
 
         return foundChronyDaemon;
+    }
+
+    private boolean findWithSystemd(String serviceName) {
+        Command chronyStatusCommand = new Command(new String[] { "systemctl", "status", serviceName });
+        chronyStatusCommand.setExecuteInAShell(true);
+        int exitCode = this.executorService.execute(chronyStatusCommand).getExitStatus().getExitCode();
+
+        return (exitCode >= 0 && exitCode != SERVICE_STATUS_UNKNOWN);
+
+    }
+
+    private boolean findWithSystemV(String serviceName) {
+        Command chronyStatusCommand = new Command(
+                new String[] { "service", "--status-all", "|", "grep", "-q", serviceName });
+        chronyStatusCommand.setExecuteInAShell(true);
+        int exitCode = this.executorService.execute(chronyStatusCommand).getExitStatus().getExitCode();
+
+        return (exitCode == 0);
     }
 
     private class JournalChronyEntry {

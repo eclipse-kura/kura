@@ -41,7 +41,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class ChronyClockSyncProvider implements ClockSyncProvider {
 
-    private static final String[] CHRONY_SERVICE_NAMES = new String[] { "chronyd", "chrony" };
+    private static final String[] CHRONY_SERVICE_NAMES = new String[] { "chrony", "chronyd" };
 
     private static final Logger logger = LoggerFactory.getLogger(ChronyClockSyncProvider.class);
 
@@ -259,7 +259,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         String foundChronyDaemon = "";
 
         for (String chronyServiceNameItem : CHRONY_SERVICE_NAMES) {
-            if (findWithSystemd(chronyServiceNameItem) || findWithSystemV(chronyServiceNameItem)) {
+            if (findWithSystemd(chronyServiceNameItem)) {
                 foundChronyDaemon = chronyServiceNameItem;
                 break;
             }
@@ -279,15 +279,6 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
         return (exitCode >= 0 && exitCode != SERVICE_STATUS_UNKNOWN);
 
-    }
-
-    private boolean findWithSystemV(String serviceName) {
-        Command chronyStatusCommand = new Command(
-                new String[] { "service", "--status-all", "|", "grep", "-q", serviceName });
-        chronyStatusCommand.setExecuteInAShell(true);
-        int exitCode = this.executorService.execute(chronyStatusCommand).getExitStatus().getExitCode();
-
-        return (exitCode == 0);
     }
 
     private class JournalChronyEntry {

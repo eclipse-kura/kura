@@ -1,7 +1,0 @@
-# Networking Interface
-DEVICE=enp3s0
-NAME=enp3s0
-TYPE=ETHERNET
-ONBOOT=yes
-BOOTPROTO=dhcp
-DEFROUTE=yes

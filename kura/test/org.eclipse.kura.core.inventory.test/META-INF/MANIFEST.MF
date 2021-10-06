@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.inventory.test
 Bundle-SymbolicName: org.eclipse.kura.core.inventory.test;singleton:=true
-Bundle-Version: 5.0.0.qualifier
+Bundle-Version: 5.1.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: org.eclipse.kura.core.inventory
@@ -23,4 +23,4 @@ Import-Package: org.eclipse.kura;version="[1.2,2.0)",
  org.osgi.service.cm;version="1.4",
  org.osgi.service.component;version="1.2"
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.kura.json.marshaller.unmarshaller.provider;bundle-version="1.0.300"
+Require-Bundle: org.eclipse.kura.json.marshaller.unmarshaller.provider;bundle-version="1.1.0"

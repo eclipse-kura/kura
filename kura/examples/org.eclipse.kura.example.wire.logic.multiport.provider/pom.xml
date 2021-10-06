@@ -20,11 +20,11 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>examples</artifactId>
-        <version>5.0.0-SNAPSHOT</version>
+        <version>5.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.eclipse.kura.example.wire.logic.multiport.provider</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>eclipse-plugin</packaging>
 
     <properties>

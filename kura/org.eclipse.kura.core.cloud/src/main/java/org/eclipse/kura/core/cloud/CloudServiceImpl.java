@@ -1172,12 +1172,17 @@ public class CloudServiceImpl
     }
 
     private boolean isFrameworkStopping() {
-        final Bundle ownBundle = FrameworkUtil.getBundle(CloudServiceImpl.class);
+        try {
+            final Bundle ownBundle = FrameworkUtil.getBundle(CloudServiceImpl.class);
 
-        if (ownBundle == null) {
-            return false; // not running in an OSGi framework? e.g. unit test
+            if (ownBundle == null) {
+                return false; // not running in an OSGi framework? e.g. unit test
+            }
+
+            return ownBundle.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
+        } catch (final Exception e) {
+            logger.warn("unexpected exception while checking if framework is shutting down", e);
+            return false;
         }
-
-        return ownBundle.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
     }
 }

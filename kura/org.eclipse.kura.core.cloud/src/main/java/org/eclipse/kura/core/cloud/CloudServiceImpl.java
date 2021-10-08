@@ -87,6 +87,8 @@ import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperEvent;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
@@ -944,6 +946,12 @@ public class CloudServiceImpl
     @Override
     public void registerRequestHandler(String appId, RequestHandler requestHandler) {
         this.registeredRequestHandlers.put(appId, requestHandler);
+
+        if (isFrameworkStopping()) {
+            logger.info("framework is stopping.. not republishing app certificate");
+            return;
+        }
+
         if (isConnected()) {
             try {
                 publishAppCertificate();
@@ -956,6 +964,12 @@ public class CloudServiceImpl
     @Override
     public void unregister(String appId) {
         this.registeredRequestHandlers.remove(appId);
+
+        if (isFrameworkStopping()) {
+            logger.info("framework is stopping.. not republishing app certificate");
+            return;
+        }
+
         if (isConnected()) {
             try {
                 publishAppCertificate();
@@ -1157,4 +1171,18 @@ public class CloudServiceImpl
         }
     }
 
+    private boolean isFrameworkStopping() {
+        try {
+            final Bundle ownBundle = FrameworkUtil.getBundle(CloudServiceImpl.class);
+
+            if (ownBundle == null) {
+                return false; // not running in an OSGi framework? e.g. unit test
+            }
+
+            return ownBundle.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
+        } catch (final Exception e) {
+            logger.warn("unexpected exception while checking if framework is shutting down", e);
+            return false;
+        }
+    }
 }

@@ -22,6 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -323,7 +325,19 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         String result = fileAsString;
         String passKey = new String(wifiConfig.getPasskey().getPassword());
-        if (passKey.trim().length() > 0) {
+
+        boolean checkAndEnconde = true;
+
+        try {
+            byte[] encodedPasskey = DatatypeConverter.parseHexBinary(passKey);
+            if (encodedPasskey.length == 256) {
+                checkAndEnconde = false;
+            }
+        } catch (Exception ignore) {
+            // it is not a valid hex string, we consider it a plain text password
+        }
+
+        if (checkAndEnconde && passKey.trim().length() > 0) {
             if (passKey.length() < 8 || passKey.length() > 63) {
                 throw KuraException.internalError(
                         "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "

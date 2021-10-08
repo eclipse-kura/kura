@@ -14,7 +14,6 @@ package org.eclipse.kura.linux.clock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -45,18 +44,19 @@ public class ChronyClockSyncProviderTest {
     @Test
     public void testSynch() throws NoSuchFieldException, IOException, KuraException, NoSuchAlgorithmException {
 
-        assumeTrue("Only run this test on Linux", System.getProperty("os.name").matches("[Ll]inux"));
-
         InputStream journalEntry = new ByteArrayInputStream(
                 IOUtil.readResource("journal-entry.json").getBytes(StandardCharsets.UTF_8));
         OutputStream statusOutputStream = new ByteArrayOutputStream();
         IOUtils.copy(journalEntry, statusOutputStream);
 
-        CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        status.setOutputStream(statusOutputStream);
+        CommandStatus successFullStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandStatus notRunningProgramStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(3));
+        successFullStatus.setOutputStream(statusOutputStream);
 
         CommandExecutorService commandExecutorMock = mock(CommandExecutorService.class);
-        when(commandExecutorMock.execute(anyObject())).thenReturn(status);
+        when(commandExecutorMock.execute(anyObject())).thenReturn(successFullStatus);
+        when(commandExecutorMock.execute(new Command(new String[] { "systemctl", "status", "chrony" })))
+                .thenReturn(notRunningProgramStatus);
 
         CryptoService cryptoServiceMock = mock(CryptoService.class);
         when(cryptoServiceMock.sha256Hash(anyObject())).thenReturn("");

@@ -43,6 +43,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     private static final String[] CHRONY_SERVICE_NAMES = new String[] { "chrony", "chronyd" };
 
+    private static final String SERVICE_MANAGER = "systemctl";
+
     private static final Logger logger = LoggerFactory.getLogger(ChronyClockSyncProvider.class);
 
     private static final int SERVICE_STATUS_UNKNOWN = 4;
@@ -241,14 +243,14 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
         logger.info("Checking chrony service status...");
 
-        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", chronyServiceName });
+        Command checkChronyStatus = new Command(new String[] { SERVICE_MANAGER, "is-active", chronyServiceName });
         CommandStatus chronyStatus = this.executorService.execute(checkChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
     }
 
     private boolean controlChronyd(String command) {
-        Command startChronyStatus = new Command(new String[] { "systemctl", command, chronyServiceName });
+        Command startChronyStatus = new Command(new String[] { SERVICE_MANAGER, command, chronyServiceName });
         CommandStatus chronyStatus = this.executorService.execute(startChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
@@ -273,7 +275,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     }
 
     private boolean findWithSystemd(String serviceName) {
-        Command chronyStatusCommand = new Command(new String[] { "systemctl", "status", serviceName });
+        Command chronyStatusCommand = new Command(new String[] { SERVICE_MANAGER, "status", serviceName });
         chronyStatusCommand.setExecuteInAShell(true);
         int exitCode = this.executorService.execute(chronyStatusCommand).getExitStatus().getExitCode();
 

@@ -330,7 +330,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         try {
             byte[] encodedPasskey = DatatypeConverter.parseHexBinary(passKey);
-            if (encodedPasskey.length == 256) {
+            if (encodedPasskey.length == 32) {
                 checkAndEnconde = false;
             }
         } catch (Exception ignore) {

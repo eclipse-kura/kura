@@ -51,6 +51,13 @@ if command -v timedatectl > /dev/null ;
     timedatectl set-ntp false
 fi
 
+# Prevent time sync services from starting
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+# Prevent time sync with chrony from starting.
+systemctl stop chrony
+systemctl disable chrony
+
 # Set up logrotate
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 if [ ! -d /etc/logrotate.d/ ]; then

@@ -41,9 +41,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class ChronyClockSyncProvider implements ClockSyncProvider {
 
-    private static final String CHRONY_DAEMON = "chronyd";
+    private static final String[] CHRONY_SERVICE_NAMES = new String[] { "chrony", "chronyd" };
 
     private static final Logger logger = LoggerFactory.getLogger(ChronyClockSyncProvider.class);
+
+    private static final int SERVICE_STATUS_UNKNOWN = 4;
 
     private final CommandExecutorService executorService;
     private ScheduledExecutorService schedulerExecutor;
@@ -52,6 +54,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     private ClockSyncListener listener;
 
     private String chronyConfig;
+
+    private String chronyServiceName;
 
     private Date lastSyncValue;
 
@@ -78,6 +82,8 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
         this.gson = new Gson();
         this.chronyConfig = clockServiceConfig.getChronyAdvancedConfig();
 
+        this.chronyServiceName = findChronyService();
+
         writeConfiguration();
     }
 
@@ -95,7 +101,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
             }
 
             if (chronyConfigLocation == null) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "chrony configuration", "....");
             }
 
             try {
@@ -128,15 +134,16 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
     public void start() throws KuraException {
 
         if (!isChronydRunning()) {
-            logger.info("chronyd down, trying to start...");
+            logger.info("chrony service down, trying to start...");
 
             boolean startChronyd = controlChronyd("start");
             if (!startChronyd) {
-                logger.error("Unable to start chronyd.");
+                logger.error("Unable to start chrony service.");
+                throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Unable to start chrony service.");
             }
+        } else {
+            logger.info("chrony service is up.");
         }
-
-        logger.info("chrony deamon is up and running.");
 
         if (syncClock()) {
             logger.info("Clock synced");
@@ -150,7 +157,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     protected boolean syncClock() {
 
-        logger.info("Forcing clock syncronization...");
+        logger.info("Forcing clock synchronization...");
 
         Command chronycMakeStep = new Command(new String[] { "chronyc", "makestep" });
         CommandStatus chronycMakeStepStatus = this.executorService.execute(chronycMakeStep);
@@ -166,10 +173,10 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     private void readAndUpdateSyncInfo() {
 
-        logger.debug("Starting read the journal for clock updates...");
+        logger.debug("Start reading the journal for clock updates...");
 
         // check either chronyd or chrony unit because both are used in journal alternatively
-        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", CHRONY_DAEMON, "-u",
+        Command journalClockUpdateRead = new Command(new String[] { "journalctl", "-r", "-u", chronyServiceName, "-u",
                 "chrony", "-b", "-o", "json", "-S", "today", "--output-fields", "MESSAGE", "|", "grep",
                 "'System clock was stepped by'", "-m", "1" });
 
@@ -212,12 +219,12 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     @Override
     public void stop() throws KuraException {
-        logger.info("Stopping chrony daemon...");
+        logger.info("Stopping chrony service...");
 
         if (controlChronyd("stop")) {
-            logger.info("chronyd stopped");
+            logger.info("chrony service stopped");
         } else {
-            logger.warn("Unable to stop chronyd");
+            logger.warn("Unable to stop chrony service");
         }
 
         if (this.future != null) {
@@ -232,19 +239,46 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
 
     private boolean isChronydRunning() {
 
-        logger.info("Checking chrony deamon status...");
+        logger.info("Checking chrony service status...");
 
-        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", CHRONY_DAEMON });
+        Command checkChronyStatus = new Command(new String[] { "systemctl", "is-active", chronyServiceName });
         CommandStatus chronyStatus = this.executorService.execute(checkChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
     }
 
     private boolean controlChronyd(String command) {
-        Command startChronyStatus = new Command(new String[] { "systemctl", command, CHRONY_DAEMON });
+        Command startChronyStatus = new Command(new String[] { "systemctl", command, chronyServiceName });
         CommandStatus chronyStatus = this.executorService.execute(startChronyStatus);
 
         return chronyStatus.getExitStatus().isSuccessful();
+    }
+
+    private String findChronyService() throws KuraException {
+
+        String foundChronyDaemon = "";
+
+        for (String chronyServiceNameItem : CHRONY_SERVICE_NAMES) {
+            if (findWithSystemd(chronyServiceNameItem)) {
+                foundChronyDaemon = chronyServiceNameItem;
+                break;
+            }
+        }
+
+        if (foundChronyDaemon.isEmpty()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+        }
+
+        return foundChronyDaemon;
+    }
+
+    private boolean findWithSystemd(String serviceName) {
+        Command chronyStatusCommand = new Command(new String[] { "systemctl", "status", serviceName });
+        chronyStatusCommand.setExecuteInAShell(true);
+        int exitCode = this.executorService.execute(chronyStatusCommand).getExitStatus().getExitCode();
+
+        return (exitCode >= 0 && exitCode != SERVICE_STATUS_UNKNOWN);
+
     }
 
     private class JournalChronyEntry {

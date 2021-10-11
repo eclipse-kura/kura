@@ -63,4 +63,51 @@ public final class TypeUtil {
         return b.toByteArray();
     }
 
+    /**
+     * 
+     * Convert an hex string to a byte array. Simple copy-paste of the method in standard JRE 8
+     * {@link javax.xml.bind.DatatypeConverter#parseHexBinary(String)}
+     * 
+     * @param string
+     * @return the byte array
+     * @throws IllegalArgumentException
+     *             if the hex string is invalid
+     */
+
+    public static byte[] parseHexBinary(String string) {
+        final int len = string.length();
+
+        // "111" is not a valid hex encoding.
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("hexBinary needs to be even-length: " + string);
+        }
+
+        byte[] out = new byte[len / 2];
+
+        for (int i = 0; i < len; i += 2) {
+            int h = hexToBin(string.charAt(i));
+            int l = hexToBin(string.charAt(i + 1));
+            if (h == -1 || l == -1) {
+                throw new IllegalArgumentException("contains illegal character for hexBinary: " + string);
+            }
+
+            out[i / 2] = (byte) (h * 16 + l);
+        }
+
+        return out;
+    }
+
+    private static int hexToBin(char ch) {
+        if ('0' <= ch && ch <= '9') {
+            return ch - '0';
+        }
+        if ('A' <= ch && ch <= 'F') {
+            return ch - 'A' + 10;
+        }
+        if ('a' <= ch && ch <= 'f') {
+            return ch - 'a' + 10;
+        }
+        return -1;
+    }
+
 }

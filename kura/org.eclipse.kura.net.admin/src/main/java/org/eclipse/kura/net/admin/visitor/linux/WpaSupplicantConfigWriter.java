@@ -22,8 +22,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.regex.Matcher;
 
-import javax.xml.bind.DatatypeConverter;
-
 import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -48,6 +46,7 @@ import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.util.base.TypeUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -329,7 +328,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         boolean checkAndEnconde = true;
 
         try {
-            byte[] encodedPasskey = DatatypeConverter.parseHexBinary(passKey);
+            byte[] encodedPasskey = TypeUtil.parseHexBinary(passKey);
             if (encodedPasskey.length == 32) {
                 checkAndEnconde = false;
             }

@@ -1,4 +1,4 @@
-Eclipse Kura - 5.0.0   - September 2021
+Eclipse Kura - 5.0.0   - October 2021
 -------------------------------------------------------------------------
 Description:
 This major release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces new security related features. 
@@ -190,7 +190,12 @@ Known Issues :
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 
-Changelog :
+Changelog:
+  * 7a6815c0ea - Replaced systemctl string with constant. (#3639) (#3640) (github-actions[bot])
+  * 8da280dc62 - Disable chrony and systemd-timesyncd and handle different systemd service name. (#3627) (#3634) (github-actions[bot])
+  * 1611295757 - Attempt to fix spurious lifecycle messages on shutdown (#3628) (#3635) (github-actions[bot])
+  * 8d178798eb - Implemented server side password strenght validation (#3625) (#3630) (github-actions[bot])
+  * c9ae41baf2 - Separate journal logs when downloading (#3626) (#3629) (github-actions[bot])
   * 9c8055f4ad - Added ntpdate dependency. (#3620) (#3621) (github-actions[bot])
   * 74768edb13 - Disabled dhcpcd service at install. (#3616) (#3619) (github-actions[bot])
   * 019531e440 - Updated release notes with a new known issue. (#3618) (Matteo Maiero)

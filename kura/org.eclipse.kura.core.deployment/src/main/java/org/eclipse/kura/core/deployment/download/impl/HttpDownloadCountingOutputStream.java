@@ -28,9 +28,11 @@ import java.util.concurrent.Future;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraConnectException;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.core.deployment.DownloadStatus;
 import org.eclipse.kura.core.deployment.download.DownloadCountingOutputStream;
 import org.eclipse.kura.core.deployment.download.DownloadOptions;
@@ -73,7 +75,6 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
 
             @Override
             public Void call() throws Exception {
-                URL localUrl = null;
                 boolean shouldAuthenticate = false;
                 try {
                     shouldAuthenticate = HttpDownloadCountingOutputStream.this.options.getUsername() != null
@@ -93,12 +94,8 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                         });
                     }
 
-                    localUrl = new URL(HttpDownloadCountingOutputStream.this.downloadURL);
-                    URLConnection urlConnection = localUrl.openConnection();
-                    int connectTimeout = getConnectTimeout();
-                    int readTimeout = getPropReadTimeout();
-                    urlConnection.setConnectTimeout(connectTimeout);
-                    urlConnection.setReadTimeout(readTimeout);
+                    HttpURLConnection.setFollowRedirects(false);
+                    URLConnection urlConnection = getUrlConnection(HttpDownloadCountingOutputStream.this.downloadURL);
 
                     testConnectionProtocol(urlConnection);
 
@@ -143,7 +140,6 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
                         close();
                     } catch (IOException e) {
                     }
-                    localUrl = null;
                     if (shouldAuthenticate) {
                         Authenticator.setDefault(null);
                     }
@@ -164,11 +160,31 @@ public class HttpDownloadCountingOutputStream extends GenericDownloadCountingOut
         }
     }
 
+    private URLConnection getUrlConnection(String downloadUrlString) throws IOException {
+        URL localUrl = new URL(downloadUrlString);
+        URLConnection urlConnection = localUrl.openConnection();
+        int connectTimeout = getConnectTimeout();
+        int readTimeout = getPropReadTimeout();
+        urlConnection.setConnectTimeout(connectTimeout);
+        urlConnection.setReadTimeout(readTimeout);
+
+        int responseCode = ((HttpURLConnection) urlConnection).getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_MOVED_TEMP || responseCode == HttpURLConnection.HTTP_MOVED_PERM
+                || responseCode == HttpURLConnection.HTTP_SEE_OTHER) {
+            String newLocation = urlConnection.getHeaderField("Location");
+            if (StringUtils.isNotEmpty(newLocation)) {
+                return getUrlConnection(newLocation);
+            } else {
+                throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER);
+            }
+        }
+        return urlConnection;
+    }
+
     private void testConnectionProtocol(URLConnection urlConnection) throws IOException, KuraConnectException {
         try {
             if (urlConnection instanceof HttpsURLConnection) {
-                ((HttpsURLConnection) urlConnection)
-                        .setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
+                ((HttpsURLConnection) urlConnection).setSSLSocketFactory(this.sslManagerService.getSSLSocketFactory());
             } else if (!(urlConnection instanceof HttpURLConnection)) {
                 postProgressEvent(this.options.getClientId(), getByteCount(), this.totalBytes, DownloadStatus.FAILED,
                         "The request URL is not supported");

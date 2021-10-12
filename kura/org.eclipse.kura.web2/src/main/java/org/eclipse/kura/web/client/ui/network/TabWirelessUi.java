@@ -131,6 +131,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String REGEX_WIFI_SID = "^[^!#;+\\]/\"\\t][^+\\]/\"\\t]{0,31}$";
     private static final int MAX_SSID_LENGTH = 32;
 
+    private final List<String> fiveGhzRadioMode = new ArrayList<String>();
+
     private final GwtSession session;
     private final TabTcpIpUi tcpTab;
     private final NetworkTabsUi netTabs;
@@ -1365,6 +1367,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         element.setAttribute("disabled", "disabled");
         element.addClassName("list-group-item disabled");
+    }
+
+    private void addItemAutomaticChannel() {
+        this.channelList.addItem("Automatic");
     }
 
     private void loadSsidData() {

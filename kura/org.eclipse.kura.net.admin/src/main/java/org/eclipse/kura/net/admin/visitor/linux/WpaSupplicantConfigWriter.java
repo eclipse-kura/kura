@@ -325,18 +325,18 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String result = fileAsString;
         String passKey = new String(wifiConfig.getPasskey().getPassword());
 
-        boolean doCheckAndEnconde = true;
+        boolean doCheckAndEncode = true;
 
         try {
             byte[] encodedPasskey = TypeUtil.parseHexBinary(passKey);
             if (encodedPasskey.length == 32) {
-                doCheckAndEnconde = false;
+                doCheckAndEncode = false;
             }
         } catch (Exception ignore) {
             // it is not a valid hex string, we consider it a plain text password
         }
 
-        if (doCheckAndEnconde) {
+        if (doCheckAndEncode) {
             if (passKey.trim().length() > 0) {
                 if (passKey.length() < 8 || passKey.length() > 63) {
                     throw KuraException.internalError(

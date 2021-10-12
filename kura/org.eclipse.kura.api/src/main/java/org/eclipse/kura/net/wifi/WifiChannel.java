@@ -13,20 +13,32 @@
 
 package org.eclipse.kura.net.wifi;
 
+import java.util.Objects;
+
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Wifi channel and Frequency in MHz
+ * 
  * @since 2.2
  * @noextend This class is not intended to be subclassed by clients.
  */
 @ProviderType
 public class WifiChannel {
+
     /** Wifi channel **/
     private Integer channel;
 
     /** Wifi frequency in MHz **/
     private Integer frequency;
+
+    private Float attenuation;
+
+    private Boolean noInitiatingRadiation;
+
+    private Boolean radarDetection;
+
+    private Boolean disabled;
 
     public WifiChannel(int channel, Integer frequency) {
         this.channel = channel;
@@ -49,38 +61,60 @@ public class WifiChannel {
         this.frequency = frequency;
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        sb.append("channel:").append(channel).append(", frequency:").append(frequency).append(" MHz");
-        sb.append("]");
-        return sb.toString();
+    public Boolean getNoInitiatingRadiation() {
+        return noInitiatingRadiation;
+    }
+
+    public void setNoInitiatingRadiation(Boolean noInitiatingRadiation) {
+        this.noInitiatingRadiation = noInitiatingRadiation;
+    }
+
+    public Boolean getRadarDetection() {
+        return radarDetection;
+    }
+
+    public void setRadarDetection(Boolean radarDetection) {
+        this.radarDetection = radarDetection;
+    }
+
+    public Boolean isDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    public Float getAttenuation() {
+        return attenuation;
+    }
+
+    public void setAttenuation(Float attenuation) {
+        this.attenuation = attenuation;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 29;
-        int result = super.hashCode();
-
-        result = prime * result + (this.channel == null ? 0 : this.channel.hashCode());
-        result = prime * result + (this.frequency == null ? 0 : this.frequency.hashCode());
-        return result;
+        return Objects.hash(channel, frequency);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof WifiChannel)) {
+        if (this == obj)
+            return true;
+        if (obj == null)
             return false;
-        }
-
+        if (getClass() != obj.getClass())
+            return false;
         WifiChannel other = (WifiChannel) obj;
-        if (!compare(this.channel, other.channel) || !compare(this.frequency, other.frequency)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(channel, other.channel) && Objects.equals(frequency, other.frequency);
     }
 
-    private boolean compare(Object obj1, Object obj2) {
-        return obj1 == null ? obj2 == null : obj1.equals(obj2);
+    @Override
+    public String toString() {
+        return "WifiChannel [channel=" + channel + ", frequency=" + frequency + ", attenuation=" + attenuation
+                + ", noInitiatingRadiation=" + noInitiatingRadiation + ", radarDetection=" + radarDetection
+                + ", disabled=" + disabled + "]";
     }
+
 }

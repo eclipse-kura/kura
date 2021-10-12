@@ -96,6 +96,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
@@ -1669,21 +1670,25 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
+    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException {
         logger.debug("Find Frequency Network Service impl");
-        List<GwtWifiHotspotEntry> channels = new ArrayList<GwtWifiHotspotEntry>();
+        List<GwtWifiChannelFrequency> channels = new ArrayList<>();
 
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
-            List<WifiChannel> frequencies = nas.getWifiFrequencies(interfaceName);
+            List<WifiChannel> channelFrequencies = nas.getWifiFrequencies(interfaceName);
 
-            for (WifiChannel freq : frequencies) {
-                logger.debug(freq.toString());
-                GwtWifiHotspotEntry channelFrequency = new GwtWifiHotspotEntry();
-                channelFrequency.setChannel(freq.getChannel());
-                channelFrequency.setFrequency(freq.getFrequency());
-                channels.add(channelFrequency);
+            for (WifiChannel channelFreq : channelFrequencies) {
+                if (logger.isDebugEnabled())
+                    logger.debug(channelFreq.toString());
+
+                if (Boolean.FALSE.equals(channelFreq.getDisabled())) {
+                    GwtWifiChannelFrequency channelFrequency = new GwtWifiChannelFrequency();
+                    channelFrequency.setChannel(channelFreq.getChannel());
+                    channelFrequency.setFrequency(channelFreq.getFrequency());
+                    channels.add(channelFrequency);
+                }
             }
             return channels;
         } catch (KuraException e) {

@@ -68,7 +68,7 @@ public interface GwtNetworkService extends RemoteService {
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Get Wifi channels and frequencies")
-    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
+    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Get Wifi Country Code")

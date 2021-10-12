@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,8 @@
 package org.eclipse.kura.web.shared.model;
 
 public enum GwtWifiRadioMode {
+
+    netWifiRadioModeANAC,
     netWifiRadioModeBGN,
     netWifiRadioModeBG,
     netWifiRadioModeB,
@@ -35,6 +37,8 @@ public enum GwtWifiRadioMode {
             return GwtWifiRadioMode.netWifiRadioModeBG;
         } else if ("n".equals(mode)) {
             return GwtWifiRadioMode.netWifiRadioModeBGN;
+        } else if ("ac".equals(mode)) {
+            return GwtWifiRadioMode.netWifiRadioModeANAC;
         }
 
         return null;

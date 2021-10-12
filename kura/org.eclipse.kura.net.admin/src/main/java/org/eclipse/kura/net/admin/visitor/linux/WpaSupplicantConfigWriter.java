@@ -325,28 +325,30 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String result = fileAsString;
         String passKey = new String(wifiConfig.getPasskey().getPassword());
 
-        boolean checkAndEnconde = true;
+        boolean doCheckAndEnconde = true;
 
         try {
             byte[] encodedPasskey = TypeUtil.parseHexBinary(passKey);
             if (encodedPasskey.length == 32) {
-                checkAndEnconde = false;
+                doCheckAndEnconde = false;
             }
         } catch (Exception ignore) {
             // it is not a valid hex string, we consider it a plain text password
         }
 
-        if (checkAndEnconde && passKey.trim().length() > 0) {
-            if (passKey.length() < 8 || passKey.length() > 63) {
-                throw KuraException.internalError(
-                        "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
-                                + passKey);
+        if (doCheckAndEnconde) {
+            if (passKey.trim().length() > 0) {
+                if (passKey.length() < 8 || passKey.length() > 63) {
+                    throw KuraException.internalError(
+                            "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
+                                    + passKey);
+                } else {
+                    String encodedPasskey = encodePassword(wifiConfig.getSSID(), passKey);
+                    result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(encodedPasskey.trim()));
+                }
             } else {
-                String encodedPasskey = encodePassword(wifiConfig.getSSID(), passKey);
-                result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(encodedPasskey.trim()));
+                throw KuraException.internalError("the passwd can not be null");
             }
-        } else {
-            throw KuraException.internalError("the passwd can not be null");
         }
 
         String replacement;

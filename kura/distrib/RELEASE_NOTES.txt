@@ -191,6 +191,8 @@ Known Issues :
 
 
 Changelog:
+  * c2b55545aa - Added redirect menagement in core.deployment (#3641) (#3642) (github-actions[bot])
+  * 229b7a1f26 - Updated release notes (Maiero)
   * 7a6815c0ea - Replaced systemctl string with constant. (#3639) (#3640) (github-actions[bot])
   * 8da280dc62 - Disable chrony and systemd-timesyncd and handle different systemd service name. (#3627) (#3634) (github-actions[bot])
   * 1611295757 - Attempt to fix spurious lifecycle messages on shutdown (#3628) (#3635) (github-actions[bot])

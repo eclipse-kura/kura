@@ -141,7 +141,7 @@ class IWAPParser {
             while (st.hasMoreTokens()) {
                 this.capabilities.add(st.nextToken());
             }
-        } else if (propLine.contains("primary channel")) {
+        } else if (propLine.contains("DS Parameter set:")) {
             String[] tokens = propLine.split(" ");
             if (tokens.length > 1) {
                 this.channel = Integer.parseInt(tokens[tokens.length - 1]);

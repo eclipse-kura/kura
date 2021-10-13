@@ -357,7 +357,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
      */
     private String updateRadioMode(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         WifiRadioMode radioMode = wifiConfig.getRadioMode();
-        if (radioMode == WifiRadioMode.RADIO_MODE_80211a) {
+
+        switch (radioMode) {
+
+        case RADIO_MODE_80211a: {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
 
@@ -368,33 +371,47 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             }
 
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211b) {
+
+            break;
+        }
+        case RADIO_MODE_80211b: {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "b");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211g) {
+            break;
+        }
+        case RADIO_MODE_80211g: {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
+            break;
+        }
+        case RADIO_MODE_80211nHT20: {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[SHORT-GI-20]");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
+            break;
+        }
+        case RADIO_MODE_80211nHT40above: {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40+][SHORT-GI-20][SHORT-GI-40]");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
+            break;
+        }
+        case RADIO_MODE_80211nHT40below: {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40-][SHORT-GI-20][SHORT-GI-40]");
-        } else {
+            break;
+        }
+        default:
             throw KuraException.internalError("invalid hardware mode");
+
         }
 
         return fileAsString;

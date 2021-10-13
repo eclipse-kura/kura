@@ -157,6 +157,9 @@ Known Issues :
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
+  * The rock-960-ubuntu-nn does not support chrony features.
+  * The rock-960-ubuntu-nn does not support writings to the hardware clock.
+  * The rock-960-ubuntu-nn does not support the download of the journald logs.
   * #3176: Modem interface number management
   * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
   * #2843: Access Banner Content All in One Line

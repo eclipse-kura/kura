@@ -85,6 +85,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class TabWirelessUi extends Composite implements NetworkTab {
 
+    private static final String AUTOMATIC_CHANNEL_DESCRIPTION = "Automatic";
     private static final String STATUS_TABLE_ROW = "status-table-row";
     private static final String WIFI_MODE_STATION = GwtWifiWirelessMode.netWifiWirelessModeStation.name();
     private static final String WIFI_MODE_AP = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
@@ -1332,7 +1333,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void addItemAutomaticChannel() {
-        this.channelList.addItem("Automatic");
+        this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
     }
 
     private void loadSsidData() {
@@ -1406,6 +1407,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private int getChannelValueByIndex(int index) {
         String itemText = this.channelList.getItemText(index);
+
+        if (itemText.equalsIgnoreCase(AUTOMATIC_CHANNEL_DESCRIPTION))
+            return 0;
+
         String[] values = itemText.split(" ");
         return Integer.parseInt(values[1]);
     }

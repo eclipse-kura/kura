@@ -1370,7 +1370,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void addItemAutomaticChannel() {
-        this.channelList.addItem("Automatic");
+        this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
     }
 
     private void loadSsidData() {

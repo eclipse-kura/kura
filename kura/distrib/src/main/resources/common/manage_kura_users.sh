@@ -37,7 +37,7 @@ function create_users {
 		if [ ! -f /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla ]; then
 		    echo "[No password prompt for kurad user]
 Identity=unix-user:kurad
-Action=org.freedesktop.systemd1.manage-units
+Action=org.freedesktop.systemd1.*
 ResultInactive=no
 ResultActive=no
 ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.systemd1.pkla
@@ -52,12 +52,20 @@ ResultAny=yes" > /etc/polkit-1/localauthority/50-local.d/51-org.freedesktop.syst
         action.lookup(\"unit\") == \"bluetooth.service\")) {
         return polkit.Result.YES;
     }
+    if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
+        subject.user == \"kurad\") {
+        return polkit.Result.YES;
+    }
 });" > /usr/share/polkit-1/rules.d/kura.rules
 			else
 			    echo "polkit.addRule(function(action, subject) {
     if (action.id == \"org.freedesktop.systemd1.manage-units\" &&
         subject.user == \"kurad\" &&
         action.lookup(\"unit\") == \"bluetooth.service\") {
+        return polkit.Result.YES;
+    }
+    if (action.id == \"org.freedesktop.systemd1.manage-unit-files\" &&
+        subject.user == \"kurad\") {
         return polkit.Result.YES;
     }
 });" > /usr/share/polkit-1/rules.d/kura.rules

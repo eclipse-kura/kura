@@ -136,6 +136,9 @@ public class UserConfigUi extends Composite {
         this.passwordDisabled.addChangeHandler(e -> {
             this.userData.setPasswordAuthEnabled(false);
             this.userData.setNewPassword(Optional.empty());
+            if (this.hasPassword) {
+                this.listener.onUserDataChanged(this.userData);
+            }
             updatePasswordWidgetState();
         });
 

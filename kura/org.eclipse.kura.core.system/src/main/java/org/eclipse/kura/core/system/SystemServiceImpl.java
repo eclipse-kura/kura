@@ -14,6 +14,7 @@
 package org.eclipse.kura.core.system;
 
 import static java.lang.Thread.currentThread;
+import static java.util.Objects.isNull;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -620,21 +621,24 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     private String getPrimaryMacAddressLinux(String primaryNetworkInterfaceName) {
-        String macAddress = null;
+
+        List<NetInterface<? extends NetInterfaceAddress>> interfaces = null;
         try {
-            List<NetInterface<? extends NetInterfaceAddress>> interfaces = this.networkService.getNetworkInterfaces();
-            if (interfaces != null) {
-                for (NetInterface<? extends NetInterfaceAddress> iface : interfaces) {
-                    if (iface.getName() != null && primaryNetworkInterfaceName.equals(iface.getName())) {
-                        macAddress = hardwareAddressToString(iface.getHardwareAddress());
-                        break;
-                    }
-                }
-            }
+            interfaces = this.networkService.getNetworkInterfaces();
         } catch (KuraException e) {
             logger.error("Failed to get network interfaces", e);
+            return null;
         }
-        return macAddress;
+
+        Optional<NetInterface<? extends NetInterfaceAddress>> primaryInterface = interfaces.stream()
+                .filter(iface -> !isNull(iface.getName()))
+                .filter(iface -> primaryNetworkInterfaceName.equals(iface.getName().split("@")[0])).findFirst();
+
+        if (primaryInterface.isPresent()) {
+            return hardwareAddressToString(primaryInterface.get().getHardwareAddress());
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -1247,7 +1251,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
      * An APK package name consists of the name and the version separated by "-".
      * The name and the version itself can contain "-".
      * Assumptions are that the fullName starts with the package name and ends with the version.
-     * 
+     *
      * @param fullName
      *            of the APK software package, e.g. "busybox-extras-1.31.1-r10"
      * @return String array with name in position 0 and version in position 1
@@ -1272,7 +1276,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                     name.append(s);
                 }
             }
-            
+
             // everything else after match is version
             if (i > matchIndex) {
                 version.append("-");

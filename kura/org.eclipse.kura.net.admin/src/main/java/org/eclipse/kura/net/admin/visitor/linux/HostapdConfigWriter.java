@@ -59,6 +59,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private static final String HT_CAPAB_KURA_HTCAPAB = "ht_capab=KURA_HTCAPAB";
     private static final String KURA_IEEE80211N = "KURA_IEEE80211N";
     private static final String KURA_WME_ENABLED = "KURA_WME_ENABLED";
+    private static final String KURA_WMM_ENABLED = "KURA_WMM_ENABLED";
     private static final String KURA_HW_MODE = "KURA_HW_MODE";
     private static final String KURA_COUNTRY_CODE = "KURA_COUNTRY_CODE";
     private static final String KURA_IEEE80211D = "KURA_IEEE80211D";
@@ -206,6 +207,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateIgnoreBroadcastSsid(wifiConfig, fileAsString);
 
+        fileAsString = updateCountryCode(wifiConfig, fileAsString);
+
         File outputFile = getTemporaryFile();
 
         // everything is set and we haven't failed - write the file
@@ -213,6 +216,23 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         // move the file if we made it this far
         moveFile(interfaceName);
+    }
+
+    private String updateCountryCode(WifiConfig wifiConfig, String fileAsString) {
+
+        String countryCode = wifiConfig.getWifiCountryCode();
+
+        if (countryCode != null && !countryCode.isEmpty() && !countryCode.equalsIgnoreCase("00")) {
+            fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, countryCode);
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211D, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211H, "1");
+        } else {
+            fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, "");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211D, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211H, "0");
+        }
+
+        return fileAsString;
     }
 
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {
@@ -325,11 +345,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private String updateChannels(WifiConfig wifiConfig, String fileAsString) throws KuraException {
-        if (wifiConfig.getChannels()[0] > 0 && wifiConfig.getChannels()[0] <= 165) {
+        if (wifiConfig.getChannels()[0] >= 0 && wifiConfig.getChannels()[0] <= 165) {
             fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(wifiConfig.getChannels()[0]));
         } else {
             throw KuraException.internalError(String.format(
-                    "the channel (%s) must be between 1 (inclusive) and 13 (inclusive) or 1 (inclusive) and 165 (inclusive) depending on your locale",
+                    "the channel (%s) must be between 1 (inclusive) and 196 (inclusive) depending on your locale, or 0 for automatic.",
                     wifiConfig.getChannels()[0]));
         }
         return fileAsString;
@@ -360,7 +380,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         switch (radioMode) {
 
-        case RADIO_MODE_80211a: {
+        case RADIO_MODE_80211a:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
 
@@ -373,46 +393,60 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
-        }
-        case RADIO_MODE_80211b: {
+
+        case RADIO_MODE_80211b:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "b");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
+
             break;
-        }
-        case RADIO_MODE_80211g: {
+
+        case RADIO_MODE_80211g:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
+
             break;
-        }
-        case RADIO_MODE_80211nHT20: {
+
+        case RADIO_MODE_80211nHT20:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[SHORT-GI-20]");
+
             break;
-        }
-        case RADIO_MODE_80211nHT40above: {
+
+        case RADIO_MODE_80211nHT40above:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40+][SHORT-GI-20][SHORT-GI-40]");
+
             break;
-        }
-        case RADIO_MODE_80211nHT40below: {
+
+        case RADIO_MODE_80211nHT40below:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40-][SHORT-GI-20][SHORT-GI-40]");
+
             break;
-        }
+
+        case RADIO_MODE_80211ac:
+            fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "1");
+
+            break;
+
         default:
             throw KuraException.internalError("invalid hardware mode");
 
         }
+
+        fileAsString = fileAsString.replaceFirst(KURA_WMM_ENABLED, "1");
 
         return fileAsString;
     }

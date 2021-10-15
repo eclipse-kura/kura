@@ -30,6 +30,8 @@ wme_enabled=KURA_WME_ENABLED
 ieee80211n=KURA_IEEE80211N
 ht_capab=KURA_HTCAPAB
 
+wmm_enabled=KURA_WMM_ENABLED
+
 #example: 1
 channel=KURA_CHANNEL
 

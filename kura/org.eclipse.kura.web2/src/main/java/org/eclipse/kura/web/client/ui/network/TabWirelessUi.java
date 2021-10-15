@@ -1324,16 +1324,27 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private void replaceChannelListWithOnlyOneItem(int channel, int frequency) {
         this.channelList.clear();
-        addItemChannelList(channel, frequency);
+
     }
 
-    private void addItemChannelList(int channel, float frequency) {
-        String frequencyString = (frequency > -1) ? " - " + frequency + " MHz" : "";
-        this.channelList.addItem("Channel " + channel + frequencyString);
+    private void addItemChannelList(GwtWifiChannelFrequency channelFrequency) {
+        String frequencyString = (channelFrequency.getFrequency() > -1)
+                ? " - " + channelFrequency.getFrequency() + " MHz"
+                : "";
+        this.channelList.addItem("Channel " + channelFrequency.getChannel() + frequencyString);
+
+        if (channelFrequency.isDisabled())
+            disableLastChannelItem();
     }
 
     private void addItemAutomaticChannel() {
         this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
+    }
+
+    private void disableLastChannelItem() {
+        int channelLength = this.channelList.getElement().getElementsByTagName("option").getLength();
+        this.channelList.getElement().getElementsByTagName("option").getItem(channelLength - 1).setAttribute("disabled",
+                "disabled");
     }
 
     private void loadSsidData() {
@@ -1608,8 +1619,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                         logger.fine("Found " + freqChannel.getChannel() + " - "
                                                 + freqChannel.getFrequency() + " MHz");
 
-                                        TabWirelessUi.this.addItemChannelList(freqChannel.getChannel(),
-                                                freqChannel.getFrequency());
+                                        TabWirelessUi.this.addItemChannelList(freqChannel);
                                     }
 
                                     int channel = TabWirelessUi.this.activeConfig.getChannels().get(0);

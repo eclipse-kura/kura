@@ -61,7 +61,7 @@ public class WifiChannel {
         this.frequency = frequency;
     }
 
-    public Boolean getNoInitiatingRadiation() {
+    public Boolean isNoInitiatingRadiation() {
         return noInitiatingRadiation;
     }
 
@@ -69,7 +69,7 @@ public class WifiChannel {
         this.noInitiatingRadiation = noInitiatingRadiation;
     }
 
-    public Boolean getRadarDetection() {
+    public Boolean isRadarDetection() {
         return radarDetection;
     }
 
@@ -100,12 +100,15 @@ public class WifiChannel {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         WifiChannel other = (WifiChannel) obj;
         return Objects.equals(channel, other.channel) && Objects.equals(frequency, other.frequency);
     }

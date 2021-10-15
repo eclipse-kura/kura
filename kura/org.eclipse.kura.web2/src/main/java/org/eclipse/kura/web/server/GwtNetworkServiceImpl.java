@@ -1683,12 +1683,15 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 if (logger.isDebugEnabled())
                     logger.debug(channelFreq.toString());
 
-                if (Boolean.FALSE.equals(channelFreq.getDisabled())) {
-                    GwtWifiChannelFrequency channelFrequency = new GwtWifiChannelFrequency();
-                    channelFrequency.setChannel(channelFreq.getChannel());
-                    channelFrequency.setFrequency(channelFreq.getFrequency());
-                    channels.add(channelFrequency);
-                }
+                GwtWifiChannelFrequency channelFrequency = new GwtWifiChannelFrequency();
+
+                channelFrequency.setChannel(channelFreq.getChannel());
+                channelFrequency.setFrequency(channelFreq.getFrequency());
+                channelFrequency.setNoIrradiation(channelFreq.isNoInitiatingRadiation());
+                channelFrequency.setRadarDetection(channelFreq.isRadarDetection());
+                channelFrequency.setDisabled(channelFreq.isDisabled());
+
+                channels.add(channelFrequency);
             }
             return channels;
         } catch (KuraException e) {

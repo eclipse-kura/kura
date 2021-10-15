@@ -194,6 +194,12 @@ Known Issues :
 
 
 Changelog:
+  * aa07fc5d2e - Fix to prevent issues with eth0@ifxx outputs from IP (#3651) (#3653) (github-actions[bot])
+  * f46ffd8f30 - Updated manage_kura_users script (#3650) (#3652) (github-actions[bot])
+  * a2a7e62e4a - Wake up listener when switching from password enabled to disabled to enable apply button (#3647) (#3649) (github-actions[bot])
+  * 12f162b08d - Added known issues for the Rock960 board (#3648) (Marcello Rinaldo Martina)
+  * af325c55a0 - Added Let's Encrypt certificate (#3644) (#3646) (github-actions[bot])
+  * 65cd76c027 - fixed channel parsing. (#3643) (#3645) (github-actions[bot])
   * c2b55545aa - Added redirect menagement in core.deployment (#3641) (#3642) (github-actions[bot])
   * 229b7a1f26 - Updated release notes (Maiero)
   * 7a6815c0ea - Replaced systemctl string with constant. (#3639) (#3640) (github-actions[bot])

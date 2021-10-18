@@ -1529,6 +1529,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
         wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
 
+        wifiConfig.setWifiCountryCode(gwtWifiConfig.getCountryCode());
+
         return wifiConfig;
     }
 

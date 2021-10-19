@@ -1513,6 +1513,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         // ignore SSID
         gwtWifiConfig.setIgnoreSSID(this.radio3.getValue());
 
+        // Country Code is not editable at moment.
+        gwtWifiConfig.setCountryCode(this.countryCode.getValue());
+
         return gwtWifiConfig;
     }
 

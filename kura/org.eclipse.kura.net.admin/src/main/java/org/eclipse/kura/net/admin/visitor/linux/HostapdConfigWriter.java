@@ -28,6 +28,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -207,7 +208,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateIgnoreBroadcastSsid(wifiConfig, fileAsString);
 
-        fileAsString = updateCountryCode(wifiConfig, fileAsString);
+        fileAsString = updateCountryCode(getWifiCountryCode(), fileAsString);
 
         File outputFile = getTemporaryFile();
 
@@ -218,9 +219,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         moveFile(interfaceName);
     }
 
-    private String updateCountryCode(WifiConfig wifiConfig, String fileAsString) {
-
-        String countryCode = wifiConfig.getWifiCountryCode();
+    private String updateCountryCode(String countryCode, String fileAsString) {
 
         if (countryCode != null && !countryCode.isEmpty() && !countryCode.equalsIgnoreCase("00")) {
             fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, countryCode);
@@ -436,8 +435,11 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         case RADIO_MODE_80211ac:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
+            fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "1");
+            
+            fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
 
@@ -490,6 +492,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             hex.append(HEXES.charAt((element & 0xF0) >> 4)).append(HEXES.charAt(element & 0x0F));
         }
         return hex.toString();
+    }
+
+    private String getWifiCountryCode() throws KuraException {
+        return IwCapabilityTool.getWifiCountryCode(this.executorService);
     }
 
 }

@@ -1483,7 +1483,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) {
+    private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) throws GwtKuraException {
 
         WifiConfig wifiConfig = new WifiConfig();
 
@@ -1591,17 +1591,30 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return channels;
     }
 
-    private WifiRadioMode getWifiConfigRadioMode(GwtWifiRadioMode radioMode) {
+    private WifiRadioMode getWifiConfigRadioMode(GwtWifiRadioMode radioMode) throws GwtKuraException {
         WifiRadioMode wifiRadioMode;
-        if (radioMode == GwtWifiRadioMode.netWifiRadioModeA) {
+
+        switch (radioMode) {
+        case netWifiRadioModeA:
             wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
-        } else if (radioMode.equals(GwtWifiRadioMode.netWifiRadioModeB)) {
+            break;
+        case netWifiRadioModeB:
             wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
-        } else if (radioMode.equals(GwtWifiRadioMode.netWifiRadioModeBG)) {
+            break;
+        case netWifiRadioModeBG:
             wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
-        } else {
+            break;
+        case netWifiRadioModeBGN:
             wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
+            break;
+        case netWifiRadioModeANAC:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211ac;
+            break;
+
+        default:
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
+
         return wifiRadioMode;
     }
 

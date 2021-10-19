@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
+import org.eclipse.kura.linux.net.util.ProcessStopUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +71,13 @@ public class HostapdManager {
     }
 
     public void stop(String ifaceName) throws KuraException {
-        if (!this.executorService.kill(formHostapdStartCommand(ifaceName), LinuxSignal.SIGKILL)) {
+        boolean failed = false;
+
+        for (final Pid pid : this.executorService.getPids(formHostapdStartCommand(ifaceName)).values()) {
+            failed |= !ProcessStopUtil.stopAndKill(executorService, pid);
+        }
+
+        if (failed) {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
                     "Failed to stop hostapd for interface " + ifaceName);
         }

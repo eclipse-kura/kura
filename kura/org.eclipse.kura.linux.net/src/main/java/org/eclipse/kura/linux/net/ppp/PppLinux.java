@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -25,6 +25,7 @@ import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.Pid;
+import org.eclipse.kura.executor.Signal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,13 +57,13 @@ public class PppLinux {
         }
     }
 
-    public void disconnect(String iface, String port) {
+    public void disconnect(String iface, String port) throws KuraException {
 
         Pid pid = getPid(iface, port);
         if (pid.getPid() >= 0) {
             logger.info("stopping {} pid={}", iface, pid);
 
-            if (this.executorService.stop(pid, LinuxSignal.SIGKILL)) {
+            if (stopAndKill(pid)) {
                 deleteLock(port);
             } else {
                 logger.warn("Failed to disconnect {}", iface);
@@ -139,5 +140,57 @@ public class PppLinux {
 
     private static String[] formConnectCommand(String peer, String port) {
         return new String[] { PPP_DAEMON, port, "call", peer };
+    }
+
+    private boolean stopAndKill(final Pid pid) throws KuraException {
+        try {
+            if (stop(pid, LinuxSignal.SIGTERM)) {
+                return true;
+            }
+
+            return stop(pid, LinuxSignal.SIGKILL);
+
+        } catch (Exception e) {
+            throw KuraException.internalError(e);
+        }
+    }
+
+    private boolean stop(final Pid pid, final Signal signal) {
+        logger.info("stopping pid={} with {}", pid, signal);
+        final boolean signalSent = this.executorService.stop(pid, signal);
+
+        final boolean result;
+
+        if (!signalSent) {
+            result = false;
+        } else {
+            result = !processExists(pid, 500, 5000);
+        }
+
+        if (result) {
+            logger.info("stopped pid={} with {}", pid, signal);
+        } else {
+            logger.warn("failed to stop pid={} with {}", pid, signal);
+        }
+
+        return result;
+    }
+
+    private boolean processExists(final Pid pid, final long poll, final long timeout) {
+        boolean exists = false;
+        try {
+            final long startTime = System.currentTimeMillis();
+            long now;
+            do {
+                Thread.sleep(poll);
+                exists = executorService.isRunning(pid);
+                now = System.currentTimeMillis();
+            } while (exists && now - startTime < timeout);
+        } catch (Exception e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Failed waiting for pid {} to exit - {}", pid.getPid(), e);
+        }
+
+        return exists;
     }
 }

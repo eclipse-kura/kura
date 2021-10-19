@@ -46,6 +46,7 @@ import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.util.base.TypeUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -323,17 +324,31 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         String result = fileAsString;
         String passKey = new String(wifiConfig.getPasskey().getPassword());
-        if (passKey.trim().length() > 0) {
-            if (passKey.length() < 8 || passKey.length() > 63) {
-                throw KuraException.internalError(
-                        "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
-                                + passKey);
-            } else {
-                String encodedPasskey = encodePassword(wifiConfig.getSSID(), passKey);
-                result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(encodedPasskey.trim()));
+
+        boolean doCheckAndEncode = true;
+
+        try {
+            byte[] encodedPasskey = TypeUtil.parseHexBinary(passKey);
+            if (encodedPasskey.length == 32) {
+                doCheckAndEncode = false;
             }
-        } else {
-            throw KuraException.internalError("the passwd can not be null");
+        } catch (Exception ignore) {
+            // it is not a valid hex string, we consider it a plain text password
+        }
+
+        if (doCheckAndEncode) {
+            if (passKey.trim().length() > 0) {
+                if (passKey.length() < 8 || passKey.length() > 63) {
+                    throw KuraException.internalError(
+                            "the WPA passphrase (passwd) must be between 8 (inclusive) and 63 (inclusive) characters in length: "
+                                    + passKey);
+                } else {
+                    String encodedPasskey = encodePassword(wifiConfig.getSSID(), passKey);
+                    result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(encodedPasskey.trim()));
+                }
+            } else {
+                throw KuraException.internalError("the passwd can not be null");
+            }
         }
 
         String replacement;

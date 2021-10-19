@@ -444,6 +444,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "1");
+            
+            fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 

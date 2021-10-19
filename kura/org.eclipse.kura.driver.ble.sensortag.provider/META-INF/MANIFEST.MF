@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: BLE SensorTag Driver
 Bundle-SymbolicName: org.eclipse.kura.driver.ble.sensortag.provider;singleton:=true
-Bundle-Version: 1.0.400.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v2.0
 Bundle-Category: Asset-Driver Management

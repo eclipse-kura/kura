@@ -2,6 +2,8 @@
 ctrl_interface=/var/run/wpa_supplicant
 ctrl_interface_group=wheel
 
+country=KURA_COUNTRY_CODE
+
 # home network; allow all valid ciphers
 ap_scan=2
 network={

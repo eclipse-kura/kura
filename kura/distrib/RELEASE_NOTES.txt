@@ -194,6 +194,9 @@ Known Issues :
 
 
 Changelog:
+  * 8752333d14 - Added missing dirty status clearing when users tab is visible (#3658) (#3660) (github-actions[bot])
+  * e52d0a28bf - Use SIGTERM before SIGKILL for hostapd and wpa_supplicant (#3656) (#3657) (github-actions[bot])
+  * af36d2bc93 - Attempt SIGTERM before killing pppd with SIGKILL (#3654) (#3655) (github-actions[bot])
   * aa07fc5d2e - Fix to prevent issues with eth0@ifxx outputs from IP (#3651) (#3653) (github-actions[bot])
   * f46ffd8f30 - Updated manage_kura_users script (#3650) (#3652) (github-actions[bot])
   * a2a7e62e4a - Wake up listener when switching from password enabled to disabled to enable apply button (#3647) (#3649) (github-actions[bot])

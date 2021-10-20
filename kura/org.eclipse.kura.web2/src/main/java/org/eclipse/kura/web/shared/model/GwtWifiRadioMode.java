@@ -14,11 +14,21 @@ package org.eclipse.kura.web.shared.model;
 
 public enum GwtWifiRadioMode {
 
-    netWifiRadioModeANAC,
-    netWifiRadioModeBGN,
-    netWifiRadioModeBG,
-    netWifiRadioModeB,
-    netWifiRadioModeA;
+    netWifiRadioModeANAC("ac", true, true),
+    netWifiRadioModeBGN("n", true, true),
+    netWifiRadioModeBG("g", true, false),
+    netWifiRadioModeB("b", true, false),
+    netWifiRadioModeA("a", false, true);
+
+    private final String radioMode;
+    private final boolean twoDotFourGhz;
+    private final boolean fiveGhz;
+
+    private GwtWifiRadioMode(String radioMode, boolean twoDotFourGhz, boolean fiveGhz) {
+        this.radioMode = radioMode;
+        this.twoDotFourGhz = twoDotFourGhz;
+        this.fiveGhz = fiveGhz;
+    }
 
     /**
      * Return mode based on given string
@@ -42,5 +52,17 @@ public enum GwtWifiRadioMode {
         }
 
         return null;
+    }
+
+    public String getRadioMode() {
+        return radioMode;
+    }
+
+    public boolean isTwoDotFourGhz() {
+        return twoDotFourGhz;
+    }
+
+    public boolean isFiveGhz() {
+        return fiveGhz;
     }
 }

@@ -389,6 +389,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                 fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             }
 
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
@@ -397,6 +398,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "b");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
@@ -405,6 +407,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
@@ -413,6 +416,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[SHORT-GI-20]");
 
             break;
@@ -421,6 +425,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40+][SHORT-GI-20][SHORT-GI-40]");
 
             break;
@@ -429,6 +434,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40-][SHORT-GI-20][SHORT-GI-40]");
 
             break;
@@ -438,7 +444,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "1");
-            
+
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;

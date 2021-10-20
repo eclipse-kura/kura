@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.NewPasswordInput;
@@ -25,6 +27,7 @@ import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtNetIfStatus;
@@ -68,6 +71,8 @@ import org.gwtbootstrap3.client.ui.html.Text;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -86,6 +91,8 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public class TabWirelessUi extends Composite implements NetworkTab {
 
     private static final String AUTOMATIC_CHANNEL_DESCRIPTION = "Automatic";
+    private static final String WORLD_REGION_COUNTRY_CODE = "00";
+
     private static final String STATUS_TABLE_ROW = "status-table-row";
     private static final String WIFI_MODE_STATION = GwtWifiWirelessMode.netWifiWirelessModeStation.name();
     private static final String WIFI_MODE_AP = GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name();
@@ -102,9 +109,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String WIFI_CIPHERS_CCMP_TKIP_MESSAGE = MessageUtils
             .get(GwtWifiCiphers.netWifiCiphers_CCMP_TKIP.name());
     private static final String WIFI_RADIO_BGN_MESSAGE = MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeBGN.name());
-    private static final String WIFI_RADIO_ANAC_MESSAGE = MessageUtils
-            .get(GwtWifiRadioMode.netWifiRadioModeANAC.name());
-    private static final String WIFI_RADIO_A_MESSAGE = MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeA.name());
 
     private static final String WIFI_SECURITY_NONE_MESSAGE = MessageUtils
             .get(GwtWifiSecurity.netWifiSecurityNONE.name());
@@ -126,8 +130,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private static final String REGEX_PASS_WEP = "^(?:[\\x00-\\x7F]{5}|[\\x00-\\x7F]{13}|[a-fA-F0-9]{10}|[a-fA-F0-9]{26})$";
     private static final String REGEX_WIFI_SID = "^[^!#;+\\]/\"\\t][^+\\]/\"\\t]{0,31}$";
     private static final int MAX_SSID_LENGTH = 32;
-
-    private final List<String> fiveGhzRadioMode = new ArrayList<String>();
 
     private final GwtSession session;
     private final TabTcpIpUi tcpTab;
@@ -323,10 +325,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.session = currentSession;
         this.tcpTab = tcp;
         this.netTabs = tabs;
-
-        fiveGhzRadioMode.add(WIFI_RADIO_A_MESSAGE);
-        fiveGhzRadioMode.add(WIFI_RADIO_BGN_MESSAGE);
-        fiveGhzRadioMode.add(WIFI_RADIO_ANAC_MESSAGE);
 
         initForm();
         initHelpButtons();
@@ -754,7 +752,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void initForm() {
         // Wireless Mode
 
-        loadChannelFrequencies();
+        loadCountryCode(); // channelFrequencies is nested in loadCountryCode
 
         this.labelWireless.setText(MSGS.netWifiWirelessMode());
         this.wireless.addItem(WIFI_MODE_STATION_MESSAGE);
@@ -1069,8 +1067,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.radio4.addMouseOutHandler(event -> resetHelp());
         this.radio4.addChangeHandler(event -> setDirty(true));
 
-        loadCountryCode();
-
         // Channel List
         this.labelChannelList.setText(MSGS.netWifiChannelList());
         this.channelList.addMouseOverHandler(event -> {
@@ -1144,6 +1140,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void loadCountryCode() {
+
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
@@ -1167,8 +1164,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                         TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
                     }
                 });
+
+                loadChannelFrequencies();
             }
         });
+
     }
 
     private void setPasswordValidation() {
@@ -1324,8 +1324,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
     private void replaceChannelListWithOnlyOneItem(int channel, int frequency) {
 
-        logger.severe("Replacing channel with " + channel + " " + frequency);
-
         this.channelList.clear();
         GwtWifiChannelFrequency gwtChannelFrequency = new GwtWifiChannelFrequency();
         gwtChannelFrequency.setChannel(channel);
@@ -1339,12 +1337,19 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 ? " - " + channelFrequency.getFrequency() + " MHz"
                 : "";
 
-        logger.severe("Adding channel: " + channelFrequency.getChannel() + " " + channelFrequency.getFrequency());
-
         this.channelList.addItem("Channel " + channelFrequency.getChannel() + frequencyString);
 
-        if (channelFrequency.isDisabled())
+        if (shouldBeDisabled(channelFrequency))
             disableLastChannelItem();
+    }
+
+    private boolean shouldBeDisabled(GwtWifiChannelFrequency channelFrequency) {
+        boolean isNotValidCountryCode = this.countryCode.getValue().isEmpty()
+                || this.countryCode.getValue().equals(WORLD_REGION_COUNTRY_CODE);
+
+        return channelFrequency.isDisabled()
+                || (channelFrequency.isNoIrradiation() && !channelFrequency.isRadarDetection())
+                || (channelFrequency.isNoIrradiation() && channelFrequency.isRadarDetection() && isNotValidCountryCode);
     }
 
     private void addItemAutomaticChannel() {
@@ -1352,9 +1357,14 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void disableLastChannelItem() {
-        int channelLength = this.channelList.getElement().getElementsByTagName("option").getLength();
-        this.channelList.getElement().getElementsByTagName("option").getItem(channelLength - 1).setAttribute("disabled",
-                "disabled");
+
+        NodeList<Element> channelElements = this.channelList.getElement().getElementsByTagName("option");
+
+        int channelLength = channelElements.getLength();
+        Element element = channelElements.getItem(channelLength - 1);
+
+        element.setAttribute("disabled", "disabled");
+        element.addClassName("list-group-item disabled");
     }
 
     private void loadSsidData() {
@@ -1468,11 +1478,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // radio mode
         String radioValue = this.radio.getSelectedItemText();
-        for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-            if (MessageUtils.get(mode.name()).equals(radioValue)) {
-                gwtWifiConfig.setRadioMode(mode.name());
-            }
-        }
+
+        gwtWifiConfig.setRadioMode(radioValueToRadioMode(radioValue).name());
 
         gwtWifiConfig
                 .setChannels(Collections.singletonList(getChannelValueByIndex(this.channelList.getSelectedIndex())));
@@ -1531,6 +1538,23 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         gwtWifiConfig.setCountryCode(this.countryCode.getValue());
 
         return gwtWifiConfig;
+    }
+
+    private GwtWifiRadioMode radioValueToRadioMode(String radioValue) {
+
+        GwtWifiRadioMode radioMode = null;
+
+        for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
+            if (MessageUtils.get(mode.name()).equals(radioValue)) {
+                radioMode = mode;
+                break;
+            }
+        }
+
+        if (radioMode == null)
+            throw new RuntimeException("Invalid Radio Mode");
+
+        return radioMode;
     }
 
     private void setForm(boolean visible) {
@@ -1622,21 +1646,29 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                 @Override
                                 public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
 
+                                    GwtWifiRadioMode radioMode = radioValueToRadioMode(
+                                            TabWirelessUi.this.radio.getSelectedItemText());
+
                                     TabWirelessUi.this.channelList.clear();
 
                                     TabWirelessUi.this.addItemAutomaticChannel();
 
                                     for (GwtWifiChannelFrequency freqChannel : freqChannels) {
 
-                                        if (isActiveConfigInAPMode() && !radioModeSupports5Ghz()
-                                                && freqChannel.getChannel() > 14) {
-                                            continue;
+                                        if (isActiveConfigInAPMode()) {
+
+                                            boolean channelIsfive5Ghz = freqChannel.getFrequency() > 2501;
+
+                                            if ((radioMode.isFiveGhz() && channelIsfive5Ghz)
+                                                    || (radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz)) {
+                                                logger.fine("Found " + freqChannel.getChannel() + " - "
+                                                        + freqChannel.getFrequency() + " MHz");
+
+                                                TabWirelessUi.this.addItemChannelList(freqChannel);
+                                            }
+
                                         }
 
-                                        logger.fine("Found " + freqChannel.getChannel() + " - "
-                                                + freqChannel.getFrequency() + " MHz");
-
-                                        TabWirelessUi.this.addItemChannelList(freqChannel);
                                     }
 
                                     int channel = TabWirelessUi.this.activeConfig.getChannels().get(0);
@@ -1662,9 +1694,4 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         return TabWirelessUi.this.activeConfig.getWirelessMode().equalsIgnoreCase(WIFI_MODE_AP);
     }
 
-    private boolean radioModeSupports5Ghz() {
-        String radioValue = TabWirelessUi.this.radio.getSelectedItemText();
-
-        return fiveGhzRadioMode.stream().anyMatch(s -> s.equalsIgnoreCase(radioValue));
-    }
 }

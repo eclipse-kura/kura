@@ -1317,20 +1317,30 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 this.activeConfig.setChannels(Collections.singletonList(wifiHotspotEntry.getChannel()));
 
-                logger.info("SSID Selected channel= " + wifiHotspotEntry.getChannel());
+                logger.info("SSID Selected channel: " + wifiHotspotEntry.getChannel());
             }
         });
     }
 
     private void replaceChannelListWithOnlyOneItem(int channel, int frequency) {
-        this.channelList.clear();
 
+        logger.severe("Replacing channel with " + channel + " " + frequency);
+
+        this.channelList.clear();
+        GwtWifiChannelFrequency gwtChannelFrequency = new GwtWifiChannelFrequency();
+        gwtChannelFrequency.setChannel(channel);
+        gwtChannelFrequency.setFrequency(frequency);
+
+        addItemChannelList(gwtChannelFrequency);
     }
 
     private void addItemChannelList(GwtWifiChannelFrequency channelFrequency) {
         String frequencyString = (channelFrequency.getFrequency() > -1)
                 ? " - " + channelFrequency.getFrequency() + " MHz"
                 : "";
+
+        logger.severe("Adding channel: " + channelFrequency.getChannel() + " " + channelFrequency.getFrequency());
+
         this.channelList.addItem("Channel " + channelFrequency.getChannel() + frequencyString);
 
         if (channelFrequency.isDisabled())
@@ -1405,7 +1415,11 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private int getSelectedChannelIndex(int channelValue) {
-        for (int i = 0; i < this.channelList.getItemCount(); i++) {
+
+        if (channelValue == 0)
+            return 0;
+
+        for (int i = 1; i < this.channelList.getItemCount(); i++) {
             String value = this.channelList.getItemText(i);
             String[] values = value.split(" ");
             int channel = Integer.parseInt(values[1]);

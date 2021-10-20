@@ -50,7 +50,7 @@ public class IwCapabilityTool {
 
     // FIXME separare no-ir e radar detection
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(
-            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\] \\((.*) dBm\\)( \\(disabled\\))*( \\((no IR)*[, ]*(radar detection)*\\))*$");
+            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\]( \\((.*) dBm\\))*( \\(disabled\\))*( \\((no IR)*[, ]*(radar detection)*\\))*$");
 
     private enum ParseState {
         HAS_RSN,
@@ -211,11 +211,11 @@ public class IwCapabilityTool {
             if (m.matches()) {
                 Integer frequency = Integer.valueOf(m.group(1));
                 Integer channel = Integer.valueOf(m.group(2));
-                Float attenuation = Float.valueOf(m.group(3));
-                Boolean disabled = m.group(4) != null;
+                Float attenuation = m.group(4) != null ? Float.valueOf(m.group(4)) : 0.0f;
+                Boolean disabled = m.group(5) != null;
 
-                Boolean noIR = m.group(6) != null;
-                Boolean radarDetection = m.group(7) != null;
+                Boolean noIR = m.group(7) != null;
+                Boolean radarDetection = m.group(8) != null;
 
                 WifiChannel wc = new WifiChannel(channel, frequency);
                 wc.setAttenuation(attenuation);

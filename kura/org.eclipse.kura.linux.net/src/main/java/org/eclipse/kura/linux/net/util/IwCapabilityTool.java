@@ -49,7 +49,7 @@ public class IwCapabilityTool {
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(
-            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\]( \\((.*) dBm\\))*( \\(disabled\\))*( \\((no IR){0,1}[, ]{0,1}radar detection){0,1}\\)){0,1}$");
+            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\]( \\((.*) dBm\\)){0,1}( \\(disabled\\)){0,1}( \\((no IR){0,1}[, ]*(radar detection){0,1}\\)){0,1}$");
 
     private enum ParseState {
         HAS_RSN,
@@ -166,7 +166,7 @@ public class IwCapabilityTool {
             final int phy = parseWiphyIndex(exec(new String[] { "iw", interfaceName, "info" }, executorService))
                     .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                             "failed to get phy index for " + interfaceName));
-            return parseCapabilities(exec(new String[] { "iw", "phy" + String.valueOf(phy), "info" }, executorService));
+            return parseCapabilities(exec(new String[] { "iw", "phy" + phy, "info" }, executorService));
 
         } catch (final KuraException e) {
             throw e;

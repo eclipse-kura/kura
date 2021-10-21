@@ -21,8 +21,10 @@ import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -56,6 +58,12 @@ public class HostapdConfigTest {
 
     private static final String TEMP_FILE = "/tmp/kura/hostapd/hostapd.config-temp";
     private static final String FINAL_FILE = "/tmp/kura/hostapd/hostapd.config-";
+
+    private static final String REGULATORY_DOMAIN = "global\n" + "country IT: DFS-ETSI\n"
+            + "(2400 - 2483 @ 40), (N/A, 20), (N/A)\n" + "(5150 - 5250 @ 80), (N/A, 23), (N/A), NO-OUTDOOR, AUTO-BW\n"
+            + "(5250 - 5350 @ 80), (N/A, 20), (0 ms), NO-OUTDOOR, DFS, AUTO-BW\n"
+            + "(5470 - 5725 @ 160), (N/A, 26), (0 ms), DFS\n" + "(5725 - 5875 @ 80), (N/A, 13), (N/A)\n"
+            + "(57000 - 66000 @ 2160), (N/A, 40), (N/A)";
 
     @Test
     public void testWriteOnlyWifi() throws UnknownHostException, KuraException {
@@ -167,7 +175,7 @@ public class HostapdConfigTest {
     }
 
     @Test
-    public void testCompleteNoSecurity() throws UnknownHostException, KuraException {
+    public void testCompleteNoSecurity() throws KuraException, IOException {
         HostapdConfigWriter writer = new HostapdConfigWriter() {
 
             @Override
@@ -230,7 +238,15 @@ public class HostapdConfigTest {
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+
+        Command getRegDom = new Command(new String[] { "iw", "reg", "get" });
+        CommandStatus iwRegGetStatus = new CommandStatus(getRegDom, new LinuxExitStatus(0));
+        iwRegGetStatus.setOutputStream(new ByteArrayOutputStream());
+
+        new OutputStreamWriter(iwRegGetStatus.getOutputStream()).write(REGULATORY_DOMAIN);
+
         when(esMock.execute(anyObject())).thenReturn(status);
+        when(esMock.execute(getRegDom)).thenReturn(iwRegGetStatus);
 
         writer.setExecutorService(esMock);
         writer.visit(config);
@@ -282,7 +298,7 @@ public class HostapdConfigTest {
     }
 
     @Test
-    public void testCompleteSecurityWep() throws UnknownHostException, KuraException {
+    public void testCompleteSecurityWep() throws KuraException, IOException {
         HostapdConfigWriter writer = new HostapdConfigWriter() {
 
             @Override
@@ -346,8 +362,17 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
+
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        Command getRegDom = new Command(new String[] { "iw", "reg", "get" });
+
+        CommandStatus iwRegGetStatus = new CommandStatus(getRegDom, new LinuxExitStatus(0));
+        iwRegGetStatus.setOutputStream(new ByteArrayOutputStream());
+
+        new OutputStreamWriter(iwRegGetStatus.getOutputStream()).write(REGULATORY_DOMAIN);
+
         when(esMock.execute(anyObject())).thenReturn(status);
+        when(esMock.execute(getRegDom)).thenReturn(iwRegGetStatus);
 
         writer.setExecutorService(esMock);
         writer.visit(config);
@@ -509,7 +534,7 @@ public class HostapdConfigTest {
     }
 
     @Test
-    public void testCompleteSecurityWpa() throws UnknownHostException, KuraException {
+    public void testCompleteSecurityWpa() throws KuraException, IOException {
         HostapdConfigWriter writer = new HostapdConfigWriter() {
 
             @Override
@@ -575,7 +600,15 @@ public class HostapdConfigTest {
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        Command getRegDom = new Command(new String[] { "iw", "reg", "get" });
+
+        CommandStatus iwRegGetStatus = new CommandStatus(getRegDom, new LinuxExitStatus(0));
+        iwRegGetStatus.setOutputStream(new ByteArrayOutputStream());
+
+        new OutputStreamWriter(iwRegGetStatus.getOutputStream()).write(REGULATORY_DOMAIN);
+
         when(esMock.execute(anyObject())).thenReturn(status);
+        when(esMock.execute(getRegDom)).thenReturn(iwRegGetStatus);
 
         writer.setExecutorService(esMock);
         writer.visit(config);

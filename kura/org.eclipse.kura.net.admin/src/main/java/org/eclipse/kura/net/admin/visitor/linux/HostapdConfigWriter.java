@@ -377,6 +377,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private String updateRadioMode(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         WifiRadioMode radioMode = wifiConfig.getRadioMode();
 
+        if (radioMode == null) {
+            throw KuraException.internalError("invalid hardware mode");
+        }
+
         switch (radioMode) {
 
         case RADIO_MODE_80211a:

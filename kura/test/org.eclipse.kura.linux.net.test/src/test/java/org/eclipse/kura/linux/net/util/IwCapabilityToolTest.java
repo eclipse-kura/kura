@@ -13,21 +13,19 @@
 
 package org.eclipse.kura.linux.net.util;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.io.BufferedReader;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -36,51 +34,45 @@ import org.eclipse.kura.executor.Pid;
 import org.eclipse.kura.executor.Signal;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiConfig;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import org.mockito.Mock;
-
-import java.net.UnknownHostException;
-
-import org.eclipse.kura.KuraErrorCode;
-import org.eclipse.kura.KuraException;
 import org.junit.Test;
 
 class CommandExecutorServiceStub implements CommandExecutorService {
+
     CommandStatus returnedStatus;
 
     CommandExecutorServiceStub(CommandStatus returnedStatus) {
-         this.returnedStatus = returnedStatus;
+        this.returnedStatus = returnedStatus;
     }
 
     public CommandStatus execute(Command command) {
         return returnedStatus;
     }
+
     public void execute(Command command, Consumer<CommandStatus> callback) {
     }
+
     public boolean stop(Pid pid, Signal signal) {
         return true;
     }
+
     public boolean kill(String[] commandLine, Signal signal) {
         return true;
     }
+
     public boolean isRunning(Pid pid) {
         return true;
     }
+
     public boolean isRunning(String[] commandLine) {
         return true;
     }
+
     public Map<String, Pid> getPids(String[] commandLine) {
         return null;
     }
+
     public void writeOutput(String commandOutput) {
-        OutputStream out= new ByteArrayOutputStream();
+        OutputStream out = new ByteArrayOutputStream();
         try (Writer w = new OutputStreamWriter(out, "UTF-8")) {
             w.write(commandOutput);
         } catch (Exception e) {
@@ -90,53 +82,43 @@ class CommandExecutorServiceStub implements CommandExecutorService {
 };
 
 public class IwCapabilityToolTest {
+
     protected static final CommandStatus successStatus = new CommandStatus(new Command(new String[] {}),
             new LinuxExitStatus(0));
 
     static private final int PHY0 = 0;
-    static private final int WIFI_2G_CHANNELS = 13;
-    static private final int WIFI_5G_CHANNELS = 22;
+    static private final int WIFI_2G_CHANNELS = 14;
+    static private final int WIFI_5G_CHANNELS = 29;
     static private final String COUNTRY_CODE_00 = "00";
     static private final String COUNTRY_CODE_FR = "FR";
 
     private String getWifiCountryCode00() {
-       return    "global\n"
-            + "country 00: DFS-UNSET\n"
-            + "        (2402 - 2472 @ 40), (N/A, 20), (N/A)\n"
-            + "        (2457 - 2482 @ 20), (N/A, 20), (N/A), AUTO-BW, PASSIVE-SCAN\n"
-            + "        (2474 - 2494 @ 20), (N/A, 20), (N/A), NO-OFDM, PASSIVE-SCAN\n"
-            + "        (5170 - 5250 @ 80), (N/A, 20), (N/A), AUTO-BW, PASSIVE-SCAN\n"
-            + "        (5250 - 5330 @ 80), (N/A, 20), (0 ms), DFS, AUTO-BW, PASSIVE-SCAN\n"
-            + "        (5490 - 5730 @ 160), (N/A, 20), (0 ms), DFS, PASSIVE-SCAN\n"
-            + "        (5735 - 5835 @ 80), (N/A, 20), (N/A), PASSIVE-SCAN\n"
-            + "        (57240 - 63720 @ 2160), (N/A, 0), (N/A)\n";
-   }
+        return "global\n" + "country 00: DFS-UNSET\n" + "        (2402 - 2472 @ 40), (N/A, 20), (N/A)\n"
+                + "        (2457 - 2482 @ 20), (N/A, 20), (N/A), AUTO-BW, PASSIVE-SCAN\n"
+                + "        (2474 - 2494 @ 20), (N/A, 20), (N/A), NO-OFDM, PASSIVE-SCAN\n"
+                + "        (5170 - 5250 @ 80), (N/A, 20), (N/A), AUTO-BW, PASSIVE-SCAN\n"
+                + "        (5250 - 5330 @ 80), (N/A, 20), (0 ms), DFS, AUTO-BW, PASSIVE-SCAN\n"
+                + "        (5490 - 5730 @ 160), (N/A, 20), (0 ms), DFS, PASSIVE-SCAN\n"
+                + "        (5735 - 5835 @ 80), (N/A, 20), (N/A), PASSIVE-SCAN\n"
+                + "        (57240 - 63720 @ 2160), (N/A, 0), (N/A)\n";
+    }
 
-   private String getWifiCountryCodeFR() {
-       return    "global\n"
-            + "country FR: DFS-ETSI\n"
-            + "        (2402 - 2482 @ 40), (N/A, 20), (N/A)\n"
-            + "        (5170 - 5250 @ 80), (N/A, 20), (N/A), AUTO-BW\n"
-            + "        (5250 - 5330 @ 80), (N/A, 20), (0 ms), DFS, AUTO-BW\n"
-            + "        (5490 - 5710 @ 160), (N/A, 27), (0 ms), DFS\n"
-            + "        (57000 - 66000 @ 2160), (N/A, 40), (N/A)\n";
-   }
+    private String getWifiCountryCodeFR() {
+        return "global\n" + "country FR: DFS-ETSI\n" + "        (2402 - 2482 @ 40), (N/A, 20), (N/A)\n"
+                + "        (5170 - 5250 @ 80), (N/A, 20), (N/A), AUTO-BW\n"
+                + "        (5250 - 5330 @ 80), (N/A, 20), (0 ms), DFS, AUTO-BW\n"
+                + "        (5490 - 5710 @ 160), (N/A, 27), (0 ms), DFS\n"
+                + "        (57000 - 66000 @ 2160), (N/A, 40), (N/A)\n";
+    }
 
     private String getPhyInfo() {
-        return "Interface wlan0\n"
-                + "\tifindex 3\n"
-                + "\twdev 0x1\n"
-                + "\taddr b8:27:eb:86:d5:0e\n"
-                + "\tssid kura_gateway_B8:27:EB:D3:80:5B\n"
-                + "\ttype AP\n"
-                + "\twiphy 0\n"
-                + "\tchannel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n"
-                + "\ttxpower 31.00 dBm\n";
+        return "Interface wlan0\n" + "\tifindex 3\n" + "\twdev 0x1\n" + "\taddr b8:27:eb:86:d5:0e\n"
+                + "\tssid kura_gateway_B8:27:EB:D3:80:5B\n" + "\ttype AP\n" + "\twiphy 0\n"
+                + "\tchannel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n" + "\ttxpower 31.00 dBm\n";
     }
 
     private String getWifi2GInfo() {
-        return    "                Frequencies:\n"
-                + "                        * 2412 MHz [1] (20.0 dBm)\n"
+        return "                Frequencies:\n" + "                        * 2412 MHz [1] (20.0 dBm)\n"
                 + "                        * 2417 MHz [2] (20.0 dBm)\n"
                 + "                        * 2422 MHz [3] (20.0 dBm)\n"
                 + "                        * 2427 MHz [4] (20.0 dBm)\n"
@@ -153,8 +135,7 @@ public class IwCapabilityToolTest {
     }
 
     private String getWifi5GInfo() {
-        return    "                Frequencies:\n"
-                + "                        * 5170 MHz [34] (disabled)\n"
+        return "                Frequencies:\n" + "                        * 5170 MHz [34] (disabled)\n"
                 + "                        * 5180 MHz [36] (20.0 dBm)\n"
                 + "                        * 5190 MHz [38] (disabled)\n"
                 + "                        * 5200 MHz [40] (20.0 dBm)\n"
@@ -190,10 +171,11 @@ public class IwCapabilityToolTest {
         String commandOutput = getPhyInfo();
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
-        final int phy = IwCapabilityTool.parseWiphyIndex(IwCapabilityTool.exec(new String[] { "iw", "wlan0", "info" }, executorServiceStub))
+        final int phy = IwCapabilityTool
+                .parseWiphyIndex(IwCapabilityTool.exec(new String[] { "iw", "wlan0", "info" }, executorServiceStub))
                 .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                         "failed to get phy index for " + "wlan0"));
-        assertEquals(phy, PHY0);
+        assertEquals(PHY0, phy);
     }
 
     @Test
@@ -202,16 +184,16 @@ public class IwCapabilityToolTest {
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         List<WifiChannel> channels = IwCapabilityTool.probeChannels("wlan0", executorServiceStub);
-        assertEquals(channels.size(), WIFI_2G_CHANNELS);
+        assertEquals(WIFI_2G_CHANNELS, channels.size());
     }
 
     @Test
     public void probeChannels_5G() throws KuraException {
-        String commandOutput = getPhyInfo() + getWifi2GInfo() + getWifi5GInfo();
+        String commandOutput = getPhyInfo() + getWifi5GInfo();
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         List<WifiChannel> channels = IwCapabilityTool.probeChannels("wlan0", executorServiceStub);
-        assertEquals(channels.size(), WIFI_5G_CHANNELS);
+        assertEquals(WIFI_5G_CHANNELS, channels.size());
     }
 
     @Test
@@ -220,7 +202,7 @@ public class IwCapabilityToolTest {
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         String countryCode = IwCapabilityTool.getWifiCountryCode(executorServiceStub);
-        assertEquals(countryCode, COUNTRY_CODE_00);
+        assertEquals(COUNTRY_CODE_00, countryCode);
     }
 
     @Test
@@ -229,7 +211,7 @@ public class IwCapabilityToolTest {
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         String countryCode = IwCapabilityTool.getWifiCountryCode(executorServiceStub);
-        assertEquals(countryCode, COUNTRY_CODE_FR);
+        assertEquals(COUNTRY_CODE_FR, countryCode);
     }
 
     @Test
@@ -238,11 +220,11 @@ public class IwCapabilityToolTest {
         CommandExecutorServiceStub executorServiceStub = new CommandExecutorServiceStub(successStatus);
         executorServiceStub.writeOutput(commandOutput);
         List<WifiChannel> channels = IwCapabilityTool.probeChannels("wlan0", executorServiceStub);
-        assertEquals(channels.size(), WIFI_5G_CHANNELS);
+        assertEquals(WIFI_2G_CHANNELS + WIFI_5G_CHANNELS, channels.size());
         commandOutput = getWifiCountryCodeFR();
         executorServiceStub.writeOutput(commandOutput);
         String countryCode = IwCapabilityTool.getWifiCountryCode(executorServiceStub);
-        assertEquals(countryCode, COUNTRY_CODE_FR);
+        assertEquals(COUNTRY_CODE_FR, countryCode);
         WifiConfig config = new WifiConfig();
         config.setChannelFrequencies(channels);
         config.setWifiCountryCode(countryCode);

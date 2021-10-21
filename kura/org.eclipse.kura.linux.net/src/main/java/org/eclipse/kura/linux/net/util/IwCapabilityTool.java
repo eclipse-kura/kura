@@ -48,9 +48,8 @@ public class IwCapabilityTool {
     private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\tDevice supports RSN.*$");
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
-    // FIXME separare no-ir e radar detection
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(
-            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\]( \\((.*) dBm\\))*( \\(disabled\\))*( \\((no IR)*[, ]*(radar detection)*\\))*$");
+            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\]( \\((.*) dBm\\))*( \\(disabled\\))*( \\((no IR){0,1}[, ]{0,1}radar detection){0,1}\\)){0,1}$");
 
     private enum ParseState {
         HAS_RSN,

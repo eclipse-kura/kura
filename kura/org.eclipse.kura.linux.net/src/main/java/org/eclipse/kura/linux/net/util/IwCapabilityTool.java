@@ -48,8 +48,9 @@ public class IwCapabilityTool {
     private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\tDevice supports RSN.*$");
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
-    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(
-            ".*\\* ([0-9]+) MHz \\[([0-9]*)\\]( \\((.*) dBm\\)){0,1}( \\(disabled\\)){0,1}( \\((no IR){0,1}[, ]*(radar detection){0,1}\\)){0,1}$");
+    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
+            .compile("^.*\\* ([0-9]+) MHz \\[([0-9]+)\\]( \\((.*) dBm\\)){0,1}"
+                    + "( \\(disabled\\)){0,1}( \\((no IR){0,1}(, ){0,1}(radar detection){0,1}\\)){0,1}$");
 
     private enum ParseState {
         HAS_RSN,
@@ -214,7 +215,7 @@ public class IwCapabilityTool {
                 Boolean disabled = m.group(5) != null;
 
                 Boolean noIR = m.group(7) != null;
-                Boolean radarDetection = m.group(8) != null;
+                Boolean radarDetection = m.group(9) != null;
 
                 WifiChannel wc = new WifiChannel(channel, frequency);
                 wc.setAttenuation(attenuation);

@@ -1226,18 +1226,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-3-4-ubuntu-20-deb</id>
+                                <id>raspberry-pi-3-4-ubuntu-20-deb-nn</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20_installer-nn.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

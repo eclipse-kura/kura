@@ -49,8 +49,7 @@ public class IwCapabilityTool {
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
-            .compile("^.*\\* ([0-9]+) MHz \\[([0-9]+)\\]( \\((.*) dBm\\)){0,1}"
-                    + "( \\(disabled\\)){0,1}( \\((no IR){0,1}(, ){0,1}(radar detection){0,1}\\)){0,1}$");
+            .compile("^.*\\* ([0-9]+) MHz \\[([0-9]+)\\]( \\((.*) dBm\\)){0,1}.*$");
 
     private enum ParseState {
         HAS_RSN,
@@ -212,10 +211,10 @@ public class IwCapabilityTool {
                 Integer frequency = Integer.valueOf(m.group(1));
                 Integer channel = Integer.valueOf(m.group(2));
                 Float attenuation = m.group(4) != null ? Float.valueOf(m.group(4)) : 0.0f;
-                Boolean disabled = m.group(5) != null;
+                Boolean disabled = line.contains("disabled");
 
-                Boolean noIR = m.group(7) != null;
-                Boolean radarDetection = m.group(9) != null;
+                Boolean noIR = line.contains("no IR");
+                Boolean radarDetection = line.contains("radar detection");
 
                 WifiChannel wc = new WifiChannel(channel, frequency);
                 wc.setAttenuation(attenuation);

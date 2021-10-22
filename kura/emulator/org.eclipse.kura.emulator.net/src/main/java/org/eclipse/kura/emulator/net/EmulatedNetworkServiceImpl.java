@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -349,6 +349,11 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
 
     @Override
     public String getModemPppPort(ModemDevice modemDevice) throws KuraException {
+        return null;
+    }
+
+    @Override
+    public String getModemPppInterfaceName(String usbPath) throws KuraException {
         return null;
     }
 }

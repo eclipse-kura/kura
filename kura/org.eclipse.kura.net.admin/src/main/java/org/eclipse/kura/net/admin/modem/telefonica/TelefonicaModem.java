@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -118,6 +118,11 @@ public class TelefonicaModem extends HspaModem {
         UsbModemDriver modemDriver = getModemDriver();
         modemDriver.disable((UsbModemDevice) getModemDevice());
         modemDriver.enable((UsbModemDevice) getModemDevice());
+    }
+
+    @Override
+    public String getFirmwareVersion() throws KuraException {
+        return "N/A";
     }
 
     private void disableURC() throws KuraException {

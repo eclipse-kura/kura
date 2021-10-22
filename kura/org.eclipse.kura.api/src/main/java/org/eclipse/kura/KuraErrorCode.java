@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -241,5 +241,11 @@ public enum KuraErrorCode {
      * 
      * @since 2.2
      */
-    IO_ERROR;
+    IO_ERROR,
+    /**
+     * Modem unsupported.
+     * 
+     * @since 2.3
+     */
+    UNSUPPORTED_MODEM;
 }

@@ -410,7 +410,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             logger.severe("active config: " + this.activeConfig);
             logger.severe("wireless mode: " + this.activeConfig.getWirelessMode());
             logger.severe("channels " + this.activeConfig.getChannels());
-            if (!TabWirelessUi.this.activeConfig.getChannels().isEmpty()) {
+            if (this.activeConfig.getChannels() != null && !TabWirelessUi.this.activeConfig.getChannels().isEmpty()) {
                 updateChanneList(TabWirelessUi.this.activeConfig);
             }
 
@@ -421,7 +421,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void updateChanneList(GwtWifiConfig config) {
-        int channelToSelect = config.getChannels().get(0);
+        int channelToSelect = 0;
+        if (config.getChannels() != null) {
+            channelToSelect = config.getChannels().get(0);
+        }
         int frequency = -1;
         if (config.getChannelsFrequency() != null && !config.getChannelsFrequency().isEmpty()) {
             frequency = config.getChannelsFrequency().get(0).getFrequency();
@@ -505,6 +508,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         // select proper channels
         updateChanneList(this.activeConfig);
 
+        logger.info(MessageUtils.get(this.activeConfig.getSecurity()));
         String activeSecurity = this.activeConfig.getSecurity();
         if (activeSecurity != null) {
             for (int i = 0; i < this.security.getItemCount(); i++) {
@@ -552,7 +556,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.verify.setValue(this.activeConfig.getPassword());
         this.radio1.setValue(this.activeConfig.pingAccessPoint());
         this.radio2.setValue(!this.activeConfig.pingAccessPoint());
-
         this.radio3.setValue(this.activeConfig.ignoreSSID());
         this.radio4.setValue(!this.activeConfig.ignoreSSID());
 
@@ -625,6 +628,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             if (WIFI_MODE_STATION_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 this.ssid.setEnabled(true);
+                this.buttonSsid.setEnabled(true);
                 this.verify.setEnabled(false);
                 if (!this.security.getSelectedItemText().equals(WIFI_SECURITY_NONE_MESSAGE)) {
                     if (this.password.getValue() != null && this.password.getValue().length() > 0) {
@@ -1082,16 +1086,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 TabWirelessUi.this.helpText.add(new Span(MSGS.netWifiToolTipChannelList()));
             }
         });
-
         this.channelList.addChangeHandler(event -> {
             TabWirelessUi.this.activeConfig.setChannels(
                     Collections.singletonList(getChannelValueByIndex(this.channelList.getSelectedIndex())));
             TabWirelessUi.this.activeConfig
                     .setChannelsFrequency(getChannelFrequencyByIndex(this.channelList.getSelectedIndex()));
         });
-
         this.channelList.addMouseOutHandler(event -> resetHelp());
-
         this.helpTitle.setText(MSGS.netHelpTitle());
 
         // Country Code
@@ -1539,9 +1540,24 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         }
 
-        gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(this.rssi.getText().trim()));
-        gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(this.shortI.getText().trim()));
-        gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(this.longI.getText().trim()));
+        String bgscanRssiThreshold = this.rssi.getText().trim();
+        if (!bgscanRssiThreshold.isEmpty()) {
+            gwtWifiConfig.setBgscanRssiThreshold(Integer.parseInt(bgscanRssiThreshold));
+        } else {
+            gwtWifiConfig.setBgscanRssiThreshold(0);
+        }
+        String bgscanShortInterval = this.shortI.getText().trim();
+        if (!bgscanShortInterval.isEmpty()) {
+            gwtWifiConfig.setBgscanShortInterval(Integer.parseInt(bgscanShortInterval));
+        } else {
+            gwtWifiConfig.setBgscanShortInterval(0);
+        }
+        String bgscanLongInterval = this.longI.getText().trim();
+        if (!bgscanLongInterval.isEmpty()) {
+            gwtWifiConfig.setBgscanLongInterval(Integer.parseInt(bgscanLongInterval));
+        } else {
+            gwtWifiConfig.setBgscanLongInterval(0);
+        }
 
         // password
         if (this.groupPassword.getValidationState().equals(ValidationState.NONE)) {

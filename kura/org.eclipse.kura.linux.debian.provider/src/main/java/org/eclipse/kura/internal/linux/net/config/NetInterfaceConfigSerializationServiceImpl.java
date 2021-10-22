@@ -29,6 +29,7 @@ import java.util.Scanner;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.internal.linux.net.NetInterfaceConfigSerializationService;
 import org.eclipse.kura.net.IPAddress;
@@ -65,6 +66,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
     private static List<String> debianIgnoreInterfaceCommands = Arrays.asList("post-up route del default dev", //
             "post-up " + REMOVE_ROUTE_COMMAND //
     );
+    private static final String DHCP = "dhcp\n";
 
     @Override
     public Properties read(String interfaceName) throws KuraException {
@@ -321,12 +323,18 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
         }
     }
 
-    @SuppressWarnings("checkstyle:innerAssignment")
     private void writeDebianConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
+        String iName = netInterfaceConfig.getName();
+        NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) netInterfaceConfig).getIP4config();
+        if (netConfigIP4 == null) {
+            logger.warn("The configuration for interface {} in empty", iName);
+            return;
+        }
+
+        boolean isLoopback = netInterfaceConfig.getType() == NetInterfaceType.LOOPBACK;
         StringBuilder sb = new StringBuilder();
         File kuraFile = getIfcfgFile();
-        String iName = netInterfaceConfig.getName();
         boolean appendConfig = true;
 
         if (!kuraFile.exists()) {
@@ -334,6 +342,21 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
             return;
         }
 
+        appendConfig = readAndReplaceConfig(netConfigIP4, sb, kuraFile, iName, isLoopback);
+
+        // If config not present in file, append to end
+        if (appendConfig) {
+            appendNetworkInterfaceConfig(netConfigIP4, sb, iName, isLoopback);
+        }
+
+        // write configuration file
+        writeConfigFile(DEBIAN_TMP_NET_CONFIGURATION_FILE, DEBIAN_NET_CONFIGURATION_FILE, sb);
+    }
+
+    @SuppressWarnings("checkstyle:innerAssignment")
+    private boolean readAndReplaceConfig(NetConfigIP4 netConfigIP4, StringBuilder sb, File kuraFile, String iName,
+            boolean isLoopback) throws KuraIOException {
+        boolean appendConfig = true;
         // found our match so load the properties
         try (FileInputStream fis = new FileInputStream(kuraFile); Scanner scanner = new Scanner(fis)) {
             // need to loop through the existing file and replace only the desired interface
@@ -353,7 +376,7 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                             if (args[1].equals(iName)) {
                                 logger.debug("Found entry in interface file...");
                                 appendConfig = false;
-                                sb.append(debianWriteUtility(netInterfaceConfig, iName));
+                                sb.append(debianWriteUtility(netConfigIP4, iName, isLoopback));
 
                                 // append Debian interface command options
                                 while (scanner.hasNextLine() && !(line = scanner.nextLine().trim()).isEmpty()) {
@@ -375,25 +398,22 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                     sb.append(noTrimLine + "\n");
                 }
             }
-        } catch (Exception e) {
-            logger.error("Debian config file is not found", e);
-            throw KuraException.internalError(e.getMessage());
+        } catch (IOException e) {
+            throw new KuraIOException(e, "Debian config file is not found");
         }
+        return appendConfig;
+    }
 
-        // If config not present in file, append to end
-        if (appendConfig) {
-            logger.debug("Appending entry to interface file...");
-            // append an empty line if not there
-            String s = sb.toString();
-            if (!"\\n".equals(s.substring(s.length() - 1))) {
-                sb.append("\n");
-            }
-            sb.append(debianWriteUtility(netInterfaceConfig, iName));
+    private void appendNetworkInterfaceConfig(NetConfigIP4 netConfigIP4, StringBuilder sb, String iName,
+            boolean isLoopback) {
+        logger.debug("Appending entry to interface file...");
+        // append an empty line if not there
+        String s = sb.toString();
+        if (!"\\n".equals(s.substring(s.length() - 1))) {
             sb.append("\n");
         }
-
-        // write configuration file
-        writeConfigFile(DEBIAN_TMP_NET_CONFIGURATION_FILE, DEBIAN_NET_CONFIGURATION_FILE, sb);
+        sb.append(debianWriteUtility(netConfigIP4, iName, isLoopback));
+        sb.append("\n");
     }
 
     private void writeConfigFile(String tmpFileName, String dstFileName, StringBuilder sb) throws KuraException {
@@ -405,9 +425,8 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
             pw.write(sb.toString());
             pw.flush();
             fos.getFD().sync();
-        } catch (Exception e) {
-            logger.error("Failed to write debian configuration file", e);
-            throw KuraException.internalError(e.getMessage());
+        } catch (IOException e) {
+            throw new KuraIOException(e, "Failed to write debian configuration file");
         }
 
         // move tmp configuration file into its final destination
@@ -424,103 +443,128 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 logger.info("Not rewriting network interfaces file because it is the same");
             }
         } catch (IOException e) {
-            logger.error("Failed to rename tmp config file {} to {}", srcFile.getName(), dstFile.getName(), e);
-            throw KuraException.internalError(e.getMessage());
+            throw new KuraIOException(e,
+                    "Failed to rename tmp config file " + srcFile.getName() + " to " + dstFile.getName());
+        }
+    }
+
+    private String debianWriteUtility(NetConfigIP4 netConfigIP4, String interfaceName, boolean isLoopback) {
+        StringBuilder sb = new StringBuilder();
+        logger.debug("Writing netconfig {} for {}", netConfigIP4.getClass(), interfaceName);
+
+        setOnBootProperty(interfaceName, sb, netConfigIP4);
+        setBootprotoProperty(netConfigIP4, interfaceName, sb, isLoopback);
+        setDnsProperty(sb, netConfigIP4);
+        if (!"\n".equals(sb.toString().substring(sb.toString().length() - 1))) {
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    private void setDnsProperty(StringBuilder sb, NetConfigIP4 netConfigIP4) {
+        // DNS
+        List<? extends IPAddress> dnsAddresses = netConfigIP4.getDnsServers();
+        boolean setDns = false;
+        for (IPAddress dnsAddress : dnsAddresses) {
+            if (LOCALHOST.equals(dnsAddress.getHostAddress())) {
+                continue;
+            }
+            if (!setDns) {
+                /*
+                 * IAB:
+                 * If DNS servers are listed, those entries will be appended to the
+                 * /etc/resolv.conf
+                 * file on every ifdown/ifup sequence resulting in multiple entries for the same
+                 * servers.
+                 * (Tested on 10-20, 10-10, and Raspberry Pi).
+                 * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS
+                 * servers
+                 * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but
+                 * the
+                 * /etc/resolv.conf file will only be updated by Kura.
+                 */
+                sb.append("\t#dns-nameservers ");
+                setDns = true;
+            }
+            sb.append(dnsAddress.getHostAddress() + " ");
+        }
+    }
+
+    private void setBootprotoProperty(NetConfigIP4 netConfigIP4, String interfaceName, StringBuilder sb,
+            boolean isLoopback) {
+        // BOOTPROTO
+        sb.append("iface " + interfaceName + " inet ");
+        switch (netConfigIP4.getStatus()) {
+        case netIPv4StatusL2Only:
+            logger.debug("new config is Layer 2 Only for {}", interfaceName);
+            sb.append("manual\n");
+            break;
+        case netIPv4StatusDisabled:
+            logger.debug("new config is Disabled for {}, so set it as DHCP", interfaceName);
+            sb.append(DHCP);
+            break;
+        case netIPv4StatusEnabledLAN:
+            logger.debug("new config is Enabled for LAN {}", interfaceName);
+            if (netConfigIP4.isDhcp()) {
+                logger.debug("new config is DHCP for {}", interfaceName);
+                sb.append(DHCP);
+                // delete default route if configured as LAN
+                sb.append("\t post-up ").append(REMOVE_ROUTE_COMMAND).append("\n");
+            } else {
+                setStaticAddressConfig(netConfigIP4, interfaceName, sb, isLoopback);
+            }
+            break;
+        case netIPv4StatusEnabledWAN:
+            if (netConfigIP4.isDhcp()) {
+                logger.debug("new config is DHCP for {}", interfaceName);
+                sb.append(DHCP);
+            } else {
+                setStaticAddressConfig(netConfigIP4, interfaceName, sb, isLoopback);
+            }
+            break;
+        case netIPv4StatusUnmanaged:
+        case netIPv4StatusUnknown:
+        default:
+        }
+    }
+
+    private void setOnBootProperty(String interfaceName, StringBuilder sb, NetConfigIP4 netConfigIP4) {
+        // ONBOOT
+        if ((netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN
+                || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only)
+                && netConfigIP4.isAutoConnect()) {
+            sb.append("auto " + interfaceName + "\n");
         }
     }
 
     @SuppressWarnings("checkstyle:todoComment")
-    private String debianWriteUtility(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            String interfaceName) {
-        StringBuilder sb = new StringBuilder();
-        List<NetConfig> netConfigs = ((AbstractNetInterface<?>) netInterfaceConfig).getNetConfigs();
-        if (netConfigs == null) {
-            logger.debug("debianWriteUtility() :: netConfigs is null");
-            return sb.toString();
-        }
-        for (NetConfig netConfig : netConfigs) {
-            if (!(netConfig instanceof NetConfigIP4)) {
-                continue;
-            }
-            logger.debug("Writing netconfig {} for {}", netConfig.getClass(), interfaceName);
+    private void setStaticAddressConfig(NetConfigIP4 netConfigIP4, String interfaceName, StringBuilder sb,
+            boolean isLoopback) {
+        // in Debian, loopback interface cannot have assigned a static address
+        if (isLoopback) {
+            sb.append("loopback\n");
+        } else {
 
-            NetConfigIP4 netConfigIP4 = (NetConfigIP4) netConfig;
+            logger.debug("new config is STATIC for {}", interfaceName);
 
-            // ONBOOT
-            if (netConfigIP4.isAutoConnect()) {
-                sb.append("auto " + interfaceName + "\n");
-            }
+            sb.append("static\n");
 
-            // BOOTPROTO
-            sb.append("iface " + interfaceName + " inet ");
-            if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
-                logger.debug("new config is Layer 2 Only for {}", interfaceName);
-                sb.append("manual\n");
-            } else if (netConfigIP4.isDhcp()) {
-                logger.debug("new config is DHCP for {}", interfaceName);
-                sb.append("dhcp\n");
-                if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN) {
-                    // delete default route if configured as LAN
-                    sb.append("\t post-up ").append(REMOVE_ROUTE_COMMAND).append("\n");
-                }
-            } else {
-                // in Debian, loopback interface cannot have assigned a static address
-                if (netInterfaceConfig.getType() == NetInterfaceType.LOOPBACK) {
-                    sb.append("loopback\n");
-                } else {
+            // IPADDR
+            sb.append("\taddress ").append(netConfigIP4.getAddress().getHostAddress()).append("\n");
 
-                    logger.debug("new config is STATIC for {}", interfaceName);
+            // NETMASK
+            sb.append("\tnetmask ").append(netConfigIP4.getSubnetMask().getHostAddress()).append("\n");
 
-                    sb.append("static\n");
+            // NETWORK
+            // TODO: Handle Debian NETWORK value
 
-                    // IPADDR
-                    sb.append("\taddress ").append(netConfigIP4.getAddress().getHostAddress()).append("\n");
-
-                    // NETMASK
-                    sb.append("\tnetmask ").append(netConfigIP4.getSubnetMask().getHostAddress()).append("\n");
-
-                    // NETWORK
-                    // TODO: Handle Debian NETWORK value
-
-                    // Gateway
-                    if (netConfigIP4.getGateway() != null) {
-                        sb.append("\tgateway ").append(netConfigIP4.getGateway().getHostAddress()).append("\n");
-                    }
-                }
-            }
-
-            // DNS
-            List<? extends IPAddress> dnsAddresses = netConfigIP4.getDnsServers();
-            boolean setDns = false;
-            for (IPAddress dnsAddress : dnsAddresses) {
-                if (LOCALHOST.equals(dnsAddress.getHostAddress())) {
-                    continue;
-                }
-                if (!setDns) {
-                    /*
-                     * IAB:
-                     * If DNS servers are listed, those entries will be appended to the
-                     * /etc/resolv.conf
-                     * file on every ifdown/ifup sequence resulting in multiple entries for the same
-                     * servers.
-                     * (Tested on 10-20, 10-10, and Raspberry Pi).
-                     * Commenting out dns-nameservers in the /etc/network interfaces file allows DNS
-                     * servers
-                     * to be picked up by the IfcfgConfigReader and be displayed on the Web UI but
-                     * the
-                     * /etc/resolv.conf file will only be updated by Kura.
-                     */
-                    sb.append("\t#dns-nameservers ");
-                    setDns = true;
-                }
-                sb.append(dnsAddress.getHostAddress() + " ");
-            }
-            if (!"\n".equals(sb.toString().substring(sb.toString().length() - 1))) {
-                sb.append("\n");
+            // Gateway
+            if (netConfigIP4.getGateway() != null) {
+                sb.append("\tgateway ").append(netConfigIP4.getGateway().getHostAddress()).append("\n");
             }
         }
-
-        return sb.toString();
     }
 
     private boolean isDebianInterfaceCommandOption(String line) {

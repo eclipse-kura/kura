@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -328,16 +328,6 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
         return modemTechnologyTypes;
     }
 
-    protected String getUnusedAtPort() throws KuraException {
-        String port;
-        if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
-            port = getDataPort();
-        } else {
-            port = getAtPort();
-        }
-        return port;
-    }
-
     protected List<ModemPdpContext> getPdpContextInfo(CommConnection comm) throws KuraException {
         List<ModemPdpContext> pdpContextInfo = new ArrayList<>();
         byte[] reply;
@@ -508,5 +498,10 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     @Override
     public void disableDiversity() throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public String getFirmwareVersion() throws KuraException {
+        return getTelitFirmwareVersion();
     }
 }

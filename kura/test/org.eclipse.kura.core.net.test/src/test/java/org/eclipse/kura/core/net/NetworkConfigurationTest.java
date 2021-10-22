@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -59,6 +59,7 @@ import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
@@ -68,6 +69,9 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class NetworkConfigurationTest {
@@ -209,7 +213,8 @@ public class NetworkConfigurationTest {
 
     @Test
     public void testAccept() throws KuraException {
-        NetworkConfiguration config = new NetworkConfiguration();
+        NetworkConfiguration config = getNetworkConfiguration();
+
         NetworkConfigurationVisitor visitor = mock(NetworkConfigurationVisitor.class);
 
         Mockito.doNothing().when(visitor).visit(any(NetworkConfiguration.class));
@@ -1858,7 +1863,6 @@ public class NetworkConfigurationTest {
         properties.put("prefix.ipAddress", null);
         properties.put("prefix.password", "password");
         properties.put("prefix.pdpType", null);
-        properties.put("prefix.pppNum", null);
         properties.put("prefix.persist", null);
         properties.put("prefix.maxFail", null);
         properties.put("prefix.idle", null);
@@ -1877,10 +1881,17 @@ public class NetworkConfigurationTest {
         expected.setDialString("dialString");
         expected.setIpAddress(null);
         expected.setPassword("password");
-        expected.setPdpType(PdpType.UNKNOWN);
+        expected.setPdpType(PdpType.IP);
         expected.setUsername("username");
         expected.setEnabled(false);
         expected.setGpsEnabled(false);
+        expected.setPersist(true);
+        expected.setMaxFail(5);
+        expected.setIdle(95);
+        expected.setActiveFilter("inbound");
+        expected.setResetTimeout(5);
+        expected.setLcpEchoFailure(0);
+        expected.setLcpEchoInterval(0);
 
         ModemConfig modemConfig = (ModemConfig) TestUtil.invokePrivate(config, "getModemConfig", prefix, properties);
 
@@ -1902,7 +1913,6 @@ public class NetworkConfigurationTest {
         properties.put("prefix.ipAddress", "");
         properties.put("prefix.password", "password");
         properties.put("prefix.pdpType", "");
-        properties.put("prefix.pppNum", 4);
         properties.put("prefix.persist", true);
         properties.put("prefix.maxFail", 5);
         properties.put("prefix.idle", 6);
@@ -1923,8 +1933,7 @@ public class NetworkConfigurationTest {
         expected.setHeaderCompression(2);
         expected.setIpAddress(null);
         expected.setPassword("password");
-        expected.setPdpType(PdpType.UNKNOWN);
-        expected.setPppNumber(4);
+        expected.setPdpType(PdpType.IP);
         expected.setPersist(true);
         expected.setMaxFail(5);
         expected.setIdle(6);
@@ -1957,7 +1966,6 @@ public class NetworkConfigurationTest {
         properties.put("prefix.ipAddress", "10.0.0.1");
         properties.put("prefix.password", "password");
         properties.put("prefix.pdpType", "IP");
-        properties.put("prefix.pppNum", 4);
         properties.put("prefix.persist", true);
         properties.put("prefix.maxFail", 5);
         properties.put("prefix.idle", 6);
@@ -1979,7 +1987,6 @@ public class NetworkConfigurationTest {
         expected.setIpAddress(IPAddress.parseHostAddress("10.0.0.1"));
         expected.setPassword("password");
         expected.setPdpType(PdpType.IP);
-        expected.setPppNumber(4);
         expected.setPersist(true);
         expected.setMaxFail(5);
         expected.setIdle(6);
@@ -2021,7 +2028,7 @@ public class NetworkConfigurationTest {
         TestUtil.invokePrivate(config, "getModemConfig", prefix, properties);
     }
 
-    @Test(expected = KuraException.class)
+    @Test
     public void testGetModemConfigInvalidPdpType() throws Throwable {
         NetworkConfiguration config = new NetworkConfiguration();
 
@@ -2030,7 +2037,9 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("prefix.pdpType", "xyz");
 
-        TestUtil.invokePrivate(config, "getModemConfig", prefix, properties);
+        ModemConfig modemConfig = (ModemConfig) TestUtil.invokePrivate(config, "getModemConfig", prefix, properties);
+
+        assertEquals(PdpType.IP, modemConfig.getPdpType());
     }
 
     @Test
@@ -2479,5 +2488,18 @@ public class NetworkConfigurationTest {
                 assertEquals("Key: " + key, expectedValue, actualValue);
             }
         }
+    }
+
+    private NetworkConfiguration getNetworkConfiguration() {
+        SystemService ssMock = mock(SystemService.class);
+        when(ssMock.getNetVirtualDevicesConfig()).thenReturn("netIPv4StatusDisabled");
+        NetworkConfiguration config = new NetworkConfiguration() {
+
+            @Override
+            protected SystemService getSystemService() {
+                return ssMock;
+            }
+        };
+        return config;
     }
 }

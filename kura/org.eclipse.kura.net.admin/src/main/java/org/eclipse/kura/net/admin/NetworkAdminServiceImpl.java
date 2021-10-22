@@ -60,7 +60,6 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.monitor.InterfaceStateBuilder;
 import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
@@ -1260,14 +1259,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         // hack to synchronize with WifiClientMonitorService
         synchronized (this.wifiClientMonitorServiceLock) {
             boolean ret = false;
-            WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
+            WpaSupplicantConfigWriter wpaSupplicantConfigWriter = new WpaSupplicantConfigWriter();
+            wpaSupplicantConfigWriter.setExecutorService(executorService);
             try {
                 // Kill dhcp, hostapd and wpa_supplicant if running
                 manageDhcpClient(ifaceName, false);
                 manageDhcpServer(ifaceName, false);
                 disableWifiInterface(ifaceName);
 
-                wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig, ifaceName);
+                wpaSupplicantConfigWriter.generateTempWpaSupplicantConf(wifiConfig);
 
                 logger.debug("verifyWifiCredentials() :: Starting temporary instance of wpa_supplicant");
                 this.wpaSupplicantManager.startTemp(ifaceName, wifiConfig.getDriver());
@@ -1278,6 +1278,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 disableWifiInterface(ifaceName);
             } catch (Exception e) {
                 logger.warn("Exception while managing the temporary instance of the Wpa supplicant.", e);
+            } finally {
+                wpaSupplicantConfigWriter.setExecutorService(null);
             }
             return ret;
         }
@@ -1423,12 +1425,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private void startTemporaryWpaSupplicant(String ifaceName) throws KuraException {
         reloadKernelModule(ifaceName, WifiMode.INFRA);
-        WpaSupplicantConfigWriter wpaSupplicantConfigWriter = WpaSupplicantConfigWriter.getInstance();
+        WpaSupplicantConfigWriter wpaSupplicantConfigWriter = new WpaSupplicantConfigWriter();
         wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
         StringBuilder key = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
-        String driver = KuranetConfig.getProperty(key.toString());
+        String driver = (String) this.networkConfigurationService.getNetworkConfiguration().getConfigurationProperties()
+                .get(key.toString());
+
         this.wpaSupplicantManager.startTemp(ifaceName, driver);
         wifiModeWait(ifaceName, WifiMode.INFRA, 10);
     }

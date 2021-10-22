@@ -595,4 +595,9 @@ public class SierraUsb598 implements EvdoCellularModem {
     public void disableDiversity() throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
     }
+
+    @Override
+    public String getFirmwareVersion() throws KuraException {
+        return "N/A";
+    }
 }

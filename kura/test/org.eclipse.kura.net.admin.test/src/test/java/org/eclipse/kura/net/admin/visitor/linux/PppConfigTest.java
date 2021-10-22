@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,26 +12,29 @@
  ******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
+import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
+import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.usb.UsbDevice;
@@ -40,188 +43,293 @@ import org.junit.Test;
 
 public class PppConfigTest {
 
-    public void testWriterVisit() {
-        // PppConfigWriter writer = new PppConfigWriter();
+    private final String PPP_DIR = "/tmp/kura/ppp/";
+    private final String PPP_PEERS_DIR = "peers/";
+    private final String PPP_SCRIPTS_DIR = "scripts/";
+    private final String PPP2 = "ppp2";
+    private final String MODEM_MODEL = "IK41VE";
+    private final String USB_BUS_NUMBER = "1";
+    private final String USB_DEVICE_PATH = "1.3";
+    private PppConfigWriter writer;
+    private NetworkConfiguration config;
+    private UsbDevice usbDevice = new UsbModemDevice("1bbb", "00b6", "TELEFONICA", MODEM_MODEL, USB_BUS_NUMBER,
+            USB_DEVICE_PATH);
+
+    @Test
+    public void shouldWritePeersFile() throws KuraException, IOException {
+        givenFoldersClean();
+        givenPppConfigWriter();
+        givenNetworkConfigurationWithPpp(PPP2);
+
+        whenPppIsVisited();
+
+        thenPppPeersFileExists();
+        thenPppPeersFileIsCorrect();
     }
 
     @Test
-    public void testReaderVisitNpPppdFileNoUmtsConfig() throws KuraException {
-        // basic flow with no pppd peers file and no supported modem configured
+    public void shouldWriteChatScriptFile() throws KuraException, IOException {
+        givenFoldersClean();
+        givenPppConfigWriter();
+        givenNetworkConfigurationWithPpp(PPP2);
 
-        String intfName = "ppp2";
-        String modemId = "pppid";
+        whenPppIsVisited();
 
-        PppConfigReader reader = new PppConfigReader() {
+        thenPppChatScriptFileExists();
+        thenPppChatScriptFileIsCorrect();
+    }
+
+    @Test
+    public void shouldWriteDisconnectScriptFile() throws KuraException, IOException {
+        givenFoldersClean();
+        givenPppConfigWriter();
+        givenNetworkConfigurationWithPpp(PPP2);
+
+        whenPppIsVisited();
+
+        thenPppDisconnectScriptFileExists();
+        thenPppDisconnectScriptFileIsCorrect();
+    }
+
+    @Test
+    public void shouldReturnPeerFilename() {
+        givenOriginalPppConfigWriter();
+        thenPeerFilenameIsReturned();
+    }
+
+    @Test
+    public void shouldReturnPppLogFilename() {
+        givenOriginalPppConfigWriter();
+        thenPppLogFilenameIsReturned();
+    }
+
+    @Test
+    public void shouldReturnChatFilename() {
+        givenOriginalPppConfigWriter();
+        thenChatFilenameIsReturned();
+    }
+
+    @Test
+    public void shouldReturnPeerLinkAbsoluteName() {
+        givenOriginalPppConfigWriter();
+        thenPeerLinkAbsoluteNameIsReturned();
+    }
+
+    @Test
+    public void shouldReturnDisconnectFilename() {
+        givenOriginalPppConfigWriter();
+        thenDisconnectFilenameIsReturned();
+    }
+
+    private void givenPppConfigWriter() {
+        this.writer = new PppConfigWriter() {
 
             @Override
-            protected String getKuranetProperty(String key) {
-                if (key.equals("net.interface." + intfName + ".modem.identifier")) {
-                    return modemId;
+            protected void createSystemFolders() {
+                File peersDir = new File(PPP_DIR + PPP_PEERS_DIR);
+                if (!peersDir.exists()) {
+                    peersDir.mkdirs();
                 }
 
-                return null;
+                File scriptsDir = new File(PPP_DIR + PPP_SCRIPTS_DIR);
+                if (!scriptsDir.exists()) {
+                    scriptsDir.mkdirs();
+                }
             }
-
-            // @Override
-            // protected boolean hasAddress(int pppNumber) throws KuraException {
-            // return true;
-            // }
 
             @Override
-            protected List<IPAddress> getPppDnServers() throws KuraException {
-                return new ArrayList<>();
+            public String formPeerFilename(UsbDevice usbDevice) {
+                return PPP_DIR + PPP_PEERS_DIR + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH;
+            }
+
+            @Override
+            public String formChatFilename(UsbDevice usbDevice) {
+                return PPP_DIR + PPP_SCRIPTS_DIR + "chat" + "_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-"
+                        + USB_DEVICE_PATH;
+            }
+
+            @Override
+            public String formDisconnectFilename(UsbDevice usbDevice) {
+                return PPP_DIR + PPP_SCRIPTS_DIR + "disconnect" + "_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-"
+                        + USB_DEVICE_PATH;
+            }
+
+            @Override
+            public String formPeerLinkAbsoluteName(String pppInterfaceName) {
+                return PPP_DIR + PPP_PEERS_DIR + PPP2;
+            }
+
+            @Override
+            public String formChapAuthSecretsFilename() {
+                return PPP_DIR + "chap-secrets";
+            }
+
+            @Override
+            public String formPapAuthSecretsFilename() {
+                return PPP_DIR + "pap-secrets";
             }
         };
+    }
 
-        NetworkConfiguration config = new NetworkConfiguration();
+    private void givenOriginalPppConfigWriter() {
+        this.writer = new PppConfigWriter() {
 
-        ModemInterfaceConfigImpl netInterfaceConfig = new ModemInterfaceConfigImpl(intfName);
+            @Override
+            protected void createSystemFolders() {
+                File peersDir = new File(PPP_DIR + PPP_PEERS_DIR);
+                if (!peersDir.exists()) {
+                    peersDir.mkdirs();
+                }
+
+                File scriptsDir = new File(PPP_DIR + PPP_SCRIPTS_DIR);
+                if (!scriptsDir.exists()) {
+                    scriptsDir.mkdirs();
+                }
+            }
+        };
+    }
+
+    private void givenFoldersClean() {
+        deleteAllFilesInFolder(new File(PPP_DIR + PPP_PEERS_DIR));
+        deleteAllFilesInFolder(new File(PPP_DIR + PPP_SCRIPTS_DIR));
+    }
+
+    private void deleteAllFilesInFolder(File folder) {
+        for (File file : folder.listFiles()) {
+            if (!file.isDirectory()) {
+                file.delete();
+            }
+        }
+    }
+
+    private void givenNetworkConfigurationWithPpp(String interfaceName) throws UnknownHostException {
+        this.config = new NetworkConfiguration();
+
+        List<String> interfaces = new ArrayList<>();
+        interfaces.add(interfaceName);
+        config.setModifiedInterfaceNames(interfaces);
+
+        ModemInterfaceConfigImpl netInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
+        netInterfaceConfig.setUsbDevice(this.usbDevice);
         config.addNetInterfaceConfig(netInterfaceConfig);
 
         List<ModemInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
         ModemInterfaceAddressConfigImpl modemInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
+        List<NetConfig> netConfigs = new ArrayList<>();
+
+        int profileId = 0;
+        PdpType pdpType = PdpType.PPP;
+        String apn = "web.eurotech.com";
+        IP4Address address = (IP4Address) IPAddress.getByAddress(new byte[] { 0x0A, 0x0A, 0x00, (byte) 0xFA });
+        int dataCompression = 0;
+        int headerCompression = 0;
+        ModemConfig modemConfig = new ModemConfig(profileId, pdpType, apn, address, dataCompression, headerCompression);
+        modemConfig.setPppNumber(2);
+        modemConfig.setDialString("atd*99***4#");
+        netConfigs.add(modemConfig);
+
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
+        netConfigs.add(netConfigIP4);
+
+        modemInterfaceAddressConfig.setNetConfigs(netConfigs);
         interfaceAddressConfigs.add(modemInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
-
-        reader.visit(config);
-
-        assertEquals(true, reader != null);
-        assertTrue(modemInterfaceAddressConfig.getDnsServers().isEmpty());
-
-        assertNotNull(modemInterfaceAddressConfig.getConfigs());
-        assertEquals(2, modemInterfaceAddressConfig.getConfigs().size());
-
-        assertTrue(modemInterfaceAddressConfig.getConfigs().get(0) instanceof ModemConfig);
-        ModemConfig mc = (ModemConfig) modemInterfaceAddressConfig.getConfigs().get(0);
-        assertEquals(2, mc.getPppNumber());
-        assertEquals("inbound", mc.getActiveFilter());
-        assertTrue(mc.isPersist());
-        assertEquals(5, mc.getMaxFail());
-        assertEquals(95, mc.getIdle());
-        assertFalse(mc.isGpsEnabled());
-        assertEquals(0, mc.getLcpEchoInterval());
-        assertEquals(0, mc.getLcpEchoFailure());
-        assertEquals("", mc.getApn());
-        assertEquals(AuthType.NONE, mc.getAuthType());
-        assertArrayEquals(new char[] {}, mc.getPasswordAsPassword().getPassword());
-        assertEquals(PdpType.IP, mc.getPdpType());
-        assertEquals("", mc.getUsername());
-
-        assertTrue(modemInterfaceAddressConfig.getConfigs().get(1) instanceof NetConfigIP4);
-        NetConfigIP4 nc = (NetConfigIP4) modemInterfaceAddressConfig.getConfigs().get(1);
-        assertNotNull(nc.getDnsServers());
-        assertTrue(nc.getDnsServers().isEmpty());
     }
 
-    @Test
-    public void testReaderVisitPppdFileWithUmtsConfig() throws KuraException, IOException {
-        // basic flow with a pppd peer file, chat file and a supported USB modem configured
-
-        String intfName = "testinterface";
-        String modemId = "pppid";
-
-        String dir = "/tmp/kurappp/";
-        String peerFile = dir + intfName;
-        new File(dir).mkdirs();
-        try (FileWriter fw = new FileWriter(peerFile)) {
-            fw.write("active-filter=\"filter\"\n");
-            fw.write("persist=true\n");
-            fw.write("maxfail=2\n");
-            fw.write("idle=30\n");
-            fw.write("lcp-echo-interval=10\n");
-            fw.write("lcp-echo-failure=1\n");
-            fw.write("unit=10\n");
-            fw.write("user='a user'\n");
-            fw.write("connect=connect -f " + dir + "chat\n");
-        }
-
-        try (FileWriter fw = new FileWriter(dir + "chat")) {
-            fw.write("expectedresult send\n");
-            fw.write("dial a number\n");
-            fw.write("CONNECT connect\n");
-        }
-
-        PppConfigReader reader = new PppConfigReader() {
-
-            @Override
-            protected String getKuranetProperty(String key) {
-                if (key.equals("net.interface." + intfName + ".modem.identifier")) {
-                    return modemId;
-                } else if (key.equals("net.interface." + intfName + ".config.dnsServers")) {
-                    return "10.10.0.250";
-                } else if (key.equals("net.interface." + intfName + ".config.gpsEnabled")) {
-                    return "true";
-                } else if (key.equals("net.interface." + intfName + ".config.resetTimeout")) {
-                    return "123";
-                } else if (key.equals("net.interface." + intfName + ".config.apn")) {
-                    return "apn";
-                } else if (key.equals("net.interface." + intfName + ".config.pdpType")) {
-                    return "PPP";
-                }
-
-                return null;
-            }
-
-            // @Override
-            // protected boolean hasAddress(int pppNumber) throws KuraException {
-            // return true;
-            // }
-
-            @Override
-            protected List<IPAddress> getPppDnServers() throws KuraException {
-                return new ArrayList<>();
-            }
-
-            @Override
-            protected String getPeerFilename(String interfaceName, UsbDevice usbDevice) {
-                return peerFile;
-            }
-        };
-
-        NetworkConfiguration config = new NetworkConfiguration();
-
-        // FIXME having files /etc/ppp/chap-secrets and /etc/ppp/pap-secrets present on the system might cause problems
-        System.setProperty("target.device", "raspbian");
-        ModemInterfaceConfigImpl netInterfaceConfig = new ModemInterfaceConfigImpl(intfName);
-        config.addNetInterfaceConfig(netInterfaceConfig);
-        UsbDevice usbDevice = new UsbModemDevice("1bc7", "0021", "ct", "", "2:1", "/dev/usb1");
-        netInterfaceConfig.setUsbDevice(usbDevice);
-
-        List<ModemInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
-        ModemInterfaceAddressConfigImpl modemInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
-        interfaceAddressConfigs.add(modemInterfaceAddressConfig);
-        netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
-
-        reader.visit(config);
-
-        assertEquals(true, reader != null);
-        assertTrue(modemInterfaceAddressConfig.getDnsServers().isEmpty());
-
-        assertNotNull(modemInterfaceAddressConfig.getConfigs());
-        assertEquals(2, modemInterfaceAddressConfig.getConfigs().size());
-
-        assertTrue(modemInterfaceAddressConfig.getConfigs().get(0) instanceof ModemConfig);
-        ModemConfig mc = (ModemConfig) modemInterfaceAddressConfig.getConfigs().get(0);
-        assertEquals(10, mc.getPppNumber());
-        assertEquals("filter", mc.getActiveFilter());
-        assertTrue(mc.isPersist());
-        assertEquals(2, mc.getMaxFail());
-        assertEquals(30, mc.getIdle());
-        assertTrue(mc.isGpsEnabled());
-        assertEquals(10, mc.getLcpEchoInterval());
-        assertEquals(1, mc.getLcpEchoFailure());
-        assertEquals("apn", mc.getApn());
-        assertEquals(AuthType.NONE, mc.getAuthType());
-        assertArrayEquals(new char[] {}, mc.getPasswordAsPassword().getPassword());
-        assertEquals(PdpType.PPP, mc.getPdpType());
-        assertEquals("a user", mc.getUsername());
-        assertEquals("a number", mc.getDialString());
-        assertEquals(123, mc.getResetTimeout());
-
-        assertTrue(modemInterfaceAddressConfig.getConfigs().get(1) instanceof NetConfigIP4);
-        NetConfigIP4 nc = (NetConfigIP4) modemInterfaceAddressConfig.getConfigs().get(1);
-        assertNotNull(nc.getDnsServers());
-        assertEquals(1, nc.getDnsServers().size());
-        assertEquals("10.10.0.250", nc.getDnsServers().get(0).getHostAddress());
+    private void whenPppIsVisited() throws KuraException {
+        this.writer.visit(this.config);
     }
+
+    private void thenPppPeersFileExists() throws IOException {
+        File f = new File(PPP_DIR + PPP_PEERS_DIR + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        assertTrue(f.exists());
+    }
+
+    private void thenPppPeersFileIsCorrect() throws IOException {
+        String peersFileContent = readFile(
+                PPP_DIR + PPP_PEERS_DIR + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+
+        List<String> expectedPeersFileContent = Arrays
+                .asList(new String[] { "921600", "unit 2", "logfile /var/log/kura-IK41VE_1-1.3", "debug",
+                        "connect 'chat -v -f /tmp/kura/ppp/scripts/chat_IK41VE_1-1.3'",
+                        "disconnect 'chat -v -f /tmp/kura/ppp/scripts/disconnect_IK41VE_1-1.3'", "modem", "lock",
+                        "noauth", "noipdefault", "defaultroute", "usepeerdns", "noproxyarp", "novj", "novjccomp",
+                        "nobsdcomp", "nodeflate", "nomagic", "opersist", "maxfail 0", "connect-delay 1000" });
+
+        expectedPeersFileContent.forEach(s -> assertTrue(peersFileContent.contains(s)));
+    }
+
+    private void thenPppChatScriptFileExists() throws IOException {
+        File f = new File(
+                PPP_DIR + PPP_SCRIPTS_DIR + "chat_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        assertTrue(f.exists());
+    }
+
+    private void thenPppChatScriptFileIsCorrect() throws IOException {
+        String chatFileContent = readFile(
+                PPP_DIR + PPP_SCRIPTS_DIR + "chat_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+
+        List<String> expectedChatFileContent = Arrays.asList(
+                new String[] { "ABORT\t\"BUSY\"", "ABORT\t\"VOICE\"", "ABORT\t\"NO CARRIER\"", "ABORT\t\"NO DIALTONE\"",
+                        "ABORT\t\"NO DIAL TONE\"", "ABORT\t\"ERROR\"", "\"\"\t\\rAT", "TIMEOUT\t1",
+                        "\"OK-+++\\c-OK\"\tATH0", "TIMEOUT\t45", "OK\tat+cgdcont=4,\"IP\",\"web.eurotech.com\"",
+                        "OK\t\"\\d\\d\\d\"", "\"\"\t\"atd*99***4#\"", "CONNECT\t\"\\c\"" });
+
+        expectedChatFileContent.forEach(s -> assertTrue(chatFileContent.contains(s.trim())));
+    }
+
+    private void thenPppDisconnectScriptFileExists() throws IOException {
+        File f = new File(
+                PPP_DIR + PPP_SCRIPTS_DIR + "disconnect_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        assertTrue(f.exists());
+    }
+
+    private void thenPppDisconnectScriptFileIsCorrect() throws IOException {
+        String disconnectFileContent = readFile(
+                PPP_DIR + PPP_SCRIPTS_DIR + "disconnect_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+
+        List<String> expectedDisconnectFileContent = Arrays
+                .asList(new String[] { "ABORT\t\"BUSY\"", "ABORT\t\"VOICE\"", "ABORT\t\"NO CARRIER\"",
+                        "ABORT\t\"NO DIALTONE\"", "ABORT\t\"NO DIAL TONE\"", "\"\"\tBREAK", "\"\"\t\"+++ATH\"" });
+
+        expectedDisconnectFileContent.forEach(s -> assertTrue(disconnectFileContent.contains(s)));
+    }
+
+    private void thenPeerFilenameIsReturned() {
+        assertEquals("/etc/ppp/peers/" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+                this.writer.formPeerFilename(this.usbDevice));
+    }
+
+    private void thenPppLogFilenameIsReturned() {
+        assertEquals("/var/log/kura-" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+                this.writer.formPppLogFilename(this.usbDevice));
+    }
+
+    private void thenChatFilenameIsReturned() {
+        assertEquals("/etc/ppp/scripts/chat_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+                this.writer.formChatFilename(this.usbDevice));
+    }
+
+    private void thenPeerLinkAbsoluteNameIsReturned() {
+        assertEquals("/etc/ppp/peers/" + PPP2, this.writer.formPeerLinkAbsoluteName("ppp2"));
+    }
+
+    private void thenDisconnectFilenameIsReturned() {
+        UsbDevice usbDevice = new UsbModemDevice("1bbb", "00b6", "TELEFONICA", MODEM_MODEL, USB_BUS_NUMBER,
+                USB_DEVICE_PATH);
+        assertEquals("/etc/ppp/scripts/disconnect_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+                this.writer.formDisconnectFilename(usbDevice));
+    }
+
+    private String readFile(String configFilename) throws IOException {
+        Path path = Paths.get(configFilename);
+        List<String> readLinesList = Files.readAllLines(path);
+        StringBuilder readLines = new StringBuilder();
+        readLinesList.forEach(line -> {
+            readLines.append(line).append("\n");
+        });
+
+        return readLines.toString();
+    }
+
 }

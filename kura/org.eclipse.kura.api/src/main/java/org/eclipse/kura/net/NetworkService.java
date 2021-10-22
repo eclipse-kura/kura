@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -82,7 +82,31 @@ public interface NetworkService {
      */
     public List<NetInterface<? extends NetInterfaceAddress>> getActiveNetworkInterfaces() throws KuraException;
 
-    public String getModemUsbPort(String interfaceName);
+    /**
+     * Given an interface name (e.g. 'ppp0'), look up the associated usb port
+     * 
+     * @param the
+     *            name of the ppp interface (i.e. ppp0)
+     * @return a string representing the usb port of the modem (i.e. 1-2.3)
+     */
+    public String getModemUsbPort(String pppInterfaceName);
 
+    /**
+     * Given a modem device, look up the associated ppp interface name
+     * 
+     * @param modemDevice
+     * @return the name of the ppp interface
+     * @throws KuraException
+     */
     public String getModemPppPort(ModemDevice modemDevice) throws KuraException;
+
+    /**
+     * Given a usb path, look up the associated ppp interface name
+     * 
+     * @param usbPath
+     *            a string representing the usb port (i.e. 1-2.3)
+     * @return the name of the ppp interface
+     * @throws KuraException
+     */
+    public String getModemPppInterfaceName(String usbPath) throws KuraException;
 }

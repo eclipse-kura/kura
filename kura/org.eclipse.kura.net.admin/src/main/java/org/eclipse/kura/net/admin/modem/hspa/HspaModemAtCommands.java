@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,18 +15,18 @@ package org.eclipse.kura.net.admin.modem.hspa;
 
 public enum HspaModemAtCommands {
 
-    at("at\r\n"),
-    getSimPinStatus("at+cpin?\r\n"),
-    getModelNumber("at+gmm\r\n"),
-    getManufacturer("at+gmi\r\n"),
-    getSerialNumber("at+cgsn\r\n"),
-    getRevision("at+gmr\r\n"),
-    getIMSI("at+cimi\r\n"),
-    getICCID("at+ccid\r\n"),
-    getSignalStrength("at+csq\r\n"),
-    getMobileStationClass("at+cgclass?\r\n"),
-    getRegistrationStatus("at+cgreg?\r\n"),
-    pdpContext("at+cgdcont");
+    AT("at\r\n"),
+    GET_SIM_PIN_STATUS("at+cpin?\r\n"),
+    GET_MODEL_NUMBER("at+gmm\r\n"),
+    GET_MANUFACTURER("at+gmi\r\n"),
+    GET_SERIAL_NUMBER("at+cgsn\r\n"),
+    GET_REVISION("at+gmr\r\n"),
+    GET_IMSI("at+cimi\r\n"),
+    GET_ICCID("at+ccid\r\n"),
+    GET_SIGNAL_STRENGTH("at+csq\r\n"),
+    GET_MOBILE_STATION_CLASS("at+cgclass?\r\n"),
+    GET_REGISTRATION_STATUS("at+cgreg?\r\n"),
+    PDP_CONTEXT("at+cgdcont");
 
     private String command;
 

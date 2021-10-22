@@ -17,6 +17,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -346,7 +348,6 @@ public class LinuxNetworkUtil {
             return config;
         } catch (KuraException e) {
             if (e.getCode() == KuraErrorCode.OS_COMMAND_ERROR || e.getCode() == KuraErrorCode.PROCESS_EXECUTION_ERROR) {
-                // Assuming ifconfig fails because a PPP link went down and its interface cannot be found
                 return getPppConfig(ifaceName);
             } else {
                 logger.warn("FIXME: IpAddrShow failed. Falling back to old ifconfig method", e);
@@ -365,14 +366,11 @@ public class LinuxNetworkUtil {
         }
     }
 
-    private LinuxIfconfig getPppConfig(String ifaceName) {
+    private LinuxIfconfig getPppConfig(String pppInterfaceName) {
         LinuxIfconfig config = null;
-        if (ifaceName.matches(PPP_IFACE_REGEX)) {
-            File pppFile = new File(NetworkServiceImpl.PPP_PEERS_DIR + ifaceName);
-            if (pppFile.exists()) {
-                config = new LinuxIfconfig(ifaceName);
-                config.setType(NetInterfaceType.valueOf(MODEM));
-            }
+        if (pppInterfaceName.matches(PPP_IFACE_REGEX)) {
+            config = new LinuxIfconfig(pppInterfaceName);
+            config.setType(NetInterfaceType.valueOf(MODEM));
         }
         return config;
     }
@@ -487,10 +485,6 @@ public class LinuxNetworkUtil {
      * Note: may return a cached information
      */
     public NetInterfaceType getType(String ifaceName) throws KuraException {
-        // ignore logical interfaces like "1-1.2"
-        if (Character.isDigit(ifaceName.charAt(0))) {
-            return NetInterfaceType.UNKNOWN;
-        }
         for (String ignoreIface : IGNORE_IFACES) {
             if (ifaceName.startsWith(ignoreIface)) {
                 return NetInterfaceType.UNKNOWN;
@@ -1062,7 +1056,7 @@ public class LinuxNetworkUtil {
             logger.debug("interface {} carrier changes {}", interfaceName, changes);
             return changes;
         } catch (IOException | NumberFormatException e) {
-            logger.error("error reading {}, error message {}", fileName, e.getMessage());
+            logger.warn("error reading {}, error message {}", fileName, e.getMessage());
         }
         return 0;
     }

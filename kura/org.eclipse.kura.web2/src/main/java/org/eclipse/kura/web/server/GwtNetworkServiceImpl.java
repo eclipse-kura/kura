@@ -63,7 +63,6 @@ import org.eclipse.kura.net.modem.ModemManagerService.ModemFunction;
 import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemPdpContextType;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
-import org.eclipse.kura.net.modem.SerialModemDevice;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.net.wifi.WifiChannel;
@@ -518,18 +517,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     String modemServiceId = null;
                                     if (usbDevice != null) {
                                         modemServiceId = netIfConfig.getUsbDevice().getUsbPort();
-                                    } else {
-                                        modemServiceId = modemManagerService.withAllModemServices(modemServices -> {
-                                            for (CellularModem modemService : modemServices) {
-                                                ModemDevice modemDevice = modemService.getModemDevice();
-                                                if (modemDevice instanceof SerialModemDevice) {
-                                                    return modemDevice.getProductName();
-                                                }
-                                            }
-
-                                            return null;
-                                        });
-
                                     }
 
                                     if (modemServiceId != null) {
@@ -570,6 +557,15 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                                 ((GwtModemInterfaceConfig) currentConfig).setGpsSupported(gpsSupported);
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get GPS supported from modem", e);
+                                            }
+
+                                            try {
+                                                String firmwareVersion = cellModemService.getFirmwareVersion();
+                                                logger.debug("Setting firwmare version to {}", firmwareVersion);
+                                                ((GwtModemInterfaceConfig) currentConfig)
+                                                        .setHwFirmware(firmwareVersion);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get firmware version from modem", e);
                                             }
 
                                             return (Void) null;

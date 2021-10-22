@@ -19,8 +19,8 @@ public final class PppFactory {
     private PppFactory() {
     }
 
-    public static IModemLinkService getPppService(final String interfaceName, final String port,
-            final CommandExecutorService executorService) {
-        return new Ppp(interfaceName, port, executorService);
+    public static IModemLinkService getPppService(final String interfaceName, String pppInterfaceName,
+            final String port, final CommandExecutorService executorService) {
+        return new Ppp(interfaceName, pppInterfaceName, port, executorService);
     }
 }

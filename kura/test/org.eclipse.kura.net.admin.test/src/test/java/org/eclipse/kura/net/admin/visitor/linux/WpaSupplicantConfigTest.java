@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,11 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
@@ -26,23 +22,19 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
-import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -51,7 +43,6 @@ import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiBgscan;
-import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
@@ -63,249 +54,13 @@ import org.junit.Test;
 public class WpaSupplicantConfigTest {
 
     @Test
-    public void testReader() throws KuraException, NoSuchFieldException, IOException {
-        String dir = "/tmp/wpaconfig";
-        new File(dir).mkdirs();
-
-        String intfName = "testinterface";
-        // 12345678901234567890123456789012
-        String pass = "3a859f5abdd14de95f99e572c31bc94650a0fd499b01a6d46056ea3bc18dc879";
-        String ssid = "ID WITH SPACE";
-
-        WpaSupplicantConfigReader reader = new WpaSupplicantConfigReader() {
-
-            @Override
-            protected String getWpaSupplicantConfigFilename(String ifaceName) {
-                return dir + "/wpa-config-" + ifaceName;
-            }
-
-            @Override
-            protected String getKuranetProperty(String key) {
-                if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.pingAccessPoint") == 0) {
-                    return "true";
-                } else if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.ignoreSSID") == 0) {
-                    return "true";
-                } else if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.driver") == 0) {
-                    return "driver";
-                }
-
-                return null;
-            }
-        };
-
-        String wpaFile = reader.getWpaSupplicantConfigFilename(intfName);
-        try (FileWriter fw = new FileWriter(wpaFile)) {
-            fw.write("ctrl_interface=/var/run/wpa_supplicant");
-            fw.write("ctrl_interface_group=wheel");
-            fw.write("network={");
-            fw.write("  mode=0\n");
-            fw.write("  ssid=\"" + ssid + "\"\n");
-            fw.write("  scan_ssid=1\n");
-            fw.write("  key_mgmt=WPA-PSK\n");
-            fw.write("  psk=\"" + pass + "\"\n");
-            fw.write("  proto=WPA RSN\n");
-            fw.write("  pairwise=CCMP\n");
-            fw.write("  group=CCMP\n");
-            fw.write("  scan_freq=2447\n");
-            fw.write("  bgscan=\"\"\n");
-            fw.write("}");
-        }
-
-        NetworkConfiguration config = new NetworkConfiguration();
-
-        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(intfName);
-        config.addNetInterfaceConfig(netInterfaceConfig);
-
-        reader.visit(config);
-
-        assertNotNull(netInterfaceConfig.getNetInterfaceAddresses());
-        assertEquals(1, netInterfaceConfig.getNetInterfaceAddresses().size());
-
-        WifiInterfaceAddressConfig addressConfig = netInterfaceConfig.getNetInterfaceAddresses().get(0);
-        assertNotNull(addressConfig);
-        List<NetConfig> configs = addressConfig.getConfigs();
-        assertNotNull(configs);
-        assertEquals(1, configs.size());
-
-        WifiConfig cfg = (WifiConfig) configs.get(0);
-        assertEquals(WifiBgscanModule.NONE, cfg.getBgscan().getModule());
-        assertArrayEquals(new int[] { 8 }, cfg.getChannels());
-        assertEquals("driver", cfg.getDriver());
-        assertEquals("", cfg.getHardwareMode());
-        assertEquals(WifiMode.INFRA, cfg.getMode());
-        assertEquals(WifiCiphers.CCMP, cfg.getGroupCiphers());
-        assertEquals(WifiCiphers.CCMP, cfg.getPairwiseCiphers());
-        assertArrayEquals(pass.toCharArray(), cfg.getPasskey().getPassword());
-        assertNull(cfg.getRadioMode());
-        assertEquals(WifiSecurity.SECURITY_WPA_WPA2, cfg.getSecurity());
-        assertEquals(ssid, cfg.getSSID());
-        assertEquals(true, cfg.ignoreSSID());
-    }
-
-    @Test
-    public void testReaderVariation2() throws KuraException, NoSuchFieldException, IOException {
-        String dir = "/tmp/wpaconfig";
-        new File(dir).mkdirs();
-
-        String intfName = "testinterface";
-        String ssid = "ID WITH SPACE";
-
-        WpaSupplicantConfigReader reader = new WpaSupplicantConfigReader() {
-
-            @Override
-            protected String getWpaSupplicantConfigFilename(String ifaceName) {
-                return dir + "/wpa-config-" + ifaceName;
-            }
-
-            @Override
-            protected String getKuranetProperty(String key) {
-                if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.pingAccessPoint") == 0) {
-                    return "true";
-                } else if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.ignoreSSID") == 0) {
-                    return "false";
-                } else if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.driver") == 0) {
-                    return "";
-                }
-
-                return null;
-            }
-        };
-
-        String wpaFile = reader.getWpaSupplicantConfigFilename(intfName);
-        try (FileWriter fw = new FileWriter(wpaFile)) {
-            fw.write("ctrl_interface=/var/run/wpa_supplicant");
-            fw.write("ctrl_interface_group=wheel");
-            fw.write("network={");
-            fw.write("  mode=1\n");
-            fw.write("  ssid=\"" + ssid + "\"\n");
-            fw.write("  scan_ssid=1\n");
-            fw.write("  key_mgmt=WPA-PSK\n");
-            fw.write("  proto=RSN\n");
-            fw.write("  pairwise=CCMP TKIP\n");
-            fw.write("  group=CCMP TKIP\n");
-            fw.write("  scan_freq=2452 2457\n");
-            fw.write("  bgscan=\"\"\n");
-            fw.write("}");
-        }
-
-        NetworkConfiguration config = new NetworkConfiguration();
-
-        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(intfName);
-        config.addNetInterfaceConfig(netInterfaceConfig);
-
-        reader.visit(config);
-
-        assertNotNull(netInterfaceConfig.getNetInterfaceAddresses());
-        assertEquals(1, netInterfaceConfig.getNetInterfaceAddresses().size());
-
-        WifiInterfaceAddressConfig addressConfig = netInterfaceConfig.getNetInterfaceAddresses().get(0);
-        assertNotNull(addressConfig);
-        List<NetConfig> configs = addressConfig.getConfigs();
-        assertNotNull(configs);
-        assertEquals(1, configs.size());
-
-        WifiConfig cfg = (WifiConfig) configs.get(0);
-        assertEquals(WifiBgscanModule.NONE, cfg.getBgscan().getModule());
-        assertArrayEquals(new int[] { 9, 10 }, cfg.getChannels());
-        assertEquals("nl80211", cfg.getDriver());
-        assertEquals("", cfg.getHardwareMode());
-        assertEquals(WifiMode.INFRA, cfg.getMode());
-        assertEquals(WifiCiphers.CCMP_TKIP, cfg.getGroupCiphers());
-        assertEquals(WifiCiphers.CCMP_TKIP, cfg.getPairwiseCiphers());
-        assertArrayEquals("".toCharArray(), cfg.getPasskey().getPassword());
-        assertNull(cfg.getRadioMode());
-        assertEquals(WifiSecurity.SECURITY_WPA2, cfg.getSecurity());
-        assertEquals(ssid, cfg.getSSID());
-        assertEquals(false, cfg.ignoreSSID());
-    }
-
-    @Test
-    public void testReaderVariationWep() throws KuraException, NoSuchFieldException, IOException {
-        String dir = "/tmp/wpaconfig";
-        new File(dir).mkdirs();
-
-        String intfName = "testinterface";
-        String pass = "Pa$&wrd";
-        String ssid = "ID WITH SPACE";
-
-        WpaSupplicantConfigReader reader = new WpaSupplicantConfigReader() {
-
-            @Override
-            protected String getWpaSupplicantConfigFilename(String ifaceName) {
-                return dir + "/wpa-config-" + ifaceName;
-            }
-
-            @Override
-            protected String getKuranetProperty(String key) {
-                if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.pingAccessPoint") == 0) {
-                    return "true";
-                } else if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.ignoreSSID") == 0) {
-                    return "false";
-                } else if (key.compareTo("net.interface." + intfName + ".config.wifi.infra.driver") == 0) {
-                    return "";
-                }
-
-                return null;
-            }
-        };
-
-        String wpaFile = reader.getWpaSupplicantConfigFilename(intfName);
-        try (FileWriter fw = new FileWriter(wpaFile)) {
-            fw.write("ctrl_interface=/var/run/wpa_supplicant");
-            fw.write("ctrl_interface_group=wheel");
-            fw.write("network={");
-            fw.write("  mode=1\n");
-            fw.write("  ssid=\"" + ssid + "\"\n");
-            fw.write("  scan_ssid=1\n");
-            fw.write("  key_mgmt=WEP\n");
-            fw.write("  proto=RSN\n");
-            fw.write("  pairwise=TKIP\n");
-            fw.write("  group=TKIP\n");
-            fw.write("  wep_key0=" + pass + "\n");
-            fw.write("  scan_freq=2452 2457\n");
-            fw.write("  bgscan=\"\"\n");
-            fw.write("}");
-        }
-
-        NetworkConfiguration config = new NetworkConfiguration();
-
-        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(intfName);
-        config.addNetInterfaceConfig(netInterfaceConfig);
-
-        reader.visit(config);
-
-        assertNotNull(netInterfaceConfig.getNetInterfaceAddresses());
-        assertEquals(1, netInterfaceConfig.getNetInterfaceAddresses().size());
-
-        WifiInterfaceAddressConfig addressConfig = netInterfaceConfig.getNetInterfaceAddresses().get(0);
-        assertNotNull(addressConfig);
-        List<NetConfig> configs = addressConfig.getConfigs();
-        assertNotNull(configs);
-        assertEquals(1, configs.size());
-
-        WifiConfig cfg = (WifiConfig) configs.get(0);
-        assertEquals(WifiBgscanModule.NONE, cfg.getBgscan().getModule());
-        assertArrayEquals(new int[] { 9, 10 }, cfg.getChannels());
-        assertEquals("nl80211", cfg.getDriver());
-        assertEquals("", cfg.getHardwareMode());
-        assertEquals(WifiMode.INFRA, cfg.getMode());
-        assertNull(cfg.getGroupCiphers());
-        assertNull(cfg.getPairwiseCiphers());
-        assertArrayEquals(pass.toCharArray(), cfg.getPasskey().getPassword());
-        assertNull(cfg.getRadioMode());
-        assertEquals(WifiSecurity.SECURITY_WEP, cfg.getSecurity());
-        assertEquals(ssid, cfg.getSSID());
-        assertEquals(false, cfg.ignoreSSID());
-    }
-
-    @Test
     public void testWriterDisabled() throws KuraException {
         // finishes before getting to file creation - helper for testing disabled interface log message
 
         String dir = "/tmp/wpaconfig";
         new File(dir).mkdirs();
 
-        String intfName = "testinterface";
+        String intfName = "testinterface-disabled";
         String pass = "Pa$&wrd";
         String ssid = "ID WITH SPACE";
 
@@ -329,6 +84,9 @@ public class WpaSupplicantConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
 
         writer.visit(config);
+
+        File f = new File(dir + "/" + intfName);
+        assertFalse("File should have been moved", f.exists());
     }
 
     @Test
@@ -384,13 +142,6 @@ public class WpaSupplicantConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
 
         writer.visit(config);
-
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(3, map.size());
-        assertEquals("false", map.get("net.interface." + intfName + ".config.wifi.infra.pingAccessPoint"));
-        assertEquals("false", map.get("net.interface." + intfName + ".config.wifi.infra.ignoreSSID"));
-        assertEquals("wifiDriver", map.get("net.interface." + intfName + ".config.wifi.infra.driver"));
 
         File f = new File(dir + "/wpaconf-" + intfName);
         assertTrue(f.exists());
@@ -470,11 +221,6 @@ public class WpaSupplicantConfigTest {
 
         writer.visit(config);
 
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(1, map.size());
-        assertEquals("wifiDriver", map.get("net.interface." + intfName + ".config.wifi.adhoc.driver"));
-
         File f = new File(dir + "/wpaconf-" + intfName);
         assertTrue(f.exists());
 
@@ -552,11 +298,6 @@ public class WpaSupplicantConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
 
         writer.visit(config);
-
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(1, map.size());
-        assertEquals("wifiDriver", map.get("net.interface." + intfName + ".config.wifi.adhoc.driver"));
 
         File f = new File(dir + "/wpaconf-" + intfName);
         assertTrue(f.exists());
@@ -642,11 +383,6 @@ public class WpaSupplicantConfigTest {
 
         writer.visit(config);
 
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(1, map.size());
-        assertEquals("wifiDriver", map.get("net.interface." + intfName + ".config.wifi.infra.driver"));
-
         File f = new File(dir + "/wpaconf-" + intfName);
         assertTrue(f.exists());
 
@@ -731,11 +467,6 @@ public class WpaSupplicantConfigTest {
 
         writer.visit(config);
 
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(1, map.size());
-        assertEquals("wifiDriver", map.get("net.interface." + intfName + ".config.wifi.infra.driver"));
-
         File f = new File(dir + "/wpaconf-" + intfName);
         assertTrue(f.exists());
 
@@ -807,11 +538,6 @@ public class WpaSupplicantConfigTest {
 
         writer.visit(config);
 
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(1, map.size());
-        assertEquals("wifiDriver", map.get("net.interface." + intfName + ".config.wifi.adhoc.driver"));
-
         File f = new File(dir + "/wpaconf-" + intfName);
         assertTrue(f.exists());
 
@@ -867,10 +593,6 @@ public class WpaSupplicantConfigTest {
 
         writer.visit(config);
 
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(0, map.size());
-
         File f = new File(dir + "/wpaconf-" + intfName);
         assertFalse(f.exists());
     }
@@ -905,10 +627,6 @@ public class WpaSupplicantConfigTest {
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
 
         writer.visit(config);
-
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(0, map.size());
 
         File f = new File(dir + "/wpaconf-" + intfName);
         assertFalse(f.exists());
@@ -945,18 +663,12 @@ public class WpaSupplicantConfigTest {
 
         writer.visit(config);
 
-        Map<String, String> map = (Map<String, String>) TestUtil.getFieldValue(writer, "map");
-
-        assertEquals(0, map.size());
-
         File f = new File(dir + "/wpaconf-" + intfName);
         assertFalse(f.exists());
     }
 
     private WpaSupplicantConfigWriter getWriter(String dir) {
         WpaSupplicantConfigWriter writer = new WpaSupplicantConfigWriter() {
-
-            private Map<String, String> map = new HashMap<>();
 
             @Override
             protected String getFinalConfigFile(String ifaceName) {
@@ -975,11 +687,6 @@ public class WpaSupplicantConfigTest {
                 String s = IOUtil.readResource(url);
 
                 return s;
-            }
-
-            @Override
-            protected void setKuranetProperty(String key, String value) throws IOException, KuraException {
-                map.put(key, value);
             }
         };
 

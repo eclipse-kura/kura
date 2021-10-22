@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,8 +16,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 
 import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.net.admin.visitor.linux.util.ChapLinux;
-import org.eclipse.kura.net.admin.visitor.linux.util.PapLinux;
+import org.eclipse.kura.net.admin.visitor.linux.util.PppAuthSecrets;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 
 /**
@@ -814,10 +813,11 @@ public class PppPeer {
      * Write the current parameters to the specified peer file
      */
     @SuppressWarnings("checkstyle:methodLength")
-    public void write(String filename) throws Exception {
+    public void write(String pppPeerfilename, String chapAuthSecretsFilename, String papAuthSecretsFilename)
+            throws Exception {
 
         // open output stream
-        try (FileOutputStream fos = new FileOutputStream(filename); PrintWriter writer = new PrintWriter(fos);) {
+        try (FileOutputStream fos = new FileOutputStream(pppPeerfilename); PrintWriter writer = new PrintWriter(fos);) {
 
             // set baud rate
             if (this.baudRate != -1) {
@@ -873,8 +873,8 @@ public class PppPeer {
                 writer.println("noauth");
             }
 
-            ChapLinux chapLinux = ChapLinux.getInstance();
-            PapLinux papLinux = PapLinux.getInstance();
+            PppAuthSecrets chapPppAuthSecrets = new PppAuthSecrets(chapAuthSecretsFilename);
+            PppAuthSecrets papPppAuthSecrets = new PppAuthSecrets(papAuthSecretsFilename);
 
             if (getAuthType() != AuthType.NONE) {
                 writer.print("user \"");
@@ -885,36 +885,37 @@ public class PppPeer {
 
                 switch (getAuthType()) {
                 case AUTO:
-                    if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                        papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    if (!papPppAuthSecrets.checkForEntry(this.provider, this.username, "*", this.password.toString(),
+                            "*")) {
+                        papPppAuthSecrets.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
                     }
-                    if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                        chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    if (!chapPppAuthSecrets.checkForEntry(this.provider, this.username, "*", this.password.toString(),
+                            "*")) {
+                        chapPppAuthSecrets.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
                     }
                     break;
                 case PAP:
                     // remove CHAP entry if exists
-                    chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
-                    if (!papLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                        papLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    chapPppAuthSecrets.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                    if (!papPppAuthSecrets.checkForEntry(this.provider, this.username, "*", this.password.toString(),
+                            "*")) {
+                        papPppAuthSecrets.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
                     }
                     break;
                 case CHAP:
                     // remove PAP entry if exists
-                    papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
-                    if (!chapLinux.checkForEntry(this.provider, this.username, "*", this.password.toString(), "*")) {
-                        chapLinux.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
+                    papPppAuthSecrets.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                    if (!chapPppAuthSecrets.checkForEntry(this.provider, this.username, "*", this.password.toString(),
+                            "*")) {
+                        chapPppAuthSecrets.addEntry(this.provider, this.username, "*", this.password.toString(), "*");
                     }
                     break;
-                case NONE:
-                    break;
                 default:
-                    break;
                 }
             } else {
                 // remove CHAP/PAP entries if exist
-                chapLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
-                papLinux.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                chapPppAuthSecrets.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
+                papPppAuthSecrets.removeEntry(AUTH_SECRETS_TYPE_PROVIDER, this.provider);
             }
 
             if (this.peerToSupplyLocalIP) {
@@ -987,5 +988,12 @@ public class PppPeer {
             writer.flush();
             fos.getFD().sync();
         }
+    }
+
+    protected void writeAuthInfo(PrintWriter writer) {
+        writer.print("user \"");
+        writer.print(this.username);
+        writer.println("\"");
+        writer.println("hide-password");
     }
 }

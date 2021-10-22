@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -161,7 +161,7 @@ public class ModemMonitorServiceImplTest {
         svc.setNetworkConfigurationService(ncsMock);
 
         NetworkConfiguration nc = new NetworkConfiguration();
-        ModemInterfaceConfigImpl netInterfaceConfig = new ModemInterfaceConfigImpl("ppp1");
+        ModemInterfaceConfigImpl netInterfaceConfig = new ModemInterfaceConfigImpl("1-2.3");
         nc.addNetInterfaceConfig(netInterfaceConfig);
 
         List<ModemInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
@@ -185,9 +185,9 @@ public class ModemMonitorServiceImplTest {
         svc.setNetworkService(networkServiceMock);
 
         List<NetInterface<? extends NetInterfaceAddress>> infcs = new ArrayList<>();
-        ModemInterfaceImpl modemIface = new ModemInterfaceConfigImpl("ppp1");
+        ModemInterfaceImpl modemIface = new ModemInterfaceConfigImpl("1-2.3");
         UsbModemDevice modemDevice = mock(UsbModemDevice.class);
-        when(modemDevice.getUsbPort()).thenReturn("usb0");
+        when(modemDevice.getUsbPort()).thenReturn("1-2.3");
         modemIface.setModemDevice(modemDevice);
         infcs.add(modemIface);
         when(networkServiceMock.getNetworkInterfaces()).thenReturn(infcs);
@@ -215,11 +215,11 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         linkStatus.setOutputStream(outputStream);
-        String[] cmd = {"ip", "-o", "link", "show", "dev", "ppp1"};
+        String[] cmd = { "ip", "-o", "link", "show", "dev", "ppp1" };
         Command linkStatusCommand = new Command(cmd);
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
-        
+
         CommandStatus addrStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
@@ -229,50 +229,47 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         addrStatus.setOutputStream(outputStream);
-        cmd = new String[] {"ip", "-o", "-4", "addr", "show", "dev", "ppp1"};
+        cmd = new String[] { "ip", "-o", "-4", "addr", "show", "dev", "ppp1" };
         Command addrStatusCommand = new Command(cmd);
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
         CommandStatus infoStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        cmd = new String[] {"iw", "dev", "ppp1", "info"};
+        cmd = new String[] { "iw", "dev", "ppp1", "info" };
         Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
-        
+
         CommandStatus iwconfigStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        cmd = new String[] {"iwconfig", "ppp1"};
+        cmd = new String[] { "iwconfig", "ppp1" };
         Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
-        out.write("ppp1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on".getBytes());
+        out.write(
+                "ppp1     IEEE 802.11  Mode:Master  Tx-Power=31 dBm\n        Retry short limit:7   RTS thr:off   Fragment thr:off\n        Power Management:on"
+                        .getBytes());
         outputStream.flush();
         outputStream.close();
         iwconfigStatus.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
-        
+
         CommandStatus ethtoolStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        cmd = new String[] {"ethtool", "-i", "ppp1"};
+        cmd = new String[] { "ethtool", "-i", "ppp1" };
         Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
-        out.write(("driver: e1000\n" + 
-                "        version: 7.3.21-k8-NAPI\n" + 
-                "        firmware-version: \n" + 
-                "        expansion-rom-version: \n" + 
-                "        bus-info: 0000:00:03.0\n" + 
-                "        supports-statistics: yes\n" + 
-                "        supports-test: yes\n" + 
-                "        supports-eeprom-access: yes\n" + 
-                "        supports-register-dump: yes\n" + 
-                "        supports-priv-flags: no").getBytes());
+        out.write(("driver: e1000\n" + "        version: 7.3.21-k8-NAPI\n" + "        firmware-version: \n"
+                + "        expansion-rom-version: \n" + "        bus-info: 0000:00:03.0\n"
+                + "        supports-statistics: yes\n" + "        supports-test: yes\n"
+                + "        supports-eeprom-access: yes\n" + "        supports-register-dump: yes\n"
+                + "        supports-priv-flags: no").getBytes());
         outputStream.flush();
         outputStream.close();
         ethtoolStatus.setOutputStream(outputStream);
         when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
-        
+
         svc.setExecutorService(esMock);
 
         doAnswer(invocation -> {
@@ -940,7 +937,7 @@ public class ModemMonitorServiceImplTest {
 
         final HspaCellularModem mockModem = mock(HspaCellularModem.class);
 
-        ModemDevice modemDevice = mock(ModemDevice.class);
+        ModemDevice modemDevice = mock(UsbModemDevice.class);
         when(mockModem.getModemDevice()).thenReturn(modemDevice);
         when(mockModem.getTechnologyTypes()).thenReturn(Collections.singletonList(ModemTechnologyType.HSDPA));
         when(mockModem.isSimCardReady()).thenReturn(isSimCardReady);
@@ -977,7 +974,7 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         linkStatus.setOutputStream(outputStream);
-        String[] cmd = {"ip", "-o", "link", "show", "dev", "ppp0"};
+        String[] cmd = { "ip", "-o", "link", "show", "dev", "ppp0" };
         Command linkStatusCommand = new Command(cmd);
         linkStatusCommand.setTimeout(60);
         when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
@@ -991,19 +988,19 @@ public class ModemMonitorServiceImplTest {
         outputStream.flush();
         outputStream.close();
         addrStatus.setOutputStream(outputStream);
-        cmd = new String[] {"ip", "-o", "-4", "addr", "show", "dev", "ppp0"};
+        cmd = new String[] { "ip", "-o", "-4", "addr", "show", "dev", "ppp0" };
         Command addrStatusCommand = new Command(cmd);
         addrStatusCommand.setTimeout(60);
         when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
 
         CommandStatus infoStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        cmd = new String[] {"iw", "dev", "ppp0", "info"};
+        cmd = new String[] { "iw", "dev", "ppp0", "info" };
         Command infoCommand = new Command(cmd);
         infoCommand.setTimeout(60);
         when(esMock.execute(infoCommand)).thenReturn(infoStatus);
 
         CommandStatus iwconfigStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        cmd = new String[] {"iwconfig", "ppp0"};
+        cmd = new String[] { "iwconfig", "ppp0" };
         Command iwconfigCommand = new Command(cmd);
         iwconfigCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
@@ -1017,7 +1014,7 @@ public class ModemMonitorServiceImplTest {
         when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
 
         CommandStatus ethtoolStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
-        cmd = new String[] {"ethtool", "-i", "ppp0"};
+        cmd = new String[] { "ethtool", "-i", "ppp0" };
         Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
@@ -1061,7 +1058,7 @@ public class ModemMonitorServiceImplTest {
     public void testModemResetNotConnectedNoSim() throws Throwable {
         testModemReset(PppState.NOT_CONNECTED, true, false, false);
     }
-    
+
     @Test
     public void testModemResetInProgress() throws Throwable {
         testModemReset(PppState.IN_PROGRESS, true, false, true);

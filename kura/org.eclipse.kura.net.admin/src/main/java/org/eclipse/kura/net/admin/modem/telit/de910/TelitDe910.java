@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -445,5 +445,10 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     @Override
     public void disableDiversity() throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "disableDiversity");
+    }
+
+    @Override
+    public String getFirmwareVersion() throws KuraException {
+        return getTelitFirmwareVersion();
     }
 }

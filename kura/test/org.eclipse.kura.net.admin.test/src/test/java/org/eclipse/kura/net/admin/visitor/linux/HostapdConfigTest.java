@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.net.admin.visitor.linux;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -28,6 +27,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +46,6 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
-import org.eclipse.kura.net.NetInterfaceAddressConfig;
-import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
@@ -275,45 +275,7 @@ public class HostapdConfigTest {
 
         assertFalse("File should have been moved", f.exists());
         assertTrue("File should have been created", ff.exists());
-
-        HostapdConfigReader reader = new HostapdConfigReader() {
-
-            @Override
-            protected File getFinalFile(String ifaceName) {
-                File f = new File(FINAL_FILE + ifaceName);
-                f.getParentFile().mkdirs();
-
-                f.deleteOnExit();
-
-                return f;
-            }
-        };
-
-        NetworkConfiguration config2 = new NetworkConfiguration();
-        WifiInterfaceConfigImpl netInterfaceConfig2 = new WifiInterfaceConfigImpl(intfName);
-        config2.addNetInterfaceConfig(netInterfaceConfig2);
-        reader.visit(config2);
-
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config2
-                .getNetInterfaceConfigs();
-        assertEquals(1, netInterfaceConfigs.size());
-
-        NetInterfaceConfig<? extends NetInterfaceAddressConfig> intfCfg0 = netInterfaceConfigs.get(0);
-        assertEquals(intfName, intfCfg0.getName());
-        List<? extends NetInterfaceAddressConfig> na0 = intfCfg0.getNetInterfaceAddresses();
-        assertEquals(1, na0.size());
-        List<NetConfig> na0cfgs = na0.get(0).getConfigs();
-        assertEquals(1, na0cfgs.size()); // no, NetConfigIP4 will not be read, here...
-
-        NetConfig na0cfg0 = na0cfgs.get(0);
-        assertTrue(na0cfg0 instanceof WifiConfig);
-        WifiConfig wc = (WifiConfig) na0cfg0;
-        assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("wifiDriver", wc.getDriver());
-        assertEquals(WifiSecurity.SECURITY_NONE, wc.getSecurity());
-        assertEquals("testSSID", wc.getSSID());
-        assertEquals(WifiRadioMode.RADIO_MODE_80211a, wc.getRadioMode());
-        assertArrayEquals(channels, wc.getChannels());
+        verifyHostapdNoSecurityFileContent(FINAL_FILE + intfName);
     }
 
     @Test
@@ -409,48 +371,7 @@ public class HostapdConfigTest {
 
         assertFalse("File should have been moved", f.exists());
         assertTrue("File should have been created", ff.exists());
-
-        HostapdConfigReader reader = new HostapdConfigReader() {
-
-            @Override
-            protected File getFinalFile(String ifaceName) {
-                File f = new File(FINAL_FILE + ifaceName);
-                f.getParentFile().mkdirs();
-
-                f.deleteOnExit();
-
-                return f;
-            }
-        };
-
-        NetworkConfiguration config2 = new NetworkConfiguration();
-        WifiInterfaceConfigImpl netInterfaceConfig2 = new WifiInterfaceConfigImpl(intfName);
-        config2.addNetInterfaceConfig(netInterfaceConfig2);
-
-        reader.setExecutorService(esMock);
-        reader.visit(config2);
-
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config2
-                .getNetInterfaceConfigs();
-        assertEquals(1, netInterfaceConfigs.size());
-
-        NetInterfaceConfig<? extends NetInterfaceAddressConfig> intfCfg0 = netInterfaceConfigs.get(0);
-        assertEquals(intfName, intfCfg0.getName());
-        List<? extends NetInterfaceAddressConfig> na0 = intfCfg0.getNetInterfaceAddresses();
-        assertEquals(1, na0.size());
-        List<NetConfig> na0cfgs = na0.get(0).getConfigs();
-        assertEquals(1, na0cfgs.size()); // no, NetConfigIP4 will not be read, here...
-
-        NetConfig na0cfg0 = na0cfgs.get(0);
-        assertTrue(na0cfg0 instanceof WifiConfig);
-        WifiConfig wc = (WifiConfig) na0cfg0;
-        assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("wifiDriver", wc.getDriver());
-        assertEquals(WifiSecurity.SECURITY_WEP, wc.getSecurity());
-        assertArrayEquals(pass.toCharArray(), wc.getPasskey().getPassword());
-        assertEquals("testSSID", wc.getSSID());
-        assertEquals(WifiRadioMode.RADIO_MODE_80211b, wc.getRadioMode());
-        assertArrayEquals(channels, wc.getChannels());
+        verifyHostapdWepFileContent(FINAL_FILE + intfName);
     }
 
     @Test
@@ -654,48 +575,7 @@ public class HostapdConfigTest {
 
         assertFalse("File should have been moved", f.exists());
         assertTrue("File should have been created", ff.exists());
-
-        HostapdConfigReader reader = new HostapdConfigReader() {
-
-            @Override
-            protected File getFinalFile(String ifaceName) {
-                File f = new File(FINAL_FILE + ifaceName);
-                f.getParentFile().mkdirs();
-
-                f.deleteOnExit();
-
-                return f;
-            }
-        };
-
-        NetworkConfiguration config2 = new NetworkConfiguration();
-        WifiInterfaceConfigImpl netInterfaceConfig2 = new WifiInterfaceConfigImpl(intfName);
-        config2.addNetInterfaceConfig(netInterfaceConfig2);
-        reader.setExecutorService(esMock);
-        reader.visit(config2);
-
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config2
-                .getNetInterfaceConfigs();
-        assertEquals(1, netInterfaceConfigs.size());
-
-        NetInterfaceConfig<? extends NetInterfaceAddressConfig> intfCfg0 = netInterfaceConfigs.get(0);
-        assertEquals(intfName, intfCfg0.getName());
-        List<? extends NetInterfaceAddressConfig> na0 = intfCfg0.getNetInterfaceAddresses();
-        assertEquals(1, na0.size());
-        List<NetConfig> na0cfgs = na0.get(0).getConfigs();
-        assertEquals(1, na0cfgs.size()); // no, NetConfigIP4 will not be read, here...
-
-        NetConfig na0cfg0 = na0cfgs.get(0);
-        assertTrue(na0cfg0 instanceof WifiConfig);
-        WifiConfig wc = (WifiConfig) na0cfg0;
-        assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("wifiDriver", wc.getDriver());
-        assertEquals(WifiSecurity.SECURITY_WPA2, wc.getSecurity());
-        assertEquals(WifiCiphers.CCMP_TKIP, wc.getPairwiseCiphers());
-        assertArrayEquals(pass.toCharArray(), wc.getPasskey().getPassword());
-        assertEquals("testSSID", wc.getSSID());
-        assertEquals(WifiRadioMode.RADIO_MODE_80211nHT40below, wc.getRadioMode());
-        assertArrayEquals(channels, wc.getChannels());
+        verifyHostapdWpaFileContent(FINAL_FILE + intfName);
     }
 
     @Test
@@ -821,52 +701,80 @@ public class HostapdConfigTest {
         }
     }
 
-    @Test
-    public void testReaderNoFile() throws KuraException {
-        HostapdConfigReader reader = new HostapdConfigReader() {
+    private void verifyHostapdNoSecurityFileContent(String configFilename) throws IOException {
+        String s = readFile(configFilename);
 
-            @Override
-            protected File getFinalFile(String ifaceName) {
-                File f = new File(FINAL_FILE + ifaceName);
-                f.getParentFile().mkdirs();
+        assertTrue(s.contains("# /etc/hostapd/hostapd.conf"));
+        assertTrue(s.contains("interface=testinterface"));
+        assertTrue(s.contains("driver=wifiDriver"));
+        assertTrue(s.contains("ssid=testSSID"));
+        assertTrue(s.contains("hw_mode=a"));
+        assertTrue(s.contains("wme_enabled=0"));
+        assertTrue(s.contains("ieee80211n=0"));
+        assertTrue(s.contains("channel=1"));
+        assertTrue(s.contains("logger_syslog=-1"));
+        assertTrue(s.contains("logger_syslog_level=2"));
+        assertTrue(s.contains("logger_stdout=-1"));
+        assertTrue(s.contains("logger_stdout_level=2"));
+        assertTrue(s.contains("dump_file=/tmp/hostapd.dump"));
+        assertTrue(s.contains("ignore_broadcast_ssid=0"));
+    }
 
-                f.deleteOnExit();
+    private void verifyHostapdWepFileContent(String configFilename) throws IOException {
+        String s = readFile(configFilename);
 
-                return f;
-            }
-        };
+        assertTrue(s.contains("# /etc/hostapd/hostapd.conf"));
+        assertTrue(s.contains("interface=testinterfacewep"));
+        assertTrue(s.contains("driver=wifiDriver"));
+        assertTrue(s.contains("ssid=testSSID"));
+        assertTrue(s.contains("hw_mode=b"));
+        assertTrue(s.contains("wme_enabled=0"));
+        assertTrue(s.contains("ieee80211n=0"));
+        assertTrue(s.contains("channel=1"));
+        assertTrue(s.contains("logger_syslog=-1"));
+        assertTrue(s.contains("logger_syslog_level=2"));
+        assertTrue(s.contains("logger_stdout=-1"));
+        assertTrue(s.contains("logger_stdout_level=2"));
+        assertTrue(s.contains("dump_file=/tmp/hostapd.dump"));
+        assertTrue(s.contains("wep_key0=CAFEBABE00"));
+        assertTrue(s.contains("ignore_broadcast_ssid=0"));
+    }
 
-        NetworkConfiguration config = new NetworkConfiguration();
-        String intfName = "nonexisting";
-        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(intfName);
-        config.addNetInterfaceConfig(netInterfaceConfig);
-        reader.visit(config);
+    private void verifyHostapdWpaFileContent(String configFilename) throws IOException {
+        String s = readFile(configFilename);
 
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
-                .getNetInterfaceConfigs();
-        assertEquals(1, netInterfaceConfigs.size());
+        assertTrue(s.contains("# /etc/hostapd/hostapd.conf"));
+        assertTrue(s.contains("interface=testinterfacewpa"));
+        assertTrue(s.contains("driver=wifiDriver"));
+        assertTrue(s.contains("ssid=testSSID"));
+        assertTrue(s.contains("hw_mode=g"));
+        assertTrue(s.contains("wme_enabled=1"));
+        assertTrue(s.contains("ieee80211n=1"));
+        assertTrue(s.contains("ht_capab=[HT40-][SHORT-GI-20][SHORT-GI-40]"));
+        assertTrue(s.contains("channel=1"));
+        assertTrue(s.contains("logger_syslog=-1"));
+        assertTrue(s.contains("logger_syslog_level=2"));
+        assertTrue(s.contains("logger_stdout=-1"));
+        assertTrue(s.contains("logger_stdout_level=2"));
+        assertTrue(s.contains("dump_file=/tmp/hostapd.dump"));
+        assertTrue(s.contains("wpa=2"));
+        assertTrue(s.contains("wpa_passphrase=CAFEBABE00"));
+        assertTrue(s.contains("wpa_key_mgmt=WPA-PSK"));
+        assertTrue(s.contains("wpa_pairwise=CCMP TKIP"));
+        assertTrue(s.contains("wpa_group_rekey=600"));
+        assertTrue(s.contains("wpa_gmk_rekey=86400"));
+        assertTrue(s.contains("ignore_broadcast_ssid=0"));
+    }
 
-        NetInterfaceConfig<? extends NetInterfaceAddressConfig> intfCfg0 = netInterfaceConfigs.get(0);
-        assertEquals(intfName, intfCfg0.getName());
-        List<? extends NetInterfaceAddressConfig> na0 = intfCfg0.getNetInterfaceAddresses();
-        assertEquals(1, na0.size());
-        List<NetConfig> na0cfgs = na0.get(0).getConfigs();
-        assertEquals(1, na0cfgs.size()); // no, NetConfigIP4 will not be read, here...
+    private String readFile(String configFilename) throws IOException {
+        Path path = Paths.get(configFilename);
+        List<String> readLinesList = Files.readAllLines(path);
+        StringBuilder readLines = new StringBuilder();
+        readLinesList.forEach(line -> {
+            readLines.append(line).append("\n");
+        });
 
-        NetConfig na0cfg0 = na0cfgs.get(0);
-        assertTrue(na0cfg0 instanceof WifiConfig);
-        WifiConfig wc = (WifiConfig) na0cfg0;
-        assertEquals(WifiMode.MASTER, wc.getMode());
-        assertEquals("nl80211", wc.getDriver());
-        assertEquals(WifiSecurity.SECURITY_NONE, wc.getSecurity());
-        assertArrayEquals(new char[] {}, wc.getPasskey().getPassword());
-        assertEquals(WifiCiphers.CCMP, wc.getPairwiseCiphers());
-        assertEquals("kura_gateway", wc.getSSID());
-        assertEquals(WifiRadioMode.RADIO_MODE_80211b, wc.getRadioMode());
-        assertEquals("b", wc.getHardwareMode());
-        assertArrayEquals(new int[] { 11 }, wc.getChannels());
-        assertFalse(wc.ignoreSSID());
-        assertTrue(wc.getBroadcast());
+        return readLines.toString();
     }
 
     private OutputStream loadStringToOutPutStream(String string) throws IOException {

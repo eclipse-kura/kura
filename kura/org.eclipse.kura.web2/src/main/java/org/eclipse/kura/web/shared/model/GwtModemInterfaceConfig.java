@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,12 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
     }
 
     public int getPppNum() {
-        return ((Integer) get("pppNum")).intValue();
+        Object pppNum = get("pppNum");
+        if (pppNum != null) {
+            return ((Integer) pppNum).intValue();
+        } else {
+            return 0;
+        }
     }
 
     public void setPppNum(int pppNum) {

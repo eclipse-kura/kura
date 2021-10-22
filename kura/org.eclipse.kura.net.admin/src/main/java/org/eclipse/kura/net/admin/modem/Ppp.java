@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,14 +27,16 @@ public class Ppp implements IModemLinkService {
     private static final Logger logger = LoggerFactory.getLogger(Ppp.class);
 
     private static final Object LOCK = new Object();
-    private final String iface;
+    private final String interfaceName;
+    private final String pppInterfaceName;
     private final String port;
     private final CommandExecutorService executorService;
     private final PppLinux pppLinux;
     private final LinuxNetworkUtil linuxNetworkUtil;
 
-    public Ppp(String iface, String port, CommandExecutorService executorService) {
-        this.iface = iface;
+    public Ppp(String interfaceName, String pppInterfaceName, String port, CommandExecutorService executorService) {
+        this.interfaceName = interfaceName;
+        this.pppInterfaceName = pppInterfaceName;
         this.port = port;
         this.executorService = executorService;
         this.pppLinux = new PppLinux(executorService);
@@ -43,14 +45,14 @@ public class Ppp implements IModemLinkService {
 
     @Override
     public void connect() throws KuraException {
-        this.pppLinux.connect(this.iface, this.port);
+        this.pppLinux.connect(this.interfaceName, this.port);
     }
 
     @Override
     public void disconnect() throws KuraException {
 
         logger.info("disconnecting :: stopping PPP monitor ...");
-        this.pppLinux.disconnect(this.iface, this.port);
+        this.pppLinux.disconnect(this.interfaceName, this.port);
 
         try {
             LinuxDns linuxDns = LinuxDns.getInstance();
@@ -65,7 +67,7 @@ public class Ppp implements IModemLinkService {
     @Override
     public String getIPaddress() throws KuraException {
         String ipAddress = null;
-        LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(this.iface);
+        LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(this.pppInterfaceName);
         if (ifconfig != null) {
             ipAddress = ifconfig.getInetAddress();
         }
@@ -74,14 +76,14 @@ public class Ppp implements IModemLinkService {
 
     @Override
     public String getIfaceName() {
-        return this.iface;
+        return this.interfaceName;
     }
 
     @Override
     public PppState getPppState() throws KuraException {
         synchronized (LOCK) {
             final PppState pppState;
-            final boolean pppdRunning = this.pppLinux.isPppProcessRunning(this.iface, this.port);
+            final boolean pppdRunning = this.pppLinux.isPppProcessRunning(this.interfaceName, this.port);
             final String ip = getIPaddress();
 
             if (pppdRunning && ip != null) {

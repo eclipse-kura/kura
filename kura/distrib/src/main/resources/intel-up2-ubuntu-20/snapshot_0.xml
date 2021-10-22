@@ -178,7 +178,7 @@
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.ssid" type="String">
-                <esf:value>kura_gateway_00:07:32:49:AC:A2</esf:value>
+                <esf:value>kura_gateway_intel_up2</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.ignoreSSID" type="Boolean">
                 <esf:value>false</esf:value>

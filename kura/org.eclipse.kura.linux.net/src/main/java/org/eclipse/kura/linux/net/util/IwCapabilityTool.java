@@ -49,7 +49,7 @@ public class IwCapabilityTool {
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
-            .compile("^.*\\* ([0-9]+) MHz \\[([0-9]+)\\]( \\((.*) dBm\\)){0,1}.*$");
+            .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\]( \\((.+) dBm\\)){0,1}.*$");
 
     private enum ParseState {
         HAS_RSN,
@@ -206,7 +206,8 @@ public class IwCapabilityTool {
         String result = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
         for (String line : result.split("\n")) {
             logger.debug(line);
-            Matcher m = FREQUENCY_CHANNEL_PATTERN.matcher(line);
+            String trimmedLine = line.trim();
+            Matcher m = FREQUENCY_CHANNEL_PATTERN.matcher(trimmedLine);
             if (m.matches()) {
                 Integer frequency = Integer.valueOf(m.group(1));
                 Integer channel = Integer.valueOf(m.group(2));

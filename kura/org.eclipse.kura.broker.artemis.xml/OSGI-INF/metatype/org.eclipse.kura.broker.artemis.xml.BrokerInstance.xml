@@ -54,7 +54,7 @@
 			type="String"
 			cardinality="1"
 			required="true" 
-            default="changeme" />
+			default="changeme" />
 
 		<AD
 			id="defaultUser"

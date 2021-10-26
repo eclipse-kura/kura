@@ -49,7 +49,7 @@ public class IwCapabilityTool {
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
-            .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\](?: \\((.+) dBm\\)){0,1}.*$");
+            .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\](?: \\((\\d{0,3}\\.\\d{0,2}) dBm\\)){0,1}[\\(\\w\\\\\\s,)]*$");
 
     private enum ParseState {
         HAS_RSN,

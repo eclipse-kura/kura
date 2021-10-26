@@ -49,7 +49,7 @@ public class IwCapabilityTool {
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
 
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
-            .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\]( \\((.+) dBm\\)){0,1}.*$");
+            .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\](?: \\((.+) dBm\\)){0,1}.*$");
 
     private enum ParseState {
         HAS_RSN,
@@ -211,7 +211,7 @@ public class IwCapabilityTool {
             if (m.matches()) {
                 Integer frequency = Integer.valueOf(m.group(1));
                 Integer channel = Integer.valueOf(m.group(2));
-                Float attenuation = m.group(4) != null ? Float.valueOf(m.group(4)) : 0.0f;
+                Float attenuation = m.group(3) != null ? Float.valueOf(m.group(3)) : 0.0f;
                 Boolean disabled = line.contains("disabled");
 
                 Boolean noIR = line.contains("no IR");

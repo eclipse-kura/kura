@@ -224,7 +224,7 @@
                 <esf:value>birth-connect-reconnect</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="device.custom-name" type="String">
-                <esf:value>Raspberry Pi 2</esf:value>
+                <esf:value>Raspberry Pi 3/4</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="device.display-name" type="String">
                 <esf:value>device-name</esf:value>

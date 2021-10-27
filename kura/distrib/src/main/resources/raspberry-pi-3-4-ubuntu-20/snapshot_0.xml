@@ -382,7 +382,7 @@
                 <esf:value>java-ntp</esf:value>
             </esf:property>
             <esf:property name="clock.set.hwclock" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
+                <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="clock.ntp.timeout" array="false" encrypted="false" type="Integer">
                 <esf:value>10000</esf:value>

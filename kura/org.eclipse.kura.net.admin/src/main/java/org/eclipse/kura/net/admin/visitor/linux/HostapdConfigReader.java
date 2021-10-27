@@ -198,6 +198,8 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
                         wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT40below;
                     }
                 }
+            } else if ("ac".equals(hwModeStr)) {
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211ac;
             }
         } else {
             throw KuraException.internalError("malformatted config file, unexpected hw_mode");

@@ -1069,7 +1069,7 @@
             <id>raspberry-pi-3-4-ubuntu-20</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, net-tools, bluez, chrony, ntpdate, rpi.gpio-common, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>   
+                    wireless-tools, net-tools, bluez, chrony, ntpdate, ifupdown, rpi.gpio-common, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>   
             </properties>
            <activation>
                 <activeByDefault>true</activeByDefault>

@@ -1608,7 +1608,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
             break;
         case netWifiRadioModeANAC:
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211ac;
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
             break;
 
         default:

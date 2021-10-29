@@ -443,7 +443,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
             break;
 
-        case RADIO_MODE_80211ac:
+        case RADIO_MODE_80211_AC:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");

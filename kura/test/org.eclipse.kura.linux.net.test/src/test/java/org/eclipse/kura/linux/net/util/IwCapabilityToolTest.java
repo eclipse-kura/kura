@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Sterwen-Technology
+ *  Eurotech
  ******************************************************************************/
 
 package org.eclipse.kura.linux.net.util;

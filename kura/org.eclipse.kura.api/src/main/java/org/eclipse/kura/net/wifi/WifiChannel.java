@@ -9,6 +9,7 @@
  *
  * Contributors:
  *  Sterwen-Technology
+ *  Eurotech
  ******************************************************************************/
 
 package org.eclipse.kura.net.wifi;
@@ -61,34 +62,58 @@ public class WifiChannel {
         this.frequency = frequency;
     }
 
+    /**
+     * @since 2.3
+     */
     public Boolean isNoInitiatingRadiation() {
         return noInitiatingRadiation;
     }
 
+    /**
+     * @since 2.3
+     */
     public void setNoInitiatingRadiation(Boolean noInitiatingRadiation) {
         this.noInitiatingRadiation = noInitiatingRadiation;
     }
 
+    /**
+     * @since 2.3
+     */
     public Boolean isRadarDetection() {
         return radarDetection;
     }
 
+    /**
+     * @since 2.3
+     */
     public void setRadarDetection(Boolean radarDetection) {
         this.radarDetection = radarDetection;
     }
 
+    /**
+     * @since 2.3
+     */
     public Boolean isDisabled() {
         return disabled;
     }
 
+    /**
+     * @since 2.3
+     */
     public void setDisabled(Boolean disabled) {
         this.disabled = disabled;
     }
 
+    /**
+     * @since 2.3
+     */
     public Float getAttenuation() {
         return attenuation;
     }
 
+    /**
+     * @since 2.3
+     */
     public void setAttenuation(Float attenuation) {
         this.attenuation = attenuation;
     }

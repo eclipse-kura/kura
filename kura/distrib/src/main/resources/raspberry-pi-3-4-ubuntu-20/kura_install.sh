@@ -125,7 +125,14 @@ systemctl disable dhcpcd
 #disable netplan
 systemctl stop systemd-networkd.socket systemd-networkd networkd-dispatcher systemd-networkd-wait-online
 systemctl disable systemd-networkd.socket systemd-networkd networkd-dispatcher systemd-networkd-wait-online
-systemctl mask systemd-networkd.socket systemd-networkd networkd-dispatcher systemd-networkd-wait-online
+
+#disable wpa_supplicant
+systemctl stop wpa_supplicant
+systemctl disable wpa_supplicant
+
+#disable dhclient apparmor profile
+ln -s /etc/apparmor.d/sbin.dhclient /etc/apparmor.d/disable/
+apparmor_parser -R /etc/apparmor.d/sbin.dhclient
 
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"

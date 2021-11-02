@@ -10,8 +10,6 @@ categories: [intro]
 
 [Eclipse Kura&trade; Installation](#eclipse-kuratrade-installation)
 
-[Development Environment Installation](#development-environment-installation)
-
 ## Overview
 
 This section provides Eclipse Kura&trade; quick installation procedures for the

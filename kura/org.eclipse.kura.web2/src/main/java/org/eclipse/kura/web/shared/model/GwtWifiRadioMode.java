@@ -18,7 +18,7 @@ public enum GwtWifiRadioMode {
     netWifiRadioModeBGN("n", true, true),
     netWifiRadioModeBG("g", true, false),
     netWifiRadioModeB("b", true, false),
-    netWifiRadioModeA("a", false, true);
+    netWifiRadioModeA("a", true, true);
 
     private final String radioMode;
     private final boolean twoDotFourGhz;

@@ -220,8 +220,18 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
                 dbExtractedData = dbExtractedBlob.getBytes(1, dbExtractedBlobLength);
             }
 
-            final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData);
-            wireRecordProperties.put(fieldName, value);
+            try {
+                final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData);
+                wireRecordProperties.put(fieldName, value);
+            } catch (final Exception e) {
+                logger.error(
+                        "Failed to convert result for column {} (SQL type {}, Java type {}) "
+                                + "to any of the supported Wires data type, "
+                                + "please consider using a conversion function like CAST in your query. "
+                                + "The result for this column will not be included in emitted envelope",
+                        fieldName, rmet.getColumnTypeName(i), dbExtractedData.getClass().getName(), e);
+            }
+
         }
         return wireRecordProperties;
     }

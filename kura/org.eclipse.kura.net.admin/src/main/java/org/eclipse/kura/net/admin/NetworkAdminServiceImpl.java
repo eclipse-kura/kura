@@ -75,6 +75,7 @@ import org.eclipse.kura.net.wifi.WifiHotspotInfo;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -93,6 +94,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private FirewallConfigurationService firewallConfigurationService;
     private DnsServerService dnsServer;
     private CommandExecutorService executorService;
+    private SystemService systemService;
 
     private Object wifiClientMonitorServiceLock;
 
@@ -174,6 +176,14 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     public void setUserAdmin(final UserAdmin userAdmin) {
         userAdmin.createRole("kura.network.admin", Role.GROUP);
+    }
+
+    public void setSystemService(final SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService() {
+        this.systemService = null;
     }
 
     // ----------------------------------------------------------------
@@ -1552,5 +1562,25 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 groupCiphers.add(securityEntry);
             }
         }
+    }
+
+    @Override
+    public boolean isWifiFiveGhz() {
+        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_5GHZ);
+    }
+
+    @Override
+    public boolean isWifiACS() {
+        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_ACS);
+    }
+
+    @Override
+    public boolean isWifiDFS() {
+        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_DFS);
+    }
+
+    @Override
+    public boolean isWifiIEEE80211AC() {
+        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_IEEE80211_AC);
     }
 }

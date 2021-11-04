@@ -236,4 +236,31 @@ public interface NetworkAdminService {
      */
     public String getWifiCountryCode() throws KuraException;
 
+    /**
+     * 
+     * @return
+     * @since 2.3
+     */
+    public boolean isWifiFiveGhz();
+
+    /**
+     * 
+     * @return
+     * @since 2.3
+     */
+    public boolean isWifiACS();
+
+    /**
+     * 
+     * @return
+     * @since 2.3
+     */
+    public boolean isWifiDFS();
+
+    /**
+     * 
+     * @return
+     * @since 2.3
+     */
+    public boolean isWifiIEEE80211AC();
 }

@@ -219,12 +219,17 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     pair.setName(getName(bundle));
                     pair.setStatus(toStateString(bundle));
                     pair.setVersion(getHeaderValue(bundle, Constants.BUNDLE_VERSION));
+                    pair.setSigned(isSigned(bundle));
 
                     pairs.add(pair);
                 }
             }
         }
         return new ArrayList<>(pairs);
+    }
+
+    private boolean isSigned(Bundle bundle) {
+        return !bundle.getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty();
     }
 
     @Override

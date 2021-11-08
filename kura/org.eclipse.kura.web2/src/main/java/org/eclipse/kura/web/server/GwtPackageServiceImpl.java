@@ -1,25 +1,28 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -30,11 +33,12 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
-import org.eclipse.kura.web.shared.model.GwtBundleInfo;
 import org.eclipse.kura.web.shared.model.GwtDeploymentPackage;
 import org.eclipse.kura.web.shared.model.GwtMarketplacePackageDescriptor;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtPackageService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.Version;
@@ -66,29 +70,34 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
 
         List<GwtDeploymentPackage> gwtDeploymentPackages = new ArrayList<>();
         DeploymentPackage[] deploymentPackages = deploymentAdmin.listDeploymentPackages();
+        BundleContext bc = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+        List<Bundle> bundles = Arrays.asList(bc.getBundles());
 
-        if (deploymentPackages != null) {
-            for (DeploymentPackage deploymentPackage : deploymentPackages) {
-                GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
-                gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
-                gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
+        if (isNull(deploymentPackages)) {
+            return gwtDeploymentPackages;
+        }
+        for (DeploymentPackage deploymentPackage : deploymentPackages) {
+            GwtDeploymentPackage gwtDeploymentPackage = new GwtDeploymentPackage();
+            gwtDeploymentPackage.setName(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getName()));
+            gwtDeploymentPackage.setVersion(GwtSafeHtmlUtils.htmlEscape(deploymentPackage.getVersion().toString()));
+            gwtDeploymentPackage.setSigned(true);
 
-                List<GwtBundleInfo> gwtBundleInfos = new ArrayList<>();
-                BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
-                if (bundleInfos != null) {
-                    for (BundleInfo bundleInfo : bundleInfos) {
-                        GwtBundleInfo gwtBundleInfo = new GwtBundleInfo();
-                        gwtBundleInfo.setName(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getSymbolicName()));
-                        gwtBundleInfo.setVersion(GwtSafeHtmlUtils.htmlEscape(bundleInfo.getVersion().toString()));
+            BundleInfo[] bundleInfos = deploymentPackage.getBundleInfos();
+            if (bundleInfos != null) {
+                for (BundleInfo bundleInfo : bundleInfos) {
+                    Optional<Bundle> bundle = bundles.stream()
+                            .filter(b -> b.getSymbolicName().equals(bundleInfo.getSymbolicName())
+                                    && b.getVersion().toString().equals(bundleInfo.getVersion().toString()))
+                            .findFirst();
 
-                        gwtBundleInfos.add(gwtBundleInfo);
+                    if (bundle.isPresent() && bundle.get().getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty()) {
+                        gwtDeploymentPackage.setSigned(false);
+                        break;
                     }
                 }
-
-                gwtDeploymentPackage.setBundleInfos(gwtBundleInfos);
-
-                gwtDeploymentPackages.add(gwtDeploymentPackage);
             }
+
+            gwtDeploymentPackages.add(gwtDeploymentPackage);
         }
 
         return gwtDeploymentPackages;
@@ -223,10 +232,8 @@ public class GwtPackageServiceImpl extends OsgiRemoteServiceServlet implements G
             boolean haveMinKuraVersion = minKuraVersionString != null && !minKuraVersionString.isEmpty();
             boolean haveMaxKuraVersion = maxKuraVersionString != null && !maxKuraVersionString.isEmpty();
 
-            if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0) {
-                throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
-            }
-            if (haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
+            if (haveMinKuraVersion && currentProductVersion.compareTo(new Version(minKuraVersionString)) < 0
+                    || haveMaxKuraVersion && currentProductVersion.compareTo(new Version(maxKuraVersionString)) > 0) {
                 throw new GwtKuraException(GwtKuraErrorCode.MARKETPLACE_COMPATIBILITY_VERSION_UNSUPPORTED);
             }
 

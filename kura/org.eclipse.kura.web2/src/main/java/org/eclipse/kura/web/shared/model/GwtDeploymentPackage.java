@@ -46,4 +46,12 @@ public class GwtDeploymentPackage extends GwtBaseModel implements Serializable {
     public void setBundleInfos(List<GwtBundleInfo> bundleInfos) {
         set("bundles", bundleInfos);
     }
+    
+    public void setSigned(boolean signed) {
+        set("signed", String.valueOf(signed));
+    }
+    
+    public String isSigned() {
+        return (String) get("signed");
+    }
 }

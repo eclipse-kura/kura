@@ -197,10 +197,8 @@ public class PackagesPanelUi extends Composite {
         this.packagesIntro.add(description);
 
         this.packagesGrid.setSelectionModel(this.selectionModel);
-        this.selectionModel.addSelectionChangeHandler(event -> {
-            PackagesPanelUi.this.packagesUninstall
-                    .setEnabled(PackagesPanelUi.this.selectionModel.getSelectedObject() != null);
-        });
+        this.selectionModel.addSelectionChangeHandler(event -> PackagesPanelUi.this.packagesUninstall
+                .setEnabled(PackagesPanelUi.this.selectionModel.getSelectedObject() != null));
         initTable();
 
         initTabButtons();
@@ -457,6 +455,16 @@ public class PackagesPanelUi extends Composite {
         };
         col2.setCellStyleNames("status-table-row");
         this.packagesGrid.addColumn(col2, "Version");
+        
+        TextColumn<GwtDeploymentPackage> col3 = new TextColumn<GwtDeploymentPackage>() {
+
+            @Override
+            public String getValue(GwtDeploymentPackage object) {
+                return object.isSigned();
+            }
+        };
+        col2.setCellStyleNames("status-table-row");
+        this.packagesGrid.addColumn(col3, "Signed?");
 
         this.packagesDataProvider.addDataDisplay(this.packagesGrid);
     }

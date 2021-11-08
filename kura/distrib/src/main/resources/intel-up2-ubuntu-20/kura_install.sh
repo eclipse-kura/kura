@@ -126,8 +126,14 @@ systemctl stop dhcpcd
 systemctl disable dhcpcd
 
 #disable netplan
-systemctl stop systemd-networkd.socket systemd-networkd networkd-dispatcher systemd-networkd-wait-online
-systemctl disable systemd-networkd.socket systemd-networkd networkd-dispatcher systemd-networkd-wait-online
+systemctl disable systemd-networkd.socket 
+systemctl disable systemd-networkd
+systemctl disable networkd-dispatcher
+systemctl disable systemd-networkd-wait-online
+systemctl mask systemd-networkd.socket 
+systemctl mask systemd-networkd
+systemctl mask networkd-dispatcher
+systemctl mask systemd-networkd-wait-online
 
 #disable wpa_supplicant
 systemctl stop wpa_supplicant

@@ -52,7 +52,7 @@ following steps:
 
 6. Install Kura with: 
 
-    <pre>sudo apt-get install kura_&lt;version&gt;_raspberry-pi-3-4-ubuntu-20_installer.deb<pre>
+    <pre>sudo apt-get install kura_&lt;version&gt;_raspberry-pi-3-4-ubuntu-20_installer.deb</pre>
 
     All the required dependencies will be downloaded and installed.
 
@@ -86,4 +86,3 @@ following steps:
      and the default **password** is:
 
      <pre>admin</pre>
-

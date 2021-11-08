@@ -36,8 +36,9 @@ following steps:
 
 3. Upgrade the system:
 
-   ```shsudo apt-get update
-   sudo apt-get upgrade
+   ```sh
+   sudo apt update
+   sudo apt upgrade
    ```
 
 4. Download the Kura package with:

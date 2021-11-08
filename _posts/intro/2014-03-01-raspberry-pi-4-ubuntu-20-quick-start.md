@@ -17,8 +17,7 @@ Raspberry Pi 3 and 4.
 
 {% include alerts.html message="This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
 
-This quickstart has been tested using the Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the sd card throught 
-<a href="https://www.raspberrypi.com/software/">Raspberry Pi Imager</a>
+This quickstart has been tested using the Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the sd card through [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
 
 The official images could be also found on the [Project Page](https://ubuntu.com/download/raspberry-pi) . Further information on the Ubuntu installation for Raspberry Pi could be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi).
 
@@ -37,52 +36,65 @@ following steps:
 
 3. Upgrade the system:
 
-   <pre>sudo apt-get update
-   sudo apt-get upgrade</pre>
+   ```shsudo apt-get update
+   sudo apt-get upgrade
+   ```
 
-4. Make sure that Java 8 is installed with
+4. Download the Kura package with:
 
-    <pre>java -version</pre>
-
-5. Download the Kura package with:
-
-    <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-3-4-ubuntu-20_installer.deb</pre>
+    ```sh
+    wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-3-4-ubuntu-20_installer.deb
+    ```
 
     Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 5.1.0).
 
-6. Install Kura with: 
+5. Install Kura with:
 
-    <pre>sudo apt-get install kura_&lt;version&gt;_raspberry-pi-3-4-ubuntu-20_installer.deb</pre>
+    ```sh
+    sudo apt install kura_&lt;version&gt;_raspberry-pi-3-4-ubuntu-20_installer.deb
+    ```
 
     All the required dependencies will be downloaded and installed.
 
-7. It could happen that 'wlan' interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:
+6. It could happen that 'wlan' interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:
 
-    <pre>rfkill list</pre>
+    ```sh
+    rfkill list
+    ```
 
     and unblock it with:
 
-    <pre>sudo rfkill unblock wlan</pre>
+    ```sh
+    sudo rfkill unblock wlan
+    ```
 
-8. Set the right Wi-Fi regulatory domain based on your current world region editing the `/etc/default/crda` and adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2" target="_blank">ISO 3166-1 alpha-2</a> code of your region.
+7. Set the right Wi-Fi regulatory domain based on your current world region editing the `/etc/default/crda` and adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region.
 
-9. Reboot the Raspberry Pi with:
+8. Reboot the Raspberry Pi with:
 
-    <pre>sudo reboot</pre>
+    ```sh
+    sudo reboot
+    ```
 
     Kura starts on the target platform after reboot.
 
-10. Kura setups a local web ui that is available using a browser via:
+9. Kura setups a local web ui that is available using a browser via:
 
-     <pre>https://&lt;device-ip&gt;</pre>
+     ```text
+     https://&lt;device-ip&gt;
+     ```
 
      The browser will prompt the user to accept the connection to an endpoint with a self signed certificate, select `Accept the risk and continue`:
      ![Self Signed Certificate]({{ site.baseurl }}/assets/images/admin/self-signed-certificate-firefox-94.png)
 
      Once trusted the source, the user will be redirected to a login page where the default **username** is:
 
-     <pre>admin</pre>
+     ```text
+     admin
+     ```
 
      and the default **password** is:
 
-     <pre>admin</pre>
+     ```text
+     admin
+     ```

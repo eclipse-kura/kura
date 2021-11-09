@@ -1734,7 +1734,12 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public boolean isIEEE80211ACSupported(String ifaceName, GwtXSRFToken xsrfToken) throws GwtKuraException {
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        return nas.isWifiIEEE80211AC(interfaceName);
+        try {
+            return nas.isWifiIEEE80211AC(ifaceName);
+        } catch (KuraException e) {
+            logger.error("Ieee80211ac support exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
     }
 
     private void validateUserPassword(final String password) throws GwtKuraException {

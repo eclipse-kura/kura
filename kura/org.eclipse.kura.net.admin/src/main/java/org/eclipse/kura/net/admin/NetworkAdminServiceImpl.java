@@ -95,7 +95,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private FirewallConfigurationService firewallConfigurationService;
     private DnsServerService dnsServer;
     private CommandExecutorService executorService;
-    private SystemService systemService;
 
     private Object wifiClientMonitorServiceLock;
 
@@ -177,14 +176,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     public void setUserAdmin(final UserAdmin userAdmin) {
         userAdmin.createRole("kura.network.admin", Role.GROUP);
-    }
-
-    public void setSystemService(final SystemService systemService) {
-        this.systemService = systemService;
-    }
-
-    public void unsetSystemService() {
-        this.systemService = null;
     }
 
     // ----------------------------------------------------------------

@@ -71,6 +71,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class PackagesPanelUi extends Composite {
 
+    private static final String STYLE_STATUS_TABLE_ROW = "status-table-row";
     private static final String UPLOADED_FILE = "uploadedFile";
     private static final String XSRF_TOKEN = "xsrfToken";
     private static final String DROPZONE_ACTIVE_STYLE_NAME = "active";
@@ -443,8 +444,8 @@ public class PackagesPanelUi extends Composite {
                 return object.getName();
             }
         };
-        col1.setCellStyleNames("status-table-row");
-        this.packagesGrid.addColumn(col1, "Name");
+        col1.setCellStyleNames(STYLE_STATUS_TABLE_ROW);
+        this.packagesGrid.addColumn(col1, MSGS.deviceBndName());
 
         TextColumn<GwtDeploymentPackage> col2 = new TextColumn<GwtDeploymentPackage>() {
 
@@ -453,8 +454,8 @@ public class PackagesPanelUi extends Composite {
                 return object.getVersion();
             }
         };
-        col2.setCellStyleNames("status-table-row");
-        this.packagesGrid.addColumn(col2, "Version");
+        col2.setCellStyleNames(STYLE_STATUS_TABLE_ROW);
+        this.packagesGrid.addColumn(col2, MSGS.deviceBndVersion());
         
         TextColumn<GwtDeploymentPackage> col3 = new TextColumn<GwtDeploymentPackage>() {
 
@@ -463,8 +464,8 @@ public class PackagesPanelUi extends Composite {
                 return object.isSigned();
             }
         };
-        col2.setCellStyleNames("status-table-row");
-        this.packagesGrid.addColumn(col3, "Signed?");
+        col2.setCellStyleNames(STYLE_STATUS_TABLE_ROW);
+        this.packagesGrid.addColumn(col3, MSGS.deviceBndSignature());
 
         this.packagesDataProvider.addDataDisplay(this.packagesGrid);
     }

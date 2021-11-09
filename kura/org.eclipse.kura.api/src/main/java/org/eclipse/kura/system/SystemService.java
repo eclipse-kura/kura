@@ -117,26 +117,6 @@ public interface SystemService {
      */
     public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
 
-    /*
-     * @since 2.3
-     */
-    public static final String KEY_KURA_WIFI_5GHZ = "kura.wifi.5ghz";
-
-    /*
-     * @since 2.3
-     */
-    public static final String KEY_KURA_WIFI_ACS = "kura.wifi.acs";
-
-    /*
-     * @since 2.3
-     */
-    public static final String KEY_KURA_WIFI_DFS = "kura.wifi.dfs";
-
-    /*
-     * @since 2.3
-     */
-    public static final String KEY_KURA_WIFI_IEEE80211_AC = "kura.wifi.ieee80211ac";
-
     /**
      * @deprecated
      */
@@ -583,13 +563,4 @@ public interface SystemService {
      */
     public boolean isLegacyBluetoothBeaconScan();
 
-    /**
-     * Returns the list of Wi-Fi capabilities supported by the current device. The list of provider capabilities
-     * are {@link #KEY_KURA_WIFI_5GHZ}, {@link #KEY_KURA_WIFI_ACS}, {@link #KEY_KURA_WIFI_DFS}, {@link
-     * #KEY_KURA_WIFI_IEEE80211_AC}
-     * 
-     * @since 2.3
-     * @return map of Wi-Fi capabilities
-     */
-    public Map<String, Boolean> getWifiCapabilities();
 }

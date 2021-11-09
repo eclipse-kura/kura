@@ -237,30 +237,32 @@ public interface NetworkAdminService {
     public String getWifiCountryCode() throws KuraException;
 
     /**
+     * Information on Automatic Channel Selection
      * 
-     * @return
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return True if Automatic Channel Selection is supported, false otherwise
      * @since 2.3
      */
-    public boolean isWifiFiveGhz();
+    public boolean isWifiACS(String ifaceName) throws KuraException;
 
     /**
+     * Information on Dynamic Frequencies Selection
      * 
-     * @return
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return True if Dynamic Frequencies Selection is supported, false otherwise
      * @since 2.3
      */
-    public boolean isWifiACS();
+    public boolean isWifiDFS(String ifaceName) throws KuraException;
 
     /**
+     * Information on WiFi 802.11ac
      * 
-     * @return
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return True if WiFi 802.11ac is supported, false otherwise.
      * @since 2.3
      */
-    public boolean isWifiDFS();
-
-    /**
-     * 
-     * @return
-     * @since 2.3
-     */
-    public boolean isWifiIEEE80211AC();
+    public boolean isWifiIEEE80211AC(String ifaceName) throws KuraException;
 }

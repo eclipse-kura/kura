@@ -72,6 +72,7 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiHotspotInfo;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -1565,22 +1566,17 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public boolean isWifiFiveGhz() {
-        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_5GHZ);
+    public boolean isWifiACS(String ifaceName) {
+        return false;
     }
 
     @Override
-    public boolean isWifiACS() {
-        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_ACS);
+    public boolean isWifiDFS(String ifaceName) throws KuraException {
+        return IwCapabilityTool.probeCapabilities(ifaceName, executorService).contains(Capability.DFS);
     }
 
     @Override
-    public boolean isWifiDFS() {
-        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_DFS);
-    }
-
-    @Override
-    public boolean isWifiIEEE80211AC() {
-        return systemService.getWifiCapabilities().get(SystemService.KEY_KURA_WIFI_IEEE80211_AC);
+    public boolean isWifiIEEE80211AC(String ifaceName) throws KuraException {
+        return IwCapabilityTool.probeCapabilities(ifaceName, executorService).contains(Capability.VHT);
     }
 }

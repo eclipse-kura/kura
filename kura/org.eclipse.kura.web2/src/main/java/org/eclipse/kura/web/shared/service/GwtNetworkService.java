@@ -26,6 +26,7 @@ import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
+import org.eclipse.kura.web.shared.model.GwtWifiRadioMode;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -68,8 +69,8 @@ public interface GwtNetworkService extends RemoteService {
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Get Wifi channels and frequencies")
-    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
-            throws GwtKuraException;
+    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName,
+            GwtWifiRadioMode radiomode) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Get Wifi Country Code")
     public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException;
@@ -80,4 +81,7 @@ public interface GwtNetworkService extends RemoteService {
 
     public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException;
+
+    @Audit(componentName = "UI Network", description = "Verify ieee80211ac is supported")
+    public boolean isIEEE80211ACSupported(String ifaceName, GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

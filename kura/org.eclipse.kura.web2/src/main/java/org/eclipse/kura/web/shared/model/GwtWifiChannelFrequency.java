@@ -25,6 +25,15 @@ public class GwtWifiChannelFrequency extends KuraBaseModel implements Serializab
     private static final String NO_IR = "no-ir";
     private static final String RADAR_DETECTION = "radar-detection";
 
+    public GwtWifiChannelFrequency() {
+
+    }
+
+    public GwtWifiChannelFrequency(int channel, int frequency) {
+        setChannel(channel);
+        setFrequency(frequency);
+    }
+
     public Integer getChannel() {
         if (get(CHANNEL) != null) {
             return get(CHANNEL);

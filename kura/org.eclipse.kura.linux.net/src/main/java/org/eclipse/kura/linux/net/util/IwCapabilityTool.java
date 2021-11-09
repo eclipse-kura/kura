@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -28,8 +29,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
@@ -42,22 +45,14 @@ public class IwCapabilityTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwCapabilityTool.class);
 
-    private static final Pattern WIPHY_PATTERN = Pattern.compile("^\\twiphy (\\d+)$");
-    private static final Pattern SUPPORTED_CHIPERS_PATTERN = Pattern.compile("^\\tSupported Ciphers:$");
-    private static final Pattern CHIPHER_CAPABILITY_PATTERN = Pattern.compile("^\\t\\t\\* ([\\w-\\d]+).*$");
-    private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\tDevice supports RSN.*$");
+    private static final Pattern WIPHY_PATTERN = Pattern.compile("^\\s*wiphy (\\d+)$");
+    private static final Pattern CHIPHER_CAPABILITY_PATTERN = Pattern.compile("^\\s*\\* ([\\w-\\d]+).*$");
+    private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\\s*Device supports RSN.*$");
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
-
     private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
             .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\](?: \\((\\d{0,3}\\.\\d{0,2}) dBm\\)){0,1}[\\(\\w\\\\\\s,)]*$");
-
-    private enum ParseState {
-        HAS_RSN,
-        HAS_CHIPHERS,
-        PARSE_CHIPHERS
-    }
-
-    private static final EnumSet<ParseState> DONE = EnumSet.of(ParseState.HAS_RSN, ParseState.HAS_CHIPHERS);
+    private static final Pattern VHT_PATTERN = Pattern.compile("^\\s* VHT Capabilities.*$");
+    private static final Pattern DFS_PATTERN = Pattern.compile("DFS_OFFLOAD");
 
     protected IwCapabilityTool() {
 
@@ -97,38 +92,37 @@ public class IwCapabilityTool {
         return Optional.empty();
     }
 
-    @SuppressWarnings("checkstyle:innerAssignment")
     private static Set<Capability> parseCapabilities(final InputStream in) throws IOException {
 
         final EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
-        final EnumSet<ParseState> parseState = EnumSet.noneOf(ParseState.class);
 
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 
             String line;
 
-            while (!parseState.containsAll(DONE) && (line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
 
-                if (parseState.contains(ParseState.PARSE_CHIPHERS)) {
-                    final Matcher matcher = CHIPHER_CAPABILITY_PATTERN.matcher(line);
+                final Matcher cipherMatcher = CHIPHER_CAPABILITY_PATTERN.matcher(line);
+                final Matcher vhtMatcher = VHT_PATTERN.matcher(line);
+                final Matcher dfsMatcher = DFS_PATTERN.matcher(line);
 
-                    if (matcher.matches()) {
-                        parseChipherCapability(matcher.group(1)).ifPresent(capabilities::add);
-                        continue;
-                    } else {
-                        parseState.remove(ParseState.PARSE_CHIPHERS);
-                        parseState.add(ParseState.HAS_CHIPHERS);
-                    }
+                if (dfsMatcher.matches()) {
+                    capabilities.add(Capability.DFS);
+                    continue;
                 }
 
-                if (!parseState.contains(ParseState.HAS_RSN) && RSN_CAPABILITY_PATTERN.matcher(line).matches()) {
+                if (vhtMatcher.matches()) {
+                    capabilities.add(Capability.VHT);
+                    continue;
+                }
+
+                if (cipherMatcher.matches()) {
+                    parseChipherCapability(cipherMatcher.group(1)).ifPresent(capabilities::add);
+                    continue;
+                }
+
+                if (RSN_CAPABILITY_PATTERN.matcher(line).matches()) {
                     capabilities.add(Capability.RSN);
-                    parseState.add(ParseState.HAS_RSN);
-                }
-
-                if (!parseState.contains(ParseState.HAS_CHIPHERS)
-                        && SUPPORTED_CHIPERS_PATTERN.matcher(line).matches()) {
-                    parseState.add(ParseState.PARSE_CHIPHERS);
                 }
 
             }
@@ -257,4 +251,5 @@ public class IwCapabilityTool {
         }
         return "Unknown";
     }
+
 }

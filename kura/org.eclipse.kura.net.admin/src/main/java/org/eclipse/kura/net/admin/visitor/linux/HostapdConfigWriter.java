@@ -41,6 +41,7 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -66,6 +67,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private static final String KURA_IEEE80211D = "KURA_IEEE80211D";
     private static final String KURA_IEEE80211H = "KURA_IEEE80211H";
     private static final String KURA_IEEE80211AC = "KURA_IEEE80211AC";
+    private static final String KURA_IEEE80211AC_FULL_LINE = "ieee80211ac=KURA_IEEE80211AC";
 
     private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 
@@ -208,7 +210,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateIgnoreBroadcastSsid(wifiConfig, fileAsString);
 
-        fileAsString = updateCountryCode(getWifiCountryCode(), fileAsString);
+        fileAsString = updateCountryCode(interfaceName, fileAsString);
 
         File outputFile = getTemporaryFile();
 
@@ -219,12 +221,14 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
         moveFile(interfaceName);
     }
 
-    private String updateCountryCode(String countryCode, String fileAsString) {
+    private String updateCountryCode(String interfaceName, String fileAsString) throws KuraException {
+
+        String countryCode = getWifiCountryCode();
 
         if (countryCode != null && !countryCode.isEmpty() && !countryCode.equalsIgnoreCase("00")) {
             fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, countryCode);
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211D, "1");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211H, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211H, isDfs(interfaceName) ? "1" : "0");
         } else {
             fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, "");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211D, "0");
@@ -344,6 +348,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private String updateChannels(WifiConfig wifiConfig, String fileAsString) throws KuraException {
+
         if (wifiConfig.getChannels()[0] >= 0 && wifiConfig.getChannels()[0] <= 165) {
             fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(wifiConfig.getChannels()[0]));
         } else {
@@ -393,7 +398,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                 fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             }
 
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
@@ -402,7 +407,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "b");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
@@ -411,7 +416,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             break;
@@ -420,7 +425,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[SHORT-GI-20]");
 
             break;
@@ -429,7 +434,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40+][SHORT-GI-20][SHORT-GI-40]");
 
             break;
@@ -438,7 +443,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
-            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40-][SHORT-GI-20][SHORT-GI-40]");
 
             break;
@@ -508,6 +513,10 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private String getWifiCountryCode() throws KuraException {
         return IwCapabilityTool.getWifiCountryCode(this.executorService);
+    }
+
+    private boolean isDfs(String interfaceName) throws KuraException {
+        return IwCapabilityTool.probeCapabilities(interfaceName, this.executorService).contains(Capability.DFS);
     }
 
 }

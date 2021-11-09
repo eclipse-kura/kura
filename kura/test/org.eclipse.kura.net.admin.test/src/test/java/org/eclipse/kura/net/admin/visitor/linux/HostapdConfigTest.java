@@ -772,6 +772,10 @@ public class HostapdConfigTest {
         result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
         assertEquals("hw_mode=g\nwme_enabled=1\nieee80211n=1\nht_capab=[HT40-][SHORT-GI-20][SHORT-GI-40]", result);
 
+        wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211_AC);
+        result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);
+        assertEquals("hw_mode=a\nwme_enabled=1\nieee80211n=1\n", result);
+
         wifiConfig.setRadioMode(null);
         try {
             result = (String) TestUtil.invokePrivate(writer, "updateRadioMode", wifiConfig, hostapd);

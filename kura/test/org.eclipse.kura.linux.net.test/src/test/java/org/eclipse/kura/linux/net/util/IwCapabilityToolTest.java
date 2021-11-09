@@ -17,70 +17,16 @@ package org.eclipse.kura.linux.net.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.executor.Command;
-import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
-import org.eclipse.kura.executor.Pid;
-import org.eclipse.kura.executor.Signal;
 import org.eclipse.kura.net.wifi.WifiChannel;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.junit.Test;
-
-class CommandExecutorServiceStub implements CommandExecutorService {
-
-    CommandStatus returnedStatus;
-
-    CommandExecutorServiceStub(CommandStatus returnedStatus) {
-        this.returnedStatus = returnedStatus;
-    }
-
-    public CommandStatus execute(Command command) {
-        return returnedStatus;
-    }
-
-    public void execute(Command command, Consumer<CommandStatus> callback) {
-    }
-
-    public boolean stop(Pid pid, Signal signal) {
-        return true;
-    }
-
-    public boolean kill(String[] commandLine, Signal signal) {
-        return true;
-    }
-
-    public boolean isRunning(Pid pid) {
-        return true;
-    }
-
-    public boolean isRunning(String[] commandLine) {
-        return true;
-    }
-
-    public Map<String, Pid> getPids(String[] commandLine) {
-        return null;
-    }
-
-    public void writeOutput(String commandOutput) {
-        OutputStream out = new ByteArrayOutputStream();
-        try (Writer w = new OutputStreamWriter(out, "UTF-8")) {
-            w.write(commandOutput);
-        } catch (Exception e) {
-        }
-        returnedStatus.setOutputStream(out);
-    }
-};
 
 public class IwCapabilityToolTest {
 

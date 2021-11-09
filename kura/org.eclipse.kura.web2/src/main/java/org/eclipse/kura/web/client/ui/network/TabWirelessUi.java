@@ -820,10 +820,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.radio.addMouseOutHandler(event -> resetHelp());
-        for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-            // We now also support 802.11a
-            this.radio.addItem(MessageUtils.get(mode.name()));
-        }
+        loadRadioMode();
         this.radio.addChangeHandler(event -> {
             setDirty(true);
             refreshForm();
@@ -1332,6 +1329,12 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void addItemChannelList(GwtWifiChannelFrequency channelFrequency) {
+
+        if (channelFrequency.getChannel() == 0 && channelFrequency.getFrequency() == 0) {
+            this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
+            return;
+        }
+
         String frequencyString = channelFrequency.getFrequency() > -1 ? " - " + channelFrequency.getFrequency() + " MHz"
                 : "";
 
@@ -1349,10 +1352,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         return channelFrequency.isDisabled()
                 || channelFrequency.isNoIrradiation() && !channelFrequency.isRadarDetection()
                 || channelFrequency.isNoIrradiation() && channelFrequency.isRadarDetection() && isNotValidCountryCode;
-    }
-
-    private void addItemAutomaticChannel() {
-        this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
     }
 
     private void disableLastChannelItem() {
@@ -1646,8 +1645,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                 @Override
                 public void onSuccess(GwtXSRFToken token) {
+                    GwtWifiRadioMode radioMode = radioValueToRadioMode(TabWirelessUi.this.radio.getSelectedItemText());
                     TabWirelessUi.this.gwtNetworkService.findFrequencies(token,
-                            TabWirelessUi.this.selectedNetIfConfig.getName(),
+                            TabWirelessUi.this.selectedNetIfConfig.getName(), radioMode,
                             new AsyncCallback<List<GwtWifiChannelFrequency>>() {
 
                                 @Override
@@ -1658,29 +1658,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                 @Override
                                 public void onSuccess(List<GwtWifiChannelFrequency> freqChannels) {
 
-                                    GwtWifiRadioMode radioMode = radioValueToRadioMode(
-                                            TabWirelessUi.this.radio.getSelectedItemText());
-
                                     TabWirelessUi.this.channelList.clear();
 
-                                    TabWirelessUi.this.addItemAutomaticChannel();
-
-                                    for (GwtWifiChannelFrequency freqChannel : freqChannels) {
-
-                                        if (isActiveConfigInAPMode()) {
-
-                                            boolean channelIsfive5Ghz = freqChannel.getFrequency() > 2501;
-
-                                            if (radioMode.isFiveGhz() && channelIsfive5Ghz
-                                                    || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
-                                                logger.fine("Found " + freqChannel.getChannel() + " - "
-                                                        + freqChannel.getFrequency() + " MHz");
-
-                                                TabWirelessUi.this.addItemChannelList(freqChannel);
-                                            }
-
-                                        }
-
+                                    if (isActiveConfigInAPMode()) {
+                                        freqChannels.stream().forEach(TabWirelessUi.this::addItemChannelList);
                                     }
 
                                     int channel = TabWirelessUi.this.activeConfig.getChannels().get(0);
@@ -1700,6 +1681,46 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 }
             });
         }
+
+    }
+
+    private void loadRadioMode() {
+
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                TabWirelessUi.this.gwtNetworkService.isIEEE80211ACSupported(
+                        TabWirelessUi.this.selectedNetIfConfig.getName(), token, new AsyncCallback<Boolean>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                logger.info("Unable to read 802.11ac capability, adding all wifi modes");
+                                for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
+                                    TabWirelessUi.this.radio.addItem(MessageUtils.get(mode.name()));
+                                }
+                            }
+
+                            @Override
+                            public void onSuccess(Boolean acSupported) {
+                                for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
+                                    if (Boolean.FALSE.equals(acSupported)
+                                            && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
+                                        continue;
+                                    }
+                                    TabWirelessUi.this.radio.addItem(MessageUtils.get(mode.name()));
+                                }
+
+                            }
+                        });
+            }
+
+        });
     }
 
     private boolean isActiveConfigInAPMode() {

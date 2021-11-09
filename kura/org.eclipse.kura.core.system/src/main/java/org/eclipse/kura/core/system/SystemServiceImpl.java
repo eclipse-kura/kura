@@ -1485,19 +1485,4 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return false;
     }
 
-    @Override
-    public Map<String, Boolean> getWifiCapabilities() {
-        Map<String, Boolean> wifiCapabilitiesMap = new HashMap<>();
-
-        String[] wifiPropertyKeys = new String[] { KEY_KURA_WIFI_5GHZ, KEY_KURA_WIFI_ACS, KEY_KURA_WIFI_DFS,
-                KEY_KURA_WIFI_IEEE80211_AC };
-
-        for (String propertyKey : wifiPropertyKeys) {
-            wifiCapabilitiesMap.put(propertyKey,
-                    Boolean.parseBoolean(getProperty(propertyKey).orElse(Boolean.FALSE.toString())));
-        }
-
-        return wifiCapabilitiesMap;
-    }
-
 }

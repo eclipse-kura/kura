@@ -45,7 +45,13 @@ public interface WifiInterface<T extends WifiInterfaceAddress> extends NetInterf
         /** The device supports the WPA encryption/authentication protocol. */
         WPA,
         /** The device supports the RSN encryption/authentication protocol. */
-        RSN;
+        RSN,
+        /** The device supports the Automatic Channel Selection. */
+        ACS,
+        /** The device supports the Dynamic Frequencies Selection. */
+        DFS,
+        /** The device supports Very High Throughput. */
+        VHT;
     }
 
     /**

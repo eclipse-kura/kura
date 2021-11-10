@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -498,7 +498,28 @@ public class JsonEncoderDecoderTest {
 
         String json = new JsonMarshallUnmarshallImpl().marshal(systemDeploymentPackages);
 
-        String expectedJson = "{\"deploymentPackages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"id\":0,\"state\":\"ACTIVE\"}]}]}";
+        String expectedJson = "{\"deploymentPackages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"id\":0,\"state\":\"ACTIVE\",\"signed\":false}],\"signed\":false}]}";
+        assertEquals(expectedJson, json);
+    }
+
+    @Test
+    public void testSystemDeploymentPackagesAllSigned() throws KuraException {
+        SystemDeploymentPackages systemDeploymentPackages = new SystemDeploymentPackages();
+        SystemDeploymentPackage[] systemDeploymentPackageArray = new SystemDeploymentPackage[1];
+        SystemDeploymentPackage systemDeploymentPackage = new SystemDeploymentPackage("dp1", "1.0.0");
+        SystemBundle[] systemBundles = new SystemBundle[1];
+        systemBundles[0] = new SystemBundle("bundle1", "2.0.0");
+        systemBundles[0].setId(0);
+        systemBundles[0].setState("ACTIVE");
+        systemBundles[0].setSigned(true);
+        systemDeploymentPackage.setBundleInfos(systemBundles);
+        systemDeploymentPackage.setSigned(true);
+        systemDeploymentPackageArray[0] = systemDeploymentPackage;
+        systemDeploymentPackages.setDeploymentPackages(systemDeploymentPackageArray);
+
+        String json = new JsonMarshallUnmarshallImpl().marshal(systemDeploymentPackages);
+
+        String expectedJson = "{\"deploymentPackages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"id\":0,\"state\":\"ACTIVE\",\"signed\":true}],\"signed\":true}]}";
         assertEquals(expectedJson, json);
     }
 
@@ -512,11 +533,32 @@ public class JsonEncoderDecoderTest {
         systemBundlesArray[1] = new SystemBundle("bundle2", "2.0.0");
         systemBundlesArray[1].setId(1);
         systemBundlesArray[1].setState("RESOLVED");
+        systemBundlesArray[1].setSigned(true);
         systemBundles.setBundles(systemBundlesArray);
 
         String json = new JsonMarshallUnmarshallImpl().marshal(systemBundles);
 
-        String expectedJson = "{\"bundles\":[{\"name\":\"bundle1\",\"version\":\"1.0.0\",\"id\":0,\"state\":\"ACTIVE\"},{\"name\":\"bundle2\",\"version\":\"2.0.0\",\"id\":1,\"state\":\"RESOLVED\"}]}";
+        String expectedJson = "{\"bundles\":[{\"name\":\"bundle1\",\"version\":\"1.0.0\",\"id\":0,\"state\":\"ACTIVE\",\"signed\":false},{\"name\":\"bundle2\",\"version\":\"2.0.0\",\"id\":1,\"state\":\"RESOLVED\",\"signed\":true}]}";
+        assertEquals(expectedJson, json);
+    }
+
+    @Test
+    public void testSystemBundlesAllSigned() throws KuraException {
+        SystemBundles systemBundles = new SystemBundles();
+        SystemBundle[] systemBundlesArray = new SystemBundle[2];
+        systemBundlesArray[0] = new SystemBundle("bundle1", "1.0.0");
+        systemBundlesArray[0].setId(0);
+        systemBundlesArray[0].setState("ACTIVE");
+        systemBundlesArray[0].setSigned(true);
+        systemBundlesArray[1] = new SystemBundle("bundle2", "2.0.0");
+        systemBundlesArray[1].setId(1);
+        systemBundlesArray[1].setState("RESOLVED");
+        systemBundlesArray[1].setSigned(true);
+        systemBundles.setBundles(systemBundlesArray);
+
+        String json = new JsonMarshallUnmarshallImpl().marshal(systemBundles);
+
+        String expectedJson = "{\"bundles\":[{\"name\":\"bundle1\",\"version\":\"1.0.0\",\"id\":0,\"state\":\"ACTIVE\",\"signed\":true},{\"name\":\"bundle2\",\"version\":\"2.0.0\",\"id\":1,\"state\":\"RESOLVED\",\"signed\":true}]}";
         assertEquals(expectedJson, json);
     }
 

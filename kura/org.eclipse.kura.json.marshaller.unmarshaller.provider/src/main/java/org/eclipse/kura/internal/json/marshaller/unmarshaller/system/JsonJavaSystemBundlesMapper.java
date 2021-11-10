@@ -40,6 +40,7 @@ public class JsonJavaSystemBundlesMapper {
     private static final String SYSTEM_BUNDLES_VERSION = "version";
     private static final String SYSTEM_BUNDLES_ID = "id";
     private static final String SYSTEM_BUNDLES_STATE = "state";
+    private static final String SYSTEM_BUNDLES_SIGNED = "signed";
 
     private JsonJavaSystemBundlesMapper() {
         // empty constructor
@@ -60,6 +61,7 @@ public class JsonJavaSystemBundlesMapper {
         jsonObject.add(SYSTEM_BUNDLES_VERSION, sb.getVersion());
         jsonObject.add(SYSTEM_BUNDLES_ID, sb.getId());
         jsonObject.add(SYSTEM_BUNDLES_STATE, sb.getState());
+        jsonObject.add(SYSTEM_BUNDLES_SIGNED, sb.isSigned());
         return jsonObject;
     }
 

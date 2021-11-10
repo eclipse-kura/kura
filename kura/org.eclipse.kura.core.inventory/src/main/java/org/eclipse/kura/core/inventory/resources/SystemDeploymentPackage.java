@@ -18,6 +18,7 @@ import org.eclipse.kura.system.SystemResourceType;
 public class SystemDeploymentPackage extends SystemResourceInfo {
 
     private SystemBundle[] bundleInfos;
+    private boolean signed;
 
     public SystemDeploymentPackage(String name, String version) {
         super(name, version, SystemResourceType.DP);
@@ -30,4 +31,13 @@ public class SystemDeploymentPackage extends SystemResourceInfo {
     public void setBundleInfos(SystemBundle[] bundleInfos) {
         this.bundleInfos = bundleInfos;
     }
+    
+    public void setSigned(boolean signed) {
+        this.signed = signed;
+    }
+
+    public boolean isSigned() {
+        return signed;
+    }
+    
 }

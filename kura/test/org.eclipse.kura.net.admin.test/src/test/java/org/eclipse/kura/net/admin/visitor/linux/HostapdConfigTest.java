@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -64,6 +65,15 @@ public class HostapdConfigTest {
             + "(5250 - 5350 @ 80), (N/A, 20), (0 ms), NO-OUTDOOR, DFS, AUTO-BW\n"
             + "(5470 - 5725 @ 160), (N/A, 26), (0 ms), DFS\n" + "(5725 - 5875 @ 80), (N/A, 13), (N/A)\n"
             + "(57000 - 66000 @ 2160), (N/A, 40), (N/A)";
+
+    private static final String IW_INTERFACE_INFO = "Interface wlan0\n" + "        ifindex 3\n" + "        wdev 0x1\n"
+            + "        addr e4:5f:01:35:80:32\n" + "        type managed\n" + "        wiphy 0\n"
+            + "        channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz\n" + "        txpower 31.00 dBm";
+
+    private static final String DFS_PART_IW_INFO = "        Supported extended features:\n"
+            + "                * [ 4WAY_HANDSHAKE_STA_PSK ]: 4-way handshake with PSK in station mode\n"
+            + "                * [ 4WAY_HANDSHAKE_STA_1X ]: 4-way handshake with 802.1X in station mode\n"
+            + "                * [ DFS_OFFLOAD ]: DFS offload";
 
     @Test
     public void testWriteOnlyWifi() throws UnknownHostException, KuraException {
@@ -241,12 +251,21 @@ public class HostapdConfigTest {
 
         Command getRegDom = new Command(new String[] { "iw", "reg", "get" });
         CommandStatus iwRegGetStatus = new CommandStatus(getRegDom, new LinuxExitStatus(0));
-        iwRegGetStatus.setOutputStream(new ByteArrayOutputStream());
+        iwRegGetStatus.setOutputStream(loadStringToOutPutStream(REGULATORY_DOMAIN));
 
-        new OutputStreamWriter(iwRegGetStatus.getOutputStream()).write(REGULATORY_DOMAIN);
+        Command iwInterFaceInfoCommand = new Command(new String[] { "iw", intfName, "info" });
+        CommandStatus iwInterFaceInfoCommandStatus = new CommandStatus(iwInterFaceInfoCommand, new LinuxExitStatus(0));
+        iwInterFaceInfoCommandStatus.setOutputStream(loadStringToOutPutStream(IW_INTERFACE_INFO));
+
+        Command iwPhyInterfaceInfoCommand = new Command(new String[] { "iw", "phy0", "info" });
+        CommandStatus iwPhyInterfaceInfoCommandStatus = new CommandStatus(iwPhyInterfaceInfoCommand,
+                new LinuxExitStatus(0));
+        iwPhyInterfaceInfoCommandStatus.setOutputStream(loadStringToOutPutStream(DFS_PART_IW_INFO));
 
         when(esMock.execute(anyObject())).thenReturn(status);
         when(esMock.execute(getRegDom)).thenReturn(iwRegGetStatus);
+        when(esMock.execute(iwInterFaceInfoCommand)).thenReturn(iwInterFaceInfoCommandStatus);
+        when(esMock.execute(iwPhyInterfaceInfoCommand)).thenReturn(iwPhyInterfaceInfoCommandStatus);
 
         writer.setExecutorService(esMock);
         writer.visit(config);
@@ -362,17 +381,25 @@ public class HostapdConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
-
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+
         Command getRegDom = new Command(new String[] { "iw", "reg", "get" });
-
         CommandStatus iwRegGetStatus = new CommandStatus(getRegDom, new LinuxExitStatus(0));
-        iwRegGetStatus.setOutputStream(new ByteArrayOutputStream());
+        iwRegGetStatus.setOutputStream(loadStringToOutPutStream(REGULATORY_DOMAIN));
 
-        new OutputStreamWriter(iwRegGetStatus.getOutputStream()).write(REGULATORY_DOMAIN);
+        Command iwInterFaceInfoCommand = new Command(new String[] { "iw", intfName, "info" });
+        CommandStatus iwInterFaceInfoCommandStatus = new CommandStatus(iwInterFaceInfoCommand, new LinuxExitStatus(0));
+        iwInterFaceInfoCommandStatus.setOutputStream(loadStringToOutPutStream(IW_INTERFACE_INFO));
+
+        Command iwPhyInterfaceInfoCommand = new Command(new String[] { "iw", "phy0", "info" });
+        CommandStatus iwPhyInterfaceInfoCommandStatus = new CommandStatus(iwPhyInterfaceInfoCommand,
+                new LinuxExitStatus(0));
+        iwPhyInterfaceInfoCommandStatus.setOutputStream(loadStringToOutPutStream(DFS_PART_IW_INFO));
 
         when(esMock.execute(anyObject())).thenReturn(status);
         when(esMock.execute(getRegDom)).thenReturn(iwRegGetStatus);
+        when(esMock.execute(iwInterFaceInfoCommand)).thenReturn(iwInterFaceInfoCommandStatus);
+        when(esMock.execute(iwPhyInterfaceInfoCommand)).thenReturn(iwPhyInterfaceInfoCommandStatus);
 
         writer.setExecutorService(esMock);
         writer.visit(config);
@@ -600,15 +627,24 @@ public class HostapdConfigTest {
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+
         Command getRegDom = new Command(new String[] { "iw", "reg", "get" });
-
         CommandStatus iwRegGetStatus = new CommandStatus(getRegDom, new LinuxExitStatus(0));
-        iwRegGetStatus.setOutputStream(new ByteArrayOutputStream());
+        iwRegGetStatus.setOutputStream(loadStringToOutPutStream(REGULATORY_DOMAIN));
 
-        new OutputStreamWriter(iwRegGetStatus.getOutputStream()).write(REGULATORY_DOMAIN);
+        Command iwInterFaceInfoCommand = new Command(new String[] { "iw", intfName, "info" });
+        CommandStatus iwInterFaceInfoCommandStatus = new CommandStatus(iwInterFaceInfoCommand, new LinuxExitStatus(0));
+        iwInterFaceInfoCommandStatus.setOutputStream(loadStringToOutPutStream(IW_INTERFACE_INFO));
+
+        Command iwPhyInterfaceInfoCommand = new Command(new String[] { "iw", "phy0", "info" });
+        CommandStatus iwPhyInterfaceInfoCommandStatus = new CommandStatus(iwPhyInterfaceInfoCommand,
+                new LinuxExitStatus(0));
+        iwPhyInterfaceInfoCommandStatus.setOutputStream(loadStringToOutPutStream(DFS_PART_IW_INFO));
 
         when(esMock.execute(anyObject())).thenReturn(status);
         when(esMock.execute(getRegDom)).thenReturn(iwRegGetStatus);
+        when(esMock.execute(iwInterFaceInfoCommand)).thenReturn(iwInterFaceInfoCommandStatus);
+        when(esMock.execute(iwPhyInterfaceInfoCommand)).thenReturn(iwPhyInterfaceInfoCommandStatus);
 
         writer.setExecutorService(esMock);
         writer.visit(config);
@@ -831,5 +867,15 @@ public class HostapdConfigTest {
         assertArrayEquals(new int[] { 11 }, wc.getChannels());
         assertFalse(wc.ignoreSSID());
         assertTrue(wc.getBroadcast());
+    }
+
+    private OutputStream loadStringToOutPutStream(String string) throws IOException {
+        OutputStream os = new ByteArrayOutputStream();
+
+        OutputStreamWriter osw = new OutputStreamWriter(os);
+        osw.write(string);
+        osw.flush();
+
+        return os;
     }
 }

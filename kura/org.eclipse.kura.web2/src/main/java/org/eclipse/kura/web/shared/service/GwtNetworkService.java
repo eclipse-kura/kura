@@ -83,5 +83,5 @@ public interface GwtNetworkService extends RemoteService {
             throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Verify ieee80211ac is supported")
-    public boolean isIEEE80211ACSupported(String ifaceName, GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException;
 }

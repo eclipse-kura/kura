@@ -1680,11 +1680,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         try {
             List<WifiChannel> channelFrequencies = nas.getWifiFrequencies(interfaceName);
             boolean hasSystemDFS = nas.isWifiDFS(interfaceName);
-            boolean hasSystemACS = nas.isWifiACS(interfaceName);
-
-            if (hasSystemACS) {
-                channels.add(new GwtWifiChannelFrequency(0, 0));
-            }
 
             for (WifiChannel channelFreq : channelFrequencies) {
                 if (logger.isDebugEnabled())
@@ -1732,7 +1727,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public boolean isIEEE80211ACSupported(String ifaceName, GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException {
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
             return nas.isWifiIEEE80211AC(ifaceName);

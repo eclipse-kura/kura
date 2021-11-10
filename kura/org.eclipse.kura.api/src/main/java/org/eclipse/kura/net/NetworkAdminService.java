@@ -237,16 +237,6 @@ public interface NetworkAdminService {
     public String getWifiCountryCode() throws KuraException;
 
     /**
-     * Information on Automatic Channel Selection
-     * 
-     * @param ifaceName
-     *            - name of WiFi interface
-     * @return True if Automatic Channel Selection is supported, false otherwise
-     * @since 2.3
-     */
-    public boolean isWifiACS(String ifaceName) throws KuraException;
-
-    /**
      * Information on Dynamic Frequencies Selection
      * 
      * @param ifaceName

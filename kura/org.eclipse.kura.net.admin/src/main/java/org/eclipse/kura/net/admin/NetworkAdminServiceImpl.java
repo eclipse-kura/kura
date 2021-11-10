@@ -76,7 +76,6 @@ import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.system.SystemService;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
@@ -1554,11 +1553,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 groupCiphers.add(securityEntry);
             }
         }
-    }
-
-    @Override
-    public boolean isWifiACS(String ifaceName) {
-        return false;
     }
 
     @Override

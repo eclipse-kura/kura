@@ -415,6 +415,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             if (!TabWirelessUi.this.activeConfig.getChannels().isEmpty()) {
                 updateChanneList(TabWirelessUi.this.activeConfig);
             }
+
+            loadCountryCode();
         }
 
         logger.severe("setNetInterface done.");
@@ -500,15 +502,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         // ------------
 
-        String activeRadioMode = this.activeConfig.getRadioMode();
-        if (activeRadioMode != null) {
-            for (int i = 0; i < this.radio.getItemCount(); i++) {
-                if (this.radio.getItemText(i).equals(MessageUtils.get(activeRadioMode))) {
-                    this.radio.setSelectedIndex(i);
-                    break;
-                }
-            }
-        }
+        setRadioModeByValue(this.activeConfig.getRadioMode());
 
         // select proper channels
         updateChanneList(this.activeConfig);
@@ -565,6 +559,17 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.radio4.setValue(!this.activeConfig.ignoreSSID());
 
         logger.severe("set values done.");
+    }
+
+    private void setRadioModeByValue(String activeRadioMode) {
+        if (activeRadioMode != null) {
+            for (int i = 0; i < this.radio.getItemCount(); i++) {
+                if (this.radio.getItemText(i).equals(MessageUtils.get(activeRadioMode))) {
+                    this.radio.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 
     private void refreshForm() {
@@ -751,8 +756,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     private void initForm() {
         // Wireless Mode
 
-        loadCountryCode(); // channelFrequencies is nested in loadCountryCode
-
         this.labelWireless.setText(MSGS.netWifiWirelessMode());
         this.wireless.addItem(WIFI_MODE_STATION_MESSAGE);
         this.wireless.addItem(WIFI_MODE_ACCESS_POINT_MESSAGE);
@@ -820,7 +823,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             }
         });
         this.radio.addMouseOutHandler(event -> resetHelp());
-        loadRadioMode();
         this.radio.addChangeHandler(event -> {
             setDirty(true);
             refreshForm();
@@ -1158,10 +1160,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                         logger.info("getWifiCountryCode Success - " + countryCode);
                         TabWirelessUi.this.countryCode.setText(countryCode);
                         TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
+
+                        loadRadioMode();
                     }
                 });
-
-                loadChannelFrequencies();
             }
         });
 
@@ -1562,7 +1564,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
 
         if (radioMode == null) {
-            throw new RuntimeException("Invalid Radio Mode");
+            radioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
         }
 
         return radioMode;
@@ -1695,19 +1697,20 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                TabWirelessUi.this.gwtNetworkService.isIEEE80211ACSupported(
-                        TabWirelessUi.this.selectedNetIfConfig.getName(), token, new AsyncCallback<Boolean>() {
+
+                TabWirelessUi.this.gwtNetworkService.isIEEE80211ACSupported(token,
+                        TabWirelessUi.this.selectedNetIfConfig.getName(), new AsyncCallback<Boolean>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
-                                logger.info("Unable to read 802.11ac capability, adding all wifi modes");
-                                for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
-                                    TabWirelessUi.this.radio.addItem(MessageUtils.get(mode.name()));
-                                }
+                                logger.info("Unable to read 802.11ac capability");
                             }
 
                             @Override
                             public void onSuccess(Boolean acSupported) {
+
+                                TabWirelessUi.this.radio.clear();
+
                                 for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
                                     if (Boolean.FALSE.equals(acSupported)
                                             && mode == GwtWifiRadioMode.netWifiRadioModeANAC) {
@@ -1716,6 +1719,9 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                     TabWirelessUi.this.radio.addItem(MessageUtils.get(mode.name()));
                                 }
 
+                                setRadioModeByValue(TabWirelessUi.this.activeConfig.getRadioMode());
+
+                                loadChannelFrequencies();
                             }
                         });
             }

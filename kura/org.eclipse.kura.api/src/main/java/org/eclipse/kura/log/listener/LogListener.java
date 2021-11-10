@@ -13,16 +13,16 @@
 package org.eclipse.kura.log.listener;
 
 import org.eclipse.kura.log.LogEntry;
-import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.annotation.versioning.ConsumerType;
 
 /**
- * Listener interface to be implemented by applications that needs to be notified of events in the {@link LogReader}
+ * Listener interface to be implemented by applications that need to be notified of events in the {@link LogProvider}.
  *
  * @noextend This class is not intended to be extended by clients.
  * @since 1.0
  */
-@ProviderType
-public interface LogReaderListener {
+@ConsumerType
+public interface LogListener {
 
     /**
      * Notifies the listener that a new log entry has been received.

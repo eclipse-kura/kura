@@ -96,4 +96,12 @@ public class GwtGroupedNVPair extends GwtBaseModel implements IsSerializable, Se
     public String getType() {
         return get("type");
     }
+    
+    public void setSigned(boolean signed) {
+        set("signed", String.valueOf(signed));
+    }
+    
+    public String isSigned() {
+        return (String) get("signed");
+    }
 }

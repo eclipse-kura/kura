@@ -237,6 +237,18 @@ public class BundlesTabUi extends Composite implements Tab {
         TextHeader version = new TextHeader(MSGS.deviceBndVersion());
         version.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col4, version);
+        
+        TextColumn<GwtGroupedNVPair> col5 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.isSigned();
+            }
+        };
+        col4.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader signature = new TextHeader(MSGS.deviceBndSignature());
+        signature.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col5, signature);
 
         dataProvider.addDataDisplay(bundlesGrid2);
     }

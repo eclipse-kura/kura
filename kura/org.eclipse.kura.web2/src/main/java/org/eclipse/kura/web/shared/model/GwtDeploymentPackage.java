@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,5 +45,13 @@ public class GwtDeploymentPackage extends GwtBaseModel implements Serializable {
 
     public void setBundleInfos(List<GwtBundleInfo> bundleInfos) {
         set("bundles", bundleInfos);
+    }
+    
+    public void setSigned(boolean signed) {
+        set("signed", String.valueOf(signed));
+    }
+    
+    public String isSigned() {
+        return (String) get("signed");
     }
 }

@@ -19,6 +19,7 @@ public class SystemBundle extends SystemResourceInfo {
 
     private long id;
     private String state;
+    private boolean signed;
 
     public SystemBundle(String name, String version) {
         super(name, version, SystemResourceType.BUNDLE);
@@ -39,4 +40,13 @@ public class SystemBundle extends SystemResourceInfo {
     public void setState(String state) {
         this.state = state;
     }
+    
+    public void setSigned(boolean signed) {
+        this.signed = signed;
+    }
+
+    public boolean isSigned() {
+        return signed;
+    }
+    
 }

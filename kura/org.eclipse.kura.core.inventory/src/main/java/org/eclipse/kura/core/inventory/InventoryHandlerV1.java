@@ -230,10 +230,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         for (int i = 0; i < dps.length; i++) {
             DeploymentPackage dp = dps[i];
 
-            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName(), dp.getVersion().toString());
-
             BundleInfo[] bis = dp.getBundleInfos();
             SystemBundle[] axbi = new SystemBundle[bis.length];
+
+            boolean dpSigned = true;
 
             for (int j = 0; j < bis.length; j++) {
 
@@ -244,14 +244,23 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 Optional<Bundle> bundle = Arrays.asList(bundles).stream()
                         .filter(b -> b.getSymbolicName().equals(bi.getSymbolicName())).findFirst();
                 if (bundle.isPresent()) {
+                    boolean bundleSigned = true;
+                    if (bundle.get().getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty()) {
+                        bundleSigned = false;
+                        dpSigned = false;
+                    }
                     xb.setId(bundle.get().getBundleId());
                     xb.setState(bundleStateToString(bundle.get().getState()));
+                    xb.setSigned(bundleSigned);
                 }
 
                 axbi[j] = xb;
             }
 
+            SystemDeploymentPackage xdp = new SystemDeploymentPackage(dp.getName(), dp.getVersion().toString());
+
             xdp.setBundleInfos(axbi);
+            xdp.setSigned(dpSigned);
 
             axdp[i] = xdp;
         }
@@ -457,7 +466,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     }
 
     private Bundle findFirstMatchingBundle(final SystemBundleRef ref) throws KuraException {
-        for (final Bundle bundle : bundleContext.getBundles()) {
+        for (final Bundle bundle : this.bundleContext.getBundles()) {
             if (!bundle.getSymbolicName().equals(ref.getName())) {
                 continue;
             }

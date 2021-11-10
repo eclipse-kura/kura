@@ -498,7 +498,7 @@ public class JsonEncoderDecoderTest {
 
         String json = new JsonMarshallUnmarshallImpl().marshal(systemDeploymentPackages);
 
-        String expectedJson = "{\"deploymentPackages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"id\":0,\"state\":\"ACTIVE\"}]}]}";
+        String expectedJson = "{\"deploymentPackages\":[{\"name\":\"dp1\",\"version\":\"1.0.0\",\"bundles\":[{\"name\":\"bundle1\",\"version\":\"2.0.0\",\"id\":0,\"state\":\"ACTIVE\",\"signed\":false}]}]}";
         assertEquals(expectedJson, json);
     }
 
@@ -512,11 +512,12 @@ public class JsonEncoderDecoderTest {
         systemBundlesArray[1] = new SystemBundle("bundle2", "2.0.0");
         systemBundlesArray[1].setId(1);
         systemBundlesArray[1].setState("RESOLVED");
+        systemBundlesArray[1].setSigned(true);
         systemBundles.setBundles(systemBundlesArray);
 
         String json = new JsonMarshallUnmarshallImpl().marshal(systemBundles);
 
-        String expectedJson = "{\"bundles\":[{\"name\":\"bundle1\",\"version\":\"1.0.0\",\"id\":0,\"state\":\"ACTIVE\"},{\"name\":\"bundle2\",\"version\":\"2.0.0\",\"id\":1,\"state\":\"RESOLVED\"}]}";
+        String expectedJson = "{\"bundles\":[{\"name\":\"bundle1\",\"version\":\"1.0.0\",\"id\":0,\"state\":\"ACTIVE\",\"signed\":false},{\"name\":\"bundle2\",\"version\":\"2.0.0\",\"id\":1,\"state\":\"RESOLVED\",\"signed\":true}]}";
         assertEquals(expectedJson, json);
     }
 

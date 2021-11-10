@@ -47,6 +47,7 @@ public class JsonJavaSystemDeploymentPackagesMapper {
     private static final String DP_BUNDLES = "bundles";
     private static final String DP_ID = "id";
     private static final String DP_STATE = "state";
+    private static final String DP_SIGNED = "signed";
 
     private JsonJavaSystemDeploymentPackagesMapper() {
         // empty constructor
@@ -69,6 +70,7 @@ public class JsonJavaSystemDeploymentPackagesMapper {
             jsonBundle.add(DP_VERSION, b.getVersion());
             jsonBundle.add(DP_ID, b.getId());
             jsonBundle.add(DP_STATE, b.getState());
+            jsonBundle.add(DP_SIGNED, b.isSigned());
             bundles.add(jsonBundle);
         });
         JsonObject jsonObject = new JsonObject();

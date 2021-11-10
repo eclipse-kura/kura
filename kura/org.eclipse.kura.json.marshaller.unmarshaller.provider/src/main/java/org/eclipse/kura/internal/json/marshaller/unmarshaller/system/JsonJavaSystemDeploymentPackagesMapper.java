@@ -77,6 +77,7 @@ public class JsonJavaSystemDeploymentPackagesMapper {
         jsonObject.add(DP_NAME, dp.getName());
         jsonObject.add(DP_VERSION, dp.getVersion());
         jsonObject.add(DP_BUNDLES, bundles);
+        jsonObject.add(DP_SIGNED, dp.isSigned());
         return jsonObject;
     }
 

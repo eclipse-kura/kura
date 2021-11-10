@@ -42,8 +42,6 @@
 	        		<b:ListBox b:id="logReaderListBox" ui:field="logReaderListBox" />
 	        		<b:CheckBox b:id="showStackTraceCheckbox" ui:field="showStackTraceCheckbox">Show errors stacktrace</b:CheckBox>
 	        		<b:CheckBox b:id="showMoreInfoCheckbox" ui:field="showMoreInfoCheckbox">Show additional info</b:CheckBox>
-	        		<b:FormLabel>Number of log rows to display</b:FormLabel>
-	        		<b:ListBox b:id="displayedRowsNumberListBox" ui:field="displayedRowsNumberListBox" />
 	        	</b:Row>
 	        	<b:Row>    	
 	          		<g:TextArea ui:field="logTextArea" />

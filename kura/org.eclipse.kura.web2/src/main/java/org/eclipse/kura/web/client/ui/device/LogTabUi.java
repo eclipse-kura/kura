@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -77,8 +76,6 @@ public class LogTabUi extends Composite {
     CheckBox showStackTraceCheckbox;
     @UiField
     CheckBox showMoreInfoCheckbox;
-    @UiField
-    ListBox displayedRowsNumberListBox;
 
     private List<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogReader = false;
@@ -115,16 +112,9 @@ public class LogTabUi extends Composite {
             LogTabUi.this.autoFollow = false;
         });
 
-        this.displayedRowsNumberListBox.addItem("10", "10");
-        this.displayedRowsNumberListBox.addItem("100", "100");
-        this.displayedRowsNumberListBox.addItem("500", "500");
-        this.displayedRowsNumberListBox.addItem("1000", "1000");
-        this.displayedRowsNumberListBox.setSelectedIndex(1);
-        this.displayedRowsNumberListBox.addChangeHandler(change -> displayLogs());
-
         initLogReaderListBox();
 
-        this.showStackTraceCheckbox.setValue(false);
+        this.showStackTraceCheckbox.setValue(true);
         this.showMoreInfoCheckbox.setValue(false);
         this.showStackTraceCheckbox.addClickHandler(click -> displayLogs());
         this.showMoreInfoCheckbox.addClickHandler(click -> displayLogs());
@@ -202,15 +192,7 @@ public class LogTabUi extends Composite {
     private void displayLogs() {
         StringBuilder displayedText = new StringBuilder();
 
-        int rowsToDisplay = Integer.parseInt(this.displayedRowsNumberListBox.getSelectedValue());
-        Iterator<GwtLogEntry> iterator = this.logs.iterator();
-        for (int i = 0; i < (this.logs.size() - rowsToDisplay); i++) {
-            iterator.next();
-        }
-
-        while (iterator.hasNext()) {
-            GwtLogEntry entry = iterator.next();
-
+        for (GwtLogEntry entry : this.logs) {
             if (this.logReaderListBox.getSelectedValue().equals(entry.getSourceLogReaderPid())) {
                 displayedText.append(entry.getSourceRealtimeTimestamp());
                 displayedText.append(" [priority: ");

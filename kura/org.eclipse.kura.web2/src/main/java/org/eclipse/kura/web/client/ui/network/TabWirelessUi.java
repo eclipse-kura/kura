@@ -1367,16 +1367,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         element.addClassName("list-group-item disabled");
     }
 
-    private void addItemAutomaticChannel() {
-        this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
-    }
-
-    private void disableLastChannelItem() {
-        int channelLength = this.channelList.getElement().getElementsByTagName("option").getLength();
-        this.channelList.getElement().getElementsByTagName("option").getItem(channelLength - 1).setAttribute("disabled",
-                "disabled");
-    }
-
     private void loadSsidData() {
         this.ssidDataProvider.getList().clear();
         this.searching.setVisible(true);

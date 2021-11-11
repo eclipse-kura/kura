@@ -16,7 +16,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.example.logprovider.ExampleLogProvider"
          name="ExampleLogProvider"
-         description="Example of a Configuring Kura Application.">
+         description="Implementation of a log provider that reads entries from the specified Log File path. Refresh the browser window after the changes.">
          
         <AD id="logFilePath"
             name="Log file path"

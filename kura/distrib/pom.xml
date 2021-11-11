@@ -551,6 +551,11 @@
                                     <artifactId>org.eclipse.kura.core.keystore</artifactId>
                                     <version>${org.eclipse.kura.core.keystore.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.filesystem.logprovider</artifactId>
+                                    <version>${org.eclipse.kura.filesystem.logprovider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -779,6 +784,8 @@
                                     tofile="target/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.keystore.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.filesystem.logprovider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.filesystem.logprovider_${org.eclipse.kura.filesystem.logprovider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

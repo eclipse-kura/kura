@@ -116,6 +116,8 @@
 
         <module>org.eclipse.kura.network.threat.manager</module>
         <module>org.eclipse.kura.core.tamper.detection</module>
+        
+        <module>org.eclipse.kura.filesystem.logprovider</module>
 
         <module>features</module>
         <module>emulator</module>

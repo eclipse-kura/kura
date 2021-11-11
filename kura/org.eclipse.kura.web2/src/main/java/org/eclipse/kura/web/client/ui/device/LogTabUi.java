@@ -71,14 +71,14 @@ public class LogTabUi extends Composite {
     @UiField
     TextArea logTextArea;
     @UiField
-    ListBox logReaderListBox;
+    ListBox logProviderListBox;
     @UiField
     CheckBox showStackTraceCheckbox;
     @UiField
     CheckBox showMoreInfoCheckbox;
 
     private List<GwtLogEntry> logs = new LinkedList<>();
-    private boolean hasLogReader = false;
+    private boolean hasLogProvider = false;
     private boolean autoFollow = true;
 
     public LogTabUi() {
@@ -107,12 +107,11 @@ public class LogTabUi extends Composite {
 
         this.logTextArea.setVisibleLines(30);
         this.logTextArea.setReadOnly(true);
-        this.logTextArea.setWidth("95%");
         this.logTextArea.addFocusHandler(focus -> {
             LogTabUi.this.autoFollow = false;
         });
 
-        initLogReaderListBox();
+        initLogProviderListBox();
 
         this.showStackTraceCheckbox.setValue(true);
         this.showMoreInfoCheckbox.setValue(false);
@@ -133,7 +132,7 @@ public class LogTabUi extends Composite {
     @Override
     public void onAttach() {
         super.onAttach();
-        if (this.hasLogReader) {
+        if (this.hasLogProvider) {
             LogPollService.getInstance().startLogPolling();
         }
     }
@@ -141,7 +140,7 @@ public class LogTabUi extends Composite {
     @Override
     public void onDetach() {
         super.onDetach();
-        if (this.hasLogReader) {
+        if (this.hasLogProvider) {
             LogPollService.getInstance().stopLogPolling();
         }
     }
@@ -150,7 +149,7 @@ public class LogTabUi extends Composite {
         this.session = currentSession;
     }
 
-    private void initLogReaderListBox() {
+    private void initLogProviderListBox() {
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
@@ -172,14 +171,14 @@ public class LogTabUi extends Composite {
                         if (pids.isEmpty()) {
                             hideLogSection();
                         } else {
-                            LogTabUi.this.hasLogReader = true;
+                            LogTabUi.this.hasLogProvider = true;
                             LogTabUi.this.deviceLogsPanel.setVisible(true);
 
                             for (String pid : pids) {
-                                LogTabUi.this.logReaderListBox.addItem(pid, pid);
+                                LogTabUi.this.logProviderListBox.addItem(pid, pid);
                             }
 
-                            LogTabUi.this.logReaderListBox.addChangeHandler(changeEvent -> displayLogs());
+                            LogTabUi.this.logProviderListBox.addChangeHandler(changeEvent -> displayLogs());
                         }
                     }
 
@@ -193,9 +192,9 @@ public class LogTabUi extends Composite {
         StringBuilder displayedText = new StringBuilder();
 
         for (GwtLogEntry entry : this.logs) {
-            if (this.logReaderListBox.getSelectedValue().equals(entry.getSourceLogReaderPid())) {
+            if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogReaderPid())) {
                 displayedText.append(entry.getSourceRealtimeTimestamp());
-                displayedText.append(" [priority: ");
+                displayedText.append("\t[priority: ");
                 displayedText.append(entry.getPriority());
                 if (this.showMoreInfoCheckbox.getValue().booleanValue()) {
                     displayedText.append(" - PID: ");
@@ -223,7 +222,7 @@ public class LogTabUi extends Composite {
     }
 
     private void hideLogSection() {
-        this.hasLogReader = false;
+        this.hasLogProvider = false;
         this.deviceLogsPanel.setVisible(false);
     }
 }

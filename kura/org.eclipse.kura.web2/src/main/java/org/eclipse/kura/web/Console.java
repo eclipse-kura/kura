@@ -48,6 +48,7 @@ import org.eclipse.kura.web.server.GwtDriverAndAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
 import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
 import org.eclipse.kura.web.server.GwtKeystoreServiceImpl;
+import org.eclipse.kura.web.server.GwtLogServiceImpl;
 import org.eclipse.kura.web.server.GwtLoginInfoServiceImpl;
 import org.eclipse.kura.web.server.GwtNetworkServiceImpl;
 import org.eclipse.kura.web.server.GwtPackageServiceImpl;
@@ -290,6 +291,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/status");
         this.httpService.unregister(DENALI_MODULE_PATH + "/device");
+        this.httpService.unregister(DENALI_MODULE_PATH + "/logservice");
         this.httpService.unregister(DENALI_MODULE_PATH + "/network");
         this.httpService.unregister(DENALI_MODULE_PATH + "/component");
         this.httpService.unregister(DENALI_MODULE_PATH + "/package");
@@ -435,6 +437,8 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/device", new GwtDeviceServiceImpl(), null,
+                this.sessionContext);
+        this.httpService.registerServlet(DENALI_MODULE_PATH + "/logservice", new GwtLogServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/network", new GwtNetworkServiceImpl(), null,
                 this.sessionContext);

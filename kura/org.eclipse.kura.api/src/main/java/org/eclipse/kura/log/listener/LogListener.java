@@ -19,7 +19,7 @@ import org.osgi.annotation.versioning.ConsumerType;
  * Listener interface to be implemented by applications that need to be notified of events in the {@link LogProvider}.
  *
  * @noextend This class is not intended to be extended by clients.
- * @since 1.0
+ * @since 2.3
  */
 @ConsumerType
 public interface LogListener {

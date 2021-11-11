@@ -19,7 +19,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * The LogProvider interface is implemented by all the services responsible to notify {@link LogListener}.
  *
  * @noextend This class is not intended to be extended by clients.
- * @since 1.0
+ * @since 2.3
  */
 @ProviderType
 public interface LogProvider {

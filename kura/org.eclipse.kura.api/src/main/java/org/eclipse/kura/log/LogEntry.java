@@ -27,7 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * A {@code LogEntry} object contains all the information associated to a device log message. The log message can be
  * produced by the operating system, the framework, a bundle in the framework or other generic resource.
  *
- * @since 1.0
+ * @since 2.3
  */
 @Immutable
 @ThreadSafe

@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * processes running on the system.
  *
  * @noextend This class is not intended to be extended by clients.
- * @since 1.0
+ * @since 2.3
  */
 @ProviderType
 public interface LogReader extends LogProvider {

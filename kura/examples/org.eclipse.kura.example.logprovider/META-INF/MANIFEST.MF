@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.example.logprovider
+Bundle-SymbolicName: org.eclipse.kura.example.logprovider;singleton:=true
+Bundle-Version: 1.1.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.kura;version="[1.0,2.0)",
+ org.eclipse.kura.log;version="[1.0,1.1)",
+ org.eclipse.kura.log.listener;version="[1.0,2.0)",
+ org.eclipse.kura.configuration;version="[1.0,2.0)",
+ org.osgi.framework;version="1.8.0",
+ org.osgi.service.component;version="1.2.0",
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j;version="1.6.4"
+Bundle-ClassPath: .

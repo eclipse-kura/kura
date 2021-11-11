@@ -83,6 +83,7 @@
         <module>org.eclipse.kura.example.web.extension</module>
         <module>org.eclipse.kura.example.gpio.led</module>
         <module>org.eclipse.kura.example.tamper.detection</module>
+        <module>org.eclipse.kura.example.logprovider</module>
         <module>features</module>
         <module>test</module>
     </modules>

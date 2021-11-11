@@ -71,42 +71,44 @@ public class ExampleLogProvider implements ConfigurableComponent, LogProvider {
 
     private void notifyListeners(String newLogLine) {
 
-        String timestamp = "example_timestamp";
-        String pid = "example_pid";
-        String priority = "example_priority";
-        String message = newLogLine;
+        if (newLogLine != null) {
+            String timestamp = "example_timestamp";
+            String pid = "example_pid";
+            String priority = "example_priority";
+            String message = newLogLine;
 
-        if (this.filePath.contains("kura.log") && newLogLine != null) {
-            /*
-             * kura.log message format:
-             * 
-             * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
-             */
-            String[] splits = newLogLine.split(" ");
-            if (splits.length > 3) {
-                timestamp = splits[0];
-                pid = splits[1];
-                pid = pid.replace("[", "");
-                pid = pid.replace("]", "");
-                priority = splits[2];
-                StringBuilder sb = new StringBuilder();
-                for (int i = 3; i < splits.length; i++) {
-                    sb.append(splits[i]);
-                    sb.append(" ");
+            if (this.filePath.contains("kura.log")) {
+                /*
+                 * kura.log message format:
+                 * 
+                 * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
+                 */
+                String[] splits = newLogLine.split(" ");
+                if (splits.length > 3) {
+                    timestamp = splits[0];
+                    pid = splits[1];
+                    pid = pid.replace("[", "");
+                    pid = pid.replace("]", "");
+                    priority = splits[2];
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 3; i < splits.length; i++) {
+                        sb.append(splits[i]);
+                        sb.append(" ");
+                    }
+                    message = sb.toString();
                 }
-                message = sb.toString();
             }
-        }
 
-        for (LogListener listener : this.registeredListeners) {
-            Map<String, Object> entryProperties = new HashMap<>();
-            entryProperties.put("_SOURCE_REALTIME_TIMESTAMP", timestamp);
-            entryProperties.put("_PID", pid);
-            entryProperties.put("MESSAGE", message.trim());
-            entryProperties.put("PRIORITY", priority);
-            entryProperties.put("SYSLOG_IDENTIFIER", "Kura");
-            entryProperties.put("_TRANSPORT", this.filePath);
-            listener.newLogEntry(new LogEntry(entryProperties));
+            for (LogListener listener : this.registeredListeners) {
+                Map<String, Object> entryProperties = new HashMap<>();
+                entryProperties.put("_SOURCE_REALTIME_TIMESTAMP", timestamp);
+                entryProperties.put("_PID", pid);
+                entryProperties.put("MESSAGE", message.trim());
+                entryProperties.put("PRIORITY", priority);
+                entryProperties.put("SYSLOG_IDENTIFIER", "Kura");
+                entryProperties.put("_TRANSPORT", this.filePath);
+                listener.newLogEntry(new LogEntry(entryProperties));
+            }
         }
     }
 

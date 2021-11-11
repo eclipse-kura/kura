@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -47,9 +47,7 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
         loadLogReaders();
         registerLogListeners();
 
-        List<String> registeredPids = new ArrayList<>();
-        registeredPids.addAll(this.registeredLogProviders.keySet());
-        return registeredPids;
+        return new ArrayList<>(this.registeredLogProviders.keySet());
     }
 
     @Override
@@ -105,7 +103,7 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
 
     private final class LogEntriesCache {
 
-        private List<GwtLogEntry> cache = new LinkedList<>();
+        private final List<GwtLogEntry> cache = new LinkedList<>();
         private static final int MAX_CACHE_SIZE = 1000;
 
         public void add(GwtLogEntry newEntry) {

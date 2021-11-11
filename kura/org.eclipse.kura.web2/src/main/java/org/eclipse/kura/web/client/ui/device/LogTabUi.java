@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -77,7 +77,7 @@ public class LogTabUi extends Composite {
     @UiField
     CheckBox showMoreInfoCheckbox;
 
-    private List<GwtLogEntry> logs = new LinkedList<>();
+    private final List<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;
 
@@ -107,9 +107,7 @@ public class LogTabUi extends Composite {
 
         this.logTextArea.setVisibleLines(30);
         this.logTextArea.setReadOnly(true);
-        this.logTextArea.addFocusHandler(focus -> {
-            LogTabUi.this.autoFollow = false;
-        });
+        this.logTextArea.addFocusHandler(focus -> LogTabUi.this.autoFollow = false);
 
         initLogProviderListBox();
 
@@ -118,14 +116,9 @@ public class LogTabUi extends Composite {
         this.showStackTraceCheckbox.addClickHandler(click -> displayLogs());
         this.showMoreInfoCheckbox.addClickHandler(click -> displayLogs());
 
-        LogPollService.subscribe(new LogPollService.LogListener() {
-
-            @Override
-            public void onLogsReceived(List<GwtLogEntry> entries) {
-                LogTabUi.this.logs.addAll(entries);
-                displayLogs();
-            }
-
+        LogPollService.subscribe(entries -> {
+            LogTabUi.this.logs.addAll(entries);
+            displayLogs();
         });
     }
 

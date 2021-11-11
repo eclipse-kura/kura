@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -37,11 +37,11 @@ public class LogPollService {
 
     private boolean stop = false;
     private Timer resendTimer;
-    private List<LogListener> listeners = new LinkedList<>();
+    private final List<LogListener> listeners = new LinkedList<>();
     private static LogPollService instance = new LogPollService();
     private final GwtLogServiceAsync gwtLogService = GWT.create(GwtLogService.class);
 
-    private Logger logger = Logger.getLogger("LogPollService");
+    private final Logger logger = Logger.getLogger("LogPollService");
     private int rpcCount = 0;
 
     private LogPollService() {
@@ -100,7 +100,7 @@ public class LogPollService {
 
         @Override
         public void onSuccess(List<GwtLogEntry> result) {
-            logger.info("RPC successful. Count: " + rpcCount++);
+            LogPollService.this.logger.fine("RPC successful. Count: " + LogPollService.this.rpcCount++);
 
             int delay = RESEND_DELAY;
 

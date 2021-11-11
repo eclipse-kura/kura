@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -20,7 +20,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GwtLoginInfo implements IsSerializable, Serializable {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 4501114031863790538L;
 
@@ -39,14 +39,14 @@ public class GwtLoginInfo implements IsSerializable, Serializable {
     }
 
     public String getBannerContent() {
-        return bannerContent;
+        return this.bannerContent;
     }
 
     public Set<String> getEnabledAuthMethods() {
-        return enabledAuthMethods;
+        return this.enabledAuthMethods;
     }
 
     public Integer getCertAuthPort() {
-        return certAuthPort;
+        return this.certAuthPort;
     }
 }

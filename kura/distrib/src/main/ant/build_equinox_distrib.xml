@@ -1752,14 +1752,14 @@ fi]]>
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.filesystem.logprovider_${org.eclipse.kura.filesystem.logprovider.version}.jar@4:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 	<target name="filesystem-logprovider-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
 			update="true">
 			<zipfileset
-				file="${project.build.directory}/plugins/org.eclipse.kura.filesystem.logprovider_${org.eclipse.kura.filesystem.logprovider.version}.jar"
+				file="${project.build.directory}/plugins/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

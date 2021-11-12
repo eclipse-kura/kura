@@ -23,12 +23,12 @@
 		<version>5.1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>org.eclipse.kura.filesystem.logprovider</artifactId>
+	<artifactId>org.eclipse.kura.log.filesystem.provider</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>
 		<kura.basedir>${project.basedir}/..</kura.basedir>
-		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.linux.clock.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.log.filesystem.provider.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 </project>

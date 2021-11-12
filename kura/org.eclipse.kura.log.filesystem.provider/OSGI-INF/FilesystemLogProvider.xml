@@ -14,16 +14,16 @@
 
 -->
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.2.0"
-    name="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider"
+    name="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"
     activate="activate"
     deactivate="deactivate"
     modified="updated"
     enabled="true"
     immediate="true"
     configuration-policy="require">
-	<implementation class="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider"/>
+	<implementation class="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"/>
 
-    <property name="service.pid" type="String" value="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider"/>
+    <property name="service.pid" type="String" value="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"/>
     <service>
         <provide interface="org.eclipse.kura.log.LogProvider"/>
     </service>

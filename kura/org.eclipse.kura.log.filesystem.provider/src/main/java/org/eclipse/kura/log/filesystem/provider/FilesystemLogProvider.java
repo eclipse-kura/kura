@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.filesystem.logprovider;
+package org.eclipse.kura.log.filesystem.provider;
 
 import java.io.File;
 import java.io.FileNotFoundException;

@@ -14,7 +14,7 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider"
+    <OCD id="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"
          name="FilesystemLogProvider"
          description="Implementation of a log provider that reads entries from the specified log file path.">
          
@@ -28,7 +28,7 @@
         </AD>
 
     </OCD>
-    <Designate pid="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider" factoryPid="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider">
-        <Object ocdref="org.eclipse.kura.filesystem.logprovider.FilesystemLogProvider"/>
+    <Designate pid="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider" factoryPid="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider">
+        <Object ocdref="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"/>
     </Designate>
 </MetaData>

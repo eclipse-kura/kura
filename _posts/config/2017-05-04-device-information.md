@@ -35,7 +35,7 @@ The **System Properties** tab shows a list of relevant properties including OS a
 A detailed description of this tab is presented in the [Command Service](../builtin/command-service.html) page.
 
 ## System Logs
-The **System Logs** tab allows displaying system logs in real-time if a component that implements `LogProvider` API is installed and running on the system. This section also provides a way to download a compressed file containing all the relevant log files from the gateway, which is always visible. A reference `LogProvider` example is implemented in the project `org.eclipse.kura.example.logprovider`.
+The **System Logs** tab allows displaying system logs in real-time if a component that implements `LogProvider` API is installed and running on the system. This section also provides a way to download a compressed file containing all the relevant log files from the gateway, which is always visible. A reference `LogProvider` is implemented in the bundle `org.eclipse.kura.log.filesystem.provider` which creates two log providers at startup; one that reads from `/var/log/kura.log` and the other that reads from `/var/log/kura-audit.log`.
 
 The collected logs are stored in a cache server-side and are collected from the point in time where the log providers get attached to the UI (usually, from the login or after a refresh of the browser's window). When the section "System Logs" is accessed, the new log entries are polled from the server's cache and stored client-side.
 

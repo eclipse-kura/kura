@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -21,10 +21,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.log.LogProvider;
-import org.eclipse.kura.log.LogEntry;
-import org.eclipse.kura.log.listener.LogListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.log.LogEntry;
+import org.eclipse.kura.log.LogProvider;
+import org.eclipse.kura.log.listener.LogListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemLogProvider.class);
 
-    private List<LogListener> registeredListeners = new LinkedList<>();
+    private final List<LogListener> registeredListeners = new LinkedList<>();
     private FileLogReader readerThread;
     private String filePath;
 
@@ -69,53 +69,10 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         this.registeredListeners.remove(listener);
     }
 
-    private void notifyListeners(String newLogLine) {
-
-        if (newLogLine != null) {
-            String timestamp = "example_timestamp";
-            String pid = "example_pid";
-            String priority = "example_priority";
-            String message = newLogLine;
-
-            if (this.filePath.contains("kura.log")) {
-                /*
-                 * kura.log message format:
-                 * 
-                 * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
-                 */
-                String[] splits = newLogLine.split(" ");
-                if (splits.length > 3) {
-                    timestamp = splits[0];
-                    pid = splits[1];
-                    pid = pid.replace("[", "");
-                    pid = pid.replace("]", "");
-                    priority = splits[2];
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 3; i < splits.length; i++) {
-                        sb.append(splits[i]);
-                        sb.append(" ");
-                    }
-                    message = sb.toString();
-                }
-            }
-
-            for (LogListener listener : this.registeredListeners) {
-                Map<String, Object> entryProperties = new HashMap<>();
-                entryProperties.put("_SOURCE_REALTIME_TIMESTAMP", timestamp);
-                entryProperties.put("_PID", pid);
-                entryProperties.put("MESSAGE", message.trim());
-                entryProperties.put("PRIORITY", priority);
-                entryProperties.put("SYSLOG_IDENTIFIER", "Kura");
-                entryProperties.put("_TRANSPORT", this.filePath);
-                listener.newLogEntry(new LogEntry(entryProperties));
-            }
-        }
-    }
-
-    public class FileLogReader extends Thread {
+    class FileLogReader extends Thread {
 
         private static final long SAMPLE_INTERVAL = 100;
-        private File logFile;
+        private final File logFile;
         private boolean follow = true;
 
         public FileLogReader(String filePath) {
@@ -151,11 +108,54 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             } catch (FileNotFoundException fnf) {
                 logger.error("File '{}' not found.", this.logFile);
             } catch (IOException ioe) {
-                logger.error("IOException {}", ioe.getStackTrace());
+                logger.error("IOException in FilesystemLogProvider", ioe);
             } catch (Exception e) {
-                logger.error("Unexpected exception in FilesystemLogProvider: {}", e.getStackTrace());
+                logger.error("Unexpected exception in FilesystemLogProvider", e);
             } finally {
                 Thread.currentThread().interrupt();
+            }
+        }
+
+        private void notifyListeners(String newLogLine) {
+
+            if (newLogLine != null) {
+                String timestamp = "example_timestamp";
+                String pid = "example_pid";
+                String priority = "example_priority";
+                String message = newLogLine;
+
+                if (FilesystemLogProvider.this.filePath.contains("kura.log")) {
+                    /*
+                     * kura.log message format:
+                     *
+                     * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
+                     */
+                    String[] splits = newLogLine.split(" ");
+                    if (splits.length > 3) {
+                        timestamp = splits[0];
+                        pid = splits[1];
+                        pid = pid.replace("[", "");
+                        pid = pid.replace("]", "");
+                        priority = splits[2];
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 3; i < splits.length; i++) {
+                            sb.append(splits[i]);
+                            sb.append(" ");
+                        }
+                        message = sb.toString();
+                    }
+                }
+
+                for (LogListener listener : FilesystemLogProvider.this.registeredListeners) {
+                    Map<String, Object> entryProperties = new HashMap<>();
+                    entryProperties.put("_SOURCE_REALTIME_TIMESTAMP", timestamp);
+                    entryProperties.put("_PID", pid);
+                    entryProperties.put("MESSAGE", message.trim());
+                    entryProperties.put("PRIORITY", priority);
+                    entryProperties.put("SYSLOG_IDENTIFIER", "Kura");
+                    entryProperties.put("_TRANSPORT", FilesystemLogProvider.this.filePath);
+                    listener.newLogEntry(new LogEntry(entryProperties));
+                }
             }
         }
     }

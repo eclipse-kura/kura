@@ -21,10 +21,13 @@ The **Wireless** tab contains the following configuration parameters:
 
 
 - **Radio Mode** - defines 802.11 mode.
+
+  - 802.11 ac/n/a (either in 2.4Ghz or 5Ghz depending on the choosen channel)
   - 802.11n/g/b (2.4Ghz only)
   - 802.11g/b (2.4Ghz only)
   - 802.11b (2.4Ghz only)
-  - 802.11a (either in 2.4Ghz or 5Ghz depending on the choosen channel. )
+  - 802.11a (either in 2.4Ghz or 5Ghz depending on the choosen channel)
+
 
 
 - **Wireless Security** - sets the security protocol for the wireless network.
@@ -85,7 +88,7 @@ The **Wireless** tab contains the following configuration parameters:
   - In _Station_ mode, does not scan for the SSID before attempting to associate.
 
 
-- **Channels table** - allows the selection of desired channel frequencies from Channel 1 (2412 MHz) to Channel 11 (2462 MHz).
+- **Channels table** - allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: [List of WLAN channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels). Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip.
   - In _Access Point_ mode, only one channel may be selected.
   - In _Station_ mode, a user may select multiple channels to scan. Note that choosing to scan multiple channels increases the time it takes to associate with an access point.
 

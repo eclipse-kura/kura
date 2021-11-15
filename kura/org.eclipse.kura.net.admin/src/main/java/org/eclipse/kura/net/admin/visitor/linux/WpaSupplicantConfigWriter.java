@@ -371,6 +371,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             } else {
                 throw KuraException.internalError("the passwd can not be null");
             }
+        } else {
+            result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(passKey));
         }
 
         String replacement;

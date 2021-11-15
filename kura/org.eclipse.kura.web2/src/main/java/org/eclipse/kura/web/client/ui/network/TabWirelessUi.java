@@ -600,7 +600,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                     setForm(false);
                 }
 
-                loadChannelFrequencies();
+                loadRadioMode();
 
                 this.radio.setEnabled(true);
                 this.groupVerify.setVisible(true);
@@ -1161,7 +1161,14 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                         TabWirelessUi.this.countryCode.setText(countryCode);
                         TabWirelessUi.this.activeConfig.setCountryCode(countryCode);
 
-                        loadRadioMode();
+                        if (isActiveConfigInAPMode()) {
+                            loadRadioMode();
+                        } else {
+                            // Useless but we fill the field.
+                            TabWirelessUi.this.radio
+                                    .addItem(MessageUtils.get(GwtWifiRadioMode.netWifiRadioModeBGN.name()));
+                            setRadioModeByValue(GwtWifiRadioMode.netWifiRadioModeBGN.name());
+                        }
                     }
                 });
             }
@@ -1331,6 +1338,8 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     }
 
     private void addItemChannelList(GwtWifiChannelFrequency channelFrequency) {
+
+        logger.fine("Adding channel: " + channelFrequency.getChannel());
 
         if (channelFrequency.getChannel() == 0 && channelFrequency.getFrequency() == 0) {
             this.channelList.addItem(AUTOMATIC_CHANNEL_DESCRIPTION);
@@ -1662,6 +1671,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                     int channelIndex = selectedChannelIndex == -1 ? 0
                                             : getSelectedChannelIndex(channel);
 
+                                    logger.fine("Setting channel to: " + channel);
                                     TabWirelessUi.this.channelList.setSelectedIndex(channelIndex);
 
                                     boolean hasChannels = TabWirelessUi.this.channelList.getItemCount() > 0;
@@ -1711,7 +1721,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                 String radioMode = TabWirelessUi.this.activeConfig.getRadioMode();
 
-                                logger.severe("Found radio mode in activeConfig: " + radioMode);
+                                logger.fine("Found radio mode in activeConfig: " + radioMode);
 
                                 setRadioModeByValue(TabWirelessUi.this.activeConfig.getRadioMode());
 

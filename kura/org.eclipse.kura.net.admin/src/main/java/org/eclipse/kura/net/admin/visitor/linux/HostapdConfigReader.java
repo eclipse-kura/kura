@@ -124,7 +124,9 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
 
     private void setWifiRadioMode(WifiConfig wifiConfig, WifiRadioMode wifiRadioMode) {
         // hw mode
-        if (wifiRadioMode == WifiRadioMode.RADIO_MODE_80211b) {
+        if (wifiRadioMode == WifiRadioMode.RADIO_MODE_80211a || wifiRadioMode == WifiRadioMode.RADIO_MODE_80211_AC) {
+            wifiConfig.setHardwareMode("a");
+        } else if (wifiRadioMode == WifiRadioMode.RADIO_MODE_80211b) {
             wifiConfig.setHardwareMode("b");
         } else if (wifiRadioMode == WifiRadioMode.RADIO_MODE_80211g) {
             wifiConfig.setHardwareMode("g");
@@ -183,7 +185,13 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
         WifiRadioMode wifiRadioMode = null;
         String hwModeStr = hostapdProps.getProperty("hw_mode");
         if ("a".equals(hwModeStr)) {
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
+            String ieee80211ac = hostapdProps.getProperty("ieee80211ac", "0");
+
+            if (("1").equals(ieee80211ac)) {
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
+            } else {
+                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
+            }
         } else if ("b".equals(hwModeStr)) {
             wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
         } else if ("g".equals(hwModeStr)) {
@@ -198,8 +206,6 @@ public class HostapdConfigReader extends WifiConfigReaderHelper implements Netwo
                         wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT40below;
                     }
                 }
-            } else if ("ac".equals(hwModeStr)) {
-                wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
             }
         } else {
             throw KuraException.internalError("malformatted config file, unexpected hw_mode");

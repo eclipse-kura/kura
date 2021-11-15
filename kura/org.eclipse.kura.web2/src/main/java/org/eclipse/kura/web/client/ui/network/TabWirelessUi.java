@@ -1709,6 +1709,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                     TabWirelessUi.this.radio.addItem(MessageUtils.get(mode.name()));
                                 }
 
+                                String radioMode = TabWirelessUi.this.activeConfig.getRadioMode();
+
+                                logger.severe("Found radio mode in activeConfig: " + radioMode);
+
                                 setRadioModeByValue(TabWirelessUi.this.activeConfig.getRadioMode());
 
                                 loadChannelFrequencies();

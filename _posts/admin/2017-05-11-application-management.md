@@ -19,3 +19,10 @@ Upon a successful installation, the new component appears in the Services list (
 The application and components in the [Eclipse Marketplace™](https://marketplace.eclipse.org/taxonomy/term/4397%2C4396/title) can be easily installed in Kura dragging the _Install_ button directly to the gray area in the **Packages** tab, as shown below.
 
 ![]({{ site.baseurl }}/assets/images/admin/marketplaceInstall.png)
+
+## Package Signature
+
+Once the selected application deployment package (dp) file is installed, it will be listed in the **Packages** page and detailed with the name of the deployment package, the version and the signature status.
+The value of the signature field can be **true** if all the bundles contained in the deployment package are digitally signed, or **false** if at least one of the bundles is not signed.
+
+![]({{ site.baseurl }}/assets/images/admin/dpsignature.png)

@@ -4,7 +4,7 @@ title:  "Device Information"
 categories: [config]
 ---
 
-Along with the **Status** of a Kura Gateway, the **Device** section provides several information about the  gateway where Kura is running on. This section can be accessed by selecting the **Device** option located in the **System** area. 
+Along with the **Status** of a Kura Gateway, the **Device** section provides several information about the  gateway where Kura is running on. This section can be accessed by selecting the **Device** option located in the **System** area.
 
 ## Profile
 The **Profile** tab shows several information about the gateway, organized under the Device, Hardware, Software and Java Information.
@@ -12,7 +12,8 @@ The **Profile** tab shows several information about the gateway, organized under
 ![]({{ site.baseurl }}/assets/images/config/DeviceProfile.png)
 
 ## Bundles
-This tab lists all the bundles installed on ESF, with details about the name, version, id and state.
+This tab lists all the bundles installed on ESF, with details about the name, version, id, state and signature.
+The signature value will be **true** if the corresponding bundle is digitally signed, **false** otherwise.
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceBundles.png)
 

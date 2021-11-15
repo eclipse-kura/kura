@@ -36,11 +36,13 @@ The **System Properties** tab shows a list of relevant properties including OS a
 A detailed description of this tab is presented in the [Command Service](../builtin/command-service.html) page.
 
 ## System Logs
-The **System Logs** tab allows to download a compressed file containing all the relevant log files from the gateway. In particular the following items will be added to the compressed file:
+The **System Logs** tab allows to download a compressed file containing all the relevant log files from the gateway. The download button creates and downloads a compressed file with the following items:
 
-- all the files in /var/log or the the content of the folder defined by the kura.log.download.sources property;
-- the content of the journal for the Kura process (kura-journal.log);
-- the content of the journal for the whole system (system-journal.log).
-
+ - all the files in /var/log or the the content of the folder defined by the kura.log.download.sources property;
+ - the content of the journal for the Kura process (kura-journal.log);
+ - the content of the journal for the whole system (system-journal.log).
+ 
+In addition to this feature, the page also allows the real-time displaying of system logs, if the framework has the availability of one or more components that  implement the `LogProvider` API.
+A reference implementation of the `LogProvider` API is provided in the  `org.eclipse.kura.log.filesystem.provider` bundle. This bundle exposes in the framework a factory that can be used to read filesystem files. By default, Eclipse Kura creates two log providers at startup: one that reads from `/var/log/kura.log` and the other that reads from `/var/log/kura-audit.log`
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceSystemLogs.png)

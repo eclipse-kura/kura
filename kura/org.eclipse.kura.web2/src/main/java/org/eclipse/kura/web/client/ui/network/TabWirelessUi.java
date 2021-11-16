@@ -561,10 +561,21 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         logger.severe("set values done.");
     }
 
-    private void setRadioModeByValue(String activeRadioMode) {
-        if (activeRadioMode != null) {
+    private void setRadioModeByValue(String radioModeValue) {
+        if (radioModeValue != null) {
             for (int i = 0; i < this.radio.getItemCount(); i++) {
-                if (this.radio.getItemText(i).equals(MessageUtils.get(activeRadioMode))) {
+                if (this.radio.getItemText(i).equals(MessageUtils.get(radioModeValue))) {
+                    this.radio.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void setRadioModeByText(String radioModeText) {
+        if (radioModeText != null) {
+            for (int i = 0; i < this.radio.getItemCount(); i++) {
+                if (this.radio.getItemText(i).equals(radioModeText)) {
                     this.radio.setSelectedIndex(i);
                     break;
                 }
@@ -1709,6 +1720,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                             @Override
                             public void onSuccess(Boolean acSupported) {
 
+                                String selectedRadioModeText = TabWirelessUi.this.radio.getSelectedItemText() != null
+                                        ? TabWirelessUi.this.radio.getSelectedItemText()
+                                        : null;
+
                                 TabWirelessUi.this.radio.clear();
 
                                 for (GwtWifiRadioMode mode : GwtWifiRadioMode.values()) {
@@ -1719,11 +1734,14 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                                     TabWirelessUi.this.radio.addItem(MessageUtils.get(mode.name()));
                                 }
 
-                                String radioMode = TabWirelessUi.this.activeConfig.getRadioMode();
-
-                                logger.fine("Found radio mode in activeConfig: " + radioMode);
-
-                                setRadioModeByValue(TabWirelessUi.this.activeConfig.getRadioMode());
+                                if (selectedRadioModeText != null) {
+                                    logger.fine("selectedRadioModeText: " + selectedRadioModeText);
+                                    setRadioModeByText(selectedRadioModeText);
+                                } else {
+                                    logger.fine("TabWirelessUi.this.activeConfig.getRadioMode(): "
+                                            + TabWirelessUi.this.activeConfig.getRadioMode());
+                                    setRadioModeByValue(TabWirelessUi.this.activeConfig.getRadioMode());
+                                }
 
                                 loadChannelFrequencies();
                             }

@@ -82,6 +82,5 @@ public interface GwtNetworkService extends RemoteService {
     public List<GwtModemPdpEntry> findPdpContextInfo(GwtXSRFToken xsrfToken, String interfaceName)
             throws GwtKuraException;
 
-    @Audit(componentName = "UI Network", description = "Verify ieee80211ac is supported")
     public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException;
 }

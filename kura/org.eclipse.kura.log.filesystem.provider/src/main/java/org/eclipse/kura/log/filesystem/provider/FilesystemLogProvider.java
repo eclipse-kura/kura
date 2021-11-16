@@ -14,7 +14,6 @@ package org.eclipse.kura.log.filesystem.provider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 public class FilesystemLogProvider implements ConfigurableComponent, LogProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(FilesystemLogProvider.class);
+    public static final String LOG_FILEPATH_PROP_KEY = "logFilePath";
 
     private List<LogListener> registeredListeners = new LinkedList<>();
     private FileLogReader readerThread;
@@ -37,22 +37,24 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
 
     protected void activate(Map<String, Object> properties) {
         logger.info("Activating FilesystemLogProvider...");
-        this.filePath = (String) properties.get("logFilePath");
-        this.readerThread = new FileLogReader(this.filePath);
-        this.readerThread.start();
+        updated(properties);
         logger.info("Activating FilesystemLogProvider... Done.");
     }
 
     protected void deactivate() {
         logger.info("Deactivating FilesystemLogProvider...");
-        this.readerThread.interrupt();
+        if (this.readerThread != null) {
+            this.readerThread.interrupt();
+        }
         logger.info("Deactivating FilesystemLogProvider... Done.");
     }
 
     public void updated(Map<String, Object> properties) {
         logger.info("Updated FilesystemLogProvider...");
-        this.readerThread.interrupt();
-        this.filePath = (String) properties.get("logFilePath");
+        if (this.readerThread != null) {
+            this.readerThread.interrupt();
+        }
+        this.filePath = (String) properties.get(LOG_FILEPATH_PROP_KEY);
         this.readerThread = new FileLogReader(this.filePath);
         this.readerThread.start();
         logger.info("Updated FilesystemLogProvider... Done.");
@@ -106,8 +108,6 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
                 }
             } catch (FileNotFoundException fnf) {
                 logger.error("File '{}' not found.", this.logFile.getPath());
-            } catch (IOException ioe) {
-                logger.error("IOException {}", ioe.getMessage());
             } catch (InterruptedException ie) {
                 // nothing to do
             } catch (Exception e) {

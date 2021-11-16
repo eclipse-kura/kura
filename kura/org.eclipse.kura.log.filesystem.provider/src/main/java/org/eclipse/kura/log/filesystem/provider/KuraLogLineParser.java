@@ -19,6 +19,12 @@ import org.eclipse.kura.log.LogEntry;
 
 public class KuraLogLineParser {
 
+    public static final String DEFAULT_TIMESTAMP = "undefined";
+    public static final String DEFAULT_PID = "undefined";
+    public static final String DEFAULT_PRIORITY = "INFO";
+    public static final String DEFAULT_SYSLOG_IDENTIFIER = "Kura";
+    public static final String DEFAULT_STACKTRACE = "";
+
     private String timestamp;
     private String pid;
     private String priority;
@@ -30,13 +36,13 @@ public class KuraLogLineParser {
     private static KuraLogLineParser instance;
 
     private KuraLogLineParser(String logLine, String filepath) {
-        this.timestamp = "example_timestamp";
-        this.pid = "example_pid";
-        this.priority = "example_priority";
+        this.timestamp = DEFAULT_TIMESTAMP;
+        this.pid = DEFAULT_PID;
+        this.priority = DEFAULT_PRIORITY;
         this.message = logLine;
         this.transport = filepath;
-        this.syslogIdentifier = "Kura";
-        this.stackTrace = "";
+        this.syslogIdentifier = DEFAULT_SYSLOG_IDENTIFIER;
+        this.stackTrace = DEFAULT_STACKTRACE;
     }
 
     public static LogEntry stringToLogEntry(String logLine, String filepath) {

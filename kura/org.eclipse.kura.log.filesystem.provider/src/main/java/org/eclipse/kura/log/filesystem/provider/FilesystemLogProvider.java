@@ -111,7 +111,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             } catch (InterruptedException ie) {
                 // nothing to do
             } catch (Exception e) {
-                logger.error("Unexpected exception in FilesystemLogProvider: {}", e.getMessage());
+                logger.error("Unexpected exception in FilesystemLogProvider.", e);
             } finally {
                 Thread.currentThread().interrupt();
             }

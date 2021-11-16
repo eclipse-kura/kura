@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -19,10 +19,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.log.LogProvider;
-import org.eclipse.kura.log.LogEntry;
-import org.eclipse.kura.log.listener.LogListener;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.log.LogEntry;
+import org.eclipse.kura.log.LogProvider;
+import org.eclipse.kura.log.listener.LogListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
     private static final Logger logger = LoggerFactory.getLogger(FilesystemLogProvider.class);
     public static final String LOG_FILEPATH_PROP_KEY = "logFilePath";
 
-    private List<LogListener> registeredListeners = new LinkedList<>();
+    private final List<LogListener> registeredListeners = new LinkedList<>();
     private FileLogReader readerThread;
     private String filePath;
 
@@ -70,10 +70,10 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         this.registeredListeners.remove(listener);
     }
 
-    public class FileLogReader extends Thread {
+    class FileLogReader extends Thread {
 
         private static final long SAMPLE_INTERVAL = 100;
-        private File logFile;
+        private final File logFile;
         private boolean follow = true;
 
         public FileLogReader(String filePath) {

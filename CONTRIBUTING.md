@@ -88,6 +88,8 @@ You can find all the details in the [Contributing via Git](http://wiki.eclipse.o
 
 Eclipse Kura since 5.1.0 version only accepts tests made following Gherkin format.
 
+Extend the old tests files is still allowed but not creating new ones.
+
 ### Gherkin Tests Guidelines
 
 Gherkin is a particular language that originates from Behavioral-Driven Development (BDD). In BDD, the developer defines tests that will guide the development and constitute a requirement. The tests are written by first defining the **feature** that is going to be tested, then defining the most relevant execution paths for that feature, called **scenarios**, and, finally, detailing the scenarios into simple **steps** using Gherkin language.

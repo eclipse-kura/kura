@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.log.filesystem.provider.test
+Bundle-SymbolicName: org.eclipse.kura.log.filesystem.provider.test;singleton:=true
+Bundle-Version: 5.1.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Fragment-Host: org.eclipse.kura.log.filesystem.provider
+Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
+ org.junit;version="4.12.0",
+ org.junit.runner;version="4.12.0",
+ org.junit.runners;version="4.12.0",
+ org.mockito;version="1.10.19",
+ org.mockito.invocation;version="1.10.19",
+ org.mockito.stubbing;version="1.10.19",
+ org.osgi.framework;version="1.7",
+ org.eclipse.kura.log;version="[1.0,1.1)",
+ org.eclipse.kura.log.listener;version="[1.0,2.0)"
+Bundle-ActivationPolicy: lazy

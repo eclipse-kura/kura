@@ -17,7 +17,7 @@ import java.util.Map;
 
 import org.eclipse.kura.log.LogEntry;
 
-public class KuraLogLineParser {
+public final class KuraLogLineParser {
 
     public static final String DEFAULT_TIMESTAMP = "undefined";
     public static final String DEFAULT_PID = "undefined";

@@ -200,7 +200,7 @@ public class LogTabUi extends Composite {
                 displayedText.append("]\nMessage: ");
                 displayedText.append(entry.getMessage());
                 if (this.showStackTraceCheckbox.getValue().booleanValue() && entry.getStacktrace() != null
-                        && !entry.getStacktrace().equals("undefined")) {
+                        && !entry.getStacktrace().equals("undefined") && !entry.getStacktrace().equals("")) {
                     displayedText.append("\nStacktrace: ");
                     displayedText.append(entry.getStacktrace());
                 }

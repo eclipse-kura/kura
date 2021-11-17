@@ -33,6 +33,7 @@ import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.executor.CommandStatus;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -63,6 +64,10 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     private static final String WPA_SUPPLICANT_CONF_RESOURCE = "/src/main/resources/wifi/wpasupplicant.conf";
 
     private static final String HEXES = "0123456789ABCDEF";
+
+    private static final String KURA_COUNTRY_CODE = "KURA_COUNTRY_CODE";
+
+    private static final String WORLD_REGION_COUNTRY_CODE = "00";
 
     private static WpaSupplicantConfigWriter instance;
     private CommandExecutorService executorService;
@@ -293,10 +298,27 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateBgScan(wifiConfig, fileAsString);
 
+        fileAsString = updateCountryCode(getWifiCountryCode(), fileAsString);
+
         fileAsString = fileAsString.replaceFirst("KURA_SCANFREQ", getScanFrequenciesMHz(wifiConfig.getChannels()));
 
         // everything is set and we haven't failed - write the file
         copyFile(fileAsString, Paths.get(configFile));
+    }
+
+    private String updateCountryCode(String countryCode, String fileAsString) {
+
+        if (countryCode != null && !countryCode.isEmpty()) {
+            fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, countryCode);
+        } else {
+            fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, WORLD_REGION_COUNTRY_CODE);
+        }
+
+        return fileAsString;
+    }
+
+    private String getWifiCountryCode() throws KuraException {
+        return IwCapabilityTool.getWifiCountryCode(this.executorService);
     }
 
     private String getAndUpdateModeContent(WifiConfig wifiConfig, String infraResource, String adhocResource,
@@ -349,6 +371,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             } else {
                 throw KuraException.internalError("the passwd can not be null");
             }
+        } else {
+            result = result.replaceFirst("KURA_PASSPHRASE", Matcher.quoteReplacement(passKey));
         }
 
         String replacement;

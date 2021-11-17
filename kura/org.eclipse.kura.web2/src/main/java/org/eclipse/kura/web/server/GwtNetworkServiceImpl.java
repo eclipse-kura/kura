@@ -96,6 +96,7 @@ import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtWifiBgscanModule;
+import org.eclipse.kura.web.shared.model.GwtWifiChannelFrequency;
 import org.eclipse.kura.web.shared.model.GwtWifiCiphers;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiHotspotEntry;
@@ -453,6 +454,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     case RADIO_MODE_80211nHT40above:
                                     case RADIO_MODE_80211nHT40below:
                                         gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeBGN;
+                                        break;
+                                    case RADIO_MODE_80211_AC:
+                                        gwtWifiRadioMode = GwtWifiRadioMode.netWifiRadioModeANAC;
                                         break;
                                     default:
                                         break;
@@ -1046,7 +1050,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                         GwtWifiCiphers gwtPairCiphers = null;
                         GwtWifiCiphers gwtGroupCiphers = null;
-                        EnumSet<WifiSecurity> pairCiphers = (EnumSet<WifiSecurity>) wifiHotspotInfo.getPairCiphers();
+                        EnumSet<WifiSecurity> pairCiphers = wifiHotspotInfo.getPairCiphers();
                         Iterator<WifiSecurity> itPairCiphers = pairCiphers.iterator();
                         while (itPairCiphers.hasNext()) {
                             WifiSecurity cipher = itPairCiphers.next();
@@ -1067,7 +1071,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                             }
                         }
 
-                        EnumSet<WifiSecurity> groupCiphers = (EnumSet<WifiSecurity>) wifiHotspotInfo.getGroupCiphers();
+                        EnumSet<WifiSecurity> groupCiphers = wifiHotspotInfo.getGroupCiphers();
                         Iterator<WifiSecurity> itGroupCiphers = groupCiphers.iterator();
                         while (itGroupCiphers.hasNext()) {
                             WifiSecurity cipher = itGroupCiphers.next();
@@ -1482,7 +1486,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) {
+    private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) throws GwtKuraException {
 
         WifiConfig wifiConfig = new WifiConfig();
 
@@ -1496,7 +1500,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         WifiRadioMode wifiRadioMode = getWifiConfigRadioMode(gwtWifiConfig.getRadioModeEnum());
         wifiConfig.setRadioMode(wifiRadioMode);
 
-        String hardwareMode = getWifiConfigHardwareMode(gwtWifiConfig.getRadioModeEnum());
+        String hardwareMode = gwtWifiConfig.getRadioModeEnum().getRadioMode();
         wifiConfig.setHardwareMode(hardwareMode);
 
         int[] wifiConfigChannels = getWifiConfigChannels(gwtWifiConfig.getChannels());
@@ -1527,6 +1531,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
 
         wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
+
+        wifiConfig.setWifiCountryCode(gwtWifiConfig.getCountryCode());
 
         return wifiConfig;
     }
@@ -1588,32 +1594,31 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return channels;
     }
 
-    private WifiRadioMode getWifiConfigRadioMode(GwtWifiRadioMode radioMode) {
+    private WifiRadioMode getWifiConfigRadioMode(GwtWifiRadioMode radioMode) throws GwtKuraException {
         WifiRadioMode wifiRadioMode;
-        if (radioMode == GwtWifiRadioMode.netWifiRadioModeA) {
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
-        } else if (radioMode.equals(GwtWifiRadioMode.netWifiRadioModeB)) {
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
-        } else if (radioMode.equals(GwtWifiRadioMode.netWifiRadioModeBG)) {
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
-        } else {
-            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
-        }
-        return wifiRadioMode;
-    }
 
-    private String getWifiConfigHardwareMode(GwtWifiRadioMode radioMode) {
-        String hardwareMode;
-        if (radioMode == GwtWifiRadioMode.netWifiRadioModeA) {
-            hardwareMode = "a";
-        } else if (radioMode == GwtWifiRadioMode.netWifiRadioModeB) {
-            hardwareMode = "b";
-        } else if (radioMode == GwtWifiRadioMode.netWifiRadioModeBG) {
-            hardwareMode = "g";
-        } else {
-            hardwareMode = "n";
+        switch (radioMode) {
+        case netWifiRadioModeA:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211a;
+            break;
+        case netWifiRadioModeB:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211b;
+            break;
+        case netWifiRadioModeBG:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211g;
+            break;
+        case netWifiRadioModeBGN:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211nHT20;
+            break;
+        case netWifiRadioModeANAC:
+            wifiRadioMode = WifiRadioMode.RADIO_MODE_80211_AC;
+            break;
+
+        default:
+            throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
         }
-        return hardwareMode;
+
+        return wifiRadioMode;
     }
 
     private WifiMode getWifiConfigWirelessMode(String mode) {
@@ -1669,21 +1674,41 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public List<GwtWifiHotspotEntry> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName)
-            throws GwtKuraException {
+    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName,
+            GwtWifiRadioMode radioMode) throws GwtKuraException {
         logger.debug("Find Frequency Network Service impl");
-        List<GwtWifiHotspotEntry> channels = new ArrayList<GwtWifiHotspotEntry>();
+        List<GwtWifiChannelFrequency> channels = new ArrayList<>();
 
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
-            List<WifiChannel> frequencies = nas.getWifiFrequencies(interfaceName);
+            List<WifiChannel> channelFrequencies = nas.getWifiFrequencies(interfaceName);
+            boolean hasSystemDFS = nas.isWifiDFS(interfaceName);
 
-            for (WifiChannel freq : frequencies) {
-                logger.debug(freq.toString());
-                GwtWifiHotspotEntry channelFrequency = new GwtWifiHotspotEntry();
-                channelFrequency.setChannel(freq.getChannel());
-                channelFrequency.setFrequency(freq.getFrequency());
-                channels.add(channelFrequency);
+            for (WifiChannel channelFreq : channelFrequencies) {
+                if (logger.isDebugEnabled())
+                    logger.debug(channelFreq.toString());
+
+                boolean channelIsfive5Ghz = channelFreq.getFrequency() > 2501;
+
+                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
+
+                    if (Boolean.TRUE.equals(channelFreq.isRadarDetection()) && !hasSystemDFS) {
+                        continue;
+                    }
+
+                    GwtWifiChannelFrequency channelFrequency = new GwtWifiChannelFrequency();
+
+                    channelFrequency.setChannel(channelFreq.getChannel());
+                    channelFrequency.setFrequency(channelFreq.getFrequency());
+                    channelFrequency.setNoIrradiation(channelFreq.isNoInitiatingRadiation());
+                    channelFrequency.setRadarDetection(channelFreq.isRadarDetection());
+                    channelFrequency.setDisabled(channelFreq.isDisabled());
+
+                    channels.add(channelFrequency);
+
+                    logger.debug("Found {} - {} Mhz", channelFrequency.getChannel(), channelFrequency.getFrequency());
+                }
+
             }
             return channels;
         } catch (KuraException e) {
@@ -1700,6 +1725,17 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             return nas.getWifiCountryCode();
         } catch (KuraException e) {
             logger.error("Get Wifi Country Code exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException {
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            return nas.isWifiIEEE80211AC(ifaceName);
+        } catch (KuraException e) {
+            logger.error("Ieee80211ac support exception");
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }

@@ -561,4 +561,5 @@ public interface SystemService {
      * @return if the legacy beacon scan has to be used
      */
     public boolean isLegacyBluetoothBeaconScan();
+
 }

@@ -42,23 +42,17 @@ public class IwCapabilityTool {
 
     private static final Logger logger = LoggerFactory.getLogger(IwCapabilityTool.class);
 
-    private static final Pattern WIPHY_PATTERN = Pattern.compile("^\\twiphy (\\d+)$");
-    private static final Pattern SUPPORTED_CHIPERS_PATTERN = Pattern.compile("^\\tSupported Ciphers:$");
-    private static final Pattern CHIPHER_CAPABILITY_PATTERN = Pattern.compile("^\\t\\t\\* ([\\w-\\d]+).*$");
-    private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\tDevice supports RSN.*$");
+    private static final Pattern WIPHY_PATTERN = Pattern.compile("^\\s*wiphy (\\d+)$");
+    private static final Pattern CHIPHER_CAPABILITY_PATTERN = Pattern.compile("^\\s+\\* ([\\w-\\d]+).+$");
+    private static final Pattern RSN_CAPABILITY_PATTERN = Pattern.compile("^\\s*Device supports RSN.*$");
     private static final Pattern COUNTRY_PATTERN = Pattern.compile("country (..): .*");
-    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern.compile(".*\\* ([0-9]+) MHz \\[([0-9]*)\\] \\((.*) dBm\\)$");
+    private static final Pattern FREQUENCY_CHANNEL_PATTERN = Pattern
+            .compile("^\\* ([0-9]+) MHz \\[([0-9]+)\\](?: \\((\\d{0,3}\\.\\d{0,2}) dBm\\)){0,1}[\\(\\w\\\\\\s,)]*$");
+    private static final Pattern VHT_PATTERN = Pattern.compile("^\\s*VHT Capabilities.*$");
+    private static final Pattern DFS_PATTERN = Pattern.compile("^.+DFS_OFFLOAD.+$");
 
-    private enum ParseState {
-        HAS_RSN,
-        HAS_CHIPHERS,
-        PARSE_CHIPHERS
-    }
-
-    private static final EnumSet<ParseState> DONE = EnumSet.of(ParseState.HAS_RSN, ParseState.HAS_CHIPHERS);
-    
     protected IwCapabilityTool() {
-        
+
     }
 
     private static Optional<Matcher> skipTo(final BufferedReader reader, final Pattern pattern) throws IOException {
@@ -95,38 +89,37 @@ public class IwCapabilityTool {
         return Optional.empty();
     }
 
-    @SuppressWarnings("checkstyle:innerAssignment")
     private static Set<Capability> parseCapabilities(final InputStream in) throws IOException {
 
         final EnumSet<Capability> capabilities = EnumSet.noneOf(Capability.class);
-        final EnumSet<ParseState> parseState = EnumSet.noneOf(ParseState.class);
 
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
 
             String line;
 
-            while (!parseState.containsAll(DONE) && (line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
 
-                if (parseState.contains(ParseState.PARSE_CHIPHERS)) {
-                    final Matcher matcher = CHIPHER_CAPABILITY_PATTERN.matcher(line);
+                final Matcher cipherMatcher = CHIPHER_CAPABILITY_PATTERN.matcher(line);
+                final Matcher vhtMatcher = VHT_PATTERN.matcher(line);
+                final Matcher dfsMatcher = DFS_PATTERN.matcher(line);
 
-                    if (matcher.matches()) {
-                        parseChipherCapability(matcher.group(1)).ifPresent(capabilities::add);
-                        continue;
-                    } else {
-                        parseState.remove(ParseState.PARSE_CHIPHERS);
-                        parseState.add(ParseState.HAS_CHIPHERS);
-                    }
+                if (dfsMatcher.matches()) {
+                    capabilities.add(Capability.DFS);
+                    continue;
                 }
 
-                if (!parseState.contains(ParseState.HAS_RSN) && RSN_CAPABILITY_PATTERN.matcher(line).matches()) {
+                if (vhtMatcher.matches()) {
+                    capabilities.add(Capability.VHT);
+                    continue;
+                }
+
+                if (cipherMatcher.matches()) {
+                    parseChipherCapability(cipherMatcher.group(1)).ifPresent(capabilities::add);
+                    continue;
+                }
+
+                if (RSN_CAPABILITY_PATTERN.matcher(line).matches()) {
                     capabilities.add(Capability.RSN);
-                    parseState.add(ParseState.HAS_RSN);
-                }
-
-                if (!parseState.contains(ParseState.HAS_CHIPHERS)
-                        && SUPPORTED_CHIPERS_PATTERN.matcher(line).matches()) {
-                    parseState.add(ParseState.PARSE_CHIPHERS);
                 }
 
             }
@@ -164,7 +157,7 @@ public class IwCapabilityTool {
             final int phy = parseWiphyIndex(exec(new String[] { "iw", interfaceName, "info" }, executorService))
                     .orElseThrow(() -> new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR,
                             "failed to get phy index for " + interfaceName));
-            return parseCapabilities(exec(new String[] { "iw", "phy" + String.valueOf(phy), "info" }, executorService));
+            return parseCapabilities(exec(new String[] { "iw", "phy" + phy, "info" }, executorService));
 
         } catch (final KuraException e) {
             throw e;
@@ -175,6 +168,7 @@ public class IwCapabilityTool {
 
     /**
      * Get the list of Wifi channels and frequencies
+     * 
      * @since 2.2
      **/
     public static List<WifiChannel> probeChannels(String ifaceName, CommandExecutorService executorService)
@@ -184,7 +178,7 @@ public class IwCapabilityTool {
 
             // ignore logical interfaces like "1-1.2"
             if (Character.isDigit(ifaceName.charAt(0))) {
-               return channels;
+                return channels;
             }
 
             final int phy = parseWiphyIndex(exec(new String[] { "iw", ifaceName, "info" }, executorService))
@@ -200,15 +194,26 @@ public class IwCapabilityTool {
     }
 
     private static void parseWifiChannelFrequency(final InputStream in, List<WifiChannel> channels) {
-        String result = new BufferedReader(new InputStreamReader(in))
-               .lines().collect(Collectors.joining("\n"));
+        String result = new BufferedReader(new InputStreamReader(in)).lines().collect(Collectors.joining("\n"));
         for (String line : result.split("\n")) {
             logger.debug(line);
-            Matcher m = FREQUENCY_CHANNEL_PATTERN.matcher(line);
+            String trimmedLine = line.trim();
+            Matcher m = FREQUENCY_CHANNEL_PATTERN.matcher(trimmedLine);
             if (m.matches()) {
                 Integer frequency = Integer.valueOf(m.group(1));
                 Integer channel = Integer.valueOf(m.group(2));
+                Float attenuation = m.group(3) != null ? Float.valueOf(m.group(3)) : 0.0f;
+                Boolean disabled = line.contains("disabled");
+
+                Boolean noIR = line.contains("no IR");
+                Boolean radarDetection = line.contains("radar detection");
+
                 WifiChannel wc = new WifiChannel(channel, frequency);
+                wc.setAttenuation(attenuation);
+                wc.setDisabled(disabled);
+                wc.setNoInitiatingRadiation(noIR);
+                wc.setRadarDetection(radarDetection);
+
                 channels.add(wc);
                 logger.debug("Wifi channel = {}", wc);
             }
@@ -217,22 +222,22 @@ public class IwCapabilityTool {
 
     /**
      * Get the Wifi Country Code
+     * 
      * @since 2.2
      */
-    public static String getWifiCountryCode(CommandExecutorService executorService)
-        throws KuraException {
-        String[] cmd = { "iw", "reg", "get"};
+    public static String getWifiCountryCode(CommandExecutorService executorService) throws KuraException {
+        String[] cmd = { "iw", "reg", "get" };
         Command command = new Command(cmd);
         command.setTimeout(60);
         command.setOutputStream(new ByteArrayOutputStream());
         CommandStatus status = executorService.execute(command);
         int exitValue = status.getExitStatus().getExitCode();
         if (!status.getExitStatus().isSuccessful()) {
-           logger.warn("error executing command --- iw reg get --- exit value = {}", exitValue);
-           throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
+            logger.warn("error executing command --- iw reg get --- exit value = {}", exitValue);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
         String commandOutput = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());
-        for (String line:commandOutput.split("\n")) {
+        for (String line : commandOutput.split("\n")) {
             logger.info("Get Wifi Country Code Output = {}", line);
             Matcher m = COUNTRY_PATTERN.matcher(line);
             if (m.matches()) {
@@ -243,4 +248,5 @@ public class IwCapabilityTool {
         }
         return "Unknown";
     }
+
 }

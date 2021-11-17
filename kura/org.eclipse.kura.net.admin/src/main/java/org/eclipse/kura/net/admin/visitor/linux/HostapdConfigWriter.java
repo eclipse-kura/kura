@@ -28,6 +28,7 @@ import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.linux.net.util.IwCapabilityTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
@@ -40,6 +41,7 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
@@ -52,13 +54,21 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     private static final int FIRST_5000MHZ_CHANNEL = 32;
 
     private static final String HEXES = "0123456789ABCDEF";
+
     private static final String KURA_SECURITY = "KURA_SECURITY";
     private static final String KURA_PAIRWISE_CIPHER = "KURA_PAIRWISE_CIPHER";
     private static final String KURA_HTCAPAB = "KURA_HTCAPAB";
     private static final String HT_CAPAB_KURA_HTCAPAB = "ht_capab=KURA_HTCAPAB";
     private static final String KURA_IEEE80211N = "KURA_IEEE80211N";
     private static final String KURA_WME_ENABLED = "KURA_WME_ENABLED";
+    private static final String KURA_WMM_ENABLED = "KURA_WMM_ENABLED";
     private static final String KURA_HW_MODE = "KURA_HW_MODE";
+    private static final String KURA_COUNTRY_CODE = "KURA_COUNTRY_CODE";
+    private static final String KURA_IEEE80211D = "KURA_IEEE80211D";
+    private static final String KURA_IEEE80211H = "KURA_IEEE80211H";
+    private static final String KURA_IEEE80211AC = "KURA_IEEE80211AC";
+    private static final String KURA_IEEE80211AC_FULL_LINE = "ieee80211ac=KURA_IEEE80211AC";
+
     private static final String HOSTAPD_TMP_CONFIG_FILE = "/etc/hostapd.conf.tmp";
 
     private static HostapdConfigWriter instance;
@@ -200,6 +210,8 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         fileAsString = updateIgnoreBroadcastSsid(wifiConfig, fileAsString);
 
+        fileAsString = updateCountryCode(interfaceName, fileAsString);
+
         File outputFile = getTemporaryFile();
 
         // everything is set and we haven't failed - write the file
@@ -207,6 +219,23 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
         // move the file if we made it this far
         moveFile(interfaceName);
+    }
+
+    private String updateCountryCode(String interfaceName, String fileAsString) throws KuraException {
+
+        String countryCode = getWifiCountryCode();
+
+        if (countryCode != null && !countryCode.isEmpty() && !countryCode.equalsIgnoreCase("00")) {
+            fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, countryCode);
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211D, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211H, isDfs(interfaceName) ? "1" : "0");
+        } else {
+            fileAsString = fileAsString.replaceFirst(KURA_COUNTRY_CODE, "");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211D, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211H, "0");
+        }
+
+        return fileAsString;
     }
 
     private String updateWPA(WifiConfig wifiConfig, String fileAsString) throws KuraException {
@@ -319,11 +348,12 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     private String updateChannels(WifiConfig wifiConfig, String fileAsString) throws KuraException {
-        if (wifiConfig.getChannels()[0] > 0 && wifiConfig.getChannels()[0] <= 165) {
+
+        if (wifiConfig.getChannels()[0] >= 0 && wifiConfig.getChannels()[0] <= 165) {
             fileAsString = fileAsString.replaceFirst("KURA_CHANNEL", Integer.toString(wifiConfig.getChannels()[0]));
         } else {
             throw KuraException.internalError(String.format(
-                    "the channel (%s) must be between 1 (inclusive) and 13 (inclusive) or 1 (inclusive) and 165 (inclusive) depending on your locale",
+                    "the channel (%s) must be between 1 (inclusive) and 196 (inclusive) depending on your locale, or 0 for automatic.",
                     wifiConfig.getChannels()[0]));
         }
         return fileAsString;
@@ -351,7 +381,14 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
      */
     private String updateRadioMode(WifiConfig wifiConfig, String fileAsString) throws KuraException {
         WifiRadioMode radioMode = wifiConfig.getRadioMode();
-        if (radioMode == WifiRadioMode.RADIO_MODE_80211a) {
+
+        if (radioMode == null) {
+            throw KuraException.internalError("invalid hardware mode");
+        }
+
+        switch (radioMode) {
+
+        case RADIO_MODE_80211a:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
 
@@ -361,35 +398,74 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                 fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
             }
 
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211b) {
+
+            break;
+
+        case RADIO_MODE_80211b:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "b");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211g) {
+
+            break;
+
+        case RADIO_MODE_80211g:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "0");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "0");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211nHT20) {
+
+            break;
+
+        case RADIO_MODE_80211nHT20:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[SHORT-GI-20]");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211nHT40above) {
+
+            break;
+
+        case RADIO_MODE_80211nHT40above:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40+][SHORT-GI-20][SHORT-GI-40]");
-        } else if (radioMode == WifiRadioMode.RADIO_MODE_80211nHT40below) {
+
+            break;
+
+        case RADIO_MODE_80211nHT40below:
             fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "g");
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC_FULL_LINE, "#" + KURA_IEEE80211AC_FULL_LINE);
             fileAsString = fileAsString.replaceFirst(KURA_HTCAPAB, "[HT40-][SHORT-GI-20][SHORT-GI-40]");
-        } else {
+
+            break;
+
+        case RADIO_MODE_80211_AC:
+            fileAsString = fileAsString.replaceFirst(KURA_HW_MODE, "a");
+            fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
+            fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "1");
+            
+            fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
+
+            fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
+
+            break;
+
+        default:
             throw KuraException.internalError("invalid hardware mode");
+
         }
+
+        fileAsString = fileAsString.replaceFirst(KURA_WMM_ENABLED, "1");
 
         return fileAsString;
     }
@@ -433,6 +509,14 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             hex.append(HEXES.charAt((element & 0xF0) >> 4)).append(HEXES.charAt(element & 0x0F));
         }
         return hex.toString();
+    }
+
+    private String getWifiCountryCode() throws KuraException {
+        return IwCapabilityTool.getWifiCountryCode(this.executorService);
+    }
+
+    private boolean isDfs(String interfaceName) throws KuraException {
+        return IwCapabilityTool.probeCapabilities(interfaceName, this.executorService).contains(Capability.DFS);
     }
 
 }

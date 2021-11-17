@@ -41,10 +41,10 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
     private final Map<String, LogProvider> registeredLogProviders = new HashMap<>();
 
     @Override
-    public List<String> initLogReaders(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public List<String> initLogProviders(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        loadLogReaders();
+        loadLogProviders();
         registerLogListeners();
 
         return new ArrayList<>(this.registeredLogProviders.keySet());
@@ -55,20 +55,20 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
         return this.cache.getLogs();
     }
 
-    private void loadLogReaders() {
+    private void loadLogProviders() {
         logger.info("Loading log providers.");
 
         try {
             final String MATCH_EVERYTHING = "(objectClass=*)";
-            List<ServiceReference<LogProvider>> logReaderRefs = (List<ServiceReference<LogProvider>>) ServiceLocator
+            List<ServiceReference<LogProvider>> logProviderRefs = (List<ServiceReference<LogProvider>>) ServiceLocator
                     .getInstance().getServiceReferences(LogProvider.class, MATCH_EVERYTHING);
 
             this.registeredLogProviders.clear();
 
-            for (ServiceReference<LogProvider> logReaderRef : logReaderRefs) {
-                String pid = (String) logReaderRef.getProperty(ConfigurationService.KURA_SERVICE_PID);
+            for (ServiceReference<LogProvider> logProviderRef : logProviderRefs) {
+                String pid = (String) logProviderRef.getProperty(ConfigurationService.KURA_SERVICE_PID);
                 LogProvider service = FrameworkUtil.getBundle(LogProvider.class).getBundleContext()
-                        .getService(logReaderRef);
+                        .getService(logProviderRef);
 
                 this.registeredLogProviders.put(pid, service);
             }
@@ -81,22 +81,22 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
 
     private void registerLogListeners() {
 
-        for (Entry<String, LogProvider> registeredLogReader : this.registeredLogProviders.entrySet()) {
+        for (Entry<String, LogProvider> registeredLogProvider : this.registeredLogProviders.entrySet()) {
 
-            String whichLogReader = registeredLogReader.getKey();
-            LogProvider logProvider = registeredLogReader.getValue();
+            String whichLogProvider = registeredLogProvider.getKey();
+            LogProvider logProvider = registeredLogProvider.getValue();
 
             if (logProvider != null) {
 
                 logProvider.registerLogListener((LogEntry entry) -> {
                     GwtLogEntry gwtEntry = new GwtLogEntry();
                     gwtEntry.setProperties(entry.getProperties());
-                    gwtEntry.setSourceLogReaderPid(whichLogReader);
+                    gwtEntry.setSourceLogProviderPid(whichLogProvider);
 
                     GwtLogServiceImpl.this.cache.add(gwtEntry);
                 });
 
-                logger.info("Registered LogListener for {}.", whichLogReader);
+                logger.info("Registered LogListener for {}.", whichLogProvider);
             }
         }
     }

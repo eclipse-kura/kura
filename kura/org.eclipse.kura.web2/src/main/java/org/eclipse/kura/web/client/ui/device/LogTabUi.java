@@ -152,7 +152,7 @@ public class LogTabUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                LogTabUi.this.gwtLogService.initLogReaders(token, new AsyncCallback<List<String>>() {
+                LogTabUi.this.gwtLogService.initLogProviders(token, new AsyncCallback<List<String>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -185,7 +185,7 @@ public class LogTabUi extends Composite {
         StringBuilder displayedText = new StringBuilder();
 
         for (GwtLogEntry entry : this.logs) {
-            if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogReaderPid())) {
+            if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogProviderPid())) {
                 displayedText.append(entry.getSourceRealtimeTimestamp());
                 displayedText.append("\t[priority: ");
                 displayedText.append(entry.getPriority());

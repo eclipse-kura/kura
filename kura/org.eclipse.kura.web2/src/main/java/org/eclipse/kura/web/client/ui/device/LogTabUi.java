@@ -185,6 +185,8 @@ public class LogTabUi extends Composite {
         StringBuilder displayedText = new StringBuilder();
 
         for (GwtLogEntry entry : this.logs) {
+            entry.setUnescaped(true);
+
             if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogProviderPid())) {
                 displayedText.append(entry.getSourceRealtimeTimestamp());
                 displayedText.append("\t[priority: ");
@@ -204,7 +206,7 @@ public class LogTabUi extends Composite {
                     displayedText.append("\nStacktrace: ");
                     displayedText.append(entry.getStacktrace());
                 }
-                displayedText.append("\n");
+                displayedText.append("\n\n");
             }
         }
 

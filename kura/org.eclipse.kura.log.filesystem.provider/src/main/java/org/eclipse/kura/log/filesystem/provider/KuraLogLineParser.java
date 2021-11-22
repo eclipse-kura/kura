@@ -31,29 +31,29 @@ public final class KuraLogLineParser {
     private String message;
     private String transport;
     private String syslogIdentifier;
-    private String stackTrace;
+    private String stacktrace;
 
     private static KuraLogLineParser instance;
 
-    private KuraLogLineParser(String logLine, String filepath) {
+    private KuraLogLineParser(String message, String filepath, String stacktrace) {
         this.timestamp = DEFAULT_TIMESTAMP;
         this.pid = DEFAULT_PID;
         this.priority = DEFAULT_PRIORITY;
-        this.message = logLine;
+        this.message = message;
         this.transport = filepath;
         this.syslogIdentifier = DEFAULT_SYSLOG_IDENTIFIER;
-        this.stackTrace = DEFAULT_STACKTRACE;
+        this.stacktrace = stacktrace;
     }
 
-    public static LogEntry stringToLogEntry(String logLine, String filepath) {
-        instance = new KuraLogLineParser(logLine, filepath);
+    public static LogEntry createLogEntry(String message, String filepath, String stacktrace) {
+        instance = new KuraLogLineParser(message, filepath, stacktrace);
 
         if (filepath.contains("kura.log")) {
-            instance.parseKuraLog(logLine);
+            instance.parseKuraLog();
         }
 
         if (filepath.contains("kura-audit.log")) {
-            instance.parseKuraAuditLog(logLine);
+            instance.parseKuraAuditLog();
         }
 
         return instance.generateLogEntry();
@@ -64,8 +64,8 @@ public final class KuraLogLineParser {
      * 
      * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
      */
-    private void parseKuraLog(String logLine) {
-        String[] splits = logLine.split(" ");
+    private void parseKuraLog() {
+        String[] splits = this.message.split(" ");
         if (splits.length >= 3) {
             instance.timestamp = splits[0];
             instance.pid = splits[1];
@@ -84,16 +84,15 @@ public final class KuraLogLineParser {
     /*
      * kura-audit.log message format:
      * 
-     * ID TIMESTAMP DEVICE SYSLOG_IDENTIFIER - - [RequestContext@28392 category="AuditLogger"
+     * <ID>NUMBER TIMESTAMP DEVICE SYSLOG_IDENTIFIER - - [RequestContext@28392 category="AuditLogger"
      * exception="STACKTRACE" priority="PRIORITY" thread="PID"] MESSAGE_WITH_POSSIBLE_SPACES
      */
-    private void parseKuraAuditLog(String logLine) {
-        String[] splits = logLine.split(" ");
+    private void parseKuraAuditLog() {
+        String[] splits = this.message.split(" ");
         if (splits.length >= 11) {
             instance.timestamp = splits[1];
-            instance.transport = splits[2];
             instance.syslogIdentifier = splits[3];
-            instance.stackTrace = splits[8].replace("exception=", "").replace("\"", "");
+            instance.stacktrace += splits[8].replace("exception=", "").replace("\"", "");
             instance.priority = splits[9].replace("priority=", "").replace("\"", "");
             instance.pid = splits[10].replace("thread=", "").replace("\"", "").replace("]", "");
             StringBuilder sb = new StringBuilder();
@@ -113,7 +112,7 @@ public final class KuraLogLineParser {
         entryProperties.put("PRIORITY", instance.priority);
         entryProperties.put("SYSLOG_IDENTIFIER", instance.syslogIdentifier);
         entryProperties.put("_TRANSPORT", instance.transport);
-        entryProperties.put("STACKTRACE", instance.stackTrace);
+        entryProperties.put("STACKTRACE", instance.stacktrace);
         return new LogEntry(entryProperties);
     }
 }

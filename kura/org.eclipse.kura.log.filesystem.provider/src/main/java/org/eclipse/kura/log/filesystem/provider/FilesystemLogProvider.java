@@ -14,6 +14,7 @@ package org.eclipse.kura.log.filesystem.provider;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,13 +95,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
 
                     if (filePointer < fileLength) {
                         file.seek(filePointer);
-
-                        String line = file.readLine();
-                        while (line != null) {
-                            line = file.readLine();
-                            notifyListeners(line);
-                        }
-
+                        readLinesAndNotifyListeners(file);
                         filePointer = file.getFilePointer();
                     }
 
@@ -117,12 +112,32 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             }
         }
 
-        private void notifyListeners(String newLogLine) {
+        private void readLinesAndNotifyListeners(RandomAccessFile file) throws IOException {
+            String line = file.readLine();
+            String message = line;
+            while (line != null) {
 
-            if (newLogLine != null) {
+                StringBuilder stacktrace = new StringBuilder();
+                // stacktraces do not start with a timestamp and are scattered through multiple lines
+                // in kura-audit log the lines starts with a <
+                while (line != null && !line.matches("^(\\d+.*)") && !line.startsWith("<")) {
+                    stacktrace.append(line);
+                    stacktrace.append("\n");
+                    line = file.readLine();
+                }
+
+                notifyListeners(message, stacktrace.toString().trim());
+                message = line;
+
+                line = file.readLine();
+            }
+        }
+
+        private void notifyListeners(String message, String stacktrace) {
+            if (message != null) {
                 for (LogListener listener : FilesystemLogProvider.this.registeredListeners) {
-                    LogEntry entry = KuraLogLineParser.stringToLogEntry(newLogLine,
-                            FilesystemLogProvider.this.filePath);
+                    LogEntry entry = KuraLogLineParser.createLogEntry(message, FilesystemLogProvider.this.filePath,
+                            stacktrace);
                     listener.newLogEntry(entry);
                 }
             }

@@ -56,7 +56,7 @@ public class FilesystemLogProviderTest {
         whenActivate();
         whenSomeTimePasses();
 
-        thenListenersGetCalled(this.nLogLines - 1);
+        thenListenersGetCalled(this.nLogLines);
         thenNoExceptionsOccurred();
     }
 
@@ -83,11 +83,14 @@ public class FilesystemLogProviderTest {
         givenLogListeners(3);
 
         whenRegisteringLogListeners();
+        whenActivate();
+        whenSomeTimePasses();
         whenUpdateWithCorrectProperties();
+        whenSomeTimePasses();
         whenNewLinesAreAddedToFile(10);
         whenSomeTimePasses();
 
-        thenListenersGetCalled(this.nLogLines - 11);
+        thenListenersGetCalled(this.nLogLines);
     }
 
     @Test
@@ -104,7 +107,7 @@ public class FilesystemLogProviderTest {
         whenSomeTimePasses();
         whenNewLinesAreAddedToFile(10);
 
-        thenListenersGetCalled(this.nLogLines - 11);
+        thenListenersGetCalled(this.nLogLines - 10);
         thenNoExceptionsOccurred();
     }
 
@@ -122,7 +125,21 @@ public class FilesystemLogProviderTest {
         whenSomeTimePasses();
         whenNewLinesAreAddedToFile(10);
 
-        thenListenersGetCalled(this.nLogLines - 11);
+        thenListenersGetCalled(this.nLogLines - 10);
+    }
+
+    @Test
+    public void listenerShouldNotBeCalledWhenExceptionReadingFile() {
+        givenFileWithErrorsOnRead("kuratest");
+        givenPropertiesWithLogFilePath();
+        givenFilesystemLogProvider();
+        givenLogListeners(1);
+
+        whenRegisteringLogListeners();
+        whenActivate();
+        whenSomeTimePasses();
+
+        thenListenersAreNotCalled();
     }
 
     /*
@@ -140,16 +157,19 @@ public class FilesystemLogProviderTest {
             this.file.deleteOnExit();
 
             try (FileWriter writer = new FileWriter(this.file)) {
-                writer.write("line01\n");
-                writer.write("line02\n");
-                writer.write("line03\n");
-                writer.write("line04\n");
-                writer.write("line05\n");
-                writer.write("line06\n");
-                writer.write("line07\n");
-                writer.write("line08\n");
-                writer.write("line09\n");
-                writer.write("line10\n");
+                writer.write("20210101 - line01\n");
+                writer.write("20210102 - line02\n");
+                writer.write("20210103 - line03\n");
+                writer.write("20210104 - line04\n");
+                writer.write("20210105 - line05\n");
+                writer.write("exception on line05\n");
+                writer.write("exception on line05\n");
+                writer.write("exception on line05\n");
+                writer.write("20210106 - line06\n");
+                writer.write("20210107 - line07\n");
+                writer.write("20210108 - line08\n");
+                writer.write("20210109 - line09\n");
+                writer.write("20210110 - line10\n");
                 this.nLogLines = 10;
             }
         } catch (IOException e) {
@@ -172,6 +192,13 @@ public class FilesystemLogProviderTest {
             LogListener listener = mock(LogListener.class);
             this.listeners.add(listener);
         }
+    }
+
+    private void givenFileWithErrorsOnRead(String filename) {
+        givenFile(filename);
+        this.file.setReadable(false);
+        this.file.setWritable(false);
+        this.file.setExecutable(false);
     }
 
     /*
@@ -206,7 +233,7 @@ public class FilesystemLogProviderTest {
 
     private void whenSomeTimePasses() {
         try {
-            Thread.sleep(2000);
+            Thread.sleep(1000);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }

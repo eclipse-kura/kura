@@ -101,14 +101,16 @@ Now you are ready to develop on Eclipse Kura.
 
 To raise an issue, please report a bug on [GitHub issues](https://github.com/eclipse/kura/issues/new).
 
-
-
 ### Known Issues
 Currently, the emulator web ui is not properly working on Windows so, with your setup, you will be able to build and deploy you applications, but not be able to use the Eclipse IDE based Kura emulator.
 
 The full build of Kura is only supported for Linux and Mac Os based systems.
 
 Currently the maven build on Windows requires to disable the tests and will fail when it tries to create the installers for the target platforms.
+
+## Contributing
+
+Contributing to Eclipse Kura is funny and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
 
 
 ## Target Gateways Installers

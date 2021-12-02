@@ -1087,10 +1087,10 @@
 
     <profiles>
         <profile>
-            <id>raspberry-pi-3-4-ubuntu-20</id>
+            <id>raspberry-ubuntu-20</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, net-tools, bluez, chrony, ntpdate, ifupdown, pi-bluetooth, rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies>   
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump, bluez,
+                    wireless-tools, net-tools, iptables, chrony, ntpdate, ifupdown, pi-bluetooth, rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies>   
             </properties>
            <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1122,7 +1122,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-3-4-ubuntu-20-jars</id>
+                                <id>raspberry-pi-ubuntu-20-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1133,11 +1133,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-3-4-ubuntu-20" />
-                                        <property name="target.device" value="raspberry-pi-3-4-ubuntu-20" />
+                                        <property name="build.name" value="raspberry-pi-ubuntu-20" />
+                                        <property name="target.device" value="raspberry-pi-ubuntu-20" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="raspberry-pi-3-4-ubuntu-20" />
+                                        <property name="kura.arch" value="raspberry-pi-ubuntu-20" />
                                         <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
@@ -1154,18 +1154,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-3-4-ubuntu-20-deb</id>
+                                <id>raspberry-pi-ubuntu-20-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1181,7 +1181,7 @@
             </build>
         </profile>
         <profile>
-            <id>raspberry-pi-3-4-ubuntu-20-nn</id>
+            <id>raspberry-pi-ubuntu-20-nn</id>
             <properties>
                 <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies.nn>   
             </properties>
@@ -1215,7 +1215,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-3-4-ubuntu-20-nn</id>
+                                <id>raspberry-pi-ubuntu-20-nn</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1226,11 +1226,11 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-3-4-ubuntu-20-nn" />
-                                        <property name="target.device" value="raspberry-pi-3-4-ubuntu-20-nn" />
+                                        <property name="build.name" value="raspberry-pi-ubuntu-20-nn" />
+                                        <property name="target.device" value="raspberry-pi-ubuntu-20-nn" />
                                         <property name="native.tag" value="aarch64" />
                                         <property name="kura.os.version" value="ubuntu" />
-                                        <property name="kura.arch" value="raspberry-pi-3-4-ubuntu-20-nn" />
+                                        <property name="kura.arch" value="raspberry-pi-ubuntu-20-nn" />
                                         <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="1024m" />
@@ -1247,18 +1247,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-3-4-ubuntu-20-deb-nn</id>
+                                <id>raspberry-pi-ubuntu-20-deb-nn</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20_installer-nn.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer-nn.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-3-4-ubuntu-20-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1274,10 +1274,11 @@
             </build>                     
         </profile>        
         <profile>
-            <id>raspberry-pi-2-3</id>
+            <id>raspberry-pi</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump, bluez,
+                    wireless-tools, net-tools, iptables, chrony, ntpdate, ifupdown, pi-bluetooth, 
+                    rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1309,7 +1310,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-2-3-jars</id>
+                                <id>raspberry-pi-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1320,8 +1321,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-2" />
-                                        <property name="target.device" value="raspberry-pi-2" />
+                                        <property name="build.name" value="raspberry-pi" />
+                                        <property name="target.device" value="raspberry-pi" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1341,18 +1342,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-2-3-deb</id>
+                                <id>raspberry-pi-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-2.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>
@@ -1369,9 +1370,12 @@
         </profile>
 
         <profile>
-            <id>raspberry-pi-2-3-nn</id>
+            <id>raspberry-pi-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn> hostapd, dos2unix, bind9, unzip, ethtool, telnet, 
+                	bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
+                	rpi.gpio-common, openjdk-8-jre-headless
+                </project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1403,7 +1407,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-2-3-nn-jars</id>
+                                <id>raspberry-pi-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -1414,8 +1418,8 @@
                                         <property name="project.version" value="${project.version}" />
                                         <property name="project.build.profile" value="${project.build.profile}" />
                                         <property name="project.build.directory" value="${project.build.directory}" />
-                                        <property name="build.name" value="raspberry-pi-2-nn" />
-                                        <property name="target.device" value="raspberry-pi-2-nn" />
+                                        <property name="build.name" value="raspberry-pi-nn" />
+                                        <property name="target.device" value="raspberry-pi-nn" />
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
@@ -1435,18 +1439,18 @@
                         <version>1.0</version>
                         <executions>
                             <execution>
-                                <id>raspberry-pi-2-3-nn-deb</id>
+                                <id>raspberry-pi-nn-deb</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>jdeb</goal>
                                 </goals>
                                 <configuration>
                                     <verbose>true</verbose>
-                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-2-3-nn_installer.deb</deb>
+                                    <deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_installer.deb</deb>
                                     <controlDir>${basedir}/src/main/deb/control_nn</controlDir>
                                     <dataSet>
                                         <data>
-                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-2-nn.zip</src>
+                                            <src>${basedir}/target/kura_${project.version}_raspberry-pi-nn.zip</src>
                                             <type>file</type>
                                             <mapper>
                                                 <type>perm</type>

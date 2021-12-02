@@ -17,6 +17,7 @@ package org.eclipse.kura.asset.provider;
 import static org.eclipse.kura.asset.provider.AssetConstants.NAME;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_SCALE;
 
 import java.util.List;
 
@@ -129,6 +130,16 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         addOptions(valueType, DataType.values());
 
         this.defaultElements.add(valueType);
+        
+        final Tad valueScale = new Tad();
+        valueScale.setName(VALUE_SCALE.value().substring(1));
+        valueScale.setId(VALUE_SCALE.value());
+        valueScale.setDescription("Scale to be applied to the numeric value of the channel");
+        valueScale.setType(Tscalar.DOUBLE);
+        valueScale.setRequired(true);
+        valueScale.setDefault("1.0");
+
+        this.defaultElements.add(valueScale);
     }
 
     /** {@inheritDoc} */

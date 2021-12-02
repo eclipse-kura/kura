@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -20,6 +20,10 @@ import java.util.Map;
 
 import org.eclipse.kura.annotation.NotThreadSafe;
 import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.DoubleValue;
+import org.eclipse.kura.type.FloatValue;
+import org.eclipse.kura.type.IntegerValue;
+import org.eclipse.kura.type.LongValue;
 import org.eclipse.kura.type.TypedValue;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -95,6 +99,8 @@ public class ChannelRecord {
      */
     private TypedValue<?> value;
 
+    private double valueScale;
+
     /** Represents the timestamp of the operation performed. */
     private long timestamp;
 
@@ -119,6 +125,33 @@ public class ChannelRecord {
         ChannelRecord result = new ChannelRecord();
         result.name = channelName;
         result.valueType = valueType;
+        result.valueScale = 1.0d;
+
+        return result;
+    }
+    
+    /**
+     * Creates a channel record that represents a read request.
+     *
+     * @param channelName
+     *            The name of the channel
+     * @param valueType
+     *            The type of the value to be read
+     * @param valueScale
+     *            The scaling factor to be applied to the value
+     * @throws NullPointerException
+     *             If any of the provided arguments is null
+     * @return the channel record
+     * @since 2.3
+     */
+    public static ChannelRecord createReadRecord(final String channelName, final DataType valueType, final double valueScale) {
+        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(valueType, "Value Type cannot be null");
+
+        ChannelRecord result = new ChannelRecord();
+        result.name = channelName;
+        result.valueType = valueType;
+        result.valueScale = valueScale;
 
         return result;
     }
@@ -255,6 +288,16 @@ public class ChannelRecord {
      * @return the value
      */
     public TypedValue<?> getValue() {
+        if (this.valueType.equals(DataType.DOUBLE)) {
+            return new DoubleValue((double) this.value.getValue() * this.valueScale);
+        } else if (this.valueType.equals(DataType.FLOAT)) {
+            return new FloatValue((float) this.value.getValue() * (float) this.valueScale);
+        } else if (this.valueType.equals(DataType.INTEGER)) {
+            return new IntegerValue((int) this.value.getValue() * (int) this.valueScale);
+        } else if (this.valueType.equals(DataType.LONG)) {
+            return new LongValue((long) this.value.getValue() * (long) this.valueScale);
+        }
+
         return this.value;
     }
 
@@ -296,10 +339,7 @@ public class ChannelRecord {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ChannelRecord other = (ChannelRecord) obj;

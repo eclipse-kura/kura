@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -20,6 +20,7 @@ import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_NAME_PROHIB
 import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_PROPERTY_SEPARATOR;
 import static org.eclipse.kura.asset.provider.AssetConstants.ENABLED;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_SCALE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 
 import java.util.ArrayList;
@@ -325,6 +326,15 @@ public final class BaseAssetConfiguration {
             return DataType.getDataType(valueTypeProp);
         }
 
+        private static Double getValueScale(final Map<String, Object> properties) {
+            final String valueScale = (String) properties.get(VALUE_SCALE.value());
+
+            if (valueScale == null) {
+                return 1.0d;
+            }
+            return Double.valueOf(valueScale);
+        }
+
         private static boolean isEnabled(final Map<String, Object> properties) {
             try {
                 return Boolean.parseBoolean(properties.get(ENABLED.value()).toString());
@@ -351,8 +361,15 @@ public final class BaseAssetConfiguration {
 
             final boolean isEnabled = isEnabled(channelConfig);
 
+            final Double valueScale = getValueScale(channelConfig);
+
             final Channel channel = new Channel(channelName, channelType, dataType, channelConfig);
             channel.setEnabled(isEnabled);
+
+            if (dataType.equals(DataType.DOUBLE) || dataType.equals(DataType.INTEGER) || dataType.equals(DataType.FLOAT)
+                    || dataType.equals(DataType.LONG)) {
+                channel.setScale(valueScale);
+            }
 
             logger.debug("Retrieving single channel information from the properties...Done");
             return channel;

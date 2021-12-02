@@ -22,7 +22,11 @@ public enum WifiRadioMode {
     RADIO_MODE_80211g(0x02),
     RADIO_MODE_80211nHT20(0x03),
     RADIO_MODE_80211nHT40below(0x04),
-    RADIO_MODE_80211nHT40above(0x05);
+    RADIO_MODE_80211nHT40above(0x05),
+    /**
+     * @since 2.3
+     */
+    RADIO_MODE_80211_AC(0x06);
 
     private int code;
 

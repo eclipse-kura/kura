@@ -236,4 +236,23 @@ public interface NetworkAdminService {
      */
     public String getWifiCountryCode() throws KuraException;
 
+    /**
+     * Information on Dynamic Frequencies Selection
+     * 
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return True if Dynamic Frequencies Selection is supported, false otherwise
+     * @since 2.3
+     */
+    public boolean isWifiDFS(String ifaceName) throws KuraException;
+
+    /**
+     * Information on WiFi 802.11ac
+     * 
+     * @param ifaceName
+     *            - name of WiFi interface
+     * @return True if WiFi 802.11ac is supported, false otherwise.
+     * @since 2.3
+     */
+    public boolean isWifiIEEE80211AC(String ifaceName) throws KuraException;
 }

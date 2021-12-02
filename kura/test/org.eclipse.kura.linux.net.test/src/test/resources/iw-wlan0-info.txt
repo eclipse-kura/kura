@@ -1,0 +1,9 @@
+Interface wlan0
+        ifindex 3
+        wdev 0x1
+        addr e4:5f:01:35:80:32
+        ssid kura_gateway_E4:5F:01:35:80:31
+        type AP
+        wiphy 0
+        channel 1 (2412 MHz), width: 20 MHz, center1: 2412 MHz
+        txpower 31.00 dBm

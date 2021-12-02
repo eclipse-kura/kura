@@ -36,7 +36,6 @@ public class LogPollService {
     private static final int RESEND_DELAY = 100;
     private static final int RESEND_DELAY_NO_UPDATES = 5000;
 
-    private boolean stop = false;
     private Timer resendTimer;
     private final List<LogListener> listeners = new LinkedList<>();
     private static LogPollService instance = new LogPollService();
@@ -49,17 +48,12 @@ public class LogPollService {
         ((ServiceDefTarget) this.gwtLogService).setRpcRequestBuilder(new TimeoutRequestBuilder());
     }
 
-    public static LogPollService getInstance() {
-        return instance;
+    public static void startLogPolling() {
+        startResendTimer(RESEND_DELAY);
     }
 
-    public void startLogPolling() {
-        this.gwtLogService.readLogs(this.eventCallback);
-        this.stop = false;
-    }
-
-    public void stopLogPolling() {
-        this.stop = true;
+    public static void stopLogPolling() {
+        stopResendTimer();
     }
 
     public static void subscribe(LogListener listener) {
@@ -85,6 +79,27 @@ public class LogPollService {
         }
     }
 
+    private static void startResendTimer(int timeout) {
+        stopResendTimer();
+
+        instance.resendTimer = new Timer() {
+
+            @Override
+            public void run() {
+                instance.gwtLogService.readLogs(instance.eventCallback);
+            }
+        };
+        instance.resendTimer.schedule(timeout);
+    }
+
+    private static void stopResendTimer() {
+        if (instance.resendTimer != null) {
+            instance.resendTimer.cancel();
+        }
+
+        instance.resendTimer = null;
+    }
+
     private final AsyncCallback<List<GwtLogEntry>> eventCallback = new AsyncCallback<List<GwtLogEntry>>() {
 
         @Override
@@ -101,14 +116,14 @@ public class LogPollService {
 
         @Override
         public void onSuccess(List<GwtLogEntry> result) {
-            LogPollService.this.logger.log(Level.FINE,
-                    () -> "RPC successful. Count: " + LogPollService.this.rpcCount++);
+            LogPollService.this.logger.log(Level.INFO,
+                    () -> "RPC successful. Count: " + LogPollService.instance.rpcCount++);
 
             int delay = RESEND_DELAY;
 
             if (result != null && !result.isEmpty()) {
 
-                for (LogListener listener : LogPollService.this.listeners) {
+                for (LogListener listener : LogPollService.instance.listeners) {
                     listener.onLogsReceived(result);
                 }
 
@@ -117,36 +132,7 @@ public class LogPollService {
                 delay = RESEND_DELAY_NO_UPDATES;
             }
 
-            new Timer() {
-
-                @Override
-                public void run() {
-                    if (!LogPollService.this.stop) {
-                        LogPollService.this.gwtLogService.readLogs(LogPollService.this.eventCallback);
-                    }
-                }
-            }.schedule(delay);
-        }
-
-        private void startResendTimer(int timeout) {
-            stopResendTimer();
-
-            LogPollService.this.resendTimer = new Timer() {
-
-                @Override
-                public void run() {
-                    LogPollService.this.gwtLogService.readLogs(LogPollService.this.eventCallback);
-                }
-            };
-            LogPollService.this.resendTimer.schedule(timeout);
-        }
-
-        private void stopResendTimer() {
-            if (LogPollService.this.resendTimer != null) {
-                LogPollService.this.resendTimer.cancel();
-            }
-
-            LogPollService.this.resendTimer = null;
+            startResendTimer(delay);
         }
     };
 }

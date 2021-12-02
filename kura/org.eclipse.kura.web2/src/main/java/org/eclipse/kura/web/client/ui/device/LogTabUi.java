@@ -126,7 +126,7 @@ public class LogTabUi extends Composite {
     public void onAttach() {
         super.onAttach();
         if (this.hasLogProvider) {
-            LogPollService.getInstance().startLogPolling();
+            LogPollService.startLogPolling();
         }
     }
 
@@ -134,7 +134,7 @@ public class LogTabUi extends Composite {
     public void onDetach() {
         super.onDetach();
         if (this.hasLogProvider) {
-            LogPollService.getInstance().stopLogPolling();
+            LogPollService.stopLogPolling();
         }
     }
 

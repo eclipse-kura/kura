@@ -38,21 +38,14 @@ following steps:
 
 1. Boot the Intel Up² with the Ubuntu Image 20.04.3.
 
-2. Assign a static ip to the primary ethernet network interface:
-   
-   <pre>nano /etc/netplan/00-installer-config.yaml
-   network:
-     ethernets:
-       enp2s0:
-         dhcp4: no
-         addresses:
-   
-           - 172.16.0.1/24
-           enp3s0:
-               dhcp4: true
-       version: 2
-   
-   </pre>
+2. Make sure your device is connected to internet.
+
+3. Upgrade the system:
+
+      <pre>
+      sudo apt update
+      sudo apt upgrade
+      </pre>
 
 3. Download the Kura package with:
 

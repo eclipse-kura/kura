@@ -23,7 +23,7 @@ This quickstart has been tested using the following image:
 
 downloaded from
 
-<pre>https://www.raspberrypi.com/software/operating-systems/#raspberry-pi-os-32-bit</pre>
+<pre>https://www.raspberrypi.com/documentation/computers/remote-access.html</pre>
 
 ## Enable SSH Access
 

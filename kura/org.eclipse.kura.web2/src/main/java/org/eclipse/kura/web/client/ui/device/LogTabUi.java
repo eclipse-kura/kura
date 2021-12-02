@@ -185,28 +185,9 @@ public class LogTabUi extends Composite {
         StringBuilder displayedText = new StringBuilder();
 
         for (GwtLogEntry entry : this.logs) {
-            entry.setUnescaped(true);
-
             if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogProviderPid())) {
-                displayedText.append(entry.getSourceRealtimeTimestamp());
-                displayedText.append("\t[priority: ");
-                displayedText.append(entry.getPriority());
-                if (this.showMoreInfoCheckbox.getValue().booleanValue()) {
-                    displayedText.append(" - PID: ");
-                    displayedText.append(entry.getPid());
-                    displayedText.append(" - syslog ID: ");
-                    displayedText.append(entry.getSyslogIdentifier());
-                    displayedText.append(" - source: ");
-                    displayedText.append(entry.getTransport());
-                }
-                displayedText.append("]\nMessage: ");
-                displayedText.append(entry.getMessage());
-                if (this.showStackTraceCheckbox.getValue().booleanValue() && entry.getStacktrace() != null
-                        && !entry.getStacktrace().equals("undefined") && !entry.getStacktrace().equals("")) {
-                    displayedText.append("\nStacktrace: ");
-                    displayedText.append(entry.getStacktrace());
-                }
-                displayedText.append("\n\n");
+                displayedText.append(entry.prettyPrint(this.showMoreInfoCheckbox.getValue().booleanValue(),
+                        this.showStackTraceCheckbox.getValue().booleanValue()));
             }
         }
 

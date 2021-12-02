@@ -55,6 +55,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         if (this.readerThread != null) {
             this.readerThread.interrupt();
         }
+        this.registeredListeners.clear();
         this.filePath = (String) properties.get(LOG_FILEPATH_PROP_KEY);
         this.readerThread = new FileLogReader(this.filePath);
         this.readerThread.start();

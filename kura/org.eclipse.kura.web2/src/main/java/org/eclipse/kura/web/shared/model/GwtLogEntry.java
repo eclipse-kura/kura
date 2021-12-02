@@ -81,6 +81,40 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
     }
 
     public String getStacktrace() {
-        return super.get(LogEntryKeys.STACKTRACE.getKey());
+        String stacktrace = super.get(LogEntryKeys.STACKTRACE.getKey());
+        if (stacktrace == null || stacktrace.equals("undefined")) {
+            return "";
+        }
+        return stacktrace;
+    }
+
+    public String prettyPrint(boolean includeMoreInfo, boolean includeStacktrace) {
+        this.setUnescaped(true);
+        StringBuilder prettyEntry = new StringBuilder();
+
+        prettyEntry.append(this.getSourceRealtimeTimestamp());
+        prettyEntry.append("\t[priority: ");
+        prettyEntry.append(this.getPriority());
+
+        if (includeMoreInfo) {
+            prettyEntry.append(" - PID: ");
+            prettyEntry.append(this.getPid());
+            prettyEntry.append(" - syslog ID: ");
+            prettyEntry.append(this.getSyslogIdentifier());
+            prettyEntry.append(" - source: ");
+            prettyEntry.append(this.getTransport());
+        }
+
+        prettyEntry.append("]\nMessage: ");
+        prettyEntry.append(this.getMessage());
+
+        if (includeStacktrace && !this.getStacktrace().isEmpty()) {
+            prettyEntry.append("\nStacktrace: ");
+            prettyEntry.append(this.getStacktrace());
+        }
+
+        prettyEntry.append("\n\n");
+
+        return prettyEntry.toString();
     }
 }

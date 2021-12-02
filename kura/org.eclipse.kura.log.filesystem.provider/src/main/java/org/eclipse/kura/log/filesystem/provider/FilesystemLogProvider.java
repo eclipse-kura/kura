@@ -97,7 +97,9 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
                     if (filePointer < fileLength) {
                         file.seek(filePointer);
                         readLinesAndNotifyListeners(file);
-                        filePointer = file.getFilePointer();
+                        if (filePointer < file.getFilePointer()) {
+                            filePointer = file.getFilePointer();
+                        }
                     }
 
                     sleep(SAMPLE_INTERVAL);
@@ -115,23 +117,36 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
 
         private void readLinesAndNotifyListeners(RandomAccessFile file) throws IOException {
             String line = file.readLine();
-            String message = line;
             while (line != null) {
 
-                StringBuilder stacktrace = new StringBuilder();
-                // stacktraces do not start with a timestamp and are scattered through multiple lines
-                // in kura-audit log the lines starts with a <
-                while (line != null && !line.matches("^(\\d+.*)") && !line.startsWith("<")) {
-                    stacktrace.append(line);
-                    stacktrace.append("\n");
+                if (!isStacktrace(line)) {
+                    String message = line;
+
+                    // look ahead for stacktrace
+                    StringBuilder stacktrace = new StringBuilder();
+                    line = file.readLine();
+                    if (line != null && isStacktrace(line)) {
+                        while (line != null) {
+                            stacktrace.append(line);
+                            stacktrace.append("\n");
+                            line = file.readLine();
+                        }
+                    }
+
+                    notifyListeners(message, stacktrace.toString().trim());
+                } else {
                     line = file.readLine();
                 }
-
-                notifyListeners(message, stacktrace.toString().trim());
-                message = line;
-
-                line = file.readLine();
             }
+        }
+
+        private boolean isStacktrace(String line) {
+            /*
+             * stacktrace lines do not start with a timestamp
+             * 
+             * in kura-audit log file the lines start with a '<'
+             */
+            return !line.matches("^(\\d+.*)") && !line.startsWith("<");
         }
 
         private void notifyListeners(String message, String stacktrace) {

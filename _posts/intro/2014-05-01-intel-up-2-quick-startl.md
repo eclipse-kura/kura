@@ -6,7 +6,7 @@ categories: [intro]
 
 [Overview](#overview)
 
-[Eclipse Kura&trade; Installation](#eclipse-kuratrade-installation)
+[Eclipse Kura&trade; Installation](#eclipse-installation)
 
 ## Overview
 
@@ -77,8 +77,9 @@ following steps:
     <pre>apt install kura_&lt;version&gt;_intel-up2-ubuntu-18_installer.deb</pre>
 
 7. Update the Wi-Fi Regulatory Domain editing the file:
+    
     <pre>/etc/default/crda</pre>
-
+    
 8. Reboot the Intel Up² with:
 
     <pre>sudo reboot</pre>

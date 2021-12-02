@@ -125,6 +125,7 @@ public class LogTabUi extends Composite {
     @Override
     public void onAttach() {
         super.onAttach();
+
         if (this.hasLogProvider) {
             LogPollService.startLogPolling();
         }

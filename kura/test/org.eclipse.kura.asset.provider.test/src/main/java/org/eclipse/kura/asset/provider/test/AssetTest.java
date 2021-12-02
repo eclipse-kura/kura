@@ -507,12 +507,12 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(22, ads.size()); // description, driver, 20 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(30, ads.size()); // description, driver, 28 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());
 
-        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#unit.id" };
+        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#+scale", "#+offset", "#unit.id" };
 
         final int expectedChannelCount = 4;
         for (int i = 0; i < expectedValues.length; i++) {

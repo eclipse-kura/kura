@@ -187,6 +187,7 @@ public class ChannelRecord {
         result.name = channelName;
         result.valueType = value.getType();
         result.value = value;
+        result.valueScale = 1.0d;
 
         return result;
     }

@@ -51,6 +51,8 @@ public class Channel {
 
     private double valueScale;
 
+    private double valueOffset;
+
     /**
      * Determines if this channel is enabled or not
      */
@@ -82,6 +84,7 @@ public class Channel {
         this.type = type;
         this.valueType = valueType;
         this.valueScale = 1.0d;
+        this.valueOffset = 0d;
     }
 
     /**
@@ -182,17 +185,33 @@ public class Channel {
     }
 
     /**
+     * Specifies the scale to be applied to the channel value
+     *
+     * @param scale
+     *            a double value that specifies the scale to be applied to the channel value
      * @since 2.3
      */
     public void setScale(double scale) {
         this.valueScale = scale;
     }
 
+    /**
+     * Specifies the offset to be applied to the channel value
+     *
+     * @param offset
+     *            a double value that specifies the offset to be applied to the channel value
+     * @since 2.3
+     */
+    public void setOffset(double offset) {
+        this.valueOffset = offset;
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {
         return "Channel [configuration=" + this.configuration + ", name=" + this.name + ", type=" + this.type
-                + ", valueType=" + this.valueType + "]";
+                + ", valueType=" + this.valueType + ", valueScale=" + this.valueScale + ", valueOffset="
+                + this.valueOffset + "]";
     }
 
     /**
@@ -203,7 +222,8 @@ public class Channel {
      *         the {@link ChannelRecord}
      */
     public ChannelRecord createReadRecord() {
-        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType, this.valueScale);
+        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType, this.valueScale,
+                this.valueOffset);
         result.setChannelConfig(this.configuration);
 
         return result;
@@ -242,6 +262,8 @@ public class Channel {
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         result = prime * result + (this.type == null ? 0 : this.type.hashCode());
         long temp;
+        temp = Double.doubleToLongBits(this.valueOffset);
+        result = prime * result + (int) (temp ^ temp >>> 32);
         temp = Double.doubleToLongBits(this.valueScale);
         result = prime * result + (int) (temp ^ temp >>> 32);
         result = prime * result + (this.valueType == null ? 0 : this.valueType.hashCode());
@@ -268,6 +290,9 @@ public class Channel {
             return false;
         }
         if (this.type != other.type) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)) {
             return false;
         }
         if (Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)) {

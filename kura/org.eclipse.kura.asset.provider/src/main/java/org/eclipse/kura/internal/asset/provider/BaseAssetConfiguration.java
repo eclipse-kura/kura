@@ -21,6 +21,7 @@ import static org.eclipse.kura.asset.provider.AssetConstants.CHANNEL_PROPERTY_SE
 import static org.eclipse.kura.asset.provider.AssetConstants.ENABLED;
 import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_SCALE;
+import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_OFFSET;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
 
 import java.util.ArrayList;
@@ -326,11 +327,20 @@ public final class BaseAssetConfiguration {
             return DataType.getDataType(valueTypeProp);
         }
 
-        private static Double getValueScale(final Map<String, Object> properties) {
+        private static double getValueScale(final Map<String, Object> properties) {
             final String valueScale = (String) properties.get(VALUE_SCALE.value());
 
             if (valueScale == null) {
                 return 1.0d;
+            }
+            return Double.valueOf(valueScale);
+        }
+        
+        private static double getValueOffset(final Map<String, Object> properties) {
+            final String valueScale = (String) properties.get(VALUE_OFFSET.value());
+
+            if (valueScale == null) {
+                return 0.0d;
             }
             return Double.valueOf(valueScale);
         }
@@ -361,7 +371,9 @@ public final class BaseAssetConfiguration {
 
             final boolean isEnabled = isEnabled(channelConfig);
 
-            final Double valueScale = getValueScale(channelConfig);
+            final double valueScale = getValueScale(channelConfig);
+            
+            final double valueOffset = getValueOffset(channelConfig);
 
             final Channel channel = new Channel(channelName, channelType, dataType, channelConfig);
             channel.setEnabled(isEnabled);
@@ -369,6 +381,7 @@ public final class BaseAssetConfiguration {
             if (dataType.equals(DataType.DOUBLE) || dataType.equals(DataType.INTEGER) || dataType.equals(DataType.FLOAT)
                     || dataType.equals(DataType.LONG)) {
                 channel.setScale(valueScale);
+                channel.setOffset(valueOffset);
             }
 
             logger.debug("Retrieving single channel information from the properties...Done");

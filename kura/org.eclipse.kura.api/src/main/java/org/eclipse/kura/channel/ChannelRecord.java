@@ -39,7 +39,9 @@ import org.osgi.annotation.versioning.ProviderType;
  * Describing a read request: in this case the channel record must contain the channel
  * name and the data type to be read.
  * A channel record suitable for this use case can be created using the
- * {@link ChannelRecord#createReadRecord(String, DataType)} or {@link Channel#createReadRecord()} methods.
+ * {@link ChannelRecord#createReadRecord(String, DataType)},
+ * {@link ChannelRecord#createReadRecord(String, DataType, double, double)} or {@link Channel#createReadRecord()}
+ * methods.
  * </li>
  *
  * <li>
@@ -72,6 +74,10 @@ import org.osgi.annotation.versioning.ProviderType;
 @NotThreadSafe
 public class ChannelRecord {
 
+    private static final String VALUE_TYPE_CANNOT_BE_NULL = "Value Type cannot be null";
+
+    private static final String CHANNEL_NAME_CANNOT_BE_NULL = "Channel Name cannot be null";
+
     /**
      * Provided channel configuration to perform read or write
      * operation.
@@ -101,6 +107,8 @@ public class ChannelRecord {
 
     private double valueScale;
 
+    private double valueOffset;
+
     /** Represents the timestamp of the operation performed. */
     private long timestamp;
 
@@ -119,8 +127,8 @@ public class ChannelRecord {
      * @return the channel record
      */
     public static ChannelRecord createReadRecord(final String channelName, final DataType valueType) {
-        requireNonNull(channelName, "Channel Name cannot be null");
-        requireNonNull(valueType, "Value Type cannot be null");
+        requireNonNull(channelName, CHANNEL_NAME_CANNOT_BE_NULL);
+        requireNonNull(valueType, VALUE_TYPE_CANNOT_BE_NULL);
 
         ChannelRecord result = new ChannelRecord();
         result.name = channelName;
@@ -129,7 +137,7 @@ public class ChannelRecord {
 
         return result;
     }
-    
+
     /**
      * Creates a channel record that represents a read request.
      *
@@ -139,19 +147,23 @@ public class ChannelRecord {
      *            The type of the value to be read
      * @param valueScale
      *            The scaling factor to be applied to the value
+     * @param valueOffset
+     *            The offset to be applied to the value
      * @throws NullPointerException
      *             If any of the provided arguments is null
      * @return the channel record
      * @since 2.3
      */
-    public static ChannelRecord createReadRecord(final String channelName, final DataType valueType, final double valueScale) {
-        requireNonNull(channelName, "Channel Name cannot be null");
-        requireNonNull(valueType, "Value Type cannot be null");
+    public static ChannelRecord createReadRecord(final String channelName, final DataType valueType,
+            final double valueScale, final double valueOffset) {
+        requireNonNull(channelName, CHANNEL_NAME_CANNOT_BE_NULL);
+        requireNonNull(valueType, VALUE_TYPE_CANNOT_BE_NULL);
 
         ChannelRecord result = new ChannelRecord();
         result.name = channelName;
         result.valueType = valueType;
         result.valueScale = valueScale;
+        result.valueOffset = valueOffset;
 
         return result;
     }
@@ -168,7 +180,7 @@ public class ChannelRecord {
      * @return the channel record
      */
     public static ChannelRecord createWriteRecord(final String channelName, final TypedValue<?> value) {
-        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(channelName, CHANNEL_NAME_CANNOT_BE_NULL);
         requireNonNull(value, "Value cannot be null");
 
         ChannelRecord result = new ChannelRecord();
@@ -191,7 +203,7 @@ public class ChannelRecord {
      * @return the channel record
      */
     public static ChannelRecord createStatusRecord(final String channelName, final ChannelStatus status) {
-        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(channelName, CHANNEL_NAME_CANNOT_BE_NULL);
         requireNonNull(status, "Status cannot be null");
 
         ChannelRecord result = new ChannelRecord();
@@ -289,13 +301,13 @@ public class ChannelRecord {
      */
     public TypedValue<?> getValue() {
         if (this.valueType.equals(DataType.DOUBLE)) {
-            return new DoubleValue((double) this.value.getValue() * this.valueScale);
+            return new DoubleValue((double) this.value.getValue() * this.valueScale + this.valueOffset);
         } else if (this.valueType.equals(DataType.FLOAT)) {
-            return new FloatValue((float) this.value.getValue() * (float) this.valueScale);
+            return new FloatValue((float) this.value.getValue() * (float) this.valueScale + (float) this.valueOffset);
         } else if (this.valueType.equals(DataType.INTEGER)) {
-            return new IntegerValue((int) this.value.getValue() * (int) this.valueScale);
+            return new IntegerValue((int) this.value.getValue() * (int) this.valueScale + (int) this.valueOffset);
         } else if (this.valueType.equals(DataType.LONG)) {
-            return new LongValue((long) this.value.getValue() * (long) this.valueScale);
+            return new LongValue((long) this.value.getValue() * (long) this.valueScale + (long) this.valueOffset);
         }
 
         return this.value;
@@ -318,18 +330,23 @@ public class ChannelRecord {
     public String toString() {
         return "ChannelRecord [channelConfiguration=" + this.channelConfiguration + ", channelStatus="
                 + this.channelStatus + ", name=" + this.name + ", valueType=" + this.valueType + ", value=" + this.value
-                + ", timestamp=" + this.timestamp + "]";
+                + ", valueScale=" + this.valueScale + ", valueOffset=" + this.valueOffset + ", timestamp="
+                + this.timestamp + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.channelConfiguration == null ? 0 : this.channelConfiguration.hashCode());
         result = prime * result + (this.channelStatus == null ? 0 : this.channelStatus.hashCode());
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         result = prime * result + (int) (this.timestamp ^ this.timestamp >>> 32);
         result = prime * result + (this.value == null ? 0 : this.value.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(this.valueOffset);
+        result = prime * result + (int) (temp ^ temp >>> 32);
+        temp = Double.doubleToLongBits(this.valueScale);
+        result = prime * result + (int) (temp ^ temp >>> 32);
         result = prime * result + (this.valueType == null ? 0 : this.valueType.hashCode());
         return result;
     }
@@ -343,13 +360,6 @@ public class ChannelRecord {
             return false;
         }
         ChannelRecord other = (ChannelRecord) obj;
-        if (this.channelConfiguration == null) {
-            if (other.channelConfiguration != null) {
-                return false;
-            }
-        } else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
-            return false;
-        }
         if (this.channelStatus == null) {
             if (other.channelStatus != null) {
                 return false;
@@ -374,9 +384,12 @@ public class ChannelRecord {
         } else if (!this.value.equals(other.value)) {
             return false;
         }
-        if (this.valueType != other.valueType) {
+        if (Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)
+                || Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)
+                || this.valueType != other.valueType) {
             return false;
         }
         return true;
     }
+
 }

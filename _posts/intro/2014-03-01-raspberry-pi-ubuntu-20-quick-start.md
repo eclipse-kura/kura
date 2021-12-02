@@ -62,7 +62,7 @@ following steps:
     <pre>sudo rfkill unblock wlan</pre>
 
 
-7. Set the right Wi-Fi regulatory domain based on your current world region editing the <pre>/etc/default/crda</pre> and adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region.
+7. Set the right Wi-Fi regulatory domain based on your current world region editing the `/etc/default/crda` and adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region.
 
 8. Reboot the Raspberry Pi with:
 

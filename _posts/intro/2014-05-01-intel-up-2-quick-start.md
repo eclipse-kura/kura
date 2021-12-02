@@ -38,48 +38,34 @@ following steps:
 
 1. Boot the Intel Up² with the Ubuntu Image 20.04.3.
 
-2. The following packages must be installed before installing Kura. However apt-get will download and install them if an internet connection is available: 
-
-   <pre>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump, wireless-tools, net-tools, chrony, java8-runtime-headless</pre>.
-
-3. Assign a static ip to the primary ethernet network interface:
+2. Assign a static ip to the primary ethernet network interface:
    
    <pre>nano /etc/netplan/00-installer-config.yaml
-   
    network:
      ethernets:
        enp2s0:
          dhcp4: no
          addresses:
+   
            - 172.16.0.1/24
-       enp3s0:
-         dhcp4: true
-     version: 2
+           enp3s0:
+               dhcp4: true
+       version: 2
    
    </pre>
-   
-4. Make sure that Java 8 is installed with
 
-    <pre>java -version</pre>
+3. Download the Kura package with:
 
-    if not install OpenJDK 8 performing the following command:
+    <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_intel-up2-ubuntu-20_installer.deb</pre>
 
-    <pre>sudo apt-get install openjdk-8-jre-headless</pre>
-
-5. Download the Kura package with:
-
-    <pre>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_intel-up2-ubuntu-18_installer.deb</pre>
-
-    Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 5.0.0).
+    Note: replace \<version\> in the URL above with the version number of the latest release (e.g. 5.1.0).
 
 6. Install Kura with: 
 
-    <pre>apt install kura_&lt;version&gt;_intel-up2-ubuntu-18_installer.deb</pre>
+    <pre>apt-get install./ kura_&lt;version&gt;_intel-up2-ubuntu-20_installer.deb</pre>
 
-7. Update the Wi-Fi Regulatory Domain editing the file:
-    
-    <pre>/etc/default/crda</pre>
-    
+7. Set the right Wi-Fi regulatory domain based on your current world region editing the `/etc/default/crda` and adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region.
+   
 8. Reboot the Intel Up² with:
 
     <pre>sudo reboot</pre>

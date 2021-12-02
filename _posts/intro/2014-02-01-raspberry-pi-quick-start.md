@@ -68,7 +68,7 @@ following steps:
 
     <pre>sudo rfkill unblock wlan</pre>
 
-7. Set the right Wi-Fi regulatory domain based on your current world region following the instructions <a href="https://www.raspberrypi.org/documentation/computers/configuration.html#using-the-desktop" target="_blank">here</a> In case of problems, you could try to edit the <pre>/etc/default/crda</pre> adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2" target="_blank">ISO 3166-1 alpha-2</a> code of your region
+7. Set the right Wi-Fi regulatory domain based on your current world region following the instructions <a href="https://www.raspberrypi.org/documentation/computers/configuration.html#using-the-desktop" target="_blank">here</a> In case of problems, you could try to edit the `/etc/default/crda` adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2" target="_blank">ISO 3166-1 alpha-2</a> code of your region
 
 8. Reboot the Raspberry Pi with:
 
@@ -88,7 +88,7 @@ following steps:
      ![Proceed trusting the source]({{ site.baseurl }}/assets/images/admin/untrusted_cert3.png)
 
      Once trusted the source, the user will be redirected to a login page where the default **username** is:
-        
+     
      <pre>admin</pre>
 
      and the default **password** is:

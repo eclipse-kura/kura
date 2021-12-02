@@ -14,6 +14,7 @@ package org.eclipse.kura.web.client.util;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.shared.model.GwtLogEntry;
@@ -100,7 +101,8 @@ public class LogPollService {
 
         @Override
         public void onSuccess(List<GwtLogEntry> result) {
-            LogPollService.this.logger.fine("RPC successful. Count: " + LogPollService.this.rpcCount++);
+            LogPollService.this.logger.log(Level.FINE,
+                    () -> "RPC successful. Count: " + LogPollService.this.rpcCount++);
 
             int delay = RESEND_DELAY;
 

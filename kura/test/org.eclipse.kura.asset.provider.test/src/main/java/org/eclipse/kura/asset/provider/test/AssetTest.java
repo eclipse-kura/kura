@@ -131,6 +131,8 @@ public final class AssetTest {
         channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", "INTEGER");
+        channels.put("1.CH#+scale", "1.0");
+        channels.put("1.CH#+offset", "0.0");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
         channels.put("2.CH#+name", "2.CH");
@@ -193,6 +195,8 @@ public final class AssetTest {
         assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
+        assertEquals(1.0d, channel1.getValueScale(), 0.0);
+        assertEquals(0.0d, channel1.getValueOffset(), 0.0);
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 

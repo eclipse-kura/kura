@@ -55,7 +55,6 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         if (this.readerThread != null) {
             this.readerThread.interrupt();
         }
-        this.registeredListeners.clear();
         this.filePath = (String) properties.get(LOG_FILEPATH_PROP_KEY);
         this.readerThread = new FileLogReader(this.filePath);
         this.readerThread.start();
@@ -119,24 +118,18 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             String line = file.readLine();
             while (line != null) {
 
-                if (!isStacktrace(line)) {
-                    String message = line;
+                String message = line;
 
-                    // look ahead for stacktrace
-                    StringBuilder stacktrace = new StringBuilder();
-                    line = file.readLine();
-                    if (line != null && isStacktrace(line)) {
-                        while (line != null) {
-                            stacktrace.append(line);
-                            stacktrace.append("\n");
-                            line = file.readLine();
-                        }
-                    }
-
-                    notifyListeners(message, stacktrace.toString().trim());
-                } else {
+                // look ahead for stacktrace
+                StringBuilder stacktrace = new StringBuilder();
+                line = file.readLine();
+                while (line != null && isStacktrace(line)) {
+                    stacktrace.append(line);
+                    stacktrace.append("\n");
                     line = file.readLine();
                 }
+
+                notifyListeners(message, stacktrace.toString().trim());
             }
         }
 
@@ -146,7 +139,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
              * 
              * in kura-audit log file the lines start with a '<'
              */
-            return !line.matches("^(\\d+.*)") && !line.startsWith("<");
+            return line.length() > 4 && !line.substring(0, 4).matches("\\d{4}") && !line.startsWith("<");
         }
 
         private void notifyListeners(String message, String stacktrace) {

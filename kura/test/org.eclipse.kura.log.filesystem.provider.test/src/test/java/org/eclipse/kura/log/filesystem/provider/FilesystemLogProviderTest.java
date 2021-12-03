@@ -17,6 +17,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -129,8 +130,8 @@ public class FilesystemLogProviderTest {
     }
 
     @Test
-    public void listenerShouldNotBeCalledWhenExceptionReadingFile() {
-        givenFileWithErrorsOnRead("kuratest");
+    public void listenerShouldNotBeCalledFileNotAccessible() {
+        givenFileWithErrorsOnRead("kuratesterror");
         givenPropertiesWithLogFilePath();
         givenFilesystemLogProvider();
         givenLogListeners(1);
@@ -254,7 +255,6 @@ public class FilesystemLogProviderTest {
         for (LogListener listener : this.listeners) {
             this.logProvider.unregisterLogListener(listener);
         }
-        givenFile("kura");
     }
 
     /*

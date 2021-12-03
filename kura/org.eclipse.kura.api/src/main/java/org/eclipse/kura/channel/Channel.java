@@ -135,6 +135,28 @@ public class Channel {
     }
 
     /**
+     * Returns a double that represents the scale factor to be applied to the read value
+     *
+     * @return a double that represents the scale factor to be applied to the read value
+     *
+     * @since 2.3
+     */
+    public double getValueScale() {
+        return this.valueScale;
+    }
+
+    /**
+     * Returns a double that represents the offset to be applied to the read value
+     *
+     * @return a double that represents the offset to be applied to the read value
+     * 
+     * @since 2.3
+     */
+    public double getValueOffset() {
+        return this.valueOffset;
+    }
+
+    /**
      * Sets the name.
      *
      * @param name
@@ -222,8 +244,7 @@ public class Channel {
      *         the {@link ChannelRecord}
      */
     public ChannelRecord createReadRecord() {
-        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType, this.valueScale,
-                this.valueOffset);
+        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType);
         result.setChannelConfig(this.configuration);
 
         return result;
@@ -275,7 +296,7 @@ public class Channel {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         Channel other = (Channel) obj;
@@ -289,16 +310,10 @@ public class Channel {
         } else if (!this.name.equals(other.name)) {
             return false;
         }
-        if (this.type != other.type) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)) {
-            return false;
-        }
-        if (this.valueType != other.valueType) {
+        if (this.type != other.type
+                || Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)
+                || Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)
+                || this.valueType != other.valueType) {
             return false;
         }
         return true;

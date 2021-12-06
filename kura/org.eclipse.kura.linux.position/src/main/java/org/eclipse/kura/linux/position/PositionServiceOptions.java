@@ -31,6 +31,11 @@ public class PositionServiceOptions {
     private static final Property<Integer> STOP_BITS = new Property<>("stopBits", 1);
     private static final Property<Integer> PARITY = new Property<>("parity", 0);
 
+    private static final Property<String> PROVIDER = new Property<String>("provider",
+            PositionProviderType.DEVICE_PORT.getValue());
+    private static final Property<String> GPSD_HOST = new Property<String>("gpsd.host", "localhost");
+    private static final Property<Integer> GPSD_PORT = new Property<Integer>("gpsd.port", 2947);
+
     private final Map<String, Object> properties;
 
     public PositionServiceOptions(final Map<String, Object> properties) {
@@ -75,6 +80,18 @@ public class PositionServiceOptions {
 
     public String getPort() {
         return PORT.get(this.properties);
+    }
+
+    public PositionProviderType getPositionProvider() {
+        return PositionProviderType.fromValue(PROVIDER.get(this.properties));
+    }
+
+    public String getGpsdHost() {
+        return GPSD_HOST.get(this.properties);
+    }
+
+    public int getGpsdPort() {
+        return GPSD_PORT.get(this.properties);
     }
 
     public CommURI getGpsDeviceUri() {

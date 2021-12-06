@@ -23,6 +23,8 @@ public enum WireAssetConstants {
     PROP_SINGLE_TIMESTAMP_NAME("assetTimestamp"),
     PROP_ASSET_NAME("assetName"),
     PROP_SUFFIX_TIMESTAMP(PROPERTY_SEPARATOR.value() + "timestamp"),
+    
+    PROP_SUFFIX_UNIT(PROPERTY_SEPARATOR.value() + "unit"),
 
     ERROR_NOT_SPECIFIED_MESSAGE("ERROR NOT SPECIFIED"),
     PROP_SUFFIX_ERROR(PROPERTY_SEPARATOR.value() + "error"),

@@ -19,6 +19,7 @@ import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_OFFSET;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_SCALE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_UNIT;
 
 import java.util.List;
 
@@ -149,6 +150,16 @@ public class BaseChannelDescriptor implements ChannelDescriptor {
         valueOffset.setRequired(false);
 
         this.defaultElements.add(valueOffset);
+        
+        final Tad valueUnit = new Tad();
+        valueUnit.setName(VALUE_UNIT.value().substring(1));
+        valueUnit.setId(VALUE_UNIT.value());
+        valueUnit.setDescription("Unit associated to the value of the channel");
+        valueUnit.setType(Tscalar.STRING);
+        valueUnit.setRequired(false);
+        valueUnit.setDefault("");
+
+        this.defaultElements.add(valueUnit);
     }
 
     /** {@inheritDoc} */

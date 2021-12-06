@@ -188,14 +188,14 @@ public class AssetRestServiceTest {
 
         JsonElement json = svc.read(pid);
         assertEquals(
-                "[{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch1\",\"valueType\":\"INTEGER\",\"value\":1,\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"FAILURE\"},\"name\":\"ch2\",\"valueType\":\"STRING\",\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch3\",\"valueType\":\"STRING\",\"value\":\"val\",\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch4\",\"valueType\":\"BOOLEAN\",\"value\":true,\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch5\",\"valueType\":\"BYTE_ARRAY\",\"value\":\"AQID\",\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch6\",\"valueType\":\"DOUBLE\",\"value\":1.234,\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch7\",\"valueType\":\"FLOAT\",\"value\":12.34,\"timestamp\":0},"
-                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch8\",\"valueType\":\"LONG\",\"value\":1234,\"timestamp\":0}]",
+                "[{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch1\",\"valueType\":\"INTEGER\",\"value\":1,\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"FAILURE\"},\"name\":\"ch2\",\"valueType\":\"STRING\",\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch3\",\"valueType\":\"STRING\",\"value\":\"val\",\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch4\",\"valueType\":\"BOOLEAN\",\"value\":true,\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch5\",\"valueType\":\"BYTE_ARRAY\",\"value\":\"AQID\",\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch6\",\"valueType\":\"DOUBLE\",\"value\":1.234,\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch7\",\"valueType\":\"FLOAT\",\"value\":12.34,\"timestamp\":0,\"unit\":\"\"},"
+                        + "{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch8\",\"valueType\":\"LONG\",\"value\":1234,\"timestamp\":0,\"unit\":\"\"}]",
                 json.toString());
     }
 
@@ -263,7 +263,7 @@ public class AssetRestServiceTest {
 
         JsonElement json = svc.read(pid, request);
         assertEquals(
-                "[{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch1\",\"valueType\":\"BOOLEAN\",\"value\":true,\"timestamp\":0}]",
+                "[{\"channelStatus\":{\"channelFlag\":\"SUCCESS\"},\"name\":\"ch1\",\"valueType\":\"BOOLEAN\",\"value\":true,\"timestamp\":0,\"unit\":\"\"}]",
                 json.toString());
     }
 

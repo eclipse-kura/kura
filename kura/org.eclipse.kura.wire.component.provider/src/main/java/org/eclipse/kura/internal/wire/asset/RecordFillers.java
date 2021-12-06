@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.ChannelStatus;
+import org.eclipse.kura.type.StringValue;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 
@@ -89,6 +90,11 @@ public final class RecordFillers {
         public void fill(Map<String, TypedValue<?>> envelopeProperties, ChannelRecord record) {
             if (record.getChannelStatus().getChannelFlag() == ChannelFlag.SUCCESS) {
                 envelopeProperties.put(this.valueKey, record.getValue());
+                String unit = record.getUnit();
+                if (!isNull(unit) && !unit.trim().isEmpty()) {
+                    envelopeProperties.put(this.valueKey + WireAssetConstants.PROP_SUFFIX_UNIT.value(),
+                            new StringValue(unit));
+                }
             }
         }
     }

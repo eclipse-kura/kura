@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -98,6 +98,8 @@ public class ChannelRecord {
     /** Represents the timestamp of the operation performed. */
     private long timestamp;
 
+    private String unit;
+
     private ChannelRecord() {
     }
 
@@ -119,6 +121,23 @@ public class ChannelRecord {
         ChannelRecord result = new ChannelRecord();
         result.name = channelName;
         result.valueType = valueType;
+        result.unit = "";
+
+        return result;
+    }
+
+    /**
+     * @since 2.3
+     */
+    public static ChannelRecord createReadRecord(final String channelName, final DataType valueType,
+            final String unit) {
+        requireNonNull(channelName, "Channel Name cannot be null");
+        requireNonNull(valueType, "Value Type cannot be null");
+
+        ChannelRecord result = new ChannelRecord();
+        result.name = channelName;
+        result.valueType = valueType;
+        result.unit = unit;
 
         return result;
     }
@@ -196,6 +215,13 @@ public class ChannelRecord {
     }
 
     /**
+     * @since 2.3
+     */
+    public String getUnit() {
+        return this.unit;
+    }
+
+    /**
      * Sets the channel configuration as provided.
      *
      * @param channelConfig
@@ -229,6 +255,13 @@ public class ChannelRecord {
      */
     public void setTimestamp(final long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    /**
+     * @since 2.3
+     */
+    public void setUnit(final String unit) {
+        this.unit = unit;
     }
 
     /**
@@ -275,17 +308,17 @@ public class ChannelRecord {
     public String toString() {
         return "ChannelRecord [channelConfiguration=" + this.channelConfiguration + ", channelStatus="
                 + this.channelStatus + ", name=" + this.name + ", valueType=" + this.valueType + ", value=" + this.value
-                + ", timestamp=" + this.timestamp + "]";
+                + ", timestamp=" + this.timestamp + ", unit=" + this.unit + "]";
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (this.channelConfiguration == null ? 0 : this.channelConfiguration.hashCode());
         result = prime * result + (this.channelStatus == null ? 0 : this.channelStatus.hashCode());
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         result = prime * result + (int) (this.timestamp ^ this.timestamp >>> 32);
+        result = prime * result + (this.unit == null ? 0 : this.unit.hashCode());
         result = prime * result + (this.value == null ? 0 : this.value.hashCode());
         result = prime * result + (this.valueType == null ? 0 : this.valueType.hashCode());
         return result;
@@ -296,20 +329,10 @@ public class ChannelRecord {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ChannelRecord other = (ChannelRecord) obj;
-        if (this.channelConfiguration == null) {
-            if (other.channelConfiguration != null) {
-                return false;
-            }
-        } else if (!this.channelConfiguration.equals(other.channelConfiguration)) {
-            return false;
-        }
         if (this.channelStatus == null) {
             if (other.channelStatus != null) {
                 return false;
@@ -325,6 +348,13 @@ public class ChannelRecord {
             return false;
         }
         if (this.timestamp != other.timestamp) {
+            return false;
+        }
+        if (this.unit == null) {
+            if (other.unit != null) {
+                return false;
+            }
+        } else if (!this.unit.equals(other.unit)) {
             return false;
         }
         if (this.value == null) {

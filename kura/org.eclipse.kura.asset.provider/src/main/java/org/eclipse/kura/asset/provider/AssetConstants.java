@@ -49,7 +49,10 @@ public enum AssetConstants {
     VALUE_SCALE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "scale"),
 
     /** Gain Property to be used in the configuration. */
-    VALUE_OFFSET(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "offset");
+    VALUE_OFFSET(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "offset"),
+    
+    /** Unit Property to be used in the configuration. */
+    VALUE_UNIT(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "unit");
 
     /** The value. */
     private String value;

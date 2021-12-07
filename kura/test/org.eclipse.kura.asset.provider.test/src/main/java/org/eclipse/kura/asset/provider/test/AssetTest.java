@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -491,7 +491,8 @@ public final class AssetTest {
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());
 
-        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#+scale", "#+offset", "#unit.id" };
+        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#+scale", "#+offset",
+                "#unit.id" };
 
         final int expectedChannelCount = 4;
         for (String expectedValue : expectedValues) {

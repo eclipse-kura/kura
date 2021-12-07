@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -23,7 +23,7 @@ public enum WireAssetConstants {
     PROP_SINGLE_TIMESTAMP_NAME("assetTimestamp"),
     PROP_ASSET_NAME("assetName"),
     PROP_SUFFIX_TIMESTAMP(PROPERTY_SEPARATOR.value() + "timestamp"),
-    
+
     PROP_SUFFIX_UNIT(PROPERTY_SEPARATOR.value() + "unit"),
 
     ERROR_NOT_SPECIFIED_MESSAGE("ERROR NOT SPECIFIED"),

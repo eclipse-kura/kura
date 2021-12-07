@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,7 +27,7 @@ public final class SerializationConstants {
     public static final String CHANNEL_VALUE_PROPERTY = "value";
     public static final String CHANNEL_MODE_PROPERTY = "mode";
     public static final String CHANNEL_TIMESTAMP_PROPERTY = "timestamp";
-    
+
     public static final String CHANNEL_UNIT_PROPERTY = "unit";
 
     public static final String ERROR_PROPERTY = "error";

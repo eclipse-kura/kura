@@ -58,6 +58,10 @@ public abstract class LinuxDnsServer {
         this.executorService = null;
     }
 
+    protected CommandExecutorService getCommandExecutorService() {
+        return this.executorService;
+    }
+
     protected void activate() {
         logger.info("Activating LinuxDnsServer...");
         try {

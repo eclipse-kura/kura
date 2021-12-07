@@ -118,6 +118,9 @@
         <module>org.eclipse.kura.core.tamper.detection</module>
         
         <module>org.eclipse.kura.log.filesystem.provider</module>
+      
+        <module>org.eclipse.kura.rest.configuration.provider</module>
+        <module>org.eclipse.kura.request.handler.jaxrs</module>
 
         <module>features</module>
         <module>emulator</module>

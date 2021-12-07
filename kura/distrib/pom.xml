@@ -556,6 +556,16 @@
                                     <artifactId>org.eclipse.kura.log.filesystem.provider</artifactId>
                                     <version>${org.eclipse.kura.log.filesystem.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.rest.configuration.provider</artifactId>
+                                    <version>${org.eclipse.kura.rest.configuration.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.request.handler.jaxrs</artifactId>
+                                    <version>${org.eclipse.kura.request.handler.jaxrs.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -786,6 +796,10 @@
                                     tofile="target/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.log.filesystem.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar"
+                                    tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>

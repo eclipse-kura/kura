@@ -387,7 +387,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         return getFinalRecords(channelRecords, channels);
     }
 
-    private List<ChannelRecord> getFinalRecords(List<ChannelRecord> channelRecords, Map<String, Channel> channels) {
+    protected List<ChannelRecord> getFinalRecords(List<ChannelRecord> channelRecords, Map<String, Channel> channels) {
         channelRecords.stream()
                 .filter(channelRecord -> !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue()))
                 .forEach(channelRecord -> {

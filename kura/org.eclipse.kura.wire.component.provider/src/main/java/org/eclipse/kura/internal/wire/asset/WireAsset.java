@@ -401,7 +401,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             if (WireAsset.this.options.emitAllChannels()) {
                 emitAllReadChannels();
             } else {
-                emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
+                emitChannelRecords(getFinalRecords(Collections.singletonList(event.getChannelRecord()),
+                        getAssetConfiguration().getAssetChannels()));
             }
         }
 

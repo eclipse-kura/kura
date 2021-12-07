@@ -14,7 +14,7 @@ package org.eclipse.kura.log.filesystem.provider;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -33,6 +33,8 @@ import org.junit.Test;
 import org.mockito.Matchers;
 
 public class FilesystemLogProviderTest {
+
+    private static final int LISTENER_CALL_TIMEOUT = 5000;
 
     private int nLogLines = 0;
     private Map<String, Object> properties;
@@ -54,7 +56,6 @@ public class FilesystemLogProviderTest {
 
         whenRegisteringLogListeners();
         whenActivate();
-        whenSomeTimePasses();
 
         thenListenersGetCalled(this.nLogLines);
         thenNoExceptionsOccurred();
@@ -69,7 +70,6 @@ public class FilesystemLogProviderTest {
 
         whenRegisteringLogListeners();
         whenUpdateWithWrongProperties();
-        whenSomeTimePasses();
 
         thenListenersAreNotCalled();
         thenNoExceptionsOccurred();
@@ -84,13 +84,10 @@ public class FilesystemLogProviderTest {
 
         whenRegisteringLogListeners();
         whenActivate();
-        whenSomeTimePasses();
         whenUpdateWithCorrectProperties();
-        whenSomeTimePasses();
         whenNewLinesAreAddedToFile(10);
-        whenSomeTimePasses();
 
-        thenListenersGetCalled(this.nLogLines);
+        thenListenersGetCalled(10);
     }
 
     @Test
@@ -102,9 +99,7 @@ public class FilesystemLogProviderTest {
 
         whenRegisteringLogListeners();
         whenActivate();
-        whenSomeTimePasses();
         whenDeactivate();
-        whenSomeTimePasses();
         whenNewLinesAreAddedToFile(10);
 
         thenListenersGetCalled(this.nLogLines - 10);
@@ -120,9 +115,7 @@ public class FilesystemLogProviderTest {
 
         whenRegisteringLogListeners();
         whenActivate();
-        whenSomeTimePasses();
         whenUnregisteringLogListeners();
-        whenSomeTimePasses();
         whenNewLinesAreAddedToFile(10);
 
         thenListenersGetCalled(this.nLogLines - 10);
@@ -130,14 +123,14 @@ public class FilesystemLogProviderTest {
 
     @Test
     public void listenerShouldNotBeCalledFileNotAccessible() {
-        givenFileWithErrorsOnRead("kuratesterror");
+        givenFile("kuratesterror");
+        givenFileBecomesNotReadable();
         givenPropertiesWithLogFilePath();
         givenFilesystemLogProvider();
         givenLogListeners(1);
 
         whenRegisteringLogListeners();
         whenActivate();
-        whenSomeTimePasses();
 
         thenListenersAreNotCalled();
     }
@@ -197,8 +190,7 @@ public class FilesystemLogProviderTest {
         }
     }
 
-    private void givenFileWithErrorsOnRead(String filename) {
-        givenFile(filename);
+    private void givenFileBecomesNotReadable() {
         this.file.setReadable(false);
         this.file.setWritable(false);
         this.file.setExecutable(false);
@@ -225,21 +217,16 @@ public class FilesystemLogProviderTest {
     }
 
     private void whenUpdateWithCorrectProperties() {
+        waitUntilListenersAreNotified(this.nLogLines);
+
         this.properties = new HashMap<>();
         this.properties.put(FilesystemLogProvider.LOG_FILEPATH_PROP_KEY, this.file.getAbsolutePath());
         this.logProvider.updated(this.properties);
     }
 
     private void whenDeactivate() {
+        waitUntilListenersAreNotified(this.nLogLines);
         this.logProvider.deactivate();
-    }
-
-    private void whenSomeTimePasses() {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     private void whenNewLinesAreAddedToFile(int nLines) {
@@ -255,6 +242,11 @@ public class FilesystemLogProviderTest {
 
     private void whenUnregisteringLogListeners() {
         for (LogListener listener : this.listeners) {
+            verify(listener, timeout(LISTENER_CALL_TIMEOUT).times(this.nLogLines))
+                    .newLogEntry(Matchers.any(LogEntry.class));
+        }
+
+        for (LogListener listener : this.listeners) {
             this.logProvider.unregisterLogListener(listener);
         }
     }
@@ -264,9 +256,7 @@ public class FilesystemLogProviderTest {
      */
 
     private void thenListenersGetCalled(int times) {
-        for (LogListener listener : this.listeners) {
-            verify(listener, times(times)).newLogEntry(Matchers.any(LogEntry.class));
-        }
+        waitUntilListenersAreNotified(times);
     }
 
     private void thenListenersAreNotCalled() {
@@ -277,5 +267,15 @@ public class FilesystemLogProviderTest {
 
     private void thenNoExceptionsOccurred() {
         assertFalse(this.exceptionOccured);
+    }
+
+    /*
+     * Utility methods
+     */
+
+    private void waitUntilListenersAreNotified(int times) {
+        for (LogListener listener : this.listeners) {
+            verify(listener, timeout(LISTENER_CALL_TIMEOUT).times(times)).newLogEntry(Matchers.any(LogEntry.class));
+        }
     }
 }

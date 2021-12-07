@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,7 +45,7 @@ public final class ValidationUtil {
     // Validates all the entered values
     public static void validateParameter(GwtConfigParameter param, String value, ValidationErrorConsumer consumer) {
 
-        if (value == null) {
+        if (value == null || value.trim().isEmpty()) {
             if (!param.isRequired()) {
                 return;
             } else {

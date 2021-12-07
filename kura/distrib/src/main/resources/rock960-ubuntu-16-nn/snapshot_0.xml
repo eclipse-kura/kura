@@ -369,36 +369,4 @@
             </esf:property>
         </esf:properties>
     </esf:configuration>
-    <esf:configuration pid="filesystem-kura-log">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="logFilePath" type="String">
-                <esf:value>/var/log/kura.log</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>filesystem-kura-log</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider-1636726365743-7</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
-    <esf:configuration pid="filesystem-kura-audit-log">
-        <esf:properties>
-            <esf:property array="false" encrypted="false" name="logFilePath" type="String">
-                <esf:value>/var/log/kura-audit.log</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
-                <esf:value>org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
-                <esf:value>filesystem-kura-audit-log</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="service.pid" type="String">
-                <esf:value>org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider-1636726365743-8</esf:value>
-            </esf:property>
-        </esf:properties>
-    </esf:configuration>
 </esf:configurations>

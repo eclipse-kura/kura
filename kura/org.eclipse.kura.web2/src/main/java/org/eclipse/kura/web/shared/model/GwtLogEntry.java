@@ -40,7 +40,6 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
         public String getKey() {
             return this.fieldKey;
         }
-
     }
 
     public void setSourceLogProviderPid(String sourceLogProviderPid) {
@@ -91,7 +90,6 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
     public String prettyPrint(boolean includeMoreInfo, boolean includeStacktrace) {
         this.setUnescaped(true);
         StringBuilder prettyEntry = new StringBuilder();
-
         prettyEntry.append(this.getSourceRealtimeTimestamp());
         prettyEntry.append("\t[priority: ");
         prettyEntry.append(this.getPriority());
@@ -114,7 +112,6 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
         }
 
         prettyEntry.append("\n\n");
-
         return prettyEntry.toString();
     }
 }

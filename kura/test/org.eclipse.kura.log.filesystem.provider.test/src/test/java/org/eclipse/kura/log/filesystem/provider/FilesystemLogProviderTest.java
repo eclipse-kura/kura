@@ -17,7 +17,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -184,6 +183,9 @@ public class FilesystemLogProviderTest {
     }
 
     private void givenFilesystemLogProvider() {
+        if (this.logProvider != null) {
+            this.logProvider.deactivate();
+        }
         this.logProvider = new FilesystemLogProvider();
     }
 
@@ -234,7 +236,7 @@ public class FilesystemLogProviderTest {
 
     private void whenSomeTimePasses() {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
         }

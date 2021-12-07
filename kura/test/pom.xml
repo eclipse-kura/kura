@@ -112,7 +112,7 @@
                         -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
                         -Ddpa.configuration=/tmp/kura/dpa.properties
                           -Dosgi.console=5002</argLine>
-                        <!--<appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
+                        <!-- <appArgLine>-consoleLog -console 5002 -noExit</appArgLine> -->
                         <dependencies>
                             <dependency>
 	                            <type>p2-installable-unit</type>
@@ -900,6 +900,7 @@
         <module>org.eclipse.kura.core.tamper.detection.test</module>
         <module>org.eclipse.kura.useradmin.store.test</module>
         <module>org.eclipse.kura.core.keystore.test</module>
+        <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

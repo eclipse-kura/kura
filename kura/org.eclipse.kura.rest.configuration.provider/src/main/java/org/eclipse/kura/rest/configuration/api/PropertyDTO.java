@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.Scalar;
 import org.eclipse.kura.internal.rest.configuration.FailureHandler;
@@ -42,6 +44,54 @@ public class PropertyDTO implements Validable {
     @Override
     public void validate() {
         FailureHandler.requireParameter(this.type, "type");
+
+        if (value instanceof List<?>) {
+            validateArrayProperty(type, (List<?>) value);
+        } else {
+            validateSingletonProperty(type, value);
+        }
+    }
+
+    private static void validateArrayProperty(final Scalar type, final List<?> values) {
+        for (final Object singletonValue : values) {
+            validateSingletonProperty(type, singletonValue);
+        }
+    }
+
+    private static void validateSingletonProperty(final Scalar type, final Object value) {
+        if (value == null) {
+            return;
+        }
+
+        final boolean isValid;
+
+        switch (type) {
+        case BYTE:
+        case FLOAT:
+        case LONG:
+        case INTEGER:
+        case SHORT:
+        case DOUBLE:
+            isValid = value instanceof Number;
+            break;
+        case PASSWORD:
+        case STRING:
+            isValid = value instanceof String;
+            break;
+        case CHAR:
+            isValid = value instanceof String && ((String) value).length() == 1;
+            break;
+        case BOOLEAN:
+            isValid = value instanceof Boolean;
+            break;
+        default:
+            isValid = false;
+        }
+
+        if (!isValid) {
+            throw FailureHandler.toWebApplicationException(Status.BAD_REQUEST,
+                    "Invalid property for type " + type + ": " + value);
+        }
     }
 
     public static Optional<PropertyDTO> fromConfigurationProperty(final Object property) {
@@ -92,28 +142,28 @@ public class PropertyDTO implements Validable {
                 result = assertType(value, Boolean.class);
                 break;
             case BYTE:
-                result = ((Double) value).byteValue();
+                result = ((Number) value).byteValue();
                 break;
             case CHAR:
                 result = ((String) value).charAt(0);
                 break;
             case DOUBLE:
-                result = assertType(value, Double.class);
+                result = ((Number) value).doubleValue();
                 break;
             case FLOAT:
-                result = ((Double) value).floatValue();
+                result = ((Number) value).floatValue();
                 break;
             case INTEGER:
-                result = ((Double) value).intValue();
+                result = ((Number) value).intValue();
                 break;
             case LONG:
-                result = ((Double) value).longValue();
+                result = ((Number) value).longValue();
                 break;
             case PASSWORD:
                 result = new Password(assertType(value, String.class));
                 break;
             case SHORT:
-                result = ((Double) value).shortValue();
+                result = ((Number) value).shortValue();
                 break;
             case STRING:
                 result = assertType(value, String.class);
@@ -138,7 +188,7 @@ public class PropertyDTO implements Validable {
                         .toArray(Boolean[]::new);
                 break;
             case BYTE:
-                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Double) v).byteValue()))
+                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Number) v).byteValue()))
                         .toArray(Byte[]::new);
                 break;
             case CHAR:
@@ -146,19 +196,19 @@ public class PropertyDTO implements Validable {
                         .toArray(Character[]::new);
                 break;
             case DOUBLE:
-                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> assertType(v, Double.class)))
+                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Number) v).doubleValue()))
                         .toArray(Double[]::new);
                 break;
             case FLOAT:
-                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Double) v).floatValue()))
+                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Number) v).floatValue()))
                         .toArray(Float[]::new);
                 break;
             case INTEGER:
-                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Double) v).intValue()))
+                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Number) v).intValue()))
                         .toArray(Integer[]::new);
                 break;
             case LONG:
-                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Double) v).longValue()))
+                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Number) v).longValue()))
                         .toArray(Long[]::new);
                 break;
             case PASSWORD:
@@ -166,7 +216,7 @@ public class PropertyDTO implements Validable {
                         .map(nullOrElse(v -> new Password(assertType(v, String.class)))).toArray(Password[]::new);
                 break;
             case SHORT:
-                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Double) v).shortValue()))
+                result = ((List<?>) propertyValue).stream().map(nullOrElse(v -> ((Number) v).shortValue()))
                         .toArray(Short[]::new);
                 break;
             case STRING:

@@ -19,6 +19,7 @@ import static org.eclipse.kura.rest.configuration.provider.test.ConfigurationUti
 import static org.eclipse.kura.rest.configuration.provider.test.JsonProjection.self;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -71,7 +72,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
 @RunWith(Parameterized.class)
-public class ConifgurationRestServiceTest {
+public class ConfigurationRestServiceTest {
 
     @Test
     public void shouldSupportGetSnapshots() throws KuraException {
@@ -614,6 +615,111 @@ public class ConifgurationRestServiceTest {
     }
 
     @Test
+    public void testUpdateTypeMismatchNumericProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":\"foo\"}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchStringProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":12}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchPasswordProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":12}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchCharProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":12}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateInvalidLengthCharProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":\"foo\"}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchNumericArrayProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"INTEGER\",\"value\":[\"foo\"]}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchStringArrayProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"STRING\",\"value\":[12]}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchPasswordArrayProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"PASSWORD\",\"value\":[12]}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchCharArrayProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update", "{\"configs\":["
+                + "{\"pid\":\"foo\"," + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[12]}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateInvalidLengthCharArrayProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"CHAR\",\"value\":[\"foo\"]}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
+    public void testUpdateTypeMismatchBooleanProperty() throws KuraException {
+        whenRequestIsPerformed(new MethodSpec("PUT"), "/configurableComponents/configurations/_update",
+                "{\"configs\":[" + "{\"pid\":\"foo\","
+                        + "properties: {\"testProp\":{\"type\":\"BOOLEAN\",\"value\":\"foo\"}}" + "}" + "]}");
+
+        thenResponseCodeIs(400);
+        thenResponseElementExists(self().field("message"));
+    }
+
+    @Test
     public void testListComponentConfigurationsByPidException() throws KuraException {
         givenMockGetComponentConfigurationsReturnException();
 
@@ -945,13 +1051,13 @@ public class ConifgurationRestServiceTest {
         configurationServiceProperties.put("service.ranking", Integer.MIN_VALUE);
         configurationServiceProperties.put("kura.service.pid", "mockConfigurationService");
 
-        FrameworkUtil.getBundle(ConifgurationRestServiceTest.class).getBundleContext()
+        FrameworkUtil.getBundle(ConfigurationRestServiceTest.class).getBundleContext()
                 .registerService(ConfigurationService.class, configurationService, configurationServiceProperties);
 
     }
 
     @SuppressWarnings("unchecked")
-    public ConifgurationRestServiceTest(final Transport transport) throws InterruptedException, ExecutionException,
+    public ConfigurationRestServiceTest(final Transport transport) throws InterruptedException, ExecutionException,
             TimeoutException, KuraException, InvalidSyntaxException, IOException {
         this.transport = transport;
         this.transport.init();
@@ -1014,6 +1120,18 @@ public class ConifgurationRestServiceTest {
         }
 
         assertEquals("after applying " + projection + " to " + root, expected, actual);
+    }
+
+    private void thenResponseElementExists(final JsonProjection projection) {
+        final JsonValue root = Json
+                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected body")));
+
+        try {
+            assertNotNull("response element " + projection + " is null", projection.apply(root));
+        } catch (final Exception e) {
+            fail("failed to apply " + projection + " to " + root);
+            throw new IllegalStateException("unreachable");
+        }
     }
 
     private Response expectResponse() {

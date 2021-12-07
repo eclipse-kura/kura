@@ -30,9 +30,9 @@ public class LinuxDnsServerSystemD extends LinuxDnsServer implements DnsServerSe
     public LinuxDnsServerSystemD() throws KuraException {
         if (findWithSystemd(NAMED_COMMAND)) {
             dnsCommand = NAMED_COMMAND;
-        } else if (findWithSystemd(BIND9_COMMAND))
+        } else if (findWithSystemd(BIND9_COMMAND)) {
             dnsCommand = BIND9_COMMAND;
-        else {
+        } else {
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Unable to find dns service.");
         }
     }

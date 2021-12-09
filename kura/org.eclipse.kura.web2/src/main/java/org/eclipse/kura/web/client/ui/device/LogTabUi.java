@@ -119,6 +119,13 @@ public class LogTabUi extends Composite {
 
         LogPollService.subscribe(entries -> {
             LogTabUi.this.logs.addAll(entries);
+
+            if (LogTabUi.this.logs.size() > CACHE_SIZE_LIMIT) {
+                List<GwtLogEntry> newEntries = LogTabUi.this.logs.subList(CACHE_SIZE_LIMIT, LogTabUi.this.logs.size());
+                LogTabUi.this.logs.clear();
+                LogTabUi.this.logs.addAll(newEntries);
+            }
+
             displayLogs();
         });
     }

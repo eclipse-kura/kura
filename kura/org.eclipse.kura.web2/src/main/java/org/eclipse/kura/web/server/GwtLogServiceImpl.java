@@ -126,6 +126,8 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
          */
         private static void manageIdIntOverflow() {
             if (nextEntryId >= Integer.MAX_VALUE) {
+                logger.info("ID overflow for cached UI log entries. Reindexing.");
+
                 for (int i = 0; i < cache.size(); i++) {
                     cache.get(i).setId(i);
                 }

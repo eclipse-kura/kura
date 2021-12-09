@@ -13,10 +13,8 @@
 package org.eclipse.kura.internal.rest.configuration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,8 +36,6 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.Password;
-import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
@@ -47,13 +43,12 @@ import org.eclipse.kura.request.handler.jaxrs.annotation.EXEC;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
 import org.eclipse.kura.rest.configuration.api.CreateFactoryComponentConfigurationsRequest;
+import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.rest.configuration.api.DeleteFactoryComponentRequest;
 import org.eclipse.kura.rest.configuration.api.FactoryComponentConfigurationDTO;
-import org.eclipse.kura.rest.configuration.api.OcdDTO;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPidSet;
 import org.eclipse.kura.rest.configuration.api.PidSet;
-import org.eclipse.kura.rest.configuration.api.PropertyDTO;
 import org.eclipse.kura.rest.configuration.api.SnapshotId;
 import org.eclipse.kura.rest.configuration.api.SnapshotIdSet;
 import org.eclipse.kura.rest.configuration.api.UpdateComponentConfigurationRequest;
@@ -172,7 +167,8 @@ public class ConfigurationRestService {
 
         for (final FactoryComponentConfigurationDTO config : configs.getConfigs()) {
             handler.runFallibleSubtask("create:" + config.getPid(), () -> {
-                final Map<String, Object> castedProperties = dtosToConfigurationProperties(config.getProperties());
+                final Map<String, Object> castedProperties = DTOUtil
+                        .dtosToConfigurationProperties(config.getProperties());
 
                 this.configurationService.createFactoryConfiguration(config.getFactoryPid(), config.getPid(),
                         castedProperties, false);
@@ -237,7 +233,7 @@ public class ConfigurationRestService {
             throw FailureHandler.toWebApplicationException(e);
         }
 
-        return toComponentConfigurationList(ocds, false);
+        return DTOUtil.toComponentConfigurationList(ocds, cryptoService, false);
     }
 
     @POST
@@ -257,7 +253,7 @@ public class ConfigurationRestService {
             throw FailureHandler.toWebApplicationException(e);
         }
 
-        return toComponentConfigurationList(ocds, false);
+        return DTOUtil.toComponentConfigurationList(ocds, cryptoService, false);
     }
 
     /**
@@ -345,7 +341,7 @@ public class ConfigurationRestService {
             throw FailureHandler.toWebApplicationException(e);
         }
 
-        return toComponentConfigurationList(ccs, true);
+        return DTOUtil.toComponentConfigurationList(ccs, cryptoService, true);
 
     }
 
@@ -376,7 +372,7 @@ public class ConfigurationRestService {
             throw FailureHandler.toWebApplicationException(e);
         }
 
-        return toComponentConfigurationList(configs, true);
+        return DTOUtil.toComponentConfigurationList(configs, cryptoService, true);
     }
 
     /**
@@ -406,7 +402,7 @@ public class ConfigurationRestService {
                     continue;
                 }
 
-                result.add(toComponentConfigurationDTO(cc, false));
+                result.add(DTOUtil.toComponentConfigurationDTO(cc, cryptoService, true));
             } catch (final Exception e) {
                 logger.warn("failed to get default configuration for {}", pid, e);
             }
@@ -435,7 +431,8 @@ public class ConfigurationRestService {
         for (ComponentConfigurationDTO ccr : request.getComponentConfigurations()) {
 
             handler.runFallibleSubtask("update:" + ccr.getPid(), () -> {
-                final Map<String, Object> configurationProperties = dtosToConfigurationProperties(ccr.getProperties());
+                final Map<String, Object> configurationProperties = DTOUtil
+                        .dtosToConfigurationProperties(ccr.getProperties());
                 this.configurationService.updateConfiguration(ccr.getPid(), configurationProperties, false);
             });
         }
@@ -467,7 +464,7 @@ public class ConfigurationRestService {
         try {
             List<ComponentConfiguration> configs = this.configurationService.getSnapshot(id.getId());
 
-            return toComponentConfigurationList(configs, false);
+            return DTOUtil.toComponentConfigurationList(configs, cryptoService, false);
         } catch (KuraException e) {
             throw FailureHandler.toWebApplicationException(e);
         }
@@ -536,111 +533,5 @@ public class ConfigurationRestService {
         }
 
         return Response.ok().build();
-    }
-
-    private ComponentConfigurationDTO toComponentConfigurationDTO(final ComponentConfiguration config,
-            final boolean decryptPasswords) {
-
-        return new ComponentConfigurationDTO(config.getPid(), ocdToDto(config.getDefinition()),
-                configurationPropertiesToDtos(config.getConfigurationProperties(), decryptPasswords));
-    }
-
-    private ComponentConfigurationList toComponentConfigurationList(final List<ComponentConfiguration> configs,
-            final boolean decryptPasswords) {
-        final List<ComponentConfigurationDTO> result = configs.stream()
-                .map(c -> toComponentConfigurationDTO(c, decryptPasswords)).collect(Collectors.toList());
-
-        return new ComponentConfigurationList(result);
-    }
-
-    private Map<String, Object> dtosToConfigurationProperties(final Map<String, PropertyDTO> properties) {
-        if (properties == null) {
-            return null;
-        }
-
-        final Map<String, Object> result = new HashMap<>(properties.size());
-
-        for (final Entry<String, PropertyDTO> e : properties.entrySet()) {
-
-            if (e.getValue().getValue() == null) {
-                result.put(e.getKey(), null);
-            } else {
-                final Object propertyValue = e.getValue().toConfigurationProperty()
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Invalid property value for " + e.getKey() + " " + e.getValue()));
-
-                result.put(e.getKey(), propertyValue);
-            }
-        }
-
-        return result;
-    }
-
-    private static OcdDTO ocdToDto(final OCD ocd) {
-        if (ocd == null) {
-            return null;
-        } else {
-            return new OcdDTO(ocd);
-        }
-
-    }
-
-    private Map<String, PropertyDTO> configurationPropertiesToDtos(Map<String, Object> properties,
-            final boolean decryptPasswords) {
-        if (properties == null) {
-            return null;
-        }
-
-        final Map<String, PropertyDTO> result = new HashMap<>();
-
-        for (final Entry<String, Object> entry : properties.entrySet()) {
-
-            final Optional<Object> value;
-
-            if (entry.getValue() == null) {
-                continue;
-            }
-
-            if (decryptPasswords) {
-                value = decryptPassword(entry.getValue());
-            } else {
-                value = Optional.ofNullable(entry.getValue());
-            }
-
-            final Optional<PropertyDTO> propertyDTO = value.flatMap(PropertyDTO::fromConfigurationProperty);
-
-            if (!propertyDTO.isPresent()) {
-                logger.warn("ignoring invalid configiration property for {}: {}", entry.getKey(), entry.getValue());
-            } else {
-                result.put(entry.getKey(), propertyDTO.get());
-            }
-        }
-
-        return result;
-    }
-
-    private Optional<Object> decryptPassword(final Object property) {
-        try {
-            final Object result;
-
-            if (property instanceof Password) {
-                result = new Password(cryptoService.decryptAes(((Password) property).getPassword()));
-            } else if (property instanceof Password[]) {
-                final Password[] asPasswords = (Password[]) property;
-                final Password[] resultPasswords = new Password[asPasswords.length];
-
-                for (int i = 0; i < asPasswords.length; i++) {
-                    resultPasswords[i] = new Password(cryptoService.decryptAes(asPasswords[i].getPassword()));
-                }
-
-                result = resultPasswords;
-            } else {
-                result = property;
-            }
-
-            return Optional.ofNullable(result);
-        } catch (final Exception e) {
-            return Optional.empty();
-        }
     }
 }

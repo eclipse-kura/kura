@@ -13,7 +13,6 @@
 package org.eclipse.kura.web.server.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +38,7 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.marshalling.Marshaller;
 import org.eclipse.kura.web.server.GwtWireGraphServiceImpl;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -55,6 +55,9 @@ public class WiresSnapshotServlet extends AuditServlet {
 
     private static final String WIRE_GRAPH_SERVICE_PID = "org.eclipse.kura.wire.graph.WireGraphService";
     private static final String WIRE_ASSET_FACTORY_PID = "org.eclipse.kura.wire.WireAsset";
+
+    private static final String JSON_FORMAT = "json";
+    private static final String XML_FORMAT = "xml";
 
     private static final long serialVersionUID = -7483037360719617846L;
     private static final Logger logger = LoggerFactory.getLogger(WiresSnapshotServlet.class);
@@ -141,21 +144,7 @@ public class WiresSnapshotServlet extends AuditServlet {
                 return null;
             });
 
-            final XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
-            xmlConfigs.setConfigurations(result);
-
-            final String marshalled = toSnapshot(xmlConfigs);
-
-            final String snapshotName = "graph_snapshot_" + System.currentTimeMillis() + ".xml";
-
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/xml");
-            response.setHeader("Content-Disposition", "attachment; filename=" + snapshotName);
-            response.setHeader("Cache-Control", "no-transform, max-age=0");
-
-            try (PrintWriter writer = response.getWriter()) {
-                writer.write(marshalled);
-            }
+            GwtServerUtil.writeSnapshot(request, response, result, "graph_snapshot_" + System.currentTimeMillis());
 
         } catch (Exception e) {
             logger.warn("Failed to download snapshot", e);

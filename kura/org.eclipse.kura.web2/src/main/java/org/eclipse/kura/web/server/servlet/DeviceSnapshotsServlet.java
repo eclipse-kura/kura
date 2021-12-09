@@ -13,8 +13,6 @@
 package org.eclipse.kura.web.server.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -23,14 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
-import org.eclipse.kura.marshalling.Marshaller;
-import org.eclipse.kura.util.service.ServiceUtil;
 import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
+import org.eclipse.kura.web.server.util.GwtServerUtil;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +50,9 @@ public class DeviceSnapshotsServlet extends AuditServlet {
         }
         // END XSRF security check
 
-        String snapshotId = request.getParameter("snapshotId");
+        try {
 
-        try (PrintWriter writer = response.getWriter();) {
+            String snapshotId = request.getParameter("snapshotId");
 
             ServiceLocator locator = ServiceLocator.getInstance();
             ConfigurationService cs = locator.getService(ConfigurationService.class);
@@ -67,62 +61,12 @@ public class DeviceSnapshotsServlet extends AuditServlet {
                 long sid = Long.parseLong(snapshotId);
                 List<ComponentConfiguration> configs = cs.getSnapshot(sid);
 
-                // build a list of configuration which can be marshalled in XML
-                List<ComponentConfiguration> configImpls = new ArrayList<>();
-                for (ComponentConfiguration config : configs) {
-                    configImpls.add(config);
-                }
-                XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
-                xmlConfigs.setConfigurations(configImpls);
-
-                //
-                // marshall the response and write it
-                String result = marshal(xmlConfigs);
-
-                response.setCharacterEncoding("UTF-8");
-                response.setContentType("application/xml");
-                response.setHeader("Content-Disposition", "attachment; filename=snapshot_" + sid + ".xml");
-                response.setHeader("Cache-Control", "no-transform, max-age=0");
-
-                writer.write(result);
+                GwtServerUtil.writeSnapshot(request, response, configs, "snapshot_" + sid);
 
             }
         } catch (Exception e) {
             logger.error("Error exporting snapshot");
             throw new ServletException(e);
         }
-    }
-
-    private ServiceReference<Marshaller>[] getXmlMarshallers() {
-        String filterString = String.format("(&(kura.service.pid=%s))",
-                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
-        return ServiceUtil.getServiceReferences(
-                FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(), Marshaller.class,
-                filterString);
-    }
-
-    private void ungetServiceReferences(final ServiceReference<?>[] refs) {
-        ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(),
-                refs);
-    }
-
-    protected String marshal(Object object) {
-        String result = null;
-        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
-        try {
-            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
-                Marshaller marshaller = FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext()
-                        .getService(marshallerSR);
-                result = marshaller.marshal(object);
-                if (result != null) {
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            logger.warn("Failed to marshal configuration.");
-        } finally {
-            ungetServiceReferences(marshallerSRs);
-        }
-        return result;
     }
 }

@@ -19,7 +19,7 @@ import org.eclipse.kura.internal.rest.configuration.FailureHandler;
 public class DeleteFactoryComponentRequest implements Validable {
 
     private final Set<String> pids;
-    private final boolean takeSnapshot;
+    private final Boolean takeSnapshot;
 
     public DeleteFactoryComponentRequest(Set<String> pids, boolean takeSnapshot) {
         this.pids = pids;
@@ -31,7 +31,7 @@ public class DeleteFactoryComponentRequest implements Validable {
     }
 
     public boolean isTakeSnapshot() {
-        return takeSnapshot;
+        return this.takeSnapshot == null || this.takeSnapshot;
     }
 
     @Override

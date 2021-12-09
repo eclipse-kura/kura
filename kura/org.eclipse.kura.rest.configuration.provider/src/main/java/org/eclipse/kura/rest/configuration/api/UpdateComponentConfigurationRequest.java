@@ -21,7 +21,7 @@ import org.eclipse.kura.internal.rest.configuration.FailureHandler;
 public class UpdateComponentConfigurationRequest implements Validable {
 
     private final List<ComponentConfigurationDTO> configs;
-    private boolean takeSnapshot = true;
+    private Boolean takeSnapshot;
 
     public UpdateComponentConfigurationRequest(List<ComponentConfigurationDTO> componentConfigurations,
             boolean takeSnapshot) {
@@ -34,7 +34,7 @@ public class UpdateComponentConfigurationRequest implements Validable {
     }
 
     public boolean isTakeSnapshot() {
-        return this.takeSnapshot;
+        return this.takeSnapshot == null || this.takeSnapshot;
     }
 
     @Override

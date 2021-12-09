@@ -553,6 +553,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.log.filesystem.provider</artifactId>
+                                    <version>${org.eclipse.kura.log.filesystem.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.rest.configuration.provider</artifactId>
                                     <version>${org.eclipse.kura.rest.configuration.provider.version}</version>
                                 </artifactItem>
@@ -789,6 +794,8 @@
                                     tofile="target/plugins/org.eclipse.kura.network.threat.manager_${org.eclipse.kura.network.threat.manager.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.core.keystore.jar"
                                     tofile="target/plugins/org.eclipse.kura.core.keystore_${org.eclipse.kura.core.keystore.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.log.filesystem.provider.jar"
+                                    tofile="target/plugins/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar"
                                     tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar"

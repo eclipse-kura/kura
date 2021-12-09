@@ -13,11 +13,8 @@
 package org.eclipse.kura.web.server;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.log.LogEntry;
@@ -37,89 +34,83 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
     private static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(GwtLogServiceImpl.class);
 
-    private final LogEntriesCache cache = new LogEntriesCache();
-    private final Map<String, LogProvider> registeredLogProviders = new HashMap<>();
+    private static final LogEntriesCache cache = new LogEntriesCache();
+    private static final List<String> registeredLogProviders = new LinkedList<>();
 
     @Override
-    public List<String> initLogReaders(GwtXSRFToken xsrfToken) throws GwtKuraException {
+    public List<String> initLogProviders(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        loadLogReaders();
-        registerLogListeners();
+        loadLogProviders();
 
-        return new ArrayList<>(this.registeredLogProviders.keySet());
+        return registeredLogProviders;
     }
 
     @Override
     public List<GwtLogEntry> readLogs() throws GwtKuraException {
-        return this.cache.getLogs();
+        return cache.getLogs();
     }
 
-    private void loadLogReaders() {
-        logger.info("Loading log providers.");
-
+    private void loadLogProviders() {
         try {
+            List<String> availableLogProviders = new ArrayList<>();
+
             final String MATCH_EVERYTHING = "(objectClass=*)";
-            List<ServiceReference<LogProvider>> logReaderRefs = (List<ServiceReference<LogProvider>>) ServiceLocator
+            List<ServiceReference<LogProvider>> logProviderRefs = (List<ServiceReference<LogProvider>>) ServiceLocator
                     .getInstance().getServiceReferences(LogProvider.class, MATCH_EVERYTHING);
 
-            this.registeredLogProviders.clear();
-
-            for (ServiceReference<LogProvider> logReaderRef : logReaderRefs) {
-                String pid = (String) logReaderRef.getProperty(ConfigurationService.KURA_SERVICE_PID);
+            for (ServiceReference<LogProvider> logProviderRef : logProviderRefs) {
+                String pid = (String) logProviderRef.getProperty(ConfigurationService.KURA_SERVICE_PID);
                 LogProvider service = FrameworkUtil.getBundle(LogProvider.class).getBundleContext()
-                        .getService(logReaderRef);
+                        .getService(logProviderRef);
 
-                this.registeredLogProviders.put(pid, service);
+                availableLogProviders.add(pid);
+
+                if (pid != null && service != null && !registeredLogProviders.contains(pid)) {
+
+                    service.registerLogListener((LogEntry entry) -> {
+                        GwtLogEntry gwtEntry = new GwtLogEntry();
+                        gwtEntry.setProperties(entry.getProperties());
+                        gwtEntry.setSourceLogProviderPid(pid);
+
+                        GwtLogServiceImpl.cache.add(gwtEntry);
+                    });
+
+                    registeredLogProviders.add(pid);
+                    logger.info("LogProvider {} loaded.", pid);
+                }
+            }
+
+            for (String pid : registeredLogProviders) {
+                if (!availableLogProviders.contains(pid)) {
+                    registeredLogProviders.remove(pid);
+                    logger.info("LogProvider {} no more available.", pid);
+                }
             }
         } catch (GwtKuraException e) {
             logger.error("Error loading log providers.");
         }
-
-        logger.info("Loaded log providers: {}", this.registeredLogProviders.keySet());
     }
 
-    private void registerLogListeners() {
+    private static final class LogEntriesCache {
 
-        for (Entry<String, LogProvider> registeredLogReader : this.registeredLogProviders.entrySet()) {
-
-            String whichLogReader = registeredLogReader.getKey();
-            LogProvider logProvider = registeredLogReader.getValue();
-
-            if (logProvider != null) {
-
-                logProvider.registerLogListener((LogEntry entry) -> {
-                    GwtLogEntry gwtEntry = new GwtLogEntry();
-                    gwtEntry.setProperties(entry.getProperties());
-                    gwtEntry.setSourceLogReaderPid(whichLogReader);
-
-                    GwtLogServiceImpl.this.cache.add(gwtEntry);
-                });
-
-                logger.info("Registered LogListener for {}.", whichLogReader);
-            }
-        }
-    }
-
-    private final class LogEntriesCache {
-
-        private final List<GwtLogEntry> cache = new LinkedList<>();
+        private static final List<GwtLogEntry> cache = new LinkedList<>();
         private static final int MAX_CACHE_SIZE = 1000;
 
         public void add(GwtLogEntry newEntry) {
-            synchronized (this.cache) {
-                if (this.cache.size() >= MAX_CACHE_SIZE) {
-                    this.cache.remove(0);
+            synchronized (cache) {
+                if (cache.size() >= MAX_CACHE_SIZE) {
+                    cache.remove(0);
                 }
-                this.cache.add(newEntry);
+                cache.add(newEntry);
             }
         }
 
         public List<GwtLogEntry> getLogs() {
             List<GwtLogEntry> result = new ArrayList<>();
-            synchronized (this.cache) {
-                result.addAll(this.cache);
-                this.cache.clear();
+            synchronized (cache) {
+                result.addAll(cache);
+                cache.clear();
             }
             return result;
         }

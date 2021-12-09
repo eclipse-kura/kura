@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2021 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"
+         name="FilesystemLogProvider"
+         description="Implementation of a log provider that reads entries from the specified log file path.">
+         
+        <AD id="logFilePath"
+            name="Log file path"
+            type="String"
+            cardinality="1"
+            required="true"
+            default="/var/log/kura.log"
+            description="Specifies the file path from which the logs are fetched.">
+        </AD>
+
+    </OCD>
+    <Designate pid="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider" factoryPid="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider">
+        <Object ocdref="org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider"/>
+    </Designate>
+</MetaData>

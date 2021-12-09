@@ -29,6 +29,6 @@ public interface GwtLogService extends RemoteService {
 
     public List<String> initLogProviders(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
-    public List<GwtLogEntry> readLogs() throws GwtKuraException;
+    public List<GwtLogEntry> readLogs(int fromId) throws GwtKuraException;
 
 }

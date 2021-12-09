@@ -47,8 +47,8 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
     }
 
     @Override
-    public List<GwtLogEntry> readLogs() throws GwtKuraException {
-        return cache.getLogs();
+    public List<GwtLogEntry> readLogs(int fromId) throws GwtKuraException {
+        return cache.getLogs(fromId);
     }
 
     private void loadLogProviders() {
@@ -96,21 +96,26 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
 
         private static final List<GwtLogEntry> cache = new LinkedList<>();
         private static final int MAX_CACHE_SIZE = 1000;
+        private static int nextEntryId = 0;
 
         public void add(GwtLogEntry newEntry) {
             synchronized (cache) {
                 if (cache.size() >= MAX_CACHE_SIZE) {
                     cache.remove(0);
                 }
+                newEntry.setId(nextEntryId++);
                 cache.add(newEntry);
             }
         }
 
-        public List<GwtLogEntry> getLogs() {
-            List<GwtLogEntry> result = new ArrayList<>();
+        public List<GwtLogEntry> getLogs(int fromId) {
+            List<GwtLogEntry> result = new LinkedList<>();
             synchronized (cache) {
-                result.addAll(cache);
-                cache.clear();
+                cache.forEach(entry -> {
+                    if (entry.getId() > fromId) {
+                        result.add(entry);
+                    }
+                });
             }
             return result;
         }

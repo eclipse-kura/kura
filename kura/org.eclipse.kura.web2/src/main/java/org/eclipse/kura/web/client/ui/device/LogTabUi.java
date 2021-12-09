@@ -77,6 +77,7 @@ public class LogTabUi extends Composite {
     @UiField
     CheckBox showMoreInfoCheckbox;
 
+    private static final int CACHE_SIZE_LIMIT = 5000;
     private final List<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;

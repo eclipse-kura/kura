@@ -103,6 +103,7 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
                 if (cache.size() >= MAX_CACHE_SIZE) {
                     cache.remove(0);
                 }
+                manageIdIntOverflow();
                 newEntry.setId(nextEntryId++);
                 cache.add(newEntry);
             }
@@ -118,6 +119,18 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
                 });
             }
             return result;
+        }
+
+        /*
+         * Very unlikely to happen, but if it will then entries are reindexed
+         */
+        private static void manageIdIntOverflow() {
+            if (nextEntryId >= Integer.MAX_VALUE) {
+                for (int i = 0; i < cache.size(); i++) {
+                    cache.get(i).setId(i);
+                }
+                nextEntryId = cache.size();
+            }
         }
     }
 }

@@ -26,8 +26,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.junit.Test;
 
-
 public class JavaNtpClockSyncProviderTest {
+
+    private static final long WAIT_CLOCK_SYNC_MS = 1000;
+    private static final long SYNC_TIMEOUT_MS = 100;
+    private static final long SLACK_WAIT_TIME_MS = 10;
 
     @Test
     public void testStartFail() throws Throwable {
@@ -51,15 +54,15 @@ public class JavaNtpClockSyncProviderTest {
         provider.start();
 
         synchronized (lock) {
-            lock.wait(500); // wait a bit so that synch runs once
+            lock.wait(WAIT_CLOCK_SYNC_MS); // wait a bit so that synch runs once
         }
 
-        Thread.sleep(20); // wait just a bit longer
+        waitProviderToSync(provider);
 
         assertTrue((boolean) TestUtil.getFieldValue(provider, "isSynced"));
 
         // now wait for the second run
-        Thread.sleep(1100);
+        Thread.sleep(WAIT_CLOCK_SYNC_MS);
 
         assertEquals(1, TestUtil.getFieldValue(provider, "syncCount"));
         assertEquals(0, TestUtil.getFieldValue(provider, "numRetry"));
@@ -76,7 +79,7 @@ public class JavaNtpClockSyncProviderTest {
         properties.put("clock.ntp.retry.interval", 1);
         properties.put("clock.ntp.refresh-interval", 1);
         properties.put("clock.ntp.max-retry", 1);
-        
+
         ClockServiceConfig clockServiceConfig = new ClockServiceConfig(properties);
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -105,10 +108,10 @@ public class JavaNtpClockSyncProviderTest {
         provider.start();
 
         synchronized (lock) {
-            lock.wait(500); // wait a bit so that synch runs once
+            lock.wait(WAIT_CLOCK_SYNC_MS); // wait a bit so that synch runs once
         }
 
-        Thread.sleep(20); // wait just a bit longer
+        waitProviderToSync(provider);
 
         assertTrue((boolean) TestUtil.getFieldValue(provider, "isSynced"));
         assertEquals(0, TestUtil.getFieldValue(provider, "syncCount"));
@@ -137,13 +140,21 @@ public class JavaNtpClockSyncProviderTest {
         provider.start();
 
         synchronized (lock) {
-            lock.wait(500); // wait a bit so that synch runs once
+            lock.wait(WAIT_CLOCK_SYNC_MS); // wait a bit so that synch runs once
         }
 
-        Thread.sleep(100); // wait just a bit longer, so that the exception propagates
+        waitProviderToSync(provider);
 
         assertEquals(0, TestUtil.getFieldValue(provider, "syncCount"));
         assertEquals(1, TestUtil.getFieldValue(provider, "numRetry"));
         assertTrue((boolean) TestUtil.getFieldValue(provider, "isSynced"));
+    }
+
+    private void waitProviderToSync(JavaNtpClockSyncProvider provider) throws InterruptedException {
+        long elapsedTime = 0;
+        while (!provider.isSynced && SYNC_TIMEOUT_MS > elapsedTime) {
+            Thread.sleep(SLACK_WAIT_TIME_MS);
+            elapsedTime += SLACK_WAIT_TIME_MS;
+        }
     }
 }

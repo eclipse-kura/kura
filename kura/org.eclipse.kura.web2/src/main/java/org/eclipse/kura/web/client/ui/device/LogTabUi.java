@@ -125,8 +125,9 @@ public class LogTabUi extends Composite {
     @Override
     public void onAttach() {
         super.onAttach();
+
         if (this.hasLogProvider) {
-            LogPollService.getInstance().startLogPolling();
+            LogPollService.startLogPolling();
         }
     }
 
@@ -134,7 +135,7 @@ public class LogTabUi extends Composite {
     public void onDetach() {
         super.onDetach();
         if (this.hasLogProvider) {
-            LogPollService.getInstance().stopLogPolling();
+            LogPollService.stopLogPolling();
         }
     }
 
@@ -152,7 +153,7 @@ public class LogTabUi extends Composite {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                LogTabUi.this.gwtLogService.initLogReaders(token, new AsyncCallback<List<String>>() {
+                LogTabUi.this.gwtLogService.initLogProviders(token, new AsyncCallback<List<String>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -185,26 +186,9 @@ public class LogTabUi extends Composite {
         StringBuilder displayedText = new StringBuilder();
 
         for (GwtLogEntry entry : this.logs) {
-            if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogReaderPid())) {
-                displayedText.append(entry.getSourceRealtimeTimestamp());
-                displayedText.append("\t[priority: ");
-                displayedText.append(entry.getPriority());
-                if (this.showMoreInfoCheckbox.getValue().booleanValue()) {
-                    displayedText.append(" - PID: ");
-                    displayedText.append(entry.getPid());
-                    displayedText.append(" - syslog ID: ");
-                    displayedText.append(entry.getSyslogIdentifier());
-                    displayedText.append(" - source: ");
-                    displayedText.append(entry.getTransport());
-                }
-                displayedText.append("]\nMessage: ");
-                displayedText.append(entry.getMessage());
-                if (this.showStackTraceCheckbox.getValue().booleanValue() && entry.getStacktrace() != null
-                        && !entry.getStacktrace().equals("undefined")) {
-                    displayedText.append("\nStacktrace: ");
-                    displayedText.append(entry.getStacktrace());
-                }
-                displayedText.append("\n");
+            if (this.logProviderListBox.getSelectedValue().equals(entry.getSourceLogProviderPid())) {
+                displayedText.append(entry.prettyPrint(this.showMoreInfoCheckbox.getValue().booleanValue(),
+                        this.showStackTraceCheckbox.getValue().booleanValue()));
             }
         }
 

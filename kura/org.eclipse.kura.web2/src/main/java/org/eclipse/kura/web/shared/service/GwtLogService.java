@@ -27,7 +27,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.DEVICE)
 public interface GwtLogService extends RemoteService {
 
-    public List<String> initLogReaders(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    public List<String> initLogProviders(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public List<GwtLogEntry> readLogs() throws GwtKuraException;
 

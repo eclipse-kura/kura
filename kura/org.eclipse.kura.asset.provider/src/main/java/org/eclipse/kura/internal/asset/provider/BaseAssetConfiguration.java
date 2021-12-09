@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -370,14 +370,14 @@ public final class BaseAssetConfiguration {
             }
 
             final boolean isEnabled = isEnabled(channelConfig);
-            
+
             final double valueScale = getValueScale(channelConfig);
 
             final double valueOffset = getValueOffset(channelConfig);
 
             final Channel channel = new Channel(channelName, channelType, dataType, channelConfig);
             channel.setEnabled(isEnabled);
-            
+
             if (dataType.equals(DataType.DOUBLE) || dataType.equals(DataType.INTEGER) || dataType.equals(DataType.FLOAT)
                     || dataType.equals(DataType.LONG)) {
                 channel.setScale(valueScale);

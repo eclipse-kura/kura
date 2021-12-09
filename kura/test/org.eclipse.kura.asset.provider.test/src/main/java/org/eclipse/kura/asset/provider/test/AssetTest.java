@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -131,6 +131,8 @@ public final class AssetTest {
         channels.put("1.CH#+name", "1.CH");
         channels.put("1.CH#+type", "READ");
         channels.put("1.CH#+value.type", "INTEGER");
+        channels.put("1.CH#+scale", "1.0");
+        channels.put("1.CH#+offset", "0.0");
         channels.put("1.CH#DRIVER.modbus.register", "sample.channel1.modbus.register");
         channels.put("1.CH#DRIVER.modbus.FC", "sample.channel1.modbus.FC");
         channels.put("2.CH#+name", "2.CH");
@@ -193,6 +195,8 @@ public final class AssetTest {
         assertEquals("1.CH", channel1.getName());
         assertEquals(ChannelType.READ, channel1.getType());
         assertEquals(DataType.INTEGER, channel1.getValueType());
+        assertEquals(1.0d, channel1.getValueScale(), 0.0);
+        assertEquals(0.0d, channel1.getValueOffset(), 0.0);
         assertEquals("sample.channel1.modbus.register", channel1.getConfiguration().get("DRIVER.modbus.register"));
         assertEquals("sample.channel1.modbus.FC", channel1.getConfiguration().get("DRIVER.modbus.FC"));
 
@@ -507,12 +511,12 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(22, ads.size()); // description, driver, 20 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(30, ads.size()); // description, driver, 28 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());
 
-        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#unit.id" };
+        String[] expectedValues = { "#+enabled", "#+name", "#+type", "#+value.type", "#+scale", "#+offset", "#unit.id" };
 
         final int expectedChannelCount = 4;
         for (int i = 0; i < expectedValues.length; i++) {

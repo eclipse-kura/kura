@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -401,7 +401,8 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             if (WireAsset.this.options.emitAllChannels()) {
                 emitAllReadChannels();
             } else {
-                emitChannelRecords(Collections.singletonList(event.getChannelRecord()));
+                emitChannelRecords(getFinalRecords(Collections.singletonList(event.getChannelRecord()),
+                        getAssetConfiguration().getAssetChannels()));
             }
         }
 

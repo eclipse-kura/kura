@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -15,6 +15,7 @@
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.kura.channel.ChannelFlag.FAILURE;
 import static org.eclipse.kura.channel.ChannelType.READ;
@@ -57,6 +58,11 @@ import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
 import org.eclipse.kura.internal.asset.provider.BaseAssetConfiguration;
 import org.eclipse.kura.internal.asset.provider.DriverTrackerCustomizer;
+import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.DoubleValue;
+import org.eclipse.kura.type.FloatValue;
+import org.eclipse.kura.type.IntegerValue;
+import org.eclipse.kura.type.LongValue;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
@@ -158,7 +164,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         logger.info("loading asset configuration...");
         final long start = System.currentTimeMillis();
         try {
-            this.config = new BaseAssetConfiguration(getOCD(), context, properties);
+            this.config = new BaseAssetConfiguration(getOCD(), this.context, properties);
         } catch (final Exception e) {
             logger.warn("Failed to retrieve properties from config", e);
         }
@@ -322,7 +328,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         }));
 
         logger.debug("Reading asset channels...Done");
-        return channelRecords;
+        return getFinalRecords(channelRecords, this.config.getAssetConfiguration().getAssetChannels());
     }
 
     private void validateChannel(final Channel channel, final EnumSet<ChannelType> allowedTypes,
@@ -378,6 +384,34 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             }));
         }
         logger.debug("Reading asset channels...Done");
+        return getFinalRecords(channelRecords, channels);
+    }
+
+    protected List<ChannelRecord> getFinalRecords(List<ChannelRecord> channelRecords, Map<String, Channel> channels) {
+        channelRecords.stream()
+                .filter(channelRecord -> !isNull(channelRecord.getValueType()) && !isNull(channelRecord.getValue()))
+                .forEach(channelRecord -> {
+                    Channel channel = channels.get(channelRecord.getChannelName());
+                    double channelScale = channel.getValueScale();
+                    double channelOffset = channel.getValueOffset();
+
+                    if (channelRecord.getValueType().equals(DataType.DOUBLE)) {
+                        channelRecord.setValue(new DoubleValue(
+                                (double) channelRecord.getValue().getValue() * channelScale + channelOffset));
+                    } else if (channelRecord.getValueType().equals(DataType.FLOAT)) {
+                        channelRecord.setValue(
+                                new FloatValue((float) channelRecord.getValue().getValue() * (float) channelScale
+                                        + (float) channelOffset));
+                    } else if (channelRecord.getValueType().equals(DataType.INTEGER)) {
+                        channelRecord.setValue(new IntegerValue(
+                                (int) channelRecord.getValue().getValue() * (int) channelScale + (int) channelOffset));
+                    } else if (channelRecord.getValueType().equals(DataType.LONG)) {
+                        channelRecord
+                                .setValue(new LongValue((long) channelRecord.getValue().getValue() * (long) channelScale
+                                        + (long) channelOffset));
+                    }
+                });
+
         return channelRecords;
     }
 
@@ -584,10 +618,7 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
             ChannelListenerRegistration other = (ChannelListenerRegistration) obj;

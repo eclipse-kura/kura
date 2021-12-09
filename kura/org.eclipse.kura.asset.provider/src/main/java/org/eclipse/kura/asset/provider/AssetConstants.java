@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -43,7 +43,13 @@ public enum AssetConstants {
     TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "type"),
 
     /** Value type Property to be used in the configuration. */
-    VALUE_TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "value.type");
+    VALUE_TYPE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "value.type"),
+
+    /** Scale Property to be used in the configuration. */
+    VALUE_SCALE(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "scale"),
+
+    /** Gain Property to be used in the configuration. */
+    VALUE_OFFSET(CHANNEL_DEFAULT_PROPERTY_PREFIX.value() + "offset");
 
     /** The value. */
     private String value;

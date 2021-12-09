@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.ServletException;
 
@@ -43,11 +46,10 @@ public class AssetConfigValidator {
 
     private static Logger logger = LoggerFactory.getLogger(AssetConfigValidator.class);
 
-    private static final AssetConfigValidator _instance = new AssetConfigValidator();
-    private int lineNumber = 0;
+    private int lineNumber;
 
     public static AssetConfigValidator get() {
-        return _instance;
+        return new AssetConfigValidator();
     }
 
     @SuppressWarnings("unchecked")
@@ -64,38 +66,108 @@ public class AssetConfigValidator {
                 }));
     }
 
-    private String scanLine(CSVRecord line, Consumer<GwtConfigParameter> parameterConsumer,
-            List<Tad> fullChannelMetatype, List<String> errors) {
-        String channelName = "";
-        boolean errorInChannel = false;
-        if (line.size() != fullChannelMetatype.size()) {
-            errors.add("Incorrect number of fields in CSV line " + this.lineNumber);
-            errorInChannel = true;
-        }
-        if (!errorInChannel) {
-            for (int i = 0; i < line.size(); i++) {
-                try {
-                    String token = line.get(i);
-                    if (fullChannelMetatype.get(i).getId().substring(1).equals("name")) {
-                        token = token.replace(" ", "_");
-                        token = token.replace("#", "_");
-                        token = token.replace("+", "_");
-                        channelName = token;
-                    }
-                    final Tad ad = fullChannelMetatype.get(i);
-                    final Object value = validate(ad, token, errors, this.lineNumber);
+    private class LineScanner {
 
-                    parameterConsumer.accept(GwtServerUtil.toGwtConfigParameter(ad, value));
-                } catch (Exception ex) {
-                    errorInChannel = true;
+        private final List<Tad> adsByIndex;
+        private final List<GwtConfigParameter> defaultValues;
+
+        public LineScanner(final List<Tad> fullChannelMetatype, final List<String> columnHeaders) {
+            this.adsByIndex = probeAdsByIndex(fullChannelMetatype, columnHeaders);
+            this.defaultValues = probeDefaultValues(fullChannelMetatype, columnHeaders);
+        }
+
+        private List<Tad> probeAdsByIndex(final List<Tad> fullChannelMetatype, final List<String> columnHeaders) {
+            final List<Tad> result = new ArrayList<>();
+
+            for (final String h : columnHeaders) {
+                final Optional<Tad> exactMatch = fullChannelMetatype.stream().filter(p -> h.equals(p.getId()))
+                        .findAny();
+
+                if (exactMatch.isPresent()) {
+                    result.add(exactMatch.get());
+                    continue;
                 }
-                if (errorInChannel) {
-                    channelName = "";
-                    break;
+
+                final String assetId = "+" + h;
+
+                final Optional<Tad> assetParam = fullChannelMetatype.stream().filter(p -> assetId.equals(p.getId()))
+                        .findAny();
+
+                if (assetParam.isPresent()) {
+                    result.add(assetParam.get());
+                } else {
+                    throw new IllegalStateException("Unknown parameter name " + h);
                 }
             }
+
+            return result;
         }
-        return channelName;
+
+        private List<GwtConfigParameter> probeDefaultValues(final List<Tad> fullChannelMetatype,
+                final List<String> columnHeaders) {
+            final List<Tad> missing = fullChannelMetatype.stream().filter(c -> {
+                if (c.getId().startsWith("+")) {
+                    return !columnHeaders.contains(c.getId().substring(1));
+                } else {
+                    return !columnHeaders.contains(c.getId());
+                }
+
+            }).collect(Collectors.toList());
+
+            final List<GwtConfigParameter> result = new ArrayList<>();
+
+            for (final Tad ad : missing) {
+                if (!ad.isRequired() || ad.getDefault() == null || ad.getDefault().isEmpty()) {
+                    result.add(GwtServerUtil.toGwtConfigParameter(ad, null));
+                    continue;
+                }
+
+                try {
+                    final Object defaultValue = validate(ad, ad.getDefault(), new ArrayList<>(), 0);
+                    result.add(GwtServerUtil.toGwtConfigParameter(ad, defaultValue));
+                } catch (final Exception e) {
+                    logger.warn("Ad default value is probably not valid", e);
+                }
+            }
+
+            return result;
+        }
+
+        public String scan(final CSVRecord line, final Consumer<GwtConfigParameter> parameterConsumer,
+                List<String> errors) {
+            String channelName = "";
+            boolean errorInChannel = false;
+            if (line.size() != adsByIndex.size()) {
+                errors.add("Incorrect number of fields in CSV line " + lineNumber);
+                errorInChannel = true;
+            }
+            if (!errorInChannel) {
+                for (int i = 0; i < line.size(); i++) {
+                    try {
+                        String token = line.get(i);
+                        if (adsByIndex.get(i).getId().substring(1).equals("name")) {
+                            token = token.replace(" ", "_");
+                            token = token.replace("#", "_");
+                            token = token.replace("+", "_");
+                            channelName = token;
+                        }
+                        final Tad ad = adsByIndex.get(i);
+                        final Object value = validate(ad, token, errors, lineNumber);
+
+                        parameterConsumer.accept(GwtServerUtil.toGwtConfigParameter(ad, value));
+                    } catch (Exception ex) {
+                        errorInChannel = true;
+                    }
+                    if (errorInChannel) {
+                        channelName = "";
+                        break;
+                    }
+                }
+            }
+
+            this.defaultValues.forEach(d -> parameterConsumer.accept(new GwtConfigParameter(d)));
+            return channelName;
+        }
     }
 
     public List<GwtConfigParameter> validateCsv(String csv, String driverPid, List<String> errors)
@@ -113,12 +185,15 @@ public class AssetConfigValidator {
                 errors.add("Empty CSV file.");
                 throw new ValidationException();
             }
-            lines.remove(0);
             this.lineNumber = 1;
+            final List<String> header = StreamSupport.stream(lines.remove(0).spliterator(), false)
+                    .collect(Collectors.toList());
+
+            final LineScanner scanner = new LineScanner(fullChannelMetatype, header);
+
             lines.forEach(record -> {
-                this.lineNumber++;
                 final List<GwtConfigParameter> params = new ArrayList<>();
-                String channelName = scanLine(record, params::add, fullChannelMetatype, errors);
+                String channelName = scanner.scan(record, params::add, errors);
                 if (!channelName.isEmpty() && !channels.contains(channelName)) {
                     channels.add(channelName);
                     for (final GwtConfigParameter param : params) {

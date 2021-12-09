@@ -486,7 +486,7 @@ public final class AssetTest {
 
         List<AD> ads = ocd.getAD();
         assertNotNull(ads);
-        assertEquals(31, ads.size()); // description, driver, 29 from BaseChannelDescriptor and StubChannelDescriptor
+        assertEquals(34, ads.size()); // description, driver, 32 from BaseChannelDescriptor and StubChannelDescriptor
 
         assertEquals("asset.desc", ads.get(0).getId());
         assertEquals("driver.pid", ads.get(1).getId());

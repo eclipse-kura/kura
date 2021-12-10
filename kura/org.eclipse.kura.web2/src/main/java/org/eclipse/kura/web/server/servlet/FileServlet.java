@@ -518,9 +518,17 @@ public class FileServlet extends AuditServlet {
 
         final List<ComponentConfiguration> configImpls;
 
-        if ("application/xml".equals(fileItem.getContentType())) {
+        String fileName = fileItem.getName();
+
+        if (fileName != null) {
+            fileName = fileName.toLowerCase();
+        } else {
+            fileName = "";
+        }
+
+        if (fileName.endsWith("xml")) {
             configImpls = parseXmlSnapshot(fileItemString);
-        } else if ("application/json".equals(fileItem.getContentType())) {
+        } else if (fileName.endsWith("json")) {
             configImpls = parseJsonSnapshot(fileItemString);
         } else {
             throw new ServletException("Unsupported content type");

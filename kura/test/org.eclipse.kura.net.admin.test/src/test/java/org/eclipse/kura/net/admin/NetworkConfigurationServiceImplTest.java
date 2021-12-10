@@ -187,7 +187,7 @@ public class NetworkConfigurationServiceImplTest {
     }
 
     @Test
-    public void testUpdated() throws NoSuchFieldException {
+    public void testUpdated() throws NoSuchFieldException, KuraException {
         // test complete updated handler
 
         boolean[] invocations = { false, false };
@@ -211,7 +211,7 @@ public class NetworkConfigurationServiceImplTest {
             Event event = invocation.getArgumentAt(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC", event.getTopic());
-            assertEquals(5, event.getPropertyNames().length); // 4+topics!
+            assertEquals(6, event.getPropertyNames().length); // 4+topics!
 
             assertEquals("MODEM", event.getProperty("net.interface.1-2.3.type"));
 
@@ -240,6 +240,10 @@ public class NetworkConfigurationServiceImplTest {
         };
         visitors.add(visitor);
         TestUtil.setFieldValue(svc, "writeVisitors", visitors);
+
+        NetworkService nsMock = mock(NetworkService.class);
+        when(nsMock.getModemPppInterfaceName("1-2.3")).thenReturn("ppp3");
+        svc.setNetworkService(nsMock);
 
         Map<String, Object> properties = new HashMap<>();
         properties.put("modified.interface.names", "testIntf");

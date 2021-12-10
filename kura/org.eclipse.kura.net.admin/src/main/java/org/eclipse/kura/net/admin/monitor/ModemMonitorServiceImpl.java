@@ -723,7 +723,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         }).get();
     }
 
-    IModemLinkService getPppService(final String interfaceName, String pppInterfaceName, final String port) {
+    IModemLinkService getPppService(final String interfaceName, final String pppInterfaceName, final String port) {
         return PppFactory.getPppService(interfaceName, pppInterfaceName, port, this.executorService);
     }
 

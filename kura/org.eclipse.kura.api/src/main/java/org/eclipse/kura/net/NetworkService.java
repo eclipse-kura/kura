@@ -107,6 +107,8 @@ public interface NetworkService {
      *            a string representing the usb port (i.e. 1-2.3)
      * @return the name of the ppp interface
      * @throws KuraException
+     * 
+     * @since 2.3
      */
     public String getModemPppInterfaceName(String usbPath) throws KuraException;
 }

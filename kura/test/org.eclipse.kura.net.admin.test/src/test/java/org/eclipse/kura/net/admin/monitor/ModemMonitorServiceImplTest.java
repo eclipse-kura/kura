@@ -145,7 +145,7 @@ public class ModemMonitorServiceImplTest {
             }
 
             @Override
-            IModemLinkService getPppService(String interfaceName, String port) {
+            IModemLinkService getPppService(String interfaceName, String pppInterfaceName, String port) {
                 final IModemLinkService modemLinkServiceMock = mock(IModemLinkService.class);
                 try {
                     when(modemLinkServiceMock.getPppState()).thenReturn(PppState.CONNECTED);
@@ -582,26 +582,6 @@ public class ModemMonitorServiceImplTest {
     }
 
     @Test
-    public void testSetInterfaceNumber() throws Throwable {
-        // test interface number setting in configuration
-
-        ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl();
-
-        List<NetConfig> netConfigs = new ArrayList<>();
-        NetConfig config = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true);
-        netConfigs.add(config);
-        ModemConfig nc = new ModemConfig(1, PdpType.PPP, "apn", IPAddress.parseHostAddress("10.10.10.10"), 1, 2);
-        nc.setPppNumber(0);
-        netConfigs.add(nc);
-
-        assertEquals(0, nc.getPppNumber());
-
-        TestUtil.invokePrivate(svc, "setInterfaceNumber", "ppp2", netConfigs);
-
-        assertEquals(2, nc.getPppNumber());
-    }
-
-    @Test
     public void testGetNetInterfaceStatusNotFound() throws Throwable {
         // test interface status retrieval from configuration
 
@@ -777,8 +757,9 @@ public class ModemMonitorServiceImplTest {
 
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
 
-            IModemLinkService getPppService(final String interfaceName, final String port) {
-                if ("ppp2".equals(interfaceName)) {
+            IModemLinkService getPppService(final String interfaceName, final String pppInterfaceName,
+                    final String port) {
+                if ("ppp2".equals(pppInterfaceName)) {
                     return pppMock;
                 }
                 fail("expected ppp2");
@@ -843,8 +824,9 @@ public class ModemMonitorServiceImplTest {
 
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
 
-            IModemLinkService getPppService(final String interfaceName, final String port) {
-                if ("ppp2".equals(interfaceName)) {
+            IModemLinkService getPppService(final String interfaceName, final String pppInterfaceName,
+                    final String port) {
+                if ("ppp2".equals(pppInterfaceName)) {
                     return pppMock;
                 }
                 fail("expected ppp2");
@@ -921,8 +903,8 @@ public class ModemMonitorServiceImplTest {
         ModemMonitorServiceImpl svc = new ModemMonitorServiceImpl() {
 
             @Override
-            IModemLinkService getPppService(final String interfaceName, final String port) {
-                if ("ppp0".equals(interfaceName)) {
+            IModemLinkService getPppService(String interfaceName, String pppInterfaceName, final String port) {
+                if ("ppp0".equals(pppInterfaceName)) {
                     return pppMock;
                 }
                 fail("expected ppp0");
@@ -937,10 +919,11 @@ public class ModemMonitorServiceImplTest {
 
         final HspaCellularModem mockModem = mock(HspaCellularModem.class);
 
-        ModemDevice modemDevice = mock(UsbModemDevice.class);
+        UsbModemDevice modemDevice = mock(UsbModemDevice.class);
         when(mockModem.getModemDevice()).thenReturn(modemDevice);
         when(mockModem.getTechnologyTypes()).thenReturn(Collections.singletonList(ModemTechnologyType.HSDPA));
         when(mockModem.isSimCardReady()).thenReturn(isSimCardReady);
+        when(modemDevice.getUsbPort()).thenReturn("1-2.3");
 
         List<NetConfig> modemConfigs = new ArrayList<>();
         NetConfig config = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
@@ -1039,11 +1022,15 @@ public class ModemMonitorServiceImplTest {
 
         for (int i = 0; i < 15; i++) {
             TestUtil.invokePrivate(svc, "monitor");
-            Thread.sleep(100);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // do nothing...
+            }
             if (resetExpected && System.currentTimeMillis() - startTime < 1000) {
                 verify(mockModem, times(0)).reset();
             }
-            verify(pppMock, connectExpected ? times(i + 2) : times(0)).connect();
+            verify(pppMock, connectExpected ? times(i + 1) : times(0)).connect();
         }
 
         verify(mockModem, resetExpected ? times(1) : times(0)).reset();

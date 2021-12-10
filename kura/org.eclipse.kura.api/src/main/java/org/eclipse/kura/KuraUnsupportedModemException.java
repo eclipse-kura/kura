@@ -18,6 +18,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * KuraUnsupportedModemException is raised when a modem of unknown type is attached.
  *
  * @noextend This class is not intended to be subclassed by clients.
+ * @since 2.3
  */
 @ProviderType
 public class KuraUnsupportedModemException extends KuraException {

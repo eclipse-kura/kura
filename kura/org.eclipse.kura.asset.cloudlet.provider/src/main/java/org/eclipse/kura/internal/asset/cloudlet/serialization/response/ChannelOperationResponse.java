@@ -1,16 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
 package org.eclipse.kura.internal.asset.cloudlet.serialization.response;
+
+import static java.util.Objects.isNull;
 
 import java.util.Base64;
 import java.util.Base64.Encoder;
@@ -35,8 +37,7 @@ public class ChannelOperationResponse extends AbstractResponse {
     private ChannelStatus getChannelStatus(ChannelRecord record) {
         ChannelStatus status = record.getChannelStatus();
 
-        if (status == null
-                || (status.getChannelFlag() == ChannelFlag.FAILURE && status.getExceptionMessage() == null)) {
+        if (status == null || status.getChannelFlag() == ChannelFlag.FAILURE && status.getExceptionMessage() == null) {
             status = new ChannelStatus(ChannelFlag.FAILURE, "Unknown error", null);
         }
 
@@ -59,7 +60,7 @@ public class ChannelOperationResponse extends AbstractResponse {
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
 
-        serialized.add(assetObject);
+        this.serialized.add(assetObject);
     }
 
     public void reportResult(String assetName, List<ChannelRecord> list) {
@@ -89,8 +90,14 @@ public class ChannelOperationResponse extends AbstractResponse {
                 } else {
                     stringValue = value.getValue().toString();
                 }
+
                 channelObject.add(SerializationConstants.CHANNEL_VALUE_PROPERTY, stringValue);
                 channelObject.add(SerializationConstants.CHANNEL_TYPE_PROPERTY, type.toString());
+
+                String unit = record.getUnit();
+                if (!isNull(unit) && !unit.trim().isEmpty()) {
+                    channelObject.add(SerializationConstants.CHANNEL_UNIT_PROPERTY, unit);
+                }
             } else {
                 channelObject.add(SerializationConstants.ERROR_PROPERTY, status.getExceptionMessage());
             }
@@ -99,7 +106,7 @@ public class ChannelOperationResponse extends AbstractResponse {
 
         assetObject.add(SerializationConstants.CHANNELS_PROPERTY, channels);
 
-        serialized.add(assetObject);
+        this.serialized.add(assetObject);
     }
 
 }

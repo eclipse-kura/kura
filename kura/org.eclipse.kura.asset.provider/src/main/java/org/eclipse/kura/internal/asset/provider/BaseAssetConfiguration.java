@@ -23,6 +23,7 @@ import static org.eclipse.kura.asset.provider.AssetConstants.TYPE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_OFFSET;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_SCALE;
 import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_TYPE;
+import static org.eclipse.kura.asset.provider.AssetConstants.VALUE_UNIT;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -345,6 +346,10 @@ public final class BaseAssetConfiguration {
             return Double.valueOf(valueScale);
         }
 
+        private static String getUnit(final Map<String, Object> properties) {
+            return (String) properties.get(VALUE_UNIT.value());
+        }
+
         private static boolean isEnabled(final Map<String, Object> properties) {
             try {
                 return Boolean.parseBoolean(properties.get(ENABLED.value()).toString());
@@ -383,6 +388,9 @@ public final class BaseAssetConfiguration {
                 channel.setScale(valueScale);
                 channel.setOffset(valueOffset);
             }
+
+            final String valueUnit = getUnit(channelConfig);
+            channel.setUnit(valueUnit);
 
             logger.debug("Retrieving single channel information from the properties...Done");
             return channel;

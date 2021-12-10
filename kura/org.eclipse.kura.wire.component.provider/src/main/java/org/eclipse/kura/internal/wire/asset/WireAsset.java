@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
@@ -401,8 +401,18 @@ public final class WireAsset extends BaseAsset implements WireEmitter, WireRecei
             if (WireAsset.this.options.emitAllChannels()) {
                 emitAllReadChannels();
             } else {
-                emitChannelRecords(getFinalRecords(Collections.singletonList(event.getChannelRecord()),
-                        getAssetConfiguration().getAssetChannels()));
+                final ChannelRecord eventRecord = event.getChannelRecord();
+
+                if (eventRecord.getUnit() == null || eventRecord.getUnit().isEmpty()) {
+                    final Channel channel = getAssetConfiguration().getAssetChannels()
+                            .get(eventRecord.getChannelName());
+
+                    if (channel != null) {
+                        eventRecord.setUnit(channel.getUnit());
+                    }
+                }
+
+                emitChannelRecords(Collections.singletonList(eventRecord));
             }
         }
 

@@ -53,6 +53,8 @@ public class Channel {
 
     private double valueOffset;
 
+    private String unit;
+
     /**
      * Determines if this channel is enabled or not
      */
@@ -85,6 +87,7 @@ public class Channel {
         this.valueType = valueType;
         this.valueScale = 1.0d;
         this.valueOffset = 0d;
+        this.unit = "";
     }
 
     /**
@@ -149,11 +152,18 @@ public class Channel {
      * Returns a double that represents the offset to be applied to the read value
      *
      * @return a double that represents the offset to be applied to the read value
-     * 
+     *
      * @since 2.3
      */
     public double getValueOffset() {
         return this.valueOffset;
+    }
+
+    /**
+     * @since 2.3
+     */
+    public String getUnit() {
+        return this.unit;
     }
 
     /**
@@ -228,12 +238,19 @@ public class Channel {
         this.valueOffset = offset;
     }
 
+    /**
+     * @since 2.3
+     */
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     /** {@inheritDoc} */
     @Override
     public String toString() {
         return "Channel [configuration=" + this.configuration + ", name=" + this.name + ", type=" + this.type
                 + ", valueType=" + this.valueType + ", valueScale=" + this.valueScale + ", valueOffset="
-                + this.valueOffset + "]";
+                + this.valueOffset + ", valueType=" + this.valueType + ", unit=" + this.unit + "]";
     }
 
     /**
@@ -244,7 +261,7 @@ public class Channel {
      *         the {@link ChannelRecord}
      */
     public ChannelRecord createReadRecord() {
-        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType);
+        ChannelRecord result = ChannelRecord.createReadRecord(this.name, this.valueType, this.unit);
         result.setChannelConfig(this.configuration);
 
         return result;
@@ -282,6 +299,7 @@ public class Channel {
         result = prime * result + (this.isEnabled ? 1231 : 1237);
         result = prime * result + (this.name == null ? 0 : this.name.hashCode());
         result = prime * result + (this.type == null ? 0 : this.type.hashCode());
+        result = prime * result + (this.unit == null ? 0 : this.unit.hashCode());
         long temp;
         temp = Double.doubleToLongBits(this.valueOffset);
         result = prime * result + (int) (temp ^ temp >>> 32);
@@ -296,7 +314,7 @@ public class Channel {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         Channel other = (Channel) obj;
@@ -310,10 +328,23 @@ public class Channel {
         } else if (!this.name.equals(other.name)) {
             return false;
         }
-        if (this.type != other.type
-                || Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)
-                || Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)
-                || this.valueType != other.valueType) {
+        if (this.type != other.type) {
+            return false;
+        }
+        if (this.unit == null) {
+            if (other.unit != null) {
+                return false;
+            }
+        } else if (!this.unit.equals(other.unit)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.valueOffset) != Double.doubleToLongBits(other.valueOffset)) {
+            return false;
+        }
+        if (Double.doubleToLongBits(this.valueScale) != Double.doubleToLongBits(other.valueScale)) {
+            return false;
+        }
+        if (this.valueType != other.valueType) {
             return false;
         }
         return true;

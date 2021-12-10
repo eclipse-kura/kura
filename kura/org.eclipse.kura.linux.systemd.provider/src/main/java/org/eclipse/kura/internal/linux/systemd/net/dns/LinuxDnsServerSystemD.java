@@ -23,7 +23,7 @@ public class LinuxDnsServerSystemD extends LinuxDnsServer implements DnsServerSe
 
     private static final String BIND9_COMMAND = "bind9";
     private static final String NAMED_COMMAND = "named";
-    private static final String BIND9_SERVICE_UNIT_LOC = "/etc/systemd/system/bind9.service";
+    private static final String BIND9_SERVICE_UNIT_LOC = "/lib/systemd/system/bind9.service";
     private static final String NAMED_SERVICE_UNIT_LOC = "/lib/systemd/system/named.service";
 
     private String dnsCommand;
@@ -35,7 +35,7 @@ public class LinuxDnsServerSystemD extends LinuxDnsServer implements DnsServerSe
         } else if (new File(BIND9_SERVICE_UNIT_LOC).exists()) {
             dnsCommand = BIND9_COMMAND;
         } else {
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Unable to find dns service.");
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, "bind9 or named");
         }
     }
 

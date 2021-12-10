@@ -44,6 +44,8 @@ public class LogPollService {
     private final Logger logger = Logger.getLogger("LogPollService");
     private int rpcCount = 0;
 
+    private int lastReadEntryId = 0;
+
     private LogPollService() {
         ((ServiceDefTarget) this.gwtLogService).setRpcRequestBuilder(new TimeoutRequestBuilder());
     }
@@ -86,7 +88,7 @@ public class LogPollService {
 
             @Override
             public void run() {
-                instance.gwtLogService.readLogs(instance.eventCallback);
+                instance.gwtLogService.readLogs(instance.lastReadEntryId, instance.eventCallback);
             }
         };
         instance.resendTimer.schedule(timeout);
@@ -126,6 +128,8 @@ public class LogPollService {
                 for (LogListener listener : LogPollService.instance.listeners) {
                     listener.onLogsReceived(result);
                 }
+
+                LogPollService.instance.lastReadEntryId = result.get(result.size() - 1).getId();
 
                 stopResendTimer();
             } else {

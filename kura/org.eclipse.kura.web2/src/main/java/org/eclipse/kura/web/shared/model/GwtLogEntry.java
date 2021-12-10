@@ -18,6 +18,7 @@ import java.util.Date;
 public class GwtLogEntry extends KuraBaseModel implements Serializable {
 
     private static final long serialVersionUID = 8526545631929936271L;
+    private int id;
 
     public enum LogEntryKeys {
 
@@ -42,8 +43,16 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
         }
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public void setSourceLogProviderPid(String sourceLogProviderPid) {
         super.set(LogEntryKeys.SOURCE_LOGPROVIDER_PID.getKey(), sourceLogProviderPid);
+    }
+
+    public int getId() {
+        return this.id;
     }
 
     public String getSourceLogProviderPid() {

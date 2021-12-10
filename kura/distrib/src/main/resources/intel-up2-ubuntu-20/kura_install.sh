@@ -125,6 +125,10 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 systemctl stop dhcpcd
 systemctl disable dhcpcd
 
+# disable isc-dhcp-server service - kura is the network manager
+systemctl stop isc-dhcp-server
+systemctl disable isc-dhcp-server
+
 #disable netplan
 systemctl disable systemd-networkd.socket 
 systemctl disable systemd-networkd

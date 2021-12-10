@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum PositionProviderType {
 
-    DEVICE_PORT("device-port"),
+    SERIAL("serial"),
     GPSD("gpsd");
 
     private String value;

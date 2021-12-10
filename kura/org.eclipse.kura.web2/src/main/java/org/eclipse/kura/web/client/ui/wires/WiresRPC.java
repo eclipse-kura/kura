@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -219,7 +219,7 @@ public final class WiresRPC {
         });
     }
 
-    public static void downloadWiresSnapshot() {
+    public static void downloadWiresSnapshot(final String format) {
         EntryClassUi.showWaitModal();
         gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -232,7 +232,7 @@ public final class WiresRPC {
             @Override
             public void onSuccess(GwtXSRFToken token) {
                 EntryClassUi.hideWaitModal();
-                DownloadHelper.instance().startDownload(token, "/wiresSnapshot");
+                DownloadHelper.instance().startDownload(token, "/wiresSnapshot?format=" + format);
             }
         });
     }

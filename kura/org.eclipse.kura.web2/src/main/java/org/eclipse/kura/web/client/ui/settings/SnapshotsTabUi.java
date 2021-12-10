@@ -99,6 +99,9 @@ public class SnapshotsTabUi extends Composite implements Tab {
     Hidden xsrfTokenField;
 
     @UiField
+    SnapshotDownloadModal downloadModal;
+
+    @UiField
     CellTable<GwtSnapshot> snapshotsGrid = new CellTable<>();
 
     GwtSnapshot selected;
@@ -230,7 +233,7 @@ public class SnapshotsTabUi extends Composite implements Tab {
 
     private void initUploadModalHandlers() {
         this.uploadUpload.setEnabled(false);
-        this.filePath.getElement().setAttribute("accept", ".xml");
+        this.filePath.getElement().setAttribute("accept", ".xml,.json");
         this.filePath.addChangeHandler(event -> {
             String fileName = this.filePath.getFilename();
             boolean uploadEnabled = false;
@@ -350,9 +353,13 @@ public class SnapshotsTabUi extends Composite implements Tab {
         final StringBuilder sbUrl = new StringBuilder();
 
         Long snapshot = this.selected.getSnapshotId();
-        sbUrl.append("/device_snapshots?snapshotId=").append(snapshot);
 
-        DownloadHelper.instance().startDownload(token, sbUrl.toString());
+        downloadModal.show(format -> {
+            sbUrl.append("/device_snapshots?snapshotId=").append(snapshot).append("&format=").append(format);
+
+            DownloadHelper.instance().startDownload(token, sbUrl.toString());
+        });
+
     }
 
     private void uploadAndApply() {

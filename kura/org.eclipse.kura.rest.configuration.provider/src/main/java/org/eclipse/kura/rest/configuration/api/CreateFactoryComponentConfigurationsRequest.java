@@ -19,7 +19,7 @@ import org.eclipse.kura.internal.rest.configuration.FailureHandler;
 public class CreateFactoryComponentConfigurationsRequest implements Validable {
 
     private final List<FactoryComponentConfigurationDTO> configs;
-    private final boolean takeSnapshot;
+    private final Boolean takeSnapshot;
 
     public CreateFactoryComponentConfigurationsRequest(List<FactoryComponentConfigurationDTO> configs,
             boolean takeSnapshot) {
@@ -32,7 +32,7 @@ public class CreateFactoryComponentConfigurationsRequest implements Validable {
     }
 
     public boolean isTakeSnapshot() {
-        return takeSnapshot;
+        return this.takeSnapshot == null || this.takeSnapshot;
     }
 
     @Override

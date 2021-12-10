@@ -14,6 +14,7 @@ package org.eclipse.kura.web.server.util;
 
 import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +29,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.Password;
@@ -36,9 +41,15 @@ import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Option;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
+import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.driver.descriptor.DriverDescriptor;
+import org.eclipse.kura.marshalling.Marshaller;
+import org.eclipse.kura.rest.configuration.api.ComponentConfigurationList;
+import org.eclipse.kura.rest.configuration.api.DTOUtil;
+import org.eclipse.kura.util.service.ServiceUtil;
+import org.eclipse.kura.web.server.servlet.DeviceSnapshotsServlet;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
@@ -51,12 +62,20 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * The Class GwtServerUtil is an utility class required for Kura Server
  * Components in GWT.
  */
 public final class GwtServerUtil {
+
+    private static final String JSON_FORMAT = "json";
+    private static final String XML_FORMAT = "xml";
 
     public static final String PASSWORD_PLACEHOLDER = "Placeholder";
 
@@ -76,6 +95,8 @@ public final class GwtServerUtil {
     public static final String PATTERN_SERVICE_PROVIDE_SELF_CONFIGURING_COMP = "provide interface=\"org.eclipse.kura.configuration.SelfConfiguringComponent\"";
 
     private static final String DRIVER_PID = "driver.pid";
+
+    private static final Logger logger = LoggerFactory.getLogger(GwtServerUtil.class);
 
     public static Object getObjectValue(GwtConfigParameter param) {
         Object objValue = null;
@@ -630,6 +651,99 @@ public final class GwtServerUtil {
             return false;
         } catch (InvalidSyntaxException e) {
             return false;
+        }
+    }
+
+    private static ServiceReference<Marshaller>[] getXmlMarshallers() {
+        String filterString = String.format("(&(kura.service.pid=%s))",
+                "org.eclipse.kura.xml.marshaller.unmarshaller.provider");
+        return ServiceUtil.getServiceReferences(
+                FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(), Marshaller.class,
+                filterString);
+    }
+
+    private static void ungetServiceReferences(final ServiceReference<?>[] refs) {
+        ServiceUtil.ungetServiceReferences(FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext(),
+                refs);
+    }
+
+    private static String marshal(Object object) {
+        String result = null;
+        ServiceReference<Marshaller>[] marshallerSRs = getXmlMarshallers();
+        try {
+            for (final ServiceReference<Marshaller> marshallerSR : marshallerSRs) {
+                Marshaller marshaller = FrameworkUtil.getBundle(DeviceSnapshotsServlet.class).getBundleContext()
+                        .getService(marshallerSR);
+                result = marshaller.marshal(object);
+                if (result != null) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to marshal configuration.");
+        } finally {
+            ungetServiceReferences(marshallerSRs);
+        }
+        return result;
+    }
+
+    public static void writeXmlSnapshot(HttpServletResponse response, PrintWriter writer, final String filename,
+            List<ComponentConfiguration> configs) {
+        // build a list of configuration which can be marshalled in XML
+        List<ComponentConfiguration> configImpls = new ArrayList<>();
+        for (ComponentConfiguration config : configs) {
+            configImpls.add(config);
+        }
+        XmlComponentConfigurations xmlConfigs = new XmlComponentConfigurations();
+        xmlConfigs.setConfigurations(configImpls);
+
+        //
+        // marshall the response and write it
+        String result = marshal(xmlConfigs);
+
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/xml");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+        response.setHeader("Cache-Control", "no-transform, max-age=0");
+
+        writer.write(result);
+    }
+
+    public static void writeJsonSnapshot(HttpServletResponse response, PrintWriter writer, final String filename,
+            List<ComponentConfiguration> configs) {
+
+        final ComponentConfigurationList dto = DTOUtil.toComponentConfigurationList(configs, null, false);
+
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+        response.setHeader("Cache-Control", "no-transform, max-age=0");
+
+        gson.toJson(dto, writer);
+    }
+
+    public static void writeSnapshot(final HttpServletRequest request, final HttpServletResponse response,
+            final List<ComponentConfiguration> configs, final String filename) throws ServletException {
+
+        String format = request.getParameter("format");
+
+        if (format == null || format.isEmpty()) {
+            format = XML_FORMAT;
+        }
+
+        try (PrintWriter writer = response.getWriter()) {
+
+            if (XML_FORMAT.equalsIgnoreCase(format)) {
+                GwtServerUtil.writeXmlSnapshot(response, writer, filename + ".xml", configs);
+            } else if (JSON_FORMAT.equalsIgnoreCase(format)) {
+                GwtServerUtil.writeJsonSnapshot(response, writer, filename + ".json", configs);
+            }
+
+        } catch (Exception e) {
+            logger.error("Error exporting snapshot");
+            throw new ServletException(e);
         }
     }
 }

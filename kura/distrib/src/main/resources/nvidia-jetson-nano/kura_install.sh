@@ -94,6 +94,14 @@ chmod 600 /etc/bind/rndc.key
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
+# disable dhcpcd service - kura is the network manager
+systemctl stop dhcpcd
+systemctl disable dhcpcd
+
+# disable isc-dhcp-server service - kura is the network manager
+systemctl stop isc-dhcp-server
+systemctl disable isc-dhcp-server
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

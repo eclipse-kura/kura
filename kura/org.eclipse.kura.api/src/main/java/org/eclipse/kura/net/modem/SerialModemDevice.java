@@ -20,6 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noextend This class is not intended to be subclassed by clients.
  * 
  * @deprecated This class is deprecated and should not be used.
+ * @since 2.3
  */
 @ProviderType
 @Deprecated

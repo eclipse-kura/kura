@@ -1016,17 +1016,17 @@ public class ModemMonitorServiceImplTest {
 
         svc.activate();
         svc.addModem("ppp0", mockModem);
-        svc.sync();
+        try {
+            svc.sync();
+        } catch (InterruptedException e) {
+            // do nothing...
+        }
 
         final long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < 15; i++) {
             TestUtil.invokePrivate(svc, "monitor");
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // do nothing...
-            }
+            Thread.sleep(100);
             if (resetExpected && System.currentTimeMillis() - startTime < 1000) {
                 verify(mockModem, times(0)).reset();
             }

@@ -94,14 +94,14 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
 
     private static final class LogEntriesCache {
 
-        private static final List<GwtLogEntry> cache = new LinkedList<>();
+        private static final LinkedList<GwtLogEntry> cache = new LinkedList<>();
         private static final int MAX_CACHE_SIZE = 1000;
         private static int nextEntryId = 0;
 
         public void add(GwtLogEntry newEntry) {
             synchronized (cache) {
                 if (cache.size() >= MAX_CACHE_SIZE) {
-                    cache.remove(0);
+                    cache.removeFirst();
                 }
                 manageIdIntOverflow();
                 newEntry.setId(nextEntryId++);

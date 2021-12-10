@@ -78,7 +78,7 @@ public class LogTabUi extends Composite {
     CheckBox showMoreInfoCheckbox;
 
     private static final int CACHE_SIZE_LIMIT = 5000;
-    private final List<GwtLogEntry> logs = new LinkedList<>();
+    private final LinkedList<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;
 
@@ -118,13 +118,12 @@ public class LogTabUi extends Composite {
         this.showMoreInfoCheckbox.addClickHandler(click -> displayLogs());
 
         LogPollService.subscribe(entries -> {
-            LogTabUi.this.logs.addAll(entries);
-
-            if (LogTabUi.this.logs.size() > CACHE_SIZE_LIMIT) {
-                List<GwtLogEntry> newEntries = LogTabUi.this.logs.subList(CACHE_SIZE_LIMIT, LogTabUi.this.logs.size());
-                LogTabUi.this.logs.clear();
-                LogTabUi.this.logs.addAll(newEntries);
+            if (LogTabUi.this.logs.size() + entries.size() > CACHE_SIZE_LIMIT) {
+                for (int i = 0; i < entries.size(); i++) {
+                    LogTabUi.this.logs.removeFirst();
+                }
             }
+            LogTabUi.this.logs.addAll(entries);
 
             displayLogs();
         });

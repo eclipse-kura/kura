@@ -23,8 +23,8 @@ public class LinuxDnsServerSystemD extends LinuxDnsServer implements DnsServerSe
 
     private static final String BIND9_COMMAND = "bind9";
     private static final String NAMED_COMMAND = "named";
-    private static final String BIND9_SERVICE_UNIT_LOC = "/lib/systemd/system/named.service";
-    private static final String NAMED_SERVICE_UNIT_LOC = "/etc/systemd/system/bind9.service";
+    private static final String BIND9_SERVICE_UNIT_LOC = "/etc/systemd/system/bind9.service";
+    private static final String NAMED_SERVICE_UNIT_LOC = "/lib/systemd/system/named.service";
 
     private String dnsCommand;
 

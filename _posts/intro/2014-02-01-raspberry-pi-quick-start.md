@@ -23,7 +23,7 @@ This quickstart has been tested using the following image:
 
 downloaded from
 
-<pre>https://www.raspberrypi.com/documentation/computers/remote-access.html</pre>
+<pre>https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf.zip</pre>
 
 ## Enable SSH Access
 
@@ -39,7 +39,7 @@ in order to enable it to follow the instructions available at the following URL:
 To install Eclipse Kura with its dependencies on the Raspberry Pi, perform the
 following steps:
 
-1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 5.1.0 Kura only supports Debian 11 or above).
+1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 5.1.0 Kura is tested with Raspbian 11).
 
 2. Make sure your device is connected to internet. By default, `eth0` lan network interface is configured in DHCP mode.
 

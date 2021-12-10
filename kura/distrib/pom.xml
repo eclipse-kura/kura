@@ -1373,8 +1373,8 @@
             <id>raspberry-pi-nn</id>
             <properties>
                 <project.raspbian.dependencies.nn> hostapd, dos2unix, bind9, unzip, ethtool, telnet, 
-                	bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
-                	rpi.gpio-common, openjdk-8-jre-headless
+                    bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
+                    rpi.gpio-common, openjdk-8-jre-headless
                 </project.raspbian.dependencies.nn>
             </properties>
             <activation>

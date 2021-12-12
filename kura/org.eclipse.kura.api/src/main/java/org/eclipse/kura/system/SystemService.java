@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -115,6 +115,11 @@ public interface SystemService {
      * @since 2.2
      */
     public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
+
+    /**
+     * @since 2.3
+     */
+    public static final String KEY_PPP_LOGGING = "kura.ppp.logging.enabled";
 
     /**
      * @deprecated
@@ -463,7 +468,7 @@ public interface SystemService {
 
     /**
      * Returns the system packages currently installed
-     * 
+     *
      * @return the list of the installed packages
      * @throws KuraProcessExecutionErrorException
      * @since 2.2
@@ -522,7 +527,7 @@ public interface SystemService {
 
     /**
      * Returns the default configuration for virtual network interfaces
-     * 
+     *
      * @return a String that represent the default configuration for virtual interfaces
      * @since 2.2
      */
@@ -546,7 +551,7 @@ public interface SystemService {
 
     /**
      * Returns a set of {@link ExtendedProperties}.
-     * 
+     *
      * @since 2.2
      * @return the extended properties, or empty if the SystemService implementation does not provide extended
      *         properties.
@@ -561,5 +566,13 @@ public interface SystemService {
      * @return if the legacy beacon scan has to be used
      */
     public boolean isLegacyBluetoothBeaconScan();
+
+    /**
+     * Returns true (default) if the PPP logging in separate log file in /var/log is enabled.
+     *
+     * @since 2.3
+     * @return true if separate log file in /var/log is required
+     */
+    public boolean isPPPLoggingEnabled();
 
 }

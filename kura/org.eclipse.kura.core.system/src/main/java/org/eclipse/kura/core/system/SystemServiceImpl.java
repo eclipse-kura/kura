@@ -1484,4 +1484,14 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
         return false;
     }
 
+    @Override
+    public boolean isPPPLoggingEnabled() {
+        final Optional<String> override = getProperty(KEY_PPP_LOGGING);
+        if (override.isPresent()) {
+            return Boolean.parseBoolean(override.get());
+        }
+
+        return false;
+    }
+
 }

@@ -1,12 +1,17 @@
 /*******************************************************************************
+<<<<<<< Updated upstream
  * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
  * 
+=======
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ *
+>>>>>>> Stashed changes
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -41,7 +46,11 @@ import org.eclipse.kura.net.admin.util.LinuxFileUtil;
 import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.admin.visitor.linux.util.ModemXchangeScript;
 import org.eclipse.kura.net.modem.ModemConfig;
+import org.eclipse.kura.system.SystemService;
 import org.eclipse.kura.usb.UsbDevice;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +64,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     public static final String OS_SCRIPTS_DIRECTORY = "/etc/ppp/scripts/";
     public static final String DNS_DELIM = ",";
 
+<<<<<<< Updated upstream
     private static PppConfigWriter instance;
 
     public static PppConfigWriter getInstance() {
@@ -63,6 +73,31 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         }
 
         return instance;
+=======
+    private boolean logEnabled;
+
+    public PppConfigWriter() {
+        createSystemFolders();
+        final BundleContext ctx = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+
+        final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
+        if (systemServiceRef == null) {
+            this.logEnabled = true;
+            return;
+        }
+
+        final SystemService service = ctx.getService(systemServiceRef);
+        if (service == null) {
+            this.logEnabled = true;
+            return;
+        }
+
+        try {
+            this.logEnabled = service.isPPPLoggingEnabled();
+        } finally {
+            ctx.ungetService(systemServiceRef);
+        }
+>>>>>>> Stashed changes
     }
 
     private PppConfigWriter() {
@@ -310,7 +345,15 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         return buf.toString();
     }
 
+<<<<<<< Updated upstream
     public static String formPppLogFilename(UsbDevice usbDevice) {
+=======
+    public String formPppLogFilename(UsbDevice usbDevice) {
+        if (!this.logEnabled) {
+            return null;
+        }
+
+>>>>>>> Stashed changes
         StringBuilder buf = new StringBuilder();
         buf.append(OS_PPP_LOG_DIRECTORY);
         buf.append("kura-");

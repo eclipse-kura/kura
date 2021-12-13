@@ -1,0 +1,14 @@
+Package: kura
+Version: [[project.version]]
+Section: misc
+Priority: low
+Depends: dos2unix, unzip, telnet, 
+ bluez-hcidump, chrony, ntpdate, 
+ java8-runtime-headless | java8-runtime
+Architecture: all
+Maintainer: support@eurotech.com
+Description: Kura is an inclusive software framework that puts a layer
+  between the operating system and the customer application, with industry
+  standard interfaces that shorten custom development time, simplified coding
+  and software that can be easily ported from one hardware platform
+  to another.

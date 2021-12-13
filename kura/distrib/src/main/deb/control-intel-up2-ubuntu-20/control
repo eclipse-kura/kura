@@ -2,7 +2,11 @@ Package: kura
 Version: [[project.version]]
 Section: misc
 Priority: low
-Depends: [[project.raspbian.dependencies.nn]]
+Depends: hostapd, isc-dhcp-server, iw, 
+ dos2unix, bind9, unzip, 
+ ethtool, telnet, bluez-hcidump, 
+ wireless-tools, net-tools, iptables, 
+ chrony, ntpdate, openjdk-8-jre-headless
 Architecture: all
 Maintainer: support@eurotech.com
 Description: Kura is an inclusive software framework that puts a layer

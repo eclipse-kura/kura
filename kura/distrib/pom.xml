@@ -1089,8 +1089,14 @@
         <profile>
             <id>raspberry-pi-ubuntu-20</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump, bluez,
-                    wireless-tools, net-tools, iptables, chrony, ntpdate, ifupdown, pi-bluetooth, rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies>   
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, 
+ dos2unix, bind9, unzip, 
+ ethtool, telnet, bluez-hcidump, 
+ bluez, wireless-tools, net-tools, 
+ iptables, chrony, ntpdate, 
+ ifupdown, pi-bluetooth, rpi.gpio-common, 
+ openjdk-8-jre-headless
+                </project.raspbian.dependencies>   
             </properties>
            <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1183,7 +1189,11 @@
         <profile>
             <id>raspberry-pi-ubuntu-20-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies.nn>   
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, 
+ bluez-hcidump, bluez, chrony, 
+ ntpdate, pi-bluetooth, rpi.gpio-common, 
+ openjdk-8-jre-headless
+                </project.raspbian.dependencies.nn>   
             </properties>
            <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1276,9 +1286,14 @@
         <profile>
             <id>raspberry-pi</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump, bluez,
-                    wireless-tools, net-tools, iptables, chrony, ntpdate, ifupdown, pi-bluetooth, 
-                    rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies>
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, 
+ dos2unix, bind9, unzip, 
+ ethtool, telnet, bluez-hcidump, 
+ bluez, wireless-tools, net-tools, 
+ iptables, chrony, ntpdate, 
+ ifupdown, pi-bluetooth, rpi.gpio-common, 
+ openjdk-8-jre-headless
+                </project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1372,9 +1387,11 @@
         <profile>
             <id>raspberry-pi-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn> hostapd, dos2unix, bind9, unzip, ethtool, telnet, 
-                    bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
-                    rpi.gpio-common, openjdk-8-jre-headless
+                <project.raspbian.dependencies.nn> hostapd, dos2unix, bind9, 
+ unzip, ethtool, telnet, 
+ bluez-hcidump, bluez, chrony, 
+ ntpdate, pi-bluetooth, rpi.gpio-common, 
+ openjdk-8-jre-headless
                 </project.raspbian.dependencies.nn>
             </properties>
             <activation>
@@ -1468,8 +1485,12 @@
         <profile>
             <id>intel-up2-ubuntu-20</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, net-tools, chrony, ntpdate, openjdk-8-jre-headless</project.raspbian.dependencies>   
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, 
+ dos2unix, bind9, unzip, 
+ ethtool, telnet, bluez-hcidump, 
+ wireless-tools, net-tools, iptables, 
+ chrony, ntpdate, openjdk-8-jre-headless
+                </project.raspbian.dependencies>   
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1563,7 +1584,10 @@
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, 
+ bluez-hcidump, chrony, ntpdate, 
+ java8-runtime-headless | java8-runtime
+                </project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1657,8 +1681,12 @@
         <profile>
             <id>nvidia-jetson-nano</id>
             <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, chrony, dmidecode, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
+                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, 
+ dos2unix, bind9, unzip, 
+ ethtool, telnet, bluez-hcidump, 
+ wireless-tools, iptables, chrony, 
+ dmidecode, ntpdate, openjdk-8-jre-headless
+                </project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1752,7 +1780,10 @@
         <profile>
             <id>nvidia-jetson-nano-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, 
+ bluez-hcidump, chrony, ntpdate, 
+ openjdk-8-jre-headless
+                </project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>

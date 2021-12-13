@@ -1255,7 +1255,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer-nn.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control</controlDir>
+                                    <controlDir>${basedir}/src/main/deb/control_nn</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20-nn.zip</src>
@@ -1373,8 +1373,8 @@
             <id>raspberry-pi-nn</id>
             <properties>
                 <project.raspbian.dependencies.nn> hostapd, dos2unix, bind9, unzip, ethtool, telnet, 
-                	bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
-                	rpi.gpio-common, openjdk-8-jre-headless
+                    bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
+                    rpi.gpio-common, openjdk-8-jre-headless
                 </project.raspbian.dependencies.nn>
             </properties>
             <activation>

@@ -1485,46 +1485,6 @@ public class NetworkConfiguration {
             netInterfaceConfig.setAutoConnect(autoConnect);
         }
 
-        // MTU
-        String mtuConfig = netIfPrefix + "mtu";
-        if (props.containsKey(mtuConfig)) {
-            int mtu = (Integer) props.get(mtuConfig);
-            logger.trace("got MTU: {}", mtu);
-            netInterfaceConfig.setMTU(mtu);
-        }
-
-        // Driver
-        String driverKey = netIfReadOnlyPrefix + "driver";
-        if (props.containsKey(driverKey)) {
-            String driver = (String) props.get(driverKey);
-            logger.trace("got Driver: {}", driver);
-            netInterfaceConfig.setDriver(driver);
-        }
-
-        // Driver Version
-        String driverVersionKey = netIfReadOnlyPrefix + "driver.version";
-        if (props.containsKey(driverVersionKey)) {
-            String driverVersion = (String) props.get(driverVersionKey);
-            logger.trace("got Driver Version: {}", driverVersion);
-            netInterfaceConfig.setDriverVersion(driverVersion);
-        }
-
-        // Firmware Version
-        String firmwardVersionKey = netIfReadOnlyPrefix + "firmware.version";
-        if (props.containsKey(firmwardVersionKey)) {
-            String firmwareVersion = (String) props.get(firmwardVersionKey);
-            logger.trace("got Firmware Version: {}", firmwareVersion);
-            netInterfaceConfig.setFirmwareVersion(firmwareVersion);
-        }
-
-        // Mac Address
-        String macAddressKey = netIfReadOnlyPrefix + "mac";
-        if (props.containsKey(macAddressKey)) {
-            String macAddress = (String) props.get(macAddressKey);
-            logger.trace("got Mac Address: {}", macAddress);
-            netInterfaceConfig.setHardwareAddress(NetUtil.hardwareAddressToBytes(macAddress));
-        }
-
         // Is Loopback
         String loopbackKey = netIfReadOnlyPrefix + "loopback";
         if (props.containsKey(loopbackKey)) {
@@ -1539,31 +1499,6 @@ public class NetworkConfiguration {
             Boolean isPtp = (Boolean) props.get(ptpKey);
             logger.trace("got Is PtP: {}", isPtp);
             netInterfaceConfig.setPointToPoint(isPtp);
-        }
-
-        // Is Up
-        String upKey = netIfReadOnlyPrefix + "up";
-        if (props.containsKey(upKey)) {
-            Boolean isUp = (Boolean) props.get(upKey);
-            logger.trace("got Is Up: {}", isUp);
-            netInterfaceConfig.setUp(isUp);
-
-            if (Boolean.TRUE.equals(isUp)) {
-                netInterfaceConfig.setState(NetInterfaceState.ACTIVATED);
-            } else {
-                netInterfaceConfig.setState(NetInterfaceState.DISCONNECTED);
-            }
-        } else {
-            logger.trace("Setting state to");
-            netInterfaceConfig.setState(NetInterfaceState.DISCONNECTED);
-        }
-
-        // Is Virtual
-        String virtualKey = netIfReadOnlyPrefix + "virtual";
-        if (props.containsKey(virtualKey)) {
-            Boolean isVirtual = (Boolean) props.get(virtualKey);
-            logger.trace("got Is Virtual: {}", isVirtual);
-            netInterfaceConfig.setVirtual(isVirtual);
         }
 
         // USB

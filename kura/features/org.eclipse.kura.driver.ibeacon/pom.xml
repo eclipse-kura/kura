@@ -21,12 +21,12 @@
 	<parent>
 		<groupId>org.eclipse.kura.feature</groupId>
 		<artifactId>features</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.driver.ibeacon</artifactId>
-	<version>1.0.200</version>
+	<version>1.0.201-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 
 	<build>

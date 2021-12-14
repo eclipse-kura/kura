@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.example.ibeacon.scanner
 Bundle-SymbolicName: org.eclipse.kura.example.ibeacon.scanner;singleton:=true
-Bundle-Version: 1.0.400
+Bundle-Version: 1.0.401.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy

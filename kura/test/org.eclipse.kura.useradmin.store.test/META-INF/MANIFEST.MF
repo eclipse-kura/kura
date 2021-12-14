@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.useradmin.store.test
 Bundle-SymbolicName: org.eclipse.kura.useradmin.store.test;singleton:=true
-Bundle-Version: 5.0.0
+Bundle-Version: 5.0.1.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
@@ -14,5 +14,5 @@ Import-Package: org.eclipse.kura;version="1.6.0",
  org.osgi.framework;version="1.10.0",
  org.osgi.service.useradmin
 Require-Bundle: org.apache.felix.useradmin;bundle-version="1.0.4",
- org.eclipse.kura.useradmin.store;bundle-version="1.0.0"
+ org.eclipse.kura.useradmin.store;bundle-version="1.0.1"
 

@@ -7,12 +7,12 @@
 	<parent>
 		<groupId>org.eclipse.kura.feature</groupId>
 		<artifactId>features</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.wire.script.filter</artifactId>
-	<version>1.0.400</version>
+	<version>1.0.401-SNAPSHOT</version>
 	<packaging>eclipse-feature</packaging>
 
 	<build>

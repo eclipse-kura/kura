@@ -20,12 +20,12 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>examples</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.example.beacon.scanner</artifactId>
-	<version>1.0.600</version>
+	<version>1.0.601-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

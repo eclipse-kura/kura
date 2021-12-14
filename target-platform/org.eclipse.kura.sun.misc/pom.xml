@@ -20,12 +20,12 @@
 	<parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.0.0</version>
+        <version>5.0.1-SNAPSHOT</version>
     </parent>
 
 	<groupId>org.eclipse.kura</groupId>
 	<artifactId>org.eclipse.kura.sun.misc</artifactId>
-	<version>1.0.500</version>
+	<version>1.0.501-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>System extension fragment for 'sun.misc'</name>

@@ -456,6 +456,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
+                                    <version>1.0.0</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.script.filter</artifactId>
                                     <version>1.0.400</version>
                                 </artifactItem>

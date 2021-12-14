@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.example.driver.sensehat"
       label="%featureName"
-      version="1.0.300.qualifier"
+      version="1.0.301.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

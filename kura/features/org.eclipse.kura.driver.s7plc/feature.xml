@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.driver.s7plc"
       label="%featureName"
-      version="1.0.400"
+      version="1.0.401.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

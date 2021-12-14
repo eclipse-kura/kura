@@ -19,11 +19,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.driver.ibeacon.provider</artifactId>
-	<version>1.0.200</version>
+	<version>1.0.201-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 	
 	<properties>

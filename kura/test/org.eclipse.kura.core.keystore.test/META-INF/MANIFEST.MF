@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.eclipse.kura.core.keystore.test
 Bundle-SymbolicName: org.eclipse.kura.core.keystore.test;singleton:=true
-Bundle-Version: 5.0.0
+Bundle-Version: 5.0.1.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
@@ -21,4 +21,4 @@ Import-Package: javax.servlet;version="3.1.0",
  org.mockito.invocation;version="1.10.19",
  org.mockito.stubbing;version="1.10.19",
  org.slf4j;version="1.6.4"
-Fragment-Host: org.eclipse.kura.core.keystore;bundle-version="1.0.0"
+Fragment-Host: org.eclipse.kura.core.keystore;bundle-version="1.0.1"

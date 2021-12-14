@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.kura.driver.eddystone"
       label="%featureName"
-      version="1.0.200"
+      version="1.0.201.qualifier"
       provider-name="%providerName"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">

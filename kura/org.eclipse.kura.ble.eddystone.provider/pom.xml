@@ -20,11 +20,11 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>kura</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.ble.eddystone.provider</artifactId>
-	<version>1.0.400</version>
+	<version>1.0.401-SNAPSHOT</version>
 	<packaging>eclipse-plugin</packaging>
 
 	<properties>

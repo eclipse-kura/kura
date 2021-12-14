@@ -7,13 +7,13 @@
 	<parent>
 		<groupId>org.eclipse.kura.feature</groupId>
 		<artifactId>features</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.driver.opcua</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>1.0.500</version>
+	<version>1.0.501-SNAPSHOT</version>
 
 	<build>
 		<plugins>

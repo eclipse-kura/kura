@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>test</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.core.ssl.test</artifactId>

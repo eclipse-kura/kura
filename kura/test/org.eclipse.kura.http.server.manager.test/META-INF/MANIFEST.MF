@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name:  org.eclipse.kura.https.server.manager.test
 Bundle-SymbolicName: org.eclipse.kura.http.server.manager.test;singleton:=true
-Bundle-Version: 5.0.0
+Bundle-Version: 5.0.1.qualifier
 Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.0.0"
+Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.0.1"
 Import-Package: org.bouncycastle.asn1.x500;version="1.65.0",
  org.eclipse.kura;version="1.6.0",
  org.eclipse.kura.configuration;version="1.2.0",

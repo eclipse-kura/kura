@@ -21,13 +21,13 @@
 	<parent>
 		<groupId>org.eclipse.kura.examples.feature</groupId>
 		<artifactId>features</artifactId>
-		<version>5.0.0</version>
+		<version>5.0.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<artifactId>org.eclipse.kura.raspberrypi.sensehat.example.bundle</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<version>1.0.500-SNAPSHOT</version>
+	<version>1.0.501-SNAPSHOT</version>
 
 	<properties>
 		<kura.basedir>${project.basedir}/../../..</kura.basedir>

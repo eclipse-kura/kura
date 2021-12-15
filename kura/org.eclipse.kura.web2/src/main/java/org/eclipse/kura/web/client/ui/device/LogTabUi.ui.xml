@@ -27,34 +27,46 @@
     	margin: 5px;
     }
     .log-area {
-    	width: 95%;
+    	width: 100%;
+    }
+    .open-window-btn {
+    	float: right;
     }
     </ui:style>
     <b:Container fluid="true" addStyleNames="log-panel">
+    
+    	<b:Column size="MD_12">
         
-        <b:Row>
-	        <b:Panel b:id="deviceLogsPanel" ui:field="deviceLogsPanel">
-	        	<b:Row b:id="controlsRow" ui:field="controlsRow">
-	        		<b:ListBox b:id="logProviderListBox" ui:field="logProviderListBox"/>
-	        		<b:CheckBox b:id="showStackTraceCheckbox" ui:field="showStackTraceCheckbox">Show errors stacktrace</b:CheckBox>
-	        		<b:CheckBox b:id="showMoreInfoCheckbox" ui:field="showMoreInfoCheckbox">Show additional info</b:CheckBox>
-	        	</b:Row>
-	        	<b:Row>
-	          		<g:TextArea ui:field="logTextArea" addStyleNames="{style.log-area}"/>
-	            </b:Row>
-	        </b:Panel>
-        </b:Row>
+	        <b:Row>
+		        <b:Panel b:id="deviceLogsPanel" ui:field="deviceLogsPanel">		        	
+		        	<b:Row b:id="controlsRow" ui:field="controlsRow">
+		        		<b:Column size="XS_10 SM_10 MD_11">
+			        		<b:ListBox b:id="logProviderListBox" ui:field="logProviderListBox"/>
+			        		<b:CheckBox b:id="showStackTraceCheckbox" ui:field="showStackTraceCheckbox">Show errors stacktrace</b:CheckBox>
+			        		<b:CheckBox b:id="showMoreInfoCheckbox" ui:field="showMoreInfoCheckbox">Show additional info</b:CheckBox>
+		        		</b:Column>
+		        		<b:Column size="XS_2 SM_2 MD_1">
+			            	<b:Button ui:field="openNewWindow" addStyleNames="fa {style.open-window-btn}">New window</b:Button>
+			            </b:Column>
+		        	</b:Row>
+		        	<b:Row>
+	          			<g:TextArea ui:field="logTextArea" addStyleNames="{style.log-area}"/>
+		            </b:Row>
+		        </b:Panel>
+	        </b:Row>
+	        
+	        <b:Row addStyleNames="panel-footer">
+	            <gwt:FormPanel ui:field="logForm">
+	                <b:FieldSet>
+	                    <b:ButtonGroup pull="LEFT">
+	                    	<b:Button ui:field="execute" addStyleNames="fa fa-download">Download</b:Button>
+	                    	<b:FormLabel ui:field="logLabel" addStyleNames="{style.download-label-text}" />
+	                    </b:ButtonGroup>
+	                </b:FieldSet>
+	            </gwt:FormPanel>
+	        </b:Row>
         
-        <b:Row addStyleNames="panel-footer">
-            <gwt:FormPanel ui:field="logForm">
-                <b:FieldSet>
-                    <b:ButtonGroup pull="LEFT">
-                    	<b:Button ui:field="execute" addStyleNames="fa fa-download">Download</b:Button>
-                    	<b:FormLabel ui:field="logLabel" addStyleNames="{style.download-label-text}" />
-                    </b:ButtonGroup>
-                </b:FieldSet>
-            </gwt:FormPanel>
-        </b:Row>
+        </b:Column>
         
     </b:Container>
 </ui:UiBinder> 

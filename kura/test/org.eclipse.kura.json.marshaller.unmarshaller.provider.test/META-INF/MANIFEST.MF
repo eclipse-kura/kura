@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wire Provider Test
 Bundle-SymbolicName: org.eclipse.kura.json.marshaller.unmarshaller.provider.test
-Bundle-Version: 4.1.3.qualifier
+Bundle-Version: 4.1.3
 Bundle-Vendor: Eclipse Kura
 Bundle-License: Eclipse Public License v1.0
 Fragment-Host: org.eclipse.kura.json.marshaller.unmarshaller.provider;bundle-version="[1.0,2.0)"

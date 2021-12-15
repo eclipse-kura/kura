@@ -19,7 +19,7 @@
 	<parent>
 		<groupId>org.eclipse.kura</groupId>
 		<artifactId>examples</artifactId>
-		<version>4.1.3-SNAPSHOT</version>
+		<version>4.1.3</version>
 	</parent>
 
 	<artifactId>org.eclipse.kura.demo.heater</artifactId>

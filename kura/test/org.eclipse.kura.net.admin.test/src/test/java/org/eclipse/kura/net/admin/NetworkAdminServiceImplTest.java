@@ -293,7 +293,6 @@ public class NetworkAdminServiceImplTest {
         props.put("net.interfaces", "intf");
         props.put("net.interface.intf.type", "WIFI");
         props.put("net.interface.intf.state", NetInterfaceState.ACTIVATED);
-        props.put("net.interface.intf.driver", "driver");
         props.put("net.interface.intf.mtu", "1492");
         props.put("net.interface.intf.mac", "12:34:56:78:90:12");
         props.put("net.interface.intf.up", true);
@@ -327,7 +326,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals("driver", config.getDriver());
             assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertFalse(config.isAutoConnect());
 
@@ -540,7 +538,6 @@ public class NetworkAdminServiceImplTest {
         props.put("net.interfaces", "intf");
         props.put("net.interface.intf.type", "ETHERNET");
         props.put("net.interface.intf.state", NetInterfaceState.ACTIVATED);
-        props.put("net.interface.intf.driver", "driver");
         props.put("net.interface.intf.mtu", "1500");
         props.put("net.interface.intf.mac", "12:34:56:78:90:12");
         props.put("net.interface.intf.up", true);
@@ -570,7 +567,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals("driver", config.getDriver());
             assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertTrue(config.isAutoConnect());
 
@@ -801,7 +797,6 @@ public class NetworkAdminServiceImplTest {
         props.put("net.interfaces", "intf");
         props.put("net.interface.intf.type", "MODEM");
         props.put("net.interface.intf.state", NetInterfaceState.ACTIVATED);
-        props.put("net.interface.intf.driver", "driver");
         props.put("net.interface.intf.mtu", "1500");
         props.put("net.interface.intf.mac", "12:34:56:78:90:12");
         props.put("net.interface.intf.up", true);
@@ -833,7 +828,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals("driver", config.getDriver());
             assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertFalse(config.isAutoConnect());
 

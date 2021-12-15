@@ -101,6 +101,7 @@ public class NetworkConfigurationTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("net.interfaces", interfaces);
         properties.put("net.interface.if1.type", "ETHERNET");
+        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         NetworkConfiguration config = new NetworkConfiguration(properties);
 
@@ -130,6 +131,7 @@ public class NetworkConfigurationTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("net.interfaces", "if1,if2");
         properties.put("net.interface.if1.type", "ETHERNET");
+        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         NetworkConfiguration config = new NetworkConfiguration(properties);
 
@@ -2220,6 +2222,7 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "LOOPBACK");
         properties.put("net.interface.if1.config.autoconnect", true);
+        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
         List<NetInterfaceAddressConfig> loopbackInterfaceAddressConfigs = new ArrayList<>();
@@ -2251,6 +2254,7 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "WIFI");
         properties.put("net.interface.if1.config.autoconnect", true);
+        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         properties.put("net.interface.if1.config.wifi.master.ssid", "ssid");
         properties.put("net.interface.if1.config.wifi.master.passphrase", "passphrase");
@@ -2328,6 +2332,7 @@ public class NetworkConfigurationTest {
 
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "ETHERNET");
+        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         TestUtil.invokePrivate(config, "populateNetInterfaceConfiguration", netInterfaceConfig, properties);
 
@@ -2354,6 +2359,7 @@ public class NetworkConfigurationTest {
         properties.put("net.interface.if1.config.wifi.mode", "ADHOC");
         properties.put("net.interface.if1.config.wifi.master.passphrase", "password");
         properties.put("net.interface.if1.config.wifi.infra.passphrase", "password");
+        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         TestUtil.invokePrivate(config, "populateNetInterfaceConfiguration", netInterfaceConfig, properties);
 

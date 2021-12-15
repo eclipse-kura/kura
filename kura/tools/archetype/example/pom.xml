@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.eclipse.kura.tools</groupId>
 		<artifactId>archetype</artifactId>
-		<version>5.0.1-SNAPSHOT</version>
+		<version>5.0.1</version>
 	</parent>
 
     <groupId>org.eclipse.kura.tools.archetype</groupId>

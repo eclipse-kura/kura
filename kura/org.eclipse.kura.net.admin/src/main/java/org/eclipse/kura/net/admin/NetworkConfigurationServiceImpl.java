@@ -74,7 +74,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
     private static final String CONFIG_MTU = ".config.mtu";
     private static final String NET_INTERFACES = "net.interfaces";
-    private static final String MODEM_PORT_REGEX = "^\\d+-\\d+(\\.\\d+)*$";
+    private static final String MODEM_PORT_REGEX = "^\\d+-\\d+\\.*";
 
     private NetworkService networkService;
     private EventAdmin eventAdmin;

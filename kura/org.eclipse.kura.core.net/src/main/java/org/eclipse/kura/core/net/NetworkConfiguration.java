@@ -1147,7 +1147,7 @@ public class NetworkConfiguration {
     }
 
     private static int getPppNumber(String prefix, Map<String, Object> properties) {
-        String key = prefix + "pppNum";
+        String key = prefix + PPP_NUM;
         Object value = properties.getOrDefault(key, DEFAULT_PPP_NUMBER_VALUE);
         return value != null ? (Integer) value : DEFAULT_PPP_NUMBER_VALUE;
     }

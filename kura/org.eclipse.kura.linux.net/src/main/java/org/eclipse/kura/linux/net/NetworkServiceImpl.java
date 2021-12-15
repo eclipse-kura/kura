@@ -24,14 +24,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.core.net.EthernetInterfaceImpl;
 import org.eclipse.kura.core.net.LoopbackInterfaceImpl;
 import org.eclipse.kura.core.net.NetInterfaceAddressImpl;
@@ -69,7 +70,6 @@ import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.usb.AbstractUsbDevice;
 import org.eclipse.kura.usb.UsbBlockDevice;
 import org.eclipse.kura.usb.UsbDevice;
@@ -93,6 +93,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkServiceImpl.class);
 
+    private static final String IP_ADDRESS_PARSING_FAILED = "IP address parsing failed";
     public static final String MODEM_PORT_REGEX = "^\\d+-\\d+(\\.\\d+)?$";
     private static final String UNKNOWN = "unknown";
     private static final String NA = "N/A";
@@ -131,7 +132,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     public void unsetEventAdmin(EventAdmin eventAdmin) {
-        this.eventAdmin = null;
+        if (eventAdmin.equals(this.eventAdmin)) {
+            this.eventAdmin = null;
+        }
     }
 
     public void setUsbService(UsbService usbService) {
@@ -139,7 +142,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     public void unsetUsbService(UsbService usbService) {
-        this.usbService = null;
+        if (usbService.equals(this.usbService)) {
+            this.usbService = null;
+        }
     }
 
     public void setExecutorService(CommandExecutorService executorService) {
@@ -147,7 +152,9 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        this.executorService = null;
+        if (executorService.equals(this.executorService)) {
+            this.executorService = null;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -191,8 +198,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     final String usbPort = e.getKey();
                     final UsbModemDevice usbModem = e.getValue();
 
-                    final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem.getVendorId(),
-                            usbModem.getProductId(), usbModem.getProductName());
+                    final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(usbModem);
 
                     logger.debug("activate() :: Found modem: {}", usbModem);
 
@@ -284,8 +290,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     @Override
     public NetworkState getState() throws KuraException {
-        // FIXME - this method needs some work
-
         // see if we have global access by trying to ping - maybe there is a better way?
         if (this.linuxNetworkUtil.canPing("8.8.8.8", 1)) {
             return NetworkState.CONNECTED_GLOBAL;
@@ -297,14 +301,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         // if we have a link we at least of network local access
         List<NetInterface<? extends NetInterfaceAddress>> netInterfaces = getNetworkInterfaces();
         for (NetInterface<? extends NetInterfaceAddress> netInterface : netInterfaces) {
-            if (netInterface.getType() == NetInterfaceType.ETHERNET) {
-                if (((EthernetInterfaceImpl<? extends NetInterfaceAddress>) netInterface).isLinkUp()) {
-                    return NetworkState.CONNECTED_SITE;
-                }
+            if (netInterface.getType() == NetInterfaceType.ETHERNET
+                    && ((EthernetInterfaceImpl<? extends NetInterfaceAddress>) netInterface).isLinkUp()) {
+                return NetworkState.CONNECTED_SITE;
             }
         }
-
-        // TODO - should be know if we are CONNECTED_SITE for wifi?
 
         @SuppressWarnings("checkstyle:lineLength")
         LoopbackInterfaceImpl<? extends NetInterfaceAddress> netInterface = (LoopbackInterfaceImpl<? extends NetInterfaceAddress>) getNetworkInterface(
@@ -313,7 +314,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             return NetworkState.CONNECTED_LOCAL;
         }
 
-        // not sure what we're doing...
         return NetworkState.UNKNOWN;
     }
 
@@ -385,19 +385,15 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     private List<NetInterface<?>> getInterfacesForUsbDevice(List<NetInterface<?>> netInterfaces, String usbPort) {
         List<NetInterface<?>> result = new ArrayList<>();
-        for (NetInterface<?> netInterface : netInterfaces) {
+        netInterfaces.forEach(netInterface -> {
             final UsbDevice usbDevice = netInterface.getUsbDevice();
-            if (usbDevice == null) {
-                continue;
+            if (usbDevice != null) {
+                final String interfaceUsbPort = usbDevice.getUsbPort();
+                if (interfaceUsbPort != null && interfaceUsbPort.equals(usbPort)) {
+                    result.add(netInterface);
+                }
             }
-            final String interfaceUsbPort = usbDevice.getUsbPort();
-            if (interfaceUsbPort == null) {
-                continue;
-            }
-            if (interfaceUsbPort.equals(usbPort)) {
-                result.add(netInterface);
-            }
-        }
+        });
         return result;
     }
 
@@ -486,7 +482,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             }
 
             ModemDevice modemDevice = this.detectedUsbModems.get(modemUsbPort);
-            return modemDevice != null ? getModemInterfaceByPppName(interfaceName, ifconfig.isUp(), modemDevice) : null;
+            return modemDevice != null ? getModemNetInterfaceByPppName(interfaceName, ifconfig.isUp(), modemDevice)
+                    : null;
         } else {
             return null;
         }
@@ -513,7 +510,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         wifiInterface.setVirtual(isVirtual(interfaceName));
         wifiInterface.setUsbDevice(getUsbDevice(interfaceName));
         wifiInterface.setState(getState(interfaceName, isUp));
-        wifiInterface.setNetInterfaceAddresses(getWifiInterfaceAddresses(interfaceName, isUp));
+        wifiInterface.setNetInterfaceAddresses(getWifiNetInterfaceAddresses(interfaceName, isUp));
 
         try {
             wifiInterface.setCapabilities(this.linuxNetworkUtil.getWifiCapabilities(interfaceName));
@@ -529,7 +526,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     protected NetInterface<? extends NetInterfaceAddress> getLoopbackInterface(String interfaceName,
             LinuxIfconfig ifconfig) throws KuraException {
         LoopbackInterfaceImpl<NetInterfaceAddress> netInterface = new LoopbackInterfaceImpl<>(interfaceName);
-        NetInterfaceType type = ifconfig.getType();
         boolean isUp = ifconfig.isUp();
 
         netInterface.setDriver(NA);
@@ -545,7 +541,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         netInterface.setVirtual(false);
         netInterface.setUsbDevice(null);
         netInterface.setState(getState(interfaceName, isUp));
-        netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
+        netInterface.setNetInterfaceAddresses(getEthernetOrLoopbackNetInterfaceAddresses(interfaceName, isUp));
 
         return netInterface;
     }
@@ -571,7 +567,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         netInterface.setVirtual(isVirtual(interfaceName));
         netInterface.setUsbDevice(getUsbDevice(interfaceName));
         netInterface.setState(getState(interfaceName, isUp));
-        netInterface.setNetInterfaceAddresses(getNetInterfaceAddresses(interfaceName, type, isUp));
+        netInterface.setNetInterfaceAddresses(getEthernetOrLoopbackNetInterfaceAddresses(interfaceName, isUp));
 
         return netInterface;
     }
@@ -581,151 +577,163 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         logger.debug("handleEvent() :: topic: {}", event.getTopic());
         String topic = event.getTopic();
         if (topic.equals(UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC)) {
-            // validate mandatory properties
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null
-                    || ((String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY)).startsWith("usb")) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) == null
-                    || ((UsbDeviceType) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY))
-                            .equals(UsbDeviceType.USB_NET_DEVICE)) {
-                return;
-            }
-
-            // do we care?
-            final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(
-                    (String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
-                    (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
-                    (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY));
-            if (modemInfo != null) {
-                // Found one - see if we have some info for it.
-                // Also check if we are getting more devices than expected.
-                // This can happen if all the modem resources cannot be removed from the OS or from Kura.
-                // In this case we did not receive an UsbDeviceRemovedEvent and we did not post
-                // an ModemRemovedEvent. Should we do it here?
-                List<? extends UsbModemDriver> drivers = modemInfo.getDeviceDrivers();
-                for (UsbModemDriver driver : drivers) {
-                    try {
-                        driver.install(this.executorService);
-                    } catch (Exception e) {
-                        logger.error("handleEvent() :: Failed to install modem device driver {} ", driver.getName(), e);
-                    }
-                }
-
-                UsbModemDevice usbModem = this.detectedUsbModems
-                        .get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
-
-                boolean createNewUsbModemDevice = false;
-                if (usbModem == null) {
-                    logger.debug("handleEvent() :: Modem not found. Create one");
-                    createNewUsbModemDevice = true;
-                } else if (modemInfo.getNumTtyDevs() > 0 && modemInfo.getNumBlockDevs() > 0) {
-                    if (usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()
-                            && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()) {
-                        logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one",
-                                usbModem);
-                        createNewUsbModemDevice = true;
-                    }
-                } else if (modemInfo.getNumTtyDevs() > 0 && usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()
-                        || modemInfo.getNumBlockDevs() > 0
-                                && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()) {
-                    logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one",
-                            usbModem);
-                    createNewUsbModemDevice = true;
-                }
-
-                if (createNewUsbModemDevice) {
-                    usbModem = new UsbModemDevice(
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY),
-                            (String) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY));
-                }
-
-                String resource = (String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY);
-                Integer interfaceNumber = (Integer) event.getProperty(UsbDeviceEvent.USB_EVENT_USB_INTERFACE_NUMBER);
-                UsbDeviceType usbDeviceType = (UsbDeviceType) event
-                        .getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY);
-                logger.debug("handleEvent() :: Found resource: {} of type {} for: {}", resource, usbDeviceType,
-                        usbModem.getUsbPort());
-                if (usbDeviceType.equals(UsbDeviceType.USB_TTY_DEVICE)) {
-                    usbModem.addTtyDev(resource, interfaceNumber);
-                } else if (usbDeviceType.equals(UsbDeviceType.USB_BLOCK_DEVICE)) {
-                    usbModem.addBlockDev(resource);
-                }
-
-                this.detectedUsbModems.put(usbModem.getUsbPort(), usbModem);
-
-                // At this point, we should have some modems - display them
-                logger.info("handleEvent() :: Modified modem (Added resource): {}", usbModem);
-
-                logger.debug("handleEvent() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
-                        usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
-                logger.debug("handleEvent() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
-                        usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
-
-                // Check for correct number of resources
-                if (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs()
-                        && usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs()) {
-                    logger.info("handleEvent() :: posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: {}",
-                            usbModem);
-                    this.eventAdmin.postEvent(new ModemAddedEvent(usbModem));
-                    this.validUsbModemsPppNumbers.put(usbModem.getUsbPort(), generatePppNumber());
-                }
+            if (validateDeviceAddedEvent(event)) {
+                manageDeviceAddedEvent(event);
             }
         } else if (topic.equals(UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC)) {
-            // validate mandatory properties
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
-                return;
-            }
-            if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
-                return;
-            }
-
-            // do we care?
-            SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(
-                    (String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
-                    (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
-                    (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY));
-            if (modemInfo != null) {
-                // found one - remove if it exists
-                UsbModemDevice usbModem = this.detectedUsbModems
-                        .remove(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
-                if (usbModem != null) {
-                    logger.info("handleEvent() :: Removing modem: {}", usbModem);
-                    this.validUsbModemsPppNumbers.remove(usbModem.getUsbPort());
-
-                    Map<String, String> properties = new HashMap<>();
-                    properties.put(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY, usbModem.getUsbBusNumber());
-                    properties.put(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY, usbModem.getUsbDevicePath());
-                    properties.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, usbModem.getUsbPort());
-                    properties.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, usbModem.getVendorId());
-                    properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY, usbModem.getProductId());
-                    properties.put(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY, usbModem.getManufacturerName());
-                    properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY, usbModem.getProductName());
-                    this.eventAdmin.postEvent(new ModemRemovedEvent(properties));
-                }
+            if (validateDeviceRemovedEvent(event)) {
+                manageDeviceRemovedEvent(event);
             }
         } else {
             logger.error("handleEvent() :: Unexpected event topic: {}", topic);
         }
     }
 
-    private ModemInterface<ModemInterfaceAddress> getModemInterfaceByPppName(String pppInterfaceName, boolean isUp,
+    private boolean validateDeviceAddedEvent(Event event) {
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
+            return false;
+        }
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
+            return false;
+        }
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
+            return false;
+        }
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY) == null) {
+            return false;
+        }
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null
+                || ((String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY)).startsWith("usb")) {
+            return false;
+        }
+        return (event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) != null
+                && !((UsbDeviceType) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY))
+                        .equals(UsbDeviceType.USB_NET_DEVICE));
+    }
+
+    private boolean validateDeviceRemovedEvent(Event event) {
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
+            return false;
+        }
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
+            return false;
+        }
+        return event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) != null;
+    }
+
+    private void manageDeviceRemovedEvent(Event event) {
+        UsbModemDevice usbModem = this.detectedUsbModems
+                .remove(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
+        if (usbModem != null) {
+            logger.info("handleEvent() :: Removing modem: {}", usbModem);
+            this.validUsbModemsPppNumbers.remove(usbModem.getUsbPort());
+
+            Map<String, String> properties = new HashMap<>();
+            properties.put(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY, usbModem.getUsbBusNumber());
+            properties.put(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY, usbModem.getUsbDevicePath());
+            properties.put(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY, usbModem.getUsbPort());
+            properties.put(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY, usbModem.getVendorId());
+            properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY, usbModem.getProductId());
+            properties.put(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY, usbModem.getManufacturerName());
+            properties.put(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY, usbModem.getProductName());
+            this.eventAdmin.postEvent(new ModemRemovedEvent(properties));
+        }
+    }
+
+    private void manageDeviceAddedEvent(Event event) {
+        UsbModemDevice temporaryUsbModem = new UsbModemDevice(
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY), null,
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY), null, null);
+        final SupportedUsbModemInfo modemInfo = SupportedUsbModemsInfo.getModem(temporaryUsbModem);
+
+        if (modemInfo != null) {
+            // Found one - see if we have some info for it.
+            // Also check if we are getting more devices than expected.
+            // This can happen if all the modem resources cannot be removed from the OS or from Kura.
+            // In this case we did not receive an UsbDeviceRemovedEvent and we did not post
+            // an ModemRemovedEvent. Should we do it here?
+            installModemDriver(modemInfo);
+
+            UsbModemDevice usbModem = getUsbModemDevice(event, modemInfo);
+            configureUsbModemDevice(event, usbModem);
+            this.detectedUsbModems.put(usbModem.getUsbPort(), usbModem);
+
+            // At this point, we should have some modems - display them
+            logger.info("handleEvent() :: Modified modem (Added resource): {}", usbModem);
+
+            logger.debug("handleEvent() :: usbModem.getTtyDevs().size()={}, modemInfo.getNumTtyDevs()={}",
+                    usbModem.getTtyDevs().size(), modemInfo.getNumTtyDevs());
+            logger.debug("handleEvent() :: usbModem.getBlockDevs().size()={}, modemInfo.getNumBlockDevs()={}",
+                    usbModem.getBlockDevs().size(), modemInfo.getNumBlockDevs());
+
+            // Check for correct number of resources
+            if (usbModem.getTtyDevs().size() == modemInfo.getNumTtyDevs()
+                    && usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs()) {
+                logger.info("handleEvent() :: posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: {}", usbModem);
+                this.eventAdmin.postEvent(new ModemAddedEvent(usbModem));
+                this.validUsbModemsPppNumbers.put(usbModem.getUsbPort(), generatePppNumber());
+            }
+        }
+    }
+
+    private void configureUsbModemDevice(Event event, UsbModemDevice usbModem) {
+        String resource = (String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY);
+        Integer interfaceNumber = (Integer) event.getProperty(UsbDeviceEvent.USB_EVENT_USB_INTERFACE_NUMBER);
+        UsbDeviceType usbDeviceType = (UsbDeviceType) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY);
+        logger.debug("handleEvent() :: Found resource: {} of type {} for: {}", resource, usbDeviceType,
+                usbModem.getUsbPort());
+        if (usbDeviceType.equals(UsbDeviceType.USB_TTY_DEVICE)) {
+            usbModem.addTtyDev(resource, interfaceNumber);
+        } else if (usbDeviceType.equals(UsbDeviceType.USB_BLOCK_DEVICE)) {
+            usbModem.addBlockDev(resource);
+        }
+    }
+
+    private UsbModemDevice getUsbModemDevice(Event event, final SupportedUsbModemInfo modemInfo) {
+        UsbModemDevice usbModem = this.detectedUsbModems
+                .get(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
+
+        if (usbModem == null) {
+            logger.debug("handleEvent() :: Modem not found. Create one");
+            usbModem = createNewUsbModemDevice(event);
+        } else if (modemInfo.getNumTtyDevs() > 0 && modemInfo.getNumBlockDevs() > 0) {
+            if (usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()
+                    && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()) {
+                logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one", usbModem);
+                usbModem = createNewUsbModemDevice(event);
+            }
+        } else if (modemInfo.getNumTtyDevs() > 0 && usbModem.getTtyDevs().size() >= modemInfo.getNumTtyDevs()
+                || modemInfo.getNumBlockDevs() > 0 && usbModem.getBlockDevs().size() >= modemInfo.getNumBlockDevs()) {
+            logger.debug("handleEvent() :: Found modem with too many resources: {}. Create a new one", usbModem);
+            usbModem = createNewUsbModemDevice(event);
+        }
+        return usbModem;
+    }
+
+    private UsbModemDevice createNewUsbModemDevice(Event event) {
+        UsbModemDevice usbModem;
+        usbModem = new UsbModemDevice((String) event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY),
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY),
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_MANUFACTURER_NAME_PROPERTY),
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY),
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY),
+                (String) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_PATH_PROPERTY));
+        return usbModem;
+    }
+
+    protected void installModemDriver(final SupportedUsbModemInfo modemInfo) {
+        List<? extends UsbModemDriver> drivers = modemInfo.getDeviceDrivers();
+        for (UsbModemDriver driver : drivers) {
+            try {
+                driver.install(this.executorService);
+            } catch (Exception e) {
+                logger.error("handleEvent() :: Failed to install modem device driver {} ", driver.getName(), e);
+            }
+        }
+    }
+
+    private ModemInterface<ModemInterfaceAddress> getModemNetInterfaceByPppName(String pppInterfaceName, boolean isUp,
             ModemDevice modemDevice) throws KuraException {
 
         ModemInterfaceImpl<ModemInterfaceAddress> modemInterface = new ModemInterfaceImpl<>(pppInterfaceName);
@@ -734,8 +742,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         if (modemDevice instanceof UsbModemDevice) {
 
             UsbModemDevice usbModemDevice = (UsbModemDevice) modemDevice;
-            SupportedUsbModemInfo supportedUsbModemInfo = SupportedUsbModemsInfo.getModem(usbModemDevice.getVendorId(),
-                    usbModemDevice.getProductId(), usbModemDevice.getProductName());
+            SupportedUsbModemInfo supportedUsbModemInfo = SupportedUsbModemsInfo.getModem(usbModemDevice);
             modemInterface.setTechnologyTypes(supportedUsbModemInfo.getTechnologyTypes());
             modemInterface.setUsbDevice((UsbModemDevice) modemDevice);
         }
@@ -769,8 +776,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     }
 
-    private List<NetInterfaceAddress> getNetInterfaceAddresses(String interfaceName, NetInterfaceType type,
-            boolean isUp) throws KuraException {
+    private List<NetInterfaceAddress> getEthernetOrLoopbackNetInterfaceAddresses(String interfaceName, boolean isUp)
+            throws KuraException {
         List<NetInterfaceAddress> netInterfaceAddresses = new ArrayList<>();
         if (isUp) {
             ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
@@ -786,22 +793,18 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         netInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
                         netInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
                         netInterfaceAddress.setGateway(conInfo.getGateway());
-                        if (type == NetInterfaceType.MODEM) {
-                            netInterfaceAddress.setDnsServers(LinuxDns.getInstance().getPppDnServers());
-                        } else {
-                            netInterfaceAddress.setDnsServers(conInfo.getDnsServers());
-                        }
+                        netInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
                         netInterfaceAddresses.add(netInterfaceAddress);
                     }
                 }
             } catch (UnknownHostException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraIOException(e, IP_ADDRESS_PARSING_FAILED);
             }
         }
         return netInterfaceAddresses;
     }
 
-    private List<WifiInterfaceAddress> getWifiInterfaceAddresses(String interfaceName, boolean isUp)
+    private List<WifiInterfaceAddress> getWifiNetInterfaceAddresses(String interfaceName, boolean isUp)
             throws KuraException {
         List<WifiInterfaceAddress> wifiInterfaceAddresses = new ArrayList<>();
         if (isUp) {
@@ -818,50 +821,42 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         wifiInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
                         wifiInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
                         wifiInterfaceAddress.setGateway(conInfo.getGateway());
-                        wifiInterfaceAddress.setDnsServers(conInfo.getDnsServers());
+                        wifiInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
 
                         WifiMode wifiMode = this.linuxNetworkUtil.getWifiMode(interfaceName);
                         wifiInterfaceAddress.setBitrate(this.linuxNetworkUtil.getWifiBitrate(interfaceName));
                         wifiInterfaceAddress.setMode(wifiMode);
 
-                        // TODO - should this only be the AP we are connected to in client mode?
                         if (wifiMode == WifiMode.INFRA) {
-                            String currentSSID = this.linuxNetworkUtil.getSSID(interfaceName);
-
-                            if (currentSSID != null) {
-                                logger.debug("Adding access point SSID: {}", currentSSID);
-
-                                WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(currentSSID);
-
-                                // FIXME: fill in other info
-                                wifiAccessPoint.setMode(WifiMode.INFRA);
-                                List<Long> bitrate = new ArrayList<>();
-                                bitrate.add(54000000L);
-                                wifiAccessPoint.setBitrate(bitrate);
-                                wifiAccessPoint.setFrequency(12345);
-                                wifiAccessPoint.setHardwareAddress("20AA4B8A6442".getBytes());
-                                wifiAccessPoint.setRsnSecurity(EnumSet.allOf(WifiSecurity.class));
-                                wifiAccessPoint.setStrength(1234);
-                                wifiAccessPoint.setWpaSecurity(EnumSet.allOf(WifiSecurity.class));
-
-                                wifiInterfaceAddress.setWifiAccessPoint(wifiAccessPoint);
-                            }
+                            addMinimalWifiInfraConfiguration(interfaceName, wifiInterfaceAddress);
                         }
                     }
                 }
             } catch (UnknownHostException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraIOException(e, IP_ADDRESS_PARSING_FAILED);
             }
         }
 
         return wifiInterfaceAddresses;
     }
 
+    // It seems that this configuration is ignored, so add only a minimal configuration
+    private void addMinimalWifiInfraConfiguration(String interfaceName, WifiInterfaceAddressImpl wifiInterfaceAddress)
+            throws KuraException {
+        String currentSSID = this.linuxNetworkUtil.getSSID(interfaceName);
+
+        if (currentSSID != null) {
+            logger.debug("Adding access point SSID: {}", currentSSID);
+            WifiAccessPointImpl wifiAccessPoint = new WifiAccessPointImpl(currentSSID);
+            wifiAccessPoint.setMode(WifiMode.INFRA);
+            wifiInterfaceAddress.setWifiAccessPoint(wifiAccessPoint);
+        }
+    }
+
     private List<ModemInterfaceAddress> getModemInterfaceAddresses(String interfaceName, boolean isUp)
             throws KuraException {
         List<ModemInterfaceAddress> modemInterfaceAddresses = new ArrayList<>();
         if (isUp) {
-            ConnectionInfo conInfo = new ConnectionInfoImpl(interfaceName);
             ModemInterfaceAddressImpl modemInterfaceAddress = new ModemInterfaceAddressImpl();
             modemInterfaceAddresses.add(modemInterfaceAddress);
             try {
@@ -873,15 +868,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         modemInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
                         modemInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
                         modemInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-                        modemInterfaceAddress.setGateway(conInfo.getGateway());
-                        modemInterfaceAddress.setDnsServers(conInfo.getDnsServers());
+                        modemInterfaceAddress.setDnsServers(LinuxDns.getInstance().getPppDnServers());
                         ModemConnectionStatus connectionStatus = ModemConnectionStatus.CONNECTED;
                         modemInterfaceAddress.setConnectionStatus(connectionStatus);
-                        // TODO - other attributes
                     }
                 }
             } catch (UnknownHostException e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                throw new KuraIOException(e, IP_ADDRESS_PARSING_FAILED);
             }
         }
         return modemInterfaceAddresses;
@@ -976,7 +969,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             try {
                 this.executor.submit(() -> {
                 }).get();
-            } catch (final Exception e) {
+            } catch (ExecutionException e) {
+                logger.warn("Exception while waiting for activation", e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
                 logger.warn("Exception while waiting for activation", e);
             }
         }
@@ -1022,6 +1018,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 }
 
                 logger.info("ToggleModemTask :: turning modem off ...");
+
                 modemDriver.disable(modemDevice);
                 sleep(3000);
                 logger.info("ToggleModemTask :: turning modem on ...");
@@ -1039,13 +1036,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 Thread.currentThread().setName(threadName);
             }
         }
-    }
 
-    private void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        private void sleep(long millis) {
+            try {
+                Thread.sleep(millis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 

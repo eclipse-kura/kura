@@ -15,7 +15,6 @@ package org.eclipse.kura.core.net;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1524,24 +1523,6 @@ public class NetworkConfiguration {
                 logger.trace("got Is Link Up: {}", linkUp);
                 ((EthernetInterfaceConfigImpl) netInterfaceConfig).setLinkUp(linkUp);
             }
-        } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-            // Wifi Capabilities
-            String capabilitiesKey = netIfReadOnlyPrefix + WIFI_CAPABILITIES;
-            if (props.containsKey(capabilitiesKey)) {
-                String capabilitiesString = (String) props.get(capabilitiesKey);
-                if (capabilitiesString != null) {
-                    String[] capabilities = capabilitiesString.split(" ");
-                    if (capabilities != null && capabilities.length > 0) {
-                        EnumSet<Capability> capabilitiesEnum = EnumSet.noneOf(Capability.class);
-                        for (String capability : capabilities) {
-                            if (capability != null && !capability.isEmpty()) {
-                                capabilitiesEnum.add(Capability.valueOf(capability));
-                            }
-                        }
-                        ((WifiInterfaceConfigImpl) netInterfaceConfig).setCapabilities(capabilitiesEnum);
-                    }
-                }
-            }
         } else if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
             ModemInterfaceConfigImpl modemInterfaceConfig = (ModemInterfaceConfigImpl) netInterfaceConfig;
             String key;
@@ -1672,17 +1653,6 @@ public class NetworkConfiguration {
                     IPAddress broadcast = IPAddress.parseHostAddress((String) props.get(key));
                     logger.trace(GOT_MESSAGE, key, broadcast);
                     netInterfaceAddressImpl.setBroadcast(broadcast);
-                }
-
-                key = NET_INTERFACE + interfaceName + addressType + ".dnsServers";
-                if (props.containsKey(key)) {
-                    List<IPAddress> dnsServers = new ArrayList<>();
-                    String dnsServersString = (String) props.get(key);
-                    logger.trace(GOT_MESSAGE, key, dnsServersString);
-                    for (String dnsServer : dnsServersString.split(",")) {
-                        dnsServers.add(IPAddress.parseHostAddress(dnsServer));
-                    }
-                    netInterfaceAddressImpl.setDnsServers(dnsServers);
                 }
 
                 key = NET_INTERFACE + interfaceName + addressType + ".gateway";

@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -792,7 +793,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
                         netInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
                         netInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-                        netInterfaceAddress.setGateway(conInfo.getGateway());
+                        Optional<IPAddress> gatewayAddress = this.linuxNetworkUtil.getGatewayIpAddress(interfaceName);
+                        if (gatewayAddress.isPresent()) {
+                            netInterfaceAddress.setGateway(gatewayAddress.get());
+                        } else {
+                            netInterfaceAddress.setGateway(conInfo.getGateway());
+                        }
                         netInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
                         netInterfaceAddresses.add(netInterfaceAddress);
                     }
@@ -820,7 +826,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                         wifiInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
                         wifiInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
                         wifiInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-                        wifiInterfaceAddress.setGateway(conInfo.getGateway());
+                        Optional<IPAddress> gatewayAddress = this.linuxNetworkUtil.getGatewayIpAddress(interfaceName);
+                        if (gatewayAddress.isPresent()) {
+                            wifiInterfaceAddress.setGateway(gatewayAddress.get());
+                        } else {
+                            wifiInterfaceAddress.setGateway(conInfo.getGateway());
+                        }
                         wifiInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
 
                         WifiMode wifiMode = this.linuxNetworkUtil.getWifiMode(interfaceName);

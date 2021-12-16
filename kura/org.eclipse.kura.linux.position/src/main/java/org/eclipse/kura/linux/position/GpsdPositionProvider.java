@@ -15,6 +15,9 @@ package org.eclipse.kura.linux.position;
 import static java.lang.Math.toRadians;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
 import org.eclipse.kura.position.NmeaPosition;
@@ -30,6 +33,7 @@ import de.taimos.gpsd4java.backend.GPSdEndpoint;
 import de.taimos.gpsd4java.types.ATTObject;
 import de.taimos.gpsd4java.types.DeviceObject;
 import de.taimos.gpsd4java.types.DevicesObject;
+import de.taimos.gpsd4java.types.ENMEAMode;
 import de.taimos.gpsd4java.types.SKYObject;
 import de.taimos.gpsd4java.types.TPVObject;
 import de.taimos.gpsd4java.types.subframes.SUBFRAMEObject;
@@ -40,16 +44,20 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     private GPSdEndpoint gpsEndpoint;
 
-    private double latitude;
-    private double latitudeError;
-    private double longitude;
-    private double longitudeError;
-    private double altitude;
-    private double altitudeError;
-    private double speed;
-    private double speedError;
-    private double course;
-    private double courseError;
+    private AtomicReference<Double> latitude = new AtomicReference<>();
+    private AtomicReference<Double> latitudeError = new AtomicReference<>();
+    private AtomicReference<Double> longitude = new AtomicReference<>();
+    private AtomicReference<Double> longitudeError = new AtomicReference<>();
+    private AtomicReference<Double> altitude = new AtomicReference<>();
+    private AtomicReference<Double> altitudeError = new AtomicReference<>();
+    private AtomicReference<Double> speed = new AtomicReference<>();
+    private AtomicReference<Double> speedError = new AtomicReference<>();
+    private AtomicReference<Double> course = new AtomicReference<>();
+    private AtomicReference<Double> courseError = new AtomicReference<>();
+    private AtomicReference<Double> timestamp = new AtomicReference<>();
+    private AtomicReference<ENMEAMode> mode = new AtomicReference<>();
+
+    private PositionServiceOptions configuration;
 
     @Override
     public void start() {
@@ -71,25 +79,34 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public NmeaPosition getNmeaPosition() {
-       return new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        return new NmeaPosition(getLatitude(), getLongitude(), getAltitude(), getSpeed(), getCourse());
     }
 
     @Override
     public String getNmeaTime() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("GpsdPositionProvider doesn't return NMEA time.");
     }
 
     @Override
     public String getNmeaDate() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("GpsdPositionProvider doesn't return NMEA time.");
+    }
+
+    @Override
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.ofEpochSecond(getTimestamp().longValue(), 0, ZoneOffset.UTC);
     }
 
     @Override
     public boolean isLocked() {
-        // TODO Auto-generated method stub
-        return false;
+        if (!this.configuration.isEnabled()) {
+            return false;
+        }
+        if (this.configuration.isStatic()) {
+            return true;
+        }
+
+        return (getMode() == ENMEAMode.TwoDimensional || getMode() == ENMEAMode.ThreeDimensional);
     }
 
     @Override
@@ -100,6 +117,8 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     @Override
     public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener) {
+
+        this.configuration = configuration;
 
         this.gpsEndpoint = new GPSdEndpoint(configuration.getGpsdHost(), configuration.getGpsdPort());
         this.gpsEndpoint.addListener(this);
@@ -132,7 +151,6 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleSKY(SKYObject sky) {
-
     }
 
     @Override
@@ -142,55 +160,118 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleTPV(TPVObject tpv) {
-        this.lastPosition = new Position(toRadiansMeasurement(tpv.getLatitude(), tpv.getLatitudeError()),
-                toRadiansMeasurement(tpv.getLongitude(), tpv.getLongitudeError()),
-                toRadiansMeasurement(tpv.getAltitude(), tpv.getAltitudeError()),
-                toRadiansMeasurement(tpv.getSpeed(), tpv.getSpeedError()),
-                toRadiansMeasurement(tpv.getCourse(), tpv.getCourseError()));
+        setLatitude(tpv.getLatitude());
+        setLatitudeError(tpv.getLatitudeError());
+        setLongitude(tpv.getLongitude());
+        setLongitudeError(tpv.getLongitudeError());
+        setAltitude(tpv.getAltitude());
+        setAltitudeError(tpv.getAltitudeError());
+        setSpeed(tpv.getSpeed());
+        setSpeedError(tpv.getSpeedError());
+        setCourse(tpv.getCourse());
+        setCourseError(tpv.getCourseError());
+        setTime(tpv.getTimestamp());
+        setMode(tpv.getMode());
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {
         return new Measurement(toRadians(value), toRadians(error), Unit.rad);
     }
 
+    private void setCourseError(double value) {
+        this.courseError.set(value);
+    }
+
+    private void setCourse(double value) {
+        this.course.set(value);
+    }
+
+    private void setSpeedError(double value) {
+        this.speedError.set(value);
+    }
+
+    private void setSpeed(double value) {
+        this.speed.set(value);
+    }
+
+    private void setAltitudeError(double value) {
+        this.altitudeError.set(value);
+    }
+
+    private void setAltitude(double value) {
+        this.altitude.set(value);
+    }
+
+    private void setLongitudeError(double value) {
+        this.longitudeError.set(value);
+    }
+
+    private void setLongitude(double value) {
+        this.longitude.set(value);
+    }
+
+    private void setLatitudeError(double value) {
+        this.latitudeError.set(value);
+    }
+
+    private void setLatitude(double value) {
+        this.latitude.set(value);
+    }
+
+    private void setTime(double value) {
+        this.timestamp.set(value);
+    }
+
+    private void setMode(ENMEAMode value) {
+        this.mode.set(value);
+    }
+
     private double getCourseError() {
-        return this.courseError;
+        return this.courseError.get();
     }
 
     private double getCourse() {
-        return this.course;
+        return this.course.get();
     }
 
     private double getSpeedError() {
-        return this.speedError;
+        return this.speedError.get();
     }
 
     private double getSpeed() {
-        return this.speed;
+        return this.speed.get();
     }
 
     private double getAltitudeError() {
-        return this.altitudeError;
+        return this.altitudeError.get();
     }
 
     private double getAltitude() {
-        return this.altitude;
+        return this.altitude.get();
     }
 
     private double getLongitudeError() {
-        return this.longitudeError;
+        return this.longitudeError.get();
     }
 
     private double getLongitude() {
-        return this.longitude;
+        return this.longitude.get();
     }
 
     private double getLatitudeError() {
-        return this.latitudeError;
+        return this.latitudeError.get();
     }
 
     private double getLatitude() {
-        return this.latitude;
+        return this.latitude.get();
+    }
+
+    private Double getTimestamp() {
+        return this.timestamp.get();
+    }
+
+    private ENMEAMode getMode() {
+        return this.mode.get();
     }
 
 }

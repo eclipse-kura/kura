@@ -22,7 +22,9 @@ public interface PositionProvider {
 
     public String getLastSentence();
 
-    void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
+    public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener);
+
+    public PositionProviderType getType();
 
 }

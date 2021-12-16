@@ -39,7 +39,7 @@ public class PositionServiceImpl
     private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
     private EventAdmin eventAdmin;
-    private List<PositionService> positionProviders = new ArrayList<>();
+    private List<PositionProvider> positionProviders = new ArrayList<>();
 
     private PositionProvider currentProvider;
 
@@ -65,11 +65,11 @@ public class PositionServiceImpl
         this.eventAdmin = null;
     }
 
-    public void setPositionProviders(PositionService positionProvider) {
+    public void setPositionProviders(PositionProvider positionProvider) {
         this.positionProviders.add(positionProvider); // ADD NAME TO PROVIDERS
     }
 
-    public void unsetPositionProviders(PositionService positionProvider) {
+    public void unsetPositionProviders(PositionProvider positionProvider) {
         this.positionProviders.remove(positionProvider);
     }
 
@@ -146,7 +146,7 @@ public class PositionServiceImpl
         if (this.options.isEnabled()) {
             return this.staticPosition;
         } else {
-            return this.provider.getPosition();
+            return this.currentProvider.getPosition();
         }
 
     }
@@ -156,23 +156,23 @@ public class PositionServiceImpl
         if (this.options.isEnabled()) {
             return this.staticNmeaPosition;
         } else {
-            return this.provider.getNmeaPosition();
+            return this.currentProvider.getNmeaPosition();
         }
     }
 
     @Override
     public boolean isLocked() {
-        return this.provider.isLocked();
+        return this.currentProvider.isLocked();
     }
 
     @Override
     public String getNmeaTime() {
-        return this.provider.getNmeaTime();
+        return this.currentProvider.getNmeaTime();
     }
 
     @Override
     public String getNmeaDate() {
-        return this.provider.getNmeaDate();
+        return this.currentProvider.getNmeaDate();
     }
 
     @Override
@@ -187,7 +187,7 @@ public class PositionServiceImpl
 
     @Override
     public String getLastSentence() {
-        return this.provider.getLastSentence();
+        return this.currentProvider.getLastSentence();
     }
 
     protected PositionServiceOptions getPositionServiceOptions() {
@@ -197,27 +197,19 @@ public class PositionServiceImpl
     private void startPositionProvider() throws KuraException {
         stopPositionProvider();
 
-        switch (this.options.getPositionProvider()) {
-        case GPSD:
-            this.provider = 
-            break;
-        case SERIAL:
-            SerialDevicePositionProvider sdpProvider = this.options
-            sdpProvider.setGpsDeviceAvailabilityListener(this);
-            sdpProvider.setGpsDeviceListener(this);
-            this.provider = sdpProvider;
-            break;
-        default:
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID);
-        }
+        this.currentProvider = this.positionProviders.stream()
+                .filter(pp -> pp.getType() == this.options.getPositionProvider()).findAny()
+                .orElseThrow(() -> new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, " provider",
+                        this.options.getPositionProvider()));
 
-        this.provider.start();
+        this.currentProvider.start();
+
     }
 
     private void stopPositionProvider() {
-        if (this.provider != null) {
-            this.provider.stop();
-            this.provider = null;
+        if (this.currentProvider != null) {
+            this.currentProvider.stop();
+            this.currentProvider = null;
         }
 
         setStaticPosition(0, 0, 0);

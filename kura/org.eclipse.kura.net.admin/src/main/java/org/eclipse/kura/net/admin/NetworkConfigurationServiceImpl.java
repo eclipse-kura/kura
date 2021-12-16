@@ -74,7 +74,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private static final String CONFIG_AUTOCONNECT = ".config.autoconnect";
     private static final String CONFIG_MTU = ".config.mtu";
     private static final String NET_INTERFACES = "net.interfaces";
-    private static final String MODEM_PORT_REGEX = "^\\d+-\\d+\\.*";
+    private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
 
     private NetworkService networkService;
     private EventAdmin eventAdmin;
@@ -198,7 +198,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {
-        if (interfaceName.matches(MODEM_PORT_REGEX)) {
+        if (isUsbPort(interfaceName)) {
             return this.linuxNetworkUtil.getType(this.networkService.getModemPppInterfaceName(interfaceName));
         } else {
             return this.linuxNetworkUtil.getType(interfaceName);
@@ -1016,5 +1016,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                 tocd.addAD(tad);
             }
         }
+    }
+
+    private boolean isUsbPort(String interfaceName) {
+        return interfaceName.split(".")[0].matches(MODEM_PORT_REGEX);
     }
 }

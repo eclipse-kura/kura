@@ -1106,6 +1106,7 @@ public class LinuxNetworkUtil {
     private CommandStatus executeCommand(String[] commandString) {
         Command command = new Command(commandString);
         command.setTimeout(60);
+        command.setExecuteInAShell(true);
         command.setOutputStream(new ByteArrayOutputStream());
         command.setErrorStream(new ByteArrayOutputStream());
         return this.executorService.execute(command);

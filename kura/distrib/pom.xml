@@ -24,7 +24,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>distrib</artifactId>
-    <version>5.0.1</version>
+    <version>5.0.0</version>
 
     <packaging>pom</packaging>
 
@@ -1067,10 +1067,11 @@
     <profiles>
         <profile>
             <id>raspberry-pi-2-3</id>
-            <properties>
-                <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
-            </properties>
+                <properties>
+                    <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump, bluez,
+                        wireless-tools, net-tools, iptables, chrony, ntpdate, ifupdown, pi-bluetooth, 
+                        rpi.gpio-common, openjdk-8-jre-headless</project.raspbian.dependencies>                
+                </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
@@ -1117,7 +1118,7 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
-                                        <property name="service.manager" value="sysv" />
+                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1163,7 +1164,10 @@
         <profile>
             <id>raspberry-pi-2-3-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn> hostapd, dos2unix, bind9, unzip, ethtool, telnet, 
+                    bluez-hcidump, bluez, chrony, ntpdate, pi-bluetooth, 
+                    rpi.gpio-common, openjdk-8-jre-headless
+                </project.raspbian.dependencies.nn>  
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1211,7 +1215,7 @@
                                         <property name="native.tag" value="armv6hf" />
                                         <property name="kura.os.version" value="raspbian" />
                                         <property name="kura.arch" value="armv7_hf" />
-                                        <property name="service.manager" value="sysv" />
+                                        <property name="service.manager" value="systemd" />
                                         <property name="os.base" value="debian" />
                                         <property name="kura.mem.size" value="512m" />
                                         <property name="kura.install.dir" value="/opt/eclipse" />
@@ -1257,7 +1261,7 @@
             <id>intel-up2-ubuntu-18</id>
             <properties>
                 <project.raspbian.dependencies>hostapd, isc-dhcp-server, iw, dos2unix, bind9, unzip, ethtool, telnet, bluez-hcidump,
-                    wireless-tools, chrony, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>   
+                    wireless-tools, java8-runtime-headless | java8-runtime</project.raspbian.dependencies>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -1459,8 +1463,6 @@
                                         <require>tar</require>
                                         <require>dos2unix</require>
                                         <require>net-tools</require>
-                                        <require>chrony</require>
-                                        <require>ntpdate</require>
                                     </requires>
                                     <entries>
                                         <entry>
@@ -1602,9 +1604,7 @@
                                         <require>tar</require>
                                         <require>dos2unix</require>
                                         <require>net-tools</require>
-                                        <require>chrony</require>
-                                        <require>ntpdate</require>
-                                    </requires>                               
+                                    </requires>
                                     <entries>
                                         <entry>
                                             <name>/tmp/kura_${project.version}_installer.sh</name>
@@ -1649,7 +1649,7 @@
         <profile>
             <id>rock960-ubuntu-16-nn</id>
             <properties>
-                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, ntpdate, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
+                <project.raspbian.dependencies.nn>dos2unix, unzip, telnet, bluez-hcidump, java8-runtime-headless | java8-runtime</project.raspbian.dependencies.nn>
             </properties>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -2146,19 +2146,19 @@
                                         <move file="${project.build.directory}/staging/tisensortag/tisensortag.classpath"
                                             tofile="${project.build.directory}/staging/tisensortag/.classpath" />
 
-                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag.dbus Project -->
-                                        <copy todir="${project.build.directory}/staging/tisensortag.dbus">
-                                            <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag.dbus" />
+                                        <!-- Stage the org.eclipse.kura.example.ble.tisensortag.tinyb Project -->
+                                        <copy todir="${project.build.directory}/staging/tisensortag.tinyb">
+                                            <fileset dir="../examples/org.eclipse.kura.example.ble.tisensortag.tinyb" />
                                         </copy>
-                                        <delete file="${project.build.directory}/staging/tisensortag.dbus/pom.xml" />
-                                        <delete dir="${project.build.directory}/staging/tisensortag.dbus/bin" />
-                                        <delete dir="${project.build.directory}/staging/tisensortag.dbus/target" />
-                                        <copy file="src/main/resources/common/classpaths/tisensortag.dbus.classpath"
-                                            tofile="${project.build.directory}/staging/tisensortag.dbus/tisensortag.dbus.classpath" />
-                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.dbus.project"
-                                            tofile="${project.build.directory}/staging/tisensortag.dbus/.project" />
-                                        <move file="${project.build.directory}/staging/tisensortag.dbus/tisensortag.dbus.classpath"
-                                            tofile="${project.build.directory}/staging/tisensortag.dbus/.classpath" />
+                                        <delete file="${project.build.directory}/staging/tisensortag.tinyb/pom.xml" />
+                                        <delete dir="${project.build.directory}/staging/tisensortag.tinyb/bin" />
+                                        <delete dir="${project.build.directory}/staging/tisensortag.tinyb/target" />
+                                        <copy file="src/main/resources/common/classpaths/tisensortag.tinyb.classpath"
+                                            tofile="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath" />
+                                        <copy overwrite="true" file="src/main/resources/common/projects/tisensortag.tinyb.project"
+                                            tofile="${project.build.directory}/staging/tisensortag.tinyb/.project" />
+                                        <move file="${project.build.directory}/staging/tisensortag.tinyb/tisensortag.tinyb.classpath"
+                                            tofile="${project.build.directory}/staging/tisensortag.tinyb/.classpath" />
 
                                         <!-- Stage the org.eclipse.kura.example.publisher Project -->
                                         <copy todir="${project.build.directory}/staging/publisher">
@@ -2241,8 +2241,8 @@
                                                 prefix="org.eclipse.kura.example.eddystone.scanner/" />
                                             <zipfileset dir="${project.build.directory}/staging/tisensortag/"
                                                 prefix="org.eclipse.kura.example.ble.tisensortag/" />
-                                            <zipfileset dir="${project.build.directory}/staging/tisensortag.dbus/"
-                                                prefix="org.eclipse.kura.example.ble.tisensortag.dbus/" />
+                                            <zipfileset dir="${project.build.directory}/staging/tisensortag.tinyb/"
+                                                prefix="org.eclipse.kura.example.ble.tisensortag.tinyb/" />
                                             <zipfileset dir="${project.build.directory}/staging/publisher/"
                                                 prefix="org.eclipse.kura.example.publisher/" />
                                             <zipfileset dir="${project.build.directory}/staging/camel_quickstart/"
@@ -2345,12 +2345,6 @@
                             <groupId>org.eclipse.kura.feature</groupId>
                             <artifactId>org.eclipse.kura.driver.gpio</artifactId>
                             <version>${org.eclipse.kura.driver.gpio.version}</version>
-                            <type>dp</type>
-                          </artifactItem>
-                          <artifactItem>
-                            <groupId>org.eclipse.kura.feature</groupId>
-                            <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
-                            <version>${org.eclipse.kura.driver.ble.xdk.version}</version>
                             <type>dp</type>
                           </artifactItem>
                         </artifactItems>

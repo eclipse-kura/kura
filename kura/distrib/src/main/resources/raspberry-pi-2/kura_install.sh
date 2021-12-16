@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+#  Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
 #
 #  This program and the accompanying materials are made
 #  available under the terms of the Eclipse Public License 2.0
@@ -38,7 +38,7 @@ fi
 #set up users and grant permissions to them
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
-${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i 
 
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
@@ -69,19 +69,6 @@ systemctl enable firewall
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
-#disable NTP service
-if command -v timedatectl > /dev/null ;
-  then
-    timedatectl set-ntp false
-fi
-
-# Prevent time sync services from starting
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
-# Prevent time sync with chrony from starting.
-systemctl stop chrony
-systemctl disable chrony
-
 #set up networking configuration
 mac_addr=$(head -1 /sys/class/net/eth0/address | tr '[:lower:]' '[:upper:]')
 sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlan0.conf
@@ -97,10 +84,6 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/user/kuranet.conf
 cp ${INSTALL_DIR}/kura/install/kuranet.conf ${INSTALL_DIR}/kura/.data/kuranet.conf
 
-#assigning kuranet.conf files ownership to kurad
-chown kurad:kurad ${INSTALL_DIR}/kura/user/kuranet.conf
-chown kurad:kurad ${INSTALL_DIR}/kura/.data/kuranet.conf
-
 #set up bind/named
 cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
 mkdir -p /var/named
@@ -111,9 +94,7 @@ cp ${INSTALL_DIR}/kura/install/usr.sbin.named /etc/apparmor.d/
 if [ ! -f "/etc/bind/rndc.key" ] ; then
 	rndc-confgen -r /dev/urandom -a
 fi
-chown bind:bind /etc/bind/rndc.key
-chmod 600 /etc/bind/rndc.key
-        
+
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
@@ -122,12 +103,13 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 systemctl stop dhcpcd
 systemctl disable dhcpcd
 
-#assigning possible .conf files ownership to kurad
-PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"
-for FILE in $(ls $PATTERN 2>/dev/null)
-do
-  chown kurad:kurad $FILE
-done
+# disable isc-dhcp-server service - kura is the network manager
+systemctl stop isc-dhcp-server
+systemctl disable isc-dhcp-server
+
+#disable wpa_supplicant
+systemctl stop wpa_supplicant
+systemctl disable wpa_supplicant
 
 # execute patch_sysctl.sh from installer install folder
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh

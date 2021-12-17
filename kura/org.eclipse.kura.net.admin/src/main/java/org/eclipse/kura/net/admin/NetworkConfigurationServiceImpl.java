@@ -1019,6 +1019,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     private boolean isUsbPort(String interfaceName) {
-        return interfaceName.split(".")[0].matches(MODEM_PORT_REGEX);
+        return interfaceName.split("\\.")[0].matches(MODEM_PORT_REGEX);
     }
 }

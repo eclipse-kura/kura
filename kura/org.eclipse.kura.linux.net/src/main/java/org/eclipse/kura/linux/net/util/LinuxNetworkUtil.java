@@ -495,13 +495,13 @@ public class LinuxNetworkUtil {
      * Note: may return a cached information
      */
     public NetInterfaceType getType(String ifaceName) throws KuraException {
+        NetInterfaceType ifaceType = NetInterfaceType.UNKNOWN;
+
         for (String ignoreIface : IGNORE_IFACES) {
             if (ifaceName.startsWith(ignoreIface)) {
-                return NetInterfaceType.UNKNOWN;
+                return ifaceType;
             }
         }
-
-        NetInterfaceType ifaceType = null;
 
         if (ifconfigs.containsKey(ifaceName)) {
             LinuxIfconfig ifconfig = ifconfigs.get(ifaceName);

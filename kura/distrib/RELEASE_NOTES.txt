@@ -2,8 +2,8 @@ Eclipse Kura - 4.1.3   - December 2021
 -------------------------------------------------------------------------
 Description:
 Eclipse Kura 4.1.3 is a service release to address various CVEs in framework dependencies.
-In particular, the release addressed CVE-2021-44228 and CVE-2021-45046 updating Log4J to version 2.17.0,
-updates Google Protobuf to 3.8.0 and updates Jetty to version 9.4.41.
+In particular, the release addressed CVE-2021-44228, CVE-2021-45046 and CVE-2021-45105 
+by updating Log4J to version 2.17.0, Google Protobuf to 3.8.0 and Jetty to version 9.4.41.
 
 
 Changes:

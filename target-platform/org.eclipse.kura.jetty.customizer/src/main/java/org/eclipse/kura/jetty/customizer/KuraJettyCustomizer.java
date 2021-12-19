@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Red Hat Inc and others
+ * Copyright (c) 2018, 2021 Red Hat Inc and others
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -50,6 +50,18 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                 continue;
             }
 
+            ((HttpConnectionFactory) factory).getHttpConfiguration().setSendServerVersion(false);
+        }
+
+        addCustomizer(serverConnector, new ForwardedRequestCustomizer());
+    }
+
+    private void addCustomizer(final ServerConnector connector, final Customizer customizer) {
+        for (final ConnectionFactory factory : connector.getConnectionFactories()) {
+            if (!(factory instanceof HttpConnectionFactory)) {
+                continue;
+            }
+
             final HttpConnectionFactory httpConnectionFactory = (HttpConnectionFactory) factory;
 
             httpConnectionFactory.getHttpConfiguration().setSendServerVersion(false);
@@ -60,8 +72,7 @@ public class KuraJettyCustomizer extends JettyCustomizer {
                 httpConnectionFactory.getHttpConfiguration().setCustomizers(customizers);
             }
 
-            customizers.add(new ForwardedRequestCustomizer());
+            customizers.add(customizer);
         }
     }
-
 }

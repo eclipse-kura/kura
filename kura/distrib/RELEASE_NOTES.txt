@@ -1,7 +1,7 @@
 Eclipse Kura - 5.0.1   - December 2021
 -------------------------------------------------------------------------
 Description:
-This patch release of Eclipse Kura fixes the Log4J vulnerabilities CVE-2021-44228, CVE-2021-45046 and CVE-2021-45105 
+This service release of Eclipse Kura fixes the Log4J vulnerabilities CVE-2021-44228, CVE-2021-45046 and CVE-2021-45105 
 by updating the Log4J dependencies to 2.17.0. Slf4J has been updated as well to 1.7.32. 
 
 

@@ -1426,6 +1426,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private void startTemporaryWpaSupplicant(String ifaceName) throws KuraException {
         reloadKernelModule(ifaceName, WifiMode.INFRA);
         WpaSupplicantConfigWriter wpaSupplicantConfigWriter = new WpaSupplicantConfigWriter();
+        wpaSupplicantConfigWriter.setExecutorService(this.executorService);
         wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");

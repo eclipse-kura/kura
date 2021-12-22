@@ -106,6 +106,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         try {
             String fileAsString = readResource(WPA_SUPPLICANT_CONF_RESOURCE);
+            fileAsString = updateCountryCode(getWifiCountryCode(), fileAsString);
             copyFile(fileAsString, Paths.get(TMP_WPA_CONFIG_FILE));
         } catch (Exception e) {
             throw KuraException.internalError("Failed to generate wpa_supplicant.conf");

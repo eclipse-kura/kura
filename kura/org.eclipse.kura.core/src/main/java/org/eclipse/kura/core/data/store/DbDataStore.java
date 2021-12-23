@@ -100,7 +100,7 @@ public class DbDataStore implements DataStore {
         this.sanitizedTableName = sanitizeSql(table);
 
         this.sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
-                + " (id INTEGER IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
+                + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
                 + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
                 + "payload VARBINARY(1048576), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
         this.sqlCreateIndex = "CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "

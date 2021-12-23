@@ -1052,7 +1052,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-raspberry-pi-ubuntu-20</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-ubuntu-20/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20.zip</src>
@@ -1142,7 +1142,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20_installer-nn.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-raspberry-pi-ubuntu-20-nn</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-ubuntu-20-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_raspberry-pi-ubuntu-20-nn.zip</src>
@@ -1232,7 +1232,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-raspberry-pi</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_raspberry-pi.zip</src>
@@ -1323,7 +1323,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_raspberry-pi-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-raspberry-pi-nn</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/raspberry-pi-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_raspberry-pi-nn.zip</src>
@@ -1413,7 +1413,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-20_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-intel-up2-ubuntu-20</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/intel-up2-ubuntu-20/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_intel-up2-ubuntu-20.zip</src>
@@ -1504,7 +1504,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_rock960-ubuntu-16-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-rock960-ubuntu-16-nn</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/rock960-ubuntu-16-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_rock960-ubuntu-16-nn.zip</src>
@@ -1595,7 +1595,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_nvidia-jetson-nano_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-nvidia-jetson-nano</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/nvidia-jetson-nano/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_nvidia-jetson-nano.zip</src>
@@ -1686,7 +1686,7 @@
                                 <configuration>
                                     <verbose>true</verbose>
                                     <deb>${basedir}/target/kura_${project.version}_nvidia-jetson-nano-nn_installer.deb</deb>
-                                    <controlDir>${basedir}/src/main/deb/control-nvidia-jetson-nano-nn</controlDir>
+                                    <controlDir>${basedir}/src/main/resources/nvidia-jetson-nano-nn/deb/control</controlDir>
                                     <dataSet>
                                         <data>
                                             <src>${basedir}/target/kura_${project.version}_nvidia-jetson-nano-nn.zip</src>

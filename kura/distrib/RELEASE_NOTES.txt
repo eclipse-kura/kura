@@ -28,7 +28,7 @@ Compatibility:
 
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3 based on Raspberry Pi OS (32 bits)
+    * Raspberry Pi 2/3 based on Raspberry Pi OS Buster (32 bits)
     * Intel Up Squared board running Ubuntu 18  
     * Intel Up Squared board running Centos 7 (Experimental)
     * Rock960 ARM_64 running Ubuntu 16 (NN version only)

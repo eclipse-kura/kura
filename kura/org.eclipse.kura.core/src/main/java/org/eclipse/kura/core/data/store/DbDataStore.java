@@ -325,7 +325,7 @@ public class DbDataStore implements DataStore {
             }
 
             // retrieve message id
-            try (PreparedStatement cstmt = c.prepareStatement("CALL IDENTITY();");
+            try (PreparedStatement cstmt = c.prepareStatement("SELECT MAX(ID) FROM " + this.sanitizedTableName + ";");
                     ResultSet rs = cstmt.executeQuery()) {
                 if (rs != null && rs.next()) {
                     result = rs.getInt(1);

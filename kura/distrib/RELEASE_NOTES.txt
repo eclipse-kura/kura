@@ -1,7 +1,7 @@
 Eclipse Kura - 5.0.1   - December 2021
 -------------------------------------------------------------------------
 Description:
-This patch release of Eclipse Kura fixes the Log4J vulnerabilities CVE-2021-44228, CVE-2021-45046 and CVE-2021-45105 
+This service release of Eclipse Kura fixes the Log4J vulnerabilities CVE-2021-44228, CVE-2021-45046 and CVE-2021-45105 
 by updating the Log4J dependencies to 2.17.0. Slf4J has been updated as well to 1.7.32. 
 
 
@@ -13,7 +13,7 @@ Changes:
 
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3/4 based on Raspbian
+    * Raspberry Pi 2/3/4 based on Raspberry Pi OS Buster (32 bits) or Raspberry Pi OS Bullseye (32 bits)
     * Intel Up Squared board running Ubuntu 18  
     * Intel Up Squared board running Centos 7 (Experimental)
     * Rock960 ARM_64 running Ubuntu 16 (NN version only)

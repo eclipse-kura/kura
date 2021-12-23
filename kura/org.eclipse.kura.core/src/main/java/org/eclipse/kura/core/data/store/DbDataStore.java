@@ -90,6 +90,7 @@ public class DbDataStore implements DataStore {
     private final String sqlDropPrimaryKey;
     private final String sqlDeleteDuplicates;
     private final String sqlCreatePrimaryKey;
+    private final String sqlGetGreatestId;
 
     // package level constructor to be invoked only by the factory
     public DbDataStore(String table) {
@@ -144,6 +145,7 @@ public class DbDataStore implements DataStore {
         this.sqlDeleteDuplicates = DELETE_FROM + this.sanitizedTableName + " WHERE id IN (SELECT id FROM "
                 + this.sanitizedTableName + " GROUP BY id HAVING COUNT(*) > 1);";
         this.sqlCreatePrimaryKey = ALTER_TABLE + this.sanitizedTableName + " ADD PRIMARY KEY (id);";
+        this.sqlGetGreatestId = "SELECT MAX(ID) FROM " + this.sanitizedTableName + ";";
     }
 
     private String sanitizeSql(final String string) {
@@ -325,7 +327,7 @@ public class DbDataStore implements DataStore {
             }
 
             // retrieve message id
-            try (PreparedStatement cstmt = c.prepareStatement("SELECT MAX(ID) FROM " + this.sanitizedTableName + ";");
+            try (PreparedStatement cstmt = c.prepareStatement(this.sqlGetGreatestId);
                     ResultSet rs = cstmt.executeQuery()) {
                 if (rs != null && rs.next()) {
                     result = rs.getInt(1);

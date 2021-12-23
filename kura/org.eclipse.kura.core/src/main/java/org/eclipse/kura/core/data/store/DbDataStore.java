@@ -544,10 +544,16 @@ public class DbDataStore implements DataStore {
 
     private synchronized void executeDeleteMessagesQuery(String sql, Timestamp timestamp, int purgeAge)
             throws KuraStoreException {
+        /*
+         * H2 v2.0.202 does not more support ? parameter in dateAndTime fields
+         * so the timestamp is directly copied into the sql string
+         */
+        final String sqlWithTimestamp = sql.replace("DATEADD('ss', -?, ?)",
+                "DATEADD('ss', -?, TIMESTAMP '" + timestamp.toString() + "')");
+
         withConnection(c -> {
-            try (final PreparedStatement stmt = c.prepareStatement(sql)) {
+            try (final PreparedStatement stmt = c.prepareStatement(sqlWithTimestamp)) {
                 stmt.setInt(1, purgeAge);
-                stmt.setTimestamp(2, timestamp, this.utcCalendar);
 
                 stmt.execute();
                 c.commit();

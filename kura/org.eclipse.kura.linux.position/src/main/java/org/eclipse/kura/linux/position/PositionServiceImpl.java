@@ -143,17 +143,17 @@ public class PositionServiceImpl
 
     @Override
     public Position getPosition() {
-        if (this.options.isEnabled()) {
+        if (this.options.isEnabled() && !this.options.isStatic()) {
             return this.currentProvider.getPosition();
         } else {
-            return this.staticPosition;            
+            return this.staticPosition;
         }
 
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        if (this.options.isEnabled()) {
+        if (this.options.isEnabled() && !this.options.isStatic()) {
             return this.currentProvider.getNmeaPosition();
         } else {
             return this.staticNmeaPosition;

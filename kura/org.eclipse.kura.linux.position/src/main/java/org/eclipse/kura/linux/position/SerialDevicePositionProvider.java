@@ -19,6 +19,8 @@ import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
 import org.eclipse.kura.position.NmeaPosition;
 import org.osgi.service.io.ConnectionFactory;
+import org.osgi.util.measurement.Measurement;
+import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,24 @@ public class SerialDevicePositionProvider implements PositionProvider {
     private Listener gpsDeviceListener;
 
     private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
+
+    private static final Position zeroPosition;
+    private static final NmeaPosition zeroNmeaPosition;
+
+    static {
+        final double latitudeRad = Math.toRadians(0);
+        final double longitudeRad = Math.toRadians(0);
+
+        final Measurement latitude = new Measurement(latitudeRad, Unit.rad);
+        final Measurement longitude = new Measurement(longitudeRad, Unit.rad);
+        final Measurement altitude = new Measurement(0, Unit.m);
+        final Measurement speed = new Measurement(0, Unit.m_s); // conversion speed in knots to m/s : 1 m/s = 1.94384449
+        // knots
+        final Measurement track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
+
+        zeroPosition = new Position(latitude, longitude, altitude, speed, track);
+        zeroNmeaPosition = new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char) 0, (char) 0, (char) 0);
+    }
 
     // ----------------------------------------------------------------
     //
@@ -138,12 +158,20 @@ public class SerialDevicePositionProvider implements PositionProvider {
 
     @Override
     public Position getPosition() {
-        return this.gpsDevice.getPosition();
+        if (this.gpsDevice != null) {
+            return this.gpsDevice.getPosition();
+        } else {
+            return this.zeroPosition;
+        }
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        return this.gpsDevice.getNmeaPosition();
+        if (this.gpsDevice != null) {
+            return this.gpsDevice.getNmeaPosition();
+        } else {
+            return this.zeroNmeaPosition;
+        }
     }
 
     @Override
@@ -214,4 +242,5 @@ public class SerialDevicePositionProvider implements PositionProvider {
     protected ModemGpsStatusTracker getModemGpsStatusTracker() {
         return this.modemGpsStatusTracker;
     }
+
 }

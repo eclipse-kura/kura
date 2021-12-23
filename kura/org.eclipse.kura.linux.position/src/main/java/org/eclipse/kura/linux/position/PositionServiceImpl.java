@@ -144,9 +144,9 @@ public class PositionServiceImpl
     @Override
     public Position getPosition() {
         if (this.options.isEnabled()) {
-            return this.staticPosition;
-        } else {
             return this.currentProvider.getPosition();
+        } else {
+            return this.staticPosition;            
         }
 
     }
@@ -154,9 +154,9 @@ public class PositionServiceImpl
     @Override
     public NmeaPosition getNmeaPosition() {
         if (this.options.isEnabled()) {
-            return this.staticNmeaPosition;
-        } else {
             return this.currentProvider.getNmeaPosition();
+        } else {
+            return this.staticNmeaPosition;
         }
     }
 

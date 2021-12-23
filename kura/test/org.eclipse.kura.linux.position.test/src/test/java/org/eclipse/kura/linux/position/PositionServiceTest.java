@@ -66,7 +66,7 @@ public class PositionServiceTest {
             this.ps = new PositionServiceImpl();
 
             this.ps.setEventAdmin(this.eventAdmin);
-            this.positionProvider = getMockSerialDevicePositionProvider(nmeaStrings);
+            this.positionProvider = getSerialDevicePositionProvider(nmeaStrings);
             this.ps.setPositionProviders(this.positionProvider);
 
         }
@@ -109,18 +109,17 @@ public class PositionServiceTest {
         return connFactoryMock;
     }
 
-    private static SerialDevicePositionProvider getMockSerialDevicePositionProvider(String nmeaStrings)
-            throws IOException {
+    private static SerialDevicePositionProvider getSerialDevicePositionProvider(String nmeaStrings) throws IOException {
 
-        final SerialDevicePositionProvider serialDevicePositionProvider = mock(SerialDevicePositionProvider.class);
+        final SerialDevicePositionProvider serialDevicePositionProvider = new SerialDevicePositionProvider();
 
         GpsDeviceTracker mockGpsDeviceTracker = getMockGpsDeviceTracker();
         ConnectionFactory mockConnectionFactory = getMockConnectionFactory(nmeaStrings);
+        ModemGpsStatusTracker mockModemGpsStatustracker = mock(ModemGpsStatusTracker.class);
 
-        when(serialDevicePositionProvider.getGpsDeviceTracker()).thenReturn(mockGpsDeviceTracker);
-        when(serialDevicePositionProvider.getModemGpsStatusTracker()).thenReturn(mock(ModemGpsStatusTracker.class));
-        when(serialDevicePositionProvider.getConnectionFactory()).thenReturn(mockConnectionFactory);
-        when(serialDevicePositionProvider.getType()).thenCallRealMethod();
+        serialDevicePositionProvider.setGpsDeviceTracker(mockGpsDeviceTracker);
+        serialDevicePositionProvider.setModemGpsStatusTracker(mockModemGpsStatustracker);
+        serialDevicePositionProvider.setConnectionFactory(mockConnectionFactory);
 
         return serialDevicePositionProvider;
     }

@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.eclipse.kura.comm.CommURI;
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
 import org.eclipse.kura.position.NmeaPosition;
@@ -33,6 +36,8 @@ public class SerialDevicePositionProvider implements PositionProvider {
     private PositionServiceOptions configuration;
 
     private Listener gpsDeviceListener;
+
+    private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
 
     // ----------------------------------------------------------------
     //
@@ -160,6 +165,16 @@ public class SerialDevicePositionProvider implements PositionProvider {
     }
 
     @Override
+    public LocalDateTime getDateTime() {
+        if (this.gpsDevice != null) {
+            String nmeaDateTime = this.getNmeaDate() + " " + this.getNmeaTime();
+            return LocalDateTime.parse(nmeaDateTime, nmeaDateTimePattern);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public boolean isLocked() {
         if (!this.configuration.isEnabled()) {
             return false;
@@ -184,4 +199,19 @@ public class SerialDevicePositionProvider implements PositionProvider {
         return PositionProviderType.SERIAL;
     }
 
+    protected GpsDevice getGpsDevice() {
+        return this.gpsDevice;
+    }
+
+    protected ConnectionFactory getConnectionFactory() {
+        return this.connectionFactory;
+    }
+
+    protected GpsDeviceTracker getGpsDeviceTracker() {
+        return this.gpsDeviceTracker;
+    }
+
+    protected ModemGpsStatusTracker getModemGpsStatusTracker() {
+        return this.modemGpsStatusTracker;
+    }
 }

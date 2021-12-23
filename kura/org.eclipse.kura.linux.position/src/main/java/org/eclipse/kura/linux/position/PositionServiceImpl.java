@@ -162,17 +162,31 @@ public class PositionServiceImpl
 
     @Override
     public boolean isLocked() {
+        if (!this.options.isEnabled()) {
+            return false;
+        }
+        if (this.options.isStatic()) {
+            return true;
+        }
         return this.currentProvider.isLocked();
     }
 
     @Override
     public String getNmeaTime() {
-        return this.currentProvider.getNmeaTime();
+        if (this.currentProvider != null) {
+            return this.currentProvider.getNmeaTime();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String getNmeaDate() {
-        return this.currentProvider.getNmeaDate();
+        if (this.currentProvider != null) {
+            return this.currentProvider.getNmeaDate();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -187,7 +201,11 @@ public class PositionServiceImpl
 
     @Override
     public String getLastSentence() {
-        return this.currentProvider.getLastSentence();
+        if (this.currentProvider != null) {
+            return this.currentProvider.getLastSentence();
+        } else {
+            return null;
+        }
     }
 
     protected PositionServiceOptions getPositionServiceOptions() {
@@ -202,6 +220,7 @@ public class PositionServiceImpl
                 .orElseThrow(() -> new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, " provider",
                         this.options.getPositionProvider()));
 
+        this.currentProvider.init(options, this, this);
         this.currentProvider.start();
 
     }

@@ -181,7 +181,7 @@ public class GpsDevice {
                 try {
                     c = this.in.read();
                 } catch (Exception e) {
-                    logger.error("Exception in gps read - {}", e);
+                    logger.error("Exception in gps read", e);
                     return false;
                 }
                 if (c == -1) {

@@ -36,6 +36,7 @@ import org.gwtbootstrap3.client.ui.Row;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FormPanel;
@@ -76,8 +77,10 @@ public class LogTabUi extends Composite {
     CheckBox showStackTraceCheckbox;
     @UiField
     CheckBox showMoreInfoCheckbox;
+    @UiField
+    Button openNewWindow;
 
-    private static final int CACHE_SIZE_LIMIT = 5000;
+    private static final int CACHE_SIZE_LIMIT = 1500;
     private final LinkedList<GwtLogEntry> logs = new LinkedList<>();
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;
@@ -126,6 +129,10 @@ public class LogTabUi extends Composite {
             LogTabUi.this.logs.addAll(entries);
 
             displayLogs();
+        });
+
+        this.openNewWindow.addClickHandler(handler -> {
+            Window.open(Window.Location.getHref(), "_blank", "");
         });
     }
 

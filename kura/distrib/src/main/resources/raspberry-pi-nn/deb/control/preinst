@@ -1,0 +1,93 @@
+#!/bin/bash
+
+INSTALL_DIR=/opt/eclipse
+WD_TMP_FILE=/tmp/watchdog
+REFRESH_TIME=5
+TIMEOUT_TIME=300
+
+##############################################
+# UTILITY FUNCTIONS
+##############################################
+# Run preInstall function and start watchdog if needed
+function runPreInstall {
+    if [ -f "${WD_TMP_FILE}" ]; then
+        WATCHDOG_DEVICE=`cat ${WD_TMP_FILE}`
+        preInstall &
+        PID=$!
+        START=$(date +%s)
+        
+        while [ -d "/proc/$PID" ]; do
+            echo w > ${WATCHDOG_DEVICE}
+            DELTA=$(($(date +%s) - $START))
+            if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
+                echo "The installation process is not responding. It'll be stopped."
+                kill -9 $PID >> /dev/null 2>&1
+            fi
+            sleep $REFRESH_TIME
+        done
+        stopWatchdog
+    else
+        preInstall &
+        PID=$!
+        START=$(date +%s)
+        
+        while [ -d "/proc/$PID" ]; do
+            DELTA=$(($(date +%s) - $START))
+            if [ "$DELTA" -ge "$TIMEOUT_TIME" ]; then
+                echo "The installation process is not responding. It'll be stopped."
+                kill -9 $PID >> /dev/null 2>&1
+            fi
+            sleep $REFRESH_TIME
+        done
+    fi
+}
+
+# Deactivate watchdog device if possible
+function stopWatchdog {
+    if [ -n "${WATCHDOG_DEVICE}" ]; then
+        echo V > ${WATCHDOG_DEVICE}
+    fi
+}
+
+# Pre-install script
+function preInstall {
+    #clean up old installation if present
+    rm -fr /opt/eclipse/* >> /tmp/kura_install.log 2>&1
+    rm -fr ${INSTALL_DIR}/kura* >> /tmp/kura_install.log 2>&1
+    rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
+    rm /tmp/coninfo-* >> /tmp/kura_install.log 2>&1
+    rm /var/log/kura.log >> /tmp/kura_install.log 2>&1
+    rm kura-*.zip >> /tmp/kura_install.log 2>&1
+    
+    echo ""
+}
+##############################################
+# END UTILITY FUNCTIONS
+##############################################
+
+##############################################
+# PRE-INSTALL SCRIPT
+##############################################
+PIDS=`pgrep java`
+
+echo ""
+echo "Installing Kura..."
+echo "Installing Kura..." > /tmp/kura_install.log 2>&1
+
+#Kill JVM and monit for installation
+if [ -f "/var/run/kura.pid" ] ; then
+  KURA_PID=`cat /var/run/kura.pid`
+
+  for pid in "${PIDS[@]}"
+  do
+    if [ "$KURA_PID" == "$pid" ] ; then
+      `kill $pid` >> /tmp/kura_install.log 2>&1
+    fi
+  done
+fi
+
+runPreInstall
+##############################################
+# END PRE-INSTALL SCRIPT
+##############################################
+

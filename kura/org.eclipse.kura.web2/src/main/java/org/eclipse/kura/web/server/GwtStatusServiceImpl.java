@@ -331,13 +331,14 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
                     String currentModemPppNum = Integer
                             .toString(((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getPppNum());
+                    String name = "ppp" + currentModemPppNum + " (" + gwtNetInterfaceConfig.getName() + ")";
                     if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
                             || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
                             || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
-                        pairs.add(new GwtGroupedNVPair("networkStatusModem", gwtNetInterfaceConfig.getName(),
+                        pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
                                 gwtNetInterfaceConfig.getStatusEnum().getValue()));
                     } else {
-                        pairs.add(new GwtGroupedNVPair("networkStatusModem", gwtNetInterfaceConfig.getName(),
+                        pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
                                 currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
                                         + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
                                         + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab + "PPP: "

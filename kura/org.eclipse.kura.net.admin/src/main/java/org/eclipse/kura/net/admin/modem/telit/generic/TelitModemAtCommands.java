@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,20 +15,20 @@ package org.eclipse.kura.net.admin.modem.telit.generic;
 
 public enum TelitModemAtCommands {
 
-    at("at\r\n"),
-    getModelNumber("at+gmm\r\n"),
-    getManufacturer("at+gmi\r\n"),
-    getSerialNumber("at#cgsn\r\n"),
-    getIMSI("at#cimi\r\n"),
-    getICCID("at#ccid\r\n"),
-    getRevision("at+gmr\r\n"),
-    getSignalStrength("at+csq\r\n"),
-    isGpsPowered("at$GPSP?\r\n"),
-    gpsPowerUp("at$GPSP=1\r\n"),
-    gpsPowerDown("at$GPSP=0\r\n"),
-    // gpsEnableNMEA("AT$GPSNMUN=3,1,1,1,1,1,1\r\n"),
-    gpsEnableNMEA("AT$GPSNMUN="),
-    escapeSequence("+++");
+    AT("at\r\n"),
+    GET_MODEL_NUMBER("at+gmm\r\n"),
+    GET_MANUFACTURER("at+gmi\r\n"),
+    GET_SERIAL_NUMBER("at#cgsn\r\n"),
+    GET_IMSI("at#cimi\r\n"),
+    GET_ICCID("at#ccid\r\n"),
+    GET_REVISION("at+gmr\r\n"),
+    GET_SIGNAL_STRENGTH("at+csq\r\n"),
+    IS_GPS_POWERED("at$GPSP?\r\n"),
+    GPS_POWER_UP("at$GPSP=1\r\n"),
+    GPS_POWER_DOWN("at$GPSP=0\r\n"),
+    // GPS_ENABLE_NMEA("AT$GPSNMUN=3,1,1,1,1,1,1\r\n"),
+    GPS_ENABLE_NMEA("AT$GPSNMUN="),
+    ESCAPE_SEQUENCE("+++");
 
     private String command;
 

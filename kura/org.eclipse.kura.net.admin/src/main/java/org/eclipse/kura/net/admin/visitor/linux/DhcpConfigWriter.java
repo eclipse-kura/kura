@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,16 +17,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
-import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerTool;
@@ -34,8 +31,8 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.admin.visitor.linux.util.KuranetConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +41,8 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
 
     private static final Logger logger = LoggerFactory.getLogger(DhcpConfigWriter.class);
 
-    private static DhcpConfigWriter instance;
-
-    public static DhcpConfigWriter getInstance() {
-        if (instance == null) {
-            instance = new DhcpConfigWriter();
-        }
-
-        return instance;
+    public DhcpConfigWriter() {
+        // Do nothing...
     }
 
     @Override
@@ -68,21 +59,12 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
             if (netInterfaceConfig.getType() == NetInterfaceType.ETHERNET
                     || netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
                 writeConfig(netInterfaceConfig);
-                writeKuraExtendedConfig(netInterfaceConfig, getKuranetProperties());
             }
         }
     }
 
     protected String getConfigFilename(String interfaceName) {
         return DhcpServerManager.getConfigFilename(interfaceName);
-    }
-
-    protected Properties getKuranetProperties() {
-        return KuranetConfig.getProperties();
-    }
-
-    protected void storeKuranetProperties(Properties kuraExtendedProps) throws IOException, KuraException {
-        KuranetConfig.storeProperties(kuraExtendedProps);
     }
 
     private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
@@ -95,7 +77,12 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
         logger.debug("Writing DHCP config for {}", interfaceName);
         NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
                 .getNetInterfaceAddressConfig();
-        writeNetInterfaceConfig(interfaceName, dhcpConfigFileName, tmpDhcpConfigFileName, netInterfaceAddressConfig);
+        if (((AbstractNetInterface<?>) netInterfaceConfig).isInterfaceEnabled()
+                && ((AbstractNetInterface<?>) netInterfaceConfig)
+                        .getInterfaceStatus() != NetInterfaceStatus.netIPv4StatusL2Only) {
+            writeNetInterfaceConfig(interfaceName, dhcpConfigFileName, tmpDhcpConfigFileName,
+                    netInterfaceAddressConfig);
+        }
 
     }
 
@@ -176,56 +163,6 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                 sb.append(address.getHostAddress()).append(" ");
             }
             pw.println("opt dns " + sb.toString().trim());
-        }
-    }
-
-    private void writeKuraExtendedConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
-            Properties kuraExtendedProps) throws KuraException {
-        boolean enabled = false;
-        boolean passDns = false;
-
-        NetInterfaceAddressConfig netInterfaceAddressConfig = null;
-        if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-            netInterfaceAddressConfig = ((EthernetInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses()
-                    .get(0);
-        } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-            netInterfaceAddressConfig = ((WifiInterfaceConfigImpl) netInterfaceConfig).getNetInterfaceAddresses()
-                    .get(0);
-        } else {
-            logger.error("not adding config for {}", netInterfaceConfig.getName());
-        }
-
-        if (netInterfaceAddressConfig != null) {
-            List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-            if (netConfigs != null) {
-                for (NetConfig netConfig : netConfigs) {
-                    if (netConfig instanceof DhcpServerConfig4) {
-                        enabled = ((DhcpServerConfig4) netConfig).isEnabled();
-                        passDns = ((DhcpServerConfig4) netConfig).isPassDns();
-                    }
-                }
-            }
-        }
-
-        // set it all
-        if (kuraExtendedProps == null) {
-            logger.debug("kuraExtendedProps was null");
-            kuraExtendedProps = new Properties();
-        }
-        StringBuilder sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())
-                .append(".config.dhcpServer4.enabled");
-        kuraExtendedProps.put(sb.toString(), Boolean.toString(enabled));
-        sb = new StringBuilder().append("net.interface.").append(netInterfaceConfig.getName())
-                .append(".config.dhcpServer4.passDns");
-        kuraExtendedProps.put(sb.toString(), Boolean.toString(passDns));
-
-        // write it
-        if (kuraExtendedProps != null && !kuraExtendedProps.isEmpty()) {
-            try {
-                storeKuranetProperties(kuraExtendedProps);
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
         }
     }
 

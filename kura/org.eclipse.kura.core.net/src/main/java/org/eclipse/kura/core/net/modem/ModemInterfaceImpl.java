@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,7 +14,9 @@
 package org.eclipse.kura.core.net.modem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -23,13 +25,14 @@ import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemPowerMode;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends AbstractNetInterface<T>
         implements ModemInterface<T> {
 
-    private static final Logger s_logger = LoggerFactory.getLogger(ModemInterfaceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ModemInterfaceImpl.class);
 
     private String modemId;
     private int pppNum;
@@ -60,6 +63,9 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
         this.poweredOn = other.isPoweredOn();
         this.powerMode = other.getPowerMode();
         this.modemDevice = other.getModemDevice();
+        if (this.modemDevice instanceof UsbModemDevice) {
+            setName(((UsbModemDevice) this.modemDevice).getUsbPort());
+        }
 
         // Copy the NetInterfaceAddresses
         List<? extends ModemInterfaceAddress> otherNetInterfaceAddresses = other.getNetInterfaceAddresses();
@@ -72,7 +78,7 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
                             modemInterfaceAddress);
                     interfaceAddresses.add(modemInterfaceAddressClass.cast(copiedInterfaceAddressImpl));
                 } catch (Exception e) {
-                    s_logger.debug("Could not copy interface address: {}", modemInterfaceAddress);
+                    logger.debug("Could not copy interface address: {}", modemInterfaceAddress);
                 }
             }
         }
@@ -181,5 +187,35 @@ public class ModemInterfaceImpl<T extends ModemInterfaceAddress> extends Abstrac
 
     public void setGpsSupported(boolean gpsSupported) {
         this.gpsSupported = gpsSupported;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + Arrays.hashCode(revisionId);
+        result = prime * result + Objects.hash(gpsSupported, manufacturer, model, modemDevice, modemId, powerMode,
+                poweredOn, pppNum, serialNumber, technologyTypes);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ModemInterfaceImpl<?> other = (ModemInterfaceImpl<?>) obj;
+        return gpsSupported == other.gpsSupported && Objects.equals(manufacturer, other.manufacturer)
+                && Objects.equals(model, other.model) && Objects.equals(modemDevice, other.modemDevice)
+                && Objects.equals(modemId, other.modemId) && powerMode == other.powerMode
+                && poweredOn == other.poweredOn && pppNum == other.pppNum && Arrays.equals(revisionId, other.revisionId)
+                && Objects.equals(serialNumber, other.serialNumber)
+                && Objects.equals(technologyTypes, other.technologyTypes);
     }
 }

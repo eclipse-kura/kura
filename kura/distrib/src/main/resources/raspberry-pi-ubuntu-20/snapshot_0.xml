@@ -297,7 +297,7 @@
                 <esf:value>7200</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.master.ssid" array="false" encrypted="false" type="String">
-                <esf:value>kura_gateway_B8:27:EB:2B:4E:35</esf:value>
+                <esf:value>kura_gateway_raspberry_pi</esf:value>
             </esf:property>
             <esf:property name="net.interface.eth0.config.autoconnect" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>

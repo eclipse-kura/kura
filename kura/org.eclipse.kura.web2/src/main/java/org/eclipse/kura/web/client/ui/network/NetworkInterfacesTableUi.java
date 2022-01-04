@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
+import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.service.GwtNetworkService;
@@ -170,7 +172,12 @@ public class NetworkInterfacesTableUi extends Composite {
 
             @Override
             public String getValue(GwtNetInterfaceConfig object) {
-                return object.getName();
+                if (object.getHwTypeEnum().equals(GwtNetIfType.MODEM) && object instanceof GwtModemInterfaceConfig) {
+                    GwtModemInterfaceConfig modemObject = (GwtModemInterfaceConfig) object;
+                    return "ppp" + modemObject.getPppNum() + " (" + modemObject.getName() + ")";
+                } else {
+                    return object.getName();
+                }
             }
         };
         this.col1.setCellStyleNames("status-table-row");

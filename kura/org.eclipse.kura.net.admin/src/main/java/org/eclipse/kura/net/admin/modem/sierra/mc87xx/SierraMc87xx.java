@@ -661,4 +661,9 @@ public class SierraMc87xx implements HspaCellularModem {
     public void disableDiversity() throws KuraException {
         throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "disableDiversity");
     }
+
+    @Override
+    public String getFirmwareVersion() throws KuraException {
+        return "N/A";
+    }
 }

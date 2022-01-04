@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -26,10 +26,10 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.internal.linux.net.NetInterfaceConfigSerializationService;
 import org.eclipse.kura.net.IPAddress;
-import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
@@ -99,6 +99,12 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
     @Override
     public void write(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) throws KuraException {
         String interfaceName = netInterfaceConfig.getName();
+        NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) netInterfaceConfig).getIP4config();
+        if (netConfigIP4 == null) {
+            logger.warn("The configuration for interface {} in empty", interfaceName);
+            return;
+        }
+
         String outputFileName = getIfcfgFileName(interfaceName);
         String tmpOutputFileName = outputFileName + ".tmp";
         logger.debug("Writing config for {}", interfaceName);
@@ -115,76 +121,20 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
         // TYPE
         sb.append(TYPE_PROP_NAME).append('=').append(netInterfaceConfig.getType()).append("\n");
 
+        setOnBootProperty(netConfigIP4, sb);
+        setBootprotoProperty(netConfigIP4, sb);
+        setDefrouteProperty(netConfigIP4, sb);
+        setDnsProperty(netConfigIP4, sb);
+        setWifiProperties(netInterfaceConfig, sb);
+
+        writeConfigFile(tmpOutputFileName, outputFileName, sb);
+    }
+
+    private void setWifiProperties(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig,
+            StringBuilder sb) throws KuraException {
+        // WIFI
         NetInterfaceAddressConfig netInterfaceAddressConfig = ((AbstractNetInterface<?>) netInterfaceConfig)
                 .getNetInterfaceAddressConfig();
-        boolean allowWrite = false;
-        List<NetConfig> netConfigs = netInterfaceAddressConfig.getConfigs();
-        if (netConfigs != null) {
-            for (NetConfig netConfig : netConfigs) {
-                if (!(netConfig instanceof NetConfigIP4)) {
-                    continue;
-                }
-                // ONBOOT
-                sb.append(ONBOOT_PROP_NAME).append('=');
-                if (((NetConfigIP4) netConfig).isAutoConnect()) {
-                    sb.append("yes");
-                } else {
-                    sb.append("no");
-                }
-                sb.append("\n");
-                if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
-                    logger.debug("new config is Layer 2 Only");
-                    sb.append(BOOTPROTO_PROP_NAME).append("=none\n");
-                } else if (((NetConfigIP4) netConfig).isDhcp()) {
-                    logger.debug("new config is DHCP");
-                    sb.append(BOOTPROTO_PROP_NAME).append("=dhcp\n");
-                } else {
-                    logger.debug("new config is STATIC");
-                    sb.append(BOOTPROTO_PROP_NAME).append("=static\n");
-
-                    // IPADDR
-                    sb.append(IPADDR_PROP_NAME).append('=')
-                            .append(((NetConfigIP4) netConfig).getAddress().getHostAddress()).append("\n");
-
-                    // PREFIX
-                    sb.append(PREFIX_PROP_NAME).append('=').append(((NetConfigIP4) netConfig).getNetworkPrefixLength())
-                            .append("\n");
-
-                    // Gateway
-                    if (((NetConfigIP4) netConfig).getGateway() != null) {
-                        sb.append(GATEWAY_PROP_NAME).append('=')
-                                .append(((NetConfigIP4) netConfig).getGateway().getHostAddress()).append("\n");
-                    }
-                }
-
-                // DEFROUTE
-                if (((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
-                    sb.append(DEFROUTE_PROP_NAME).append("=yes\n");
-                } else {
-                    sb.append(DEFROUTE_PROP_NAME).append("=no\n");
-                }
-
-                // DNS
-                List<? extends IPAddress> dnsAddresses = ((NetConfigIP4) netConfig).getDnsServers();
-                if (dnsAddresses != null) {
-                    for (int i = 0; i < dnsAddresses.size(); i++) {
-                        IPAddress ipAddr = dnsAddresses.get(i);
-                        if (!(ipAddr.isLoopbackAddress() || ipAddr.isLinkLocalAddress()
-                                || ipAddr.isMulticastAddress())) {
-                            sb.append("DNS").append(i + 1).append("=").append(ipAddr.getHostAddress()).append("\n");
-                        }
-                    }
-                } else {
-                    logger.debug("no DNS entries");
-                }
-
-                allowWrite = true;
-            }
-        } else {
-            logger.debug("writeRedhatConfig() :: netConfigs is null");
-        }
-
-        // WIFI
         if (netInterfaceAddressConfig instanceof WifiInterfaceAddressConfig) {
             logger.debug("new config is a WifiInterfaceAddressConfig");
             sb.append("\n#Wireless configuration\n");
@@ -206,27 +156,83 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
             }
             sb.append("MODE=").append(mode).append("\n");
         }
+    }
 
-        if (allowWrite) {
-            // write configuration file
-            writeConfigFile(tmpOutputFileName, outputFileName, sb);
+    private void setDnsProperty(NetConfigIP4 netConfigIP4, StringBuilder sb) {
+        // DNS
+        List<? extends IPAddress> dnsAddresses = netConfigIP4.getDnsServers();
+        if (dnsAddresses != null) {
+            for (int i = 0; i < dnsAddresses.size(); i++) {
+                IPAddress ipAddr = dnsAddresses.get(i);
+                if (!(ipAddr.isLoopbackAddress() || ipAddr.isLinkLocalAddress() || ipAddr.isMulticastAddress())) {
+                    sb.append("DNS").append(i + 1).append("=").append(ipAddr.getHostAddress()).append("\n");
+                }
+            }
         } else {
-            logger.warn("writeNewConfig :: operation is not allowed");
+            logger.debug("no DNS entries");
         }
+    }
+
+    private void setDefrouteProperty(NetConfigIP4 netConfigIP4, StringBuilder sb) {
+        // DEFROUTE
+        if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN) {
+            sb.append(DEFROUTE_PROP_NAME).append("=yes\n");
+        } else {
+            sb.append(DEFROUTE_PROP_NAME).append("=no\n");
+        }
+    }
+
+    private void setBootprotoProperty(NetConfigIP4 netConfigIP4, StringBuilder sb) {
+        // BOOTPROTO
+        if (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only) {
+            logger.debug("new config is Layer 2 Only");
+            sb.append(BOOTPROTO_PROP_NAME).append("=none\n");
+        } else if (netConfigIP4.isDhcp() || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusDisabled) {
+            logger.debug("new config is DHCP");
+            sb.append(BOOTPROTO_PROP_NAME).append("=dhcp\n");
+        } else {
+            logger.debug("new config is STATIC");
+            sb.append(BOOTPROTO_PROP_NAME).append("=static\n");
+
+            // IPADDR
+            sb.append(IPADDR_PROP_NAME).append('=').append(netConfigIP4.getAddress().getHostAddress()).append("\n");
+
+            // PREFIX
+            sb.append(PREFIX_PROP_NAME).append('=').append(netConfigIP4.getNetworkPrefixLength()).append("\n");
+
+            // Gateway
+            if (netConfigIP4.getGateway() != null) {
+                sb.append(GATEWAY_PROP_NAME).append('=').append(netConfigIP4.getGateway().getHostAddress())
+                        .append("\n");
+            }
+        }
+    }
+
+    private void setOnBootProperty(NetConfigIP4 netConfigIP4, StringBuilder sb) {
+        // ONBOOT
+        sb.append(ONBOOT_PROP_NAME).append('=');
+        if ((netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN
+                || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusL2Only)
+                && netConfigIP4.isAutoConnect()) {
+            sb.append("yes");
+        } else {
+            sb.append("no");
+        }
+        sb.append("\n");
     }
 
     private void writeConfigFile(String tmpFileName, String dstFileName, StringBuilder sb) throws KuraException {
         File srcFile = new File(tmpFileName);
         File dstFile = new File(dstFileName);
-        
+
         // write tmp configuration file
         try (FileOutputStream fos = new FileOutputStream(srcFile); PrintWriter pw = new PrintWriter(fos)) {
             pw.write(sb.toString());
             pw.flush();
             fos.getFD().sync();
-        } catch (Exception e) {
-            logger.error("Failed to write debian configuration file", e);
-            throw KuraException.internalError(e.getMessage());
+        } catch (IOException e) {
+            throw new KuraIOException(e, "Failed to write redhat configuration file");
         }
 
         // move tmp configuration file into its final destination
@@ -243,8 +249,8 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
                 logger.info("Not rewriting network interfaces file because it is the same");
             }
         } catch (IOException e) {
-            logger.error("Failed to rename tmp config file {} to {}", srcFile.getName(), dstFile.getName(), e);
-            throw KuraException.internalError(e.getMessage());
+            throw new KuraIOException(e,
+                    "Failed to rename tmp config file " + srcFile.getName() + " to " + dstFile.getName());
         }
     }
 }

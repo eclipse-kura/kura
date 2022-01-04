@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -95,6 +95,14 @@ public class EthernetMonitorServiceImplTest {
 
         NetworkConfiguration nc = new NetworkConfiguration();
         EthernetInterfaceConfigImpl nic = new EthernetInterfaceConfigImpl("eth3");
+        NetInterfaceAddressConfigImpl addressConfig = new NetInterfaceAddressConfigImpl();
+        List<NetConfig> netConfigs = new ArrayList<>();
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
+        netConfigs.add(netConfigIP4);
+        addressConfig.setNetConfigs(netConfigs);
+        List<NetInterfaceAddressConfig> addressConfigs = new ArrayList<>();
+        addressConfigs.add(addressConfig);
+        nic.setNetInterfaceAddresses(addressConfigs);
         nc.addNetInterfaceConfig(nic);
         when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
 
@@ -358,7 +366,8 @@ public class EthernetMonitorServiceImplTest {
             int callNo = 1;
 
             @Override
-            protected InterfaceState getEthernetInterfaceState(String interfaceName, boolean isL2Only) throws KuraException {
+            protected InterfaceState getEthernetInterfaceState(String interfaceName, boolean isL2Only)
+                    throws KuraException {
                 InterfaceState isMock = mock(InterfaceState.class);
 
                 if (callNo == 1) {

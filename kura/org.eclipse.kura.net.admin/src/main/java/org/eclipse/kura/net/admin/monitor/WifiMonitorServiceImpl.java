@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -443,7 +443,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     }
 
                     NetConfigIP4 netConfigIP4 = ((AbstractNetInterface<?>) wifiInterfaceConfig).getIP4config();
-                    boolean isDhcpClient = netConfigIP4 != null && netConfigIP4.isDhcp();
+                    boolean isDhcpClient = isDhcpClientEnabled(netConfigIP4);
                     boolean dhcpLeaseRenewed = false;
                     logger.debug("monitor() :: pingAccessPoint()? {}", wifiConfig.pingAccessPoint());
                     if (isDhcpClient && wifiConfig.pingAccessPoint()) {
@@ -487,6 +487,12 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 }
             }
         }
+    }
+
+    private boolean isDhcpClientEnabled(NetConfigIP4 netConfigIP4) {
+        return netConfigIP4 != null && netConfigIP4.isDhcp()
+                && (netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledLAN
+                        || netConfigIP4.getStatus() == NetInterfaceStatus.netIPv4StatusEnabledWAN);
     }
 
     private void monitorDisabledInterfaces() throws KuraException {

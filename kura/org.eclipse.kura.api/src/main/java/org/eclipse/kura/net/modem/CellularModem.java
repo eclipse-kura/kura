@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -194,4 +194,13 @@ public interface CellularModem {
      * @since 1.4
      */
     public List<ModemPdpContext> getPdpContextInfo() throws KuraException;
+
+    /**
+     * Return the firmware version of the modem module
+     * 
+     * @return a string representing the firmware version
+     * 
+     * @since 2.3
+     */
+    public String getFirmwareVersion() throws KuraException;
 }

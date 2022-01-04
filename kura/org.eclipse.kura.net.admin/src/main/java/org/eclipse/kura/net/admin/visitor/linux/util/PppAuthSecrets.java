@@ -36,11 +36,11 @@ import org.slf4j.LoggerFactory;
 public class PppAuthSecrets {
 
     /*
-     * #Secrets for authentication using PAP/CHAP 
-     * #client server secret IP addresses Provider 
-     * ISP@CINGULARGPRS.COM * CINGULAR1 * #att 
+     * #Secrets for authentication using PAP/CHAP
+     * #client server secret IP addresses Provider
+     * ISP@CINGULARGPRS.COM * CINGULAR1 * #att
      * mobileweb * password * #o2
-     * user * pass * #orange 
+     * user * pass * #orange
      * web * web * #vodaphone
      */
 

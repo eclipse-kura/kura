@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -29,11 +29,11 @@ public class LinuxWriteVisitor implements NetworkConfigurationVisitor {
 
     private LinuxWriteVisitor() {
         this.visitors = new ArrayList<>();
-        this.visitors.add(IfcfgConfigWriter.getInstance());
-        this.visitors.add(WifiConfigWriter.getInstance());
-        this.visitors.add(PppConfigWriter.getInstance());
-        this.visitors.add(DhcpConfigWriter.getInstance());
-        this.visitors.add(FirewallAutoNatConfigWriter.getInstance());
+        this.visitors.add(new IfcfgConfigWriter());
+        this.visitors.add(new WifiConfigWriter());
+        this.visitors.add(new PppConfigWriter());
+        this.visitors.add(new DhcpConfigWriter());
+        this.visitors.add(new FirewallAutoNatConfigWriter());
     }
 
     public static LinuxWriteVisitor getInstance() {

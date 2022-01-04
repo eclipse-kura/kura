@@ -15,6 +15,7 @@ package org.eclipse.kura.net.admin.modem.telit.generic;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -87,7 +88,7 @@ public abstract class TelitModem {
     public String getModel() throws KuraException {
         synchronized (this.atLock) {
             if (this.model == null) {
-                logger.debug("sendCommand getModelNumber :: {}", TelitModemAtCommands.getModelNumber.getCommand());
+                logger.debug("sendCommand getModelNumber :: {}", TelitModemAtCommands.GET_MODEL_NUMBER.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -96,7 +97,7 @@ public abstract class TelitModem {
                             MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
                 }
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.getModelNumber.getCommand().getBytes(),
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_MODEL_NUMBER.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -114,7 +115,7 @@ public abstract class TelitModem {
     public String getManufacturer() throws KuraException {
         synchronized (this.atLock) {
             if (this.manufacturer == null) {
-                logger.debug("sendCommand getManufacturer :: {}", TelitModemAtCommands.getManufacturer.getCommand());
+                logger.debug("sendCommand getManufacturer :: {}", TelitModemAtCommands.GET_MANUFACTURER.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -123,7 +124,7 @@ public abstract class TelitModem {
                             MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
                 }
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.getManufacturer.getCommand().getBytes(),
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_MANUFACTURER.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -141,7 +142,7 @@ public abstract class TelitModem {
     public String getSerialNumber() throws KuraException {
         synchronized (this.atLock) {
             if (this.serialNumber == null) {
-                logger.debug("sendCommand getSerialNumber :: {}", TelitModemAtCommands.getSerialNumber.getCommand());
+                logger.debug("sendCommand getSerialNumber :: {}", TelitModemAtCommands.GET_SERIAL_NUMBER.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -150,7 +151,7 @@ public abstract class TelitModem {
                             MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
                 }
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.getSerialNumber.getCommand().getBytes(),
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_SERIAL_NUMBER.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -174,7 +175,7 @@ public abstract class TelitModem {
     public String getRevisionID() throws KuraException {
         synchronized (this.atLock) {
             if (this.revisionId == null) {
-                logger.debug("sendCommand getRevision :: {}", TelitModemAtCommands.getRevision.getCommand());
+                logger.debug("sendCommand getRevision :: {}", TelitModemAtCommands.GET_REVISION.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -183,8 +184,8 @@ public abstract class TelitModem {
                             MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
                 }
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.getRevision.getCommand().getBytes(), 1000,
-                            100);
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_REVISION.getCommand().getBytes(),
+                            1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
                     throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -234,7 +235,7 @@ public abstract class TelitModem {
                 return this.rssi;
             }
 
-            logger.debug("sendCommand getSignalStrength :: {}", TelitModemAtCommands.getSignalStrength.getCommand());
+            logger.debug("sendCommand getSignalStrength :: {}", TelitModemAtCommands.GET_SIGNAL_STRENGTH.getCommand());
             byte[] reply;
             CommConnection commAtConnection = openSerialPort(atPort);
             if (!isAtReachable(commAtConnection)) {
@@ -243,7 +244,7 @@ public abstract class TelitModem {
                         MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
             }
             try {
-                reply = commAtConnection.sendCommand(TelitModemAtCommands.getSignalStrength.getCommand().getBytes(),
+                reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_SIGNAL_STRENGTH.getCommand().getBytes(),
                         1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -281,7 +282,7 @@ public abstract class TelitModem {
         }
         synchronized (this.atLock) {
             if (this.gpsSupported == null) {
-                logger.debug("sendCommand isGpsSupported :: {}", TelitModemAtCommands.isGpsPowered.getCommand());
+                logger.debug("sendCommand isGpsSupported :: {}", TelitModemAtCommands.IS_GPS_POWERED.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -291,7 +292,7 @@ public abstract class TelitModem {
                 }
 
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.isGpsPowered.getCommand().getBytes(),
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.IS_GPS_POWERED.getCommand().getBytes(),
                             1000, 100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -314,7 +315,7 @@ public abstract class TelitModem {
     }
 
     public void enableGps() throws KuraException {
-        enableGps(TelitModemAtCommands.gpsPowerUp.getCommand());
+        enableGps(TelitModemAtCommands.GPS_POWER_UP.getCommand());
     }
 
     protected void enableGps(String gpsPowerupCommand) throws KuraException {
@@ -395,11 +396,11 @@ public abstract class TelitModem {
                     int numAttempts = 3;
                     while (numAttempts > 0) {
                         logger.debug("disableGps() :: sendCommand escapeSequence {}",
-                                TelitModemAtCommands.escapeSequence.getCommand());
+                                TelitModemAtCommands.ESCAPE_SEQUENCE.getCommand());
 
                         sleep(1000); // do not send anything for 1 second before the escape sequence
                         byte[] reply = commAtConnection
-                                .sendCommand(TelitModemAtCommands.escapeSequence.getCommand().getBytes(), 1000, 1100);
+                                .sendCommand(TelitModemAtCommands.ESCAPE_SEQUENCE.getCommand().getBytes(), 1000, 1100);
 
                         if (reply != null && reply.length > 0) {
                             logger.trace("disableGps() :: reply={}", new String(reply));
@@ -440,8 +441,8 @@ public abstract class TelitModem {
                 }
 
                 logger.debug("disableGps() :: sendCommand gpsPowerDown :: {}",
-                        TelitModemAtCommands.gpsPowerDown.getCommand());
-                commAtConnection.sendCommand(TelitModemAtCommands.gpsPowerDown.getCommand().getBytes(), 1000, 100);
+                        TelitModemAtCommands.GPS_POWER_DOWN.getCommand());
+                commAtConnection.sendCommand(TelitModemAtCommands.GPS_POWER_DOWN.getCommand().getBytes(), 1000, 100);
 
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
@@ -454,7 +455,7 @@ public abstract class TelitModem {
     public String getMobileSubscriberIdentity() throws KuraException {
         synchronized (this.atLock) {
             if (this.imsi == null && isTelitSimCardReady()) {
-                logger.debug("sendCommand getIMSI :: {}", TelitModemAtCommands.getIMSI.getCommand());
+                logger.debug("sendCommand getIMSI :: {}", TelitModemAtCommands.GET_IMSI.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -463,7 +464,7 @@ public abstract class TelitModem {
                             MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
                 }
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.getIMSI.getCommand().getBytes(), 1000,
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_IMSI.getCommand().getBytes(), 1000,
                             100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -487,7 +488,7 @@ public abstract class TelitModem {
     public String getIntegratedCirquitCardId() throws KuraException {
         synchronized (this.atLock) {
             if (this.iccid == null && isTelitSimCardReady()) {
-                logger.debug("sendCommand getICCID :: {}", TelitModemAtCommands.getICCID.getCommand());
+                logger.debug("sendCommand getICCID :: {}", TelitModemAtCommands.GET_ICCID.getCommand());
                 byte[] reply;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
@@ -496,7 +497,7 @@ public abstract class TelitModem {
                             MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
                 }
                 try {
-                    reply = commAtConnection.sendCommand(TelitModemAtCommands.getICCID.getCommand().getBytes(), 1000,
+                    reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_ICCID.getCommand().getBytes(), 1000,
                             100);
                 } catch (IOException e) {
                     closeSerialPort(commAtConnection);
@@ -651,7 +652,7 @@ public abstract class TelitModem {
         do {
             try {
                 logger.trace("isAtReachable() :: sending AT commnd to modem on port {}", connection.getURI().getPort());
-                byte[] reply = connection.sendCommand(TelitModemAtCommands.at.getCommand().getBytes(), 1000, 100);
+                byte[] reply = connection.sendCommand(TelitModemAtCommands.AT.getCommand().getBytes(), 1000, 100);
                 if (reply.length > 0) {
                     String sReply = new String(reply);
                     if (sReply.contains("OK")) {
@@ -702,10 +703,11 @@ public abstract class TelitModem {
             return false;
         }
 
-        logger.debug("sendCommand isGpsPowered :: {}", TelitModemAtCommands.isGpsPowered.getCommand());
+        logger.debug("sendCommand isGpsPowered :: {}", TelitModemAtCommands.IS_GPS_POWERED.getCommand());
         byte[] reply = null;
         try {
-            reply = commAtConnection.sendCommand(TelitModemAtCommands.isGpsPowered.getCommand().getBytes(), 1000, 100);
+            reply = commAtConnection.sendCommand(TelitModemAtCommands.IS_GPS_POWERED.getCommand().getBytes(), 1000,
+                    100);
         } catch (IOException e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -760,7 +762,7 @@ public abstract class TelitModem {
 
     private String formGpsEnableNMEACommand(String atPort, String gpsPort) throws KuraException {
 
-        StringBuilder sbCommand = new StringBuilder(TelitModemAtCommands.gpsEnableNMEA.getCommand());
+        StringBuilder sbCommand = new StringBuilder(TelitModemAtCommands.GPS_ENABLE_NMEA.getCommand());
         if (atPort.equals(gpsPort)) {
             sbCommand.append("3");
         } else {
@@ -768,5 +770,46 @@ public abstract class TelitModem {
         }
         sbCommand.append(",1,1,1,1,1,1\r\n");
         return sbCommand.toString();
+    }
+
+    protected String getTelitFirmwareVersion() throws KuraException {
+        String firmwareVersion = "N/A";
+        synchronized (this.atLock) {
+            CommConnection commAtConnection = null;
+            try {
+                String port = getUnusedAtPort();
+                commAtConnection = openSerialPort(port);
+                if (!isAtReachable(commAtConnection)) {
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                }
+
+                firmwareVersion = readTelitFirmwareVersion(commAtConnection);
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            } finally {
+                closeSerialPort(commAtConnection);
+            }
+        }
+        return firmwareVersion;
+    }
+
+    private String readTelitFirmwareVersion(CommConnection comm) throws IOException, KuraException {
+        String firmwareVersion = "N/A";
+        byte[] reply = comm.sendCommand(
+                TelitModemAtCommands.GET_REVISION.getCommand().getBytes(StandardCharsets.US_ASCII), 1000, 100);
+        if (reply != null) {
+            firmwareVersion = getResponseString(reply);
+        }
+        return firmwareVersion;
+    }
+
+    protected String getUnusedAtPort() throws KuraException {
+        String port;
+        if (isGpsEnabled() && getAtPort().equals(getGpsPort()) && !getAtPort().equals(getDataPort())) {
+            port = getDataPort();
+        } else {
+            port = getAtPort();
+        }
+        return port;
     }
 }

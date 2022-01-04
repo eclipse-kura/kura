@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -416,7 +416,7 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
      */
     public boolean isInterfaceManaged() {
         NetInterfaceStatus status = getInterfaceStatus();
-        return status != NetInterfaceStatus.netIPv4StatusUnmanaged ? true : false;
+        return status != NetInterfaceStatus.netIPv4StatusUnmanaged && status != NetInterfaceStatus.netIPv4StatusUnknown;
     }
 
     /**
@@ -427,6 +427,15 @@ public abstract class AbstractNetInterface<T extends NetInterfaceAddress> implem
     public boolean isInterfaceEnabled() {
         NetInterfaceStatus status = getInterfaceStatus();
         return status == NetInterfaceStatus.netIPv4StatusL2Only || status == NetInterfaceStatus.netIPv4StatusEnabledLAN
-                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN ? true : false;
+                || status == NetInterfaceStatus.netIPv4StatusEnabledWAN;
+    }
+
+    /**
+     * Reports if interface status is unknown
+     *
+     * @return boolean
+     */
+    public boolean isInterfaceUnknown() {
+        return getInterfaceStatus() == NetInterfaceStatus.netIPv4StatusUnknown;
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 3 PORT d.o.o. and others
+ * Copyright (c) 2019, 2021 3 PORT d.o.o. and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -364,6 +364,11 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
     @Override
     public void disableGps() throws KuraException {
         logger.warn("Modem GPS not supported");
+    }
+
+    @Override
+    public String getFirmwareVersion() throws KuraException {
+        return "N/A";
     }
 
 }

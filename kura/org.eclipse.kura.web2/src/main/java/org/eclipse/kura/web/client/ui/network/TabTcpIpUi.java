@@ -636,7 +636,6 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     break;
                 }
             }
-
             // Configure
             for (int i = 0; i < this.configure.getItemCount(); i++) {
                 if (this.configure.getValue(i).equals(MessageUtils.get(this.selectedNetIfConfig.getConfigMode()))) {
@@ -644,9 +643,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
                     break;
                 }
             }
-
             this.tabs.adjustInterfaceTabs();
-
             this.ip.setText(this.selectedNetIfConfig.getIpAddress());
             this.subnet.setText(this.selectedNetIfConfig.getSubnetMask());
             this.gateway.setText(this.selectedNetIfConfig.getGateway());

@@ -333,6 +333,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>com.eclipsesource.jaxrs.provider.multipart</artifactId>
+                                    <version>${com.eclipsesource.jaxrs.provider.multipart.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>com.google.gson</artifactId>
                                     <version>${com.google.gson.version}</version>
                                 </artifactItem>
@@ -575,6 +580,7 @@
                                 <move file="target/source/plugins/com.eclipsesource.jaxrs.publisher.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.version}.jar"/>
                                 <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.gson.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.version}.jar"/>
                                 <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.security.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar"/>
+                                <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.multipart.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.multipart_${com.eclipsesource.jaxrs.provider.multipart.version}.jar"/>
                                 <move file="target/source/plugins/com.google.gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.xml.bind-api.jar" tofile="target/source/plugins/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.activation-api.jar" tofile="target/source/plugins/jakarta.activation-api_${jakarta.activation-api.version}.jar"/>

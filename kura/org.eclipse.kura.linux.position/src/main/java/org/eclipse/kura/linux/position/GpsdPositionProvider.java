@@ -73,8 +73,9 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     public Position getPosition() {
         return new Position(toRadiansMeasurement(getLatitude(), getLatitudeError()),
                 toRadiansMeasurement(getLongitude(), getLongitudeError()),
-                toRadiansMeasurement(getAltitude(), getAltitudeError()),
-                toRadiansMeasurement(getSpeed(), getSpeedError()), toRadiansMeasurement(getCourse(), getCourseError()));
+                toMetersMeasurement(getAltitude(), getAltitudeError()),
+                toMetersPerSecondMeasurement(getSpeed(), getSpeedError()),
+                toRadiansMeasurement(getCourse(), getCourseError()));
     }
 
     @Override
@@ -136,26 +137,27 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleATT(ATTObject att) {
-
+        // Noting to do.
     }
 
     @Override
     public void handleDevice(DeviceObject device) {
-
+        // Noting to do.
     }
 
     @Override
     public void handleDevices(DevicesObject devices) {
-
+        // Noting to do.
     }
 
     @Override
     public void handleSKY(SKYObject sky) {
+        // Noting to do.
     }
 
     @Override
     public void handleSUBFRAME(SUBFRAMEObject subframe) {
-
+        // Noting to do.
     }
 
     @Override
@@ -175,7 +177,15 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {
-        return new Measurement(toRadians(value), toRadians(error), Unit.rad);
+        return new Measurement(toRadians(value), Double.isNaN(error) ? 0.0d : toRadians(error), Unit.rad);
+    }
+
+    private Measurement toMetersMeasurement(double value, double error) {
+        return new Measurement(value, Double.isNaN(error) ? 0.0d : error, Unit.m);
+    }
+
+    private Measurement toMetersPerSecondMeasurement(double value, double error) {
+        return new Measurement(value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
     }
 
     private void setCourseError(double value) {

@@ -161,7 +161,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
         if (this.gpsDevice != null) {
             return this.gpsDevice.getPosition();
         } else {
-            return this.zeroPosition;
+            return zeroPosition;
         }
     }
 
@@ -170,7 +170,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
         if (this.gpsDevice != null) {
             return this.gpsDevice.getNmeaPosition();
         } else {
-            return this.zeroNmeaPosition;
+            return zeroNmeaPosition;
         }
     }
 

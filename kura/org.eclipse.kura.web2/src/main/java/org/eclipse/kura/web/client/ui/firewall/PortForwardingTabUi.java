@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -187,10 +187,8 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
 
     public PortForwardingTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.selectionModel.addSelectionChangeHandler(event -> {
-            PortForwardingTabUi.this.buttonBar
-                    .setEditDeleteButtonsDirty(PortForwardingTabUi.this.selectionModel.getSelectedObject() != null);
-        });
+        this.selectionModel.addSelectionChangeHandler(event -> PortForwardingTabUi.this.buttonBar
+                .setEditDeleteButtonsDirty(PortForwardingTabUi.this.selectionModel.getSelectedObject() != null));
         this.portForwardGrid.setSelectionModel(this.selectionModel);
 
         this.buttonBar.setListener(this);
@@ -216,7 +214,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
     @Override
     public void refresh() {
         EntryClassUi.showWaitModal();
-        this.portForwardDataProvider.getList().clear();
+        clear();
         this.notification.setVisible(false);
 
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
@@ -243,14 +241,10 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
                             @Override
                             public void onSuccess(List<GwtFirewallPortForwardEntry> result) {
                                 for (GwtFirewallPortForwardEntry pair : result) {
-                                    // Avoid duplicates
-                                    PortForwardingTabUi.this.portForwardDataProvider.getList().remove(pair);
                                     PortForwardingTabUi.this.portForwardDataProvider.getList().add(pair);
                                 }
                                 setVisibility();
                                 refreshTable();
-                                PortForwardingTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
-                                PortForwardingTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -436,6 +430,7 @@ public class PortForwardingTabUi extends Composite implements Tab, ButtonBar.Lis
         this.portForwardGrid.setVisibleRange(0, size);
         this.portForwardDataProvider.flush();
         this.portForwardGrid.redraw();
+        this.selectionModel.setSelected(this.selectionModel.getSelectedObject(), false);
     }
 
     @Override

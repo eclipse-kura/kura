@@ -920,6 +920,8 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.eclipsesource.jaxrs.provider.multipart_${com.eclipsesource.jaxrs.provider.multipart.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.google.gson_${com.google.gson.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.apache.commons.csv_${org.apache.commons.csv.version}.jar@3" />

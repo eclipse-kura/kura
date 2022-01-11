@@ -167,7 +167,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     protected void activate(ComponentContext componentContext) {
         // save the bundle context
         this.ctx = componentContext;
-        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
+        setLinuxNetworkUtil(new LinuxNetworkUtil(this.executorService));
 
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -231,6 +231,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 this.activated.set(true);
             }
         });
+    }
+
+    protected void setLinuxNetworkUtil(LinuxNetworkUtil linuxNetworkUtil) {
+        this.linuxNetworkUtil = linuxNetworkUtil;
     }
 
     private int generatePppNumber() {

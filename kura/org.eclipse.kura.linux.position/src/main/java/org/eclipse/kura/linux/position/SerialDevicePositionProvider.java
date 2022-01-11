@@ -41,8 +41,8 @@ public class SerialDevicePositionProvider implements PositionProvider {
 
     private DateTimeFormatter nmeaDateTimePattern = DateTimeFormatter.ofPattern("ddMMyy hhmmss");
 
-    private static final Position zeroPosition;
-    private static final NmeaPosition zeroNmeaPosition;
+    private static final Position ZERO_POSITION;
+    private static final NmeaPosition ZERO_NMEA_POSITION;
 
     static {
         final double latitudeRad = Math.toRadians(0);
@@ -55,8 +55,8 @@ public class SerialDevicePositionProvider implements PositionProvider {
         // knots
         final Measurement track = new Measurement(java.lang.Math.toRadians(0), Unit.rad);
 
-        zeroPosition = new Position(latitude, longitude, altitude, speed, track);
-        zeroNmeaPosition = new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char) 0, (char) 0, (char) 0);
+        ZERO_POSITION = new Position(latitude, longitude, altitude, speed, track);
+        ZERO_NMEA_POSITION = new NmeaPosition(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char) 0, (char) 0, (char) 0);
     }
 
     // ----------------------------------------------------------------
@@ -161,7 +161,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
         if (this.gpsDevice != null) {
             return this.gpsDevice.getPosition();
         } else {
-            return zeroPosition;
+            return ZERO_POSITION;
         }
     }
 
@@ -170,7 +170,7 @@ public class SerialDevicePositionProvider implements PositionProvider {
         if (this.gpsDevice != null) {
             return this.gpsDevice.getNmeaPosition();
         } else {
-            return zeroNmeaPosition;
+            return ZERO_NMEA_POSITION;
         }
     }
 

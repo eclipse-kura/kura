@@ -866,7 +866,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     private void getLoopbackDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
-        Tad tad;
         addMtuDefinition(objectFactory, tocd, ifaceName);
         addAutoconnectDefinition(objectFactory, tocd, ifaceName);
         addDriverDefinition(objectFactory, tocd, ifaceName);

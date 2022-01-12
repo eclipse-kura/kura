@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -192,7 +192,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
     @Override
     public void refresh() {
         EntryClassUi.showWaitModal();
-        this.openPortsDataProvider.getList().clear();
+        clear();
         this.notification.setVisible(false);
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -218,14 +218,10 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
                             @Override
                             public void onSuccess(List<GwtFirewallOpenPortEntry> result) {
                                 for (GwtFirewallOpenPortEntry pair : result) {
-                                    // Avoid duplicates
-                                    OpenPortsTabUi.this.openPortsDataProvider.getList().remove(pair);
                                     OpenPortsTabUi.this.openPortsDataProvider.getList().add(pair);
                                 }
                                 refreshTable();
                                 setVisibility();
-                                OpenPortsTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
-                                OpenPortsTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -371,6 +367,7 @@ public class OpenPortsTabUi extends Composite implements Tab, ButtonBar.Listener
         this.openPortsGrid.setVisibleRange(0, size);
         this.openPortsDataProvider.flush();
         this.openPortsGrid.redraw();
+        this.selectionModel.setSelected(this.selectionModel.getSelectedObject(), false);
     }
 
     @Override

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -158,9 +158,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
 
     public NatTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        this.selectionModel.addSelectionChangeHandler(event -> {
-            NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(NatTabUi.this.selectionModel.getSelectedObject() != null);
-        });
+        this.selectionModel.addSelectionChangeHandler(event -> NatTabUi.this.buttonBar
+                .setEditDeleteButtonsDirty(NatTabUi.this.selectionModel.getSelectedObject() != null));
         this.natGrid.setSelectionModel(this.selectionModel);
 
         initTable();
@@ -184,7 +183,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
     @Override
     public void refresh() {
         EntryClassUi.showWaitModal();
-        this.natDataProvider.getList().clear();
+        clear();
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
@@ -209,13 +208,10 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                             @Override
                             public void onSuccess(List<GwtFirewallNatEntry> result) {
                                 for (GwtFirewallNatEntry pair : result) {
-                                    NatTabUi.this.natDataProvider.getList().remove(pair);
                                     NatTabUi.this.natDataProvider.getList().add(pair);
                                 }
-                                setVisibility();
                                 refreshTable();
-                                NatTabUi.this.buttonBar.setApplyResetButtonsDirty(false);
-                                NatTabUi.this.buttonBar.setEditDeleteButtonsDirty(false);
+                                setVisibility();
                                 EntryClassUi.hideWaitModal();
                             }
                         });
@@ -345,6 +341,7 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
         this.natGrid.setVisibleRange(0, size);
         this.natDataProvider.flush();
         this.natGrid.redraw();
+        this.selectionModel.setSelected(this.selectionModel.getSelectedObject(), false);
     }
 
     @Override
@@ -616,7 +613,8 @@ public class NatTabUi extends Composite implements Tab, ButtonBar.Listener {
                 List<EditorError> result = new ArrayList<>();
                 if (!NatTabUi.this.source.getText().trim().isEmpty()
                         && !NatTabUi.this.source.getText().trim().matches(FieldType.NETWORK.getRegex())) {
-                    result.add(new BasicEditorError(NatTabUi.this.source, value, MSGS.firewallNatFormSourceNetworkErrorMessage()));
+                    result.add(new BasicEditorError(NatTabUi.this.source, value,
+                            MSGS.firewallNatFormSourceNetworkErrorMessage()));
                 }
                 return result;
             }

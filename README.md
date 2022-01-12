@@ -92,7 +92,7 @@ The simplest way to start developing on Eclipse Kura is to use an [Eclipse Insta
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
 - Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select ""Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
+- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
 - Set the Java 1.8+ VM: to the recently installed local jdk-8 VM, and press the Next button
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
@@ -117,7 +117,7 @@ Currently the maven build on Windows requires to disable the tests and will fail
 
 ## Contributing
 
-Contributing to Eclipse Kura is funny and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
+Contributing to Eclipse Kura is fun and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
 
 
 ## Target Gateways Installers

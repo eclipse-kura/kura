@@ -2,8 +2,10 @@ Eclipse Kura™
 =============
 
 <div align="center">
+
 [![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
 [![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 </div>
 
 An OSGi-based Application Framework for M2M Service Gateways

@@ -120,8 +120,9 @@ public class PositionServiceOptions {
                 && getStaticLongitude() == other.getStaticLongitude()
                 && getStaticAltitude() == other.getStaticAltitude() && getPort().equals(other.getPort())
                 && getBaudRate() == other.getBaudRate() && getBitsPerWord() == other.getBitsPerWord()
-                && getStopBits() == other.getStopBits() && getParity() == other.getParity();
-
+                && getStopBits() == other.getStopBits() && getParity() == other.getParity()
+                && getPositionProvider().equals(other.getPositionProvider())
+                && getGpsdHost().equals(other.getGpsdHost()) && getGpsdPort() == other.getGpsdPort();
     }
 
     private static final class Property<T> {

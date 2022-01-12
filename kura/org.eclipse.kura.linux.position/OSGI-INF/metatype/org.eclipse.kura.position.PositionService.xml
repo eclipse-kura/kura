@@ -47,13 +47,14 @@
             <Option label="serial" value="serial" />
             <Option label="gpsd" value="gpsd" />
             
+        </AD>
         <AD id="gpsd.host" 
             name="gpsd.host" 
             type="String"
             cardinality="0"
             required="false"
             default="localhost"
-            description="Host where the gpsd service is running.">
+            description="Host where the gpsd service is running." />
             
         <AD id="gpsd.port" 
             name="gpsd.port"
@@ -61,7 +62,7 @@
             cardinality="0"
             required="false"
             default="2947"
-            description="Port where the gpsd service is running.">
+            description="Port where the gpsd service is running." />
         	
        	<AD id="latitude"
        		name="latitude"

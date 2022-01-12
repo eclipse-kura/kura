@@ -23,4 +23,5 @@
    <reference bind="setPositionProviders" cardinality="1..n" interface="org.eclipse.kura.linux.position.PositionProvider" name="PositionProviders" policy="static" unbind="unsetPositionProviders"/>
    
    <property name="service.pid" value="org.eclipse.kura.position.PositionService"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
 </scr:component>

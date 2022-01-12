@@ -57,7 +57,7 @@ Use the following commands in a terminal
 For Java  
 ```
 brew tap adoptopenjdk/openjdk 
-brew cask install adoptopenjdk8   
+brew install --cask adoptopenjdk8   
 ```
 Make sure to set this version in your path, this can be done by:
 ```

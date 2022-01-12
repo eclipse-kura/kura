@@ -55,31 +55,31 @@ Using [Brew](https://brew.sh/) you can easily install both Java and Maven from t
 Use the following commands in a terminal
 
 For Java  
-```
+```bash
 brew tap adoptopenjdk/openjdk 
 ```
-```
+```bash
 brew install --cask adoptopenjdk8   
 ```
 Make sure to set this version in your path, this can be done by:
-```
+```bash
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
 ```
 Run `java -version` to make sure it is installed correctly.  
 
 For Maven
-```
+```bash
 brew install maven@3.5
 ```
 Run `mvn -version` to ensure that Maven has been added to the PATH.
 If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
-```
+```bash
 export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
 ```
 
 #### Installing Prerequisites in Linux
 For Java
-```
+```bash
 sudo apt install openjdk-8-jdk
 ```
 For Maven   

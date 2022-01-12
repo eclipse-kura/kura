@@ -47,8 +47,9 @@ public class UseGpsdPositionProviderTest {
     @Test
     public void startGpsdPositionProvider() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
 
-        whenPropertiesAre(defaultProperties());
+        whenGpsdProviderIsStarted();
 
         thenIsStartedProperly();
     }
@@ -56,8 +57,9 @@ public class UseGpsdPositionProviderTest {
     @Test
     public void stopGpsdPositionProvider() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
 
-        whenPropertiesAre(defaultProperties());
+        whenGpsdProviderIsStopped();
 
         thenIsStoppedProperly();
     }
@@ -65,88 +67,88 @@ public class UseGpsdPositionProviderTest {
     @Test
     public void getPositionFromBoltgate1012Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(BOLTGATE_10_12_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenPositionIsNotNull();
     }
 
     @Test
     public void getPositionFromBoltgate1012Stream2() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(BOLTGATE_10_12_JSON_STREAM_2);
 
-        thenIsStartedProperly();
         thenPositionIsNotNull();
     }
 
     @Test
     public void getPositionFromDynaGate2030Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenPositionIsNotNull();
     }
 
     @Test
     public void verifyPositionIsLockedFromDynaGate2030Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenPositionIsLocked();
     }
 
     @Test
     public void getNmeaPositionFromDynaGate2030Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenNmeaPositionIsNotNull();
     }
 
     @Test
     public void getNmeaDateFromDynaGate2030Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenNmeaDateIsNotAvailable();
     }
 
     @Test
     public void getNmeaTimeFromDynaGate2030Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenNmeaTimeIsNotAvailable();
     }
 
     @Test
     public void getDateTimeFromDynaGate2030Stream() {
         givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
 
-        whenPropertiesAre(defaultProperties());
         whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
 
-        thenIsStartedProperly();
         thenDateTimeIsNotNull();
     }
 
@@ -154,7 +156,7 @@ public class UseGpsdPositionProviderTest {
         this.gpsdPositionProvider = new GpsdPositionProvider();
     }
 
-    private void whenPropertiesAre(Map<String, Object> properties) {
+    private void givenProperties(Map<String, Object> properties) {
         this.gpsdPositionProvider.init(createOptionsFromProperties(properties), null, null);
         this.gpsEndpointMock = mock(GPSdEndpoint.class);
         try {
@@ -162,6 +164,10 @@ public class UseGpsdPositionProviderTest {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
+    }
+
+    private void givenGpsdProviderIsStarted() {
+        gpsdPositionProviderStart();
     }
 
     private void whenNMEAStreamArriveFrom(String filename) {
@@ -185,13 +191,19 @@ public class UseGpsdPositionProviderTest {
 
     }
 
+    private void whenGpsdProviderIsStarted() {
+        gpsdPositionProviderStart();
+    }
+
+    private void whenGpsdProviderIsStopped() {
+        this.gpsdPositionProvider.stop();
+    }
+
     private void thenIsStartedProperly() {
-        this.gpsdPositionProvider.start();
         verify(this.gpsEndpointMock).start();
     }
 
     private void thenIsStoppedProperly() {
-        this.gpsdPositionProvider.stop();
         verify(this.gpsEndpointMock).stop();
     }
 
@@ -225,6 +237,10 @@ public class UseGpsdPositionProviderTest {
 
     private void thenPositionIsLocked() {
         assertTrue(this.gpsdPositionProvider.isLocked());
+    }
+
+    private void gpsdPositionProviderStart() {
+        this.gpsdPositionProvider.start();
     }
 
     private PositionServiceOptions createOptionsFromProperties(Map<String, Object> properties) {

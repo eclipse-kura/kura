@@ -72,7 +72,10 @@ For Maven
 brew install maven@3.5
 ```
 Run `mvn -version` to ensure that Maven has been added to the PATH.
-If Maven cannot be found, try running `brew link maven@3.5 --force`.  
+If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
+```
+export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
+```
 
 #### Installing Prerequisites in Linux
 For Java

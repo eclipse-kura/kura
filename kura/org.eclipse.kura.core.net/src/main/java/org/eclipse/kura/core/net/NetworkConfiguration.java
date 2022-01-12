@@ -108,7 +108,7 @@ public class NetworkConfiguration {
     private static final Boolean DEFAULT_DIVERSITY_ENABLED_VALUE = false;
     private static final Boolean DEFAULT_ENABLED_VALUE = false;
     private static final Integer DEFAULT_PROFILE_ID_VALUE = 0;
-    private static final Integer DEFAULT_PPP_NUMBER_VALUE = 0;
+    // private static final Integer DEFAULT_PPP_NUMBER_VALUE = 0;
     private static final Integer DEFAULT_DATA_COMPRESSION_VALUE = 0;
     private static final Integer DEFAULT_HEADER_COMPRESSION_VALUE = 0;
 
@@ -1064,7 +1064,7 @@ public class NetworkConfiguration {
         modemConfig.setPassword(getPassword(prefix, properties));
         modemConfig.setPdpType(getPdpType(prefix, properties));
         modemConfig.setProfileID(getProfileId(prefix, properties));
-        modemConfig.setPppNumber(getPppNumber(prefix, properties));
+        // modemConfig.setPppNumber(getPppNumber(prefix, properties));
         modemConfig.setPersist(isPersist(prefix, properties));
         modemConfig.setMaxFail(getMaximumFailures(prefix, properties));
         modemConfig.setResetTimeout(getResetTimeout(prefix, properties));
@@ -1146,11 +1146,11 @@ public class NetworkConfiguration {
         return value != null ? (Integer) value : DEFAULT_PROFILE_ID_VALUE;
     }
 
-    private static int getPppNumber(String prefix, Map<String, Object> properties) {
-        String key = prefix + PPP_NUM;
-        Object value = properties.getOrDefault(key, DEFAULT_PPP_NUMBER_VALUE);
-        return value != null ? (Integer) value : DEFAULT_PPP_NUMBER_VALUE;
-    }
+    // private static int getPppNumber(String prefix, Map<String, Object> properties) {
+    // String key = prefix + PPP_NUM;
+    // Object value = properties.getOrDefault(key, DEFAULT_PPP_NUMBER_VALUE);
+    // return value != null ? (Integer) value : DEFAULT_PPP_NUMBER_VALUE;
+    // }
 
     private static PdpType getPdpType(String prefix, Map<String, Object> properties) {
         String key = prefix + "pdpType";
@@ -2044,7 +2044,8 @@ public class NetworkConfiguration {
                 logger.trace("Adding modem netconfig");
 
                 ModemConfig modemConfig = getModemConfig(netIfConfigPrefix, props);
-                ((ModemInterfaceConfigImpl) netInterfaceConfig).setPppNum(modemConfig.getPppNumber());
+                modemConfig.setPppNumber(((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum());
+                // ((ModemInterfaceConfigImpl) netInterfaceConfig).setPppNum(modemConfig.getPppNumber());
                 netConfigs.add(modemConfig);
             }
         }

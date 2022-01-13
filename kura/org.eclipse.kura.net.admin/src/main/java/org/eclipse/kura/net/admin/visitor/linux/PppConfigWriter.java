@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -57,31 +57,35 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
     public static final String OS_PPP_LOG_DIRECTORY = "/var/log/";
     public static final String OS_SCRIPTS_DIRECTORY = OS_PPP_DIRECTORY + "scripts/";
     public static final String DNS_DELIM = ",";
-    
-    private boolean logEnabled;
+
+    private final boolean logEnabled;
 
     public PppConfigWriter() {
         createSystemFolders();
-        
+
+        this.logEnabled = getPPPLogStatus();
+    }
+
+    protected boolean getPPPLogStatus() {
         final BundleContext ctx = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 
         final ServiceReference<SystemService> systemServiceRef = ctx.getServiceReference(SystemService.class);
         if (systemServiceRef == null) {
-            this.logEnabled = true;
-            return;
+            return true;
         }
 
         final SystemService service = ctx.getService(systemServiceRef);
         if (service == null) {
-            this.logEnabled = true;
-            return;
+            return true;
         }
 
+        boolean enabled = false;
         try {
-            this.logEnabled = service.isLegacyPPPLoggingEnabled();
+            enabled = service.isLegacyPPPLoggingEnabled();
         } finally {
             ctx.ungetService(systemServiceRef);
         }
+        return enabled;
     }
 
     protected void createSystemFolders() {
@@ -221,7 +225,7 @@ public class PppConfigWriter implements NetworkConfigurationVisitor {
         if (!this.logEnabled) {
             return null;
         }
-        
+
         StringBuilder buf = new StringBuilder();
         buf.append(OS_PPP_LOG_DIRECTORY);
         buf.append("kura-");

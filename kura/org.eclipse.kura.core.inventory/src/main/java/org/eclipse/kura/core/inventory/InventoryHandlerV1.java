@@ -58,6 +58,9 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.eurotech.framework.docker.ContainerDescriptor;
+import com.eurotech.framework.docker.DockerService;
+
 public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryHandlerV1.class);
@@ -66,6 +69,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String RESOURCE_DEPLOYMENT_PACKAGES = "deploymentPackages";
     public static final String RESOURCE_BUNDLES = "bundles";
     public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
+    public static final String RESOURCE_DOCKER_CONTAINERS = "dockerContainers";
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
@@ -82,11 +86,23 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     private SystemService systemService;
     private BundleContext bundleContext;
 
+    private DockerService dockerService;
+
     // ----------------------------------------------------------------
     //
     // Dependencies
     //
     // ----------------------------------------------------------------
+
+    public void setDockerService(DockerService dockerService) {
+        this.dockerService = dockerService;
+    }
+
+    public void unsetDockerService(DockerService dockerService) {
+        if (this.dockerService == dockerService) {
+            this.dockerService = null;
+        }
+    }
 
     protected void setDeploymentAdmin(DeploymentAdmin deploymentAdmin) {
         this.deploymentAdmin = deploymentAdmin;
@@ -160,6 +176,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             resPayload = doGetBundles();
         } else if (resources.get(0).equals(RESOURCE_SYSTEM_PACKAGES)) {
             resPayload = doGetSystemPackages();
+        } else if (resources.get(0).equals(RESOURCE_DOCKER_CONTAINERS)) {
+            resPayload = doGetDockerContainers();
         } else {
             logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
             logger.error(CANNOT_FIND_RESOURCE_MESSAGE, resources.get(0));
@@ -311,7 +329,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private KuraPayload doGetInventory() {
         List<SystemResourceInfo> inventory = new ArrayList<>();
-
+        logger.error("TEST MESSAGE");
         // get System Packages
         try {
             inventory.addAll(this.systemService.getSystemPackages());
@@ -329,8 +347,19 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         Arrays.asList(dps).stream().forEach(dp -> inventory
                 .add(new SystemResourceInfo(dp.getName(), dp.getVersion().toString(), SystemResourceType.DP)));
 
-        // get Containers
-        // to be defined...
+        // get Docker Containers
+        if (this.dockerService != null) {
+            try {
+                logger.info("Creating docker invenetory");
+                ContainerDescriptor[] containers = this.dockerService.listByContainerDescriptor();
+                Arrays.asList(containers).stream().forEach(
+                        container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
+                                container.getContainerImage(), SystemResourceType.DOCKER)));
+            } catch (Exception e) {
+                logger.error("Could not connect to docker");
+            }
+
+        }
 
         inventory.sort(Comparator.comparing(SystemResourceInfo::getName));
         SystemResourcesInfo systemResourcesInfo = new SystemResourcesInfo(inventory);
@@ -358,6 +387,23 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             SystemPackages systemPackages = new SystemPackages(systemPackageList);
 
             String s = marshal(systemPackages);
+            respPayload.setTimestamp(new Date());
+            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+        } catch (Exception e) {
+            logger.error(ERROR_GETTING_RESOURCE, RESOURCE_SYSTEM_PACKAGES, e);
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+        }
+
+        return respPayload;
+    }
+
+    private KuraPayload doGetDockerContainers() {
+        List<ContainerDescriptor> containerList;
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        try {
+            ContainerDescriptor[] containers = this.dockerService.listByContainerDescriptor();
+
+            String s = marshal(containers);
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -521,7 +521,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             wifiInterface.setCapabilities(this.linuxNetworkUtil.getWifiCapabilities(interfaceName));
         } catch (final Exception e) {
             logger.warn("failed to get capabilities for {}", interfaceName);
-            logger.debug("excepton", e);
+            logger.debug("exception", e);
             wifiInterface.setCapabilities(EnumSet.noneOf(Capability.class));
         }
 

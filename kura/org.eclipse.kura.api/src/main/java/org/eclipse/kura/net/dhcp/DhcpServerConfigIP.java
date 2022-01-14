@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -321,15 +321,16 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("# enabled? ").append(this.enabled).append("\n");
-        sb.append("# prefix: ").append(this.prefix).append("\n");
-        sb.append("# pass DNS? ").append(this.passDns).append("\n\n");
+        sb.append("Enabled? ").append(this.enabled).append(" :: ");
+        sb.append("Prefix: ").append(this.prefix).append(" :: ");
+        sb.append("PassDNS? ").append(this.passDns).append("\n");
 
-        sb.append("subnet " + this.subnet.getHostAddress() + " netmask " + this.subnetMask.getHostAddress() + " {\n");
+        sb.append(
+                "\t\tsubnet " + this.subnet.getHostAddress() + " netmask " + this.subnetMask.getHostAddress() + " {\n");
 
         // DNS servers
         if (this.passDns && this.dnsServers != null && !this.dnsServers.isEmpty()) {
-            sb.append("    option domain-name-servers ");
+            sb.append("\t\t\toption domain-name-servers ");
             for (int i = 0; i < this.dnsServers.size(); i++) {
                 if (this.dnsServers.get(i) != null) {
                     sb.append(this.dnsServers.get(i).getHostAddress());
@@ -344,28 +345,28 @@ public abstract class DhcpServerConfigIP<T extends IPAddress> implements DhcpSer
         }
         // interface
         if (this.interfaceName != null) {
-            sb.append("    interface " + this.interfaceName + ";\n");
+            sb.append("\t\t\tinterface " + this.interfaceName + ";\n");
         }
         // router address
         if (this.routerAddress != null) {
-            sb.append("    option routers " + this.routerAddress.getHostAddress() + ";\n");
+            sb.append("\t\t\toption routers " + this.routerAddress.getHostAddress() + ";\n");
         }
         // if DNS should not be forwarded, add the following lines
         if (!this.passDns) {
-            sb.append("    ddns-update-style none;\n");
-            sb.append("    ddns-updates off;\n");
+            sb.append("\t\t\tddns-update-style none;\n");
+            sb.append("\t\t\tddns-updates off;\n");
         }
         // Lease times
-        sb.append("    default-lease-time " + this.defaultLeaseTime + ";\n");
+        sb.append("\t\t\tdefault-lease-time " + this.defaultLeaseTime + ";\n");
         if (this.maximumLeaseTime > -1) {
-            sb.append("    max-lease-time " + this.maximumLeaseTime + ";\n");
+            sb.append("\t\t\tmax-lease-time " + this.maximumLeaseTime + ";\n");
         }
 
         // Add the pool and range
-        sb.append("    pool {\n");
-        sb.append("        range " + this.rangeStart.getHostAddress() + " " + this.rangeEnd.getHostAddress() + ";\n");
-        sb.append("    }\n");
-        sb.append("}\n");
+        sb.append("\t\t\tpool {\n");
+        sb.append("\t\t\t\trange " + this.rangeStart.getHostAddress() + " " + this.rangeEnd.getHostAddress() + ";\n");
+        sb.append("\t\t\t}\n");
+        sb.append("\t\t}\n");
 
         return sb.toString();
     }

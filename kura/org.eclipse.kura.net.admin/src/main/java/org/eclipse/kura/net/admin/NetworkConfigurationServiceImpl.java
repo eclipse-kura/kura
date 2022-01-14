@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -302,6 +302,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
+        // This method returns the network configuration properties without the current values.
+        // i.e. the ip address that should be applied to the system, but not the actual one.
         logger.debug("getConfiguration()");
         return new ComponentConfigurationImpl(PID, getDefinition(),
                 getNetworkConfiguration().getConfigurationProperties());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -19,8 +19,15 @@ public interface NetworkConfigurationService {
 
     public static final String PID = "org.eclipse.kura.net.admin.NetworkConfigurationService";
 
+    /*
+     * Sets the network configuration and write it into the system.
+     */
     public void setNetworkConfiguration(NetworkConfiguration networkConfiguration) throws KuraException;
 
+    /*
+     * Returns the current network configuration with actual and desired properties.
+     * i.e. the current ip address as read from the system and the ip address that should be applied.
+     */
     public NetworkConfiguration getNetworkConfiguration() throws KuraException;
 
 }

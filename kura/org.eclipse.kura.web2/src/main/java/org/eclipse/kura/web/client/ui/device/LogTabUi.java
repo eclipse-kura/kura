@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.LogPollService;
 import org.eclipse.kura.web.shared.model.GwtLogEntry;
@@ -32,10 +33,13 @@ import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.Row;
+import org.gwtbootstrap3.client.ui.Form;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -62,7 +66,7 @@ public class LogTabUi extends Composite {
     @UiField
     Button execute;
     @UiField
-    FormPanel logForm;
+    Form logForm;
     @UiField
     FormLabel logLabel;
     @UiField
@@ -85,6 +89,35 @@ public class LogTabUi extends Composite {
     private boolean hasLogProvider = false;
     private boolean autoFollow = true;
 
+    private static final int DOWNLOAD_COMPLETE_WAIT_TIMEOUT = 5000;
+    private static final Timer waitDownloadCompleted = new Timer() {
+
+        // safety parameter, 9 = 45secs
+        private short retryLimit = 9;
+
+        @Override
+        public void run() {
+            if (Cookies.getCookie("LogsDownload") != null) {
+                hideModalAndStop();
+            }
+
+            // eventually regain access to the UI
+            if (this.retryLimit <= 0) {
+                hideModalAndStop();
+            }
+
+            this.retryLimit--;
+            this.schedule(DOWNLOAD_COMPLETE_WAIT_TIMEOUT);
+        }
+
+        private void hideModalAndStop() {
+            EntryClassUi.hideWaitModal();
+            Cookies.removeCookie("LogsDownload", "/");
+            this.cancel();
+        }
+
+    };
+
     public LogTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -102,6 +135,10 @@ public class LogTabUi extends Composite {
                     @Override
                     public void onSuccess(GwtXSRFToken token) {
                         LogTabUi.this.logForm.submit();
+
+                        EntryClassUi.showWaitModal();
+                        Cookies.removeCookie("LogsDownload", "/");
+                        LogTabUi.waitDownloadCompleted.schedule(DOWNLOAD_COMPLETE_WAIT_TIMEOUT);
                     }
                 }));
 

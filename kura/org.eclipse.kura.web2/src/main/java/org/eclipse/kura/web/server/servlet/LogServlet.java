@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -117,6 +118,10 @@ public class LogServlet extends AuditServlet {
         try {
             byte[] zip = zipFiles(fileList);
             ServletOutputStream sos = httpServletResponse.getOutputStream();
+
+            Cookie downloadedCookie = new Cookie("LogsDownload", "finished");
+            downloadedCookie.setPath("/");
+            httpServletResponse.addCookie(downloadedCookie);
             httpServletResponse.setContentType("application/zip");
             httpServletResponse.setHeader("Content-Disposition", "attachment; filename=\"Kura_Logs.zip\"");
 

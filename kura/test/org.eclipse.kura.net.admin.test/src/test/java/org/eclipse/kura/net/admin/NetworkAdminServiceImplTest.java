@@ -326,7 +326,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertFalse(config.isAutoConnect());
 
             List<? extends NetInterfaceAddressConfig> addresses = config.getNetInterfaceAddresses();
@@ -567,7 +566,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertTrue(config.isAutoConnect());
 
             List<? extends NetInterfaceAddressConfig> addresses = config.getNetInterfaceAddresses();
@@ -828,7 +826,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertFalse(config.isAutoConnect());
 
             List<? extends NetInterfaceAddressConfig> addresses = config.getNetInterfaceAddresses();

@@ -79,7 +79,6 @@ public class NetworkConfiguration {
     private static final String HARDWARE_MODE = ".hardwareMode";
     private static final String PASSPHRASE = ".passphrase";
     private static final String SECURITY_TYPE = ".securityType";
-    private static final String PPP_NUM = "pppNum";
     private static final String AUTOCONNECT = "autoconnect";
     private static final String NET_INTERFACE = "net.interface.";
     private static final String NET_INTERFACES = "net.interfaces";
@@ -315,7 +314,6 @@ public class NetworkConfiguration {
         sb.append(" :: Data Compression: " + ((ModemConfig) netConfig).getDataCompression());
         sb.append(" :: Dial String: " + ((ModemConfig) netConfig).getDialString());
         sb.append(" :: Header Compression: " + ((ModemConfig) netConfig).getHeaderCompression());
-        sb.append(" :: Password: " + ((ModemConfig) netConfig).getPasswordAsPassword().toString());
         sb.append(" :: PPP number: " + ((ModemConfig) netConfig).getPppNumber());
         sb.append(" :: Profile ID: " + ((ModemConfig) netConfig).getProfileID());
         sb.append(" :: Username: " + ((ModemConfig) netConfig).getUsername());
@@ -425,7 +423,7 @@ public class NetworkConfiguration {
     }
 
     protected void appendDhcpServerConfig(StringBuilder sb, NetConfig netConfig) {
-        sb.append("\n\tDhcpServerConfig :: ");
+        sb.append("\n\tDhcpServerConfig :: \n");
         sb.append(((DhcpServerConfig) netConfig).toString());
     }
 
@@ -589,16 +587,13 @@ public class NetworkConfiguration {
                         addModemConfigProperties((ModemConfig) netConfig, netIfConfigPrefix, newNetworkProperties);
                     } else if (netConfig instanceof NetConfigIP4) {
                         logger.trace("adding netconfig NetConfigIP4 for {}", netInterfaceConfig.getName());
-                        addNetConfigIP4Properties((NetConfigIP4) netConfig, netIfConfigPrefix,
-                                newNetworkProperties);
+                        addNetConfigIP4Properties((NetConfigIP4) netConfig, netIfConfigPrefix, newNetworkProperties);
                     } else if (netConfig instanceof NetConfigIP6) {
                         logger.trace("adding netconfig NetConfigIP6 for {}", netInterfaceConfig.getName());
-                        addNetConfigIP6Properties((NetConfigIP6) netConfig, netIfConfigPrefix,
-                                newNetworkProperties);
+                        addNetConfigIP6Properties((NetConfigIP6) netConfig, netIfConfigPrefix, newNetworkProperties);
                     } else if (netConfig instanceof DhcpServerConfig4) {
                         logger.trace("adding netconfig DhcpServerConfig4 for {}", netInterfaceConfig.getName());
-                        addDhcpServerConfig4((DhcpServerConfig4) netConfig, netIfConfigPrefix,
-                                newNetworkProperties);
+                        addDhcpServerConfig4((DhcpServerConfig4) netConfig, netIfConfigPrefix, newNetworkProperties);
                     } else if (netConfig instanceof FirewallAutoNatConfig) {
                         logger.trace("adding netconfig FirewallNatConfig for {}", netInterfaceConfig.getName());
                         addFirewallNatConfig(netIfConfigPrefix, newNetworkProperties);
@@ -901,7 +896,6 @@ public class NetworkConfiguration {
                 modemConfig.getIpAddress() != null ? modemConfig.getIpAddress().toString() : "");
         properties.put(prefix + "password", modemConfig.getPasswordAsPassword());
         properties.put(prefix + "pdpType", modemConfig.getPdpType() != null ? modemConfig.getPdpType().toString() : "");
-        properties.put(prefix + PPP_NUM, modemConfig.getPppNumber());
         properties.put(prefix + "persist", modemConfig.isPersist());
         properties.put(prefix + "maxFail", modemConfig.getMaxFail());
         properties.put(prefix + "idle", modemConfig.getIdle());

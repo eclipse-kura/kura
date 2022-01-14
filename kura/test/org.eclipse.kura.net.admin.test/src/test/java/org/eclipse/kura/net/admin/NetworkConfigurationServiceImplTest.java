@@ -432,19 +432,15 @@ public class NetworkConfigurationServiceImplTest {
         Map<String, Object> properties = configuration.getConfigurationProperties();
 
         assertNotNull(properties);
-        assertEquals(62, properties.size());
+        assertEquals(19, properties.size());
         assertEquals("eth2", properties.get("net.interface.eth2.config.name"));
         assertEquals("ETHERNET", properties.get("net.interface.eth2.type"));
-        assertFalse((boolean) properties.get("net.interface.eth2.up"));
         assertEquals("lo", properties.get("net.interface.lo.config.name"));
         assertEquals("LOOPBACK", properties.get("net.interface.lo.type"));
-        assertFalse((boolean) properties.get("net.interface.lo.up"));
         assertEquals("ppp1", properties.get("net.interface.ppp1.config.name"));
         assertEquals("MODEM", properties.get("net.interface.ppp1.type"));
-        assertFalse((boolean) properties.get("net.interface.ppp1.up"));
         assertEquals("wlan1", properties.get("net.interface.wlan1.config.name"));
         assertEquals("WIFI", properties.get("net.interface.wlan1.type"));
-        assertTrue((boolean) properties.get("net.interface.wlan1.up"));
 
         OCD ocd = configuration.getDefinition();
 

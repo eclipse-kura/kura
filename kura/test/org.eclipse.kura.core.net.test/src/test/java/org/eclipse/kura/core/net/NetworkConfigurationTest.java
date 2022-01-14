@@ -101,7 +101,6 @@ public class NetworkConfigurationTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("net.interfaces", interfaces);
         properties.put("net.interface.if1.type", "ETHERNET");
-        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         NetworkConfiguration config = new NetworkConfiguration(properties);
 
@@ -118,7 +117,6 @@ public class NetworkConfigurationTest {
         interfaceAddresses.add(addressConfig);
 
         EthernetInterfaceConfigImpl interfaceConfig = new EthernetInterfaceConfigImpl("if1");
-        interfaceConfig.setState(NetInterfaceState.DISCONNECTED);
         interfaceConfig.setNetInterfaceAddresses(interfaceAddresses);
 
         assertEquals(interfaceConfig, config.getNetInterfaceConfigs().get(0));
@@ -131,7 +129,6 @@ public class NetworkConfigurationTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("net.interfaces", "if1,if2");
         properties.put("net.interface.if1.type", "ETHERNET");
-        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         NetworkConfiguration config = new NetworkConfiguration(properties);
 
@@ -148,7 +145,6 @@ public class NetworkConfigurationTest {
         interfaceAddresses.add(addressConfig);
 
         EthernetInterfaceConfigImpl interfaceConfig = new EthernetInterfaceConfigImpl("if1");
-        interfaceConfig.setState(NetInterfaceState.DISCONNECTED);
         interfaceConfig.setNetInterfaceAddresses(interfaceAddresses);
 
         assertEquals(interfaceConfig, config.getNetInterfaceConfigs().get(0));
@@ -659,7 +655,7 @@ public class NetworkConfigurationTest {
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null"
                 + " :: Type: WIFI :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null"
                 + " :: Broadcast: false :: Group Ciphers: null :: Hardware Mode: null :: Mode: null"
-                + " :: Pairwise Ciphers: null :: Passkey: null :: Security: null";
+                + " :: Pairwise Ciphers: null :: Security: null";
 
         assertEquals(expected, config.toString());
     }
@@ -687,7 +683,7 @@ public class NetworkConfigurationTest {
         String expected = "\nname: if1 :: Loopback? false :: Point to Point? false :: Up? false :: Virtual? false"
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null :: Type: WIFI"
                 + " :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null :: Broadcast: false"
-                + " :: Group Ciphers: null :: Hardware Mode: null :: Mode: null :: Pairwise Ciphers: null :: Passkey: null"
+                + " :: Group Ciphers: null :: Hardware Mode: null :: Mode: null :: Pairwise Ciphers: null"
                 + " :: Security: null";
 
         assertEquals(expected, config.toString());
@@ -717,7 +713,7 @@ public class NetworkConfigurationTest {
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null :: Type: WIFI"
                 + " :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null :: Broadcast: false"
                 + " :: Channels: 1,2 :: Group Ciphers: null :: Hardware Mode: null :: Mode: null :: Pairwise Ciphers: null"
-                + " :: Passkey: null :: Security: null";
+                + " :: Security: null";
 
         assertEquals(expected, config.toString());
     }
@@ -755,7 +751,7 @@ public class NetworkConfigurationTest {
         String expected = "\nname: if1 :: Loopback? false :: Point to Point? false :: Up? false :: Virtual? false"
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null"
                 + " :: Type: MODEM :: Usb Device: null :: Prefix: 0\n	ModemConfig  :: APN: apn :: Data Compression: 0"
-                + " :: Dial String: dialString :: Header Compression: 0 :: Password: password :: PPP number: 0"
+                + " :: Dial String: dialString :: Header Compression: 0 :: PPP number: 0"
                 + " :: Profile ID: 0 :: Username: username :: Auth Type: AUTO :: IP Address: 10.0.0.2 :: PDP Type: PPP";
 
         assertEquals(expected, config.toString());
@@ -798,7 +794,12 @@ public class NetworkConfigurationTest {
 
         String expected = "\nname: if1 :: Loopback? false :: Point to Point? false :: Up? false :: Virtual? false"
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null"
-                + " :: Type: ETHERNET :: Usb Device: null :: Prefix: 0\n	DhcpServerConfig \n	FirewallAutoNatConfig "
+                + " :: Type: ETHERNET :: Usb Device: null :: Prefix: 0\n	DhcpServerConfig :: \n# enabled? true\n"
+                + "# prefix: 24\n" + "# pass DNS? false\n" + "\n" + "subnet 192.168.1.0 netmask 255.255.255.0 {\n"
+                + "    interface eth0;\n" + "    option routers 192.168.1.1;\n" + "    ddns-update-style none;\n"
+                + "    ddns-updates off;\n" + "    default-lease-time 7200;\n" + "    max-lease-time 7200;\n"
+                + "    pool {\n" + "        range 192.168.1.100 192.168.1.254;\n" + "    }\n"
+                + "}\n\n	FirewallAutoNatConfig "
                 + "\n	NULL NETCONFIG PRESENT?!?\n	UNKNOWN CONFIG TYPE???: org.eclipse.kura.core.net.MockConfig";
 
         assertEquals(expected, config.toString());
@@ -912,19 +913,10 @@ public class NetworkConfigurationTest {
 
         Map<String, Object> expected = new HashMap<>();
         expected.put("net.interfaces", "if1");
-        expected.put("net.interface.if1.mac", "N/A");
-        expected.put("net.interface.if1.loopback", false);
-        expected.put("net.interface.if1.ptp", false);
-        expected.put("net.interface.if1.up", false);
-        expected.put("net.interface.if1.virtual", false);
         expected.put("net.interface.if1.type", "ETHERNET");
-        expected.put("net.interface.if1.driver", null);
-        expected.put("net.interface.if1.driver.version", null);
-        expected.put("net.interface.if1.firmware.version", null);
         expected.put("net.interface.if1.config.name", "if1");
         expected.put("net.interface.if1.config.autoconnect", false);
         expected.put("net.interface.if1.config.mtu", 0);
-        expected.put("net.interface.if1.eth.link.up", false);
 
         assertMapEquals(expected, properties);
     }
@@ -1092,7 +1084,6 @@ public class NetworkConfigurationTest {
         NetworkConfiguration config = new NetworkConfiguration();
 
         EthernetInterfaceConfigImpl netInterfaceConfig1 = new EthernetInterfaceConfigImpl("if1");
-        netInterfaceConfig1.setState(NetInterfaceState.ACTIVATED);
         netInterfaceConfig1.setUsbDevice(new UsbBlockDevice("vendorId", "productId", "vendorName", "productName",
                 "usbBusNumber", "usbDevicePath", "deviceNode"));
         config.addNetInterfaceConfig(netInterfaceConfig1);
@@ -1140,46 +1131,13 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> expected = new HashMap<>();
         expected.put("net.interface.if1.type", "ETHERNET");
         expected.put("net.interface.if1.config.name", "if1");
-        expected.put("net.interface.if1.config.state", "ACTIVATED");
         expected.put("net.interface.if1.config.autoconnect", netInterfaceConfig1.isAutoConnect());
         expected.put("net.interface.if1.config.mtu", netInterfaceConfig1.getMTU());
-        expected.put("net.interface.if1.driver", netInterfaceConfig1.getDriver());
-        expected.put("net.interface.if1.driver.version", netInterfaceConfig1.getDriverVersion());
-        expected.put("net.interface.if1.firmware.version", netInterfaceConfig1.getFirmwareVersion());
-        expected.put("net.interface.if1.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig1.getHardwareAddress()));
-        expected.put("net.interface.if1.loopback", netInterfaceConfig1.isLoopback());
-        expected.put("net.interface.if1.ptp", netInterfaceConfig1.isPointToPoint());
-        expected.put("net.interface.if1.up", netInterfaceConfig1.isUp());
-        expected.put("net.interface.if1.virtual", netInterfaceConfig1.isVirtual());
-        expected.put("net.interface.if1.usb.vendor.id", "vendorId");
-        expected.put("net.interface.if1.usb.vendor.name", "vendorName");
-        expected.put("net.interface.if1.usb.product.id", "productId");
-        expected.put("net.interface.if1.usb.product.name", "productName");
-        expected.put("net.interface.if1.usb.busNumber", "usbBusNumber");
-        expected.put("net.interface.if1.usb.devicePath", "usbDevicePath");
-        expected.put("net.interface.if1.eth.link.up", netInterfaceConfig1.isLinkUp());
 
         expected.put("net.interface.if2.type", "ETHERNET");
         expected.put("net.interface.if2.config.name", "if2");
         expected.put("net.interface.if2.config.autoconnect", netInterfaceConfig2.isAutoConnect());
         expected.put("net.interface.if2.config.mtu", netInterfaceConfig2.getMTU());
-        expected.put("net.interface.if2.driver", netInterfaceConfig2.getDriver());
-        expected.put("net.interface.if2.driver.version", netInterfaceConfig2.getDriverVersion());
-        expected.put("net.interface.if2.firmware.version", netInterfaceConfig2.getFirmwareVersion());
-        expected.put("net.interface.if2.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig2.getHardwareAddress()));
-        expected.put("net.interface.if2.loopback", netInterfaceConfig2.isLoopback());
-        expected.put("net.interface.if2.ptp", netInterfaceConfig2.isPointToPoint());
-        expected.put("net.interface.if2.up", netInterfaceConfig2.isUp());
-        expected.put("net.interface.if2.virtual", netInterfaceConfig2.isVirtual());
-        expected.put("net.interface.if2.eth.link.up", netInterfaceConfig2.isLinkUp());
-        expected.put("net.interface.if2.ip4.address", "10.0.0.10");
-        expected.put("net.interface.if2.ip4.broadcast", "10.0.0.255");
-        expected.put("net.interface.if2.ip4.gateway", "10.0.0.1");
-        expected.put("net.interface.if2.ip4.netmask", "255.255.255.0");
-        expected.put("net.interface.if2.ip4.prefix", (short) 24);
-        expected.put("net.interface.if2.ip4.dnsServers", "10.0.1.1,10.0.1.2");
         expected.put("net.interface.if2.config.autoconnect", true);
         expected.put("net.interface.if2.config.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("net.interface.if2.config.ip4.dnsServers", "");
@@ -1244,47 +1202,17 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if1.config.name", "if1");
         expected.put("net.interface.if1.config.autoconnect", netInterfaceConfig1.isAutoConnect());
         expected.put("net.interface.if1.config.mtu", netInterfaceConfig1.getMTU());
-        expected.put("net.interface.if1.driver", netInterfaceConfig1.getDriver());
-        expected.put("net.interface.if1.driver.version", netInterfaceConfig1.getDriverVersion());
-        expected.put("net.interface.if1.firmware.version", netInterfaceConfig1.getFirmwareVersion());
-        expected.put("net.interface.if1.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig1.getHardwareAddress()));
-        expected.put("net.interface.if1.loopback", netInterfaceConfig1.isLoopback());
-        expected.put("net.interface.if1.ptp", netInterfaceConfig1.isPointToPoint());
-        expected.put("net.interface.if1.up", netInterfaceConfig1.isUp());
-        expected.put("net.interface.if1.virtual", netInterfaceConfig1.isVirtual());
 
         expected.put("net.interface.if2.type", "WIFI");
         expected.put("net.interface.if2.config.name", "if2");
         expected.put("net.interface.if2.config.autoconnect", netInterfaceConfig2.isAutoConnect());
         expected.put("net.interface.if2.config.mtu", netInterfaceConfig2.getMTU());
-        expected.put("net.interface.if2.driver", netInterfaceConfig2.getDriver());
-        expected.put("net.interface.if2.driver.version", netInterfaceConfig2.getDriverVersion());
-        expected.put("net.interface.if2.firmware.version", netInterfaceConfig2.getFirmwareVersion());
-        expected.put("net.interface.if2.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig2.getHardwareAddress()));
-        expected.put("net.interface.if2.loopback", netInterfaceConfig2.isLoopback());
-        expected.put("net.interface.if2.ptp", netInterfaceConfig2.isPointToPoint());
-        expected.put("net.interface.if2.up", netInterfaceConfig2.isUp());
-        expected.put("net.interface.if2.virtual", netInterfaceConfig2.isVirtual());
-        expected.put("net.interface.if2.wifi.capabilities", "");
 
         expected.put("net.interface.if3.type", "WIFI");
         expected.put("net.interface.if3.config.name", "if3");
         expected.put("net.interface.if3.config.autoconnect", netInterfaceConfig3.isAutoConnect());
         expected.put("net.interface.if3.config.mtu", netInterfaceConfig3.getMTU());
-        expected.put("net.interface.if3.driver", netInterfaceConfig3.getDriver());
-        expected.put("net.interface.if3.driver.version", netInterfaceConfig3.getDriverVersion());
-        expected.put("net.interface.if3.firmware.version", netInterfaceConfig3.getFirmwareVersion());
-        expected.put("net.interface.if3.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig3.getHardwareAddress()));
-        expected.put("net.interface.if3.loopback", netInterfaceConfig3.isLoopback());
-        expected.put("net.interface.if3.ptp", netInterfaceConfig3.isPointToPoint());
-        expected.put("net.interface.if3.up", netInterfaceConfig3.isUp());
-        expected.put("net.interface.if3.virtual", netInterfaceConfig3.isVirtual());
-        expected.put("net.interface.if3.wifi.capabilities", "CIPHER_TKIP CIPHER_CCMP ");
-        expected.put("net.interface.if3.wifi.bitrate", (long) 42);
-        expected.put("net.interface.if3.wifi.mode", null);
+        expected.put("net.interface.if3.config.wifi.mode", "ADHOC");
         expected.put("net.interface.if3.config.wifi.adhoc.ssid", "ssid");
         expected.put("net.interface.if3.config.wifi.adhoc.driver", "driver");
         expected.put("net.interface.if3.config.wifi.adhoc.mode", "ADHOC");
@@ -1330,7 +1258,6 @@ public class NetworkConfigurationTest {
         interfaceAddresses.add(interfaceAddressConfig1);
         ModemInterfaceAddressConfigImpl interfaceAddressConfig2 = new ModemInterfaceAddressConfigImpl();
         interfaceAddressConfig2.setConnectionType(ModemConnectionType.PPP);
-        interfaceAddressConfig2.setConnectionStatus(ModemConnectionStatus.CONNECTED);
         ArrayList<NetConfig> netConfigs = new ArrayList<>();
         ModemConfig netConfig = new ModemConfig();
         netConfig.setApn("apn");
@@ -1368,49 +1295,12 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if1.config.name", "if1");
         expected.put("net.interface.if1.config.autoconnect", netInterfaceConfig1.isAutoConnect());
         expected.put("net.interface.if1.config.mtu", netInterfaceConfig1.getMTU());
-        expected.put("net.interface.if1.driver", netInterfaceConfig1.getDriver());
-        expected.put("net.interface.if1.driver.version", netInterfaceConfig1.getDriverVersion());
-        expected.put("net.interface.if1.firmware.version", netInterfaceConfig1.getFirmwareVersion());
-        expected.put("net.interface.if1.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig1.getHardwareAddress()));
-        expected.put("net.interface.if1.loopback", netInterfaceConfig1.isLoopback());
-        expected.put("net.interface.if1.ptp", netInterfaceConfig1.isPointToPoint());
-        expected.put("net.interface.if1.up", netInterfaceConfig1.isUp());
-        expected.put("net.interface.if1.virtual", netInterfaceConfig1.isVirtual());
-        expected.put("net.interface.if1.manufacturer", netInterfaceConfig1.getManufacturer());
-        expected.put("net.interface.if1.model", netInterfaceConfig1.getModel());
-        expected.put("net.interface.if1.revisionId", "");
-        expected.put("net.interface.if1.serialNum", netInterfaceConfig1.getSerialNumber());
-        expected.put("net.interface.if1.technologyTypes", "");
-        expected.put("net.interface.if1.config.identifier", netInterfaceConfig1.getModemIdentifier());
-        expected.put("net.interface.if1.config.powerMode", "UNKNOWN");
-        expected.put("net.interface.if1.config.pppNum", netInterfaceConfig1.getPppNum());
-        expected.put("net.interface.if1.config.poweredOn", netInterfaceConfig1.isPoweredOn());
 
         expected.put("net.interface.if2.type", "MODEM");
         expected.put("net.interface.if2.config.name", "if2");
         expected.put("net.interface.if2.config.autoconnect", netInterfaceConfig2.isAutoConnect());
         expected.put("net.interface.if2.config.mtu", netInterfaceConfig2.getMTU());
-        expected.put("net.interface.if2.driver", netInterfaceConfig2.getDriver());
-        expected.put("net.interface.if2.driver.version", netInterfaceConfig2.getDriverVersion());
-        expected.put("net.interface.if2.firmware.version", netInterfaceConfig2.getFirmwareVersion());
-        expected.put("net.interface.if2.mac",
-                NetUtil.hardwareAddressToString(netInterfaceConfig2.getHardwareAddress()));
-        expected.put("net.interface.if2.loopback", netInterfaceConfig2.isLoopback());
-        expected.put("net.interface.if2.ptp", netInterfaceConfig2.isPointToPoint());
-        expected.put("net.interface.if2.up", netInterfaceConfig2.isUp());
-        expected.put("net.interface.if2.virtual", netInterfaceConfig2.isVirtual());
-        expected.put("net.interface.if2.manufacturer", netInterfaceConfig2.getManufacturer());
-        expected.put("net.interface.if2.model", netInterfaceConfig2.getModel());
-        expected.put("net.interface.if2.revisionId", "rev1,rev2");
-        expected.put("net.interface.if2.serialNum", netInterfaceConfig2.getSerialNumber());
-        expected.put("net.interface.if2.technologyTypes", "CDMA,EVDO");
-        expected.put("net.interface.if2.config.identifier", netInterfaceConfig2.getModemIdentifier());
-        expected.put("net.interface.if2.config.powerMode", "LOW_POWER");
-        expected.put("net.interface.if2.config.pppNum", netInterfaceConfig2.getPppNum());
-        expected.put("net.interface.if2.config.poweredOn", netInterfaceConfig2.isPoweredOn());
         expected.put("net.interface.if2.config.connection.type", "PPP");
-        expected.put("net.interface.if2.config.connection.status", "CONNECTED");
         expected.put("net.interface.if2.config.apn", "apn");
         expected.put("net.interface.if2.config.authType", "");
         expected.put("net.interface.if2.config.dataCompression", 42);
@@ -1419,7 +1309,6 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if2.config.ipAddress", "");
         expected.put("net.interface.if2.config.password", new Password("password"));
         expected.put("net.interface.if2.config.pdpType", "");
-        expected.put("net.interface.if2.config.pppNum", 123);
         expected.put("net.interface.if2.config.persist", true);
         expected.put("net.interface.if2.config.maxFail", 10);
         expected.put("net.interface.if2.config.idle", 20);
@@ -1747,7 +1636,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.ipAddress", "");
         expected.put("prefix.password", new Password("password"));
         expected.put("prefix.pdpType", "");
-        expected.put("prefix.pppNum", 123);
         expected.put("prefix.persist", true);
         expected.put("prefix.maxFail", 10);
         expected.put("prefix.idle", 20);
@@ -1805,7 +1693,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.ipAddress", "10.0.0.1");
         expected.put("prefix.password", new Password("password"));
         expected.put("prefix.pdpType", "IP");
-        expected.put("prefix.pppNum", 123);
         expected.put("prefix.persist", true);
         expected.put("prefix.maxFail", 10);
         expected.put("prefix.idle", 20);
@@ -2234,7 +2121,6 @@ public class NetworkConfigurationTest {
         loopbackInterfaceAddressConfigs.add(addressConfig);
         loopbackInterfaceConfig.setNetInterfaceAddresses(loopbackInterfaceAddressConfigs);
         loopbackInterfaceConfig.setAutoConnect(true);
-        loopbackInterfaceConfig.setState(NetInterfaceState.DISCONNECTED);
 
         HashMap<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> expected = new HashMap<>();
         expected.put(interfaceName, loopbackInterfaceConfig);
@@ -2283,7 +2169,6 @@ public class NetworkConfigurationTest {
         wifiInterfaceAddressConfigs.add(addressConfig);
         wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
         wifiInterfaceConfig.setAutoConnect(true);
-        wifiInterfaceConfig.setState(NetInterfaceState.DISCONNECTED);
 
         HashMap<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> expected = new HashMap<>();
         expected.put(interfaceName, wifiInterfaceConfig);
@@ -2332,12 +2217,10 @@ public class NetworkConfigurationTest {
 
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "ETHERNET");
-        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         TestUtil.invokePrivate(config, "populateNetInterfaceConfiguration", netInterfaceConfig, properties);
 
         EthernetInterfaceConfigImpl expected = new EthernetInterfaceConfigImpl("if1");
-        expected.setState(NetInterfaceState.DISCONNECTED);
 
         assertEquals(expected, netInterfaceConfig);
     }
@@ -2359,12 +2242,10 @@ public class NetworkConfigurationTest {
         properties.put("net.interface.if1.config.wifi.mode", "ADHOC");
         properties.put("net.interface.if1.config.wifi.master.passphrase", "password");
         properties.put("net.interface.if1.config.wifi.infra.passphrase", "password");
-        properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         TestUtil.invokePrivate(config, "populateNetInterfaceConfiguration", netInterfaceConfig, properties);
 
         WifiInterfaceConfigImpl expected = new WifiInterfaceConfigImpl("if1");
-        expected.setState(NetInterfaceState.DISCONNECTED);
         expected.setAutoConnect(true);
         expected.setUp(false);
         expected.setCapabilities(EnumSet.of(Capability.CIPHER_CCMP, Capability.CIPHER_TKIP));

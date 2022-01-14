@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -39,10 +40,14 @@ import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.web.server.KuraRemoteServiceServlet;
 import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gwt.user.client.Cookies;
 
 public class LogServlet extends AuditServlet {
 
@@ -58,7 +63,16 @@ public class LogServlet extends AuditServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+            throws ServletException {
+        // BEGIN XSRF - Servlet dependent code
+        try {
+            GwtXSRFToken token = new GwtXSRFToken(httpServletRequest.getParameter("xsrfToken"));
+            KuraRemoteServiceServlet.checkXSRFToken(httpServletRequest, token);
+        } catch (Exception e) {
+            throw new ServletException("Security error: please retry this operation correctly.", e);
+        }
+        // END XSRF security check
 
         SystemService ss = null;
         ServiceLocator locator = ServiceLocator.getInstance();
@@ -110,16 +124,17 @@ public class LogServlet extends AuditServlet {
             logger.warn("Error producing: {}", SYSTEM_JOURNAL_LOG_FILE);
         }
 
-        createReply(httpServletResponse, fileList);
+        String nonce = httpServletRequest.getParameter("nonce");
+        createReply(httpServletResponse, fileList, nonce);
         removeTmpFiles();
     }
 
-    private void createReply(HttpServletResponse httpServletResponse, List<File> fileList) {
+    private void createReply(HttpServletResponse httpServletResponse, List<File> fileList, String nonce) {
         try {
             byte[] zip = zipFiles(fileList);
             ServletOutputStream sos = httpServletResponse.getOutputStream();
 
-            Cookie downloadedCookie = new Cookie("LogsDownload", "finished");
+            Cookie downloadedCookie = new Cookie("LogsDownload-" + nonce, "finished");
             downloadedCookie.setPath("/");
             httpServletResponse.addCookie(downloadedCookie);
             httpServletResponse.setContentType("application/zip");

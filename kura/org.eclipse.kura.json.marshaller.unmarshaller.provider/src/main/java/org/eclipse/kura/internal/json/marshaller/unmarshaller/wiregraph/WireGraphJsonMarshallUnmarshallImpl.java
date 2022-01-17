@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiConsumer;
 
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
@@ -32,7 +33,7 @@ import com.eclipsesource.json.JsonValue;
 
 @SuppressWarnings("checkstyle:hideUtilityClassConstructor")
 public class WireGraphJsonMarshallUnmarshallImpl {
-    
+
     private static final String RENDERING_PROPERTIES_KEY = "renderingProperties";
     private static final String OUTPUT_PORT_COUNT_KEY = "outputPortCount";
     private static final String INPUT_PORT_COUNT_KEY = "inputPortCount";
@@ -46,11 +47,11 @@ public class WireGraphJsonMarshallUnmarshallImpl {
     private static final String EMITTER_PORT_KEY = "emitterPort";
     private static final String WIRES_KEY = "wires";
     private static final String COMPONENTS_KEY = "components";
-    
+
     public WireGraphJsonMarshallUnmarshallImpl() {
         // Public for testing purposes
     }
-    
+
     public static JsonObject marshalWireGraphConfiguration(WireGraphConfiguration graphConfiguration) {
         JsonArray wireConfigurationJson = marshalWireConfigurationList(graphConfiguration.getWireConfigurations());
         JsonArray wireComponentConfigurationJson = marshalWireComponentConfigurationList(
@@ -108,8 +109,11 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         resultElems.add(OUTPUT_PORT_NAMES_KEY, outputPortNames);
 
         result.add(PID_KEY, pid);
-        result.add(INPUT_PORT_COUNT_KEY, (int) componentProperties.get(INPUT_PORT_COUNT_KEY));
-        result.add(OUTPUT_PORT_COUNT_KEY, (int) componentProperties.get(OUTPUT_PORT_COUNT_KEY));
+
+        addPropertyChecked(componentProperties, INPUT_PORT_COUNT_KEY, INPUT_PORT_COUNT_KEY, Integer.class, result::add);
+        addPropertyChecked(componentProperties, OUTPUT_PORT_COUNT_KEY, OUTPUT_PORT_COUNT_KEY, Integer.class,
+                result::add);
+
         result.add(RENDERING_PROPERTIES_KEY, resultElems);
 
         return result;
@@ -117,8 +121,9 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
     private static JsonObject marshalPosition(Map<String, Object> componentProperties) {
         JsonObject positionElems = new JsonObject();
-        positionElems.add("x", (float) componentProperties.get("position.x"));
-        positionElems.add("y", (float) componentProperties.get("position.y"));
+
+        addPropertyChecked(componentProperties, "x", "position.x", Float.class, positionElems::add);
+        addPropertyChecked(componentProperties, "y", "position.y", Float.class, positionElems::add);
 
         return positionElems;
     }
@@ -127,7 +132,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
         JsonObject inputPortElems = new JsonObject();
         for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
-            if (mapEntry.getKey().startsWith(INPUT_PORT_NAMES_KEY)) {
+            if (mapEntry.getKey().startsWith(INPUT_PORT_NAMES_KEY) && mapEntry.getValue() instanceof String) {
                 String portNumber = mapEntry.getKey().split("\\.")[1];
                 inputPortElems.add(portNumber, (String) mapEntry.getValue());
             }
@@ -140,7 +145,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
         JsonObject outputPortElems = new JsonObject();
         for (Entry<String, Object> mapEntry : componentProperties.entrySet()) {
-            if (mapEntry.getKey().startsWith(OUTPUT_PORT_NAMES_KEY)) {
+            if (mapEntry.getKey().startsWith(OUTPUT_PORT_NAMES_KEY) && mapEntry.getValue() instanceof String) {
                 String portNumber = mapEntry.getKey().split("\\.")[1];
                 outputPortElems.add(portNumber, (String) mapEntry.getValue());
             }
@@ -148,7 +153,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
         return outputPortElems;
     }
-    
+
     public static WireGraphConfiguration unmarshalToWireGraphConfiguration(String jsonString) {
 
         List<WireComponentConfiguration> wireCompConfigList = new ArrayList<>();
@@ -170,7 +175,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
 
     private static List<MultiportWireConfiguration> unmarshalWireConfiguration(JsonArray array) {
         List<MultiportWireConfiguration> wireConfigurationList = new ArrayList<>();
-        
+
         array.forEach(jsonWireConfigValue -> {
             JsonObject jsonWireConfig = jsonWireConfigValue.asObject();
 
@@ -227,6 +232,7 @@ public class WireGraphJsonMarshallUnmarshallImpl {
                     componentPid = value.asString();
                 }
             }
+
             if (componentPid != null) {
                 ComponentConfiguration componentConfiguration = new ComponentConfigurationImpl(componentPid, null,
                         null);
@@ -303,6 +309,19 @@ public class WireGraphJsonMarshallUnmarshallImpl {
         }
 
         return positionMap;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> void addPropertyChecked(final Map<String, Object> componentProperties,
+            final String jsonPropertyKey, final String componentPropertyKey, final Class<T> expectedClass,
+            final BiConsumer<String, T> adder) {
+        final Object property = componentProperties.get(componentPropertyKey);
+
+        if (!(expectedClass.isInstance(property))) {
+            return;
+        }
+
+        adder.accept(jsonPropertyKey, (T) property);
     }
 
 }

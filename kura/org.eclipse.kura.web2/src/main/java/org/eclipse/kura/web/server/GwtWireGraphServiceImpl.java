@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -139,8 +139,19 @@ public final class GwtWireGraphServiceImpl extends OsgiRemoteServiceServlet impl
             Map<String, Object> renderingProperties) {
         component.setInputPortCount((Integer) renderingProperties.get("inputPortCount"));
         component.setOutputPortCount((Integer) renderingProperties.get("outputPortCount"));
-        component.setPositionX((Float) renderingProperties.get("position.x"));
-        component.setPositionY((Float) renderingProperties.get("position.y"));
+        component.setPositionX(getOrDefault(renderingProperties, "position.x", 0.0f));
+        component.setPositionY(getOrDefault(renderingProperties, "position.y", 0.0f));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T getOrDefault(final Map<String, Object> properties, final String key, final T defaultValue) {
+        final Object raw = properties.get(key);
+
+        if (defaultValue.getClass().isInstance(raw)) {
+            return (T) raw;
+        }
+
+        return defaultValue;
     }
 
     private List<GwtConfigComponent> getAdditionalConfigurations(Set<String> wireComponentsInGraph,

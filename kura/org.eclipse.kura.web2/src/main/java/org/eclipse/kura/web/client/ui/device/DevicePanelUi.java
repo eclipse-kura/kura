@@ -49,6 +49,8 @@ public class DevicePanelUi extends Composite {
     TabListItem packages;
     @UiField
     TabListItem systemProperties;
+    @UiField
+    TabListItem dockerContainers;
 
     @UiField
     ProfileTabUi profilePanel;
@@ -64,6 +66,8 @@ public class DevicePanelUi extends Composite {
     CommandTabUi commandPanel;
     @UiField
     LogTabUi logPanel;
+    @UiField
+    DockerContainersTabUi dockerContainersPanel;
 
     public DevicePanelUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -74,6 +78,7 @@ public class DevicePanelUi extends Composite {
         this.threads.addClickHandler(new Tab.RefreshHandler(this.threadsPanel));
         this.packages.addClickHandler(new Tab.RefreshHandler(this.packagesPanel));
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
+        this.dockerContainers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
     }
 
     public void initDevicePanel() {

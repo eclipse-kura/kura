@@ -43,6 +43,8 @@
                         ui:field="command" />
                     <b:TabListItem dataTarget="#logPanel" text="System Logs"
                         ui:field="log" />
+                    <b:TabListItem dataTarget="#dockerContainersPanel" text="Docker Containers"
+                        ui:field="containers" />
                 </b:NavTabs>
                 <b:TabContent>
                     <b:TabPane b:id="profilePanel" active="true">
@@ -65,6 +67,9 @@
                     </b:TabPane>
                     <b:TabPane b:id="logPanel">
                         <device:LogTabUi ui:field="logPanel"></device:LogTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="dockerContainersPanel">
+                        <device:DockerContainersTabUi ui:field="dockerContainersPanel"></device:DockerContainersTabUi>
                     </b:TabPane>
                 </b:TabContent>
             </b:Well>

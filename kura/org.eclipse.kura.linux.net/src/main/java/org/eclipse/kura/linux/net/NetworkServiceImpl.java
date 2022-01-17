@@ -963,8 +963,17 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     @Override
-    public String getModemPppInterfaceName(String usbPath) throws KuraException {
+    public String getModemPppInterfaceName(String usbPath) {
         return generatePppName(this.validUsbModemsPppNumbers.get(usbPath));
+    }
+
+    @Override
+    public Optional<ModemDevice> getModemDevice(String usbPath) {
+        Optional<ModemDevice> modem = Optional.empty();
+        if (this.validUsbModemsPppNumbers.containsKey(usbPath)) {
+            modem = Optional.of(this.detectedUsbModems.get(usbPath));
+        }
+        return modem;
     }
 
     private boolean isVirtual(String interfaceName) {

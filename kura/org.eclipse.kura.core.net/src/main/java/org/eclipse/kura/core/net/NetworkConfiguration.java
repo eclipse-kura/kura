@@ -61,6 +61,8 @@ import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.system.SystemService;
+import org.eclipse.kura.usb.UsbDevice;
+import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -1309,6 +1311,7 @@ public class NetworkConfiguration {
         // build the prefixes for all the properties associated with this interface
         StringBuilder sbPrefix = new StringBuilder();
         sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
+        String netIfReadOnlyPrefix = sbPrefix.toString();
 
         String netIfPrefix = sbPrefix.append("config.").toString();
         String netIfConfigPrefix = sbPrefix.toString();
@@ -1320,6 +1323,21 @@ public class NetworkConfiguration {
             autoConnect = (Boolean) props.get(autoConnectKey);
             logger.trace("got autoConnect: {}", autoConnect);
             netInterfaceConfig.setAutoConnect(autoConnect);
+        }
+
+        // USB
+        String vendorId = (String) props.get(netIfReadOnlyPrefix + "usb.vendor.id");
+        String vendorName = (String) props.get(netIfReadOnlyPrefix + "usb.vendor.name");
+        String productId = (String) props.get(netIfReadOnlyPrefix + "usb.product.id");
+        String productName = (String) props.get(netIfReadOnlyPrefix + "usb.product.name");
+        String usbBusNumber = (String) props.get(netIfReadOnlyPrefix + "usb.busNumber");
+        String usbDevicePath = (String) props.get(netIfReadOnlyPrefix + "usb.devicePath");
+
+        if (vendorId != null && productId != null) {
+            UsbDevice usbDevice = new UsbNetDevice(vendorId, productId, vendorName, productName, usbBusNumber,
+                    usbDevicePath, interfaceName);
+            logger.trace("adding usbDevice: {}, port: {}", usbDevice, usbDevice.getUsbPort());
+            netInterfaceConfig.setUsbDevice(usbDevice);
         }
 
         // Status

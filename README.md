@@ -1,9 +1,12 @@
 Eclipse Kura™
 =============
-Jenkins:
-[![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
 
+<div align="center">
+
+[![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
 [![Gitter](https://badges.gitter.im/eclipse/kura.svg)](https://gitter.im/eclipse/kura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
+</div>
 
 An OSGi-based Application Framework for M2M Service Gateways
 
@@ -54,26 +57,31 @@ Using [Brew](https://brew.sh/) you can easily install both Java and Maven from t
 Use the following commands in a terminal
 
 For Java  
-```
+```bash
 brew tap adoptopenjdk/openjdk 
-brew cask install adoptopenjdk8   
+```
+```bash
+brew install --cask adoptopenjdk8   
 ```
 Make sure to set this version in your path, this can be done by:
-```
+```bash
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
 ```
 Run `java -version` to make sure it is installed correctly.  
 
 For Maven
-```
+```bash
 brew install maven@3.5
 ```
 Run `mvn -version` to ensure that Maven has been added to the PATH.
-If Maven cannot be found, try running `brew link maven@3.5 --force`.  
+If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
+```bash
+export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
+```
 
 #### Installing Prerequisites in Linux
 For Java
-```
+```bash
 sudo apt install openjdk-8-jdk
 ```
 For Maven   
@@ -81,11 +89,12 @@ For Maven
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
 
 ### Eclipse IDE
-The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup.
+The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
+
 To correctly setup the environment, proceed as follows:
 - Start the Eclipse Installer
 - Switch to advanced mode (top right hamburger menu > Advanced Mode)
-- Select "Eclipse for Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
+- Select "Eclipse IDE for Eclipse Committers" and configure the "Product Version" to be a IDE with JRE 1.8+ supported (2020-06 or older)
 - Set the Java 1.8+ VM: to the recently installed local jdk-8 VM, and press the Next button
 - Select the Eclipse Kura installer from the list. If this is not available, add a new installer from https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup, then check and press the Next button
 - Select the "Developer Type":
@@ -110,7 +119,7 @@ Currently the maven build on Windows requires to disable the tests and will fail
 
 ## Contributing
 
-Contributing to Eclipse Kura is funny and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
+Contributing to Eclipse Kura is fun and easy! To start contributing you can follow our guide [here](CONTRIBUTING.md).
 
 
 ## Target Gateways Installers

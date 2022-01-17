@@ -752,7 +752,8 @@ public class NetworkConfigurationTest {
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null"
                 + " :: Type: MODEM :: Usb Device: null :: Prefix: 0\n	ModemConfig  :: APN: apn :: Data Compression: 0"
                 + " :: Dial String: dialString :: Header Compression: 0 :: PPP number: 0"
-                + " :: Profile ID: 0 :: Username: username :: Auth Type: AUTO :: IP Address: 10.0.0.2 :: PDP Type: PPP";
+                + " :: Profile ID: 0 :: Username: username :: Auth Type: AUTO :: IP Address: 10.0.0.2 :: PDP Type: PPP"
+                + " :: Gps enabled: false :: Antenna diversity enabled: false";
 
         assertEquals(expected, config.toString());
     }

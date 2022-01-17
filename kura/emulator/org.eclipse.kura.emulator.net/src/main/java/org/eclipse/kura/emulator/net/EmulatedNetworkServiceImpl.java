@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -353,7 +354,12 @@ public class EmulatedNetworkServiceImpl implements NetworkService {
     }
 
     @Override
-    public String getModemPppInterfaceName(String usbPath) throws KuraException {
+    public String getModemPppInterfaceName(String usbPath) {
         return null;
+    }
+
+    @Override
+    public Optional<ModemDevice> getModemDevice(String usbPath) {
+        return Optional.empty();
     }
 }

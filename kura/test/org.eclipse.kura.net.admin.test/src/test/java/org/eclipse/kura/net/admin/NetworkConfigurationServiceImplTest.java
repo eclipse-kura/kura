@@ -31,6 +31,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -54,6 +55,8 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.junit.Test;
@@ -211,7 +214,7 @@ public class NetworkConfigurationServiceImplTest {
             Event event = invocation.getArgumentAt(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC", event.getTopic());
-            assertEquals(6, event.getPropertyNames().length); // 4+topics!
+            assertEquals(12, event.getPropertyNames().length);
 
             assertEquals("MODEM", event.getProperty("net.interface.1-2.3.type"));
 
@@ -243,6 +246,8 @@ public class NetworkConfigurationServiceImplTest {
 
         NetworkService nsMock = mock(NetworkService.class);
         when(nsMock.getModemPppInterfaceName("1-2.3")).thenReturn("ppp3");
+        ModemDevice modemDevice = new UsbModemDevice("1111", "2222", "Acme", "CoolModem", "1", "2.3");
+        when(nsMock.getModemDevice("1-2.3")).thenReturn(Optional.of(modemDevice));
         svc.setNetworkService(nsMock);
 
         Map<String, Object> properties = new HashMap<>();

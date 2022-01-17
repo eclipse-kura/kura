@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -52,14 +52,14 @@ public class PppConfigTest {
     private final String USB_DEVICE_PATH = "1.3";
     private PppConfigWriter writer;
     private NetworkConfiguration config;
-    private UsbDevice usbDevice = new UsbModemDevice("1bbb", "00b6", "TELEFONICA", MODEM_MODEL, USB_BUS_NUMBER,
-            USB_DEVICE_PATH);
+    private final UsbDevice usbDevice = new UsbModemDevice("1bbb", "00b6", "TELEFONICA", this.MODEM_MODEL,
+            this.USB_BUS_NUMBER, this.USB_DEVICE_PATH);
 
     @Test
     public void shouldWritePeersFile() throws KuraException, IOException {
         givenFoldersClean();
-        givenPppConfigWriter();
-        givenNetworkConfigurationWithPpp(PPP2);
+        givenPppConfigWriterLogEnabled();
+        givenNetworkConfigurationWithPpp(this.PPP2);
 
         whenPppIsVisited();
 
@@ -70,8 +70,8 @@ public class PppConfigTest {
     @Test
     public void shouldWriteChatScriptFile() throws KuraException, IOException {
         givenFoldersClean();
-        givenPppConfigWriter();
-        givenNetworkConfigurationWithPpp(PPP2);
+        givenPppConfigWriterLogEnabled();
+        givenNetworkConfigurationWithPpp(this.PPP2);
 
         whenPppIsVisited();
 
@@ -82,8 +82,8 @@ public class PppConfigTest {
     @Test
     public void shouldWriteDisconnectScriptFile() throws KuraException, IOException {
         givenFoldersClean();
-        givenPppConfigWriter();
-        givenNetworkConfigurationWithPpp(PPP2);
+        givenPppConfigWriterLogEnabled();
+        givenNetworkConfigurationWithPpp(this.PPP2);
 
         whenPppIsVisited();
 
@@ -92,46 +92,63 @@ public class PppConfigTest {
     }
 
     @Test
+    public void shouldNotWriteLogDirective() throws KuraException, IOException {
+        givenFoldersClean();
+        givenPppConfigWriterLogDisabled();
+        givenNetworkConfigurationWithPpp(this.PPP2);
+
+        whenPppIsVisited();
+
+        thenPppPeersFileExists();
+        thenPppPeersFileNoLoggingEnabled();
+    }
+
+    @Test
     public void shouldReturnPeerFilename() {
-        givenOriginalPppConfigWriter();
+        givenOriginalPppConfigWriterLogEnabled();
         thenPeerFilenameIsReturned();
     }
 
     @Test
     public void shouldReturnPppLogFilename() {
-        givenOriginalPppConfigWriter();
+        givenOriginalPppConfigWriterLogEnabled();
         thenPppLogFilenameIsReturned();
     }
 
     @Test
     public void shouldReturnChatFilename() {
-        givenOriginalPppConfigWriter();
+        givenOriginalPppConfigWriterLogEnabled();
         thenChatFilenameIsReturned();
     }
 
     @Test
     public void shouldReturnPeerLinkAbsoluteName() {
-        givenOriginalPppConfigWriter();
+        givenOriginalPppConfigWriterLogEnabled();
         thenPeerLinkAbsoluteNameIsReturned();
     }
 
     @Test
     public void shouldReturnDisconnectFilename() {
-        givenOriginalPppConfigWriter();
+        givenOriginalPppConfigWriterLogEnabled();
         thenDisconnectFilenameIsReturned();
     }
 
-    private void givenPppConfigWriter() {
+    private void givenPppConfigWriterLogEnabled() {
         this.writer = new PppConfigWriter() {
 
             @Override
+            protected boolean getPPPLogStatus() {
+                return true;
+            }
+
+            @Override
             protected void createSystemFolders() {
-                File peersDir = new File(PPP_DIR + PPP_PEERS_DIR);
+                File peersDir = new File(PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR);
                 if (!peersDir.exists()) {
                     peersDir.mkdirs();
                 }
 
-                File scriptsDir = new File(PPP_DIR + PPP_SCRIPTS_DIR);
+                File scriptsDir = new File(PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR);
                 if (!scriptsDir.exists()) {
                     scriptsDir.mkdirs();
                 }
@@ -139,49 +156,115 @@ public class PppConfigTest {
 
             @Override
             public String formPeerFilename(UsbDevice usbDevice) {
-                return PPP_DIR + PPP_PEERS_DIR + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH;
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR + PppConfigTest.this.MODEM_MODEL
+                        + "_" + PppConfigTest.this.USB_BUS_NUMBER + "-" + PppConfigTest.this.USB_DEVICE_PATH;
             }
 
             @Override
             public String formChatFilename(UsbDevice usbDevice) {
-                return PPP_DIR + PPP_SCRIPTS_DIR + "chat" + "_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-"
-                        + USB_DEVICE_PATH;
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR + "chat" + "_"
+                        + PppConfigTest.this.MODEM_MODEL + "_" + PppConfigTest.this.USB_BUS_NUMBER + "-"
+                        + PppConfigTest.this.USB_DEVICE_PATH;
             }
 
             @Override
             public String formDisconnectFilename(UsbDevice usbDevice) {
-                return PPP_DIR + PPP_SCRIPTS_DIR + "disconnect" + "_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-"
-                        + USB_DEVICE_PATH;
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR + "disconnect" + "_"
+                        + PppConfigTest.this.MODEM_MODEL + "_" + PppConfigTest.this.USB_BUS_NUMBER + "-"
+                        + PppConfigTest.this.USB_DEVICE_PATH;
             }
 
             @Override
             public String formPeerLinkAbsoluteName(String pppInterfaceName) {
-                return PPP_DIR + PPP_PEERS_DIR + PPP2;
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR + PppConfigTest.this.PPP2;
             }
 
             @Override
             public String formChapAuthSecretsFilename() {
-                return PPP_DIR + "chap-secrets";
+                return PppConfigTest.this.PPP_DIR + "chap-secrets";
             }
 
             @Override
             public String formPapAuthSecretsFilename() {
-                return PPP_DIR + "pap-secrets";
+                return PppConfigTest.this.PPP_DIR + "pap-secrets";
             }
         };
     }
 
-    private void givenOriginalPppConfigWriter() {
+    private void givenPppConfigWriterLogDisabled() {
         this.writer = new PppConfigWriter() {
 
             @Override
+            protected boolean getPPPLogStatus() {
+                return false;
+            }
+
+            @Override
             protected void createSystemFolders() {
-                File peersDir = new File(PPP_DIR + PPP_PEERS_DIR);
+                File peersDir = new File(PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR);
                 if (!peersDir.exists()) {
                     peersDir.mkdirs();
                 }
 
-                File scriptsDir = new File(PPP_DIR + PPP_SCRIPTS_DIR);
+                File scriptsDir = new File(PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR);
+                if (!scriptsDir.exists()) {
+                    scriptsDir.mkdirs();
+                }
+            }
+
+            @Override
+            public String formPeerFilename(UsbDevice usbDevice) {
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR + PppConfigTest.this.MODEM_MODEL
+                        + "_" + PppConfigTest.this.USB_BUS_NUMBER + "-" + PppConfigTest.this.USB_DEVICE_PATH;
+            }
+
+            @Override
+            public String formChatFilename(UsbDevice usbDevice) {
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR + "chat" + "_"
+                        + PppConfigTest.this.MODEM_MODEL + "_" + PppConfigTest.this.USB_BUS_NUMBER + "-"
+                        + PppConfigTest.this.USB_DEVICE_PATH;
+            }
+
+            @Override
+            public String formDisconnectFilename(UsbDevice usbDevice) {
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR + "disconnect" + "_"
+                        + PppConfigTest.this.MODEM_MODEL + "_" + PppConfigTest.this.USB_BUS_NUMBER + "-"
+                        + PppConfigTest.this.USB_DEVICE_PATH;
+            }
+
+            @Override
+            public String formPeerLinkAbsoluteName(String pppInterfaceName) {
+                return PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR + PppConfigTest.this.PPP2;
+            }
+
+            @Override
+            public String formChapAuthSecretsFilename() {
+                return PppConfigTest.this.PPP_DIR + "chap-secrets";
+            }
+
+            @Override
+            public String formPapAuthSecretsFilename() {
+                return PppConfigTest.this.PPP_DIR + "pap-secrets";
+            }
+        };
+    }
+
+    private void givenOriginalPppConfigWriterLogEnabled() {
+        this.writer = new PppConfigWriter() {
+
+            @Override
+            protected boolean getPPPLogStatus() {
+                return true;
+            }
+
+            @Override
+            protected void createSystemFolders() {
+                File peersDir = new File(PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_PEERS_DIR);
+                if (!peersDir.exists()) {
+                    peersDir.mkdirs();
+                }
+
+                File scriptsDir = new File(PppConfigTest.this.PPP_DIR + PppConfigTest.this.PPP_SCRIPTS_DIR);
                 if (!scriptsDir.exists()) {
                     scriptsDir.mkdirs();
                 }
@@ -190,8 +273,8 @@ public class PppConfigTest {
     }
 
     private void givenFoldersClean() {
-        deleteAllFilesInFolder(new File(PPP_DIR + PPP_PEERS_DIR));
-        deleteAllFilesInFolder(new File(PPP_DIR + PPP_SCRIPTS_DIR));
+        deleteAllFilesInFolder(new File(this.PPP_DIR + this.PPP_PEERS_DIR));
+        deleteAllFilesInFolder(new File(this.PPP_DIR + this.PPP_SCRIPTS_DIR));
     }
 
     private void deleteAllFilesInFolder(File folder) {
@@ -207,11 +290,11 @@ public class PppConfigTest {
 
         List<String> interfaces = new ArrayList<>();
         interfaces.add(interfaceName);
-        config.setModifiedInterfaceNames(interfaces);
+        this.config.setModifiedInterfaceNames(interfaces);
 
         ModemInterfaceConfigImpl netInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
         netInterfaceConfig.setUsbDevice(this.usbDevice);
-        config.addNetInterfaceConfig(netInterfaceConfig);
+        this.config.addNetInterfaceConfig(netInterfaceConfig);
 
         List<ModemInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
         ModemInterfaceAddressConfigImpl modemInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
@@ -241,13 +324,14 @@ public class PppConfigTest {
     }
 
     private void thenPppPeersFileExists() throws IOException {
-        File f = new File(PPP_DIR + PPP_PEERS_DIR + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        File f = new File(this.PPP_DIR + this.PPP_PEERS_DIR + this.MODEM_MODEL + "_" + this.USB_BUS_NUMBER + "-"
+                + this.USB_DEVICE_PATH);
         assertTrue(f.exists());
     }
 
     private void thenPppPeersFileIsCorrect() throws IOException {
-        String peersFileContent = readFile(
-                PPP_DIR + PPP_PEERS_DIR + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        String peersFileContent = readFile(this.PPP_DIR + this.PPP_PEERS_DIR + this.MODEM_MODEL + "_"
+                + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
 
         List<String> expectedPeersFileContent = Arrays
                 .asList(new String[] { "921600", "unit 2", "logfile /var/log/kura-IK41VE_1-1.3", "debug",
@@ -259,15 +343,28 @@ public class PppConfigTest {
         expectedPeersFileContent.forEach(s -> assertTrue(peersFileContent.contains(s)));
     }
 
+    private void thenPppPeersFileNoLoggingEnabled() throws IOException {
+        String peersFileContent = readFile(this.PPP_DIR + this.PPP_PEERS_DIR + this.MODEM_MODEL + "_"
+                + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
+
+        List<String> expectedPeersFileContent = Arrays.asList(new String[] { "921600", "unit 2", "debug",
+                "connect 'chat -v -f /tmp/kura/ppp/scripts/chat_IK41VE_1-1.3'",
+                "disconnect 'chat -v -f /tmp/kura/ppp/scripts/disconnect_IK41VE_1-1.3'", "modem", "lock", "noauth",
+                "noipdefault", "defaultroute", "usepeerdns", "noproxyarp", "novj", "novjccomp", "nobsdcomp",
+                "nodeflate", "nomagic", "opersist", "maxfail 0", "connect-delay 1000" });
+
+        expectedPeersFileContent.forEach(s -> assertTrue(peersFileContent.contains(s)));
+    }
+
     private void thenPppChatScriptFileExists() throws IOException {
-        File f = new File(
-                PPP_DIR + PPP_SCRIPTS_DIR + "chat_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        File f = new File(this.PPP_DIR + this.PPP_SCRIPTS_DIR + "chat_" + this.MODEM_MODEL + "_" + this.USB_BUS_NUMBER
+                + "-" + this.USB_DEVICE_PATH);
         assertTrue(f.exists());
     }
 
     private void thenPppChatScriptFileIsCorrect() throws IOException {
-        String chatFileContent = readFile(
-                PPP_DIR + PPP_SCRIPTS_DIR + "chat_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        String chatFileContent = readFile(this.PPP_DIR + this.PPP_SCRIPTS_DIR + "chat_" + this.MODEM_MODEL + "_"
+                + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
 
         List<String> expectedChatFileContent = Arrays.asList(
                 new String[] { "ABORT\t\"BUSY\"", "ABORT\t\"VOICE\"", "ABORT\t\"NO CARRIER\"", "ABORT\t\"NO DIALTONE\"",
@@ -279,14 +376,14 @@ public class PppConfigTest {
     }
 
     private void thenPppDisconnectScriptFileExists() throws IOException {
-        File f = new File(
-                PPP_DIR + PPP_SCRIPTS_DIR + "disconnect_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        File f = new File(this.PPP_DIR + this.PPP_SCRIPTS_DIR + "disconnect_" + this.MODEM_MODEL + "_"
+                + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
         assertTrue(f.exists());
     }
 
     private void thenPppDisconnectScriptFileIsCorrect() throws IOException {
-        String disconnectFileContent = readFile(
-                PPP_DIR + PPP_SCRIPTS_DIR + "disconnect_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH);
+        String disconnectFileContent = readFile(this.PPP_DIR + this.PPP_SCRIPTS_DIR + "disconnect_" + this.MODEM_MODEL
+                + "_" + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
 
         List<String> expectedDisconnectFileContent = Arrays
                 .asList(new String[] { "ABORT\t\"BUSY\"", "ABORT\t\"VOICE\"", "ABORT\t\"NO CARRIER\"",
@@ -296,29 +393,30 @@ public class PppConfigTest {
     }
 
     private void thenPeerFilenameIsReturned() {
-        assertEquals("/etc/ppp/peers/" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+        assertEquals("/etc/ppp/peers/" + this.MODEM_MODEL + "_" + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH,
                 this.writer.formPeerFilename(this.usbDevice));
     }
 
     private void thenPppLogFilenameIsReturned() {
-        assertEquals("/var/log/kura-" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+        assertEquals("/var/log/kura-" + this.MODEM_MODEL + "_" + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH,
                 this.writer.formPppLogFilename(this.usbDevice));
     }
 
     private void thenChatFilenameIsReturned() {
-        assertEquals("/etc/ppp/scripts/chat_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
+        assertEquals(
+                "/etc/ppp/scripts/chat_" + this.MODEM_MODEL + "_" + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH,
                 this.writer.formChatFilename(this.usbDevice));
     }
 
     private void thenPeerLinkAbsoluteNameIsReturned() {
-        assertEquals("/etc/ppp/peers/" + PPP2, this.writer.formPeerLinkAbsoluteName("ppp2"));
+        assertEquals("/etc/ppp/peers/" + this.PPP2, this.writer.formPeerLinkAbsoluteName("ppp2"));
     }
 
     private void thenDisconnectFilenameIsReturned() {
-        UsbDevice usbDevice = new UsbModemDevice("1bbb", "00b6", "TELEFONICA", MODEM_MODEL, USB_BUS_NUMBER,
-                USB_DEVICE_PATH);
-        assertEquals("/etc/ppp/scripts/disconnect_" + MODEM_MODEL + "_" + USB_BUS_NUMBER + "-" + USB_DEVICE_PATH,
-                this.writer.formDisconnectFilename(usbDevice));
+        UsbDevice usbDevice = new UsbModemDevice("1bbb", "00b6", "TELEFONICA", this.MODEM_MODEL, this.USB_BUS_NUMBER,
+                this.USB_DEVICE_PATH);
+        assertEquals("/etc/ppp/scripts/disconnect_" + this.MODEM_MODEL + "_" + this.USB_BUS_NUMBER + "-"
+                + this.USB_DEVICE_PATH, this.writer.formDisconnectFilename(usbDevice));
     }
 
     private String readFile(String configFilename) throws IOException {

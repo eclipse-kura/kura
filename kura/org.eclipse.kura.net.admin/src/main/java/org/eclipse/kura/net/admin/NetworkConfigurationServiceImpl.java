@@ -836,25 +836,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private void getInterfaceCommonDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
         Tad tad;
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_MTU).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_MTU).toString());
-        tad.setType(Tscalar.INTEGER);
-        tad.setCardinality(0);
-        tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_MTU));
-        tocd.addAD(tad);
-
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
-        tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_AUTOCONNECT));
-        tocd.addAD(tad);
+        addMtuDefinition(objectFactory, tocd, ifaceName);
+        addAutoconnectDefinition(objectFactory, tocd, ifaceName);
 
         tad = objectFactory.createTad();
         tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.dhcpClient4.enabled").toString());
@@ -868,25 +851,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                 .getMessage(NetworkAdminConfiguration.CONFIG_IPV4_DHCP_CLIENT_ENABLED));
         tocd.addAD(tad);
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_ADDRESS));
-        tocd.addAD(tad);
-
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
-        tad.setType(Tscalar.SHORT);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_PREFIX));
-        tocd.addAD(tad);
+        addIp4AddressDefinition(objectFactory, tocd, ifaceName);
+        addIp4PrefixDefinition(objectFactory, tocd, ifaceName);
 
         tad = objectFactory.createTad();
         tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(".config.ip4.gateway").toString());
@@ -900,6 +866,40 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     private void getLoopbackDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+        addMtuDefinition(objectFactory, tocd, ifaceName);
+        addAutoconnectDefinition(objectFactory, tocd, ifaceName);
+        addDriverDefinition(objectFactory, tocd, ifaceName);
+        addIp4AddressDefinition(objectFactory, tocd, ifaceName);
+        addIp4PrefixDefinition(objectFactory, tocd, ifaceName);
+    }
+
+    private void addDriverDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+        Tad tad;
+        tad = objectFactory.createTad();
+        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_DRIVER).toString());
+        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_DRIVER).toString());
+        tad.setType(Tscalar.STRING);
+        tad.setCardinality(0);
+        tad.setRequired(false);
+        tad.setDefault("");
+        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_DRIVER));
+        tocd.addAD(tad);
+    }
+
+    private void addAutoconnectDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+        Tad tad;
+        tad = objectFactory.createTad();
+        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
+        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
+        tad.setType(Tscalar.BOOLEAN);
+        tad.setCardinality(0);
+        tad.setRequired(true);
+        tad.setDefault("");
+        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_AUTOCONNECT));
+        tocd.addAD(tad);
+    }
+
+    private void addMtuDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
         Tad tad;
         tad = objectFactory.createTad();
         tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_MTU).toString());
@@ -910,37 +910,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         tad.setDefault("");
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_MTU));
         tocd.addAD(tad);
+    }
 
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_AUTOCONNECT).toString());
-        tad.setType(Tscalar.BOOLEAN);
-        tad.setCardinality(0);
-        tad.setRequired(true);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_AUTOCONNECT));
-        tocd.addAD(tad);
-
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_DRIVER).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_DRIVER).toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_DRIVER));
-        tocd.addAD(tad);
-
-        tad = objectFactory.createTad();
-        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
-        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
-        tad.setType(Tscalar.STRING);
-        tad.setCardinality(0);
-        tad.setRequired(false);
-        tad.setDefault("");
-        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_ADDRESS));
-        tocd.addAD(tad);
-
+    private void addIp4PrefixDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+        Tad tad;
         tad = objectFactory.createTad();
         tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
         tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_PREFIX).toString());
@@ -949,6 +922,19 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         tad.setRequired(false);
         tad.setDefault("");
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_PREFIX));
+        tocd.addAD(tad);
+    }
+
+    private void addIp4AddressDefinition(ObjectFactory objectFactory, Tocd tocd, String ifaceName) {
+        Tad tad;
+        tad = objectFactory.createTad();
+        tad.setId(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
+        tad.setName(new StringBuffer().append(PREFIX).append(ifaceName).append(CONFIG_IP4_ADDRESS).toString());
+        tad.setType(Tscalar.STRING);
+        tad.setCardinality(0);
+        tad.setRequired(false);
+        tad.setDefault("");
+        tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.CONFIG_IPV4_ADDRESS));
         tocd.addAD(tad);
     }
 

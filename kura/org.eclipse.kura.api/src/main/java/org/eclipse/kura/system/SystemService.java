@@ -115,6 +115,11 @@ public interface SystemService {
      * @since 2.2
      */
     public static final String KEY_LEGACY_BT_BEACON_SCAN = "kura.legacy.bluetooth.beacon.scan";
+    
+    /**
+     * @since 2.3
+     */
+    public static final String KEY_LEGACY_PPP_LOGGING = "kura.legacy.ppp.logging.enabled";
 
     /**
      * @deprecated
@@ -561,5 +566,13 @@ public interface SystemService {
      * @return if the legacy beacon scan has to be used
      */
     public boolean isLegacyBluetoothBeaconScan();
+    
+    /**
+     * Returns true (default) if the PPP logging in separate log file in /var/log is enabled.
+     *
+     * @since 2.3
+     * @return true if separate log file in /var/log is required
+     */
+    public boolean isLegacyPPPLoggingEnabled();
 
 }

@@ -322,6 +322,8 @@ public class NetworkConfiguration {
         sb.append(" :: Auth Type: " + ((ModemConfig) netConfig).getAuthType());
         sb.append(" :: IP Address: " + ((ModemConfig) netConfig).getIpAddress());
         sb.append(" :: PDP Type: " + ((ModemConfig) netConfig).getPdpType());
+        sb.append(" :: Gps enabled: " + ((ModemConfig) netConfig).isGpsEnabled());
+        sb.append(" :: Antenna diversity enabled: " + ((ModemConfig) netConfig).isDiversityEnabled());
     }
 
     protected void appendWifiConfig(StringBuilder sb, NetConfig netConfig) {

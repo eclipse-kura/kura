@@ -351,10 +351,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         if (this.dockerService != null) {
             try {
                 logger.info("Creating docker invenetory");
-                ContainerDescriptor[] containers = this.dockerService.listByContainerDescriptor();
-                Arrays.asList(containers).stream().forEach(
+                List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
+                containers.stream().forEach(
                         container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
-                                container.getContainerImage(), SystemResourceType.DOCKER)));
+                                container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
+                                SystemResourceType.DOCKER)));
             } catch (Exception e) {
                 logger.error("Could not connect to docker");
             }
@@ -398,10 +399,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     }
 
     private KuraPayload doGetDockerContainers() {
-        List<ContainerDescriptor> containerList;
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            ContainerDescriptor[] containers = this.dockerService.listByContainerDescriptor();
+            List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
 
             String s = marshal(containers);
             respPayload.setTimestamp(new Date());

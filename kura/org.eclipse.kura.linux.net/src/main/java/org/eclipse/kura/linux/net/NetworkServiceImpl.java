@@ -167,7 +167,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     protected void activate(ComponentContext componentContext) {
         // save the bundle context
         this.ctx = componentContext;
-        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
+        setLinuxNetworkUtil(new LinuxNetworkUtil(this.executorService));
 
         Dictionary<String, String[]> d = new Hashtable<>();
         d.put(EventConstants.EVENT_TOPIC, EVENT_TOPICS);
@@ -231,6 +231,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 this.activated.set(true);
             }
         });
+    }
+
+    protected void setLinuxNetworkUtil(LinuxNetworkUtil linuxNetworkUtil) {
+        this.linuxNetworkUtil = linuxNetworkUtil;
     }
 
     private int generatePppNumber() {
@@ -819,28 +823,26 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             wifiInterfaceAddresses.add(wifiInterfaceAddress);
             try {
                 LinuxIfconfig ifconfig = this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName);
-                if (ifconfig != null) {
+                if (ifconfig != null && ifconfig.getInetMask() != null) {
                     String currentNetmask = ifconfig.getInetMask();
-                    if (currentNetmask != null) {
-                        wifiInterfaceAddress.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
-                        wifiInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
-                        wifiInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
-                        wifiInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
-                        Optional<IPAddress> gatewayAddress = this.linuxNetworkUtil.getGatewayIpAddress(interfaceName);
-                        if (gatewayAddress.isPresent()) {
-                            wifiInterfaceAddress.setGateway(gatewayAddress.get());
-                        } else {
-                            wifiInterfaceAddress.setGateway(conInfo.getGateway());
-                        }
-                        wifiInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
+                    wifiInterfaceAddress.setAddress(IPAddress.parseHostAddress(ifconfig.getInetAddress()));
+                    wifiInterfaceAddress.setBroadcast(IPAddress.parseHostAddress(ifconfig.getInetBcast()));
+                    wifiInterfaceAddress.setNetmask(IPAddress.parseHostAddress(currentNetmask));
+                    wifiInterfaceAddress.setNetworkPrefixLength(NetworkUtil.getNetmaskShortForm(currentNetmask));
+                    Optional<IPAddress> gatewayAddress = this.linuxNetworkUtil.getGatewayIpAddress(interfaceName);
+                    if (gatewayAddress.isPresent()) {
+                        wifiInterfaceAddress.setGateway(gatewayAddress.get());
+                    } else {
+                        wifiInterfaceAddress.setGateway(conInfo.getGateway());
+                    }
+                    wifiInterfaceAddress.setDnsServers(new ArrayList<>(LinuxDns.getInstance().getDnServers()));
 
-                        WifiMode wifiMode = this.linuxNetworkUtil.getWifiMode(interfaceName);
-                        wifiInterfaceAddress.setBitrate(this.linuxNetworkUtil.getWifiBitrate(interfaceName));
-                        wifiInterfaceAddress.setMode(wifiMode);
+                    WifiMode wifiMode = this.linuxNetworkUtil.getWifiMode(interfaceName);
+                    wifiInterfaceAddress.setBitrate(this.linuxNetworkUtil.getWifiBitrate(interfaceName));
+                    wifiInterfaceAddress.setMode(wifiMode);
 
-                        if (wifiMode == WifiMode.INFRA) {
-                            addMinimalWifiInfraConfiguration(interfaceName, wifiInterfaceAddress);
-                        }
+                    if (wifiMode == WifiMode.INFRA) {
+                        addMinimalWifiInfraConfiguration(interfaceName, wifiInterfaceAddress);
                     }
                 }
             } catch (UnknownHostException e) {

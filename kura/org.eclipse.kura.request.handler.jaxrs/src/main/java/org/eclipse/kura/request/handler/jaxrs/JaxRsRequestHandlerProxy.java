@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,10 +30,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -219,47 +216,9 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
     }
 
     protected KuraMessage handleException(final Throwable e) {
-        if (e instanceof KuraException) {
-            return handleKuraException((KuraException) e);
-        } else if (e instanceof WebApplicationException) {
-            return handleWebApplicationException((WebApplicationException) e);
-        } else if (e instanceof InvocationTargetException && e.getCause() != null) {
-            return handleException(e.getCause());
-        } else {
-            return handleException(buildWebApplicationException(Status.INTERNAL_SERVER_ERROR, e.getMessage()));
-        }
-    }
 
-    protected KuraMessage handleKuraException(final KuraException e) {
-        if (e.getCode() == KuraErrorCode.NOT_FOUND) {
-            return handleException(buildWebApplicationException(Status.NOT_FOUND, e.getMessage()));
-        } else if (e.getCode() == KuraErrorCode.BAD_REQUEST) {
-            return handleException(buildWebApplicationException(Status.BAD_REQUEST, e.getMessage()));
-        } else {
-            return handleException(buildWebApplicationException(Status.INTERNAL_SERVER_ERROR, e.getMessage()));
-        }
-    }
-
-    protected KuraMessage handleWebApplicationException(final WebApplicationException e) {
-        final Response response = e.getResponse();
-
-        final KuraPayload responsePayload = new KuraResponsePayload(response.getStatus());
-
-        try {
-            ResponseBodyHandlers.responseHandler(gson).buildBody(response).ifPresent(responsePayload::setBody);
-        } catch (final Exception ex) {
-            logger.warn("failed to serialize WebApplicationException entity", ex);
-        }
-
-        return new KuraMessage(responsePayload);
-    }
-
-    protected WebApplicationException buildWebApplicationException(final Status status, final String message) {
-
-        final String actualMessage = message != null ? message : "An internal error occurred";
-
-        return new WebApplicationException(
-                Response.status(status).type(MediaType.APPLICATION_JSON).entity(new Failure(actualMessage)).build());
+        return DefaultExceptionHandler.toKuraMessage(DefaultExceptionHandler.toWebApplicationException(e),
+                Optional.of(gson));
     }
 
     @SuppressWarnings("unchecked")
@@ -316,20 +275,6 @@ public class JaxRsRequestHandlerProxy implements RequestHandler {
             this.method = method;
             this.parameterHandler = parameterHandler;
             this.bodyHandler = bodyHandler;
-        }
-    }
-
-    private static class Failure {
-
-        private final String message;
-
-        public Failure(String message) {
-            this.message = message;
-        }
-
-        @SuppressWarnings("unused")
-        public String getMessage() {
-            return message;
         }
     }
 

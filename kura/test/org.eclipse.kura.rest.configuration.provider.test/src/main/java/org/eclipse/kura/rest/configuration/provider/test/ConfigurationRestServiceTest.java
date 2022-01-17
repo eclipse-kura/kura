@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,10 +13,10 @@
 package org.eclipse.kura.rest.configuration.provider.test;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.kura.core.testutil.json.JsonProjection.self;
 import static org.eclipse.kura.rest.configuration.provider.test.ConfigurationUtil.adBuilder;
 import static org.eclipse.kura.rest.configuration.provider.test.ConfigurationUtil.configurationBuilder;
 import static org.eclipse.kura.rest.configuration.provider.test.ConfigurationUtil.ocdBuilder;
-import static org.eclipse.kura.rest.configuration.provider.test.JsonProjection.self;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -53,9 +53,13 @@ import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.Icon;
 import org.eclipse.kura.configuration.metatype.OCD;
 import org.eclipse.kura.configuration.metatype.Scalar;
+import org.eclipse.kura.core.testutil.json.JsonProjection;
+import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
+import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
+import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
+import org.eclipse.kura.core.testutil.requesthandler.Transport;
+import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.rest.configuration.provider.test.Transport.MethodSpec;
-import org.eclipse.kura.rest.configuration.provider.test.Transport.Response;
 import org.eclipse.kura.util.wire.test.WireTestUtil;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -72,7 +76,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonValue;
 
 @RunWith(Parameterized.class)
-public class ConfigurationRestServiceTest {
+public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
     @Test
     public void shouldSupportGetSnapshots() throws KuraException {
@@ -81,7 +85,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/snapshots");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"ids\":[]}");
+        thenResponseBodyEqualsJson("{\"ids\":[]}");
     }
 
     @Test
@@ -91,7 +95,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/snapshots");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"ids\":[10000,10001,10002,10003,10004]}");
+        thenResponseBodyEqualsJson("{\"ids\":[10000,10001,10002,10003,10004]}");
     }
 
     @Test
@@ -110,7 +114,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/factoryComponents");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"pids\":[]}");
+        thenResponseBodyEqualsJson("{\"pids\":[]}");
     }
 
     @Test
@@ -120,7 +124,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/factoryComponents");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"pids\":[\"pid0\",\"pid1\",\"pid2\",\"pid3\",\"pid4\"]}");
+        thenResponseBodyEqualsJson("{\"pids\":[\"pid0\",\"pid1\",\"pid2\",\"pid3\",\"pid4\"]}");
     }
 
     @Test
@@ -130,7 +134,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"pids\":[]}");
+        thenResponseBodyEqualsJson("{\"pids\":[]}");
     }
 
     @Test
@@ -140,7 +144,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"pids\":[\"pid0\",\"pid1\",\"pid2\",\"pid3\",\"pid4\"]}");
+        thenResponseBodyEqualsJson("{\"pids\":[\"pid0\",\"pid1\",\"pid2\",\"pid3\",\"pid4\"]}");
     }
 
     @Test
@@ -159,7 +163,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[]}");
+        thenResponseBodyEqualsJson("{\"configs\":[]}");
     }
 
     @Test
@@ -169,8 +173,8 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[" + "{\"pid\":\"pid0\"}," + "{\"pid\":\"pid1\"}," + "{\"pid\":\"pid2\"},"
-                + "{\"pid\":\"pid3\"}," + "{\"pid\":\"pid4\"}]" + "}");
+        thenResponseBodyEqualsJson("{\"configs\":[" + "{\"pid\":\"pid0\"}," + "{\"pid\":\"pid1\"},"
+                + "{\"pid\":\"pid2\"}," + "{\"pid\":\"pid3\"}," + "{\"pid\":\"pid4\"}]" + "}");
     }
 
     @Test
@@ -737,7 +741,7 @@ public class ConfigurationRestServiceTest {
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[]}");
+        thenResponseBodyEqualsJson("{\"configs\":[]}");
     }
 
     @Test
@@ -748,7 +752,7 @@ public class ConfigurationRestServiceTest {
                 "{\"pids\":[\"pid1\",\"pid3\"]}");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[" + "{\"pid\":\"pid1\"}," + "{\"pid\":\"pid3\"}]" + "}");
+        thenResponseBodyEqualsJson("{\"configs\":[" + "{\"pid\":\"pid1\"}," + "{\"pid\":\"pid3\"}]" + "}");
     }
 
     @Test
@@ -759,7 +763,7 @@ public class ConfigurationRestServiceTest {
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[]}");
+        thenResponseBodyEqualsJson("{\"configs\":[]}");
     }
 
     @Test
@@ -770,7 +774,8 @@ public class ConfigurationRestServiceTest {
                 "{\"pids\":[\"test\"]}");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[{\"pid\":\"test\",\"definition\":{\"name\":\"test\",\"id\":\"test\"}}]}");
+        thenResponseBodyEqualsJson(
+                "{\"configs\":[{\"pid\":\"test\",\"definition\":{\"name\":\"test\",\"id\":\"test\"}}]}");
     }
 
     @Test
@@ -789,8 +794,8 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":12345}");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"configs\":[" + "{\"pid\":\"pid0\"}," + "{\"pid\":\"pid1\"}," + "{\"pid\":\"pid2\"},"
-                + "{\"pid\":\"pid3\"}," + "{\"pid\":\"pid4\"}]" + "}");
+        thenResponseBodyEqualsJson("{\"configs\":[" + "{\"pid\":\"pid0\"}," + "{\"pid\":\"pid1\"},"
+                + "{\"pid\":\"pid2\"}," + "{\"pid\":\"pid3\"}," + "{\"pid\":\"pid4\"}]" + "}");
     }
 
     @Test
@@ -809,7 +814,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("POST", "EXEC"), "/snapshots/_write");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"id\":12345}");
+        thenResponseBodyEqualsJson("{\"id\":12345}");
     }
 
     @Test
@@ -828,7 +833,7 @@ public class ConfigurationRestServiceTest {
         whenRequestIsPerformed(new MethodSpec("POST", "EXEC"), "/snapshots/_rollback");
 
         thenRequestSucceeds();
-        thenResponseBodyEquals("{\"id\":11111}");
+        thenResponseBodyEqualsJson("{\"id\":11111}");
     }
 
     @Test
@@ -1021,16 +1026,14 @@ public class ConfigurationRestServiceTest {
                 self().field("configs").arrayItem(0).field("definition").field("ad").arrayItem(0).field("option"));
     }
 
-    private final Transport transport;
     private static ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
     private final CryptoService cryptoService;
 
-    private Optional<Response> response = Optional.empty();
     private Map<String, Map<String, Object>> receivedConfigsByPid = new HashMap<>();
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport(), new MqttTransport());
+        return Arrays.asList(new RestTransport("configuration/v2"), new MqttTransport("CONF-V2"));
     }
 
     @BeforeClass
@@ -1059,8 +1062,7 @@ public class ConfigurationRestServiceTest {
     @SuppressWarnings("unchecked")
     public ConfigurationRestServiceTest(final Transport transport) throws InterruptedException, ExecutionException,
             TimeoutException, KuraException, InvalidSyntaxException, IOException {
-        this.transport = transport;
-        this.transport.init();
+        super(transport);
         this.cryptoService = WireTestUtil.trackService(CryptoService.class, Optional.empty()).get(30, TimeUnit.SECONDS);
         Mockito.reset(configurationService);
         Mockito.doAnswer(i -> {
@@ -1075,36 +1077,6 @@ public class ConfigurationRestServiceTest {
                 Mockito.any());
         Mockito.doAnswer(configurationUpdateAnswer).when(configurationService).updateConfiguration(Mockito.any(),
                 Mockito.any(), Mockito.anyBoolean());
-    }
-
-    private void whenRequestIsPerformed(final MethodSpec method, final String resource) {
-        this.response = Optional.of(this.transport.runRequest(resource, method));
-    }
-
-    private void whenRequestIsPerformed(final MethodSpec method, final String resource, final String body) {
-        this.response = Optional.of(this.transport.runRequest(resource, method, body));
-    }
-
-    private void thenRequestSucceeds() {
-        thenResponseCodeIs(200);
-    }
-
-    private void thenResponseCodeIs(final int expectedResponseCode) {
-        final Response currentResponse = expectResponse();
-
-        if (currentResponse.status != expectedResponseCode) {
-            fail("expected status: " + expectedResponseCode + " but was: " + currentResponse.status + " body: "
-                    + currentResponse.body);
-        }
-    }
-
-    private void thenResponseBodyIsEmpty() {
-        assertEquals(Optional.empty(), expectResponse().body);
-    }
-
-    private void thenResponseBodyEquals(final String value) {
-        assertEquals(Json.parse(value), Json
-                .parse(expectResponse().body.orElseThrow(() -> new IllegalStateException("expected response body"))));
     }
 
     private void thenResponseElementIs(final JsonValue expected, final JsonProjection projection) {
@@ -1132,10 +1104,6 @@ public class ConfigurationRestServiceTest {
             fail("failed to apply " + projection + " to " + root);
             throw new IllegalStateException("unreachable");
         }
-    }
-
-    private Response expectResponse() {
-        return response.orElseThrow(() -> new IllegalStateException("response not available"));
     }
 
     private void givenMockGetSnapshotsReturnEmpty() throws KuraException {

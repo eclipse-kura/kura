@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,11 +10,9 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.core.tamper.detection.test;
+package org.eclipse.kura.core.testutil.requesthandler;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +32,13 @@ public class RestTransport implements Transport {
     private static final Encoder ENCODER = Base64.getEncoder();
     private static final Logger logger = LoggerFactory.getLogger(RestTransport.class);
 
-    private static final String BASE_URL = "http://localhost:8080/services/tamper/v1/";
+    private final String baseURL;
 
     private boolean initialized = false;
+
+    public RestTransport(final String servicePath) {
+        this.baseURL = "http://localhost:8080/services/" + servicePath;
+    }
 
     @Override
     public void init() {
@@ -51,48 +54,12 @@ public class RestTransport implements Transport {
                             Optional.of("(kura.service.pid=org.eclipse.kura.internal.rest.provider.RestService)"))
                     .get(1, TimeUnit.MINUTES);
 
-            ServiceUtil
-                    .trackService("org.eclipse.kura.core.tamper.detection.TamperDetectionRestService", Optional.empty())
-                    .get(1, TimeUnit.MINUTES);
-
             Thread.sleep(5000);
 
             initialized = true;
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public String runRequestAndGetResponse(String resource, String method) {
-        try {
-            return runRequest(resource, method,
-                    conn -> IOUtils.toString(conn.getInputStream(), StandardCharsets.UTF_8));
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public int runRequestAndGetStatus(String resource, String method) {
-        try {
-            return runRequest(resource, method, conn -> {
-                conn.connect();
-                return conn.getResponseCode();
-            });
-        } catch (final Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private <T> T runRequest(final String relativeUri, final String method, final ResponseCollector<T> collector)
-            throws MalformedURLException, IOException {
-        final HttpURLConnection connection = (HttpURLConnection) new URL(BASE_URL + relativeUri).openConnection();
-        final String encoded = ENCODER.encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8));
-        connection.setRequestProperty("Authorization", "Basic " + encoded);
-        connection.setRequestMethod(method);
-
-        return collector.collect(connection);
     }
 
     private static void waitPortOpen(final String url, final int port, final long timeout, final TimeUnit timeoutUnit)
@@ -118,9 +85,40 @@ public class RestTransport implements Transport {
         throw new IllegalStateException("Port " + port + "not open");
     }
 
-    private interface ResponseCollector<T> {
+    @Override
+    public Response runRequest(String relativeUri, MethodSpec method) {
+        return runRequest(relativeUri, method, null);
+    }
 
-        T collect(final HttpURLConnection conn) throws IOException;
+    @Override
+    public Response runRequest(String relativeUri, MethodSpec method, String requestBody) {
+        final HttpURLConnection connection;
+
+        try {
+            connection = (HttpURLConnection) new URL(this.baseURL + relativeUri).openConnection();
+            final String encoded = ENCODER.encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8));
+            connection.setRequestProperty("Authorization", "Basic " + encoded);
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setRequestMethod(method.getRestMethod());
+
+            if (requestBody != null) {
+                connection.setDoOutput(true);
+                connection.setRequestProperty("Content-Type", "application/json");
+                IOUtils.write(requestBody, connection.getOutputStream());
+            }
+
+            connection.connect();
+
+            final int status = connection.getResponseCode();
+
+            final String body = IOUtils.toString(
+                    ((status / 200) == 1) ? connection.getInputStream() : connection.getErrorStream(),
+                    StandardCharsets.UTF_8);
+
+            return new Response(status, body == null || body.isEmpty() ? Optional.empty() : Optional.of(body));
+        } catch (final Exception e) {
+            throw new IllegalStateException("request failed", e);
+        }
     }
 
 }

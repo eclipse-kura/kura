@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,10 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.core.tamper.detection.test;
-
-import static org.eclipse.kura.util.wire.test.WireTestUtil.createFactoryConfiguration;
-import static org.eclipse.kura.util.wire.test.WireTestUtil.updateComponentConfiguration;
+package org.eclipse.kura.core.testutil.requesthandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -26,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.core.testutil.service.ServiceUtil;
 import org.eclipse.kura.core.util.MqttTopicUtil;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.data.DataTransportService;
@@ -47,20 +45,20 @@ public class MqttTransport implements Transport {
     private static final String DEFAULT_CLOUD_SERVICE_PID = "org.eclipse.kura.cloud.CloudService";
     private static final String DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
 
-    private ConfigurationService configurationService;
-
-    private DataTransportService mqttDataTransport;
-    private DataTransportInspector underTestInspector;
-
     private CryptoService cryptoService;
 
-    private DataTransportService observer;
     private DataTransportInspector observerInspector;
 
     private Marshaller jsonMarshaller;
     private Unmarshaller jsonUnmarshaller;
 
+    private String appId;
+
     private boolean initialized = false;
+
+    public MqttTransport(final String appId) {
+        this.appId = appId;
+    }
 
     @Override
     public void init() {
@@ -69,10 +67,10 @@ public class MqttTransport implements Transport {
         }
 
         try {
-            configurationService = ServiceUtil.trackService(ConfigurationService.class, Optional.empty()).get(1,
-                    TimeUnit.MINUTES);
-            mqttDataTransport = ServiceUtil.trackService(DataTransportService.class, Optional.empty()).get(1,
-                    TimeUnit.MINUTES);
+            final ConfigurationService configurationService = ServiceUtil
+                    .trackService(ConfigurationService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
+            final DataTransportService mqttDataTransport = ServiceUtil
+                    .trackService(DataTransportService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
             cryptoService = ServiceUtil.trackService(CryptoService.class, Optional.empty()).get(1, TimeUnit.MINUTES);
             jsonMarshaller = ServiceUtil
                     .trackService(Marshaller.class,
@@ -88,21 +86,23 @@ public class MqttTransport implements Transport {
             brokerProperties.put("enabled", true);
             brokerProperties.put("password", new String(cryptoService.encryptAes("foo".toCharArray())));
 
-            updateComponentConfiguration(configurationService, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
+            ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_MQTT_DATA_TRANSPORT_SERVICE_PID,
                     getConfigForLocalBroker("test")).get(30, TimeUnit.SECONDS);
-            updateComponentConfiguration(configurationService, SIMPLE_ARTEMIS_BROKER_SERVICE_PID, brokerProperties)
-                    .get(30, TimeUnit.SECONDS);
+            ServiceUtil.updateComponentConfiguration(configurationService, SIMPLE_ARTEMIS_BROKER_SERVICE_PID,
+                    brokerProperties).get(30, TimeUnit.SECONDS);
 
             final Map<String, Object> cloudServiceProperties = Collections.singletonMap("payload.encoding",
                     "simple-json");
 
-            updateComponentConfiguration(configurationService, DEFAULT_CLOUD_SERVICE_PID, cloudServiceProperties)
-                    .get(30, TimeUnit.SECONDS);
+            ServiceUtil.updateComponentConfiguration(configurationService, DEFAULT_CLOUD_SERVICE_PID,
+                    cloudServiceProperties).get(30, TimeUnit.SECONDS);
 
-            observer = createFactoryConfiguration(configurationService, DataTransportService.class, "observer",
-                    MQTT_DATA_TRANSPORT_FACTORY_PID, getConfigForLocalBroker("observer")).get(30, TimeUnit.SECONDS);
+            final DataTransportService observer = ServiceUtil
+                    .createFactoryConfiguration(configurationService, DataTransportService.class, "observer",
+                            MQTT_DATA_TRANSPORT_FACTORY_PID, getConfigForLocalBroker("observer"))
+                    .get(30, TimeUnit.SECONDS);
             observerInspector = new DataTransportInspector(observer);
-            underTestInspector = new DataTransportInspector(mqttDataTransport);
+            final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport);
 
             final CompletableFuture<Void> underTestConnected = underTestInspector.connected();
 
@@ -123,34 +123,34 @@ public class MqttTransport implements Transport {
     }
 
     @Override
-    public String runRequestAndGetResponse(final String resource, final String method) {
-
-        try {
-            final KuraPayload response = observerInspector
-                    .runRequest(adaptResource(resource, method), new KuraPayload()).get(1, TimeUnit.MINUTES);
-
-            return new String(response.getBody(), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public Response runRequest(String resource, MethodSpec method) {
+        return runRequest(resource, method, null);
     }
 
     @Override
-    public int runRequestAndGetStatus(String resource, String method) {
+    public Response runRequest(String resource, MethodSpec method, String requestBody) {
         try {
-            final KuraPayload response = observerInspector
-                    .runRequest(adaptResource(resource, method), new KuraPayload()).get(1, TimeUnit.MINUTES);
+            final KuraPayload requestPayload = new KuraPayload();
 
-            return (int) (long) response.getMetric("response.code");
+            if (requestBody != null) {
+                requestPayload.setBody(requestBody.getBytes(StandardCharsets.UTF_8));
+            }
+
+            final KuraPayload response = observerInspector.runRequest(adaptResource(resource, method), requestPayload)
+                    .get(1, TimeUnit.MINUTES);
+
+            final int status = (int) (long) response.getMetric("response.code");
+            final Optional<String> body = Optional.ofNullable(response.getBody())
+                    .map(s -> new String(s, StandardCharsets.UTF_8));
+
+            return new Response(status, body);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private String adaptResource(final String resource, final String method) {
-        final String actualMetod = method.equals("POST") ? "EXEC" : method;
-
-        return actualMetod + "/" + resource;
+    private String adaptResource(final String resource, final MethodSpec method) {
+        return method.getRequestHandlerMethod() + resource;
     }
 
     private Map<String, Object> getConfigForLocalBroker(final String clientId) throws KuraException {
@@ -279,11 +279,12 @@ public class MqttTransport implements Transport {
 
             final byte[] data = jsonMarshaller.marshal(request).getBytes(StandardCharsets.UTF_8);
 
-            final String topic = "$EDC/mqtt/test/TAMPER-V1/" + resource;
+            final String topic = "$EDC/mqtt/test/" + appId + "/" + resource;
 
             final CompletableFuture<byte[]> message = new CompletableFuture<>();
 
-            this.messageLookup = Optional.of(new MessageLookup(message, "$EDC/mqtt/test/TAMPER-V1/REPLY/" + requestId));
+            this.messageLookup = Optional
+                    .of(new MessageLookup(message, "$EDC/mqtt/test/" + appId + "/REPLY/" + requestId));
 
             dataTransportService.publish(topic, data, 0, false);
 

@@ -1152,16 +1152,16 @@ public class NetworkConfiguration {
             // }
             // properties.put(netIfConfigPrefix + "winsServers", sbWinsAddresses.toString());
 
-            StringBuilder sbDomains = new StringBuilder();
-            if (nc.getDomains() != null) {
-                for (String domain : nc.getDomains()) {
-                    if (sbDomains.length() != 0) {
-                        sbDomains.append(",");
-                    }
-                    sbDomains.append(domain);
-                }
-            }
-            properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
+            // StringBuilder sbDomains = new StringBuilder();
+            // if (nc.getDomains() != null) {
+            // for (String domain : nc.getDomains()) {
+            // if (sbDomains.length() != 0) {
+            // sbDomains.append(",");
+            // }
+            // sbDomains.append(domain);
+            // }
+            // }
+            // properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
         }
     }
 
@@ -1187,14 +1187,14 @@ public class NetworkConfiguration {
             }
             properties.put(netIfConfigPrefix + "ip6.dnsServers", sbDnsAddresses.toString());
 
-            StringBuilder sbDomains = new StringBuilder();
-            for (String domain : nc.getDomains()) {
-                if (sbDomains.length() != 0) {
-                    sbDomains.append(",");
-                }
-                sbDomains.append(domain);
-            }
-            properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
+            // StringBuilder sbDomains = new StringBuilder();
+            // for (String domain : nc.getDomains()) {
+            // if (sbDomains.length() != 0) {
+            // sbDomains.append(",");
+            // }
+            // sbDomains.append(domain);
+            // }
+            // properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
         }
     }
 

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -296,10 +296,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     @Override
     public NetworkState getState() throws KuraException {
         // see if we have global access by trying to ping - maybe there is a better way?
-        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1)) {
-            return NetworkState.CONNECTED_GLOBAL;
-        }
-        if (this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
+        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1) || this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
             return NetworkState.CONNECTED_GLOBAL;
         }
 
@@ -595,32 +592,24 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     private boolean validateDeviceAddedEvent(Event event) {
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY) == null) {
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY) == null) {
             return false;
         }
         if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null
                 || ((String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY)).startsWith("usb")) {
             return false;
         }
-        return (event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) != null
+        return event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) != null
                 && !((UsbDeviceType) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY))
-                        .equals(UsbDeviceType.USB_NET_DEVICE));
+                        .equals(UsbDeviceType.USB_NET_DEVICE);
     }
 
     private boolean validateDeviceRemovedEvent(Event event) {
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
             return false;
         }
         return event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) != null;

@@ -610,10 +610,10 @@ public class NetworkConfiguration {
             NetInterfaceAddressConfig nia) {
         // Modem interface address
         if (nia instanceof ModemInterfaceAddress) {
-            if (((ModemInterfaceAddress) nia).getConnectionType() != null) {
-                newNetworkProperties.put(netIfConfigPrefix + "connection.type",
-                        ((ModemInterfaceAddress) nia).getConnectionType().toString());
-            }
+            // if (((ModemInterfaceAddress) nia).getConnectionType() != null) {
+            // newNetworkProperties.put(netIfConfigPrefix + "connection.type",
+            // ((ModemInterfaceAddress) nia).getConnectionType().toString());
+            // }
             if (((ModemInterfaceAddress) nia).getConnectionStatus() != null) {
                 newNetworkProperties.put(netIfConfigPrefix + "connection.status",
                         ((ModemInterfaceAddress) nia).getConnectionStatus().toString());

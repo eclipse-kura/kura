@@ -549,7 +549,6 @@ public class NetworkConfiguration {
 
             // add the properties of the interface
             newNetworkProperties.put(netIfReadOnlyPrefix + "type", netInterfaceConfig.getType().toString());
-            newNetworkProperties.put(netIfPrefix + "name", netInterfaceConfig.getName());
             newNetworkProperties.put(netIfPrefix + AUTOCONNECT, netInterfaceConfig.isAutoConnect());
             newNetworkProperties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
 

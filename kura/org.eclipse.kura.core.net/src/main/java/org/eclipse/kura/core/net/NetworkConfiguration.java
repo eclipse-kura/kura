@@ -689,11 +689,11 @@ public class NetworkConfiguration {
         } else {
             properties.put(prefix + PASSPHRASE, new Password(""));
         }
-        if (wifiConfig.getHardwareMode() != null) {
-            properties.put(prefix + HARDWARE_MODE, wifiConfig.getHardwareMode());
-        } else {
-            properties.put(prefix + HARDWARE_MODE, "");
-        }
+        // if (wifiConfig.getHardwareMode() != null) {
+        // properties.put(prefix + HARDWARE_MODE, wifiConfig.getHardwareMode());
+        // } else {
+        // properties.put(prefix + HARDWARE_MODE, "");
+        // }
         // properties.put(prefix + BROADCAST, Boolean.valueOf(wifiConfig.getBroadcast()));
         if (wifiConfig.getRadioMode() != null) {
             properties.put(prefix + ".radioMode", wifiConfig.getRadioMode().toString());
@@ -1141,16 +1141,16 @@ public class NetworkConfiguration {
                 properties.put(netIfConfigPrefix + "ip4.gateway", "");
             }
 
-            StringBuilder sbWinsAddresses = new StringBuilder();
-            if (nc.getWinsServers() != null) {
-                for (IP4Address ip : nc.getWinsServers()) {
-                    if (sbWinsAddresses.length() != 0) {
-                        sbWinsAddresses.append(",");
-                    }
-                    sbWinsAddresses.append(ip.getHostAddress());
-                }
-            }
-            properties.put(netIfConfigPrefix + "winsServers", sbWinsAddresses.toString());
+            // StringBuilder sbWinsAddresses = new StringBuilder();
+            // if (nc.getWinsServers() != null) {
+            // for (IP4Address ip : nc.getWinsServers()) {
+            // if (sbWinsAddresses.length() != 0) {
+            // sbWinsAddresses.append(",");
+            // }
+            // sbWinsAddresses.append(ip.getHostAddress());
+            // }
+            // }
+            // properties.put(netIfConfigPrefix + "winsServers", sbWinsAddresses.toString());
 
             StringBuilder sbDomains = new StringBuilder();
             if (nc.getDomains() != null) {

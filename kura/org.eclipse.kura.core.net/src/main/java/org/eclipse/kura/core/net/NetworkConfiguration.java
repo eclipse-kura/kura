@@ -694,7 +694,7 @@ public class NetworkConfiguration {
         } else {
             properties.put(prefix + HARDWARE_MODE, "");
         }
-        properties.put(prefix + BROADCAST, Boolean.valueOf(wifiConfig.getBroadcast()));
+        // properties.put(prefix + BROADCAST, Boolean.valueOf(wifiConfig.getBroadcast()));
         if (wifiConfig.getRadioMode() != null) {
             properties.put(prefix + ".radioMode", wifiConfig.getRadioMode().toString());
         }

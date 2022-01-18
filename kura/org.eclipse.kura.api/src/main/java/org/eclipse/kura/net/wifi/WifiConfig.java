@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -55,9 +55,6 @@ public class WifiConfig implements NetConfig {
     /** Radio mode **/
     private WifiRadioMode radioMode;
 
-    /** Whether or not to broadcast the SSID **/
-    private boolean broadcast;
-
     /** Background scan **/
     private WifiBgscan bgscan;
 
@@ -80,7 +77,12 @@ public class WifiConfig implements NetConfig {
         super();
     }
 
+    /**
+     * @deprecated since 2.3. Use {@link WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security,
+     *             String passkey, String hwMode, WifiBgscan bgscan)}
+     */
     @SuppressWarnings("checkstyle:parameterNumber")
+    @Deprecated
     public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
             boolean broadcast, WifiBgscan bgscan) {
         super();
@@ -91,7 +93,21 @@ public class WifiConfig implements NetConfig {
         this.security = security;
         this.passkey = new Password(passkey);
         this.hwMode = hwMode;
-        this.broadcast = broadcast;
+        this.bgscan = bgscan;
+        this.channelFrequencies = null;
+        this.wifiCountryCode = null;
+    }
+
+    public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
+            WifiBgscan bgscan) {
+        super();
+
+        this.mode = mode;
+        this.ssid = ssid;
+        this.channels = channels;
+        this.security = security;
+        this.passkey = new Password(passkey);
+        this.hwMode = hwMode;
         this.bgscan = bgscan;
         this.channelFrequencies = null;
         this.wifiCountryCode = null;
@@ -178,12 +194,20 @@ public class WifiConfig implements NetConfig {
         this.radioMode = radioMode;
     }
 
+    /**
+     * @deprecated since 2.3
+     */
+    @Deprecated
     public boolean getBroadcast() {
-        return this.broadcast;
+        return false;
     }
 
+    /**
+     * @deprecated since 2.3
+     */
+    @Deprecated
     public void setBroadcast(boolean broadcast) {
-        this.broadcast = broadcast;
+        // Do nothing...
     }
 
     public WifiBgscan getBgscan() {
@@ -282,7 +306,6 @@ public class WifiConfig implements NetConfig {
         result = prime * result + (this.passkey == null ? 0 : this.passkey.hashCode());
         result = prime * result + (this.hwMode == null ? 0 : this.hwMode.hashCode());
         result = prime * result + (this.radioMode == null ? 0 : this.radioMode.hashCode());
-        result = prime * result + (this.broadcast ? 1021 : 1031);
 
         result = prime * result + (this.pairwiseCiphers == null ? 0 : WifiCiphers.getCode(this.pairwiseCiphers));
 
@@ -353,9 +376,6 @@ public class WifiConfig implements NetConfig {
         if (!compare(this.bgscan, other.bgscan)) {
             return false;
         }
-        if (this.broadcast != other.broadcast) {
-            return false;
-        }
         if (this.pingAccessPoint != other.pingAccessPoint()) {
             return false;
         }
@@ -371,7 +391,7 @@ public class WifiConfig implements NetConfig {
 
     @Override
     public boolean isValid() {
-        return this.mode != null ? true : false;
+        return this.mode != null;
     }
 
     @Override
@@ -417,7 +437,6 @@ public class WifiConfig implements NetConfig {
         if (this.radioMode != null) {
             sb.append("radioMode: ").append(this.radioMode).append(" :: ");
         }
-        sb.append("broadcast: ").append(this.broadcast).append(" :: ");
         if (this.bgscan != null) {
             sb.append("bgscan: ").append(this.bgscan).append(" :: ");
         }

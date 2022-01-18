@@ -550,7 +550,7 @@ public class NetworkConfiguration {
             // add the properties of the interface
             newNetworkProperties.put(netIfReadOnlyPrefix + "type", netInterfaceConfig.getType().toString());
             // newNetworkProperties.put(netIfPrefix + AUTOCONNECT, netInterfaceConfig.isAutoConnect());
-            newNetworkProperties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
+            // newNetworkProperties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
 
             netInterfaceConfig.getNetInterfaceAddresses().forEach(nia -> {
                 if (nia != null) {

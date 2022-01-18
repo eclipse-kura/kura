@@ -892,9 +892,9 @@ public class NetworkConfiguration {
         properties.put(prefix + "apn", modemConfig.getApn());
         properties.put(prefix + "authType",
                 modemConfig.getAuthType() != null ? modemConfig.getAuthType().toString() : "");
-        properties.put(prefix + "dataCompression", modemConfig.getDataCompression());
+        // properties.put(prefix + "dataCompression", modemConfig.getDataCompression());
         properties.put(prefix + "dialString", modemConfig.getDialString());
-        properties.put(prefix + "headerCompression", modemConfig.getHeaderCompression());
+        // properties.put(prefix + "headerCompression", modemConfig.getHeaderCompression());
         properties.put(prefix + "ipAddress",
                 modemConfig.getIpAddress() != null ? modemConfig.getIpAddress().toString() : "");
         properties.put(prefix + "password", modemConfig.getPasswordAsPassword());
@@ -906,7 +906,7 @@ public class NetworkConfiguration {
         properties.put(prefix + "resetTimeout", modemConfig.getResetTimeout());
         properties.put(prefix + "lcpEchoInterval", modemConfig.getLcpEchoInterval());
         properties.put(prefix + "lcpEchoFailure", modemConfig.getLcpEchoFailure());
-        properties.put(prefix + "profileId", modemConfig.getProfileID());
+        // properties.put(prefix + "profileId", modemConfig.getProfileID());
         properties.put(prefix + "username", modemConfig.getUsername());
         properties.put(prefix + "enabled", modemConfig.isEnabled());
         properties.put(prefix + "gpsEnabled", modemConfig.isGpsEnabled());

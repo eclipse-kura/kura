@@ -549,7 +549,7 @@ public class NetworkConfiguration {
 
             // add the properties of the interface
             newNetworkProperties.put(netIfReadOnlyPrefix + "type", netInterfaceConfig.getType().toString());
-            newNetworkProperties.put(netIfPrefix + AUTOCONNECT, netInterfaceConfig.isAutoConnect());
+            // newNetworkProperties.put(netIfPrefix + AUTOCONNECT, netInterfaceConfig.isAutoConnect());
             newNetworkProperties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
 
             netInterfaceConfig.getNetInterfaceAddresses().forEach(nia -> {
@@ -1108,7 +1108,7 @@ public class NetworkConfiguration {
     private static void addNetConfigIP4Properties(NetConfigIP4 nc, String netIfConfigPrefix,
             Map<String, Object> properties) {
 
-        properties.put(netIfConfigPrefix + AUTOCONNECT, nc.isAutoConnect());
+        // properties.put(netIfConfigPrefix + AUTOCONNECT, nc.isAutoConnect());
         properties.put(netIfConfigPrefix + "ip4.status", nc.getStatus().toString());
 
         StringBuilder sbDnsAddresses = new StringBuilder();
@@ -1317,14 +1317,14 @@ public class NetworkConfiguration {
         String netIfPrefix = sbPrefix.append("config.").toString();
         String netIfConfigPrefix = sbPrefix.toString();
 
-        // Auto connect
-        boolean autoConnect = false;
-        String autoConnectKey = netIfPrefix + AUTOCONNECT;
-        if (props.containsKey(autoConnectKey)) {
-            autoConnect = (Boolean) props.get(autoConnectKey);
-            logger.trace("got autoConnect: {}", autoConnect);
-            netInterfaceConfig.setAutoConnect(autoConnect);
-        }
+        // // Auto connect
+        // boolean autoConnect = false;
+        // String autoConnectKey = netIfPrefix + AUTOCONNECT;
+        // if (props.containsKey(autoConnectKey)) {
+        // autoConnect = (Boolean) props.get(autoConnectKey);
+        // logger.trace("got autoConnect: {}", autoConnect);
+        // netInterfaceConfig.setAutoConnect(autoConnect);
+        // }
 
         // USB
         String vendorId = (String) props.get(netIfReadOnlyPrefix + "usb.vendor.id");
@@ -1435,7 +1435,8 @@ public class NetworkConfiguration {
             NetConfigIP4 netConfigIP4;
             boolean dhcpEnabled = isDhcpClient4Enabled(props, interfaceName);
 
-            netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.valueOf(configStatus4), autoConnect);
+            NetInterfaceStatus status4 = NetInterfaceStatus.valueOf(configStatus4);
+            netConfigIP4 = new NetConfigIP4(status4, getAutoConnectProperty(status4));
             netConfigs.add(netConfigIP4);
 
             if (dhcpEnabled) {
@@ -1673,7 +1674,8 @@ public class NetworkConfiguration {
 
             if (!dhcp6Enabled) {
                 // ip6
-                netConfigIP6 = new NetConfigIP6(NetInterfaceStatus.valueOf(configStatus6), autoConnect, dhcp6Enabled);
+                NetInterfaceStatus status6 = NetInterfaceStatus.valueOf(configStatus6);
+                netConfigIP6 = new NetConfigIP6(status6, getAutoConnectProperty(status6), dhcp6Enabled);
                 netConfigs.add(netConfigIP6);
 
                 String configIp6 = NET_INTERFACE + interfaceName + ".config.ip6.address";
@@ -1758,5 +1760,18 @@ public class NetworkConfiguration {
             logger.trace("DHCP 4 enabled? {}", dhcpEnabled);
         }
         return dhcpEnabled;
+    }
+
+    private boolean getAutoConnectProperty(NetInterfaceStatus status) {
+        boolean autoconnect = false;
+        if (status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
+                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN)
+                || status.equals(NetInterfaceStatus.netIPv4StatusL2Only)
+                || status.equals(NetInterfaceStatus.netIPv6StatusEnabledLAN)
+                || status.equals(NetInterfaceStatus.netIPv6StatusEnabledWAN)
+                || status.equals(NetInterfaceStatus.netIPv6StatusL2Only)) {
+            autoconnect = true;
+        }
+        return autoconnect;
     }
 }

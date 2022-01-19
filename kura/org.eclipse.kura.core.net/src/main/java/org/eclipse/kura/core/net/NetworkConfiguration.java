@@ -549,8 +549,6 @@ public class NetworkConfiguration {
 
             // add the properties of the interface
             newNetworkProperties.put(netIfReadOnlyPrefix + "type", netInterfaceConfig.getType().toString());
-            // newNetworkProperties.put(netIfPrefix + AUTOCONNECT, netInterfaceConfig.isAutoConnect());
-            // newNetworkProperties.put(netIfPrefix + "mtu", netInterfaceConfig.getMTU());
 
             netInterfaceConfig.getNetInterfaceAddresses().forEach(nia -> {
                 if (nia != null) {
@@ -609,15 +607,9 @@ public class NetworkConfiguration {
     private void addModemConnectionProperty(Map<String, Object> newNetworkProperties, String netIfConfigPrefix,
             NetInterfaceAddressConfig nia) {
         // Modem interface address
-        if (nia instanceof ModemInterfaceAddress) {
-            // if (((ModemInterfaceAddress) nia).getConnectionType() != null) {
-            // newNetworkProperties.put(netIfConfigPrefix + "connection.type",
-            // ((ModemInterfaceAddress) nia).getConnectionType().toString());
-            // }
-            if (((ModemInterfaceAddress) nia).getConnectionStatus() != null) {
-                newNetworkProperties.put(netIfConfigPrefix + "connection.status",
-                        ((ModemInterfaceAddress) nia).getConnectionStatus().toString());
-            }
+        if (nia instanceof ModemInterfaceAddress && ((ModemInterfaceAddress) nia).getConnectionStatus() != null) {
+            newNetworkProperties.put(netIfConfigPrefix + "connection.status",
+                    ((ModemInterfaceAddress) nia).getConnectionStatus().toString());
         }
     }
 
@@ -689,12 +681,6 @@ public class NetworkConfiguration {
         } else {
             properties.put(prefix + PASSPHRASE, new Password(""));
         }
-        // if (wifiConfig.getHardwareMode() != null) {
-        // properties.put(prefix + HARDWARE_MODE, wifiConfig.getHardwareMode());
-        // } else {
-        // properties.put(prefix + HARDWARE_MODE, "");
-        // }
-        // properties.put(prefix + BROADCAST, Boolean.valueOf(wifiConfig.getBroadcast()));
         if (wifiConfig.getRadioMode() != null) {
             properties.put(prefix + ".radioMode", wifiConfig.getRadioMode().toString());
         }
@@ -892,9 +878,7 @@ public class NetworkConfiguration {
         properties.put(prefix + "apn", modemConfig.getApn());
         properties.put(prefix + "authType",
                 modemConfig.getAuthType() != null ? modemConfig.getAuthType().toString() : "");
-        // properties.put(prefix + "dataCompression", modemConfig.getDataCompression());
         properties.put(prefix + "dialString", modemConfig.getDialString());
-        // properties.put(prefix + "headerCompression", modemConfig.getHeaderCompression());
         properties.put(prefix + "ipAddress",
                 modemConfig.getIpAddress() != null ? modemConfig.getIpAddress().toString() : "");
         properties.put(prefix + "password", modemConfig.getPasswordAsPassword());
@@ -906,7 +890,6 @@ public class NetworkConfiguration {
         properties.put(prefix + "resetTimeout", modemConfig.getResetTimeout());
         properties.put(prefix + "lcpEchoInterval", modemConfig.getLcpEchoInterval());
         properties.put(prefix + "lcpEchoFailure", modemConfig.getLcpEchoFailure());
-        // properties.put(prefix + "profileId", modemConfig.getProfileID());
         properties.put(prefix + "username", modemConfig.getUsername());
         properties.put(prefix + "enabled", modemConfig.isEnabled());
         properties.put(prefix + "gpsEnabled", modemConfig.isGpsEnabled());
@@ -1108,7 +1091,6 @@ public class NetworkConfiguration {
     private static void addNetConfigIP4Properties(NetConfigIP4 nc, String netIfConfigPrefix,
             Map<String, Object> properties) {
 
-        // properties.put(netIfConfigPrefix + AUTOCONNECT, nc.isAutoConnect());
         properties.put(netIfConfigPrefix + "ip4.status", nc.getStatus().toString());
 
         StringBuilder sbDnsAddresses = new StringBuilder();
@@ -1140,28 +1122,6 @@ public class NetworkConfiguration {
             } else {
                 properties.put(netIfConfigPrefix + "ip4.gateway", "");
             }
-
-            // StringBuilder sbWinsAddresses = new StringBuilder();
-            // if (nc.getWinsServers() != null) {
-            // for (IP4Address ip : nc.getWinsServers()) {
-            // if (sbWinsAddresses.length() != 0) {
-            // sbWinsAddresses.append(",");
-            // }
-            // sbWinsAddresses.append(ip.getHostAddress());
-            // }
-            // }
-            // properties.put(netIfConfigPrefix + "winsServers", sbWinsAddresses.toString());
-
-            // StringBuilder sbDomains = new StringBuilder();
-            // if (nc.getDomains() != null) {
-            // for (String domain : nc.getDomains()) {
-            // if (sbDomains.length() != 0) {
-            // sbDomains.append(",");
-            // }
-            // sbDomains.append(domain);
-            // }
-            // }
-            // properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
         }
     }
 
@@ -1186,15 +1146,6 @@ public class NetworkConfiguration {
                 sbDnsAddresses.append(ip.getHostAddress());
             }
             properties.put(netIfConfigPrefix + "ip6.dnsServers", sbDnsAddresses.toString());
-
-            // StringBuilder sbDomains = new StringBuilder();
-            // for (String domain : nc.getDomains()) {
-            // if (sbDomains.length() != 0) {
-            // sbDomains.append(",");
-            // }
-            // sbDomains.append(domain);
-            // }
-            // properties.put(netIfConfigPrefix + "domains", sbDomains.toString());
         }
     }
 
@@ -1316,15 +1267,6 @@ public class NetworkConfiguration {
 
         String netIfPrefix = sbPrefix.append("config.").toString();
         String netIfConfigPrefix = sbPrefix.toString();
-
-        // // Auto connect
-        // boolean autoConnect = false;
-        // String autoConnectKey = netIfPrefix + AUTOCONNECT;
-        // if (props.containsKey(autoConnectKey)) {
-        // autoConnect = (Boolean) props.get(autoConnectKey);
-        // logger.trace("got autoConnect: {}", autoConnect);
-        // netInterfaceConfig.setAutoConnect(autoConnect);
-        // }
 
         // USB
         String vendorId = (String) props.get(netIfReadOnlyPrefix + "usb.vendor.id");

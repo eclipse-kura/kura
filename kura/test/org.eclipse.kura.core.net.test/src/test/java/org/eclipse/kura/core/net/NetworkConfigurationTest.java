@@ -915,9 +915,6 @@ public class NetworkConfigurationTest {
         Map<String, Object> expected = new HashMap<>();
         expected.put("net.interfaces", "if1");
         expected.put("net.interface.if1.type", "ETHERNET");
-        expected.put("net.interface.if1.config.name", "if1");
-        expected.put("net.interface.if1.config.autoconnect", false);
-        expected.put("net.interface.if1.config.mtu", 0);
 
         assertMapEquals(expected, properties);
     }
@@ -1131,15 +1128,8 @@ public class NetworkConfigurationTest {
 
         HashMap<String, Object> expected = new HashMap<>();
         expected.put("net.interface.if1.type", "ETHERNET");
-        expected.put("net.interface.if1.config.name", "if1");
-        expected.put("net.interface.if1.config.autoconnect", netInterfaceConfig1.isAutoConnect());
-        expected.put("net.interface.if1.config.mtu", netInterfaceConfig1.getMTU());
 
         expected.put("net.interface.if2.type", "ETHERNET");
-        expected.put("net.interface.if2.config.name", "if2");
-        expected.put("net.interface.if2.config.autoconnect", netInterfaceConfig2.isAutoConnect());
-        expected.put("net.interface.if2.config.mtu", netInterfaceConfig2.getMTU());
-        expected.put("net.interface.if2.config.autoconnect", true);
         expected.put("net.interface.if2.config.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("net.interface.if2.config.ip4.dnsServers", "");
         expected.put("net.interface.if2.config.dhcpClient4.enabled", true);
@@ -1189,7 +1179,6 @@ public class NetworkConfigurationTest {
         netConfig.setMode(WifiMode.ADHOC);
         netConfig.setSSID("ssid");
         netConfig.setDriver("driver");
-        netConfig.setBroadcast(false);
         netConfig.setPingAccessPoint(false);
         netConfig.setIgnoreSSID(false);
         netConfigs.add(netConfig);
@@ -1200,19 +1189,10 @@ public class NetworkConfigurationTest {
 
         HashMap<String, Object> expected = new HashMap<>();
         expected.put("net.interface.if1.type", "WIFI");
-        expected.put("net.interface.if1.config.name", "if1");
-        expected.put("net.interface.if1.config.autoconnect", netInterfaceConfig1.isAutoConnect());
-        expected.put("net.interface.if1.config.mtu", netInterfaceConfig1.getMTU());
 
         expected.put("net.interface.if2.type", "WIFI");
-        expected.put("net.interface.if2.config.name", "if2");
-        expected.put("net.interface.if2.config.autoconnect", netInterfaceConfig2.isAutoConnect());
-        expected.put("net.interface.if2.config.mtu", netInterfaceConfig2.getMTU());
 
         expected.put("net.interface.if3.type", "WIFI");
-        expected.put("net.interface.if3.config.name", "if3");
-        expected.put("net.interface.if3.config.autoconnect", netInterfaceConfig3.isAutoConnect());
-        expected.put("net.interface.if3.config.mtu", netInterfaceConfig3.getMTU());
         expected.put("net.interface.if3.config.wifi.mode", "ADHOC");
         expected.put("net.interface.if3.config.wifi.adhoc.ssid", "ssid");
         expected.put("net.interface.if3.config.wifi.adhoc.driver", "driver");
@@ -1220,8 +1200,6 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if3.config.wifi.adhoc.securityType", "NONE");
         expected.put("net.interface.if3.config.wifi.adhoc.channel", "");
         expected.put("net.interface.if3.config.wifi.adhoc.passphrase", new Password(""));
-        expected.put("net.interface.if3.config.wifi.adhoc.hardwareMode", "");
-        expected.put("net.interface.if3.config.wifi.adhoc.broadcast", false);
         expected.put("net.interface.if3.config.wifi.adhoc.bgscan", "");
         expected.put("net.interface.if3.config.wifi.adhoc.pingAccessPoint", false);
         expected.put("net.interface.if3.config.wifi.adhoc.ignoreSSID", false);
@@ -1293,20 +1271,11 @@ public class NetworkConfigurationTest {
 
         HashMap<String, Object> expected = new HashMap<>();
         expected.put("net.interface.if1.type", "MODEM");
-        expected.put("net.interface.if1.config.name", "if1");
-        expected.put("net.interface.if1.config.autoconnect", netInterfaceConfig1.isAutoConnect());
-        expected.put("net.interface.if1.config.mtu", netInterfaceConfig1.getMTU());
 
         expected.put("net.interface.if2.type", "MODEM");
-        expected.put("net.interface.if2.config.name", "if2");
-        expected.put("net.interface.if2.config.autoconnect", netInterfaceConfig2.isAutoConnect());
-        expected.put("net.interface.if2.config.mtu", netInterfaceConfig2.getMTU());
-        expected.put("net.interface.if2.config.connection.type", "PPP");
         expected.put("net.interface.if2.config.apn", "apn");
         expected.put("net.interface.if2.config.authType", "");
-        expected.put("net.interface.if2.config.dataCompression", 42);
         expected.put("net.interface.if2.config.dialString", "dialString");
-        expected.put("net.interface.if2.config.headerCompression", 100);
         expected.put("net.interface.if2.config.ipAddress", "");
         expected.put("net.interface.if2.config.password", new Password("password"));
         expected.put("net.interface.if2.config.pdpType", "");
@@ -1317,7 +1286,6 @@ public class NetworkConfigurationTest {
         expected.put("net.interface.if2.config.resetTimeout", 30);
         expected.put("net.interface.if2.config.lcpEchoInterval", 40);
         expected.put("net.interface.if2.config.lcpEchoFailure", 50);
-        expected.put("net.interface.if2.config.profileId", 60);
         expected.put("net.interface.if2.config.username", "username");
         expected.put("net.interface.if2.config.enabled", true);
         expected.put("net.interface.if2.config.gpsEnabled", true);
@@ -1354,7 +1322,6 @@ public class NetworkConfigurationTest {
         wifiConfig.setMode(WifiMode.ADHOC);
         wifiConfig.setSSID("ssid");
         wifiConfig.setDriver("driver");
-        wifiConfig.setBroadcast(false);
         wifiConfig.setPingAccessPoint(false);
         wifiConfig.setIgnoreSSID(false);
 
@@ -1367,8 +1334,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.wifi.adhoc.securityType", "NONE");
         expected.put("prefix.wifi.adhoc.channel", "");
         expected.put("prefix.wifi.adhoc.passphrase", new Password(""));
-        expected.put("prefix.wifi.adhoc.hardwareMode", "");
-        expected.put("prefix.wifi.adhoc.broadcast", (Boolean) false);
         expected.put("prefix.wifi.adhoc.bgscan", "");
         expected.put("prefix.wifi.adhoc.pingAccessPoint", (Boolean) false);
         expected.put("prefix.wifi.adhoc.ignoreSSID", (Boolean) false);
@@ -1390,7 +1355,6 @@ public class NetworkConfigurationTest {
         wifiConfig.setSecurity(WifiSecurity.GROUP_CCMP);
         wifiConfig.setPasskey("password");
         wifiConfig.setHardwareMode("HW mode");
-        wifiConfig.setBroadcast(true);
         wifiConfig.setRadioMode(WifiRadioMode.RADIO_MODE_80211a);
         wifiConfig.setBgscan(new WifiBgscan(WifiBgscanModule.LEARN, 1, 2, 3));
         wifiConfig.setPairwiseCiphers(WifiCiphers.CCMP);
@@ -1407,8 +1371,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.wifi.adhoc.securityType", "GROUP_CCMP");
         expected.put("prefix.wifi.adhoc.channel", "1 2 3");
         expected.put("prefix.wifi.adhoc.passphrase", new Password("password"));
-        expected.put("prefix.wifi.adhoc.hardwareMode", "HW mode");
-        expected.put("prefix.wifi.adhoc.broadcast", (Boolean) true);
         expected.put("prefix.wifi.adhoc.radioMode", "RADIO_MODE_80211a");
         expected.put("prefix.wifi.adhoc.bgscan", "learn:1:2:3");
         expected.put("prefix.wifi.adhoc.pairwiseCiphers", "CCMP");
@@ -1631,9 +1593,7 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> expected = new HashMap<>();
         expected.put("prefix.apn", "apn");
         expected.put("prefix.authType", "");
-        expected.put("prefix.dataCompression", 42);
         expected.put("prefix.dialString", "dialString");
-        expected.put("prefix.headerCompression", 100);
         expected.put("prefix.ipAddress", "");
         expected.put("prefix.password", new Password("password"));
         expected.put("prefix.pdpType", "");
@@ -1644,7 +1604,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.resetTimeout", 30);
         expected.put("prefix.lcpEchoInterval", 40);
         expected.put("prefix.lcpEchoFailure", 50);
-        expected.put("prefix.profileId", 60);
         expected.put("prefix.username", "username");
         expected.put("prefix.enabled", true);
         expected.put("prefix.gpsEnabled", true);
@@ -1688,9 +1647,7 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> expected = new HashMap<>();
         expected.put("prefix.apn", "apn");
         expected.put("prefix.authType", "AUTO");
-        expected.put("prefix.dataCompression", 42);
         expected.put("prefix.dialString", "dialString");
-        expected.put("prefix.headerCompression", 100);
         expected.put("prefix.ipAddress", "10.0.0.1");
         expected.put("prefix.password", new Password("password"));
         expected.put("prefix.pdpType", "IP");
@@ -1701,7 +1658,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.resetTimeout", 30);
         expected.put("prefix.lcpEchoInterval", 40);
         expected.put("prefix.lcpEchoFailure", 50);
-        expected.put("prefix.profileId", 60);
         expected.put("prefix.username", "username");
         expected.put("prefix.enabled", true);
         expected.put("prefix.gpsEnabled", true);
@@ -1945,7 +1901,6 @@ public class NetworkConfigurationTest {
 
         String prefix = "prefix.";
         HashMap<String, Object> expected = new HashMap<>();
-        expected.put("prefix.autoconnect", true);
         expected.put("prefix.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("prefix.ip4.dnsServers", "10.0.0.1,10.0.0.2");
         expected.put("prefix.dhcpClient4.enabled", true);
@@ -1976,15 +1931,12 @@ public class NetworkConfigurationTest {
 
         String prefix = "prefix.";
         HashMap<String, Object> expected = new HashMap<>();
-        expected.put("prefix.autoconnect", true);
         expected.put("prefix.ip4.status", "netIPv4StatusEnabledLAN");
         expected.put("prefix.ip4.dnsServers", "");
         expected.put("prefix.dhcpClient4.enabled", false);
         expected.put("prefix.ip4.address", "10.0.0.1");
         expected.put("prefix.ip4.prefix", (short) 24);
         expected.put("prefix.ip4.gateway", "10.0.0.2");
-        expected.put("prefix.winsServers", "10.0.1.1,10.0.1.2");
-        expected.put("prefix.domains", "domain1,domain2");
 
         HashMap<String, Object> properties = new HashMap<>();
 
@@ -2032,7 +1984,6 @@ public class NetworkConfigurationTest {
         expected.put("prefix.dhcpClient6.enabled", false);
         expected.put("prefix.address", "2001:db8:0:0:0:ff00:42:8329");
         expected.put("prefix.ip6.dnsServers", "2001:db8:0:0:0:ff00:42:1000,2001:db8:0:0:0:ff00:42:1001");
-        expected.put("prefix.domains", "domain1,domain2");
 
         HashMap<String, Object> properties = new HashMap<>();
 
@@ -2109,19 +2060,18 @@ public class NetworkConfigurationTest {
         NetInterfaceType type = NetInterfaceType.LOOPBACK;
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "LOOPBACK");
-        properties.put("net.interface.if1.config.autoconnect", true);
         properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
         List<NetInterfaceAddressConfig> loopbackInterfaceAddressConfigs = new ArrayList<>();
         NetInterfaceAddressConfigImpl addressConfig = new NetInterfaceAddressConfigImpl();
         List<NetConfig> netConfigs = new ArrayList<>();
-        netConfigs.add(new NetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true));
-        netConfigs.add(new NetConfigIP6(NetInterfaceStatus.netIPv6StatusDisabled, true));
+        netConfigs.add(new NetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, false));
+        netConfigs.add(new NetConfigIP6(NetInterfaceStatus.netIPv6StatusDisabled, false));
         addressConfig.setNetConfigs(netConfigs);
         loopbackInterfaceAddressConfigs.add(addressConfig);
         loopbackInterfaceConfig.setNetInterfaceAddresses(loopbackInterfaceAddressConfigs);
-        loopbackInterfaceConfig.setAutoConnect(true);
+        loopbackInterfaceConfig.setAutoConnect(false);
 
         HashMap<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> expected = new HashMap<>();
         expected.put(interfaceName, loopbackInterfaceConfig);
@@ -2140,7 +2090,6 @@ public class NetworkConfigurationTest {
         NetInterfaceType type = NetInterfaceType.WIFI;
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "WIFI");
-        properties.put("net.interface.if1.config.autoconnect", true);
         properties.put("net.interface.if1.state", NetInterfaceState.DISCONNECTED);
 
         properties.put("net.interface.if1.config.wifi.master.ssid", "ssid");
@@ -2153,23 +2102,23 @@ public class NetworkConfigurationTest {
         List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = new ArrayList<>();
         WifiInterfaceAddressConfigImpl addressConfig = new WifiInterfaceAddressConfigImpl();
         List<NetConfig> netConfigs = new ArrayList<>();
-        netConfigs.add(new NetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true));
-        netConfigs.add(new NetConfigIP6(NetInterfaceStatus.netIPv6StatusDisabled, true));
+        netConfigs.add(new NetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, false));
+        netConfigs.add(new NetConfigIP6(NetInterfaceStatus.netIPv6StatusDisabled, false));
 
         WifiConfig wifiConfig1 = new WifiConfig(WifiMode.MASTER, "ssid", null, WifiSecurity.NONE, "passphrase", "",
-                false, null);
+                null);
         wifiConfig1.setDriver("");
         netConfigs.add(wifiConfig1);
 
         WifiConfig wifiConfig2 = new WifiConfig(WifiMode.INFRA, "ssid", null, WifiSecurity.NONE, "passphrase", "",
-                false, new WifiBgscan(""));
+                new WifiBgscan(""));
         wifiConfig2.setDriver("");
         netConfigs.add(wifiConfig2);
 
         addressConfig.setNetConfigs(netConfigs);
         wifiInterfaceAddressConfigs.add(addressConfig);
         wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
-        wifiInterfaceConfig.setAutoConnect(true);
+        wifiInterfaceConfig.setAutoConnect(false);
 
         HashMap<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> expected = new HashMap<>();
         expected.put(interfaceName, wifiInterfaceConfig);
@@ -2238,7 +2187,6 @@ public class NetworkConfigurationTest {
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("net.interface.if1.type", "WIFI");
         properties.put("net.interface.if1.up", false);
-        properties.put("net.interface.if1.config.autoconnect", true);
         properties.put("net.interface.if1.wifi.capabilities", "CIPHER_CCMP CIPHER_TKIP");
         properties.put("net.interface.if1.config.wifi.mode", "ADHOC");
         properties.put("net.interface.if1.config.wifi.master.passphrase", "password");
@@ -2247,7 +2195,7 @@ public class NetworkConfigurationTest {
         TestUtil.invokePrivate(config, "populateNetInterfaceConfiguration", netInterfaceConfig, properties);
 
         WifiInterfaceConfigImpl expected = new WifiInterfaceConfigImpl("if1");
-        expected.setAutoConnect(true);
+        expected.setAutoConnect(false);
         expected.setUp(false);
         expected.setCapabilities(EnumSet.of(Capability.CIPHER_CCMP, Capability.CIPHER_TKIP));
 
@@ -2257,8 +2205,8 @@ public class NetworkConfigurationTest {
 
         List<NetConfig> netConfigs = new ArrayList<>();
 
-        netConfigs.add(new NetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, true));
-        netConfigs.add(new NetConfigIP6(NetInterfaceStatus.netIPv6StatusDisabled, true));
+        netConfigs.add(new NetConfigIP4(NetInterfaceStatus.netIPv4StatusDisabled, false));
+        netConfigs.add(new NetConfigIP6(NetInterfaceStatus.netIPv6StatusDisabled, false));
 
         WifiConfig netConfig1 = new WifiConfig();
         netConfig1.setMode(WifiMode.MASTER);

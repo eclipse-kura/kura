@@ -81,7 +81,6 @@ public class NetworkConfiguration {
     private static final String HARDWARE_MODE = ".hardwareMode";
     private static final String PASSPHRASE = ".passphrase";
     private static final String SECURITY_TYPE = ".securityType";
-    private static final String AUTOCONNECT = "autoconnect";
     private static final String NET_INTERFACE = "net.interface.";
     private static final String NET_INTERFACES = "net.interfaces";
 

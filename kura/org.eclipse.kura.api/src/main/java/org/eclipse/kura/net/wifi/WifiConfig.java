@@ -174,8 +174,10 @@ public class WifiConfig implements NetConfig {
     }
 
     public void setPasskey(String key) {
-        Password psswd = new Password(key);
-        this.passkey = psswd;
+        if (key != null) {
+            Password psswd = new Password(key);
+            this.passkey = psswd;
+        }
     }
 
     public String getHardwareMode() {

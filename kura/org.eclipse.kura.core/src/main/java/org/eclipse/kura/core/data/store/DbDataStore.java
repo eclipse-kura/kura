@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.core.data.store;
 
+import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -103,7 +104,7 @@ public class DbDataStore implements DataStore {
         this.sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
                 + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
                 + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
-                + "payload VARBINARY(1048576), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
+                + "payload BLOB, priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
         this.sqlCreateIndex = "CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "
                 + this.sanitizedTableName + " (publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC, qos);";
         this.sqlMessageCount = "SELECT COUNT(*) FROM " + this.sanitizedTableName + ";";
@@ -319,7 +320,7 @@ public class DbDataStore implements DataStore {
                 pstmt.setTimestamp(5, null);                // publishedOn
                 pstmt.setInt(6, -1);                 // publishedMessageId
                 pstmt.setTimestamp(7, null);                // confirmedOn
-                pstmt.setBytes(8, payload);         // payload
+                pstmt.setBinaryStream(8, new ByteArrayInputStream(payload));         // payload
                 pstmt.setInt(9, priority);            // priority
                 pstmt.setString(10, null);               // sessionId
                 pstmt.setTimestamp(11, null);               // droppedOn

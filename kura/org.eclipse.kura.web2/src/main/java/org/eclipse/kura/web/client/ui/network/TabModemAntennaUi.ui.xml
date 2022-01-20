@@ -62,6 +62,69 @@
                                 </g:FlowPanel>
                             </b:FormGroup>
 
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelRegistration" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="registration" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelIMSI" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="imsi" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelICCID" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="iccid" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelPLMNID" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="plmnid" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelNetwork" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="network" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelRadio" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="radio" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelBand" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="band" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelLAC" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="lac" />
+                            </b:FormGroup>
+
+                            <b:FormGroup>
+                                <b:FormLabel for="state"
+                                    ui:field="labelCI" />
+                                <b:FormControlStatic
+                                    b:id="state" ui:field="ci" />
+                            </b:FormGroup>
+
                         </b:FieldSet>
                     </b:Form>
 

@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Sterwen-Technology
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem.sierra.usb598;
 
@@ -598,6 +599,36 @@ public class SierraUsb598 implements EvdoCellularModem {
 
     @Override
     public String getFirmwareVersion() throws KuraException {
+        return "N/A";
+    }
+
+    @Override
+    public String getLAC() throws KuraException {
+        return "N/A";
+    }
+
+    @Override
+    public String getCI() throws KuraException {
+        return "N/A";
+    }
+
+    @Override
+    public String getPLMNID() throws KuraException {
+        return "N/A";
+    }
+
+    @Override
+    public String getBand() throws KuraException {
+        return "N/A";
+    }
+
+    @Override
+    public String getNetworkName() throws KuraException {
+        return "N/A";
+    }
+
+    @Override
+    public String getRadio() throws KuraException {
         return "N/A";
     }
 }

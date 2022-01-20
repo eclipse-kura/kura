@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Sterwen-Technology
  *******************************************************************************/
 package org.eclipse.kura.web.shared.model;
 
@@ -266,6 +267,114 @@ public class GwtModemInterfaceConfig extends GwtNetInterfaceConfig {
 
     public void setDiversityEnabled(boolean diversityEnabled) {
         set(DIVERSITY_ENABLED_KEY, diversityEnabled);
+    }
+
+    public String getHwRegistration() {
+        if (get("hwRegistration") != null) {
+            return get("hwRegistration");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwRegistration(String registration) {
+        set("hwRegistration", registration);
+    }
+
+    public String getHwIMSI() {
+        if (get("hwIMSI") != null) {
+            return get("hwIMSI");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwIMSI(String imsi) {
+        set("hwIMSI", imsi);
+    }
+
+    public String getHwICCID() {
+        if (get("hwICCID") != null) {
+            return get("hwICCID");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwICCID(String iccid) {
+        set("hwICCID", iccid);
+    }
+
+    public String getHwPLMNID() {
+        if (get("hwPLMNID") != null) {
+            return get("hwPLMNID");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwPLMNID(String plmnid) {
+        set("hwPLMNID", plmnid);
+    }
+
+    public String getHwNetwork() {
+        if (get("hwNetwork") != null) {
+            return get("hwNetwork");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwNetwork(String network) {
+        set("hwNetwork", network);
+    }
+
+    public String getHwRadio() {
+        if (get("hwRadio") != null) {
+            return get("hwRadio");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwRadio(String radio) {
+        set("hwRadio", radio);
+    }
+
+    public String getHwBand() {
+        if (get("hwBand") != null) {
+            return get("hwBand");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwBand(String band) {
+        set("hwBand", band);
+    }
+
+    public String getHwLAC() {
+        if (get("hwLAC") != null) {
+            return get("hwLAC");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwLAC(String lac) {
+        set("hwLAC", lac);
+    }
+
+    public String getHwCI() {
+        if (get("hwCI") != null) {
+            return get("hwCI");
+        } else {
+            return "N/A";
+        }
+    }
+
+    public void setHwCI(String ci) {
+        set("hwCI", ci);
     }
 
 }

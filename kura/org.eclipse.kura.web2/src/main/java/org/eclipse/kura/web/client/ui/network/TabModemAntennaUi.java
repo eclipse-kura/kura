@@ -18,6 +18,7 @@ import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.gwtbootstrap3.client.ui.FieldSet;
+import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.PanelHeader;
@@ -48,7 +49,43 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
 
     @UiField
     FormLabel labelAntenna;
+    @UiField
+    FormLabel labelRegistration;
+    @UiField
+    FormLabel labelIMSI;
+    @UiField
+    FormLabel labelICCID;
+    @UiField
+    FormLabel labelPLMNID;
+    @UiField
+    FormLabel labelNetwork;
+    @UiField
+    FormLabel labelRadio;
+    @UiField
+    FormLabel labelBand;
+    @UiField
+    FormLabel labelLAC;
+    @UiField
+    FormLabel labelCI;
 
+    @UiField
+    FormControlStatic registration;
+    @UiField
+    FormControlStatic imsi;
+    @UiField
+    FormControlStatic iccid;
+    @UiField
+    FormControlStatic plmnid;
+    @UiField
+    FormControlStatic network;
+    @UiField
+    FormControlStatic radio;
+    @UiField
+    FormControlStatic band;
+    @UiField
+    FormControlStatic lac;
+    @UiField
+    FormControlStatic ci;
     @UiField
     InlineRadio radio2;
     @UiField
@@ -73,6 +110,15 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
         initForm();
 
         this.antennaHelp.setHelpText(MSGS.netModemToolTipAntenna());
+        this.labelRegistration.setText(MSGS.netHwRegistration());
+        this.labelIMSI.setText(MSGS.netHwIMSI());
+        this.labelICCID.setText(MSGS.netHwICCID());
+        this.labelPLMNID.setText(MSGS.netHwPLMNID());
+        this.labelNetwork.setText(MSGS.netHwNetwork());
+        this.labelRadio.setText(MSGS.netHwRadio());
+        this.labelBand.setText(MSGS.netHwBand());
+        this.labelLAC.setText(MSGS.netHwLAC());
+        this.labelCI.setText(MSGS.netHwCI());
     }
 
     @Override
@@ -173,6 +219,15 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
                 this.radio1.setValue(false);
             }
         }
+        this.registration.setText(this.selectedModemIfConfig.getHwRegistration());
+        this.imsi.setText(this.selectedModemIfConfig.getHwIMSI());
+        this.iccid.setText(this.selectedModemIfConfig.getHwICCID());
+        this.plmnid.setText(this.selectedModemIfConfig.getHwPLMNID());
+        this.network.setText(this.selectedModemIfConfig.getHwNetwork());
+        this.radio.setText(this.selectedModemIfConfig.getHwRadio());
+        this.band.setText(this.selectedModemIfConfig.getHwBand());
+        this.lac.setText(this.selectedModemIfConfig.getHwLAC());
+        this.ci.setText(this.selectedModemIfConfig.getHwCI());
         refreshForm();
     }
 
@@ -184,6 +239,15 @@ public class TabModemAntennaUi extends Composite implements NetworkTab {
     private void reset() {
         this.radio2.setValue(true);
         this.radio1.setValue(false);
+        this.registration.setText("");
+        this.imsi.setText("");
+        this.iccid.setText("");
+        this.plmnid.setText("");
+        this.network.setText("");
+        this.radio.setText("");
+        this.band.setText("");
+        this.lac.setText("");
+        this.ci.setText("");
         update();
     }
 }

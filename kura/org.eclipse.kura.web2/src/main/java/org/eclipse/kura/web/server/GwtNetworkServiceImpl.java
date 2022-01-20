@@ -62,6 +62,7 @@ import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.net.modem.ModemManagerService.ModemFunction;
 import org.eclipse.kura.net.modem.ModemPdpContext;
 import org.eclipse.kura.net.modem.ModemPdpContextType;
+import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.net.modem.ModemTechnologyType;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
@@ -537,12 +538,85 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get IMEI from modem", e);
                                             }
+
                                             try {
                                                 int rssi = cellModemService.getSignalStrength();
                                                 logger.debug("Setting Received Signal Strength to {}", rssi);
                                                 gwtModemConfig.setHwRssi(Integer.toString(rssi));
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get Received Signal Strength from modem", e);
+                                            }
+
+                                            try {
+                                                String iccid = cellModemService.getIntegratedCirquitCardId();
+                                                logger.debug("Setting ICCID to {}", iccid);
+                                                gwtModemConfig.setHwICCID(iccid);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get ICCID from modem", e);
+                                            }
+
+                                            try {
+                                                String imsi = cellModemService.getMobileSubscriberIdentity();
+                                                logger.debug("Setting IMSI to {}", imsi);
+                                                gwtModemConfig.setHwIMSI(imsi);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get IMSI from modem", e);
+                                            }
+
+                                            try {
+                                                ModemRegistrationStatus registration = cellModemService.getRegistrationStatus();
+                                                logger.debug("Setting Registration Status to {}", registration.name());
+                                                gwtModemConfig.setHwRegistration(registration.name());
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get Registration from modem", e);
+                                            }
+
+                                            try {
+                                                String plmnid = cellModemService.getPLMNID();
+                                                logger.debug("Setting PLMNID to {}", plmnid);
+                                                gwtModemConfig.setHwPLMNID(plmnid);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get PLMNID from modem", e);
+                                            }
+
+                                            try {
+                                                String network = cellModemService.getNetworkName();
+                                                logger.debug("Setting Network to {}", network);
+                                                gwtModemConfig.setHwNetwork(network);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get Network from modem", e);
+                                            }
+
+                                            try {
+                                                String radio = cellModemService.getRadio();
+                                                logger.debug("Setting Radio to {}", radio);
+                                                gwtModemConfig.setHwRadio(radio);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get Radio from modem", e);
+                                            }
+
+                                            try {
+                                                String band = cellModemService.getBand();
+                                                logger.debug("Setting Band to {}", band);
+                                                gwtModemConfig.setHwBand(band);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get Band from modem", e);
+                                            }
+
+                                            try {
+                                                String lac = cellModemService.getLAC();
+                                                logger.debug("Setting Band to {}", lac);
+                                                gwtModemConfig.setHwLAC(lac);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get LAC from modem", e);
+                                            }
+
+                                            try {
+                                                String ci = cellModemService.getCI();
+                                                logger.debug("Setting CI to {}", ci);
+                                                gwtModemConfig.setHwCI(ci);
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed to get CI from modem", e);
                                             }
 
                                             try {

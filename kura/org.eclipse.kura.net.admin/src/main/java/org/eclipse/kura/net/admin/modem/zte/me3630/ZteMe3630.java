@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  3 PORT d.o.o.
+ *  Sterwen-Technology
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.zte.me3630;
@@ -153,12 +154,18 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
                         break;
                     case 1:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                        getRegisteredNetwork();
+                        getExtendedRegistrationStatus();
+                        getMobileSubscriberIdentity();
                         break;
                     case 3:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
                         break;
                     case 5:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                        getRegisteredNetwork();
+                        getExtendedRegistrationStatus();
+                        getMobileSubscriberIdentity();
                         break;
                     default:
                         modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;

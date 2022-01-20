@@ -85,17 +85,7 @@ public class WifiConfig implements NetConfig {
     @Deprecated
     public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
             boolean broadcast, WifiBgscan bgscan) {
-        super();
-
-        this.mode = mode;
-        this.ssid = ssid;
-        this.channels = channels;
-        this.security = security;
-        this.passkey = new Password(passkey);
-        this.hwMode = hwMode;
-        this.bgscan = bgscan;
-        this.channelFrequencies = null;
-        this.wifiCountryCode = null;
+        this(mode, ssid, channels, security, passkey, hwMode, bgscan);
     }
 
     /**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 
-    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -29,13 +29,7 @@
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
-            <esf:property name="net.interface.wlan0.config.wifi.master.broadcast" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property name="net.interface.eth0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
             </esf:property>
             <esf:property name="net.interface.eth0.config.dhcpServer4.passDns" array="false" encrypted="false" type="Boolean">
@@ -44,44 +38,14 @@
             <esf:property name="net.interface.wlan0.config.wifi.master.passphrase" array="false" encrypted="false" type="Password">
                 <esf:value>testKEYS</esf:value>
             </esf:property>
-            <esf:property name="net.interface.eth0.driver" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.config.autoconnect" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.driver.version" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.virtual" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.mode" array="false" encrypted="false" type="String">
                 <esf:value>INFRA</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.wifi.bitrate" array="false" encrypted="false" type="Long">
-                <esf:value>0</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.infra.channel" array="false" encrypted="false" type="String">
-                <esf:value>1 2 3 4 5 6 7 8 9 10 11</esf:value>
             </esf:property>
             <esf:property name="net.interface.eth0.type" array="false" encrypted="false" type="String">
                 <esf:value>ETHERNET</esf:value>
             </esf:property>
             <esf:property name="net.interface.lo.type" array="false" encrypted="false" type="String">
                 <esf:value>LOOPBACK</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.virtual" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.virtual" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.ptp" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.master.hardwareMode" array="false" encrypted="false" type="String">
-                <esf:value>g</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.master.securityType" array="false" encrypted="false" type="String">
                 <esf:value>SECURITY_WPA2</esf:value>
@@ -92,29 +56,8 @@
             <esf:property name="net.interface.lo.config.ip4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>8</esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.firmware.version" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.winsServers" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.mtu" array="false" encrypted="false" type="Integer">
-                <esf:value>16436</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.ip4.broadcast" array="false" encrypted="false" type="String">
-                <esf:value>255.0.0.0</esf:value>
-            </esf:property>
             <esf:property name="net.interface.eth0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledWAN</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.loopback" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.config.name" array="false" encrypted="false" type="String">
-                <esf:value>eth0</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.wifi.capabilities" array="false" encrypted="false" type="String">
-                <esf:value>CIPHER_TKIP CIPHER_CCMP WPA RSN </esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.broadcast" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
@@ -125,29 +68,11 @@
             <esf:property name="net.interface.wlan0.config.nat.enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property name="net.interface.eth0.eth.link.up" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.ptp" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property name="net.interface.eth0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.winsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.config.mtu" array="false" encrypted="false" type="Integer">
-                <esf:value>1500</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.usb.devicePath" array="false" encrypted="false" type="String">
-                <esf:value>1.1</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.up" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.ip4.broadcast" array="false" encrypted="false" type="String">
-                <esf:value>255.255.255.0</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.dhcpServer4.rangeStart" array="false" encrypted="false" type="String">
                 <esf:value>172.16.1.100</esf:value>
@@ -164,12 +89,6 @@
             <esf:property name="net.interface.wlan0.config.wifi.master.driver" array="false" encrypted="false" type="String">
                 <esf:value>nl80211</esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.mac" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.usb.vendor.id" array="false" encrypted="false" type="String">
-                <esf:value>0424</esf:value>
-            </esf:property>
             <esf:property name="net.interfaces" array="false" encrypted="false" type="String">
                 <esf:value>lo,wlan0,eth0</esf:value>
             </esf:property>
@@ -179,32 +98,11 @@
             <esf:property name="net.interface.wlan0.config.ip4.address" array="false" encrypted="false" type="String">
                 <esf:value>172.16.1.1</esf:value>
             </esf:property>
-            <esf:property name="net.interface.eth0.ip4.address" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.domains" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.ip4.address" array="false" encrypted="false" type="String">
-                <esf:value>127.0.0.1</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.autoconnect" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.mac" array="false" encrypted="false" type="String">
-                <esf:value>00:00:00:00:00:00</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.loopback" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
             <esf:property name="net.interface.eth0.config.dhcpServer4.maxLeaseTime" array="false" encrypted="false" type="Integer">
                 <esf:value>7200</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.gateway" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.usb.product.id" array="false" encrypted="false" type="String">
-                <esf:value>ec00</esf:value>
             </esf:property>
             <esf:property name="net.interface.eth0.config.dhcpServer4.rangeStart" array="false" encrypted="false" type="String">
                 <esf:value>172.16.0.100</esf:value>
@@ -212,41 +110,8 @@
             <esf:property name="net.interface.eth0.config.dhcpServer4.enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.state" array="false" encrypted="false" type="String">
-                <esf:value>DISCONNECTED</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.firmware.version" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.ip4.dnsServers" array="false" encrypted="false" type="String">
-                <esf:value>127.0.0.1</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.name" array="false" encrypted="false" type="String">
-                <esf:value>lo</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.mac" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.config.name" array="false" encrypted="false" type="String">
-                <esf:value>wlan0</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.driver.version" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.config.state" array="false" encrypted="false" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
             <esf:property name="net.interface.eth0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
                 <esf:value>7200</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.lo.driver" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.ptp" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="modified.interface.names" array="false" encrypted="false" type="String">
-                <esf:value>wlan0</esf:value>
             </esf:property>
             <esf:property name="net.interface.lo.config.ip4.address" array="false" encrypted="false" type="String">
                 <esf:value>127.0.0.1</esf:value>
@@ -260,17 +125,8 @@
             <esf:property name="net.interface.eth0.config.dhcpServer4.rangeEnd" array="false" encrypted="false" type="String">
                 <esf:value>172.16.0.110</esf:value>
             </esf:property>
-            <esf:property name="net.interface.eth0.config.state" array="false" encrypted="false" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.usb.busNumber" array="false" encrypted="false" type="String">
-                <esf:value>1</esf:value>
-            </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.mode" array="false" encrypted="false" type="String">
                 <esf:value>MASTER</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.driver" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.master.radioMode" array="false" encrypted="false" type="String">
                 <esf:value>RADIO_MODE_80211g</esf:value>
@@ -278,14 +134,8 @@
             <esf:property name="net.interface.wlan0.config.dhcpServer4.rangeEnd" array="false" encrypted="false" type="String">
                 <esf:value>172.16.1.110</esf:value>
             </esf:property>
-            <esf:property name="net.interface.lo.up" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
             <esf:property name="net.interface.lo.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.config.mtu" array="false" encrypted="false" type="Integer">
-                <esf:value>1500</esf:value>
             </esf:property>
             <esf:property name="net.interface.lo.config.ip4.gateway" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
@@ -299,10 +149,6 @@
             <esf:property name="net.interface.wlan0.config.wifi.master.ssid" array="false" encrypted="false" type="String">
                 <esf:value>kura_gateway_raspberry_pi</esf:value>
             </esf:property>
-            <esf:property name="net.interface.eth0.config.autoconnect" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.usb.product.name" array="false" encrypted="false"/>
             <esf:property name="net.interface.wlan0.config.dhcpServer4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>
             </esf:property>
@@ -311,10 +157,6 @@
             </esf:property>
             <esf:property name="net.interface.lo.config.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.usb.vendor.name" array="false" encrypted="false"/>
-            <esf:property name="net.interface.eth0.loopback" array="false" encrypted="false" type="Boolean">
-                <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.prefix" array="false" encrypted="false" type="Short">
                 <esf:value>24</esf:value>
@@ -325,16 +167,10 @@
             <esf:property name="net.interface.wlan0.config.ip4.dnsServers" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
             </esf:property>
-            <esf:property name="net.interface.wlan0.config.domains" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
             <esf:property name="net.interface.wlan0.config.dhcpClient4.enabled" array="false" encrypted="false" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.wifi.infra.ssid" array="false" encrypted="false" type="String">
-                <esf:value></esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.config.wifi.infra.hardwareMode" array="false" encrypted="false" type="String">
                 <esf:value></esf:value>
             </esf:property>
             <esf:property name="net.interface.wlan0.config.dhcpServer4.defaultLeaseTime" array="false" encrypted="false" type="Integer">
@@ -342,15 +178,6 @@
             </esf:property>
             <esf:property name="net.interface.wlan0.config.ip4.status" array="false" encrypted="false" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.firmware.version" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.eth0.up" array="false" encrypted="false" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property name="net.interface.wlan0.driver.version" array="false" encrypted="false" type="String">
-                <esf:value>unknown</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

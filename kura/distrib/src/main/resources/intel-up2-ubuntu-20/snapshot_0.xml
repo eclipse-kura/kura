@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+
+    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+     Eurotech
+
+-->
 <esf:configurations xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0" xmlns:esf="http://eurotech.com/esf/2.0">
     <esf:configuration pid="org.eclipse.kura.net.admin.FirewallConfigurationService">
 	<esf:properties>
@@ -15,17 +29,8 @@
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.net.admin.NetworkConfigurationService">
         <esf:properties>
-        <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.winsServers" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.mac" type="String">
-                <esf:value>00:00:00:00:00:00</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.ip4.prefix" type="Short">
                 <esf:value>24</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.domains" type="String">
-                <esf:value/>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.dhcpServer4.maxLeaseTime" type="Integer">
                 <esf:value>7200</esf:value>
@@ -33,14 +38,8 @@
             <esf:property array="false" encrypted="false" name="net.interfaces" type="String">
                 <esf:value>wlp4s0,enp3s0,lo,enp2s0</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.virtual" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip4.status" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.loopback" type="Boolean">
-                <esf:value>false</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.ip4.address" type="String">
                 <esf:value>172.16.1.1</esf:value>
@@ -51,14 +50,8 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.pingAccessPoint" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.virtual" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpServer4.defaultLeaseTime" type="Integer">
                 <esf:value>7200</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.up" type="Boolean">
-                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.ip4.address" type="String">
                 <esf:value>172.16.0.1</esf:value>
@@ -84,23 +77,8 @@
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.ip4.gateway" type="String">
                 <esf:value/>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.driver" type="String">
-                <esf:value> r8169</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.virtual" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.ignoreSSID" type="Boolean">
                 <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ptp" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.domains" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.driver.version" type="String">
-                <esf:value> 2.3LK-NAPI</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.ip4.dnsServers" type="String">
                 <esf:value/>
@@ -108,23 +86,11 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpClient4.enabled" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.config.name" type="String">
-                <esf:value>lo</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.ptp" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.ssid" type="String">
                 <esf:value/>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.loopback" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.dhcpServer4.passDns" type="Boolean">
                 <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.channel" type="String">
-                <esf:value>1 2 3 4 5 6 7 8 9 10 11 12 13</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.nat.enabled" type="Boolean">
                 <esf:value>true</esf:value>
@@ -132,41 +98,17 @@
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ip4.gateway" type="String">
                 <esf:value>127.0.0.1</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.autoconnect" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.dhcpClient4.enabled" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.driver.version" type="String">
-                <esf:value> 2.3LK-NAPI</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.firmware.version" type="String">
-                <esf:value> rtl8168g-2_0.0.1 02/06/13</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.ptp" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.driver.version" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="true" name="net.interface.wlp4s0.config.wifi.infra.passphrase" type="Password">
                 <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.mac" type="String">
-                <esf:value>00:07:32:49:AC:A2</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.nat.enabled" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.securityType" type="String">
                 <esf:value>SECURITY_NONE</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.wifi.bitrate" type="Long">
-                <esf:value>0</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.bgscan" type="String">
                 <esf:value/>
@@ -183,17 +125,8 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.ignoreSSID" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.ip4.address" type="String">
-                <esf:value>127.0.0.1</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip4.prefix" type="Short">
                 <esf:value>-1</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.autoconnect" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.hardwareMode" type="String">
-                <esf:value>g</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.dhcpServer4.enabled" type="Boolean">
                 <esf:value>true</esf:value>
@@ -204,50 +137,20 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.driver" type="String">
                 <esf:value>nl80211</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.ptp" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.config.domains" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.eth.link.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.dhcpServer4.prefix" type="Short">
                 <esf:value>24</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.broadcast" type="Boolean">
                 <esf:value>false</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.autoconnect" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.dhcpClient4.enabled" type="Boolean">
                 <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.name" type="String">
-                <esf:value>enp2s0</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.mode" type="String">
                 <esf:value>MASTER</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ip4.dnsServers" type="String">
-                <esf:value>127.0.0.53</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.winsServers" type="String">
-                <esf:value/>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpServer4.maxLeaseTime" type="Integer">
                 <esf:value>7200</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.virtual" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.mtu" type="Integer">
-                <esf:value>1500</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.firmware.version" type="String">
-                <esf:value> rtl8168g-2_0.0.1 02/06/13</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpServer4.rangeStart" type="String">
                 <esf:value>172.16.1.100</esf:value>
@@ -255,44 +158,11 @@
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip4.dnsServers" type="String">
                 <esf:value/>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.ip4.netmask" type="String">
-                <esf:value>255.0.0.0</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.dhcpServer4.rangeEnd" type="String">
                 <esf:value>172.16.0.110</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.name" type="String">
-                <esf:value>enp3s0</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.mac" type="String">
-                <esf:value>E0:94:67:5B:0D:BF</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.pairwiseCiphers" type="String">
                 <esf:value>CCMP</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.eth.link.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.state" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.ip4.dnsServers" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ip4.netmask" type="String">
-                <esf:value>255.255.255.0</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.state" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ip4.broadcast" type="String">
-                <esf:value>172.16.0.255</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.broadcast" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.wifi.capabilities" type="String">
-                <esf:value>CIPHER_TKIP CIPHER_CCMP WPA RSN </esf:value>
             </esf:property>
             <esf:property array="false" encrypted="true" name="net.interface.wlp4s0.config.wifi.master.passphrase" type="Password">
                 <esf:value>dGVzdEtFWVM=</esf:value>
@@ -300,41 +170,11 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.securityType" type="String">
                 <esf:value>SECURITY_WPA2</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.driver" type="String">
-                <esf:value> iwlwifi</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.ip4.prefix" type="Short">
-                <esf:value>8</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp3s0.config.dhcpClient4.enabled" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.loopback" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.mac" type="String">
-                <esf:value>00:07:32:49:AC:A3</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.config.state" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.state" type="String">
-                <esf:value>ACTIVATED</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.ip4.prefix" type="Short">
                 <esf:value>24</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.ip4.broadcast" type="String">
-                <esf:value>127.0.0.1</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.mtu" type="Integer">
-                <esf:value>1500</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp3s0.loopback" type="Boolean">
-                <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.config.mtu" type="Integer">
-                <esf:value>1500</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.ip4.gateway" type="String">
                 <esf:value/>
@@ -351,23 +191,11 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpServer4.prefix" type="Short">
                 <esf:value>24</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.driver" type="String">
-                <esf:value> r8169</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.type" type="String">
                 <esf:value>LOOPBACK</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.pingAccessPoint" type="Boolean">
                 <esf:value>false</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.config.mtu" type="Integer">
-                <esf:value>65536</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.driver" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.name" type="String">
-                <esf:value>wlp4s0</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.lo.config.ip4.address" type="String">
                 <esf:value/>
@@ -381,32 +209,11 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpServer4.rangeEnd" type="String">
                 <esf:value>172.16.1.110</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.firmware.version" type="String">
-                <esf:value>unknown</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.firmware.version" type="String">
-                <esf:value> 29.1044073957.0</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.channel" type="String">
                 <esf:value>1</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.config.winsServers" type="String">
-                <esf:value/>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.enp2s0.type" type="String">
                 <esf:value>ETHERNET</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.up" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.driver.version" type="String">
-                <esf:value> 4.18.0-17-generic</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.infra.hardwareMode" type="String">
-                <esf:value/>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.up" type="Boolean">
-                <esf:value>true</esf:value>
             </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.ip4.status" type="String">
                 <esf:value>netIPv4StatusEnabledLAN</esf:value>
@@ -417,13 +224,7 @@
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.wifi.master.radioMode" type="String">
                 <esf:value>RADIO_MODE_80211g</esf:value>
             </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.enp2s0.ip4.prefix" type="Short">
-                <esf:value>24</esf:value>
-            </esf:property>
             <esf:property array="false" encrypted="false" name="net.interface.wlp4s0.config.dhcpServer4.passDns" type="Boolean">
-                <esf:value>true</esf:value>
-            </esf:property>
-            <esf:property array="false" encrypted="false" name="net.interface.lo.config.autoconnect" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
         </esf:properties>

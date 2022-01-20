@@ -98,6 +98,24 @@ public class WifiConfig implements NetConfig {
         this.wifiCountryCode = null;
     }
 
+    /**
+     * @since 2.3
+     * 
+     * @param mode
+     *            for the configuration as {@link WifiMode}
+     * @param ssid
+     *            of the the wifi interface
+     * @param channels
+     *            supported by the wifi interface
+     * @param security
+     *            mode of the interface as {@link WifiSecurity}
+     * @param passkey
+     *            for the wifi interface
+     * @param hwMode
+     *            the hardware mode
+     * @param bgscan
+     *            the background scan
+     */
     public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
             WifiBgscan bgscan) {
         super();

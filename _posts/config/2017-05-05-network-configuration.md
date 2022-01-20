@@ -97,9 +97,10 @@ The following table describes all the properties related to the Network Configur
 
 Name                                           | Type     | Description
 -----------------------------------------------|----------|------------------------------------------
+net.interfaces                                 | String   | Comma-separated list of the interface names in the device
 net.interface.\<interface\>.config.type	       | String	  | The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK
-net.interface.\<interface\>.config.wifi.mode	 | String	  | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
-net.interface.\<interface\>.config.nat.enabled | Boolean	| Enable the NAT feature
+net.interface.\<interface\>.config.wifi.mode   | String   | For wifi interfaces, specify the modality; possible values are INFRA and MASTER
+net.interface.\<interface\>.config.nat.enabled | Boolean  | Enable the NAT feature
 
 ### IPv4 properties
 

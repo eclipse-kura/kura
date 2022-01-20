@@ -491,6 +491,12 @@ Moreover, if a property is not present in the new snapshot, the old value is use
             <esf:property array="false" encrypted="false" name="net.interface.1-1.config.persist" type="Boolean">
                 <esf:value>true</esf:value>
             </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.1-1.config.dialString" type="String">
+                <esf:value>atd*99***2#</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="net.interface.1-1.config.apn" type="String">
+                <esf:value>web.omnitel.it</esf:value>
+            </esf:property>
         </esf:properties>
     </esf:configuration>
 </esf:configurations>

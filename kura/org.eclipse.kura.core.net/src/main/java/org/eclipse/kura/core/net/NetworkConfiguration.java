@@ -330,7 +330,6 @@ public class NetworkConfiguration {
 
         sb.append(" :: SSID: " + ((WifiConfig) netConfig).getSSID());
         sb.append(" :: BgScan: " + ((WifiConfig) netConfig).getBgscan());
-        sb.append(" :: Broadcast: " + ((WifiConfig) netConfig).getBroadcast());
         int[] channels = ((WifiConfig) netConfig).getChannels();
         if (channels != null && channels.length > 0) {
             sb.append(" :: Channels: ");
@@ -840,14 +839,6 @@ public class NetworkConfiguration {
 
             wifiConfig.setPingAccessPoint(pingAccessPoint);
         }
-
-        // broadcast
-        key = prefix + BROADCAST;
-        Boolean broadcast = (Boolean) properties.get(key);
-        if (broadcast != null) {
-            wifiConfig.setBroadcast(broadcast);
-        }
-        logger.trace("hwMode is {}", hwMode);
 
         // radio mode
         key = prefix + ".radioMode";

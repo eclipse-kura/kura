@@ -50,7 +50,7 @@ public class DevicePanelUi extends Composite {
     @UiField
     TabListItem systemProperties;
     @UiField
-    TabListItem dockerContainers;
+    TabListItem containers;
 
     @UiField
     ProfileTabUi profilePanel;
@@ -78,7 +78,7 @@ public class DevicePanelUi extends Composite {
         this.threads.addClickHandler(new Tab.RefreshHandler(this.threadsPanel));
         this.packages.addClickHandler(new Tab.RefreshHandler(this.packagesPanel));
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
-        this.dockerContainers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
+        this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
     }
 
     public void initDevicePanel() {

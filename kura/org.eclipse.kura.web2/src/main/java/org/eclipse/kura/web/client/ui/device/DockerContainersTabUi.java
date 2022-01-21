@@ -13,6 +13,7 @@
 package org.eclipse.kura.web.client.ui.device;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
@@ -21,10 +22,15 @@ import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
+import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerService;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
@@ -37,6 +43,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -59,11 +66,14 @@ public class DockerContainersTabUi extends Composite implements Tab {
     private boolean isRequestRunning = false;
 
     @UiField
-    Button bundlesRefresh;
+    Panel mgmtPanel;
+
     @UiField
-    Button bundleStart;
+    Button containersRefresh;
     @UiField
-    Button bundleStop;
+    Button containersStart;
+    @UiField
+    Button containersStop;
 
     @UiField
     CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<>();
@@ -75,18 +85,18 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
     public DockerContainersTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
-        loadBundlesTable(this.bundlesGrid, this.bundlesDataProvider);
+        loadContainersTable(this.bundlesGrid, this.bundlesDataProvider);
 
-        this.bundlesRefresh.setText(MSGS.refresh());
-        this.bundleStart.setText(MSGS.deviceTabBundleStart());
-        this.bundleStop.setText(MSGS.deviceTabBundleStop());
+        this.containersRefresh.setText(MSGS.refresh());
+        this.containersStart.setText(MSGS.deviceTabContainerStart());
+        this.containersStop.setText(MSGS.deviceTabContainerStop());
 
         this.selectionModel.clear();
         this.bundlesGrid.setSelectionModel(this.selectionModel);
         this.selectionModel.addSelectionChangeHandler(event -> updateButtons());
-        this.bundlesRefresh.addClickHandler(event -> refresh());
-        this.bundleStart.addClickHandler(event -> startSelectedBundle());
-        this.bundleStop.addClickHandler(event -> stopSelectedBundle());
+        this.containersRefresh.addClickHandler(event -> refresh());
+        this.containersStart.addClickHandler(event -> startSelectedContainer());
+        this.containersStop.addClickHandler(event -> stopSelectedContainer());
 
         updateButtons();
 
@@ -96,19 +106,18 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
         };
 
-        EventService.subscribe(ForwardedEventTopic.BUNDLE_INSTALLED, onBundleUpdatedHandler);
-        EventService.subscribe(ForwardedEventTopic.BUNDLE_RESOLVED, onBundleUpdatedHandler);
-        EventService.subscribe(ForwardedEventTopic.BUNDLE_STARTED, onBundleUpdatedHandler);
-        EventService.subscribe(ForwardedEventTopic.BUNDLE_STOPPED, onBundleUpdatedHandler);
-        EventService.subscribe(ForwardedEventTopic.BUNDLE_UNINSTALLED, onBundleUpdatedHandler);
-        EventService.subscribe(ForwardedEventTopic.BUNDLE_UNRESOLVED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.DOCKER_RUNNING, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.DOCKER_STARTED, onBundleUpdatedHandler);
+        EventService.subscribe(ForwardedEventTopic.DOCKER_STOPPED, onBundleUpdatedHandler);
+
+        // this.containerPanl
     }
 
     private void updateButtons() {
         GwtGroupedNVPair selected = this.selectionModel.getSelectedObject();
 
-        this.bundleStart.setEnabled(false);
-        this.bundleStop.setEnabled(false);
+        this.containersStart.setEnabled(false);
+        this.containersStop.setEnabled(false);
 
         String status;
 
@@ -118,19 +127,21 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
         boolean isActive = "bndActive".equals(status);
 
-        this.bundleStart.setEnabled(!isActive);
-        this.bundleStop.setEnabled(isActive);
+        this.containersStart.setEnabled(!isActive);
+        this.containersStop.setEnabled(isActive);
+
     }
 
-    private void startSelectedBundle() {
+    private void startSelectedContainer() {
         EntryClassUi.showWaitModal();
 
         this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                DockerContainersTabUi.this.deviceService.startBundle(token,
-                        DockerContainersTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+                DockerContainersTabUi.this.deviceService.startContainer(token,
+                        DockerContainersTabUi.this.selectionModel.getSelectedObject().getName(),
+                        new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -153,9 +164,10 @@ public class DockerContainersTabUi extends Composite implements Tab {
                 FailureHandler.handle(caught);
             }
         });
+        refresh();
     }
 
-    private void stopSelectedBundle() {
+    private void stopSelectedContainer() {
         EntryClassUi.showWaitModal();
         this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
@@ -167,8 +179,9 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                DockerContainersTabUi.this.deviceService.stopBundle(token,
-                        DockerContainersTabUi.this.selectionModel.getSelectedObject().getId(), new AsyncCallback<Void>() {
+                DockerContainersTabUi.this.deviceService.stopContainer(token,
+                        DockerContainersTabUi.this.selectionModel.getSelectedObject().getName(),
+                        new AsyncCallback<Void>() {
 
                             @Override
                             public void onFailure(Throwable caught) {
@@ -180,14 +193,15 @@ public class DockerContainersTabUi extends Composite implements Tab {
                             @Override
                             public void onSuccess(Void result) {
                                 EntryClassUi.hideWaitModal();
-                                DockerContainersTabUi.this.bundleStop.setEnabled(false);
+                                DockerContainersTabUi.this.containersStop.setEnabled(false);
                             }
                         });
             }
         });
+        refresh();
     }
 
-    private void loadBundlesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
+    private void loadContainersTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
             ListDataProvider<GwtGroupedNVPair> dataProvider) {
 
         TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
@@ -237,18 +251,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
         TextHeader version = new TextHeader(MSGS.deviceBndVersion());
         version.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col4, version);
-        
-        TextColumn<GwtGroupedNVPair> col5 = new TextColumn<GwtGroupedNVPair>() {
-
-            @Override
-            public String getValue(GwtGroupedNVPair object) {
-                return object.isSigned();
-            }
-        };
-        col4.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        TextHeader signature = new TextHeader(MSGS.deviceBndSignature());
-        signature.setHeaderStyleNames(ROW_HEADER_STYLE);
-        bundlesGrid2.addColumn(col5, signature);
 
         dataProvider.addDataDisplay(bundlesGrid2);
     }
@@ -278,6 +280,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
         EntryClassUi.showWaitModal();
 
         this.bundlesDataProvider.getList().clear();
+
         this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
             @Override
@@ -289,30 +292,31 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
-                DockerContainersTabUi.this.gwtDeviceService.findBundles(token, new AsyncCallback<List<GwtGroupedNVPair>>() {
+                DockerContainersTabUi.this.gwtDeviceService.findContainers(token,
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        DockerContainersTabUi.this.isRequestRunning = false;
-                        EntryClassUi.hideWaitModal();
-                        FailureHandler.handle(caught);
-                        DockerContainersTabUi.this.bundlesDataProvider.flush();
-                    }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                DockerContainersTabUi.this.isRequestRunning = false;
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                                DockerContainersTabUi.this.bundlesDataProvider.flush();
+                            }
 
-                    @Override
-                    public void onSuccess(List<GwtGroupedNVPair> result) {
-                        EntryClassUi.hideWaitModal();
-                        DockerContainersTabUi.this.isRequestRunning = false;
-                        for (GwtGroupedNVPair resultPair : result) {
-                            DockerContainersTabUi.this.bundlesDataProvider.getList().add(resultPair);
-                        }
-                        int size = DockerContainersTabUi.this.bundlesDataProvider.getList().size();
-                        DockerContainersTabUi.this.bundlesGrid.setVisibleRange(0, size);
-                        DockerContainersTabUi.this.bundlesDataProvider.flush();
-                        DockerContainersTabUi.this.selectionModel.clear();
-                        updateButtons();
-                    }
-                });
+                            @Override
+                            public void onSuccess(List<GwtGroupedNVPair> result) {
+                                EntryClassUi.hideWaitModal();
+                                DockerContainersTabUi.this.isRequestRunning = false;
+                                for (GwtGroupedNVPair resultPair : result) {
+                                    DockerContainersTabUi.this.bundlesDataProvider.getList().add(resultPair);
+                                }
+                                int size = DockerContainersTabUi.this.bundlesDataProvider.getList().size();
+                                DockerContainersTabUi.this.bundlesGrid.setVisibleRange(0, size);
+                                DockerContainersTabUi.this.bundlesDataProvider.flush();
+                                DockerContainersTabUi.this.selectionModel.clear();
+                                updateButtons();
+                            }
+                        });
             }
 
         });
@@ -321,6 +325,44 @@ public class DockerContainersTabUi extends Composite implements Tab {
     @Override
     public void clear() {
         // Not needed
+    }
+
+    private static class DockerConfigurableGenericManagerServiceWrapper implements GwtRestrictedComponentServiceAsync {
+
+        private static GwtDockerConfigurableGenericManagerServiceAsync wrapped = GWT
+                .create(GwtDockerConfigurableGenericManagerService.class);
+
+        @Override
+        public void listFactoryPids(AsyncCallback<Set<String>> callback) {
+            wrapped.listFactoryPids(callback);
+        }
+
+        @Override
+        public void listServiceInstances(AsyncCallback<List<GwtComponentInstanceInfo>> callback) {
+            wrapped.listServiceInstances(callback);
+        }
+
+        @Override
+        public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid,
+                AsyncCallback<Void> callback) {
+            wrapped.createFactoryConfiguration(token, pid, factoryPid, callback);
+        }
+
+        @Override
+        public void getConfiguration(GwtXSRFToken token, String pid, AsyncCallback<GwtConfigComponent> callback) {
+            wrapped.getConfiguration(token, pid, callback);
+        }
+
+        @Override
+        public void updateConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                AsyncCallback<Void> callback) {
+            wrapped.updateConfiguration(token, component, callback);
+        }
+
+        @Override
+        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
+            wrapped.deleteFactoryConfiguration(token, pid, callback);
+        }
     }
 
 }

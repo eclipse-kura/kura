@@ -654,7 +654,7 @@ public class NetworkConfigurationTest {
         String expected = "\nname: if1 :: Loopback? false :: Point to Point? false :: Up? false :: Virtual? false"
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null"
                 + " :: Type: WIFI :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null"
-                + " :: Broadcast: false :: Group Ciphers: null :: Hardware Mode: null :: Mode: null"
+                + " :: Group Ciphers: null :: Hardware Mode: null :: Mode: null"
                 + " :: Pairwise Ciphers: null :: Security: null";
 
         assertEquals(expected, config.toString());
@@ -682,7 +682,7 @@ public class NetworkConfigurationTest {
 
         String expected = "\nname: if1 :: Loopback? false :: Point to Point? false :: Up? false :: Virtual? false"
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null :: Type: WIFI"
-                + " :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null :: Broadcast: false"
+                + " :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null"
                 + " :: Group Ciphers: null :: Hardware Mode: null :: Mode: null :: Pairwise Ciphers: null"
                 + " :: Security: null";
 
@@ -711,7 +711,7 @@ public class NetworkConfigurationTest {
 
         String expected = "\nname: if1 :: Loopback? false :: Point to Point? false :: Up? false :: Virtual? false"
                 + " :: Driver: null :: Driver Version: null :: Firmware Version: null :: MTU: 0 :: State: null :: Type: WIFI"
-                + " :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null :: Broadcast: false"
+                + " :: Usb Device: null :: Prefix: 0\n	WifiConfig  :: SSID: null :: BgScan: null"
                 + " :: Channels: 1,2 :: Group Ciphers: null :: Hardware Mode: null :: Mode: null :: Pairwise Ciphers: null"
                 + " :: Security: null";
 

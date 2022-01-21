@@ -77,7 +77,6 @@ public class NetworkConfiguration {
     private static final String ADDRESS = " :: Address: ";
     private static final String GOT_MESSAGE = "got {}: {}";
     private static final String BGSCAN = ".bgscan";
-    private static final String BROADCAST = ".broadcast";
     private static final String HARDWARE_MODE = ".hardwareMode";
     private static final String PASSPHRASE = ".passphrase";
     private static final String SECURITY_TYPE = ".securityType";

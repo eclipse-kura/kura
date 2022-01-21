@@ -34,12 +34,18 @@ public interface NetworkService {
 
     /**
      * Returns the overall state of the networking subsystem
+     * 
+     * @deprecated since 2.3
      */
+    @Deprecated
     public NetworkState getState() throws KuraException;
 
     /**
      * Returns the state of a specific network interface
+     * 
+     * @deprecated since 2.3
      */
+    @Deprecated
     public NetInterfaceState getState(String interfaceName) throws KuraException;
 
     /**

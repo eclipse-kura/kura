@@ -295,39 +295,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     @Override
     public NetworkState getState() throws KuraException {
-        // see if we have global access by trying to ping - maybe there is a better way?
-        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1) || this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
-            return NetworkState.CONNECTED_GLOBAL;
-        }
-
-        // if we have a link we at least of network local access
-        List<NetInterface<? extends NetInterfaceAddress>> netInterfaces = getNetworkInterfaces();
-        for (NetInterface<? extends NetInterfaceAddress> netInterface : netInterfaces) {
-            if (netInterface.getType() == NetInterfaceType.ETHERNET
-                    && ((EthernetInterfaceImpl<? extends NetInterfaceAddress>) netInterface).isLinkUp()) {
-                return NetworkState.CONNECTED_SITE;
-            }
-        }
-
-        @SuppressWarnings("checkstyle:lineLength")
-        LoopbackInterfaceImpl<? extends NetInterfaceAddress> netInterface = (LoopbackInterfaceImpl<? extends NetInterfaceAddress>) getNetworkInterface(
-                "lo");
-        if (netInterface.isUp()) {
-            return NetworkState.CONNECTED_LOCAL;
-        }
-
         return NetworkState.UNKNOWN;
     }
 
     @Override
     public NetInterfaceState getState(String interfaceName) throws KuraException {
-        NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
-        if (netInterface == null) {
-            logger.error("There is no status available for network interface {}", interfaceName);
-            return NetInterfaceState.UNKNOWN;
-        } else {
-            return netInterface.getState();
-        }
+        return NetInterfaceState.UNKNOWN;
     }
 
     @Override

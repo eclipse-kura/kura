@@ -90,7 +90,7 @@ When applying a new network configuration, Kura changes the configuration files 
 
 ## Network Configuration properties
 
-The Network configuration can be modified using the ESF Gateway Administration Console, as described above, the Configuration Service or appling a proper [snapshot](../admin/snapshot-management.html).
+The Network configuration can be modified using the ESF Gateway Administration Console, as described above, using the Configuration Service or by appling a proper [snapshot](../admin/snapshot-management.html).
 The following table describes all the properties related to the Network Configuration.
 
 ### Common properties

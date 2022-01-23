@@ -4,9 +4,10 @@ title:  "WireGraphService Configuration Format"
 categories: [ref]
 ---
 
-This document describes the format of the configuration of the WireGraphService component. The configuration of the WireGraphService contains the informations related to the Wire Graph topology and rendering properties.
+This document describes the configuration format for the WireGraphService component.
+The WireGraphService configuration contains all the information related to the Wire Graph topology and rendering properties.
 The pid of the WireGraphService configuration is `org.eclipse.kura.wire.graph.WireGraphService`.
-The WireGraphService configuration contains a single property of string type named `WireGraph` that contains a serialized JSON representation of a [WireGraph](#wire_graph) object describing the current graph layout.
+The WireGraphService configuration represents the current graph layout as a single string typed property named `WireGraph` that represents a serialized JSON representation of a [WireGraph](#wire_graph) object.
 
 ## JSON definitions
 #### Position
@@ -35,7 +36,7 @@ An object representing a Wire Component position
 {}
 ```
 #### PortNameList
-An object that specifies custom names for Wire Component input and output ports. The name of properties of this object must be an integer starting from 0, representing the index of the port whose name needs to be assigned. If the name of a specific property is not specified, the default port name will be used.
+An object that specifies custom names for Wire Component input and output ports. The properties name for this object must be represented as an integer starting from 0, matching the index of the port whose name needs to be assigned. If the property name is not specified, the default port name will be used.
 <br>**Properties**:
 
 * **_portIndex**: `string`

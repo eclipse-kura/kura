@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -54,6 +54,7 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.modem.SupportedUsbModemsFactoryInfo;
 import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
 import org.eclipse.kura.net.modem.CellularModem;
+import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemManagerService;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
@@ -227,7 +228,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
                     setInterfaceType(modifiedProps, interfaceName, type);
                     if (NetInterfaceType.MODEM.equals(type)) {
-                        setPppNumber(modifiedProps, interfaceName);
+                        setModemPppNumber(modifiedProps, interfaceName);
+                        setModemUsbDeviceProperties(modifiedProps, interfaceName);
                     }
                 }
 
@@ -249,7 +251,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         }
     }
 
-    protected void setPppNumber(Map<String, Object> modifiedProps, String interfaceName) throws KuraException {
+    protected void setModemPppNumber(Map<String, Object> modifiedProps, String interfaceName) {
         StringBuilder sb = new StringBuilder();
         sb.append(PREFIX).append(interfaceName).append(".config.pppNum");
         Integer pppNum = Integer.valueOf(this.networkService.getModemPppInterfaceName(interfaceName).substring(3));
@@ -260,6 +262,20 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         StringBuilder sb = new StringBuilder();
         sb.append(PREFIX).append(interfaceName).append(".type");
         modifiedProps.put(sb.toString(), type.toString());
+    }
+
+    protected void setModemUsbDeviceProperties(Map<String, Object> modifiedProps, String interfaceName) {
+        Optional<ModemDevice> modemOptional = this.networkService.getModemDevice(interfaceName);
+        if (modemOptional.isPresent() && modemOptional.get() instanceof UsbModemDevice) {
+            String prefix = PREFIX + interfaceName + ".";
+            UsbModemDevice usbModemDevice = (UsbModemDevice) modemOptional.get();
+            modifiedProps.put(prefix + "usb.vendor.id", usbModemDevice.getVendorId());
+            modifiedProps.put(prefix + "usb.vendor.name", usbModemDevice.getManufacturerName());
+            modifiedProps.put(prefix + "usb.product.id", usbModemDevice.getProductId());
+            modifiedProps.put(prefix + "usb.product.name", usbModemDevice.getProductName());
+            modifiedProps.put(prefix + "usb.busNumber", usbModemDevice.getUsbBusNumber());
+            modifiedProps.put(prefix + "usb.devicePath", usbModemDevice.getUsbDevicePath());
+        }
     }
 
     private boolean isEncrypted(String password) {
@@ -302,6 +318,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
+        // This method returns the network configuration properties without the current values.
+        // i.e. the ip address that should be applied to the system, but not the actual one.
         logger.debug("getConfiguration()");
         return new ComponentConfigurationImpl(PID, getDefinition(),
                 getNetworkConfiguration().getConfigurationProperties());

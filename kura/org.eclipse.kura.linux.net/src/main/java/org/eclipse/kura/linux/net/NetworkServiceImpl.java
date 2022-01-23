@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -295,42 +295,12 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     @Override
     public NetworkState getState() throws KuraException {
-        // see if we have global access by trying to ping - maybe there is a better way?
-        if (this.linuxNetworkUtil.canPing("8.8.8.8", 1)) {
-            return NetworkState.CONNECTED_GLOBAL;
-        }
-        if (this.linuxNetworkUtil.canPing("8.8.4.4", 1)) {
-            return NetworkState.CONNECTED_GLOBAL;
-        }
-
-        // if we have a link we at least of network local access
-        List<NetInterface<? extends NetInterfaceAddress>> netInterfaces = getNetworkInterfaces();
-        for (NetInterface<? extends NetInterfaceAddress> netInterface : netInterfaces) {
-            if (netInterface.getType() == NetInterfaceType.ETHERNET
-                    && ((EthernetInterfaceImpl<? extends NetInterfaceAddress>) netInterface).isLinkUp()) {
-                return NetworkState.CONNECTED_SITE;
-            }
-        }
-
-        @SuppressWarnings("checkstyle:lineLength")
-        LoopbackInterfaceImpl<? extends NetInterfaceAddress> netInterface = (LoopbackInterfaceImpl<? extends NetInterfaceAddress>) getNetworkInterface(
-                "lo");
-        if (netInterface.isUp()) {
-            return NetworkState.CONNECTED_LOCAL;
-        }
-
         return NetworkState.UNKNOWN;
     }
 
     @Override
     public NetInterfaceState getState(String interfaceName) throws KuraException {
-        NetInterface<? extends NetInterfaceAddress> netInterface = getNetworkInterface(interfaceName);
-        if (netInterface == null) {
-            logger.error("There is no status available for network interface {}", interfaceName);
-            return NetInterfaceState.UNKNOWN;
-        } else {
-            return netInterface.getState();
-        }
+        return NetInterfaceState.UNKNOWN;
     }
 
     @Override
@@ -521,7 +491,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             wifiInterface.setCapabilities(this.linuxNetworkUtil.getWifiCapabilities(interfaceName));
         } catch (final Exception e) {
             logger.warn("failed to get capabilities for {}", interfaceName);
-            logger.debug("excepton", e);
+            logger.debug("exception", e);
             wifiInterface.setCapabilities(EnumSet.noneOf(Capability.class));
         }
 
@@ -595,32 +565,24 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     private boolean validateDeviceAddedEvent(Event event) {
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY) == null) {
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_NAME_PROPERTY) == null) {
             return false;
         }
         if (event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY) == null
                 || ((String) event.getProperty(UsbDeviceEvent.USB_EVENT_RESOURCE_PROPERTY)).startsWith("usb")) {
             return false;
         }
-        return (event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) != null
+        return event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY) != null
                 && !((UsbDeviceType) event.getProperty(UsbDeviceEvent.USB_EVENT_DEVICE_TYPE_PROPERTY))
-                        .equals(UsbDeviceType.USB_NET_DEVICE));
+                        .equals(UsbDeviceType.USB_NET_DEVICE);
     }
 
     private boolean validateDeviceRemovedEvent(Event event) {
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null) {
-            return false;
-        }
-        if (event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
+        if (event.getProperty(UsbDeviceEvent.USB_EVENT_VENDOR_ID_PROPERTY) == null
+                || event.getProperty(UsbDeviceEvent.USB_EVENT_PRODUCT_ID_PROPERTY) == null) {
             return false;
         }
         return event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY) != null;
@@ -963,8 +925,17 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     @Override
-    public String getModemPppInterfaceName(String usbPath) throws KuraException {
+    public String getModemPppInterfaceName(String usbPath) {
         return generatePppName(this.validUsbModemsPppNumbers.get(usbPath));
+    }
+
+    @Override
+    public Optional<ModemDevice> getModemDevice(String usbPath) {
+        Optional<ModemDevice> modem = Optional.empty();
+        if (this.validUsbModemsPppNumbers.containsKey(usbPath)) {
+            modem = Optional.of(this.detectedUsbModems.get(usbPath));
+        }
+        return modem;
     }
 
     private boolean isVirtual(String interfaceName) {

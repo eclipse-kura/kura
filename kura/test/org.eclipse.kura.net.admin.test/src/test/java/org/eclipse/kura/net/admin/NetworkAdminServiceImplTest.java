@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -326,7 +326,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertFalse(config.isAutoConnect());
 
             List<? extends NetInterfaceAddressConfig> addresses = config.getNetInterfaceAddresses();
@@ -567,7 +566,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertTrue(config.isAutoConnect());
 
             List<? extends NetInterfaceAddressConfig> addresses = config.getNetInterfaceAddresses();
@@ -828,7 +826,6 @@ public class NetworkAdminServiceImplTest {
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> config = networkConfiguration
                     .getNetInterfaceConfig(interfaceName);
 
-            assertEquals(NetInterfaceState.ACTIVATED, config.getState());
             assertFalse(config.isAutoConnect());
 
             List<? extends NetInterfaceAddressConfig> addresses = config.getNetInterfaceAddresses();

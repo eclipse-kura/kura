@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -505,38 +505,58 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         }
     }
 
-    private void checkStatusChange(Map<String, InterfaceState> oldStatuses, Map<String, InterfaceState> newStatuses) {
+    private void checkStatusChange(Map<String, InterfaceState> oldStatuses, Map<String, InterfaceState> newStatuses)
+            throws KuraException {
 
         if (newStatuses != null) {
-            // post NetworkStatusChangeEvent on current and new interfaces
-            Iterator<String> it = newStatuses.keySet().iterator();
+            postEventForStatusChanged(oldStatuses, newStatuses);
+            postEventForDisabledInterfaces(oldStatuses, newStatuses);
+        }
+    }
+
+    private void postEventForDisabledInterfaces(Map<String, InterfaceState> oldStatuses,
+            Map<String, InterfaceState> newStatuses) throws KuraException {
+        Iterator<String> it;
+        // post NetworkStatusChangeEvent on interfaces that are no longer there
+        if (oldStatuses != null) {
+            it = oldStatuses.keySet().iterator();
             while (it.hasNext()) {
                 String interfaceName = it.next();
-                if (oldStatuses != null && oldStatuses.containsKey(interfaceName)) {
-                    if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
-                        logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
-                        this.eventAdmin.postEvent(
-                                new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
-                    }
-                } else {
-                    logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
+                if (!newStatuses.containsKey(interfaceName)) {
+                    logCurrentNetworkConfiguration();
+                    logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
+                    this.eventAdmin.postEvent(
+                            new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
+                }
+            }
+        }
+    }
+
+    private void postEventForStatusChanged(Map<String, InterfaceState> oldStatuses,
+            Map<String, InterfaceState> newStatuses) throws KuraException {
+        // post NetworkStatusChangeEvent on current and new interfaces
+        Iterator<String> it = newStatuses.keySet().iterator();
+        while (it.hasNext()) {
+            String interfaceName = it.next();
+            if (oldStatuses != null && oldStatuses.containsKey(interfaceName)) {
+                if (!newStatuses.get(interfaceName).equals(oldStatuses.get(interfaceName))) {
+                    logCurrentNetworkConfiguration();
+                    logger.debug("Posting NetworkStatusChangeEvent on interface: {}", interfaceName);
                     this.eventAdmin.postEvent(
                             new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
                 }
+            } else {
+                logCurrentNetworkConfiguration();
+                logger.debug("Posting NetworkStatusChangeEvent on enabled interface: {}", interfaceName);
+                this.eventAdmin
+                        .postEvent(new NetworkStatusChangeEvent(interfaceName, newStatuses.get(interfaceName), null));
             }
+        }
+    }
 
-            // post NetworkStatusChangeEvent on interfaces that are no longer there
-            if (oldStatuses != null) {
-                it = oldStatuses.keySet().iterator();
-                while (it.hasNext()) {
-                    String interfaceName = it.next();
-                    if (!newStatuses.containsKey(interfaceName)) {
-                        logger.debug("Posting NetworkStatusChangeEvent on disabled interface: {}", interfaceName);
-                        this.eventAdmin.postEvent(
-                                new NetworkStatusChangeEvent(interfaceName, oldStatuses.get(interfaceName), null));
-                    }
-                }
-            }
+    private void logCurrentNetworkConfiguration() throws KuraException {
+        if (logger.isDebugEnabled()) {
+            logger.debug(this.netConfigService.getNetworkConfiguration().toString());
         }
     }
 

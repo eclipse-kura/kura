@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -49,42 +49,8 @@ public class NetworkServiceImplTest {
     private List<NetInterface<? extends NetInterfaceAddress>> networkInterfaces;
 
     @Test
-    public void shouldBeGlobalConnected() throws KuraException {
-        givenNetworkService();
-        givenCanPingGlobal();
-
-        whenGetState();
-
-        thenStateIsGlobalConnected();
-    }
-
-    @Test
-    public void shouldBeSiteConnected() throws KuraException {
-        givenNetworkService();
-        givenCannotPingGlobal();
-        givenEthernetInterface("eth0", true, true);
-
-        whenGetState();
-
-        thenStateIsSiteConnected();
-    }
-
-    @Test
-    public void shouldBeLocalConnected() throws KuraException {
-        givenNetworkService();
-        givenCannotPingGlobal();
-        givenLoopbackInterface(true);
-
-        whenGetState();
-
-        thenStateIsLocalConnected();
-    }
-
-    @Test
     public void shouldBeUnknownConnected() throws KuraException {
         givenNetworkService();
-        givenCannotPingGlobal();
-        givenLoopbackInterface(false);
 
         whenGetState();
 
@@ -98,26 +64,6 @@ public class NetworkServiceImplTest {
         whenGetInterfaceState("eth0");
 
         thenNetInterfaceStateIsUnknown();
-    }
-
-    @Test
-    public void shouldBeActivatedInterfaceState() throws KuraException {
-        givenNetworkService();
-        givenEthernetInterface("eth0", true, true);
-
-        whenGetInterfaceState("eth0");
-
-        thenNetInterfaceStateIsActivated();
-    }
-
-    @Test
-    public void shouldBeDisconnectedInterfaceState() throws KuraException {
-        givenNetworkService();
-        givenEthernetInterface("eth0", false, false);
-
-        whenGetInterfaceState("eth0");
-
-        thenNetInterfaceStateIsDisconnected();
     }
 
     @Test
@@ -162,38 +108,6 @@ public class NetworkServiceImplTest {
         this.networkService.setLinuxNetworkUtil(this.linuxNetworkUtil);
         this.networkService.setUsbService(usbService);
         this.networkService.setEventAdmin(eventAdmin);
-    }
-
-    private void givenCanPingGlobal() {
-        when(this.linuxNetworkUtil.canPing("8.8.8.8", 1)).thenReturn(true);
-    }
-
-    private void givenCannotPingGlobal() {
-        when(this.linuxNetworkUtil.canPing("8.8.8.8", 1)).thenReturn(false);
-        when(this.linuxNetworkUtil.canPing("8.8.4.4", 1)).thenReturn(false);
-    }
-
-    private void givenEthernetInterface(String interfaceName, boolean isUp, boolean isLinkUp) throws KuraException {
-        List<String> interfaces = new ArrayList<>();
-        interfaces.add(interfaceName);
-        when(this.linuxNetworkUtil.getAllInterfaceNames()).thenReturn(interfaces);
-        when(this.linuxNetworkUtil.isLinkUp(NetInterfaceType.ETHERNET, interfaceName)).thenReturn(isLinkUp);
-
-        LinuxIfconfig eth0Ifconfig = new LinuxIfconfig(interfaceName);
-        eth0Ifconfig.setType(NetInterfaceType.ETHERNET);
-        eth0Ifconfig.setUp(isUp);
-        when(this.linuxNetworkUtil.getInterfaceConfiguration(interfaceName)).thenReturn(eth0Ifconfig);
-    }
-
-    private void givenLoopbackInterface(boolean isUp) throws KuraException {
-        List<String> interfaces = new ArrayList<>();
-        interfaces.add("lo");
-        when(this.linuxNetworkUtil.getAllInterfaceNames()).thenReturn(interfaces);
-
-        LinuxIfconfig loIfconfig = new LinuxIfconfig("lo");
-        loIfconfig.setType(NetInterfaceType.LOOPBACK);
-        loIfconfig.setUp(isUp);
-        when(this.linuxNetworkUtil.getInterfaceConfiguration("lo")).thenReturn(loIfconfig);
     }
 
     private void givenPppInterface(String interfaceName, boolean isUp, boolean isLinkUp) throws KuraException {
@@ -271,32 +185,12 @@ public class NetworkServiceImplTest {
         events.forEach(this.networkService::handleEvent);
     }
 
-    private void thenStateIsGlobalConnected() {
-        assertEquals(NetworkState.CONNECTED_GLOBAL, this.networkState);
-    }
-
-    private void thenStateIsSiteConnected() {
-        assertEquals(NetworkState.CONNECTED_SITE, this.networkState);
-    }
-
-    private void thenStateIsLocalConnected() {
-        assertEquals(NetworkState.CONNECTED_LOCAL, this.networkState);
-    }
-
     private void thenStateIsUnknownConnected() {
         assertEquals(NetworkState.UNKNOWN, this.networkState);
     }
 
     private void thenNetInterfaceStateIsUnknown() {
         assertEquals(NetInterfaceState.UNKNOWN, this.netInterfaceState);
-    }
-
-    private void thenNetInterfaceStateIsActivated() {
-        assertEquals(NetInterfaceState.ACTIVATED, this.netInterfaceState);
-    }
-
-    private void thenNetInterfaceStateIsDisconnected() {
-        assertEquals(NetInterfaceState.DISCONNECTED, this.netInterfaceState);
     }
 
     private void thenNetworkNamesListSize(int size) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -31,6 +31,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -54,6 +55,8 @@ import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkService;
+import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
 import org.junit.Test;
@@ -211,7 +214,7 @@ public class NetworkConfigurationServiceImplTest {
             Event event = invocation.getArgumentAt(0, Event.class);
 
             assertEquals("org/eclipse/kura/net/admin/event/NETWORK_EVENT_CONFIG_CHANGE_TOPIC", event.getTopic());
-            assertEquals(6, event.getPropertyNames().length); // 4+topics!
+            assertEquals(12, event.getPropertyNames().length);
 
             assertEquals("MODEM", event.getProperty("net.interface.1-2.3.type"));
 
@@ -243,6 +246,8 @@ public class NetworkConfigurationServiceImplTest {
 
         NetworkService nsMock = mock(NetworkService.class);
         when(nsMock.getModemPppInterfaceName("1-2.3")).thenReturn("ppp3");
+        ModemDevice modemDevice = new UsbModemDevice("1111", "2222", "Acme", "CoolModem", "1", "2.3");
+        when(nsMock.getModemDevice("1-2.3")).thenReturn(Optional.of(modemDevice));
         svc.setNetworkService(nsMock);
 
         Map<String, Object> properties = new HashMap<>();
@@ -432,19 +437,11 @@ public class NetworkConfigurationServiceImplTest {
         Map<String, Object> properties = configuration.getConfigurationProperties();
 
         assertNotNull(properties);
-        assertEquals(62, properties.size());
-        assertEquals("eth2", properties.get("net.interface.eth2.config.name"));
+        assertEquals(6, properties.size());
         assertEquals("ETHERNET", properties.get("net.interface.eth2.type"));
-        assertFalse((boolean) properties.get("net.interface.eth2.up"));
-        assertEquals("lo", properties.get("net.interface.lo.config.name"));
         assertEquals("LOOPBACK", properties.get("net.interface.lo.type"));
-        assertFalse((boolean) properties.get("net.interface.lo.up"));
-        assertEquals("ppp1", properties.get("net.interface.ppp1.config.name"));
         assertEquals("MODEM", properties.get("net.interface.ppp1.type"));
-        assertFalse((boolean) properties.get("net.interface.ppp1.up"));
-        assertEquals("wlan1", properties.get("net.interface.wlan1.config.name"));
         assertEquals("WIFI", properties.get("net.interface.wlan1.type"));
-        assertTrue((boolean) properties.get("net.interface.wlan1.up"));
 
         OCD ocd = configuration.getDefinition();
 
@@ -460,13 +457,6 @@ public class NetworkConfigurationServiceImplTest {
 
         int adsConfigured = 0;
         for (AD ad : ads) {
-            if ("net.interface.eth2.config.autoconnect".equals(ad.getId())) {
-                assertEquals("net.interface.eth2.config.autoconnect", ad.getName());
-                assertEquals("BOOLEAN", ad.getType().name());
-                assertTrue(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.eth2.config.dhcpClient4.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.eth2.config.dhcpClient4.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -551,31 +541,10 @@ public class NetworkConfigurationServiceImplTest {
                 adsConfigured++;
             }
 
-            if ("net.interface.eth2.config.mtu".equals(ad.getId())) {
-                assertEquals("net.interface.eth2.config.mtu", ad.getName());
-                assertEquals("INTEGER", ad.getType().name());
-                assertTrue(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.eth2.config.nat.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.eth2.config.nat.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
                 assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.eth2.config.winsServers".equals(ad.getId())) {
-                assertEquals("net.interface.eth2.config.winsServers", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.lo.config.autoconnect".equals(ad.getId())) {
-                assertEquals("net.interface.lo.config.autoconnect", ad.getName());
-                assertEquals("BOOLEAN", ad.getType().name());
-                assertTrue(ad.isRequired());
                 adsConfigured++;
             }
 
@@ -597,20 +566,6 @@ public class NetworkConfigurationServiceImplTest {
                 assertEquals("net.interface.lo.config.ip4.prefix", ad.getName());
                 assertEquals("SHORT", ad.getType().name());
                 assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.lo.config.mtu".equals(ad.getId())) {
-                assertEquals("net.interface.lo.config.mtu", ad.getName());
-                assertEquals("INTEGER", ad.getType().name());
-                assertTrue(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.config.autoconnect".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.config.autoconnect", ad.getName());
-                assertEquals("BOOLEAN", ad.getType().name());
-                assertTrue(ad.isRequired());
                 adsConfigured++;
             }
 
@@ -698,13 +653,6 @@ public class NetworkConfigurationServiceImplTest {
                 adsConfigured++;
             }
 
-            if ("net.interface.wlan1.config.mtu".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.config.mtu", ad.getName());
-                assertEquals("INTEGER", ad.getType().name());
-                assertTrue(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.wlan1.config.nat.enabled".equals(ad.getId())) {
                 assertEquals("net.interface.wlan1.config.nat.enabled", ad.getName());
                 assertEquals("BOOLEAN", ad.getType().name());
@@ -768,22 +716,8 @@ public class NetworkConfigurationServiceImplTest {
                 adsConfigured++;
             }
 
-            if ("net.interface.wlan1.config.wifi.master.broadcast".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.config.wifi.master.broadcast", ad.getName());
-                assertEquals("BOOLEAN", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.wlan1.config.wifi.master.channel".equals(ad.getId())) {
                 assertEquals("net.interface.wlan1.config.wifi.master.channel", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.config.wifi.master.hardwareMode".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.config.wifi.master.hardwareMode", ad.getName());
                 assertEquals("STRING", ad.getType().name());
                 assertFalse(ad.isRequired());
                 adsConfigured++;
@@ -824,48 +758,6 @@ public class NetworkConfigurationServiceImplTest {
                 adsConfigured++;
             }
 
-            if ("net.interface.wlan1.config.winsServers".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.config.winsServers", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.usb.manufacturer".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.usb.manfacturer", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.usb.manufacturer.id".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.usb.manfacturer.id", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.usb.port".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.usb.port", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.usb.product".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.usb.product", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
-            if ("net.interface.wlan1.usb.product.id".equals(ad.getId())) {
-                assertEquals("net.interface.wlan1.usb.product.id", ad.getName());
-                assertEquals("STRING", ad.getType().name());
-                assertFalse(ad.isRequired());
-                adsConfigured++;
-            }
-
             if ("net.interface.wlan1.wifi.capabilities".equals(ad.getId())) {
                 assertEquals("net.interface.wlan1.wifi.capabilities", ad.getName());
                 assertEquals("STRING", ad.getType().name());
@@ -880,7 +772,7 @@ public class NetworkConfigurationServiceImplTest {
                 adsConfigured++;
             }
         }
-        assertEquals(60, adsConfigured);
+        assertEquals(45, adsConfigured);
     }
 
 }

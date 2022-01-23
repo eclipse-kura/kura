@@ -419,14 +419,6 @@ public class HostapdConfigTest {
         result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
         assertEquals("wep_key0=61736466676173646667617364666761\n", result);
 
-        wifiConfig.setPasskey(null);
-        try {
-            result = (String) TestUtil.invokePrivate(writer, "updateWepPassKey", wifiConfig, hostapd);
-            fail("Exception was expected");
-        } catch (NullPointerException e) {
-            // OK
-        }
-
         // test wrong password lengths
         wifiConfig.setPasskey("");
         try {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -232,7 +232,6 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
 
                     if (isConfigChanged(newNiacs, curNiacs)) {
                         logger.info("Found a new Ethernet network configuration for {}", interfaceName);
-
                         if (!((AbstractNetInterface<?>) newInterfaceConfig).isInterfaceManaged()) {
                             logger.info(
                                     "The {} interface is configured not to be managed by Kura and will not be monitored.",
@@ -247,7 +246,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                         this.networkConfiguration.put(interfaceName, newInterfaceConfig);
                         currentInterfaceConfig = newInterfaceConfig;
 
-                        // Post a status change event - not to be confusd with the Config Change that I am consuming
+                        // Post a status change event - not to be confused with the Config Change that I am consuming
                         postStatusChangeEvent = true;
                     }
 
@@ -391,6 +390,9 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // post event if there were any changes
                 if (postStatusChangeEvent) {
                     logger.debug("Posting NetworkStatusChangeEvent for {}: {}", interfaceName, currentInterfaceState);
+                    if (logger.isDebugEnabled()) {
+                        logger.debug(this.netConfigService.getNetworkConfiguration().toString());
+                    }
                     this.eventAdmin.postEvent(new NetworkStatusChangeEvent(interfaceName, currentInterfaceState, null));
                     this.interfaceState.put(interfaceName, currentInterfaceState);
                 }

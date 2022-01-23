@@ -16,6 +16,7 @@ package org.eclipse.kura.net;
  * The current state of the a NetworkInterface.
  */
 public enum NetInterfaceState {
+
     /** The device is in an unknown state. */
     UNKNOWN(0),
     /** The device is recognized but not managed by NetworkManager. */

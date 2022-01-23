@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
 package org.eclipse.kura.net;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.net.modem.ModemDevice;
@@ -33,12 +34,18 @@ public interface NetworkService {
 
     /**
      * Returns the overall state of the networking subsystem
+     * 
+     * @deprecated since 2.3
      */
+    @Deprecated
     public NetworkState getState() throws KuraException;
 
     /**
      * Returns the state of a specific network interface
+     * 
+     * @deprecated since 2.3
      */
+    @Deprecated
     public NetInterfaceState getState(String interfaceName) throws KuraException;
 
     /**
@@ -110,5 +117,17 @@ public interface NetworkService {
      * 
      * @since 2.3
      */
-    public String getModemPppInterfaceName(String usbPath) throws KuraException;
+    public String getModemPppInterfaceName(String usbPath);
+
+    /**
+     * Given a usb path, look up the associated modem device
+     * 
+     * @param usbPath
+     *            a string representing the usb port (i.e. 1-2.3)
+     * @return the {@link ModemDevice} attached to the specified usb port
+     * @throws KuraException
+     * 
+     * @since 2.3
+     */
+    public Optional<ModemDevice> getModemDevice(String usbPath);
 }

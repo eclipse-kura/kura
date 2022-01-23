@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.testutil.requesthandler.AbstractRequestHandlerTest;
+import org.eclipse.kura.core.testutil.requesthandler.MqttTransport;
+import org.eclipse.kura.core.testutil.requesthandler.RestTransport;
+import org.eclipse.kura.core.testutil.requesthandler.Transport;
+import org.eclipse.kura.core.testutil.requesthandler.Transport.MethodSpec;
 import org.eclipse.kura.security.tamper.detection.TamperDetectionService;
 import org.eclipse.kura.security.tamper.detection.TamperStatus;
 import org.eclipse.kura.type.TypedValues;
@@ -43,24 +48,22 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @RunWith(Parameterized.class)
-public class TamperDetectionRemoteServiceTest {
+public class TamperDetectionRemoteServiceTest extends AbstractRequestHandlerTest {
 
     @Parameterized.Parameters
     public static Collection<Transport> transports() {
-        return Arrays.asList(new RestTransport(), new MqttTransport());
+        return Arrays.asList(new RestTransport("tamper/v1"), new MqttTransport("TAMPER-V1"));
     }
 
-    private final Transport transport;
-
     public TamperDetectionRemoteServiceTest(final Transport transport) {
-        this.transport = transport;
-        transport.init();
+        super(transport);
     }
 
     @Test
     public void shouldSupportListingTamperDetectionServices() throws MalformedURLException, IOException {
-        assertEquals(0, runRequestAndGetResponse("list", "GET", new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
-        }).size());
+        assertEquals(0, runRequestAndGetResponse("/list", new MethodSpec("GET"),
+                new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
+                }).size());
     }
 
     @Test
@@ -71,7 +74,7 @@ public class TamperDetectionRemoteServiceTest {
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("list", "GET",
+            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("/list", new MethodSpec("GET"),
                     new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
                     });
 
@@ -89,7 +92,7 @@ public class TamperDetectionRemoteServiceTest {
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            assertEquals(404, transport.runRequestAndGetStatus("pid/boo", "GET"));
+            assertEquals(404, transport.runRequest("/pid/boo", new MethodSpec("GET")).status);
         }
     }
 
@@ -105,7 +108,7 @@ public class TamperDetectionRemoteServiceTest {
             Mockito.when(second.getDisplayName()).thenReturn("boo");
             fixture.registerService(second, TamperDetectionService.class, "bar");
 
-            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("list", "GET",
+            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("/list", new MethodSpec("GET"),
                     new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
                     });
 
@@ -125,8 +128,9 @@ public class TamperDetectionRemoteServiceTest {
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            final TamperStatusInfo info = runRequestAndGetResponse("pid/moo", "GET", new TypeToken<TamperStatusInfo>() {
-            });
+            final TamperStatusInfo info = runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"),
+                    new TypeToken<TamperStatusInfo>() {
+                    });
 
             assertEquals(false, info.isDeviceTampered);
             assertTrue(info.properties.isEmpty());
@@ -143,8 +147,9 @@ public class TamperDetectionRemoteServiceTest {
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            final TamperStatusInfo info = runRequestAndGetResponse("pid/moo", "GET", new TypeToken<TamperStatusInfo>() {
-            });
+            final TamperStatusInfo info = runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"),
+                    new TypeToken<TamperStatusInfo>() {
+                    });
 
             assertEquals(true, info.isDeviceTampered);
             assertEquals(5000.0d, info.properties.get("timestamp"));
@@ -176,13 +181,15 @@ public class TamperDetectionRemoteServiceTest {
 
             fixture.registerService(tamperDetectionService, TamperDetectionService.class, "moo");
 
-            assertEquals(true, runRequestAndGetResponse("pid/moo", "GET", new TypeToken<TamperStatusInfo>() {
-            }).isDeviceTampered);
+            assertEquals(true,
+                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {
+                    }).isDeviceTampered);
 
-            assertEquals(1, transport.runRequestAndGetStatus("pid/moo/_reset", "POST") / 200);
+            assertEquals(1, transport.runRequest("/pid/moo/_reset", new MethodSpec("POST", "EXEC")).status / 200);
 
-            assertEquals(false, runRequestAndGetResponse("pid/moo", "GET", new TypeToken<TamperStatusInfo>() {
-            }).isDeviceTampered);
+            assertEquals(false,
+                    runRequestAndGetResponse("/pid/moo", new MethodSpec("GET"), new TypeToken<TamperStatusInfo>() {
+                    }).isDeviceTampered);
         }
     }
 
@@ -195,7 +202,7 @@ public class TamperDetectionRemoteServiceTest {
             fixture.registerService(tamperDetectionService, TamperDetectionService.class,
                     Collections.singletonMap("service.pid", "moo"));
 
-            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("list", "GET",
+            final List<TamperDetectionServiceInfo> infos = runRequestAndGetResponse("/list", new MethodSpec("GET"),
                     new TypeToken<ArrayList<TamperDetectionServiceInfo>>() {
                     });
 
@@ -236,9 +243,10 @@ public class TamperDetectionRemoteServiceTest {
 
     }
 
-    private <T> T runRequestAndGetResponse(final String resource, final String method,
+    private <T> T runRequestAndGetResponse(final String resource, final MethodSpec method,
             final TypeToken<T> responseType) {
-        final String response = this.transport.runRequestAndGetResponse(resource, method);
+        final String response = this.transport.runRequest(resource, method).body
+                .orElseThrow(() -> new IllegalStateException("expected body"));
 
         final Gson gson = new Gson();
         return gson.fromJson(response, responseType.getType());

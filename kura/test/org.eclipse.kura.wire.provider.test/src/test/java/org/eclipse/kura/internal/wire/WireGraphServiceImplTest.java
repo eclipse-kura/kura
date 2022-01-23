@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -315,6 +315,7 @@ public class WireGraphServiceImplTest {
         String emitterPid = "emitterPid";
         emitterProperties.put("kura.service.pid", emitterPid);
         emitterProperties.put("fakeProp1", "value1");
+        emitterProperties.put("service.factoryPid", "bar");
         return new ComponentConfigurationImpl(emitterPid, null, emitterProperties);
     }
 
@@ -344,6 +345,7 @@ public class WireGraphServiceImplTest {
         Map<String, Object> receiverProperties = new HashMap<>();
         String receiverPid = "receiverPid";
         receiverProperties.put("kura.service.pid", receiverPid);
+        receiverProperties.put("service.factoryPid", "foo");
         receiverProperties.put("fakeProp1", "value2");
         return new ComponentConfigurationImpl(receiverPid, null, receiverProperties);
     }

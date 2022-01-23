@@ -285,6 +285,10 @@ public final class WireTestUtil {
     public static CompletableFuture<Void> componentsActivated(final BundleContext context,
             final Set<String> expectedPids, final BiConsumer<String, Object> trackedObjectConsumer) {
 
+        if (expectedPids.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
+
         final Set<String> tracked = new HashSet<>();
 
         final CompletableFuture<Void> result = new CompletableFuture<>();
@@ -327,6 +331,10 @@ public final class WireTestUtil {
 
     public static CompletableFuture<Void> wiresConnected(final BundleContext context,
             final Set<MultiportWireConfiguration> expected) {
+
+        if (expected.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
 
         final Set<MultiportWireConfiguration> tracked = new HashSet<>();
 

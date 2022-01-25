@@ -144,6 +144,10 @@
 				</not>
 			</and>
 		</condition>
+		
+        <condition property="is.nvidia.jetson.nano">
+            <contains string="${build.name}" substring="nvidia-jetson-nano" />
+        </condition>
 
 		<copy file="src/main/resources/${build.name}/snapshot_0.xml"
 			tofile="${project.build.directory}/${build.output.name}/snapshot_0.xml" />
@@ -245,6 +249,7 @@
 		<antcall target="linux-debian-config" />
 		<antcall target="linux-redhat-config" />
 		<antcall target="linux-systemd-config" />
+		<antcall target="nvidia-triton-server-config" />
 
 
 		<!-- Add mToolkit to config.ini -->
@@ -738,6 +743,7 @@ fi]]>
 		<antcall target="linux-debian-jars" />
 		<antcall target="linux-redhat-jars" />
 		<antcall target="linux-systemd-jars" />
+		<antcall target="nvidia-jetson-nano-jars" />
 
 		<echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -1598,6 +1604,14 @@ fi]]>
 		</propertyfile>
 	</target>
 
+    <target name="nvidia-triton-server-config" if="is.nvidia.jetson.nano">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar@4" />
+        </propertyfile>
+    </target>
+	
 	<target name="emulator-jars" if="is.nn">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
 			update="true">
@@ -1657,6 +1671,15 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
+
+    <target name="nvidia-jetson-nano-jars" if="is.nvidia.jetson.nano">
+        <zip destfile="${project.build.directory}/${build.output.name}.zip"
+            update="true">
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
+        </zip>
+    </target>
 
 	<target name="web2-jar-win" if="is.web2.jar.available">
 		<echo

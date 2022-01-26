@@ -38,8 +38,13 @@
                     	<b:FormGroup>
                             <b:FormLabel text="{msgs.usersPasswordEnabled}" />
                             <gwt:FlowPanel>
-                            	<b:InlineRadio ui:field="passwordEnabled" name="pwdEnabled" text="{msgs.trueLabel}" formValue="true"/>
-                            	<b:InlineRadio ui:field="passwordDisabled" name="pwdEnabled" text="{msgs.falseLabel}" formValue="false"/>
+                            	<b:InlineRadio name="passwordEnabled" ui:field="passwordEnabled" text="{msgs.trueLabel}" formValue="true"/>
+                            	<b:InlineRadio name="passwordEnabled" ui:field="passwordDisabled" text="{msgs.falseLabel}" formValue="false"/>
+                            </gwt:FlowPanel>
+                            <b:FormLabel text="{msgs.usersPasswordChangeNeeded}" />
+                            <gwt:FlowPanel>
+                            	<b:InlineRadio name="passwordChange" ui:field="passwordChangeRequired" text="{msgs.trueLabel}" formValue="true"/>
+                            	<b:InlineRadio name="passwordChange" ui:field="passwordPasswordChangeNotRequired" text="{msgs.falseLabel}" formValue="false"/>
                             </gwt:FlowPanel>
                         </b:FormGroup>
                         <b:FormGroup>

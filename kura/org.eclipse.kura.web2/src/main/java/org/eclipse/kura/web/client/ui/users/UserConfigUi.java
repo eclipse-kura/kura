@@ -49,6 +49,10 @@ public class UserConfigUi extends Composite {
     }
 
     @UiField
+    InlineRadio passwordChangeRequired;
+    @UiField
+    InlineRadio passwordPasswordChangeNotRequired;
+    @UiField
     InlineRadio passwordEnabled;
     @UiField
     InlineRadio passwordDisabled;
@@ -142,6 +146,20 @@ public class UserConfigUi extends Composite {
             updatePasswordWidgetState();
         });
 
+        this.passwordChangeRequired.addChangeHandler(e -> {
+            if (!this.userData.isPasswordChangeNeeded()) {
+                this.userData.setPasswordChangeNeeded(true);
+                this.listener.onUserDataChanged(this.userData);
+            }
+        });
+
+        this.passwordPasswordChangeNotRequired.addChangeHandler(e -> {
+            if (this.userData.isPasswordChangeNeeded()) {
+                this.userData.setPasswordChangeNeeded(false);
+                this.listener.onUserDataChanged(this.userData);
+            }
+        });
+
         this.changePassword.addClickHandler(e -> pickPassword());
     }
 
@@ -192,11 +210,16 @@ public class UserConfigUi extends Composite {
 
     public void updatePasswordWidgetState() {
         final boolean isPasswordEnabled = this.userData.isPasswordAuthEnabled();
+        final boolean isPasswordChangeNeeded = this.userData.isPasswordChangeNeeded();
 
         this.passwordEnabled.setValue(isPasswordEnabled);
         this.passwordDisabled.setValue(!isPasswordEnabled);
+        this.passwordChangeRequired.setValue(isPasswordChangeNeeded);
+        this.passwordPasswordChangeNotRequired.setValue(!isPasswordChangeNeeded);
 
         this.changePassword.setEnabled(isPasswordEnabled);
+        this.passwordChangeRequired.setEnabled(isPasswordEnabled);
+        this.passwordPasswordChangeNotRequired.setEnabled(isPasswordEnabled);
     }
 
     private class AssignedPermission {

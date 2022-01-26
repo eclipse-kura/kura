@@ -22,6 +22,9 @@
 	xmlns:gwt="urn:import:org.gwtbootstrap3.client.ui.gwt"
 	xmlns:kura="urn:import:org.eclipse.kura.web.client.ui">
 
+	<ui:with field="msgs"
+		type="org.eclipse.kura.web.client.messages.Messages" />
+
 	<b:Container fluid="true" addStyleNames="login-background">
 
 <g:FormPanel ui:field="loginForm">
@@ -29,7 +32,7 @@
 			fade="false" dataBackdrop="FALSE" addStyleNames="login-form" visible="false">
 			
 			<b:ModalBody ui:field="loginModalBody">
-						<b.html:Paragraph text="Web UI access is not enabled." ui:field="noAuthMethodsWarning" />
+						<b.html:Paragraph text="{msgs.loginWebUiAccessNotEnabled}" ui:field="noAuthMethodsWarning" />
 						<b:FormGroup ui:field="authenticationMethodGroup" visible="false">
                             <b:FormLabel for="authenticationMethod" text="Authentication Method"/>
                             <g:FlowPanel>

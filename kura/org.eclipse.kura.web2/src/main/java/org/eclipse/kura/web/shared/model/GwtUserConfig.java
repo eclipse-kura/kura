@@ -21,14 +21,17 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class GwtUserConfig extends GwtUserData implements IsSerializable {
 
     private static final String PASSWORD_KEY = "password";
+    private static final String PASSWORD_CHANGE_NEEDED_KEY = "password.change.needed";
     private static final long serialVersionUID = 8795619406606205153L;
 
     public GwtUserConfig() {
     }
 
-    public GwtUserConfig(final String userName, final Set<String> permissions, final boolean isPasswordAuthEnabled) {
+    public GwtUserConfig(final String userName, final Set<String> permissions, final boolean isPasswordAuthEnabled,
+            final boolean isPasswordChangeNeeded) {
         super(userName, permissions);
         setPasswordAuthEnabled(isPasswordAuthEnabled);
+        setPasswordChangeNeeded(isPasswordChangeNeeded);
     }
 
     public boolean isPasswordAuthEnabled() {
@@ -49,6 +52,14 @@ public class GwtUserConfig extends GwtUserData implements IsSerializable {
 
     public Optional<String> getNewPassword() {
         return Optional.ofNullable(get(PASSWORD_KEY));
+    }
+
+    public boolean isPasswordChangeNeeded() {
+        return Optional.ofNullable((Boolean) get(PASSWORD_CHANGE_NEEDED_KEY)).orElse(false);
+    }
+
+    public void setPasswordChangeNeeded(final boolean isPasswordChangeNeeded) {
+        set(PASSWORD_CHANGE_NEEDED_KEY, isPasswordChangeNeeded);
     }
 
     @Override

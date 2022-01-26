@@ -80,6 +80,7 @@ import org.eclipse.kura.web.session.RoutingSecurityHandler;
 import org.eclipse.kura.web.session.SecurityHandler;
 import org.eclipse.kura.web.session.SessionAutorizationSecurityHandler;
 import org.eclipse.kura.web.session.SessionExpirationSecurityHandler;
+import org.eclipse.kura.web.session.SessionLockedSecurityHandler;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.event.Event;
@@ -93,6 +94,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.api.Console {
+
+    private static final String SESSION = "/session";
 
     private static final String EVENT_PATH = "/event";
 
@@ -287,7 +290,9 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.unregister(PASSWORD_AUTH_PATH);
         this.httpService.unregister(CERT_AUTH_PATH);
         this.httpService.unregister(LOGIN_MODULE_PATH + "/loginInfo");
-        this.httpService.unregister(DENALI_MODULE_PATH + "/session");
+        this.httpService.unregister(DENALI_MODULE_PATH + SESSION);
+        this.httpService.unregister(LOGIN_MODULE_PATH + SESSION);
+        this.httpService.unregister(LOGIN_MODULE_PATH + "/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/xsrf");
         this.httpService.unregister(DENALI_MODULE_PATH + "/status");
         this.httpService.unregister(DENALI_MODULE_PATH + "/device");
@@ -372,9 +377,12 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         final SecurityHandler baseHandler = chain(new BaseSecurityHandler());
         final SecurityHandler sessionAuthHandler = new SessionAutorizationSecurityHandler();
         final SecurityHandler sessionExpirationHandler = new SessionExpirationSecurityHandler();
+        final SecurityHandler sessionLockedSecurityHandler = new SessionLockedSecurityHandler();
 
-        // default session handler requires an authenticated session and handles session expiration
-        final SecurityHandler defaultHandler = chain(baseHandler, sessionAuthHandler, sessionExpirationHandler);
+        // default session handler requires an authenticated session and handles session expiration, handles session
+        // lock
+        final SecurityHandler defaultHandler = chain(baseHandler, sessionAuthHandler, sessionLockedSecurityHandler,
+                sessionExpirationHandler);
 
         final RoutingSecurityHandler routingHandler = new RoutingSecurityHandler(
                 defaultHandler.sendErrorOnFailure(401));
@@ -391,6 +399,11 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
 
         // exception on admin console path, redirect to login page on failure instead of sending 401 status
         routingHandler.addRouteHandler(CONSOLE_PATH::equals, defaultHandler.redirectOnFailure(AUTH_PATH));
+
+        // exception on login session and xsrf path, like default but without locked session checking
+        routingHandler.addRouteHandler(
+                Arrays.asList(LOGIN_MODULE_PATH + SESSION, LOGIN_MODULE_PATH + "/xsrf")::contains,
+                chain(baseHandler, sessionAuthHandler, sessionExpirationHandler));
 
         return new HttpContextImpl(routingHandler, defaultContext);
     }
@@ -430,8 +443,13 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
-        this.httpService.registerServlet(DENALI_MODULE_PATH + "/session", new GwtSessionServiceImpl(this.userManager),
+
+        this.httpService.registerServlet(DENALI_MODULE_PATH + SESSION, new GwtSessionServiceImpl(this.userManager),
                 null, this.sessionContext);
+        this.httpService.registerServlet(LOGIN_MODULE_PATH + SESSION, new GwtSessionServiceImpl(this.userManager), null,
+                this.sessionContext);
+        this.httpService.registerServlet(LOGIN_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
+                this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/xsrf", new GwtSecurityTokenServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/status", new GwtStatusServiceImpl(), null,

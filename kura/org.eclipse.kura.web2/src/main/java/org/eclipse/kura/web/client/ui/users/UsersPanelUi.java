@@ -39,8 +39,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
-import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
@@ -170,7 +170,7 @@ public class UsersPanelUi extends Composite implements Tab, UserConfigUi.Listene
                         throw new IllegalArgumentException(MSGS.usersIdentityAlreadyExists());
                     }
 
-                    return new GwtUserConfig(userName, new HashSet<>(), false);
+                    return new GwtUserConfig(userName, new HashSet<>(), false, false);
                 }).setOnPick(user -> {
                     this.dataProvider.getList().add(user);
                     setDirty(true);

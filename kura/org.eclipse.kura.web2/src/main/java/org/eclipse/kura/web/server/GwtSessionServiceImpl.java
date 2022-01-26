@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
 import org.eclipse.kura.web.session.Attributes;
@@ -95,5 +97,35 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         }
 
         return userManager.getUserConfig((String) username).orElse(null);
+    }
+
+    @Override
+    public void updatePassword(String newPassword) throws GwtKuraException {
+
+        final HttpServletRequest request = getThreadLocalRequest();
+        final HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
+        }
+
+        final Object username = session.getAttribute(Attributes.AUTORIZED_USER.getValue());
+
+        if (!(username instanceof String)) {
+            throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
+        }
+
+        try {
+            if (!this.userManager.setUserPassword((String) username, newPassword)) {
+                throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD);
+            }
+        } catch (final KuraException e) {
+            logger.warn("failed to update user password", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
+
+        Console.instance().setAuthenticated(session, (String) username,
+                AuditContext.current().orElseThrow(() -> new GwtKuraException("Audit context is not available")));
+        session.removeAttribute(Attributes.LOCKED.getValue());
     }
 }

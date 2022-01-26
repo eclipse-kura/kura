@@ -34,10 +34,6 @@ public interface GwtUserService extends RemoteService {
     @Audit(componentName = "UI User", description = "Delete identity")
     public void deleteUser(GwtXSRFToken token, final String userName) throws GwtKuraException;
 
-    @Audit(componentName = "UI User", description = "Set identity password")
-    public void setUserPassword(GwtXSRFToken token, final String userName, final String password)
-            throws GwtKuraException;
-
     public Set<String> getDefinedPermissions(GwtXSRFToken token) throws GwtKuraException;
 
     @Audit(componentName = "UI User", description = "Get identities configuration")

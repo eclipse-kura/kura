@@ -39,6 +39,7 @@ public class UserManager {
     private static final String PERMISSION_ROLE_NAME_PREFIX = "kura.permission.";
     private static final String USER_ROLE_NAME_PREFIX = "kura.user.";
     private static final String PASSWORD_PROPERTY = "kura.password";
+    private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
 
     private final UserAdmin userAdmin;
     private final CryptoService cryptoService;
@@ -106,6 +107,19 @@ public class UserManager {
         }
     }
 
+    public boolean isPasswordChangeRequired(final String username) throws KuraException {
+        final String userRoleName = getUserRoleName(username);
+        final Role role = userAdmin.getRole(userRoleName);
+
+        if (!(role instanceof User)) {
+            throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
+        }
+
+        final User asUser = (User) role;
+
+        return "true".equals(asUser.getProperties().get("kura.need.password.change"));
+    }
+
     public void createUser(final String userName) {
         getOrCreateUser(getUserRoleName(userName));
     }
@@ -124,11 +138,20 @@ public class UserManager {
     }
 
     @SuppressWarnings("unchecked")
-    public void setUserPassword(final String userName, final String userPassword) throws KuraException {
+    public boolean setUserPassword(final String userName, final String userPassword) throws KuraException {
         final User user = getUser(userName).orElseThrow(() -> new KuraException(KuraErrorCode.NOT_FOUND));
 
         try {
-            user.getCredentials().put(PASSWORD_PROPERTY, cryptoService.sha256Hash(userPassword));
+            final String newHash = cryptoService.sha256Hash(userPassword);
+
+            if (Objects.equals(user.getCredentials().get(PASSWORD_PROPERTY), newHash)) {
+                return false;
+            }
+
+            user.getCredentials().put(PASSWORD_PROPERTY, newHash);
+            user.getProperties().remove(KURA_NEED_PASSWORD_CHANGE);
+
+            return true;
         } catch (final Exception e) {
             throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE, e);
         }
@@ -192,7 +215,7 @@ public class UserManager {
     @SuppressWarnings("unchecked")
     public void setUserConfig(final Set<GwtUserConfig> userData) throws KuraException {
         foreachUser((name, user) -> {
-            if (!userData.stream().anyMatch(data -> data.getUserName().equals(name))) {
+            if (userData.stream().noneMatch(data -> data.getUserName().equals(name))) {
                 deleteUser(name);
             }
         });
@@ -229,6 +252,15 @@ public class UserManager {
             } else {
                 credentials.remove(PASSWORD_PROPERTY);
             }
+
+            @SuppressWarnings("rawtypes")
+            final Dictionary properties = user.getProperties();
+
+            if (config.isPasswordChangeNeeded()) {
+                properties.put(KURA_NEED_PASSWORD_CHANGE, "true");
+            } else {
+                properties.remove(KURA_NEED_PASSWORD_CHANGE);
+            }
         }
     }
 
@@ -251,8 +283,10 @@ public class UserManager {
     private GwtUserConfig initUserConfig(final User user) {
 
         final boolean isPasswordEnabled = user.getCredentials().get(PASSWORD_PROPERTY) instanceof String;
+        final boolean isPasswordChangeRequired = Objects.equals("true",
+                user.getProperties().get(KURA_NEED_PASSWORD_CHANGE));
 
-        return new GwtUserConfig(getBaseName(user), new HashSet<>(), isPasswordEnabled);
+        return new GwtUserConfig(getBaseName(user), new HashSet<>(), isPasswordEnabled, isPasswordChangeRequired);
     }
 
     private void fillPermissions(final Map<String, ? extends GwtUserData> userData) {

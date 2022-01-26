@@ -56,20 +56,6 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
     }
 
     @Override
-    public void setUserPassword(final GwtXSRFToken token, final String userName, final String password)
-            throws GwtKuraException {
-        checkXSRFToken(token);
-
-        validateUserPassword(password);
-
-        try {
-            this.userManager.setUserPassword(userName, password);
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
     public Set<String> getDefinedPermissions(final GwtXSRFToken token) throws GwtKuraException {
         checkXSRFToken(token);
 

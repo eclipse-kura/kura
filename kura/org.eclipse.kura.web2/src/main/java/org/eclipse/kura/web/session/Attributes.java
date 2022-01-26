@@ -17,7 +17,8 @@ public enum Attributes {
     AUTORIZED_USER("org.eclipse.kura.web.user"),
     LAST_ACTIVITY("org.eclipse.kura.web.lastActivity"),
     CREDENTIALS_HASH("org.eclipse.kura.web.credentialsHash"),
-    AUDIT_CONTEXT("org.eclipse.kura.audit.context");
+    AUDIT_CONTEXT("org.eclipse.kura.audit.context"),
+    LOCKED("org.eclipse.kura.locked");
 
     private String value;
 

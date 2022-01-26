@@ -20,7 +20,9 @@ import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtPasswordAuthenticationResult;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService;
 
 public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServlet
@@ -40,7 +42,8 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
     }
 
     @Override
-    public String authenticate(final String username, final String password) throws GwtKuraException {
+    public GwtPasswordAuthenticationResult authenticate(final String username, final String password)
+            throws GwtKuraException {
 
         final HttpSession session = Console.instance().createSession(getThreadLocalRequest());
 
@@ -58,7 +61,13 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
 
             Console.instance().setAuthenticated(session, username, context.copy());
 
-            return this.redirectPath;
+            final boolean needsPasswordChange = this.userManager.isPasswordChangeRequired(username);
+
+            if (needsPasswordChange) {
+                session.setAttribute(Attributes.LOCKED.getValue(), true);
+            }
+
+            return new GwtPasswordAuthenticationResult(needsPasswordChange, this.redirectPath);
 
         } catch (final Exception e) {
             session.invalidate();

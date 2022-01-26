@@ -14,6 +14,7 @@ package org.eclipse.kura.web.shared.service;
 
 import org.eclipse.kura.web.server.Audit;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtPasswordAuthenticationResult;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -22,5 +23,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface GwtPasswordAuthenticationService extends RemoteService {
 
     @Audit(componentName = "UI Login", description = "Password authentication")
-    public String authenticate(final String username, final String password) throws GwtKuraException;
+    public GwtPasswordAuthenticationResult authenticate(final String username, final String password)
+            throws GwtKuraException;
 }

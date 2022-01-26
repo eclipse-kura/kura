@@ -329,7 +329,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private KuraPayload doGetInventory() {
         List<SystemResourceInfo> inventory = new ArrayList<>();
-        logger.error("TEST MESSAGE");
         // get System Packages
         try {
             inventory.addAll(this.systemService.getSystemPackages());

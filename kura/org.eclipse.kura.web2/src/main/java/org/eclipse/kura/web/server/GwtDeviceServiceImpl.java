@@ -242,11 +242,10 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         if (containers != null) {
             for (ContainerDescriptor container : containers) {
                 GwtGroupedNVPair pair = new GwtGroupedNVPair();
-                pair.setId(String.valueOf(container.getContainerFactoryPID()));
-                pair.setName(container.getContainerName());
+                pair.setId(container.getContainerName());
+                pair.setName(container.getContainerImage());
                 pair.setStatus(containerStateToString(container));
-                pair.setVersion(container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0]);
-
+                pair.setVersion(container.getContainerImageTag().split(":")[0]);
                 pairs.add(pair);
             }
         }

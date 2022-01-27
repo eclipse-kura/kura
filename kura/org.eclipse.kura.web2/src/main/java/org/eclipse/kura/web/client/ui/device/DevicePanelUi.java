@@ -12,15 +12,25 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
+import java.util.List;
+import java.util.Set;
+
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
+import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerService;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -79,6 +89,7 @@ public class DevicePanelUi extends Composite {
         this.packages.addClickHandler(new Tab.RefreshHandler(this.packagesPanel));
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
         this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
+        this.dockerContainersPanel.setBackend(new DockerConfigurableGenericManagerServiceWrapper());
     }
 
     public void initDevicePanel() {
@@ -90,4 +101,41 @@ public class DevicePanelUi extends Composite {
         this.session = currentSession;
     }
 
+    private static class DockerConfigurableGenericManagerServiceWrapper implements GwtRestrictedComponentServiceAsync {
+
+        private static GwtDockerConfigurableGenericManagerServiceAsync wrapped = GWT
+                .create(GwtDockerConfigurableGenericManagerService.class);
+
+        @Override
+        public void listFactoryPids(AsyncCallback<Set<String>> callback) {
+            wrapped.listFactoryPids(callback);
+        }
+
+        @Override
+        public void listServiceInstances(AsyncCallback<List<GwtComponentInstanceInfo>> callback) {
+            wrapped.listServiceInstances(callback);
+        }
+
+        @Override
+        public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid,
+                AsyncCallback<Void> callback) {
+            wrapped.createFactoryConfiguration(token, pid, factoryPid, callback);
+        }
+
+        @Override
+        public void getConfiguration(GwtXSRFToken token, String pid, AsyncCallback<GwtConfigComponent> callback) {
+            wrapped.getConfiguration(token, pid, callback);
+        }
+
+        @Override
+        public void updateConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+                AsyncCallback<Void> callback) {
+            wrapped.updateConfiguration(token, component, callback);
+        }
+
+        @Override
+        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
+            wrapped.deleteFactoryConfiguration(token, pid, callback);
+        }
+    }
 }

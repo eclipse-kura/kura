@@ -974,8 +974,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         try {
             NetInterfaceType type = this.linuxNetworkUtil.getType(interfaceName);
 
-            NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
-            WifiMode wifiMode = WifiMode.UNKNOWN;
+            NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusDisabled;
+            WifiMode wifiMode = WifiMode.MASTER;
             WifiConfig wifiConfig = null;
             WifiInterfaceState wifiInterfaceState = null;
             if (type == NetInterfaceType.WIFI) {
@@ -992,9 +992,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
-                        isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only
-                                ? true
-                                : false;
+                        isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
@@ -1043,7 +1041,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                 return (WifiInterfaceAddressConfig) wifiNetInterfaceAddressConfig;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Wrong configuration for a wifi interface");
     }
 
     private List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getWifiInterfaceConfigs()

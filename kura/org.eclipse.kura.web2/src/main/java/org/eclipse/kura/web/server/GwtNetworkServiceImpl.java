@@ -148,7 +148,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         NetworkAdminService nas = null;
         try {
             nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("Exception", t);
             return gwtNetConfigs;
         }
@@ -156,14 +156,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         ModemManagerService modemManagerService = null;
         try {
             modemManagerService = ServiceLocator.getInstance().getService(ModemManagerService.class);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("{ModemManagerService} Exception", t);
         }
 
         WifiClientMonitorService wifiClientMonitorService = null;
         try {
             wifiClientMonitorService = ServiceLocator.getInstance().getService(WifiClientMonitorService.class);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("{WifiClientMonitorService} Exception", t);
         }
 

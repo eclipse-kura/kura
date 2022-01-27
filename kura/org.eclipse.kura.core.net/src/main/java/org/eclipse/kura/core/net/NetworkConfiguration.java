@@ -61,8 +61,6 @@ import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.system.SystemService;
-import org.eclipse.kura.usb.UsbDevice;
-import org.eclipse.kura.usb.UsbNetDevice;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -618,7 +616,7 @@ public class NetworkConfiguration {
             if (((WifiInterfaceAddress) nia).getMode() != null) {
                 wifiMode = ((WifiInterfaceAddress) nia).getMode();
             } else {
-                wifiMode = WifiMode.UNKNOWN;
+                wifiMode = WifiMode.MASTER;
             }
             newNetworkProperties.put(netIfPrefix + "wifi.mode", wifiMode.toString());
         }
@@ -768,12 +766,15 @@ public class NetworkConfiguration {
                     wifiConfig.setChannels(channels);
                 }
             }
+        } else {
+            int[] channels = new int[]{1};
+            wifiConfig.setChannels(channels);
         }
 
         // passphrase
         key = prefix + PASSPHRASE;
         Object psswdObj = properties.get(key);
-        String passphrase = null;
+        String passphrase = "PLACEHOLDER";
         if (psswdObj instanceof Password) {
             Password psswd = (Password) psswdObj;
             passphrase = new String(psswd.getPassword());
@@ -788,7 +789,7 @@ public class NetworkConfiguration {
         key = prefix + HARDWARE_MODE;
         String hwMode = (String) properties.get(key);
         if (hwMode == null) {
-            hwMode = "";
+            hwMode = "b";
         }
         logger.trace("hwMode is {}", hwMode);
         wifiConfig.setHardwareMode(hwMode);
@@ -809,6 +810,8 @@ public class NetworkConfiguration {
         String pairwiseCiphers = (String) properties.get(key);
         if (pairwiseCiphers != null) {
             wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
+        } else {
+            wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf("CCMP"));
         }
 
         if (mode == WifiMode.INFRA) {
@@ -845,13 +848,12 @@ public class NetworkConfiguration {
         String radioModeString = (String) properties.get(key);
         logger.trace("radioModeString is {}", radioModeString);
         if (radioModeString != null && !radioModeString.isEmpty()) {
-            try {
-                radioMode = WifiRadioMode.valueOf(radioModeString);
-                wifiConfig.setRadioMode(radioMode);
-            } catch (IllegalArgumentException e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
-                        "Could not parse wifi radio mode " + radioModeString);
-            }
+            radioMode = WifiRadioMode.valueOf(radioModeString);
+            wifiConfig.setRadioMode(radioMode);
+        } else {
+            radioMode = WifiRadioMode.valueOf("RADIO_MODE_80211b");
+            wifiConfig.setRadioMode(radioMode);
+            
         }
 
         if (!wifiConfig.isValid()) {
@@ -1252,25 +1254,9 @@ public class NetworkConfiguration {
         // build the prefixes for all the properties associated with this interface
         StringBuilder sbPrefix = new StringBuilder();
         sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
-        String netIfReadOnlyPrefix = sbPrefix.toString();
 
         String netIfPrefix = sbPrefix.append("config.").toString();
         String netIfConfigPrefix = sbPrefix.toString();
-
-        // USB
-        String vendorId = (String) props.get(netIfReadOnlyPrefix + "usb.vendor.id");
-        String vendorName = (String) props.get(netIfReadOnlyPrefix + "usb.vendor.name");
-        String productId = (String) props.get(netIfReadOnlyPrefix + "usb.product.id");
-        String productName = (String) props.get(netIfReadOnlyPrefix + "usb.product.name");
-        String usbBusNumber = (String) props.get(netIfReadOnlyPrefix + "usb.busNumber");
-        String usbDevicePath = (String) props.get(netIfReadOnlyPrefix + "usb.devicePath");
-
-        if (vendorId != null && productId != null) {
-            UsbDevice usbDevice = new UsbNetDevice(vendorId, productId, vendorName, productName, usbBusNumber,
-                    usbDevicePath, interfaceName);
-            logger.trace("adding usbDevice: {}, port: {}", usbDevice, usbDevice.getUsbPort());
-            netInterfaceConfig.setUsbDevice(usbDevice);
-        }
 
         // Status
         String configStatus4 = null;
@@ -1289,14 +1275,7 @@ public class NetworkConfiguration {
         }
         logger.trace("Status Ipv4? {}", configStatus4);
 
-        String configStatus6 = null;
-        String configStatus6Key = NET_INTERFACE + interfaceName + ".config.ip6.status";
-        if (props.containsKey(configStatus6Key)) {
-            configStatus6 = (String) props.get(configStatus6Key);
-        }
-        if (configStatus6 == null) {
-            configStatus6 = NetInterfaceStatus.netIPv6StatusDisabled.name();
-        }
+        String configStatus6 = NetInterfaceStatus.netIPv6StatusDisabled.name();
 
         // POPULATE NetInterfaceAddresses
         for (NetInterfaceAddressConfig netInterfaceAddress : netInterfaceConfig.getNetInterfaceAddresses()) {
@@ -1317,16 +1296,12 @@ public class NetworkConfiguration {
 
                 // wifi mode
                 String configWifiMode = netIfPrefix + "wifi.mode";
-                if (props.containsKey(configWifiMode)) {
-
-                    WifiMode mode = WifiMode.INFRA;
-                    if (props.get(configWifiMode) != null) {
+                WifiMode mode = WifiMode.MASTER;
+                if (props.containsKey(configWifiMode) && props.get(configWifiMode) != null) {
                         mode = WifiMode.valueOf((String) props.get(configWifiMode));
-                    }
-
-                    logger.trace("Adding wifiMode: {}", mode);
-                    wifiInterfaceAddressImpl.setMode(mode);
                 }
+                logger.trace("Adding wifiMode: {}", mode);
+                wifiInterfaceAddressImpl.setMode(mode);
             }
 
             // ModemInterfaceAddress

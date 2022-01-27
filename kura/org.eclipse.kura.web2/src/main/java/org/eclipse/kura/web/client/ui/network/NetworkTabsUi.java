@@ -95,12 +95,11 @@ public class NetworkTabsUi extends Composite {
 
     public void setNetInterface(GwtNetInterfaceConfig selection) {
         this.netIfConfig = selection;
-        // initTabs();
 
         this.tcpIp.setNetInterface(selection);
         this.hardware.setNetInterface(selection);
-        this.wireless.setNetInterface(selection);
         this.dhcpNat.setNetInterface(selection);
+        this.wireless.setNetInterface(selection);
         this.modem.setNetInterface(selection);
         this.modemGps.setNetInterface(selection);
         this.modemAntenna.setNetInterface(selection);

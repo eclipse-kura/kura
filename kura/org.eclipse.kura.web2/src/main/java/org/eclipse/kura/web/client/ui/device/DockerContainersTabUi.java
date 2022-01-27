@@ -14,7 +14,8 @@ package org.eclipse.kura.web.client.ui.device;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
@@ -25,7 +26,6 @@ import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
-import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
@@ -33,12 +33,11 @@ import org.eclipse.kura.web.shared.service.GwtComponentService;
 import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerService;
-import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
@@ -49,7 +48,6 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -99,6 +97,10 @@ public class DockerContainersTabUi extends Composite implements Tab {
     private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
     private HashSet allTrackedPids;
 
+    public void setBackend(final GwtRestrictedComponentServiceAsync backend) {
+        this.backend = backend;
+    }
+
     public DockerContainersTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         loadContainersTable(this.bundlesGrid, this.bundlesDataProvider);
@@ -126,8 +128,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
         EventService.subscribe(ForwardedEventTopic.DOCKER_STARTED, onBundleUpdatedHandler);
         EventService.subscribe(ForwardedEventTopic.DOCKER_STOPPED, onBundleUpdatedHandler);
 
-        // this.containerPanl
-        backend = new DockerConfigurableGenericManagerServiceWrapper();
     }
 
     private void updateButtons() {
@@ -302,21 +302,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
     }
 
     @Override
-    public void setDirty(boolean flag) {
-        // Not needed
-    }
-
-    @Override
-    public boolean isDirty() {
-        return true;
-    }
-
-    @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
     public void refresh() {
         if (this.isRequestRunning) {
             return;
@@ -370,6 +355,9 @@ public class DockerContainersTabUi extends Composite implements Tab {
         RequestQueue.submit(
                 c -> this.securityTokenService.generateSecurityToken(c.callback(token -> this.gwtComponentService
                         .findTrackedPids(token, c.callback(pids -> this.allTrackedPids = new HashSet<>(pids))))));
+
+        Logger.getLogger("org.eclipse").info("GREG: " + this.allTrackedPids.iterator().next().toString());
+        Logger.getLogger("org.eclipse").info("GREG:");
     }
 
     @Override
@@ -379,42 +367,28 @@ public class DockerContainersTabUi extends Composite implements Tab {
         // Not needed
     }
 
-    private static class DockerConfigurableGenericManagerServiceWrapper implements GwtRestrictedComponentServiceAsync {
+    @Override
+    public boolean isDirty() {
+        return this.getConfigurationUi().map(ServicesUi::isDirty).orElse(false);
+    }
 
-        private static GwtDockerConfigurableGenericManagerServiceAsync wrapped = GWT
-                .create(GwtDockerConfigurableGenericManagerService.class);
+    @Override
+    public void setDirty(boolean flag) {
+        getConfigurationUi().ifPresent(c -> c.setDirty(flag));
+    }
 
-        @Override
-        public void listFactoryPids(AsyncCallback<Set<String>> callback) {
-            wrapped.listFactoryPids(callback);
+    @Override
+    public boolean isValid() {
+
+        return getConfigurationUi().map(ServicesUi::isValid).orElse(true);
+    }
+
+    private Optional<ServicesUi> getConfigurationUi() {
+        if (this.mgmtPanel.getWidgetCount() == 0) {
+            return Optional.empty();
         }
 
-        @Override
-        public void listServiceInstances(AsyncCallback<List<GwtComponentInstanceInfo>> callback) {
-            wrapped.listServiceInstances(callback);
-        }
-
-        @Override
-        public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid,
-                AsyncCallback<Void> callback) {
-            wrapped.createFactoryConfiguration(token, pid, factoryPid, callback);
-        }
-
-        @Override
-        public void getConfiguration(GwtXSRFToken token, String pid, AsyncCallback<GwtConfigComponent> callback) {
-            wrapped.getConfiguration(token, pid, callback);
-        }
-
-        @Override
-        public void updateConfiguration(GwtXSRFToken token, GwtConfigComponent component,
-                AsyncCallback<Void> callback) {
-            wrapped.updateConfiguration(token, component, callback);
-        }
-
-        @Override
-        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid, AsyncCallback<Void> callback) {
-            wrapped.deleteFactoryConfiguration(token, pid, callback);
-        }
+        return Optional.of((ServicesUi) this.mgmtPanel.getWidget(0));
     }
 
 }

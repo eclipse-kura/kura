@@ -12,11 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.request.handler.jaxrs;
 
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.request.handler.jaxrs.consumer.ResponseBodyHandler;
 
 import com.google.gson.Gson;
@@ -46,6 +49,12 @@ public final class ResponseBodyHandlers {
                 return Optional.of(((String) entity).getBytes(StandardCharsets.UTF_8));
             } else if (entity instanceof byte[]) {
                 return Optional.of((byte[]) entity);
+            } else if (entity instanceof InputStream) {
+                try {
+                    return Optional.of(IOUtils.toByteArray((InputStream) entity));
+                } catch (final Exception e) {
+                    throw KuraException.internalError(e);
+                }
             } else {
                 final String asJson = gson.toJson(entity);
                 return Optional.of(asJson.getBytes(StandardCharsets.UTF_8));

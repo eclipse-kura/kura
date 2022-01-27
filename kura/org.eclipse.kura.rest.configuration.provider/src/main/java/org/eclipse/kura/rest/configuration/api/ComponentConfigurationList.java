@@ -14,8 +14,6 @@ package org.eclipse.kura.rest.configuration.api;
 
 import java.util.List;
 
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
-
 public class ComponentConfigurationList implements Validable {
 
     private final List<ComponentConfigurationDTO> configs;

@@ -30,7 +30,7 @@ public interface JsonProjection {
 
             @Override
             public String toString() {
-                return "self";
+                return "";
             }
         };
     }
@@ -74,12 +74,64 @@ public interface JsonProjection {
             @Override
             public JsonValue apply(JsonValue element) {
                 final JsonArray asArray = element.asArray();
-                return asArray.get(index);
+                try {
+                    return asArray.get(index);
+                } catch (final Exception e) {
+                    return null;
+                }
             }
 
             @Override
             public String toString() {
                 return "[" + index + "]";
+            }
+        });
+    }
+
+    public default JsonProjection anyArrayItem(final JsonProjection other) {
+        return this.compose(new JsonProjection() {
+
+            @Override
+            public JsonValue apply(JsonValue element) {
+                final JsonArray asArray = element.asArray();
+
+                for (final JsonValue member : asArray) {
+                    try {
+                        final JsonValue value = other.apply(member);
+
+                        if (value != null) {
+                            return value;
+                        }
+                    } catch (final Exception e) {
+                        // continue
+                    }
+                }
+
+                return null;
+            }
+
+            @Override
+            public String toString() {
+                return "[*]" + other.toString();
+            }
+        });
+    }
+
+    public default JsonProjection matching(final JsonValue value) {
+        return this.compose(new JsonProjection() {
+
+            @Override
+            public JsonValue apply(JsonValue element) {
+                if (value.equals(element)) {
+                    return element;
+                } else {
+                    return null;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return "(=" + value + ")";
             }
         });
     }

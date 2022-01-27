@@ -12,8 +12,6 @@
  *******************************************************************************/
 package org.eclipse.kura.rest.configuration.api;
 
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
-
 public class SnapshotId implements Validable {
 
     private final Long id;

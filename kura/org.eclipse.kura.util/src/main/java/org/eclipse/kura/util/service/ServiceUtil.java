@@ -16,9 +16,16 @@ package org.eclipse.kura.util.service;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.annotation.Nullable;
 import org.osgi.framework.BundleContext;
@@ -26,6 +33,7 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
@@ -127,5 +135,75 @@ public final class ServiceUtil {
         serviceTracker.close();
 
         return Optional.ofNullable(service);
+    }
+
+    public static <T> T withService(final BundleContext bundleContext, final Function<Optional<Object>, T> func,
+            final String filter) throws InvalidSyntaxException {
+        final ServiceReference<?>[] refs = bundleContext.getServiceReferences((String) null, filter);
+
+        if (refs == null || refs.length == 0) {
+            return func.apply(Optional.empty());
+        }
+
+        final ServiceReference<?> ref = refs[0];
+
+        try {
+            final Object o = bundleContext.getService(ref);
+
+            return func.apply(Optional.ofNullable(o));
+        } finally {
+            bundleContext.ungetService(ref);
+        }
+    }
+
+    public static boolean isFactoryOf(final BundleContext bundleContext, final String factoryPid,
+            final Predicate<Set<String>> filter) {
+
+        final ServiceReference<ServiceComponentRuntime>[] refs = getServiceReferences(bundleContext,
+                ServiceComponentRuntime.class, null);
+
+        if (refs == null || refs.length == 0) {
+            return false;
+        }
+
+        final ServiceReference<ServiceComponentRuntime> ref = refs[0];
+
+        try {
+            final ServiceComponentRuntime scr = bundleContext.getService(ref);
+
+            return scr.getComponentDescriptionDTOs().stream().anyMatch(c -> {
+                if (!Objects.equals(factoryPid, c.name)) {
+                    return false;
+                }
+
+                return providedInterfacesMatch(c.serviceInterfaces, filter);
+            });
+        } catch (final Exception e) {
+            return false;
+        } finally {
+            bundleContext.ungetService(ref);
+        }
+    }
+
+    private static boolean providedInterfacesMatch(final String[] providedInterfaces,
+            final Predicate<Set<String>> filter) {
+        if (providedInterfaces == null) {
+            return filter.test(Collections.emptySet());
+        }
+
+        return filter.test(Arrays.stream(providedInterfaces).collect(Collectors.toSet()));
+    }
+
+    public static boolean isFactoryOfAnyService(final BundleContext bundleContext, final String factoryPid,
+            final Class<?>... interfaces) {
+        return isFactoryOf(bundleContext, factoryPid, s -> {
+            for (final Class<?> intf : interfaces) {
+                if (s.contains(intf.getName())) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
     }
 }

@@ -440,6 +440,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
             mergeWithDefaults(ocd, mergedProperties);
 
             mergedProperties.put(ConfigurationService.KURA_SERVICE_PID, pid);
+            mergedProperties.put(ConfigurationAdmin.SERVICE_FACTORYPID, factoryPid);
 
             Dictionary<String, Object> dict = CollectionsUtil.mapToDictionary(mergedProperties);
             Configuration config = this.configurationAdmin.getConfiguration(servicePid, "?");

@@ -7,16 +7,30 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Import-Package: javax.annotation.security;version="1.2.0",
+Import-Package: com.google.gson;version="2.7.0",
+ javax.annotation.security;version="1.2.0",
  javax.ws.rs,
  javax.ws.rs.core;version="2.0.1",
+ org.apache.commons.io;version="2.4.0",
  org.eclipse.kura;version="[1.6,2.0)",
+ org.eclipse.kura.asset;version="1.0.0",
+ org.eclipse.kura.asset.provider;version="2.0.0",
  org.eclipse.kura.cloudconnection.request;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.2,2.0)",
  org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
  org.eclipse.kura.crypto;version="[1.3,2.0)",
+ org.eclipse.kura.driver;version="1.0.0",
+ org.eclipse.kura.driver.descriptor;version="1.0.0",
+ org.eclipse.kura.internal.wire.asset;version="1.0.0",
  org.eclipse.kura.marshalling;version="[1.0,2.0)",
  org.eclipse.kura.request.handler.jaxrs;version="[1.0,2.0)",
  org.eclipse.kura.rest.configuration.api;version="[1.0,2.0)",
+ org.eclipse.kura.util.service;version="1.0.0",
+ org.eclipse.kura.wire;version="2.0.0",
  org.eclipse.kura.wire.graph;version="[1.0,2.0)",
+ org.osgi.framework;version="1.10.0",
+ org.osgi.service.cm;version="1.6.0",
+ org.osgi.service.component;version="1.4.0",
+ org.osgi.service.useradmin;version="1.1.0",
  org.slf4j;version="1.7.32"
+Export-Package: org.eclipse.kura.rest.wire.api;version="1.0.0"

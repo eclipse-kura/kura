@@ -16,7 +16,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class UpdateComponentConfigurationRequest implements Validable {
 
@@ -43,7 +43,7 @@ public class UpdateComponentConfigurationRequest implements Validable {
 
         for (final ComponentConfigurationDTO config : this.configs) {
             if (config == null) {
-                throw FailureHandler.toWebApplicationException(Status.BAD_REQUEST,
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
                         "component configuration objects cannot be null");
             }
 

@@ -18,7 +18,7 @@ import java.util.Optional;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.configuration.metatype.OCD;
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class ComponentConfigurationDTO implements Validable {
 
@@ -52,7 +52,8 @@ public class ComponentConfigurationDTO implements Validable {
 
         for (final PropertyDTO param : properties.values()) {
             if (param == null) {
-                throw FailureHandler.toWebApplicationException(Status.BAD_REQUEST, "propety values cannot be null");
+                throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                        "propety values cannot be null");
             }
 
             param.validate();

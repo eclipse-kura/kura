@@ -14,8 +14,6 @@ package org.eclipse.kura.rest.configuration.api;
 
 import java.util.Set;
 
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
-
 public class PidSet implements Validable {
 
     private final Set<String> pids;

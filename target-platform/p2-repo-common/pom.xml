@@ -508,14 +508,9 @@
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                	<groupId>de.taimos</groupId>
+                                	<groupId>org.eclipse.kura</groupId>
                                 	<artifactId>gpsd4java</artifactId>
-                                	<version>${de.taimos.gpsd4java.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                	<groupId>org.json</groupId>
-                                	<artifactId>json</artifactId>
-                                	<version>${org.json.json.version}</version>
+                                	<version>${org.eclipse.kura.gpsd4java.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -624,7 +619,6 @@
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/de.taimos.gpsd4java_${de.taimos.gpsd4java.version}.jar"/>
-                                <move file="target/source/plugins/json.jar" tofile="target/source/plugins/org.json.json_${org.json.json.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

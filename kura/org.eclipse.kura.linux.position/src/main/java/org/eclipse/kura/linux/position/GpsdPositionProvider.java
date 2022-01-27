@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
 import org.eclipse.kura.position.NmeaPosition;
-import org.json.JSONException;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
@@ -125,7 +124,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         this.gpsEndpoint.addListener(this);
         try {
             this.gpsEndpoint.watch(true, true);
-        } catch (JSONException | IOException e) {
+        } catch (IOException e) {
             logger.info("Unable to start the Gpsd watch mode", e);
         }
     }

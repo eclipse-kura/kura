@@ -8,10 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: de.taimos.gpsd4java.api;version="[1.10,2.0)",
- de.taimos.gpsd4java.backend;version="[1.10,2.0)",
- de.taimos.gpsd4java.types;version="[1.10,2.0)",
- de.taimos.gpsd4java.types.subframes;version="[1.10,2.0)",
+Import-Package: de.taimos.gpsd4java.api;version="[1.0,2.0)",
+ de.taimos.gpsd4java.backend;version="[1.0,2.0)",
+ de.taimos.gpsd4java.types;version="[1.0,2.0)",
+ de.taimos.gpsd4java.types.subframes;version="[1.0,2.0)",
  javax.microedition.io,
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.comm;version="[1.0,2.0)",
@@ -19,7 +19,6 @@ Import-Package: de.taimos.gpsd4java.api;version="[1.10,2.0)",
  org.eclipse.kura.net.modem;version="[2.0,3.0)",
  org.eclipse.kura.position;version="[1.2,1.3)",
  org.eclipse.kura.usb;version="[1.0,2.0)",
- org.json;version="20160810.0.0",
  org.osgi.framework,
  org.osgi.service.component;version="1.2.0",
  org.osgi.service.event;version="1.3.0",

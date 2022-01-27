@@ -950,9 +950,7 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.osgi-resource-locator_${osgi-resource-locator.version}.jar@2:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/de.taimos.gpsd4java_${de.taimos.gpsd4java.version}.jar@3" />
-            <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.json.json_${org.json.json.version}.jar@2" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.gpsd4java_${org.eclipse.kura.gpsd4java.version}.jar@3" />
 		</propertyfile>
 	</target>
 

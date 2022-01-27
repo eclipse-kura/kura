@@ -149,33 +149,91 @@ public class DockerContainersTabUi extends Composite implements Tab {
         this.containersStart.setEnabled(!isActive);
         this.containersStop.setEnabled(isActive);
 
-        RequestQueue.submit(c -> this.securityTokenService.generateSecurityToken(
-                c.callback(token -> this.backend.getConfiguration(token, selected.getId(), c.callback(result -> {
+        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-                    this.contentPanelHeader.setText(selected.getName());
+            @Override
+            public void onFailure(Throwable caught) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(caught);
+            }
 
-                    final ServicesUi servicesUi = new ServicesUi(result);
-                    servicesUi.setBackend(new ServicesUi.Backend() {
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                DockerContainersTabUi.this.backend.getConfiguration(token, selected.getId(),
+                        new AsyncCallback<GwtConfigComponent>() {
 
-                        @Override
-                        public void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
-                                AsyncCallback<Void> callback) {
-                            DockerContainersTabUi.this.backend.updateConfiguration(token, component, callback);
+                            @Override
+                            public void onSuccess(GwtConfigComponent result) {
+                                /**
+                                 * DockerContainersTabUi.this.contentPanelHeader.setText(selected.getName());
+                                 * 
+                                 * final ServicesUi servicesUi = new ServicesUi(result);
+                                 * servicesUi.setBackend(new ServicesUi.Backend() {
+                                 * 
+                                 * @Override
+                                 *           public void updateComponentConfiguration(GwtXSRFToken token,
+                                 *           GwtConfigComponent component, AsyncCallback<Void> callback) {
+                                 *           DockerContainersTabUi.this.backend.updateConfiguration(token, component,
+                                 *           callback);
+                                 * 
+                                 *           }
+                                 * 
+                                 * @Override
+                                 *           public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
+                                 *           AsyncCallback<Void> callback) {
+                                 *           DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid,
+                                 *           callback);
+                                 *           }
+                                 *           });
+                                 * 
+                                 *           servicesUi.setDeleteButtonVisible(false);
+                                 * 
+                                 *           DockerContainersTabUi.this.mgmtPanel.add(servicesUi);
+                                 *           DockerContainersTabUi.this.configurationArea.setVisible(true);
+                                 **/
+                            }
 
-                        }
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                            }
 
-                        @Override
-                        public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
-                                AsyncCallback<Void> callback) {
-                            DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid, callback);
-                        }
-                    });
+                        });
+            }
+        });
+        /*
+         * RequestQueue.submit(c -> this.securityTokenService.generateSecurityToken(
+         * c.callback(token -> this.backend.getConfiguration(token, selected.getId(), c.callback(result ->
+         * 
+         * {
+         * 
+         * this.contentPanelHeader.setText(selected.getName());
+         * 
+         * final ServicesUi servicesUi = new ServicesUi(result);
+         * servicesUi.setBackend(new ServicesUi.Backend() {
+         * 
+         * @Override
+         * public void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
+         * AsyncCallback<Void> callback) {
+         * DockerContainersTabUi.this.backend.updateConfiguration(token, component, callback);
+         * 
+         * }
+         * 
+         * @Override
+         * public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
+         * AsyncCallback<Void> callback) {
+         * DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid, callback);
+         * }
+         * });
+         * 
+         * servicesUi.setDeleteButtonVisible(false);
+         * 
+         * this.mgmtPanel.add(servicesUi);
+         * this.configurationArea.setVisible(true);
+         * })))));
+         **/
 
-                    servicesUi.setDeleteButtonVisible(false);
-
-                    this.mgmtPanel.add(servicesUi);
-                    this.configurationArea.setVisible(true);
-                })))));
     }
 
     private void startSelectedContainer() {

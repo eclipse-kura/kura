@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.login;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -93,7 +94,25 @@ public class PasswordChangeModal extends Composite {
 
     @SuppressWarnings("unchecked")
     private void setUserOptions(final GwtConsoleUserOptions options) {
-        this.newPassword.setValidators(GwtValidators.passwordStrength(options).toArray(new Validator[0]));
+        this.newPassword.setValidators(new Validator<String>() {
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+            @Override
+            public List<EditorError> validate(final Editor<String> editor, final String value) {
+                final List<EditorError> result = new ArrayList<>();
+
+                for (final Validator<String> validator : GwtValidators.passwordStrength(options)) {
+                    result.addAll(validator.validate(editor, value));
+                }
+
+                return result;
+            }
+
+        });
     }
 
     public void pickPassword(final GwtConsoleUserOptions options, final Callback callback) {

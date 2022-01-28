@@ -117,7 +117,7 @@ public class UserManager {
 
         final User asUser = (User) role;
 
-        return "true".equals(asUser.getProperties().get("kura.need.password.change"));
+        return "true".equals(asUser.getProperties().get(KURA_NEED_PASSWORD_CHANGE));
     }
 
     public void createUser(final String userName) {

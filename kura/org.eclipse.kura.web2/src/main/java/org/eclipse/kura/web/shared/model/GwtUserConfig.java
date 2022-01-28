@@ -20,6 +20,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GwtUserConfig extends GwtUserData implements IsSerializable {
 
+    private static final String PASSWORD_ENABLED_KEY = "password.enabled";
     private static final String PASSWORD_KEY = "password";
     private static final String PASSWORD_CHANGE_NEEDED_KEY = "password.change.needed";
     private static final long serialVersionUID = 8795619406606205153L;
@@ -35,11 +36,11 @@ public class GwtUserConfig extends GwtUserData implements IsSerializable {
     }
 
     public boolean isPasswordAuthEnabled() {
-        return this.get("password.enabled");
+        return this.get(PASSWORD_ENABLED_KEY);
     }
 
     public void setPasswordAuthEnabled(final boolean enabled) {
-        set("password.enabled", enabled);
+        set(PASSWORD_ENABLED_KEY, enabled);
     }
 
     public void setNewPassword(final Optional<String> password) {

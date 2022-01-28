@@ -45,7 +45,7 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
     public GwtPasswordAuthenticationResult authenticate(final String username, final String password)
             throws GwtKuraException {
 
-        final HttpSession session = Console.instance().createSession(getThreadLocalRequest());
+        final HttpSession session = Console.instance().createNewSession(getThreadLocalRequest());
 
         final AuditContext context = AuditContext.currentOrInternal();
         context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), username);

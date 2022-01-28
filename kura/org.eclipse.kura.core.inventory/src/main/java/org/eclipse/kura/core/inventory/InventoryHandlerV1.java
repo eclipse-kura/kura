@@ -73,9 +73,14 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
+    private static final String DELETE = "_delete";
 
     private static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
     private static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
+
+    private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
+    private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+    private static final List<String> DELETE_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, DELETE);
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
@@ -217,6 +222,12 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             } else if (STOP_BUNDLE.equals(resources)) {
                 findFirstMatchingBundle(extractBundleRef(reqMessage)).stop();
                 return success();
+            } else if (START_CONTAINER.equals(resources)) {
+                this.dockerService.startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                return success();
+            } else if (STOP_CONTAINER.equals(resources)) {
+                this.dockerService.stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                return success();
             }
         } catch (final KuraException e) {
             throw e;
@@ -231,6 +242,22 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     @Override
     public KuraMessage doDel(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
+        final List<String> resources = extractResources(reqMessage);
+
+        try {
+            if (DELETE_CONTAINER.equals(resources)) {
+                // TODO: add API for removing factory
+                this.dockerService.stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                return success();
+            }
+        } catch (final KuraException e) {
+            throw e;
+        } catch (final Exception e) {
+            logger.debug("unexpected exception dispatcing call", e);
+            // this should result in response code 500
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
+        }
+
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
 
@@ -510,6 +537,19 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         return unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), SystemBundleRef.class);
     }
 
+    private ContainerDescriptor extractContainerRef(final KuraMessage message) throws KuraException {
+        final KuraPayload payload = message.getPayload();
+
+        final byte[] body = payload.getBody();
+
+        if (body == null) {
+            logger.warn("missing message body");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        return unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), ContainerDescriptor.class);
+    }
+
     private Bundle findFirstMatchingBundle(final SystemBundleRef ref) throws KuraException {
         for (final Bundle bundle : this.bundleContext.getBundles()) {
             if (!bundle.getSymbolicName().equals(ref.getName())) {
@@ -520,6 +560,16 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
             if (!version.isPresent() || version.get().equals(bundle.getVersion().toString())) {
                 return bundle;
+            }
+        }
+
+        throw new KuraException(KuraErrorCode.NOT_FOUND);
+    }
+
+    private ContainerDescriptor findFirstMatchingContainer(final ContainerDescriptor ref) throws KuraException {
+        for (final ContainerDescriptor container : this.dockerService.listRegisteredContainers()) {
+            if (container.getContainerName().equals(ref.getContainerName())) {
+                return container;
             }
         }
 

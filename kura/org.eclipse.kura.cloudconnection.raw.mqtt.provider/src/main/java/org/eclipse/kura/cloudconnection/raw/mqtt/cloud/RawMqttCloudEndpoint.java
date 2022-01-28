@@ -14,6 +14,7 @@ package org.eclipse.kura.cloudconnection.raw.mqtt.cloud;
 
 import static org.eclipse.kura.cloudconnection.raw.mqtt.util.Utils.catchAll;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -141,7 +142,12 @@ public class RawMqttCloudEndpoint
 
     public String publish(final PublishOptions options, final KuraPayload kuraPayload) throws KuraException {
 
-        final byte[] body = kuraPayload.getBody();
+        final byte[] body;
+        if (kuraPayload.metricNames().contains("payload")) {
+            body = kuraPayload.getMetric("payload").toString().getBytes(StandardCharsets.UTF_8);
+        } else {
+            body = kuraPayload.getBody();
+        }
 
         if (body == null) {
             throw new KuraException(KuraErrorCode.INVALID_PARAMETER, null, null, "missing message body");
@@ -253,6 +259,9 @@ public class RawMqttCloudEndpoint
 
         final KuraPayload kuraPayload = new KuraPayload();
         kuraPayload.setBody(payload);
+
+        kuraPayload.addMetric("payload", new String(payload));
+        kuraPayload.addMetric("topic", topic);
 
         final Map<String, Object> messagePropertes = Collections.singletonMap(Constants.TOPIC_PROP_NAME, topic);
 

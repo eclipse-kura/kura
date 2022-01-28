@@ -12,33 +12,22 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.messages.Messages;
 import org.eclipse.kura.web.client.messages.ValidationMessages;
 import org.eclipse.kura.web.client.ui.EntryClassUi;
-import org.eclipse.kura.web.client.ui.ServicesUi;
 import org.eclipse.kura.web.client.ui.Tab;
 import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
-import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
-import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtComponentService;
-import org.eclipse.kura.web.shared.service.GwtComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
-import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
 import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.Panel;
-import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 
 import com.google.gwt.core.client.GWT;
@@ -66,20 +55,8 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
-    private final GwtComponentServiceAsync gwtComponentService = GWT.create(GwtComponentService.class);
 
     private boolean isRequestRunning = false;
-
-    // private ConfigurableComponentUi containerPanel;
-    private GwtRestrictedComponentServiceAsync backend;
-    private List<String> factoriesList;
-
-    @UiField
-    Panel configurationArea;
-    @UiField
-    PanelHeader contentPanelHeader;
-    @UiField
-    Panel mgmtPanel;
 
     @UiField
     Button containersRefresh;
@@ -95,11 +72,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
     private final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
     private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
-    private HashSet allTrackedPids;
-
-    public void setBackend(final GwtRestrictedComponentServiceAsync backend) {
-        this.backend = backend;
-    }
 
     public DockerContainersTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -135,8 +107,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
         this.containersStart.setEnabled(false);
         this.containersStop.setEnabled(false);
-        this.mgmtPanel.setVisible(false);
-        // TODO: add panel here
 
         String status;
 
@@ -148,91 +118,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
         this.containersStart.setEnabled(!isActive);
         this.containersStop.setEnabled(isActive);
-
-        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                EntryClassUi.hideWaitModal();
-                FailureHandler.handle(caught);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                DockerContainersTabUi.this.backend.getConfiguration(token, selected.getId(),
-                        new AsyncCallback<GwtConfigComponent>() {
-
-                            @Override
-                            public void onSuccess(GwtConfigComponent result) {
-
-                                DockerContainersTabUi.this.contentPanelHeader.setText(selected.getName());
-
-                                final ServicesUi servicesUi = new ServicesUi(result);
-                                servicesUi.setBackend(new ServicesUi.Backend() {
-
-                                    @Override
-                                    public void updateComponentConfiguration(GwtXSRFToken token,
-                                            GwtConfigComponent component, AsyncCallback<Void> callback) {
-                                        DockerContainersTabUi.this.backend.updateConfiguration(token, component,
-                                                callback);
-
-                                    }
-
-                                    @Override
-                                    public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
-                                            AsyncCallback<Void> callback) {
-                                        DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid,
-                                                callback);
-                                    }
-                                });
-
-                                servicesUi.setDeleteButtonVisible(false);
-
-                                DockerContainersTabUi.this.mgmtPanel.add(servicesUi);
-                                DockerContainersTabUi.this.configurationArea.setVisible(true);
-
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-                            }
-
-                        });
-            }
-        });
-        /*
-         * RequestQueue.submit(c -> this.securityTokenService.generateSecurityToken(
-         * c.callback(token -> this.backend.getConfiguration(token, selected.getId(), c.callback(result ->
-         * 
-         * {
-         * 
-         * this.contentPanelHeader.setText(selected.getName());
-         * 
-         * final ServicesUi servicesUi = new ServicesUi(result);
-         * servicesUi.setBackend(new ServicesUi.Backend() {
-         * 
-         * @Override
-         * public void updateComponentConfiguration(GwtXSRFToken token, GwtConfigComponent component,
-         * AsyncCallback<Void> callback) {
-         * DockerContainersTabUi.this.backend.updateConfiguration(token, component, callback);
-         * 
-         * }
-         * 
-         * @Override
-         * public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
-         * AsyncCallback<Void> callback) {
-         * DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid, callback);
-         * }
-         * });
-         * 
-         * servicesUi.setDeleteButtonVisible(false);
-         * 
-         * this.mgmtPanel.add(servicesUi);
-         * this.configurationArea.setVisible(true);
-         * })))));
-         **/
 
     }
 
@@ -409,44 +294,25 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
 
         });
-
-        RequestQueue.submit(
-                c -> this.securityTokenService.generateSecurityToken(c.callback(token -> this.gwtComponentService
-                        .findTrackedPids(token, c.callback(pids -> this.allTrackedPids = new HashSet<>(pids))))));
-
-        Logger.getLogger("org.eclipse").info("GREG: " + this.allTrackedPids.iterator().next().toString());
-        Logger.getLogger("org.eclipse").info("GREG:");
     }
 
     @Override
     public void clear() {
-        this.mgmtPanel.clear();
-        this.configurationArea.setVisible(false);
         // Not needed
     }
 
     @Override
-    public boolean isDirty() {
-        return this.getConfigurationUi().map(ServicesUi::isDirty).orElse(false);
+    public void setDirty(boolean flag) {
     }
 
     @Override
-    public void setDirty(boolean flag) {
-        getConfigurationUi().ifPresent(c -> c.setDirty(flag));
+    public boolean isDirty() {
+        return false;
     }
 
     @Override
     public boolean isValid() {
-
-        return getConfigurationUi().map(ServicesUi::isValid).orElse(true);
-    }
-
-    private Optional<ServicesUi> getConfigurationUi() {
-        if (this.mgmtPanel.getWidgetCount() == 0) {
-            return Optional.empty();
-        }
-
-        return Optional.of((ServicesUi) this.mgmtPanel.getWidget(0));
+        return false;
     }
 
 }

@@ -701,9 +701,9 @@ public class NetworkConfiguration {
 
     private static WifiConfig getWifiConfig(String netIfConfigPrefix, WifiMode mode, Map<String, Object> properties)
             throws KuraException {
-        
-        String prefix = new StringBuilder(netIfConfigPrefix).append("wifi.")
-                .append(mode.toString().toLowerCase()).toString();
+
+        String prefix = new StringBuilder(netIfConfigPrefix).append("wifi.").append(mode.toString().toLowerCase())
+                .toString();
 
         String ssid = getSsid(properties, prefix + ".ssid");
 
@@ -715,22 +715,22 @@ public class NetworkConfiguration {
 
         String hwMode = getHwMode(properties, prefix + HARDWARE_MODE);
 
-
         String bgscan = null;
-        WifiConfig wifiConfig = new WifiConfig(mode, ssid, wifiChannels, wifiSecurity, passphrase, hwMode, new WifiBgscan(bgscan));
-        
+        WifiConfig wifiConfig = new WifiConfig(mode, ssid, wifiChannels, wifiSecurity, passphrase, hwMode,
+                new WifiBgscan(bgscan));
+
         wifiConfig.setDriver(getDriver(properties, prefix + ".driver"));
         wifiConfig.setIgnoreSSID(isSsidIgnored(properties, prefix + ".ignoreSSID"));
         wifiConfig.setPairwiseCiphers(getPairwiseCiphers(properties, prefix + ".groupCiphers"));
         wifiConfig.setRadioMode(getRadioMode(properties, prefix + ".radioMode"));
-        
+
         if (mode == WifiMode.INFRA) {
             wifiConfig.setBgscan(getBgScan(properties, prefix + BGSCAN));
             wifiConfig.setGroupCiphers(getGroupCiphers(properties, prefix + ".groupCiphers"));
             wifiConfig.setPingAccessPoint(getPingAccessPoint(properties, prefix + ".pingAccessPoint"));
         }
 
-        return wifiConfig;  
+        return wifiConfig;
     }
 
     private static boolean getPingAccessPoint(Map<String, Object> properties, String key) {
@@ -751,18 +751,22 @@ public class NetworkConfiguration {
         }
         return new WifiBgscan(bgscan);
     }
+
     private static WifiCiphers getGroupCiphers(Map<String, Object> properties, String key) {
         String groupCiphers = (String) properties.get(key);
 
-        return WifiCiphers.valueOf(groupCiphers);
+        if (groupCiphers != null) {
+            return WifiCiphers.valueOf(groupCiphers);
+        }
+        return WifiCiphers.valueOf("CCMP");
     }
 
     private static WifiCiphers getPairwiseCiphers(Map<String, Object> properties, String key) {
         String pairwiseCiphers = (String) properties.get(key);
         if (pairwiseCiphers != null) {
             return WifiCiphers.valueOf(pairwiseCiphers);
-        } 
-            return WifiCiphers.valueOf("CCMP");
+        }
+        return WifiCiphers.valueOf("CCMP");
     }
 
     private static WifiRadioMode getRadioMode(Map<String, Object> properties, String key) {
@@ -771,7 +775,7 @@ public class NetworkConfiguration {
         if (radioModeString != null && !radioModeString.isEmpty()) {
             return WifiRadioMode.valueOf(radioModeString);
         }
-        
+
         return WifiRadioMode.valueOf("RADIO_MODE_80211b");
     }
 
@@ -809,28 +813,25 @@ public class NetworkConfiguration {
     private static int[] getWifiChannels(Map<String, Object> properties, String key) {
         String channelsString = (String) properties.get(key);
         logger.trace("channelsString is {}", channelsString);
-        if (channelsString != null) {
+        if (channelsString != null && !channelsString.trim().isEmpty()) {
             channelsString = channelsString.trim();
-            if (channelsString.length() > 0) {
-                StringTokenizer st = new StringTokenizer(channelsString, " ");
-                int tokens = st.countTokens();
-                if (tokens > 0) {
-                    int[] channels = new int[tokens];
-                    for (int i = 0; i < tokens; i++) {
-                        String token = st.nextToken();
-                        try {
-                            channels[i] = Integer.parseInt(token);
-                        } catch (Exception e) {
-                            logger.error("Error parsing channels!", e);
-                        }
+            StringTokenizer st = new StringTokenizer(channelsString, " ");
+            int tokens = st.countTokens();
+            if (tokens > 0) {
+                int[] channels = new int[tokens];
+                for (int i = 0; i < tokens; i++) {
+                    String token = st.nextToken();
+                    try {
+                        channels[i] = Integer.parseInt(token);
+                    } catch (Exception e) {
+                        logger.error("Error parsing channels!", e);
                     }
-                    return channels;
                 }
+                return channels;
             }
         }
-            
-        return new int[]{1};
-        
+
+        return new int[] { 1 };
     }
 
     private static WifiSecurity getWifiSecurity(Map<String, Object> properties, String key) throws KuraException {
@@ -1250,7 +1251,6 @@ public class NetworkConfiguration {
             logger.debug("Interface {} type not found.", interfaceName);
             return;
         }
-        NetInterfaceType interfaceType = interfaceTypeOptional.get();
 
         // build the prefixes for all the properties associated with this interface
         StringBuilder sbPrefix = new StringBuilder();
@@ -1293,15 +1293,31 @@ public class NetworkConfiguration {
                 String configWifiMode = netIfPrefix + "wifi.mode";
                 WifiMode mode = WifiMode.MASTER;
                 if (props.containsKey(configWifiMode) && props.get(configWifiMode) != null) {
-                        mode = WifiMode.valueOf((String) props.get(configWifiMode));
+                    mode = WifiMode.valueOf((String) props.get(configWifiMode));
                 }
                 logger.trace("Adding wifiMode: {}", mode);
                 wifiInterfaceAddressImpl.setMode(mode);
+                
+                WifiConfig apConfig = getWifiConfig(netIfConfigPrefix, WifiMode.MASTER, props);
+                if (apConfig != null) {
+                    logger.trace("Adding AP wifi config");
+                    netConfigs.add(apConfig);
+                } else {
+                    logger.warn("no AP wifi config specified");
+                }
+
+                WifiConfig infraConfig = getWifiConfig(netIfConfigPrefix, WifiMode.INFRA, props);
+                if (infraConfig != null) {
+                    logger.trace("Adding client INFRA wifi config");
+                    netConfigs.add(infraConfig);
+                } else {
+                    logger.warn("no INFRA wifi config specified");
+                }
             } else if (netInterfaceAddress instanceof ModemInterfaceAddressConfigImpl) {
                 logger.trace("netInterfaceAddress is instanceof ModemInterfaceAddressConfigImpl");
                 ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = (ModemInterfaceAddressConfigImpl) netInterfaceAddress;
                 modemInterfaceAddressImpl.setNetConfigs(netConfigs);
-                
+
                 // connection type
                 String configConnType = netIfPrefix + "connection.type";
                 if (props.containsKey(configConnType)) {
@@ -1327,8 +1343,11 @@ public class NetworkConfiguration {
                     logger.trace("Adding modem connection status: {}", connStatus);
                     modemInterfaceAddressImpl.setConnectionStatus(connStatus);
                 }
+                
+                ModemConfig modemConfig = getModemConfig(netIfConfigPrefix, props);
+                modemConfig.setPppNumber(((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum());
+                netConfigs.add(modemConfig);
             }
-
 
             // POPULATE NetConfigs
             // dhcp4
@@ -1618,35 +1637,6 @@ public class NetworkConfiguration {
                         netConfigIP6.setDomains(domainNames);
                     }
                 }
-            }
-
-            if (interfaceType == NetInterfaceType.WIFI) {
-                logger.trace("Adding wifi netconfig");
-
-                // Wifi access point config
-                WifiConfig apConfig = getWifiConfig(netIfConfigPrefix, WifiMode.MASTER, props);
-                if (apConfig != null) {
-                    logger.trace("Adding AP wifi config");
-                    netConfigs.add(apConfig);
-                } else {
-                    logger.warn("no AP wifi config specified");
-                }
-
-                WifiConfig infraConfig = getWifiConfig(netIfConfigPrefix, WifiMode.INFRA, props);
-                if (infraConfig != null) {
-                    logger.trace("Adding client INFRA wifi config");
-                    netConfigs.add(infraConfig);
-                } else {
-                    logger.warn("no INFRA wifi config specified");
-                }
-            }
-
-            if (interfaceType == NetInterfaceType.MODEM) {
-                logger.trace("Adding modem netconfig");
-
-                ModemConfig modemConfig = getModemConfig(netIfConfigPrefix, props);
-                modemConfig.setPppNumber(((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum());
-                netConfigs.add(modemConfig);
             }
         }
 

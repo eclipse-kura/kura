@@ -624,8 +624,8 @@
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <!-- Docker Containers -->
-                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${com.eurotech.framework.docker.configurable.version}.jar"/>
-                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.generic.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${com.eurotech.framework.docker.configurable.version.generic}.jar"/>
+                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.jar" tofile="target/source/plugins/com.eurotech.framework.docker.configurable_${com.eurotech.framework.docker.configurable.version}.jar"/>
+                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.generic.jar" tofile="target/source/plugins/com.eurotech.framework.docker.configurable.generic_${com.eurotech.framework.docker.configurable.version.generic}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

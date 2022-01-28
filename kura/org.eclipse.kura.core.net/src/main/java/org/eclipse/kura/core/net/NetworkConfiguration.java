@@ -701,51 +701,112 @@ public class NetworkConfiguration {
 
     private static WifiConfig getWifiConfig(String netIfConfigPrefix, WifiMode mode, Map<String, Object> properties)
             throws KuraException {
+        
+        String prefix = new StringBuilder(netIfConfigPrefix).append("wifi.")
+                .append(mode.toString().toLowerCase()).toString();
 
-        String key;
-        WifiConfig wifiConfig = new WifiConfig();
-        StringBuilder prefix = new StringBuilder(netIfConfigPrefix).append("wifi.")
-                .append(mode.toString().toLowerCase());
+        String ssid = getSsid(properties, prefix + ".ssid");
 
-        // mode
-        logger.trace("mode is {}", mode);
-        wifiConfig.setMode(mode);
+        WifiSecurity wifiSecurity = getWifiSecurity(properties, prefix + SECURITY_TYPE);
 
-        // ssid
-        key = prefix + ".ssid";
-        String ssid = (String) properties.get(key);
-        if (ssid == null) {
-            ssid = "";
+        int[] wifiChannels = getWifiChannels(properties, prefix + ".channel");
+
+        String passphrase = getWifiPassphrase(properties, prefix + PASSPHRASE);
+
+        String hwMode = getHwMode(properties, prefix + HARDWARE_MODE);
+
+
+        String bgscan = null;
+        WifiConfig wifiConfig = new WifiConfig(mode, ssid, wifiChannels, wifiSecurity, passphrase, hwMode, new WifiBgscan(bgscan));
+        
+        wifiConfig.setDriver(getDriver(properties, prefix + ".driver"));
+        wifiConfig.setIgnoreSSID(isSsidIgnored(properties, prefix + ".ignoreSSID"));
+        wifiConfig.setPairwiseCiphers(getPairwiseCiphers(properties, prefix + ".groupCiphers"));
+        wifiConfig.setRadioMode(getRadioMode(properties, prefix + ".radioMode"));
+        
+        if (mode == WifiMode.INFRA) {
+            wifiConfig.setBgscan(getBgScan(properties, prefix + BGSCAN));
+            wifiConfig.setGroupCiphers(getGroupCiphers(properties, prefix + ".groupCiphers"));
+            wifiConfig.setPingAccessPoint(getPingAccessPoint(properties, prefix + ".pingAccessPoint"));
         }
-        logger.trace("SSID is {}", ssid);
-        wifiConfig.setSSID(ssid);
 
-        // driver
-        key = prefix + ".driver";
-        String driver = (String) properties.get(key);
-        if (driver == null) {
-            driver = "";
+        return wifiConfig;  
+    }
+
+    private static boolean getPingAccessPoint(Map<String, Object> properties, String key) {
+        boolean pingAccessPoint = false;
+        if (properties.get(key) != null) {
+            pingAccessPoint = (Boolean) properties.get(key);
+            logger.trace("Ping Access Point is {}", pingAccessPoint);
+        } else {
+            logger.trace("Ping Access Point is null");
         }
-        logger.trace("driver is {}", driver);
-        wifiConfig.setDriver(driver);
+        return pingAccessPoint;
+    }
 
-        // security
-        key = prefix + SECURITY_TYPE;
-        WifiSecurity wifiSecurity = WifiSecurity.NONE;
-        String securityString = (String) properties.get(key);
-        logger.trace("securityString is {}", securityString);
-        if (securityString != null && !securityString.isEmpty()) {
-            try {
-                wifiSecurity = WifiSecurity.valueOf(securityString);
-            } catch (IllegalArgumentException e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
-                        "Could not parse wifi security " + securityString);
-            }
+    private static WifiBgscan getBgScan(Map<String, Object> properties, String key) {
+        String bgscan = (String) properties.get(key);
+        if (bgscan == null) {
+            bgscan = "";
         }
-        wifiConfig.setSecurity(wifiSecurity);
+        return new WifiBgscan(bgscan);
+    }
+    private static WifiCiphers getGroupCiphers(Map<String, Object> properties, String key) {
+        String groupCiphers = (String) properties.get(key);
 
-        // channels
-        key = prefix + ".channel";
+        return WifiCiphers.valueOf(groupCiphers);
+    }
+
+    private static WifiCiphers getPairwiseCiphers(Map<String, Object> properties, String key) {
+        String pairwiseCiphers = (String) properties.get(key);
+        if (pairwiseCiphers != null) {
+            return WifiCiphers.valueOf(pairwiseCiphers);
+        } 
+            return WifiCiphers.valueOf("CCMP");
+    }
+
+    private static WifiRadioMode getRadioMode(Map<String, Object> properties, String key) {
+        String radioModeString = (String) properties.get(key);
+        logger.trace("radioModeString is {}", radioModeString);
+        if (radioModeString != null && !radioModeString.isEmpty()) {
+            return WifiRadioMode.valueOf(radioModeString);
+        }
+        
+        return WifiRadioMode.valueOf("RADIO_MODE_80211b");
+    }
+
+    private static boolean isSsidIgnored(Map<String, Object> properties, String key) {
+        boolean ignoreSSID = false;
+        if (properties.get(key) != null) {
+            ignoreSSID = (Boolean) properties.get(key);
+            logger.trace("Ignore SSID is {}", ignoreSSID);
+        } else {
+            logger.trace("Ignore SSID is null");
+        }
+        return ignoreSSID;
+    }
+
+    private static String getHwMode(Map<String, Object> properties, String key) {
+        String hwMode = (String) properties.get(key);
+        if (hwMode == null) {
+            hwMode = "b";
+        }
+        return hwMode;
+    }
+
+    private static String getWifiPassphrase(Map<String, Object> properties, String key) {
+        Object psswdObj = properties.get(key);
+        String passphrase = "PLACEHOLDER";
+        if (psswdObj instanceof Password) {
+            Password psswd = (Password) psswdObj;
+            passphrase = new String(psswd.getPassword());
+        } else if (psswdObj instanceof String) {
+            passphrase = (String) psswdObj;
+        }
+        return passphrase;
+    }
+
+    private static int[] getWifiChannels(Map<String, Object> properties, String key) {
         String channelsString = (String) properties.get(key);
         logger.trace("channelsString is {}", channelsString);
         if (channelsString != null) {
@@ -763,105 +824,45 @@ public class NetworkConfiguration {
                             logger.error("Error parsing channels!", e);
                         }
                     }
-                    wifiConfig.setChannels(channels);
+                    return channels;
                 }
             }
-        } else {
-            int[] channels = new int[]{1};
-            wifiConfig.setChannels(channels);
         }
-
-        // passphrase
-        key = prefix + PASSPHRASE;
-        Object psswdObj = properties.get(key);
-        String passphrase = "PLACEHOLDER";
-        if (psswdObj instanceof Password) {
-            Password psswd = (Password) psswdObj;
-            passphrase = new String(psswd.getPassword());
-        } else if (psswdObj instanceof String) {
-            passphrase = (String) psswdObj;
-        }
-
-        logger.trace("passphrase is {}", passphrase);
-        wifiConfig.setPasskey(passphrase);
-
-        // hardware mode
-        key = prefix + HARDWARE_MODE;
-        String hwMode = (String) properties.get(key);
-        if (hwMode == null) {
-            hwMode = "b";
-        }
-        logger.trace("hwMode is {}", hwMode);
-        wifiConfig.setHardwareMode(hwMode);
-
-        // ignore SSID
-        key = prefix + ".ignoreSSID";
-        boolean ignoreSSID = false;
-        if (properties.get(key) != null) {
-            ignoreSSID = (Boolean) properties.get(key);
-            logger.trace("Ignore SSID is {}", ignoreSSID);
-        } else {
-            logger.trace("Ignore SSID is null");
-        }
-
-        wifiConfig.setIgnoreSSID(ignoreSSID);
-
-        key = prefix + ".pairwiseCiphers";
-        String pairwiseCiphers = (String) properties.get(key);
-        if (pairwiseCiphers != null) {
-            wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf(pairwiseCiphers));
-        } else {
-            wifiConfig.setPairwiseCiphers(WifiCiphers.valueOf("CCMP"));
-        }
-
-        if (mode == WifiMode.INFRA) {
-            key = prefix + BGSCAN;
-            String bgscan = (String) properties.get(key);
-            if (bgscan == null) {
-                bgscan = "";
-            }
-            logger.trace("bgscan is {}", bgscan);
-            wifiConfig.setBgscan(new WifiBgscan(bgscan));
-
-            key = prefix + ".groupCiphers";
-            String groupCiphers = (String) properties.get(key);
-            if (groupCiphers != null) {
-                wifiConfig.setGroupCiphers(WifiCiphers.valueOf(groupCiphers));
-            }
-
-            // ping access point?
-            key = prefix + ".pingAccessPoint";
-            boolean pingAccessPoint = false;
-            if (properties.get(key) != null) {
-                pingAccessPoint = (Boolean) properties.get(key);
-                logger.trace("Ping Access Point is {}", pingAccessPoint);
-            } else {
-                logger.trace("Ping Access Point is null");
-            }
-
-            wifiConfig.setPingAccessPoint(pingAccessPoint);
-        }
-
-        // radio mode
-        key = prefix + ".radioMode";
-        WifiRadioMode radioMode;
-        String radioModeString = (String) properties.get(key);
-        logger.trace("radioModeString is {}", radioModeString);
-        if (radioModeString != null && !radioModeString.isEmpty()) {
-            radioMode = WifiRadioMode.valueOf(radioModeString);
-            wifiConfig.setRadioMode(radioMode);
-        } else {
-            radioMode = WifiRadioMode.valueOf("RADIO_MODE_80211b");
-            wifiConfig.setRadioMode(radioMode);
             
-        }
+        return new int[]{1};
+        
+    }
 
-        if (!wifiConfig.isValid()) {
-            return null;
-        } else {
-            logger.trace("Returning wifiConfig: {}", wifiConfig);
-            return wifiConfig;
+    private static WifiSecurity getWifiSecurity(Map<String, Object> properties, String key) throws KuraException {
+        String securityString = (String) properties.get(key);
+        logger.trace("securityString is {}", securityString);
+        if (securityString != null && !securityString.isEmpty()) {
+            try {
+                return WifiSecurity.valueOf(securityString);
+            } catch (IllegalArgumentException e) {
+                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
+                        "Could not parse wifi security " + securityString);
+            }
         }
+        return WifiSecurity.NONE;
+    }
+
+    private static String getDriver(Map<String, Object> properties, String key) {
+        String driver = (String) properties.get(key);
+        if (driver == null) {
+            driver = "";
+        }
+        logger.trace("driver is {}", driver);
+        return driver;
+    }
+
+    private static String getSsid(Map<String, Object> properties, String key) {
+        String ssid = (String) properties.get(key);
+        if (ssid == null) {
+            ssid = "";
+        }
+        logger.trace("SSID is {}", ssid);
+        return ssid;
     }
 
     private void addModemConfigProperties(ModemConfig modemConfig, String prefix, Map<String, Object> properties) {
@@ -1284,15 +1285,9 @@ public class NetworkConfiguration {
             if (netInterfaceAddress instanceof NetInterfaceAddressConfigImpl) {
                 ((NetInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(netConfigs);
             } else if (netInterfaceAddress instanceof WifiInterfaceAddressConfigImpl) {
-                ((WifiInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(netConfigs);
-            } else if (netInterfaceAddress instanceof ModemInterfaceAddressConfigImpl) {
-                ((ModemInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(netConfigs);
-            }
-
-            // WifiInterfaceAddress
-            if (netInterfaceAddress instanceof WifiInterfaceAddressImpl) {
                 logger.trace("netInterfaceAddress is instanceof WifiInterfaceAddressImpl");
-                WifiInterfaceAddressImpl wifiInterfaceAddressImpl = (WifiInterfaceAddressImpl) netInterfaceAddress;
+                WifiInterfaceAddressConfigImpl wifiInterfaceAddressImpl = (WifiInterfaceAddressConfigImpl) netInterfaceAddress;
+                wifiInterfaceAddressImpl.setNetConfigs(netConfigs);
 
                 // wifi mode
                 String configWifiMode = netIfPrefix + "wifi.mode";
@@ -1302,13 +1297,11 @@ public class NetworkConfiguration {
                 }
                 logger.trace("Adding wifiMode: {}", mode);
                 wifiInterfaceAddressImpl.setMode(mode);
-            }
-
-            // ModemInterfaceAddress
-            if (netInterfaceAddress instanceof ModemInterfaceAddressConfigImpl) {
+            } else if (netInterfaceAddress instanceof ModemInterfaceAddressConfigImpl) {
                 logger.trace("netInterfaceAddress is instanceof ModemInterfaceAddressConfigImpl");
                 ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = (ModemInterfaceAddressConfigImpl) netInterfaceAddress;
-
+                modemInterfaceAddressImpl.setNetConfigs(netConfigs);
+                
                 // connection type
                 String configConnType = netIfPrefix + "connection.type";
                 if (props.containsKey(configConnType)) {
@@ -1335,6 +1328,7 @@ public class NetworkConfiguration {
                     modemInterfaceAddressImpl.setConnectionStatus(connStatus);
                 }
             }
+
 
             // POPULATE NetConfigs
             // dhcp4

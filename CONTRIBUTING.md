@@ -68,8 +68,8 @@ You can find all the details in the [Contributing via Git](http://wiki.eclipse.o
 * Fork the repository on GitHub
 * Create a new branch for your changes
 * Configure your IDE installing:
-  * The formatter profile available in kura/setup/formatting/KuraFormatter*.xml
-  * The cleanup profile available in kura/setup/formatting/KuraCleanupProfile*.xml
+  * The formatter profile available in kura/setups/formatting/KuraFormatter*.xml
+  * The cleanup profile available in kura/setups/formatting/KuraCleanupProfile*.xml
   * [SonarLint](http://www.sonarlint.org/eclipse/index.html)
 * Make your changes
 * Make sure you include test cases for non-trivial features

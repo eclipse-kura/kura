@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -78,7 +78,7 @@ public class JdkDioPinTest {
 
         assertEquals(KuraGPIOMode.INPUT_PULL_UP, pin.getMode());
         assertEquals(KuraGPIODirection.INPUT, pin.getDirection());
-        assertEquals(KuraGPIOTrigger.RAISING_EDGE, pin.getTrigger());
+        assertEquals(KuraGPIOTrigger.RISING_EDGE, pin.getTrigger());
 
         assertEquals(0, (int) TestUtil.invokePrivate(pin, "getDirectionInternal"));
         assertEquals(1, (int) TestUtil.invokePrivate(pin, "getModeInternal"));

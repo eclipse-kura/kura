@@ -507,6 +507,16 @@
                                     <artifactId>bcprov-jdk15on</artifactId>
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.eurotech.framework</groupId>
+                                    <artifactId>com.eurotech.framework.docker.configurable</artifactId>
+                                    <version>${com.eurotech.framework.docker.configurable.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.eurotech.framework</groupId>
+                                    <artifactId>com.eurotech.framework.docker.configurable.generic</artifactId>
+                                    <version>${com.eurotech.framework.docker.configurable.generic.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -613,6 +623,9 @@
                                 <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
+                                <!-- Docker Containers -->
+                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${com.eurotech.framework.docker.configurable.version}.jar"/>
+                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.generic.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${com.eurotech.framework.docker.configurable.version.generic}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

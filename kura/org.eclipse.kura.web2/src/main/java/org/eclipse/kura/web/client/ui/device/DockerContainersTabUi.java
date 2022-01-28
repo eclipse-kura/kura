@@ -164,33 +164,33 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
                             @Override
                             public void onSuccess(GwtConfigComponent result) {
-                                /**
-                                 * DockerContainersTabUi.this.contentPanelHeader.setText(selected.getName());
-                                 * 
-                                 * final ServicesUi servicesUi = new ServicesUi(result);
-                                 * servicesUi.setBackend(new ServicesUi.Backend() {
-                                 * 
-                                 * @Override
-                                 *           public void updateComponentConfiguration(GwtXSRFToken token,
-                                 *           GwtConfigComponent component, AsyncCallback<Void> callback) {
-                                 *           DockerContainersTabUi.this.backend.updateConfiguration(token, component,
-                                 *           callback);
-                                 * 
-                                 *           }
-                                 * 
-                                 * @Override
-                                 *           public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
-                                 *           AsyncCallback<Void> callback) {
-                                 *           DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid,
-                                 *           callback);
-                                 *           }
-                                 *           });
-                                 * 
-                                 *           servicesUi.setDeleteButtonVisible(false);
-                                 * 
-                                 *           DockerContainersTabUi.this.mgmtPanel.add(servicesUi);
-                                 *           DockerContainersTabUi.this.configurationArea.setVisible(true);
-                                 **/
+
+                                DockerContainersTabUi.this.contentPanelHeader.setText(selected.getName());
+
+                                final ServicesUi servicesUi = new ServicesUi(result);
+                                servicesUi.setBackend(new ServicesUi.Backend() {
+
+                                    @Override
+                                    public void updateComponentConfiguration(GwtXSRFToken token,
+                                            GwtConfigComponent component, AsyncCallback<Void> callback) {
+                                        DockerContainersTabUi.this.backend.updateConfiguration(token, component,
+                                                callback);
+
+                                    }
+
+                                    @Override
+                                    public void deleteFactoryConfiguration(GwtXSRFToken token, String pid,
+                                            AsyncCallback<Void> callback) {
+                                        DockerContainersTabUi.this.backend.deleteFactoryConfiguration(token, pid,
+                                                callback);
+                                    }
+                                });
+
+                                servicesUi.setDeleteButtonVisible(false);
+
+                                DockerContainersTabUi.this.mgmtPanel.add(servicesUi);
+                                DockerContainersTabUi.this.configurationArea.setVisible(true);
+
                             }
 
                             @Override

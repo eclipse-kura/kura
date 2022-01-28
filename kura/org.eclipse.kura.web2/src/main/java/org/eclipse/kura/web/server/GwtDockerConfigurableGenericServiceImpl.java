@@ -13,19 +13,19 @@
 package org.eclipse.kura.web.server;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerService;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericService;
 
 import com.eurotech.framework.docker.configurable.generic.ConfigurableGenericDockerService;
 
-public class GwtDockerConfigurableGenericManagerServiceImpl extends BaseGwtRestrictedComponentService
-        implements GwtDockerConfigurableGenericManagerService {
+public class GwtDockerConfigurableGenericServiceImpl extends BaseGwtRestrictedComponentService
+        implements GwtDockerConfigurableGenericService {
 
     /**
      * 
      */
     private static final long serialVersionUID = -1480613592267828475L;
 
-    public GwtDockerConfigurableGenericManagerServiceImpl() {
+    public GwtDockerConfigurableGenericServiceImpl() {
         super(i -> i.contains(ConfigurableGenericDockerService.class.getName())
                 && i.contains(ConfigurableComponent.class.getName()));
     }

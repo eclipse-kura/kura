@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -265,7 +265,7 @@ public class JdkDioPin implements KuraGPIOPin {
             case GPIOPinConfig.TRIGGER_NONE:
                 return KuraGPIOTrigger.NONE;
             case GPIOPinConfig.TRIGGER_RISING_EDGE:
-                return KuraGPIOTrigger.RAISING_EDGE;
+                return KuraGPIOTrigger.RISING_EDGE;
             default:
                 return KuraGPIOTrigger.NONE;
             }
@@ -303,7 +303,7 @@ public class JdkDioPin implements KuraGPIOPin {
             return GPIOPinConfig.TRIGGER_LOW_LEVEL;
         case NONE:
             return GPIOPinConfig.TRIGGER_NONE;
-        case RAISING_EDGE:
+        case RISING_EDGE:
             return GPIOPinConfig.TRIGGER_RISING_EDGE;
         default:
             return -1;

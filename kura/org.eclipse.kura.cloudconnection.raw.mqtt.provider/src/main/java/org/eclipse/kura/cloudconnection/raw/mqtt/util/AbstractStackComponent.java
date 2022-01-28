@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.cloudconnecton.raw.mqtt.util;
+package org.eclipse.kura.cloudconnection.raw.mqtt.util;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.cloudconnection.listener.CloudConnectionListener;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint;
-import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions.OptionsFactory;
+import org.eclipse.kura.cloudconnection.raw.mqtt.util.StackComponentOptions.OptionsFactory;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;

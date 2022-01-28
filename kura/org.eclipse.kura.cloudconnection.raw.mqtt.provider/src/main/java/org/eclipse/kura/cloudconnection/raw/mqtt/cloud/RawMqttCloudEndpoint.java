@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.cloudconnection.raw.mqtt.cloud;
 
-import static org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils.catchAll;
+import static org.eclipse.kura.cloudconnection.raw.mqtt.util.Utils.catchAll;
 
 import java.util.Collections;
 import java.util.HashSet;

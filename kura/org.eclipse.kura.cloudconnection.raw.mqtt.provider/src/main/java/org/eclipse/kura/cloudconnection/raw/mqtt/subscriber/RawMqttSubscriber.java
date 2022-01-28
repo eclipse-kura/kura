@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -18,12 +18,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.RawMqttCloudEndpoint;
+import org.eclipse.kura.cloudconnection.raw.mqtt.util.AbstractStackComponent;
+import org.eclipse.kura.cloudconnection.raw.mqtt.util.StackComponentOptions;
+import org.eclipse.kura.cloudconnection.raw.mqtt.util.StackComponentOptions.OptionsFactory;
+import org.eclipse.kura.cloudconnection.raw.mqtt.util.Utils;
 import org.eclipse.kura.cloudconnection.subscriber.CloudSubscriber;
 import org.eclipse.kura.cloudconnection.subscriber.listener.CloudSubscriberListener;
-import org.eclipse.kura.cloudconnecton.raw.mqtt.util.AbstractStackComponent;
-import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions;
-import org.eclipse.kura.cloudconnecton.raw.mqtt.util.StackComponentOptions.OptionsFactory;
-import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

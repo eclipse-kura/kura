@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,7 +16,7 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.raw.mqtt.cloud.Qos;
-import org.eclipse.kura.cloudconnecton.raw.mqtt.util.Property;
+import org.eclipse.kura.cloudconnection.raw.mqtt.util.Property;
 
 public class PublishOptions {
 

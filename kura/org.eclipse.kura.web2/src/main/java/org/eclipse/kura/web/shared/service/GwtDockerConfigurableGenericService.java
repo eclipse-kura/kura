@@ -23,7 +23,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RequiredPermissions(KuraPermission.ADMIN)
 @RemoteServiceRelativePath("dockerconfigurablegeneric")
-public interface GwtDockerConfigurableGenericManagerService extends GwtRestrictedComponentService {
+public interface GwtDockerConfigurableGenericService extends GwtRestrictedComponentService {
 
     @Audit(componentName = "UI DockerConfigurableGenericManagerService", description = "Create configuration")
     public void createFactoryConfiguration(GwtXSRFToken token, String pid, String factoryPid) throws GwtKuraException;

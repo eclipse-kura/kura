@@ -21,8 +21,8 @@ import org.eclipse.kura.web.shared.model.GwtComponentInstanceInfo;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
-import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerService;
-import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericManagerServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericService;
+import org.eclipse.kura.web.shared.service.GwtDockerConfigurableGenericServiceAsync;
 import org.eclipse.kura.web.shared.service.GwtRestrictedComponentServiceAsync;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -89,7 +89,7 @@ public class DevicePanelUi extends Composite {
         this.packages.addClickHandler(new Tab.RefreshHandler(this.packagesPanel));
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
         this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
-        this.dockerContainersPanel.setBackend(new DockerConfigurableGenericManagerServiceWrapper());
+        this.dockerContainersPanel.setBackend(new DockerConfigurableGenericServiceWrapper());
     }
 
     public void initDevicePanel() {
@@ -101,10 +101,10 @@ public class DevicePanelUi extends Composite {
         this.session = currentSession;
     }
 
-    private static class DockerConfigurableGenericManagerServiceWrapper implements GwtRestrictedComponentServiceAsync {
+    private static class DockerConfigurableGenericServiceWrapper implements GwtRestrictedComponentServiceAsync {
 
-        private static GwtDockerConfigurableGenericManagerServiceAsync wrapped = GWT
-                .create(GwtDockerConfigurableGenericManagerService.class);
+        private static GwtDockerConfigurableGenericServiceAsync wrapped = GWT
+                .create(GwtDockerConfigurableGenericService.class);
 
         @Override
         public void listFactoryPids(AsyncCallback<Set<String>> callback) {

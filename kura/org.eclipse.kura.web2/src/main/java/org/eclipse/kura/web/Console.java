@@ -44,7 +44,7 @@ import org.eclipse.kura.web.server.GwtCertificatesServiceImpl;
 import org.eclipse.kura.web.server.GwtCloudConnectionServiceImpl;
 import org.eclipse.kura.web.server.GwtComponentServiceImpl;
 import org.eclipse.kura.web.server.GwtDeviceServiceImpl;
-import org.eclipse.kura.web.server.GwtDockerConfigurableGenericManagerServiceImpl;
+import org.eclipse.kura.web.server.GwtDockerConfigurableGenericServiceImpl;
 import org.eclipse.kura.web.server.GwtDriverAndAssetServiceImpl;
 import org.eclipse.kura.web.server.GwtEventServiceImpl;
 import org.eclipse.kura.web.server.GwtExtensionServiceImpl;
@@ -429,7 +429,7 @@ public class Console implements SelfConfiguringComponent, org.eclipse.kura.web.a
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/ssl", new GwtSslManagerServiceImpl(), null,
                 this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/dockerconfigurablegeneric",
-                new GwtDockerConfigurableGenericManagerServiceImpl(), null, this.sessionContext);
+                new GwtDockerConfigurableGenericServiceImpl(), null, this.sessionContext);
         this.httpService.registerServlet(DENALI_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,
                 resourceContext);
         this.httpService.registerServlet(LOGIN_MODULE_PATH + "/extension", new GwtExtensionServiceImpl(), null,

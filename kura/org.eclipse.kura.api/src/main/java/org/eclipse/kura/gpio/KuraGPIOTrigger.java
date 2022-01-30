@@ -13,6 +13,11 @@
 package org.eclipse.kura.gpio;
 
 public enum KuraGPIOTrigger {
+	/**
+	 * @deprecated Use RISING_EDGE instead 
+	 */
+	@Deprecated
+	RAISING_EDGE,
     RISING_EDGE,
     FALLING_EDGE,
     BOTH_EDGES,

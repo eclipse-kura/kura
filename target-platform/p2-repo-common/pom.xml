@@ -508,9 +508,9 @@
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                	<groupId>org.eclipse.kura</groupId>
+                                	<groupId>com.eurotech</groupId>
                                 	<artifactId>gpsd4java</artifactId>
-                                	<version>${org.eclipse.kura.gpsd4java.version}</version>
+                                	<version>${com.eurotech.gpsd4java.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>

@@ -1232,7 +1232,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public String getValue(GwtWifiHotspotEntry object) {
-                return object.getSSID();
+                return GwtSafeHtmlUtils.htmlUnescape(object.getSSID());
             }
         };
         col1.setCellStyleNames(STATUS_TABLE_ROW);
@@ -1300,7 +1300,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.ssidSelectionModel.addSelectionChangeHandler(event -> {
             GwtWifiHotspotEntry wifiHotspotEntry = TabWirelessUi.this.ssidSelectionModel.getSelectedObject();
             if (wifiHotspotEntry != null) {
-                TabWirelessUi.this.ssid.setValue(wifiHotspotEntry.getSSID());
+                TabWirelessUi.this.ssid.setValue(GwtSafeHtmlUtils.htmlUnescape(wifiHotspotEntry.getSSID()));
                 String sec = wifiHotspotEntry.getSecurity();
                 for (int i1 = 0; i1 < TabWirelessUi.this.security.getItemCount(); i1++) {
                     if (sec.equals(TabWirelessUi.this.security.getItemText(i1))) {

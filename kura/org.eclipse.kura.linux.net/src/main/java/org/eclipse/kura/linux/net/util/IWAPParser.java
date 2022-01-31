@@ -21,6 +21,7 @@ import org.eclipse.kura.core.net.WifiAccessPointImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.net.wifi.WifiAccessPoint;
 import org.eclipse.kura.net.wifi.WifiMode;
+import org.eclipse.kura.util.base.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,7 +90,7 @@ class IWAPParser {
             st.nextToken(); // eat freq:
             this.frequency = Long.parseLong(st.nextToken());
         } else if (propLine.startsWith("SSID: ")) {
-            this.ssid = propLine.substring(5).trim();
+            this.ssid = StringUtil.unescapeUTF8String(propLine.substring(5).trim());
         } else if (propLine.startsWith("RSN:")) {
             this.securityParser = this.rsn;
             parsePropLine(propLine);

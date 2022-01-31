@@ -14,6 +14,9 @@ package org.eclipse.kura.util.base;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import org.eclipse.kura.annotation.Nullable;
@@ -23,6 +26,18 @@ import org.eclipse.kura.annotation.Nullable;
  * manipulating String instances
  */
 public final class StringUtil {
+
+    /**
+     * Used to build output as hex.
+     */
+    private static final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+            'e', 'f' };
+
+    /**
+     * Used to build output as hex.
+     */
+    private static final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+            'E', 'F' };
 
     /** Constructor */
     private StringUtil() {
@@ -65,4 +80,44 @@ public final class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * Unescape an UTF-8 string.
+     * 
+     * @param string
+     *            an UTF-8 escaped string.
+     * @return string in UTF-8 with unescaped characters.
+     */
+
+    public static String unescapeUTF8String(final String string) {
+
+        requireNonNull(string, "String cannot be null");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i = 0;
+        while (i < string.length()) {
+            if (string.charAt(i) == '\\') {
+                i += 2;
+                String hexString = string.substring(i, i + 2);
+                baos.write(Integer.parseInt(hexString, 16));
+                i += 2;
+            } else {
+                baos.write(string.charAt(i));
+                i += 1;
+            }
+        }
+
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Covert a string in hexadecimal format.
+     * 
+     * @param string
+     *            string to be converted in hex format.
+     * @return string in hex format.
+     */
+
+    public static String toHex(String string) {
+        return String.format("%x", new BigInteger(1, string.getBytes(StandardCharsets.UTF_8)));
+    }
 }

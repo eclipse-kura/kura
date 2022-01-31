@@ -79,7 +79,7 @@ public interface PositionService {
     public boolean isLocked();
 
     /**
-     * @deprecated
+     * @deprecated since version 2.3
      *             Returns the last sentence received from the gps.
      */
     @Deprecated

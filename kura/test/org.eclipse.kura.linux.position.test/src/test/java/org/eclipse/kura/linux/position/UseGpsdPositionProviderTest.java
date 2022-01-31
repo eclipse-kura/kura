@@ -40,9 +40,9 @@ public class UseGpsdPositionProviderTest {
     private GPSdEndpoint gpsEndpointMock;
     private ResultParser parser = new ResultParser();
 
-    private String BOLTGATE_10_12_JSON_STREAM = "gpsd-raw-json-boltgate-10-12-el27.1.txt";
-    private String BOLTGATE_10_12_JSON_STREAM_2 = "gpsd-raw-json-boltgate-10-12-el27.1_2.txt";
-    private String DYNAGATE_20_30_JSON_STREAM = "gpsd-raw-json-dynagate-20-30-el30.txt";
+    private final String DEVICE_2_1_JSON_STREAM = "gpsd-raw-json-device-2-1.txt";
+    private final String BOLTGATE_10_12_JSON_STREAM_2 = "gpsd-raw-json-device-2-2.txt";
+    private final String DEVICE1_JSON_STREAM = "gpsd-raw-json-device-1.txt";
 
     @Test
     public void startGpsdPositionProvider() {
@@ -70,7 +70,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(BOLTGATE_10_12_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE_2_1_JSON_STREAM);
 
         thenPositionIsNotNull();
     }
@@ -92,7 +92,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
         thenPositionIsNotNull();
     }
@@ -103,7 +103,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
         thenPositionIsLocked();
     }
@@ -114,7 +114,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
         thenNmeaPositionIsNotNull();
     }
@@ -125,7 +125,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
         thenNmeaDateIsNotAvailable();
     }
@@ -136,7 +136,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
         thenNmeaTimeIsNotAvailable();
     }
@@ -147,7 +147,7 @@ public class UseGpsdPositionProviderTest {
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
 
-        whenNMEAStreamArriveFrom(DYNAGATE_20_30_JSON_STREAM);
+        whenNMEAStreamArriveFrom(DEVICE1_JSON_STREAM);
 
         thenDateTimeIsNotNull();
     }

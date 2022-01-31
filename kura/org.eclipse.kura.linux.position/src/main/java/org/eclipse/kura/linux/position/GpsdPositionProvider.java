@@ -60,12 +60,16 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void start() {
-        this.gpsEndpoint.start();
+        if (this.gpsEndpoint != null) {
+            this.gpsEndpoint.start();
+        }
     }
 
     @Override
     public void stop() {
-        this.gpsEndpoint.stop();
+        if (this.gpsEndpoint != null) {
+            this.gpsEndpoint.stop();
+        }
     }
 
     @Override

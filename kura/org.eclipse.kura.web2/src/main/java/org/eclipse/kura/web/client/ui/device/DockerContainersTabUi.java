@@ -241,6 +241,22 @@ public class DockerContainersTabUi extends Composite implements Tab {
         version.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col4, version);
 
+        TextColumn<GwtGroupedNVPair> col5 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                if ((boolean) object.get("isEsfManaged")) {
+                    return MSGS.trueLabel();
+                } else {
+                    return MSGS.falseLabel();
+                }
+            }
+        };
+        col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader isEsfManaged = new TextHeader(MSGS.deviceTabContainerIsEsfManagedHeading());
+        isEsfManaged.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col5, isEsfManaged);
+
         dataProvider.addDataDisplay(bundlesGrid2);
     }
 

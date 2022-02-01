@@ -42,20 +42,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private static final Logger logger = LoggerFactory.getLogger(GpsdPositionProvider.class);
 
     private GPSdEndpoint gpsEndpoint;
-
-    private AtomicReference<Double> latitude = new AtomicReference<>();
-    private AtomicReference<Double> latitudeError = new AtomicReference<>();
-    private AtomicReference<Double> longitude = new AtomicReference<>();
-    private AtomicReference<Double> longitudeError = new AtomicReference<>();
-    private AtomicReference<Double> altitude = new AtomicReference<>();
-    private AtomicReference<Double> altitudeError = new AtomicReference<>();
-    private AtomicReference<Double> speed = new AtomicReference<>();
-    private AtomicReference<Double> speedError = new AtomicReference<>();
-    private AtomicReference<Double> course = new AtomicReference<>();
-    private AtomicReference<Double> courseError = new AtomicReference<>();
-    private AtomicReference<Double> timestamp = new AtomicReference<>();
-    private AtomicReference<ENMEAMode> mode = new AtomicReference<>();
-
+    private AtomicReference<GpsdInternalState> internalState;
     private PositionServiceOptions configuration;
 
     @Override
@@ -74,16 +61,18 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public Position getPosition() {
-        return new Position(toRadiansMeasurement(getLatitude(), getLatitudeError()),
-                toRadiansMeasurement(getLongitude(), getLongitudeError()),
-                toMetersMeasurement(getAltitude(), getAltitudeError()),
-                toMetersPerSecondMeasurement(getSpeed(), getSpeedError()),
-                toRadiansMeasurement(getCourse(), getCourseError()));
+        return new Position(
+                toRadiansMeasurement(internalState.get().getLatitude(), internalState.get().getLatitudeError()),
+                toRadiansMeasurement(internalState.get().getLongitude(), internalState.get().getLongitudeError()),
+                toMetersMeasurement(internalState.get().getAltitude(), internalState.get().getAltitudeError()),
+                toMetersPerSecondMeasurement(internalState.get().getSpeed(), internalState.get().getSpeedError()),
+                toRadiansMeasurement(internalState.get().getCourse(), internalState.get().getCourseError()));
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        return new NmeaPosition(getLatitude(), getLongitude(), getAltitude(), getSpeed(), getCourse());
+        return new NmeaPosition(internalState.get().getLatitude(), internalState.get().getLongitude(),
+                internalState.get().getAltitude(), internalState.get().getSpeed(), internalState.get().getCourse());
     }
 
     @Override
@@ -98,7 +87,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public LocalDateTime getDateTime() {
-        return LocalDateTime.ofEpochSecond(getTimestamp().longValue(), 0, ZoneOffset.UTC);
+        return LocalDateTime.ofEpochSecond(internalState.get().getTimestamp().longValue(), 0, ZoneOffset.UTC);
     }
 
     @Override
@@ -110,7 +99,9 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
             return true;
         }
 
-        return (getMode() == ENMEAMode.TwoDimensional || getMode() == ENMEAMode.ThreeDimensional);
+        ENMEAMode enmeaMode = internalState.get().getMode();
+
+        return (enmeaMode == ENMEAMode.TwoDimensional || enmeaMode == ENMEAMode.ThreeDimensional);
     }
 
     @Override
@@ -123,6 +114,8 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener) {
 
         this.configuration = configuration;
+        this.internalState = new AtomicReference<>();
+        this.internalState.set(new GpsdInternalState());
 
         this.gpsEndpoint = new GPSdEndpoint(configuration.getGpsdHost(), configuration.getGpsdPort());
         this.gpsEndpoint.addListener(this);
@@ -165,18 +158,18 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleTPV(TPVObject tpv) {
-        setLatitude(tpv.getLatitude());
-        setLatitudeError(tpv.getLatitudeError());
-        setLongitude(tpv.getLongitude());
-        setLongitudeError(tpv.getLongitudeError());
-        setAltitude(tpv.getAltitude());
-        setAltitudeError(tpv.getAltitudeError());
-        setSpeed(tpv.getSpeed());
-        setSpeedError(tpv.getSpeedError());
-        setCourse(tpv.getCourse());
-        setCourseError(tpv.getCourseError());
-        setTime(tpv.getTimestamp());
-        setMode(tpv.getMode());
+        internalState.get().setLatitude(tpv.getLatitude());
+        internalState.get().setLatitudeError(tpv.getLatitudeError());
+        internalState.get().setLongitude(tpv.getLongitude());
+        internalState.get().setLongitudeError(tpv.getLongitudeError());
+        internalState.get().setAltitude(tpv.getAltitude());
+        internalState.get().setAltitudeError(tpv.getAltitudeError());
+        internalState.get().setSpeed(tpv.getSpeed());
+        internalState.get().setSpeedError(tpv.getSpeedError());
+        internalState.get().setCourse(tpv.getCourse());
+        internalState.get().setCourseError(tpv.getCourseError());
+        internalState.get().setTime(tpv.getTimestamp());
+        internalState.get().setMode(tpv.getMode());
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {
@@ -191,100 +184,117 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         return new Measurement(value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
     }
 
-    private void setCourseError(double value) {
-        this.courseError.set(value);
-    }
+    private class GpsdInternalState {
 
-    private void setCourse(double value) {
-        this.course.set(value);
-    }
+        private double latitude;
+        private double latitudeError;
+        private double longitude;
+        private double longitudeError;
+        private double altitude;
+        private double altitudeError;
+        private double speed;
+        private double speedError;
+        private double course;
+        private double courseError;
+        private double timestamp;
+        private ENMEAMode mode = ENMEAMode.NotSeen;
 
-    private void setSpeedError(double value) {
-        this.speedError.set(value);
-    }
+        public void setCourseError(double value) {
+            this.courseError = value;
+        }
 
-    private void setSpeed(double value) {
-        this.speed.set(value);
-    }
+        public void setCourse(double value) {
+            this.course = value;
+        }
 
-    private void setAltitudeError(double value) {
-        this.altitudeError.set(value);
-    }
+        public void setSpeedError(double value) {
+            this.speedError = value;
+        }
 
-    private void setAltitude(double value) {
-        this.altitude.set(value);
-    }
+        public void setSpeed(double value) {
+            this.speed = value;
+        }
 
-    private void setLongitudeError(double value) {
-        this.longitudeError.set(value);
-    }
+        public void setAltitudeError(double value) {
+            this.altitudeError = value;
+        }
 
-    private void setLongitude(double value) {
-        this.longitude.set(value);
-    }
+        public void setAltitude(double value) {
+            this.altitude = value;
+        }
 
-    private void setLatitudeError(double value) {
-        this.latitudeError.set(value);
-    }
+        public void setLongitudeError(double value) {
+            this.longitudeError = value;
+        }
 
-    private void setLatitude(double value) {
-        this.latitude.set(value);
-    }
+        public void setLongitude(double value) {
+            this.longitude = value;
+        }
 
-    private void setTime(double value) {
-        this.timestamp.set(value);
-    }
+        public void setLatitudeError(double value) {
+            this.latitudeError = value;
+        }
 
-    private void setMode(ENMEAMode value) {
-        this.mode.set(value);
-    }
+        public void setLatitude(double value) {
+            this.latitude = value;
+        }
 
-    private double getCourseError() {
-        return this.courseError.get();
-    }
+        public void setTime(double value) {
+            this.timestamp = value;
+        }
 
-    private double getCourse() {
-        return this.course.get();
-    }
+        public void setMode(ENMEAMode value) {
+            this.mode = value;
+        }
 
-    private double getSpeedError() {
-        return this.speedError.get();
-    }
+        public double getCourseError() {
+            return this.courseError;
+        }
 
-    private double getSpeed() {
-        return this.speed.get();
-    }
+        public double getCourse() {
+            return this.course;
+        }
 
-    private double getAltitudeError() {
-        return this.altitudeError.get();
-    }
+        public double getSpeedError() {
+            return this.speedError;
+        }
 
-    private double getAltitude() {
-        return this.altitude.get();
-    }
+        public double getSpeed() {
+            return this.speed;
+        }
 
-    private double getLongitudeError() {
-        return this.longitudeError.get();
-    }
+        public double getAltitudeError() {
+            return this.altitudeError;
+        }
 
-    private double getLongitude() {
-        return this.longitude.get();
-    }
+        public double getAltitude() {
+            return this.altitude;
+        }
 
-    private double getLatitudeError() {
-        return this.latitudeError.get();
-    }
+        public double getLongitudeError() {
+            return this.longitudeError;
+        }
 
-    private double getLatitude() {
-        return this.latitude.get();
-    }
+        public double getLongitude() {
+            return this.longitude;
+        }
 
-    private Double getTimestamp() {
-        return this.timestamp.get();
-    }
+        public double getLatitudeError() {
+            return this.latitudeError;
+        }
 
-    private ENMEAMode getMode() {
-        return this.mode.get();
+        public double getLatitude() {
+            return this.latitude;
+        }
+
+        public Double getTimestamp() {
+            return this.timestamp;
+        }
+
+        public ENMEAMode getMode() {
+            return this.mode;
+        }
+
     }
 
 }

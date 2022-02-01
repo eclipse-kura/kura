@@ -65,7 +65,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getPositionFromBoltgate1012Stream() {
+    public void getPositionFromDevice2Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -76,7 +76,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getPositionFromBoltgate1012Stream2() {
+    public void getPositionFromDevice2Stream2() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -87,7 +87,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getPositionFromDynaGate2030Stream() {
+    public void getPositionFromDevice1Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -98,7 +98,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void verifyPositionIsLockedFromDynaGate2030Stream() {
+    public void verifyPositionIsLockedFromDevice1Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -109,7 +109,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getNmeaPositionFromDynaGate2030Stream() {
+    public void getNmeaPositionFromDevice1Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -120,7 +120,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getNmeaDateFromDynaGate2030Stream() {
+    public void getNmeaDateFromDevice1Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -131,7 +131,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getNmeaTimeFromDynaGate2030Stream() {
+    public void getNmeaTimeFromDevice1Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();
@@ -142,7 +142,7 @@ public class UseGpsdPositionProviderTest {
     }
 
     @Test
-    public void getDateTimeFromDynaGate2030Stream() {
+    public void getDateTimeFromDevice1Stream() {
         givenGpsdPositionProvider();
         givenProperties(defaultProperties());
         givenGpsdProviderIsStarted();

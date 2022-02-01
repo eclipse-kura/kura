@@ -49,6 +49,7 @@ import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.util.base.StringUtil;
 import org.junit.Test;
 
 public class WpaSupplicantConfigTest {
@@ -160,7 +161,7 @@ public class WpaSupplicantConfigTest {
         assertFalse(configFileContents.contains("\nctrl_interface_group=wheel\n"));
         assertTrue(configFileContents.contains("network={\n"));
         assertTrue(configFileContents.contains("mode=0\n"));
-        assertTrue(configFileContents.contains("ssid=\"testSSIDi\"\n"));
+        assertTrue(configFileContents.contains("ssid=" + StringUtil.toHex("testSSIDi") + "\n"));
         assertTrue(configFileContents.contains("scan_ssid=1\n"));
         assertTrue(configFileContents.contains("key_mgmt=NONE\n"));
         assertTrue(configFileContents.contains("wep_key0=5061242677\n"));
@@ -239,7 +240,7 @@ public class WpaSupplicantConfigTest {
         assertTrue(configFileContents.contains("ap_scan=2\n"));
         assertTrue(configFileContents.contains("network={\n"));
         assertTrue(configFileContents.contains("mode=1\n"));
-        assertTrue(configFileContents.contains("ssid=\"testSSID\"\n"));
+        assertTrue(configFileContents.contains("ssid=" + StringUtil.toHex("testSSID") + "\n"));
         assertTrue(configFileContents.contains("key_mgmt=NONE\n"));
         assertTrue(configFileContents.contains("wep_key0=" + pass + "\n"));
         assertTrue(configFileContents.contains("frequency=2412\n"));
@@ -317,7 +318,7 @@ public class WpaSupplicantConfigTest {
         assertTrue(configFileContents.contains("ap_scan=2\n"));
         assertTrue(configFileContents.contains("network={\n"));
         assertTrue(configFileContents.contains("mode=1\n"));
-        assertTrue(configFileContents.contains("ssid=\"testSSID\"\n"));
+        assertTrue(configFileContents.contains("ssid=" + StringUtil.toHex("testSSID") + "\n"));
         assertTrue(configFileContents.contains("key_mgmt=WPA-NONE\n"));
         assertTrue(configFileContents.contains("psk=" + encodedPass + "\n"));
         assertTrue(configFileContents.contains("frequency=2412\n"));
@@ -400,7 +401,7 @@ public class WpaSupplicantConfigTest {
         assertFalse(configFileContents.contains("\nctrl_interface_group=wheel\n"));
         assertTrue(configFileContents.contains("network={\n"));
         assertTrue(configFileContents.contains("mode=0\n"));
-        assertTrue(configFileContents.contains("ssid=\"testSSIDi\"\n"));
+        assertTrue(configFileContents.contains("ssid=" + StringUtil.toHex("testSSIDi") + "\n"));
         assertTrue(configFileContents.contains("key_mgmt=WPA-PSK\n"));
         assertTrue(configFileContents.contains("psk=" + encodedPass + "\n"));
         assertTrue(configFileContents.contains("scan_freq=2417\n"));
@@ -484,7 +485,7 @@ public class WpaSupplicantConfigTest {
         assertFalse(configFileContents.contains("\nctrl_interface_group=wheel\n"));
         assertTrue(configFileContents.contains("network={\n"));
         assertTrue(configFileContents.contains("mode=0\n"));
-        assertTrue(configFileContents.contains("ssid=\"testSSIDi\"\n"));
+        assertTrue(configFileContents.contains("ssid=" + StringUtil.toHex("testSSIDi") + "\n"));
         assertTrue(configFileContents.contains("scan_freq=2417\n"));
         assertTrue(configFileContents.contains("key_mgmt=NONE\n"));
         assertTrue(configFileContents.contains("bgscan=\"\"\n"));
@@ -555,7 +556,7 @@ public class WpaSupplicantConfigTest {
         assertFalse(configFileContents.contains("\nctrl_interface_group=wheel\n"));
         assertTrue(configFileContents.contains("network={\n"));
         assertTrue(configFileContents.contains("mode=1\n"));
-        assertTrue(configFileContents.contains("ssid=\"testSSID\"\n"));
+        assertTrue(configFileContents.contains("ssid=" + StringUtil.toHex("testSSID") + "\n"));
         assertTrue(configFileContents.contains("frequency=2412\n"));
         assertTrue(configFileContents.contains("key_mgmt=NONE\n"));
         assertTrue(configFileContents.contains("}"));

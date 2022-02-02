@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -171,16 +171,12 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     @Override
     public boolean isValid() {
-        if (this.groupRouter.getValidationState().equals(ValidationState.ERROR)
+        return !(this.groupRouter.getValidationState().equals(ValidationState.ERROR)
                 || this.groupBegin.getValidationState().equals(ValidationState.ERROR)
                 || this.groupEnd.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupDefaultLease.getValidationState().equals(ValidationState.ERROR)
-                || this.groupMaxLease.getValidationState().equals(ValidationState.ERROR)) {
-            return false;
-        } else {
-            return true;
-        }
+                || this.groupMaxLease.getValidationState().equals(ValidationState.ERROR));
     }
 
     @Override
@@ -254,16 +250,6 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     // enable/disable fields depending on values in other tabs
     private void refreshForm() {
-        // if (!tcpTab.isLanEnabled()) {
-        // router.setEnabled(false);
-        // begin.setEnabled(false);
-        // end.setEnabled(false);
-        // subnet.setEnabled(false);
-        // defaultL.setEnabled(false);
-        // max.setEnabled(false);
-        // radio1.setEnabled(false);
-        // radio2.setEnabled(false);
-        // } else {
         GwtWifiConfig wifiConfig = this.wirelessTab.activeConfig;
         String wifiMode = null;
         if (wifiConfig != null) {
@@ -310,7 +296,6 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 this.radio2.setEnabled(true);
             }
         }
-        // }
     }
 
     private void reset() {
@@ -347,134 +332,16 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     }
 
     private void initForm() {
-        // Router Mode
-        this.labelRouter.setText(MSGS.netRouterMode());
-        int i = 0;
-        for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
-            this.router.addItem(MessageUtils.get(mode.name()));
+        initRouterMode();
+        initDHCPBeginAddress();
+        initDHCPEndAddress();
+        initDHCPSubnetMask();
+        initDefaultLeaseTime();
+        initMaxLeaseTime();
+        initPassDNS();
+    }
 
-            if (this.tcpTab.isDhcp() && mode.equals(GwtNetRouterMode.netRouterOff)) {
-                this.router.setSelectedIndex(i);
-            }
-            i++;
-        }
-        this.router.addMouseOverHandler(event -> {
-            if (TabDhcpNatUi.this.router.isEnabled()) {
-                TabDhcpNatUi.this.helpText.clear();
-                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipMode()));
-            }
-        });
-        this.router.addMouseOutHandler(event -> resetHelp());
-        this.router.addChangeHandler(event -> {
-            setDirty(true);
-            ListBox box = (ListBox) event.getSource();
-            if (TabDhcpNatUi.this.tcpTab.isDhcp() && !box.getSelectedItemText().equals(ROUTER_OFF_MESSAGE)) { // MessageUtils.get(GwtNetRouterMode.netRouterOff.name())))
-                // { TODO:check
-                TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.ERROR);
-                TabDhcpNatUi.this.helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
-                TabDhcpNatUi.this.helpRouter.setColor("red");
-            } else {
-                TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.NONE);
-                TabDhcpNatUi.this.helpRouter.setText("");
-            }
-            if (router.getSelectedIndex() == 0 || router.getSelectedIndex() == 2) {
-                alertDialog.show(MSGS.netRouterDhcpNATWarning(), Severity.ALERT, (ConfirmListener) null);
-            }
-            refreshForm();
-        });
-
-        // DHCP Beginning Address
-        this.labelBegin.setText(MSGS.netRouterDhcpBeginningAddress());
-        this.begin.addMouseOverHandler(event -> {
-            if (TabDhcpNatUi.this.router.isEnabled()) {
-                TabDhcpNatUi.this.helpText.clear();
-                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpBeginAddr()));
-            }
-        });
-        this.begin.addMouseOutHandler(event -> resetHelp());
-        this.begin.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (!TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
-                TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.NONE);
-            }
-        });
-
-        // DHCP Ending Address
-        this.labelEnd.setText(MSGS.netRouterDhcpEndingAddress());
-        this.end.addMouseOverHandler(event -> {
-            if (TabDhcpNatUi.this.router.isEnabled()) {
-                TabDhcpNatUi.this.helpText.clear();
-                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpEndAddr()));
-            }
-        });
-        this.end.addMouseOutHandler(event -> resetHelp());
-        this.end.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (!TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
-                TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.NONE);
-            }
-        });
-
-        // DHCP Subnet Mask
-        this.labelSubnet.setText(MSGS.netRouterDhcpSubnetMask());
-        this.subnet.addMouseOverHandler(event -> {
-            if (TabDhcpNatUi.this.router.isEnabled()) {
-                TabDhcpNatUi.this.helpText.clear();
-                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpSubnet()));
-            }
-        });
-        this.subnet.addMouseOutHandler(event -> resetHelp());
-        this.subnet.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (!TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
-                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
-            }
-        });
-
-        // DHCP Default Lease
-        this.labelDefaultLease.setText(MSGS.netRouterDhcpDefaultLease());
-        this.defaultLease.addMouseOverHandler(event -> {
-            if (TabDhcpNatUi.this.router.isEnabled()) {
-                TabDhcpNatUi.this.helpText.clear();
-                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpDefaultLeaseTime()));
-            }
-        });
-        this.defaultLease.addMouseOutHandler(event -> resetHelp());
-        this.defaultLease.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (!TabDhcpNatUi.this.defaultLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
-                    || !isPositiveInteger(TabDhcpNatUi.this.defaultLease.getText().trim())) {
-                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
-            }
-        });
-
-        // DHCP Max Lease
-        this.labelMaxLease.setText(MSGS.netRouterDhcpMaxLease());
-        this.maxLease.addMouseOverHandler(event -> {
-            if (TabDhcpNatUi.this.router.isEnabled()) {
-                TabDhcpNatUi.this.helpText.clear();
-                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpMaxLeaseTime()));
-            }
-        });
-        this.maxLease.addMouseOutHandler(event -> resetHelp());
-        this.maxLease.addValueChangeHandler(event -> {
-            setDirty(true);
-            if (!TabDhcpNatUi.this.maxLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
-                    || !isPositiveInteger(TabDhcpNatUi.this.maxLease.getText().trim())) {
-                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
-            }
-        });
-
+    private void initPassDNS() {
         // Pass DNS
         this.labelPass.setText(MSGS.netRouterPassDns());
         this.radio1.setText(MSGS.trueLabel());
@@ -499,6 +366,145 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.helpTitle.setText(MSGS.netHelpTitle());
     }
 
+    private void initMaxLeaseTime() {
+        // DHCP Max Lease
+        this.labelMaxLease.setText(MSGS.netRouterDhcpMaxLease());
+        this.maxLease.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpMaxLeaseTime()));
+            }
+        });
+        this.maxLease.addMouseOutHandler(event -> resetHelp());
+        this.maxLease.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.maxLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
+                    || !isPositiveInteger(TabDhcpNatUi.this.maxLease.getText().trim())) {
+                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
+            }
+        });
+    }
+
+    private void initDefaultLeaseTime() {
+        // DHCP Default Lease
+        this.labelDefaultLease.setText(MSGS.netRouterDhcpDefaultLease());
+        this.defaultLease.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpDefaultLeaseTime()));
+            }
+        });
+        this.defaultLease.addMouseOutHandler(event -> resetHelp());
+        this.defaultLease.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.defaultLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
+                    || !isPositiveInteger(TabDhcpNatUi.this.defaultLease.getText().trim())) {
+                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
+            }
+        });
+    }
+
+    private void initDHCPSubnetMask() {
+        // DHCP Subnet Mask
+        this.labelSubnet.setText(MSGS.netRouterDhcpSubnetMask());
+        this.subnet.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpSubnet()));
+            }
+        });
+        this.subnet.addMouseOutHandler(event -> resetHelp());
+        this.subnet.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
+                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
+            } else {
+                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
+            }
+        });
+    }
+
+    private void initDHCPEndAddress() {
+        // DHCP Ending Address
+        this.labelEnd.setText(MSGS.netRouterDhcpEndingAddress());
+        this.end.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpEndAddr()));
+            }
+        });
+        this.end.addMouseOutHandler(event -> resetHelp());
+        this.end.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
+                TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+            } else {
+                checkDhcpRangeValidity();
+            }
+        });
+    }
+
+    private void initDHCPBeginAddress() {
+        // DHCP Beginning Address
+        this.labelBegin.setText(MSGS.netRouterDhcpBeginningAddress());
+        this.begin.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpBeginAddr()));
+            }
+        });
+        this.begin.addMouseOutHandler(event -> resetHelp());
+        this.begin.addValueChangeHandler(event -> {
+            setDirty(true);
+            if (!TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
+                TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
+            } else {
+                checkDhcpRangeValidity();
+            }
+        });
+    }
+
+    private void initRouterMode() {
+        // Router Mode
+        this.labelRouter.setText(MSGS.netRouterMode());
+        int i = 0;
+        for (GwtNetRouterMode mode : GwtNetRouterMode.values()) {
+            this.router.addItem(MessageUtils.get(mode.name()));
+
+            if (this.tcpTab.isDhcp() && mode.equals(GwtNetRouterMode.netRouterOff)) {
+                this.router.setSelectedIndex(i);
+            }
+            i++;
+        }
+        this.router.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipMode()));
+            }
+        });
+        this.router.addMouseOutHandler(event -> resetHelp());
+        this.router.addChangeHandler(event -> {
+            setDirty(true);
+            ListBox box = (ListBox) event.getSource();
+            if (TabDhcpNatUi.this.tcpTab.isDhcp() && !box.getSelectedItemText().equals(ROUTER_OFF_MESSAGE)) {
+                TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.ERROR);
+                TabDhcpNatUi.this.helpRouter.setText(MSGS.netRouterConfiguredForDhcpError());
+                TabDhcpNatUi.this.helpRouter.setColor("red");
+            } else {
+                TabDhcpNatUi.this.groupRouter.setValidationState(ValidationState.NONE);
+                TabDhcpNatUi.this.helpRouter.setText("");
+            }
+            if (this.router.getSelectedIndex() == 0 || this.router.getSelectedIndex() == 2) {
+                this.alertDialog.show(MSGS.netRouterDhcpNATWarning(), Severity.ALERT, (ConfirmListener) null);
+            }
+            refreshForm();
+        });
+    }
+
     private void resetHelp() {
         this.helpText.clear();
         this.helpText.add(new Span(MSGS.netHelpDefaultHint()));
@@ -513,5 +519,35 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             return false;
         }
         return false;
+    }
+
+    private void checkDhcpRangeValidity() {
+        if (!isDhcpRangeValid()) {
+            TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
+            TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+        } else {
+            TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.NONE);
+            TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.NONE);
+        }
+    }
+
+    private boolean isDhcpRangeValid() {
+        try {
+            long beginAddress = addressToLong(TabDhcpNatUi.this.begin.getText().trim());
+            long endAddress = addressToLong(TabDhcpNatUi.this.end.getText().trim());
+            return endAddress > beginAddress;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private long addressToLong(String address) {
+        String[] addressArray = address.split("\\.");
+        long addressLong = 0;
+        for (String addressfield : addressArray) {
+            addressLong <<= 8;
+            addressLong |= Long.parseLong(addressfield) & 0x000000ff;
+        }
+        return addressLong;
     }
 }

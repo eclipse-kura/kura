@@ -431,23 +431,20 @@ public class IpConfigurationInterpreter {
             netConfigIP6 = new NetConfigIP6(status6, getAutoConnectProperty(status6), dhcp6Enabled);
 
             String configIp6 = NET_INTERFACE + interfaceName + ".config.ip6.address";
-            if (props.containsKey(configIp6)) {
-
-                // address
-                String addressIp6 = (String) props.get(configIp6);
+            String addressIp6 = (String) props.get(configIp6);
+            if (!isNull(addressIp6) && !addressIp6.trim().isEmpty()) {
                 logger.trace("IPv6 address: {}", addressIp6);
-                if (addressIp6 != null && !addressIp6.isEmpty()) {
-                    IP6Address ip6Address = (IP6Address) IPAddress.parseHostAddress(addressIp6);
-                    netConfigIP6.setAddress(ip6Address);
-                }
+
+                IP6Address ip6Address = (IP6Address) IPAddress.parseHostAddress(addressIp6);
+                netConfigIP6.setAddress(ip6Address);
             }
 
             // dns servers
             String configDNSs6 = NET_INTERFACE + interfaceName + ".config.ip6.dnsServers";
-            if (props.containsKey(configDNSs6)) {
+            String dnsAll = (String) props.get(configDNSs6);
+            if (!isNull(dnsAll) && !dnsAll.trim().isEmpty()) {
 
                 List<IP6Address> dnsIPs = new ArrayList<>();
-                String dnsAll = (String) props.get(configDNSs6);
                 String[] dnss = dnsAll.split(",");
                 for (String dns : dnss) {
                     logger.trace("IPv6 DNS: {}", dns);
@@ -459,10 +456,11 @@ public class IpConfigurationInterpreter {
 
             // domains
             String configDomains6 = NET_INTERFACE + interfaceName + ".config.ip6.domains";
-            if (props.containsKey(configDomains6)) {
+            String domainsAll = (String) props.get(configDomains6);
+            if (!isNull(domainsAll) && !domainsAll.trim().isEmpty()) {
 
                 List<String> domainNames = new ArrayList<>();
-                String domainsAll = (String) props.get(configDomains6);
+
                 String[] domains = domainsAll.split(",");
                 for (String domain : domains) {
                     logger.trace("IPv6 Domain: {}", domain);

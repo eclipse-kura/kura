@@ -32,6 +32,8 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.core.inventory.resources.DockerContainer;
+import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
@@ -69,7 +71,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String RESOURCE_DEPLOYMENT_PACKAGES = "deploymentPackages";
     public static final String RESOURCE_BUNDLES = "bundles";
     public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
-    public static final String RESOURCE_DOCKER_CONTAINERS = "dockerContainers";
+    public static final String RESOURCE_DOCKER_CONTAINERS = "containers";
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
@@ -171,6 +173,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public KuraMessage doGet(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
 
         List<String> resources = extractResources(reqMessage);
+
+        logger.error("GREG: " + resources.get(0));
+        logger.error("GREG: " + resources.toString());
 
         KuraPayload resPayload;
         if (resources.get(0).equals(INVENTORY)) {
@@ -408,7 +413,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
             systemResourceList = this.systemService.getSystemPackages();
+
             List<SystemPackage> systemPackageList = new ArrayList<>();
+
             systemResourceList.stream()
                     .forEach(p -> systemPackageList.add(new SystemPackage(p.getName(), p.getVersion(), p.getType())));
             SystemPackages systemPackages = new SystemPackages(systemPackageList);
@@ -429,7 +436,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
 
-            String s = marshal(containers);
+            List<DockerContainer> containersList = new ArrayList<>();
+            containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
+
+            DockerContainers dockerContainers = new DockerContainers(containersList);
+            String s = marshal(dockerContainers);
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(Charsets.UTF_8));
         } catch (Exception e) {

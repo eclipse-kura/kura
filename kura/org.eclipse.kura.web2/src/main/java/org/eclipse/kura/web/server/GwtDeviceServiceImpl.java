@@ -488,9 +488,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     private String containerStateToString(final ContainerDescriptor container) {
-        logger.info("Container State: " + container.getContainerState());
         switch (container.getContainerState()) {
-        case STARTING: // TODO: changeToStarting
+        case STARTING:
             return "bndInstalled";
         case ACTIVE:
             return "bndActive";

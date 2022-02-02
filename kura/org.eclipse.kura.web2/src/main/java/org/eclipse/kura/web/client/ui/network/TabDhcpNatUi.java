@@ -75,9 +75,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     FormLabel labelSubnet;
     @UiField
-    FormLabel labelDefaultL;
+    FormLabel labelDefaultLease;
     @UiField
-    FormLabel labelMax;
+    FormLabel labelMaxLease;
     @UiField
     FormLabel labelPass;
 
@@ -91,9 +91,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     TextBox subnet;
     @UiField
-    TextBox defaultL;
+    TextBox defaultLease;
     @UiField
-    TextBox max;
+    TextBox maxLease;
 
     @UiField
     InlineRadio radio1;
@@ -109,9 +109,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     FormGroup groupSubnet;
     @UiField
-    FormGroup groupDefaultL;
+    FormGroup groupDefaultLease;
     @UiField
-    FormGroup groupMax;
+    FormGroup groupMaxLease;
 
     @UiField
     HelpBlock helpRouter;
@@ -131,9 +131,9 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     @UiField
     HelpButton subnetHelp;
     @UiField
-    HelpButton defaultLHelp;
+    HelpButton defaultLeaseHelp;
     @UiField
-    HelpButton maxHelp;
+    HelpButton maxLeaseHelp;
     @UiField
     HelpButton passHelp;
 
@@ -175,8 +175,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 || this.groupBegin.getValidationState().equals(ValidationState.ERROR)
                 || this.groupEnd.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
-                || this.groupDefaultL.getValidationState().equals(ValidationState.ERROR)
-                || this.groupMax.getValidationState().equals(ValidationState.ERROR)) {
+                || this.groupDefaultLease.getValidationState().equals(ValidationState.ERROR)
+                || this.groupMaxLease.getValidationState().equals(ValidationState.ERROR)) {
             return false;
         } else {
             return true;
@@ -214,11 +214,11 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             updatedNetIf.setRouterDhcpBeginAddress(this.begin.getText());
             updatedNetIf.setRouterDhcpEndAddress(this.end.getText());
             updatedNetIf.setRouterDhcpSubnetMask(this.subnet.getText());
-            if (this.defaultL.getText() != null && !"".equals(this.defaultL.getText().trim())) {
-                updatedNetIf.setRouterDhcpDefaultLease(Integer.parseInt(this.defaultL.getText()));
+            if (this.defaultLease.getText() != null && !"".equals(this.defaultLease.getText().trim())) {
+                updatedNetIf.setRouterDhcpDefaultLease(Integer.parseInt(this.defaultLease.getText()));
             }
-            if (this.max.getText() != null && !"".equals(this.max.getText().trim())) {
-                updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(this.max.getText()));
+            if (this.maxLease.getText() != null && !"".equals(this.maxLease.getText().trim())) {
+                updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(this.maxLease.getText()));
             }
             updatedNetIf.setRouterDnsPass(this.radio1.getValue());
 
@@ -243,8 +243,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             this.begin.setText(this.selectedNetIfConfig.getRouterDhcpBeginAddress());
             this.end.setText(this.selectedNetIfConfig.getRouterDhcpEndAddress());
             this.subnet.setText(this.selectedNetIfConfig.getRouterDhcpSubnetMask());
-            this.defaultL.setText(String.valueOf(this.selectedNetIfConfig.getRouterDhcpDefaultLease()));
-            this.max.setText(String.valueOf(this.selectedNetIfConfig.getRouterDhcpMaxLease()));
+            this.defaultLease.setText(String.valueOf(this.selectedNetIfConfig.getRouterDhcpDefaultLease()));
+            this.maxLease.setText(String.valueOf(this.selectedNetIfConfig.getRouterDhcpMaxLease()));
             this.radio1.setValue(this.selectedNetIfConfig.getRouterDnsPass());
             this.radio2.setValue(!this.selectedNetIfConfig.getRouterDnsPass());
 
@@ -275,8 +275,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             this.begin.setEnabled(false);
             this.end.setEnabled(false);
             this.subnet.setEnabled(false);
-            this.defaultL.setEnabled(false);
-            this.max.setEnabled(false);
+            this.defaultLease.setEnabled(false);
+            this.maxLease.setEnabled(false);
             this.radio1.setEnabled(false);
             this.radio2.setEnabled(false);
         } else {
@@ -284,8 +284,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             this.begin.setEnabled(true);
             this.end.setEnabled(true);
             this.subnet.setEnabled(true);
-            this.defaultL.setEnabled(true);
-            this.max.setEnabled(true);
+            this.defaultLease.setEnabled(true);
+            this.maxLease.setEnabled(true);
             this.radio1.setEnabled(true);
             this.radio2.setEnabled(true);
 
@@ -295,8 +295,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 this.begin.setEnabled(false);
                 this.end.setEnabled(false);
                 this.subnet.setEnabled(false);
-                this.defaultL.setEnabled(false);
-                this.max.setEnabled(false);
+                this.defaultLease.setEnabled(false);
+                this.maxLease.setEnabled(false);
                 this.radio1.setEnabled(false);
                 this.radio2.setEnabled(false);
             } else {
@@ -304,8 +304,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 this.begin.setEnabled(true);
                 this.end.setEnabled(true);
                 this.subnet.setEnabled(true);
-                this.defaultL.setEnabled(true);
-                this.max.setEnabled(true);
+                this.defaultLease.setEnabled(true);
+                this.maxLease.setEnabled(true);
                 this.radio1.setEnabled(true);
                 this.radio2.setEnabled(true);
             }
@@ -318,8 +318,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.begin.setText("");
         this.end.setText("");
         this.subnet.setText("");
-        this.defaultL.setText("");
-        this.max.setText("");
+        this.defaultLease.setText("");
+        this.maxLease.setText("");
         this.radio1.setValue(true);
         this.radio2.setValue(false);
         update();
@@ -330,8 +330,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.groupBegin.setValidationState(ValidationState.NONE);
         this.groupEnd.setValidationState(ValidationState.NONE);
         this.groupSubnet.setValidationState(ValidationState.NONE);
-        this.groupDefaultL.setValidationState(ValidationState.NONE);
-        this.groupMax.setValidationState(ValidationState.NONE);
+        this.groupDefaultLease.setValidationState(ValidationState.NONE);
+        this.groupMaxLease.setValidationState(ValidationState.NONE);
 
         this.helpRouter.setText("");
     }
@@ -341,8 +341,8 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.beginHelp.setHelpText(MSGS.netRouterToolTipDhcpBeginAddr());
         this.endHelp.setHelpText(MSGS.netRouterToolTipDhcpEndAddr());
         this.subnetHelp.setHelpText(MSGS.netRouterToolTipDhcpSubnet());
-        this.defaultLHelp.setHelpText(MSGS.netRouterToolTipDhcpDefaultLeaseTime());
-        this.maxHelp.setHelpText(MSGS.netRouterToolTipDhcpMaxLeaseTime());
+        this.defaultLeaseHelp.setHelpText(MSGS.netRouterToolTipDhcpDefaultLeaseTime());
+        this.maxLeaseHelp.setHelpText(MSGS.netRouterToolTipDhcpMaxLeaseTime());
         this.passHelp.setHelpText(MSGS.netRouterToolTipPassDns());
     }
 
@@ -438,38 +438,40 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         });
 
         // DHCP Default Lease
-        this.labelDefaultL.setText(MSGS.netRouterDhcpDefaultLease());
-        this.defaultL.addMouseOverHandler(event -> {
+        this.labelDefaultLease.setText(MSGS.netRouterDhcpDefaultLease());
+        this.defaultLease.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
                 TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpDefaultLeaseTime()));
             }
         });
-        this.defaultL.addMouseOutHandler(event -> resetHelp());
-        this.defaultL.addValueChangeHandler(event -> {
+        this.defaultLease.addMouseOutHandler(event -> resetHelp());
+        this.defaultLease.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.defaultL.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
-                TabDhcpNatUi.this.groupDefaultL.setValidationState(ValidationState.ERROR);
+            if (!TabDhcpNatUi.this.defaultLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
+                    || !isPositiveInteger(TabDhcpNatUi.this.defaultLease.getText().trim())) {
+                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
             } else {
-                TabDhcpNatUi.this.groupDefaultL.setValidationState(ValidationState.NONE);
+                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
             }
         });
 
         // DHCP Max Lease
-        this.labelMax.setText(MSGS.netRouterDhcpMaxLease());
-        this.max.addMouseOverHandler(event -> {
+        this.labelMaxLease.setText(MSGS.netRouterDhcpMaxLease());
+        this.maxLease.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
                 TabDhcpNatUi.this.helpText.add(new Span(MSGS.netRouterToolTipDhcpMaxLeaseTime()));
             }
         });
-        this.max.addMouseOutHandler(event -> resetHelp());
-        this.max.addValueChangeHandler(event -> {
+        this.maxLease.addMouseOutHandler(event -> resetHelp());
+        this.maxLease.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.max.getText().trim().matches(FieldType.NUMERIC.getRegex())) {
-                TabDhcpNatUi.this.groupMax.setValidationState(ValidationState.ERROR);
+            if (!TabDhcpNatUi.this.maxLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
+                    || !isPositiveInteger(TabDhcpNatUi.this.maxLease.getText().trim())) {
+                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
             } else {
-                TabDhcpNatUi.this.groupMax.setValidationState(ValidationState.NONE);
+                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
             }
         });
 
@@ -500,5 +502,16 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     private void resetHelp() {
         this.helpText.clear();
         this.helpText.add(new Span(MSGS.netHelpDefaultHint()));
+    }
+
+    private boolean isPositiveInteger(String value) {
+        try {
+            if (Integer.parseInt(value) > 0) {
+                return true;
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return false;
     }
 }

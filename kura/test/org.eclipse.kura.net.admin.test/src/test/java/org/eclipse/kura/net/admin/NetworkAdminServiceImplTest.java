@@ -909,7 +909,7 @@ public class NetworkAdminServiceImplTest {
         verify(networkConfigurationServiceMock, times(1)).setNetworkConfiguration(anyObject());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetWifiAddressConfigEmpty() throws Throwable {
         // no configs available
 
@@ -922,7 +922,7 @@ public class NetworkAdminServiceImplTest {
         assertNull(wifiConfig);
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testGetWifiAddressConfigNoWifi() throws Throwable {
         // no wifi configs available
 
@@ -932,8 +932,6 @@ public class NetworkAdminServiceImplTest {
         List<? extends NetInterfaceAddressConfig> configs = Arrays.asList(arr);
 
         Object wifiConfig = TestUtil.invokePrivate(nasi, "getWifiAddressConfig", configs);
-
-        assertNull(wifiConfig);
     }
 
     @Test

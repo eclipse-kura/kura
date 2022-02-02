@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringTokenizer;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -30,70 +29,56 @@ import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IP6Address;
-import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetConfigIP6;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.dhcp.DhcpServerCfg;
-import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig4;
-import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemConfig.AuthType;
-import org.eclipse.kura.net.modem.ModemConfig.PdpType;
-import org.eclipse.kura.net.modem.ModemConnectionStatus;
-import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemInterfaceAddress;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
-import org.eclipse.kura.net.wifi.WifiBgscan;
-import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddress;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
-import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.system.SystemService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
+import org.eclipse.kura.usb.UsbDevice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("checkstyle:methodLength")
 public class NetworkConfiguration {
+
+    private static final String WIFI_CHANNELS_KEY = ".channel";
+
+    private static final String WIFI_IGNORE_SSID_KEY = ".ignoreSSID";
+
+    private static final String WIFI_PING_ACCESS_POINT_KEY = ".pingAccessPoint";
+
+    private static final String WIFI_RADIO_MODE_KEY = ".radioMode";
+
+    private static final String WIFI_GROUP_CIPHERS_KEY = ".groupCiphers";
+
+    private static final String WIFI_PAIRWISE_CIPHERS_KEY = ".pairwiseCiphers";
+
+    private static final String WIFI_MODE_KEY = ".mode";
+
+    private static final String DRIVER_KEY = ".driver";
+
+    private static final String WIFI_SSID_KEY = ".ssid";
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfiguration.class);
 
     private static final String ADDRESS = " :: Address: ";
-    private static final String GOT_MESSAGE = "got {}: {}";
     private static final String BGSCAN = ".bgscan";
-    private static final String HARDWARE_MODE = ".hardwareMode";
-    private static final String PASSPHRASE = ".passphrase";
+    private static final String WIFI_PASSPHRASE_KEY = ".passphrase";
     private static final String SECURITY_TYPE = ".securityType";
     private static final String NET_INTERFACE = "net.interface.";
     private static final String NET_INTERFACES = "net.interfaces";
-
-    private static final Boolean DEFAULT_PERSIST_VALUE = true;
-    private static final Integer DEFAULT_MAXFAIL_VALUE = 5;
-    private static final Integer DEFAULT_RESET_TIMEOUT_VALUE = 5;
-    private static final Integer DEFAULT_IDLE_VALUE = 95;
-    private static final String DEFAULT_ACTIVE_FILTER_VALUE = "inbound";
-    private static final Integer DEFAULT_LCP_ECHO_FAILURE_VALUE = 0;
-    private static final Integer DEFAULT_LCP_ECHO_INTERVAL_VALUE = 0;
-    private static final Boolean DEFAULT_GPS_ENABLED_VALUE = false;
-    private static final Boolean DEFAULT_DIVERSITY_ENABLED_VALUE = false;
-    private static final Boolean DEFAULT_ENABLED_VALUE = false;
-    private static final Integer DEFAULT_PROFILE_ID_VALUE = 0;
-    private static final Integer DEFAULT_DATA_COMPRESSION_VALUE = 0;
-    private static final Integer DEFAULT_HEADER_COMPRESSION_VALUE = 0;
 
     private final Map<String, NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs;
     private Map<String, Object> properties;
@@ -103,12 +88,6 @@ public class NetworkConfiguration {
     public NetworkConfiguration() {
         logger.debug("Created empty NetworkConfiguration");
         this.netInterfaceConfigs = new HashMap<>();
-    }
-
-    protected SystemService getSystemService() {
-        BundleContext context = FrameworkUtil.getBundle(NetworkConfiguration.class).getBundleContext();
-        ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
-        return context.getService(systemServiceSR);
     }
 
     /**
@@ -616,7 +595,7 @@ public class NetworkConfiguration {
             if (((WifiInterfaceAddress) nia).getMode() != null) {
                 wifiMode = ((WifiInterfaceAddress) nia).getMode();
             } else {
-                wifiMode = WifiMode.MASTER;
+                wifiMode = WifiMode.UNKNOWN;
             }
             newNetworkProperties.put(netIfPrefix + "wifi.mode", wifiMode.toString());
         }
@@ -647,9 +626,48 @@ public class NetworkConfiguration {
             return;
         }
 
-        StringBuilder prefix = new StringBuilder(netIfConfigPrefix).append("wifi.")
-                .append(mode.toString().toLowerCase());
+        String prefix = new StringBuilder(netIfConfigPrefix).append("wifi.").append(mode.toString().toLowerCase())
+                .toString();
 
+        properties.put(prefix + WIFI_SSID_KEY, wifiConfig.getSSID());
+        properties.put(prefix + DRIVER_KEY, wifiConfig.getDriver());
+        properties.put(prefix + WIFI_MODE_KEY, wifiConfig.getMode().toString());
+        if (wifiConfig.getSecurity() != null) {
+            properties.put(prefix + SECURITY_TYPE, wifiConfig.getSecurity().toString());
+        } else {
+            properties.put(prefix + SECURITY_TYPE, WifiSecurity.NONE.toString());
+        }
+        properties.put(prefix + WIFI_CHANNELS_KEY, serializeWifiChannels(wifiConfig));
+        Password psswd = wifiConfig.getPasskey();
+        if (psswd != null) {
+            properties.put(prefix + WIFI_PASSPHRASE_KEY, psswd);
+        } else {
+            properties.put(prefix + WIFI_PASSPHRASE_KEY, new Password(""));
+        }
+        if (wifiConfig.getRadioMode() != null) {
+            properties.put(prefix + WIFI_RADIO_MODE_KEY, wifiConfig.getRadioMode().toString());
+        }
+
+        if (wifiConfig.getBgscan() != null) {
+            properties.put(prefix + BGSCAN, wifiConfig.getBgscan().toString());
+        } else {
+            properties.put(prefix + BGSCAN, "");
+        }
+
+        if (wifiConfig.getPairwiseCiphers() != null) {
+            properties.put(prefix + WIFI_PAIRWISE_CIPHERS_KEY, wifiConfig.getPairwiseCiphers().name());
+        }
+
+        if (wifiConfig.getGroupCiphers() != null) {
+            properties.put(prefix + WIFI_GROUP_CIPHERS_KEY, wifiConfig.getGroupCiphers().name());
+        }
+
+        properties.put(prefix + WIFI_PING_ACCESS_POINT_KEY, wifiConfig.pingAccessPoint());
+
+        properties.put(prefix + WIFI_IGNORE_SSID_KEY, wifiConfig.ignoreSSID());
+    }
+
+    private static String serializeWifiChannels(WifiConfig wifiConfig) {
         int[] channels = wifiConfig.getChannels();
         StringBuilder sbChannel = new StringBuilder();
         if (channels != null) {
@@ -660,210 +678,7 @@ public class NetworkConfiguration {
                 }
             }
         }
-
-        properties.put(prefix + ".ssid", wifiConfig.getSSID());
-        properties.put(prefix + ".driver", wifiConfig.getDriver());
-        properties.put(prefix + ".mode", wifiConfig.getMode().toString());
-        if (wifiConfig.getSecurity() != null) {
-            properties.put(prefix + SECURITY_TYPE, wifiConfig.getSecurity().toString());
-        } else {
-            properties.put(prefix + SECURITY_TYPE, WifiSecurity.NONE.toString());
-        }
-        properties.put(prefix + ".channel", sbChannel.toString());
-        Password psswd = wifiConfig.getPasskey();
-        if (psswd != null) {
-            properties.put(prefix + PASSPHRASE, psswd);
-        } else {
-            properties.put(prefix + PASSPHRASE, new Password(""));
-        }
-        if (wifiConfig.getRadioMode() != null) {
-            properties.put(prefix + ".radioMode", wifiConfig.getRadioMode().toString());
-        }
-
-        if (wifiConfig.getBgscan() != null) {
-            properties.put(prefix + BGSCAN, wifiConfig.getBgscan().toString());
-        } else {
-            properties.put(prefix + BGSCAN, "");
-        }
-
-        if (wifiConfig.getPairwiseCiphers() != null) {
-            properties.put(prefix + ".pairwiseCiphers", wifiConfig.getPairwiseCiphers().name());
-        }
-
-        if (wifiConfig.getGroupCiphers() != null) {
-            properties.put(prefix + ".groupCiphers", wifiConfig.getGroupCiphers().name());
-        }
-
-        properties.put(prefix + ".pingAccessPoint", wifiConfig.pingAccessPoint());
-
-        properties.put(prefix + ".ignoreSSID", wifiConfig.ignoreSSID());
-    }
-
-    private static WifiConfig getWifiConfig(String netIfConfigPrefix, WifiMode mode, Map<String, Object> properties)
-            throws KuraException {
-
-        String prefix = new StringBuilder(netIfConfigPrefix).append("wifi.").append(mode.toString().toLowerCase())
-                .toString();
-
-        String ssid = getSsid(properties, prefix + ".ssid");
-
-        WifiSecurity wifiSecurity = getWifiSecurity(properties, prefix + SECURITY_TYPE);
-
-        int[] wifiChannels = getWifiChannels(properties, prefix + ".channel");
-
-        String passphrase = getWifiPassphrase(properties, prefix + PASSPHRASE);
-
-        String hwMode = getHwMode(properties, prefix + HARDWARE_MODE);
-
-        String bgscan = null;
-        WifiConfig wifiConfig = new WifiConfig(mode, ssid, wifiChannels, wifiSecurity, passphrase, hwMode,
-                new WifiBgscan(bgscan));
-
-        wifiConfig.setDriver(getDriver(properties, prefix + ".driver"));
-        wifiConfig.setIgnoreSSID(isSsidIgnored(properties, prefix + ".ignoreSSID"));
-        wifiConfig.setPairwiseCiphers(getPairwiseCiphers(properties, prefix + ".groupCiphers"));
-        wifiConfig.setRadioMode(getRadioMode(properties, prefix + ".radioMode"));
-
-        if (mode == WifiMode.INFRA) {
-            wifiConfig.setBgscan(getBgScan(properties, prefix + BGSCAN));
-            wifiConfig.setGroupCiphers(getGroupCiphers(properties, prefix + ".groupCiphers"));
-            wifiConfig.setPingAccessPoint(getPingAccessPoint(properties, prefix + ".pingAccessPoint"));
-        }
-
-        return wifiConfig;
-    }
-
-    private static boolean getPingAccessPoint(Map<String, Object> properties, String key) {
-        boolean pingAccessPoint = false;
-        if (properties.get(key) != null) {
-            pingAccessPoint = (Boolean) properties.get(key);
-            logger.trace("Ping Access Point is {}", pingAccessPoint);
-        } else {
-            logger.trace("Ping Access Point is null");
-        }
-        return pingAccessPoint;
-    }
-
-    private static WifiBgscan getBgScan(Map<String, Object> properties, String key) {
-        String bgscan = (String) properties.get(key);
-        if (bgscan == null) {
-            bgscan = "";
-        }
-        return new WifiBgscan(bgscan);
-    }
-
-    private static WifiCiphers getGroupCiphers(Map<String, Object> properties, String key) {
-        String groupCiphers = (String) properties.get(key);
-
-        if (groupCiphers != null) {
-            return WifiCiphers.valueOf(groupCiphers);
-        }
-        return WifiCiphers.valueOf("CCMP");
-    }
-
-    private static WifiCiphers getPairwiseCiphers(Map<String, Object> properties, String key) {
-        String pairwiseCiphers = (String) properties.get(key);
-        if (pairwiseCiphers != null) {
-            return WifiCiphers.valueOf(pairwiseCiphers);
-        }
-        return WifiCiphers.valueOf("CCMP");
-    }
-
-    private static WifiRadioMode getRadioMode(Map<String, Object> properties, String key) {
-        String radioModeString = (String) properties.get(key);
-        logger.trace("radioModeString is {}", radioModeString);
-        if (radioModeString != null && !radioModeString.isEmpty()) {
-            return WifiRadioMode.valueOf(radioModeString);
-        }
-
-        return WifiRadioMode.valueOf("RADIO_MODE_80211b");
-    }
-
-    private static boolean isSsidIgnored(Map<String, Object> properties, String key) {
-        boolean ignoreSSID = false;
-        if (properties.get(key) != null) {
-            ignoreSSID = (Boolean) properties.get(key);
-            logger.trace("Ignore SSID is {}", ignoreSSID);
-        } else {
-            logger.trace("Ignore SSID is null");
-        }
-        return ignoreSSID;
-    }
-
-    private static String getHwMode(Map<String, Object> properties, String key) {
-        String hwMode = (String) properties.get(key);
-        if (hwMode == null) {
-            hwMode = "b";
-        }
-        return hwMode;
-    }
-
-    private static String getWifiPassphrase(Map<String, Object> properties, String key) {
-        Object psswdObj = properties.get(key);
-        String passphrase = "PLACEHOLDER";
-        if (psswdObj instanceof Password) {
-            Password psswd = (Password) psswdObj;
-            passphrase = new String(psswd.getPassword());
-        } else if (psswdObj instanceof String) {
-            passphrase = (String) psswdObj;
-        }
-        return passphrase;
-    }
-
-    private static int[] getWifiChannels(Map<String, Object> properties, String key) {
-        String channelsString = (String) properties.get(key);
-        logger.trace("channelsString is {}", channelsString);
-        if (channelsString != null && !channelsString.trim().isEmpty()) {
-            channelsString = channelsString.trim();
-            StringTokenizer st = new StringTokenizer(channelsString, " ");
-            int tokens = st.countTokens();
-            if (tokens > 0) {
-                int[] channels = new int[tokens];
-                for (int i = 0; i < tokens; i++) {
-                    String token = st.nextToken();
-                    try {
-                        channels[i] = Integer.parseInt(token);
-                    } catch (Exception e) {
-                        logger.error("Error parsing channels!", e);
-                    }
-                }
-                return channels;
-            }
-        }
-
-        return new int[] { 1 };
-    }
-
-    private static WifiSecurity getWifiSecurity(Map<String, Object> properties, String key) throws KuraException {
-        String securityString = (String) properties.get(key);
-        logger.trace("securityString is {}", securityString);
-        if (securityString != null && !securityString.isEmpty()) {
-            try {
-                return WifiSecurity.valueOf(securityString);
-            } catch (IllegalArgumentException e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID,
-                        "Could not parse wifi security " + securityString);
-            }
-        }
-        return WifiSecurity.NONE;
-    }
-
-    private static String getDriver(Map<String, Object> properties, String key) {
-        String driver = (String) properties.get(key);
-        if (driver == null) {
-            driver = "";
-        }
-        logger.trace("driver is {}", driver);
-        return driver;
-    }
-
-    private static String getSsid(Map<String, Object> properties, String key) {
-        String ssid = (String) properties.get(key);
-        if (ssid == null) {
-            ssid = "";
-        }
-        logger.trace("SSID is {}", ssid);
-        return ssid;
+        return sbChannel.toString();
     }
 
     private void addModemConfigProperties(ModemConfig modemConfig, String prefix, Map<String, Object> properties) {
@@ -887,198 +702,6 @@ public class NetworkConfiguration {
         properties.put(prefix + "enabled", modemConfig.isEnabled());
         properties.put(prefix + "gpsEnabled", modemConfig.isGpsEnabled());
         properties.put(prefix + "diversityEnabled", modemConfig.isDiversityEnabled());
-    }
-
-    private static ModemConfig getModemConfig(String prefix, Map<String, Object> properties) throws KuraException {
-        ModemConfig modemConfig = new ModemConfig();
-
-        modemConfig.setApn(getApn(prefix, properties));
-        modemConfig.setAuthType(getAuthenticationType(prefix, properties));
-        modemConfig.setDataCompression(getDataCompression(prefix, properties));
-        modemConfig.setDialString(getDialString(prefix, properties));
-        modemConfig.setHeaderCompression(getHeaderCompression(prefix, properties));
-        modemConfig.setIpAddress(getIpAddress(prefix, properties));
-        modemConfig.setPassword(getPassword(prefix, properties));
-        modemConfig.setPdpType(getPdpType(prefix, properties));
-        modemConfig.setProfileID(getProfileId(prefix, properties));
-        modemConfig.setPersist(isPersist(prefix, properties));
-        modemConfig.setMaxFail(getMaximumFailures(prefix, properties));
-        modemConfig.setResetTimeout(getResetTimeout(prefix, properties));
-        modemConfig.setIdle(getIdle(prefix, properties));
-        modemConfig.setActiveFilter(getActiveFilter(prefix, properties));
-        modemConfig.setLcpEchoInterval(getLcpEchoInterval(prefix, properties));
-        modemConfig.setLcpEchoFailure(getLcpEchoFailure(prefix, properties));
-        modemConfig.setUsername((String) properties.get(prefix + "username"));
-        modemConfig.setEnabled(isEnabled(prefix, properties));
-        modemConfig.setGpsEnabled(isGpsEnabled(prefix, properties));
-        modemConfig.setDiversityEnabled(isDiversityEnabled(prefix, properties));
-
-        return modemConfig;
-    }
-
-    private static boolean isGpsEnabled(String prefix, Map<String, Object> properties) {
-        String key = prefix + "gpsEnabled";
-        Object value = properties.getOrDefault(key, DEFAULT_GPS_ENABLED_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_GPS_ENABLED_VALUE;
-    }
-
-    private static boolean isDiversityEnabled(String prefix, Map<String, Object> properties) {
-        String key = prefix + "diversityEnabled";
-        Object value = properties.getOrDefault(key, DEFAULT_DIVERSITY_ENABLED_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_DIVERSITY_ENABLED_VALUE;
-    }
-
-    private static boolean isEnabled(String prefix, Map<String, Object> properties) {
-        String key = prefix + "enabled";
-        Object value = properties.getOrDefault(key, DEFAULT_ENABLED_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_ENABLED_VALUE;
-    }
-
-    private static int getLcpEchoFailure(String prefix, Map<String, Object> properties) {
-        String key = prefix + "lcpEchoFailure";
-        Object value = properties.getOrDefault(key, DEFAULT_LCP_ECHO_FAILURE_VALUE);
-        return value != null ? (Integer) value : DEFAULT_LCP_ECHO_FAILURE_VALUE;
-    }
-
-    private static int getLcpEchoInterval(String prefix, Map<String, Object> properties) {
-        String key = prefix + "lcpEchoInterval";
-        Object value = properties.getOrDefault(key, DEFAULT_LCP_ECHO_INTERVAL_VALUE);
-        return value != null ? (Integer) value : DEFAULT_LCP_ECHO_INTERVAL_VALUE;
-    }
-
-    private static String getActiveFilter(String prefix, Map<String, Object> properties) {
-        String key = prefix + "activeFilter";
-        Object value = properties.getOrDefault(key, DEFAULT_ACTIVE_FILTER_VALUE);
-        return value != null ? (String) value : DEFAULT_ACTIVE_FILTER_VALUE;
-    }
-
-    private static int getIdle(String prefix, Map<String, Object> properties) {
-        String key = prefix + "idle";
-        Object value = properties.getOrDefault(key, DEFAULT_IDLE_VALUE);
-        return value != null ? (Integer) value : DEFAULT_IDLE_VALUE;
-    }
-
-    private static int getResetTimeout(String prefix, Map<String, Object> properties) {
-        String key = prefix + "resetTimeout";
-        Object value = properties.getOrDefault(key, DEFAULT_RESET_TIMEOUT_VALUE);
-        return value != null ? (Integer) value : DEFAULT_RESET_TIMEOUT_VALUE;
-    }
-
-    private static int getMaximumFailures(String prefix, Map<String, Object> properties) {
-        String key = prefix + "maxFail";
-        Object value = properties.getOrDefault(key, DEFAULT_MAXFAIL_VALUE);
-        return value != null ? (Integer) value : DEFAULT_MAXFAIL_VALUE;
-    }
-
-    private static boolean isPersist(String prefix, Map<String, Object> properties) {
-        String key = prefix + "persist";
-        Object value = properties.getOrDefault(key, DEFAULT_PERSIST_VALUE);
-        return value != null ? (Boolean) value : DEFAULT_PERSIST_VALUE;
-    }
-
-    private static int getProfileId(String prefix, Map<String, Object> properties) {
-        String key = prefix + "profileId";
-        Object value = properties.getOrDefault(key, DEFAULT_PROFILE_ID_VALUE);
-        return value != null ? (Integer) value : DEFAULT_PROFILE_ID_VALUE;
-    }
-
-    private static PdpType getPdpType(String prefix, Map<String, Object> properties) {
-        String key = prefix + "pdpType";
-        Object value = properties.getOrDefault(key, PdpType.IP.name());
-        return value != null ? parsePdpType((String) value) : PdpType.IP;
-    }
-
-    private static PdpType parsePdpType(String pdpTypeString) {
-        PdpType pdpType = PdpType.UNKNOWN;
-        try {
-            pdpType = PdpType.valueOf(pdpTypeString);
-        } catch (IllegalArgumentException e) {
-            pdpType = PdpType.IP;
-        }
-        return pdpType;
-    }
-
-    private static Password getPassword(String prefix, Map<String, Object> properties) throws KuraException {
-        Password password = null;
-        String key = prefix + "password";
-        Object psswdObj = properties.get(key);
-        if (psswdObj instanceof Password) {
-            password = (Password) psswdObj;
-        } else if (psswdObj instanceof String) {
-            password = new Password((String) psswdObj);
-        } else if (psswdObj == null) {
-            password = new Password("");
-        } else {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "Invalid password type.", key,
-                    psswdObj.getClass());
-        }
-        return password;
-    }
-
-    private static IPAddress getIpAddress(String prefix, Map<String, Object> properties) throws KuraException {
-        String ipAddressString = (String) properties.get(prefix + "ipAddress");
-        IPAddress ipAddress = null;
-        logger.trace("IP address is {}", ipAddressString);
-        if (ipAddressString != null && !ipAddressString.isEmpty()) {
-            ipAddress = parseIpAddress(ipAddressString);
-        } else {
-            logger.trace("IP address is null");
-        }
-        return ipAddress;
-    }
-
-    private static IPAddress parseIpAddress(String ipAddressString) throws KuraException {
-        try {
-            return IPAddress.parseHostAddress(ipAddressString);
-        } catch (UnknownHostException e) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Could not parse ip address " + ipAddressString);
-        }
-    }
-
-    private static int getHeaderCompression(String prefix, Map<String, Object> properties) {
-        String key = prefix + "headerCompression";
-        Object value = properties.getOrDefault(key, DEFAULT_HEADER_COMPRESSION_VALUE);
-        return value != null ? (Integer) value : DEFAULT_HEADER_COMPRESSION_VALUE;
-    }
-
-    private static String getDialString(String prefix, Map<String, Object> properties) {
-        String key = prefix + "dialString";
-        return (String) properties.get(key);
-    }
-
-    private static int getDataCompression(String prefix, Map<String, Object> properties) {
-        String key = prefix + "dataCompression";
-        Object value = properties.getOrDefault(key, DEFAULT_DATA_COMPRESSION_VALUE);
-        return value != null ? (Integer) value : DEFAULT_DATA_COMPRESSION_VALUE;
-    }
-
-    private static AuthType getAuthenticationType(String prefix, Map<String, Object> properties) throws KuraException {
-        String key = prefix + "authType";
-        String authTypeString = (String) properties.get(key);
-        AuthType authType;
-        logger.trace("Auth type is {}", authTypeString);
-        if (authTypeString != null && !authTypeString.isEmpty()) {
-            authType = parseAuthenticationType(authTypeString);
-        } else {
-            logger.trace("Auth type is null");
-            authType = AuthType.NONE;
-        }
-        return authType;
-    }
-
-    private static AuthType parseAuthenticationType(String authTypeString) throws KuraException {
-        AuthType authType = AuthType.NONE;
-        try {
-            authType = AuthType.valueOf(authTypeString);
-        } catch (IllegalArgumentException e) {
-            throw new KuraException(KuraErrorCode.INVALID_PARAMETER, "Could not parse auth type " + authTypeString);
-        }
-        return authType;
-    }
-
-    private static String getApn(String prefix, Map<String, Object> properties) {
-        String key = prefix + "apn";
-        return (String) properties.get(key);
     }
 
     private static void addNetConfigIP4Properties(NetConfigIP4 nc, String netIfConfigPrefix,
@@ -1164,504 +787,79 @@ public class NetworkConfiguration {
             return;
         }
 
+        UsbDevice usbDevice = IpConfigurationInterpreter.getUsbDeviceInfo(props, interfaceName);
+        NetInterfaceConfig<?> interfaceConfig = null;
+
         switch (type) {
         case LOOPBACK:
-            LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
+            interfaceConfig = new LoopbackInterfaceConfigImpl(interfaceName);
             List<NetInterfaceAddressConfig> loopbackInterfaceAddressConfigs = new ArrayList<>();
-            loopbackInterfaceAddressConfigs.add(new NetInterfaceAddressConfigImpl());
-            loopbackInterfaceConfig.setNetInterfaceAddresses(loopbackInterfaceAddressConfigs);
+            NetInterfaceAddressConfigImpl netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
+            netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
+                    interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
+            loopbackInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
+            ((LoopbackInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(loopbackInterfaceAddressConfigs);
 
-            populateNetInterfaceConfiguration(loopbackInterfaceConfig, props);
+            ((LoopbackInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-            this.netInterfaceConfigs.put(interfaceName, loopbackInterfaceConfig);
             break;
         case ETHERNET:
-            EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
+            interfaceConfig = new EthernetInterfaceConfigImpl(interfaceName);
             List<NetInterfaceAddressConfig> ethernetInterfaceAddressConfigs = new ArrayList<>();
-            ethernetInterfaceAddressConfigs.add(new NetInterfaceAddressConfigImpl());
-            ethernetInterfaceConfig.setNetInterfaceAddresses(ethernetInterfaceAddressConfigs);
+            netInterfaceAddressConfigImpl = new NetInterfaceAddressConfigImpl();
+            netInterfaceAddressConfigImpl.setNetConfigs(IpConfigurationInterpreter.populateConfiguration(props,
+                    interfaceName, netInterfaceAddressConfigImpl.getAddress(), interfaceConfig.isVirtual()));
+            ethernetInterfaceAddressConfigs.add(netInterfaceAddressConfigImpl);
+            ((EthernetInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(ethernetInterfaceAddressConfigs);
 
-            populateNetInterfaceConfiguration(ethernetInterfaceConfig, props);
+            ((EthernetInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-            this.netInterfaceConfigs.put(interfaceName, ethernetInterfaceConfig);
             break;
         case WIFI:
-            WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
+            interfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
 
             List<WifiInterfaceAddressConfig> wifiInterfaceAddressConfigs = new ArrayList<>();
-            wifiInterfaceAddressConfigs.add(new WifiInterfaceAddressConfigImpl());
-            wifiInterfaceConfig.setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
 
-            populateNetInterfaceConfiguration(wifiInterfaceConfig, props);
+            WifiInterfaceAddressConfig wifiInterfaceAddressConfig = new WifiInterfaceAddressConfigImpl();
+            List<NetConfig> wifiNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
+                    wifiInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
+            wifiNetConfigs.addAll(WifiConfigurationInterpreter.populateConfiguration(props, interfaceName));
+            ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig).setNetConfigs(wifiNetConfigs);
+            ((WifiInterfaceAddressConfigImpl) wifiInterfaceAddressConfig)
+                    .setMode(WifiConfigurationInterpreter.getWifiMode(props, interfaceName));
+            wifiInterfaceAddressConfigs.add(wifiInterfaceAddressConfig);
 
-            this.netInterfaceConfigs.put(interfaceName, wifiInterfaceConfig);
+            ((WifiInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(wifiInterfaceAddressConfigs);
+
+            ((WifiInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
+
             break;
         case MODEM:
-            ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
+            interfaceConfig = new ModemInterfaceConfigImpl(interfaceName);
+
+            ModemInterfaceAddressConfig modemInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
+            List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
+                    modemInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
+            modemNetConfigs.addAll(ModemConfigurationInterpreter.populateNetInterfaceConfiguration(
+                    modemInterfaceAddressConfig, props, interfaceName, (ModemInterfaceConfigImpl) interfaceConfig));
+            ((ModemInterfaceAddressConfigImpl) modemInterfaceAddressConfig).setNetConfigs(modemNetConfigs);
 
             List<ModemInterfaceAddressConfig> modemInterfaceAddressConfigs = new ArrayList<>();
-            modemInterfaceAddressConfigs.add(new ModemInterfaceAddressConfigImpl());
-            modemInterfaceConfig.setNetInterfaceAddresses(modemInterfaceAddressConfigs);
+            modemInterfaceAddressConfigs.add(modemInterfaceAddressConfig);
+            ((ModemInterfaceConfigImpl) interfaceConfig).setNetInterfaceAddresses(modemInterfaceAddressConfigs);
 
-            populateNetInterfaceConfiguration(modemInterfaceConfig, props);
+            ((ModemInterfaceConfigImpl) interfaceConfig).setUsbDevice(usbDevice);
 
-            this.netInterfaceConfigs.put(interfaceName, modemInterfaceConfig);
             break;
         case UNKNOWN:
             logger.trace("Found interface of unknown type in current configuration: {}", interfaceName);
-            break;
+            return;
         default:
             logger.error("Unsupported type {} for interface {}", type, interfaceName);
-            break;
-        }
-    }
-
-    private Optional<NetInterfaceType> getInterfaceType(
-            AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props) {
-        Optional<NetInterfaceType> interfaceType = Optional.empty();
-
-        String interfaceName = netInterfaceConfig.getName();
-        StringBuilder keyBuffer = new StringBuilder();
-        keyBuffer.append(NET_INTERFACE).append(interfaceName).append(".type");
-        Object type = props.get(keyBuffer.toString());
-        if (type == null) {
-            logger.debug("Interface {} type not found in properties. Try to infer it from the object class.",
-                    interfaceName);
-            if (netInterfaceConfig instanceof EthernetInterfaceConfigImpl) {
-                interfaceType = Optional.of(NetInterfaceType.ETHERNET);
-            } else if (netInterfaceConfig instanceof WifiInterfaceConfigImpl) {
-                interfaceType = Optional.of(NetInterfaceType.WIFI);
-            } else if (netInterfaceConfig instanceof LoopbackInterfaceConfigImpl) {
-                interfaceType = Optional.of(NetInterfaceType.LOOPBACK);
-            } else if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
-                interfaceType = Optional.of(NetInterfaceType.MODEM);
-            }
-        } else {
-            interfaceType = Optional.of(NetInterfaceType.valueOf((String) type));
-        }
-        return interfaceType;
-    }
-
-    public void populateNetInterfaceConfiguration(
-            AbstractNetInterface<? extends NetInterfaceAddressConfig> netInterfaceConfig, Map<String, Object> props)
-            throws UnknownHostException, KuraException {
-        String interfaceName = netInterfaceConfig.getName();
-        Optional<NetInterfaceType> interfaceTypeOptional = getInterfaceType(netInterfaceConfig, props);
-        if (!interfaceTypeOptional.isPresent()) {
-            logger.debug("Interface {} type not found.", interfaceName);
             return;
         }
 
-        // build the prefixes for all the properties associated with this interface
-        StringBuilder sbPrefix = new StringBuilder();
-        sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
-
-        String netIfPrefix = sbPrefix.append("config.").toString();
-        String netIfConfigPrefix = sbPrefix.toString();
-
-        // Status
-        String configStatus4 = null;
-        String configStatus4Key = NET_INTERFACE + interfaceName + ".config.ip4.status";
-        if (props.containsKey(configStatus4Key)) {
-            configStatus4 = (String) props.get(configStatus4Key);
-        } else {
-            configStatus4 = NetInterfaceStatus.netIPv4StatusDisabled.name();
-            if ((netInterfaceConfig instanceof EthernetInterfaceConfigImpl
-                    || netInterfaceConfig instanceof WifiInterfaceConfigImpl) && netInterfaceConfig.isVirtual()) {
-                SystemService service = getSystemService();
-                if (service != null) {
-                    configStatus4 = NetInterfaceStatus.valueOf(service.getNetVirtualDevicesConfig()).name();
-                }
-            }
-        }
-        logger.trace("Status Ipv4? {}", configStatus4);
-
-        String configStatus6 = NetInterfaceStatus.netIPv6StatusDisabled.name();
-
-        // POPULATE NetInterfaceAddresses
-        for (NetInterfaceAddressConfig netInterfaceAddress : netInterfaceConfig.getNetInterfaceAddresses()) {
-
-            List<NetConfig> netConfigs = new ArrayList<>();
-            if (netInterfaceAddress instanceof NetInterfaceAddressConfigImpl) {
-                ((NetInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(netConfigs);
-            } else if (netInterfaceAddress instanceof WifiInterfaceAddressConfigImpl) {
-                logger.trace("netInterfaceAddress is instanceof WifiInterfaceAddressImpl");
-                WifiInterfaceAddressConfigImpl wifiInterfaceAddressImpl = (WifiInterfaceAddressConfigImpl) netInterfaceAddress;
-                wifiInterfaceAddressImpl.setNetConfigs(netConfigs);
-
-                // wifi mode
-                String configWifiMode = netIfPrefix + "wifi.mode";
-                WifiMode mode = WifiMode.MASTER;
-                if (props.containsKey(configWifiMode) && props.get(configWifiMode) != null) {
-                    mode = WifiMode.valueOf((String) props.get(configWifiMode));
-                }
-                logger.trace("Adding wifiMode: {}", mode);
-                wifiInterfaceAddressImpl.setMode(mode);
-                
-                WifiConfig apConfig = getWifiConfig(netIfConfigPrefix, WifiMode.MASTER, props);
-                if (apConfig != null) {
-                    logger.trace("Adding AP wifi config");
-                    netConfigs.add(apConfig);
-                } else {
-                    logger.warn("no AP wifi config specified");
-                }
-
-                WifiConfig infraConfig = getWifiConfig(netIfConfigPrefix, WifiMode.INFRA, props);
-                if (infraConfig != null) {
-                    logger.trace("Adding client INFRA wifi config");
-                    netConfigs.add(infraConfig);
-                } else {
-                    logger.warn("no INFRA wifi config specified");
-                }
-            } else if (netInterfaceAddress instanceof ModemInterfaceAddressConfigImpl) {
-                logger.trace("netInterfaceAddress is instanceof ModemInterfaceAddressConfigImpl");
-                ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = (ModemInterfaceAddressConfigImpl) netInterfaceAddress;
-                modemInterfaceAddressImpl.setNetConfigs(netConfigs);
-
-                // connection type
-                String configConnType = netIfPrefix + "connection.type";
-                if (props.containsKey(configConnType)) {
-                    ModemConnectionType connType = ModemConnectionType.PPP;
-                    String connTypeStr = (String) props.get(configConnType);
-                    if (connTypeStr != null && !connTypeStr.isEmpty()) {
-                        connType = ModemConnectionType.valueOf(connTypeStr);
-                    }
-
-                    logger.trace("Adding modem connection type: {}", connType);
-                    modemInterfaceAddressImpl.setConnectionType(connType);
-                }
-
-                // connection status
-                String configConnStatus = netIfPrefix + "connection.status";
-                if (props.containsKey(configConnStatus)) {
-                    ModemConnectionStatus connStatus = ModemConnectionStatus.UNKNOWN;
-                    String connStatusStr = (String) props.get(configConnStatus);
-                    if (connStatusStr != null && !connStatusStr.isEmpty()) {
-                        connStatus = ModemConnectionStatus.valueOf(connStatusStr);
-                    }
-
-                    logger.trace("Adding modem connection status: {}", connStatus);
-                    modemInterfaceAddressImpl.setConnectionStatus(connStatus);
-                }
-                
-                ModemConfig modemConfig = getModemConfig(netIfConfigPrefix, props);
-                modemConfig.setPppNumber(((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum());
-                netConfigs.add(modemConfig);
-            }
-
-            // POPULATE NetConfigs
-            // dhcp4
-            NetConfigIP4 netConfigIP4;
-            boolean dhcpEnabled = isDhcpClient4Enabled(props, interfaceName);
-
-            NetInterfaceStatus status4 = NetInterfaceStatus.valueOf(configStatus4);
-            netConfigIP4 = new NetConfigIP4(status4, getAutoConnectProperty(status4));
-            netConfigs.add(netConfigIP4);
-
-            if (dhcpEnabled) {
-                netConfigIP4.setDhcp(true);
-            } else {
-                // NetConfigIP4
-                String configIp4 = NET_INTERFACE + interfaceName + ".config.ip4.address";
-                if (props.containsKey(configIp4)) {
-                    logger.trace(GOT_MESSAGE, configIp4, props.get(configIp4));
-
-                    // address
-                    String addressIp4 = (String) props.get(configIp4);
-                    logger.trace("IPv4 address: {}", addressIp4);
-                    if (addressIp4 != null && !addressIp4.isEmpty()) {
-                        IP4Address ip4Address = (IP4Address) IPAddress.parseHostAddress(addressIp4);
-                        netConfigIP4.setAddress(ip4Address);
-                    }
-
-                    // prefix
-                    String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
-                    short networkPrefixLength = -1;
-                    if (props.containsKey(configIp4Prefix)) {
-                        if (props.get(configIp4Prefix) instanceof Short) {
-                            networkPrefixLength = (Short) props.get(configIp4Prefix);
-                        } else if (props.get(configIp4Prefix) instanceof String) {
-                            networkPrefixLength = Short.parseShort((String) props.get(configIp4Prefix));
-                        }
-
-                        try {
-                            netConfigIP4.setNetworkPrefixLength(networkPrefixLength);
-                        } catch (KuraException e) {
-                            logger.error("Exception while setting Network Prefix length!", e);
-                        }
-                    }
-
-                    // gateway
-                    String configIp4Gateway = NET_INTERFACE + interfaceName + ".config.ip4.gateway";
-                    if (props.containsKey(configIp4Gateway)) {
-
-                        String gatewayIp4 = (String) props.get(configIp4Gateway);
-                        logger.trace("IPv4 gateway: {}", gatewayIp4);
-                        if (gatewayIp4 != null && !gatewayIp4.isEmpty()) {
-                            IP4Address ip4Gateway = (IP4Address) IPAddress.parseHostAddress(gatewayIp4);
-                            netConfigIP4.setGateway(ip4Gateway);
-                        }
-                    }
-                }
-            }
-
-            // dns servers
-            String configDNSs = NET_INTERFACE + interfaceName + ".config.ip4.dnsServers";
-            if (props.containsKey(configDNSs)) {
-
-                List<IP4Address> dnsIPs = new ArrayList<>();
-                String dnsAll = (String) props.get(configDNSs);
-                String[] dnss = dnsAll.split(",");
-                for (String dns : dnss) {
-                    if (dns != null && dns.length() > 0) {
-                        logger.trace("IPv4 DNS: {}", dns);
-                        IP4Address dnsIp4 = (IP4Address) IPAddress.parseHostAddress(dns);
-                        dnsIPs.add(dnsIp4);
-                    }
-                }
-                netConfigIP4.setDnsServers(dnsIPs);
-            }
-
-            // win servers
-            String configWINSs = NET_INTERFACE + interfaceName + ".config.ip4.winsServers";
-            if (props.containsKey(configWINSs)) {
-
-                List<IP4Address> winsIPs = new ArrayList<>();
-                String winsAll = (String) props.get(configWINSs);
-                String[] winss = winsAll.split(",");
-                for (String wins : winss) {
-                    logger.trace("WINS: {}", wins);
-                    IP4Address winsIp4 = (IP4Address) IPAddress.parseHostAddress(wins);
-                    winsIPs.add(winsIp4);
-                }
-                netConfigIP4.setWinsServers(winsIPs);
-            }
-
-            // domains
-            String configDomains = NET_INTERFACE + interfaceName + ".config.ip4.domains";
-            if (props.containsKey(configDomains)) {
-
-                List<String> domainNames = new ArrayList<>();
-                String domainsAll = (String) props.get(configDomains);
-                String[] domains = domainsAll.split(",");
-                for (String domain : domains) {
-                    logger.trace("IPv4 Domain: {}", domain);
-                    domainNames.add(domain);
-                }
-                netConfigIP4.setDomains(domainNames);
-            }
-
-            // FirewallNatConfig - see if NAT is enabled
-            String configNatEnabled = NET_INTERFACE + interfaceName + ".config.nat.enabled";
-            if (props.containsKey(configNatEnabled)) {
-                boolean natEnabled = (Boolean) props.get(configNatEnabled);
-                logger.trace("NAT enabled? {}", natEnabled);
-
-                if (natEnabled) {
-                    FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(interfaceName, "unknown", true);
-                    netConfigs.add(natConfig);
-                }
-            }
-
-            // DhcpServerConfigIP4 - see if there is a DHCP 4 Server
-            String configDhcpServerEnabled = NET_INTERFACE + interfaceName + ".config.dhcpServer4.enabled";
-            if (props.containsKey(configDhcpServerEnabled)) {
-                boolean dhcpServerEnabled = (Boolean) props.get(configDhcpServerEnabled);
-                logger.trace("DHCP Server 4 enabled? {}", dhcpServerEnabled);
-
-                IP4Address subnet = null;
-                IP4Address routerAddress = dhcpEnabled ? (IP4Address) netInterfaceAddress.getAddress()
-                        : netConfigIP4.getAddress();
-                IP4Address subnetMask = null;
-                int defaultLeaseTime = -1;
-                int maximumLeaseTime = -1;
-                short prefix = -1;
-                IP4Address rangeStart = null;
-                IP4Address rangeEnd = null;
-                boolean passDns = false;
-                List<IP4Address> dnServers = new ArrayList<>();
-
-                // prefix
-                String configDhcpServerPrefix = NET_INTERFACE + interfaceName + ".config.dhcpServer4.prefix";
-                if (props.containsKey(configDhcpServerPrefix)) {
-                    if (props.get(configDhcpServerPrefix) instanceof Short) {
-                        prefix = (Short) props.get(configDhcpServerPrefix);
-                    } else if (props.get(configDhcpServerPrefix) instanceof String) {
-                        prefix = Short.parseShort((String) props.get(configDhcpServerPrefix));
-                    }
-                    logger.trace("DHCP Server prefix: {}", prefix);
-                }
-
-                // rangeStart
-                String configDhcpServerRangeStart = NET_INTERFACE + interfaceName + ".config.dhcpServer4.rangeStart";
-                if (props.containsKey(configDhcpServerRangeStart)) {
-                    String dhcpServerRangeStart = (String) props.get(configDhcpServerRangeStart);
-                    logger.trace("DHCP Server Range Start: {}", dhcpServerRangeStart);
-                    if (dhcpServerRangeStart != null && !dhcpServerRangeStart.isEmpty()) {
-                        rangeStart = (IP4Address) IPAddress.parseHostAddress(dhcpServerRangeStart);
-                    }
-                }
-
-                // rangeEnd
-                String configDhcpServerRangeEnd = NET_INTERFACE + interfaceName + ".config.dhcpServer4.rangeEnd";
-                if (props.containsKey(configDhcpServerRangeEnd)) {
-                    String dhcpServerRangeEnd = (String) props.get(configDhcpServerRangeEnd);
-                    logger.trace("DHCP Server Range End: {}", dhcpServerRangeEnd);
-                    if (dhcpServerRangeEnd != null && !dhcpServerRangeEnd.isEmpty()) {
-                        rangeEnd = (IP4Address) IPAddress.parseHostAddress(dhcpServerRangeEnd);
-                    }
-                }
-
-                // default lease time
-                String configDhcpServerDefaultLeaseTime = NET_INTERFACE + interfaceName
-                        + ".config.dhcpServer4.defaultLeaseTime";
-                if (props.containsKey(configDhcpServerDefaultLeaseTime)) {
-                    if (props.get(configDhcpServerDefaultLeaseTime) instanceof Integer) {
-                        defaultLeaseTime = (Integer) props.get(configDhcpServerDefaultLeaseTime);
-                    } else if (props.get(configDhcpServerDefaultLeaseTime) instanceof String) {
-                        defaultLeaseTime = Integer.parseInt((String) props.get(configDhcpServerDefaultLeaseTime));
-                    }
-                    logger.trace("DHCP Server Default Lease Time: {}", defaultLeaseTime);
-                }
-
-                // max lease time
-                String configDhcpServerMaxLeaseTime = NET_INTERFACE + interfaceName
-                        + ".config.dhcpServer4.maxLeaseTime";
-                if (props.containsKey(configDhcpServerMaxLeaseTime)) {
-                    if (props.get(configDhcpServerMaxLeaseTime) instanceof Integer) {
-                        maximumLeaseTime = (Integer) props.get(configDhcpServerMaxLeaseTime);
-                    } else if (props.get(configDhcpServerMaxLeaseTime) instanceof String) {
-                        maximumLeaseTime = Integer.parseInt((String) props.get(configDhcpServerMaxLeaseTime));
-                    }
-                    logger.trace("DHCP Server Maximum Lease Time: {}", maximumLeaseTime);
-                }
-
-                // passDns
-                String configDhcpServerPassDns = NET_INTERFACE + interfaceName + ".config.dhcpServer4.passDns";
-                if (props.containsKey(configDhcpServerPassDns)) {
-                    if (props.get(configDhcpServerPassDns) instanceof Boolean) {
-                        passDns = (Boolean) props.get(configDhcpServerPassDns);
-                    } else if (props.get(configDhcpServerPassDns) instanceof String) {
-                        passDns = Boolean.parseBoolean((String) props.get(configDhcpServerPassDns));
-                    }
-                    logger.trace("DHCP Server Pass DNS?: {}", passDns);
-                }
-
-                if (routerAddress != null && rangeStart != null && rangeEnd != null) {
-                    // get the netmask and subnet
-                    int prefixInt = prefix;
-                    int mask = ~((1 << 32 - prefixInt) - 1);
-                    String subnetMaskString = NetworkUtil.dottedQuad(mask);
-                    String subnetString = NetworkUtil.calculateNetwork(routerAddress.getHostAddress(),
-                            subnetMaskString);
-                    subnet = (IP4Address) IPAddress.parseHostAddress(subnetString);
-                    subnetMask = (IP4Address) IPAddress.parseHostAddress(subnetMaskString);
-
-                    dnServers.add(routerAddress);
-
-                    DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(interfaceName, dhcpServerEnabled, defaultLeaseTime,
-                            maximumLeaseTime, passDns);
-                    DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix, routerAddress,
-                            rangeStart, rangeEnd, dnServers);
-                    try {
-                        netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
-                    } catch (KuraException e) {
-                        logger.warn("This invalid DhcpServerCfgIP4 configuration is ignored - {}, {}", dhcpServerCfg,
-                                dhcpServerCfgIP4);
-                    }
-                } else {
-                    if (logger.isTraceEnabled()) {
-                        StringBuilder sb = new StringBuilder("Not including DhcpServerConfig - router: ");
-                        sb.append(routerAddress);
-                        sb.append(", range start: ");
-                        sb.append(rangeStart);
-                        sb.append(", range end: ");
-                        sb.append(rangeEnd);
-                        logger.trace(sb.toString());
-                    }
-                }
-            }
-
-            // dhcp6
-            String configDhcp6 = NET_INTERFACE + interfaceName + ".config.dhcpClient6.enabled";
-            NetConfigIP6 netConfigIP6 = null;
-            boolean dhcp6Enabled = false;
-            if (props.containsKey(configDhcp6)) {
-                dhcp6Enabled = (Boolean) props.get(configDhcp6);
-                logger.trace("DHCP 6 enabled? {}", dhcp6Enabled);
-            }
-
-            if (!dhcp6Enabled) {
-                // ip6
-                NetInterfaceStatus status6 = NetInterfaceStatus.valueOf(configStatus6);
-                netConfigIP6 = new NetConfigIP6(status6, getAutoConnectProperty(status6), dhcp6Enabled);
-                netConfigs.add(netConfigIP6);
-
-                String configIp6 = NET_INTERFACE + interfaceName + ".config.ip6.address";
-                if (props.containsKey(configIp6)) {
-
-                    // address
-                    String addressIp6 = (String) props.get(configIp6);
-                    logger.trace("IPv6 address: {}", addressIp6);
-                    if (addressIp6 != null && !addressIp6.isEmpty()) {
-                        IP6Address ip6Address = (IP6Address) IPAddress.parseHostAddress(addressIp6);
-                        netConfigIP6.setAddress(ip6Address);
-                    }
-
-                    // dns servers
-                    String configDNSs6 = NET_INTERFACE + interfaceName + ".config.ip6.dnsServers";
-                    if (props.containsKey(configDNSs6)) {
-
-                        List<IP6Address> dnsIPs = new ArrayList<>();
-                        String dnsAll = (String) props.get(configDNSs6);
-                        String[] dnss = dnsAll.split(",");
-                        for (String dns : dnss) {
-                            logger.trace("IPv6 DNS: {}", dns);
-                            IP6Address dnsIp6 = (IP6Address) IPAddress.parseHostAddress(dns);
-                            dnsIPs.add(dnsIp6);
-                        }
-                        netConfigIP6.setDnsServers(dnsIPs);
-                    }
-
-                    // domains
-                    String configDomains6 = NET_INTERFACE + interfaceName + ".config.ip6.domains";
-                    if (props.containsKey(configDomains6)) {
-
-                        List<String> domainNames = new ArrayList<>();
-                        String domainsAll = (String) props.get(configDomains6);
-                        String[] domains = domainsAll.split(",");
-                        for (String domain : domains) {
-                            logger.trace("IPv6 Domain: {}", domain);
-                            domainNames.add(domain);
-                        }
-                        netConfigIP6.setDomains(domainNames);
-                    }
-                }
-            }
-        }
-
+        this.netInterfaceConfigs.put(interfaceName, interfaceConfig);
     }
 
-    private boolean isDhcpClient4Enabled(Map<String, Object> props, String interfaceName) {
-        String configDhcp4 = NET_INTERFACE + interfaceName + ".config.dhcpClient4.enabled";
-        boolean dhcpEnabled = false;
-        if (props.containsKey(configDhcp4)) {
-            dhcpEnabled = (Boolean) props.get(configDhcp4);
-            logger.trace("DHCP 4 enabled? {}", dhcpEnabled);
-        }
-        return dhcpEnabled;
-    }
-
-    private boolean getAutoConnectProperty(NetInterfaceStatus status) {
-        boolean autoconnect = false;
-        if (status.equals(NetInterfaceStatus.netIPv4StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN)
-                || status.equals(NetInterfaceStatus.netIPv4StatusL2Only)
-                || status.equals(NetInterfaceStatus.netIPv6StatusEnabledLAN)
-                || status.equals(NetInterfaceStatus.netIPv6StatusEnabledWAN)
-                || status.equals(NetInterfaceStatus.netIPv6StatusL2Only)) {
-            autoconnect = true;
-        }
-        return autoconnect;
-    }
 }

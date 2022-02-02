@@ -406,6 +406,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
         if (config instanceof GwtWifiNetInterfaceConfig) {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
+            logger.severe("config: " + selectedNetIfConfig);
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
             logger.severe("active config: " + this.activeConfig);
             logger.severe("wireless mode: " + this.activeConfig.getWirelessMode());

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -301,7 +302,7 @@ public class IpConfigurationInterpreter {
         return ip4Gateway;
     }
 
-    private static short getIp4StaticPrefix(Map<String, Object> props, String interfaceName) {
+    private static short getIp4StaticPrefix(Map<String, Object> props, String interfaceName) throws KuraException {
         // prefix
         String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
         short networkPrefixLength = -1;
@@ -313,8 +314,10 @@ public class IpConfigurationInterpreter {
                 networkPrefixLength = Short.parseShort((String) ip4PrefixObj);
             }
 
+            return networkPrefixLength;
         }
-        return networkPrefixLength;
+
+        throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_UNDEFINED);
     }
 
     private static IP4Address getIp4StaticAddress(Map<String, Object> props, String interfaceName)

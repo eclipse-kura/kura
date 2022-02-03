@@ -27,18 +27,6 @@ import org.eclipse.kura.annotation.Nullable;
  */
 public final class StringUtil {
 
-    /**
-     * Used to build output as hex.
-     */
-    private static final char[] DIGITS_LOWER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
-            'e', 'f' };
-
-    /**
-     * Used to build output as hex.
-     */
-    private static final char[] DIGITS_UPPER = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
-            'E', 'F' };
-
     /** Constructor */
     private StringUtil() {
         // Static Factory Methods container. No need to instantiate.

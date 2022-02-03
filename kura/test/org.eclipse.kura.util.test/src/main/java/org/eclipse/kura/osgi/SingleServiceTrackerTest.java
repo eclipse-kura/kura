@@ -11,7 +11,7 @@
  *  Red Hat Inc
  *******************************************************************************/
 
-package org.eclipse.kura.utils;
+package org.eclipse.kura.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;

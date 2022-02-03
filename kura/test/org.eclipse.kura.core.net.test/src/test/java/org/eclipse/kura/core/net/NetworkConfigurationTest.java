@@ -1783,13 +1783,6 @@ public class NetworkConfigurationTest {
     private NetworkConfiguration getNetworkConfiguration() {
         SystemService ssMock = mock(SystemService.class);
         when(ssMock.getNetVirtualDevicesConfig()).thenReturn("netIPv4StatusDisabled");
-        NetworkConfiguration config = new NetworkConfiguration() {
-
-//            @Override
-//            protected SystemService getSystemService() {
-//                return ssMock;
-//            }
-        };
-        return config;
+        return new NetworkConfiguration();
     }
 }

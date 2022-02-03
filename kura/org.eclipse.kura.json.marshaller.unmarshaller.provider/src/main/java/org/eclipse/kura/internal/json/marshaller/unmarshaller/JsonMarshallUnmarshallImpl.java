@@ -14,6 +14,7 @@ package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
@@ -73,6 +74,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             return (T) KeystoreEntryInfoMapper.unmarshal(s, clazz);
         } else if (clazz.equals(SystemBundleRef.class)) {
             return (T) JsonJavaSystemBundleRefMapper.unmarshal(s);
+        } else if (clazz.equals(DockerContainer.class)) {
+            return (T) JsonJavaDockerContainersMapper.unmarshal(s);
         }
         throw new IllegalArgumentException("Invalid parameter!");
     }

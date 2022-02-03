@@ -23,7 +23,6 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
-import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
@@ -32,10 +31,6 @@ import org.eclipse.kura.net.modem.ModemConnectionStatus;
 import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
-import org.eclipse.kura.system.SystemService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +58,8 @@ public class ModemConfigurationInterpreter {
 
     }
     
-    public static List<NetConfig> populateNetInterfaceConfiguration(NetInterfaceAddressConfig netInterfaceAddress,
-            Map<String, Object> props, String interfaceName, ModemInterfaceConfigImpl netInterfaceConfig)
+    public static List<NetConfig> populateConfiguration(NetInterfaceAddressConfig netInterfaceAddress,
+            Map<String, Object> props, String interfaceName, int pppNum)
             throws KuraException {
         List<NetConfig> netConfigs = new ArrayList<>();
 
@@ -77,13 +72,8 @@ public class ModemConfigurationInterpreter {
         sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
 
         String netIfPrefix = sbPrefix.append("config.").toString();
-        String netIfConfigPrefix = sbPrefix.toString();
-
-        // POPULATE NetInterfaceAddresses
-
 
         ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = (ModemInterfaceAddressConfigImpl) netInterfaceAddress;
-        modemInterfaceAddressImpl.setNetConfigs(netConfigs);
 
         // connection type
         String configConnType = netIfPrefix + "connection.type";
@@ -111,8 +101,8 @@ public class ModemConfigurationInterpreter {
             modemInterfaceAddressImpl.setConnectionStatus(connStatus);
         }
 
-        ModemConfig modemConfig = getModemConfig(netIfConfigPrefix, props);
-        modemConfig.setPppNumber(netInterfaceConfig.getPppNum());
+        ModemConfig modemConfig = getModemConfig(netIfPrefix, props);
+        modemConfig.setPppNumber(pppNum);
         netConfigs.add(modemConfig);
 
         return netConfigs;

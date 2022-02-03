@@ -415,7 +415,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             try {
                 List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
                         interfaceName, netInterfaceAddress.getAddress(), isVirtual);
-                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateNetInterfaceConfiguration(
+                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(
                         netInterfaceAddress, this.properties, interfaceName, modemInterfaceConfig));
                 ((ModemInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(modemNetConfigs);
             } catch (UnknownHostException | KuraException e) {

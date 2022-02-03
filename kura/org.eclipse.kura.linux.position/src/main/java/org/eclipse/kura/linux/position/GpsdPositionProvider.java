@@ -42,7 +42,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private static final Logger logger = LoggerFactory.getLogger(GpsdPositionProvider.class);
 
     private GPSdEndpoint gpsEndpoint;
-    private AtomicReference<GpsdInternalState> internalState;
+    private AtomicReference<GpsdInternalState> internalStateReference;
     private PositionServiceOptions configuration;
 
     @Override
@@ -61,18 +61,19 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public Position getPosition() {
-        return new Position(
-                toRadiansMeasurement(internalState.get().getLatitude(), internalState.get().getLatitudeError()),
-                toRadiansMeasurement(internalState.get().getLongitude(), internalState.get().getLongitudeError()),
-                toMetersMeasurement(internalState.get().getAltitude(), internalState.get().getAltitudeError()),
-                toMetersPerSecondMeasurement(internalState.get().getSpeed(), internalState.get().getSpeedError()),
-                toRadiansMeasurement(internalState.get().getCourse(), internalState.get().getCourseError()));
+        GpsdInternalState internalState = internalStateReference.get();
+        return new Position(toRadiansMeasurement(internalState.getLatitude(), internalState.getLatitudeError()),
+                toRadiansMeasurement(internalState.getLongitude(), internalState.getLongitudeError()),
+                toMetersMeasurement(internalState.getAltitude(), internalState.getAltitudeError()),
+                toMetersPerSecondMeasurement(internalState.getSpeed(), internalState.getSpeedError()),
+                toRadiansMeasurement(internalState.getCourse(), internalState.getCourseError()));
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        return new NmeaPosition(internalState.get().getLatitude(), internalState.get().getLongitude(),
-                internalState.get().getAltitude(), internalState.get().getSpeed(), internalState.get().getCourse());
+        GpsdInternalState internalState = internalStateReference.get();
+        return new NmeaPosition(internalState.getLatitude(), internalState.getLongitude(), internalState.getAltitude(),
+                internalState.getSpeed(), internalState.getCourse());
     }
 
     @Override
@@ -87,7 +88,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public LocalDateTime getDateTime() {
-        return LocalDateTime.ofEpochSecond(internalState.get().getTimestamp().longValue(), 0, ZoneOffset.UTC);
+        return LocalDateTime.ofEpochSecond(internalStateReference.get().getTimestamp().longValue(), 0, ZoneOffset.UTC);
     }
 
     @Override
@@ -99,7 +100,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
             return true;
         }
 
-        ENMEAMode enmeaMode = internalState.get().getMode();
+        ENMEAMode enmeaMode = internalStateReference.get().getMode();
 
         return (enmeaMode == ENMEAMode.TwoDimensional || enmeaMode == ENMEAMode.ThreeDimensional);
     }
@@ -114,8 +115,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener) {
 
         this.configuration = configuration;
-        this.internalState = new AtomicReference<>();
-        this.internalState.set(new GpsdInternalState());
+        this.internalStateReference = new AtomicReference<>();
 
         this.gpsEndpoint = new GPSdEndpoint(configuration.getGpsdHost(), configuration.getGpsdPort());
         this.gpsEndpoint.addListener(this);
@@ -158,18 +158,23 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     @Override
     public void handleTPV(TPVObject tpv) {
-        internalState.get().setLatitude(tpv.getLatitude());
-        internalState.get().setLatitudeError(tpv.getLatitudeError());
-        internalState.get().setLongitude(tpv.getLongitude());
-        internalState.get().setLongitudeError(tpv.getLongitudeError());
-        internalState.get().setAltitude(tpv.getAltitude());
-        internalState.get().setAltitudeError(tpv.getAltitudeError());
-        internalState.get().setSpeed(tpv.getSpeed());
-        internalState.get().setSpeedError(tpv.getSpeedError());
-        internalState.get().setCourse(tpv.getCourse());
-        internalState.get().setCourseError(tpv.getCourseError());
-        internalState.get().setTime(tpv.getTimestamp());
-        internalState.get().setMode(tpv.getMode());
+
+        GpsdInternalState internalState = new GpsdInternalState();
+
+        internalState.setLatitude(tpv.getLatitude());
+        internalState.setLatitudeError(tpv.getLatitudeError());
+        internalState.setLongitude(tpv.getLongitude());
+        internalState.setLongitudeError(tpv.getLongitudeError());
+        internalState.setAltitude(tpv.getAltitude());
+        internalState.setAltitudeError(tpv.getAltitudeError());
+        internalState.setSpeed(tpv.getSpeed());
+        internalState.setSpeedError(tpv.getSpeedError());
+        internalState.setCourse(tpv.getCourse());
+        internalState.setCourseError(tpv.getCourseError());
+        internalState.setTime(tpv.getTimestamp());
+        internalState.setMode(tpv.getMode());
+
+        internalStateReference.set(internalState);
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {

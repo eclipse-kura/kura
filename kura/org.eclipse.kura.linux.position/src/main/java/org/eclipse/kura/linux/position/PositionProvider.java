@@ -27,40 +27,16 @@ public interface PositionProvider {
 
     public Position getPosition();
 
-    /**
-     * @deprecated
-     * 
-     */
-
-    @Deprecated
     public NmeaPosition getNmeaPosition();
 
-    /**
-     * @deprecated
-     * 
-     */
-
-    @Deprecated
     public String getNmeaTime();
 
-    /**
-     * @deprecated
-     * 
-     */
-
-    @Deprecated
     public String getNmeaDate();
 
     public LocalDateTime getDateTime();
 
     public boolean isLocked();
 
-    /**
-     * @deprecated
-     * 
-     */
-
-    @Deprecated
     public String getLastSentence();
 
     public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,

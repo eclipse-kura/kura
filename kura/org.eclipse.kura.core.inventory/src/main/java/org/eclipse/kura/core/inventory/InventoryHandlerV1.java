@@ -220,6 +220,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         final List<String> resources = extractResources(reqMessage);
 
+        logger.error("GREG: " + resources.get(0));
+        logger.error("GREG: " + resources.toString());
+
         try {
             if (START_BUNDLE.equals(resources)) {
                 findFirstMatchingBundle(extractBundleRef(reqMessage)).start();
@@ -558,7 +561,24 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
-        return unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), ContainerDescriptor.class);
+        DockerContainer dc = unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8),
+                DockerContainer.class);
+
+        try {
+            List<ContainerDescriptor> containerList = this.dockerService.listRegisteredContainers();
+
+            for (ContainerDescriptor container : containerList) {
+                if (container.getContainerName().equals(dc.getContainerName())) {
+                    return container;
+                }
+            }
+            logger.warn("Failed to find container");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        } catch (Exception e) {
+            logger.warn("failed to access docker service");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
     }
 
     private Bundle findFirstMatchingBundle(final SystemBundleRef ref) throws KuraException {

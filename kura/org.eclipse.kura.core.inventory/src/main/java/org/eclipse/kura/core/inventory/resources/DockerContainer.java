@@ -38,6 +38,11 @@ public class DockerContainer extends SystemResourceInfo {
 
     private Boolean isEsfManaged;
 
+    public DockerContainer(String name, String version) {
+        super(name, version, SystemResourceType.DOCKER);
+        this.containerName = name;
+    }
+
     public DockerContainer(ContainerDescriptor container) {
         super(container.getContainerName(), container.getContainerImage() + ":" + container.getContainerImageTag(),
                 SystemResourceType.DOCKER);

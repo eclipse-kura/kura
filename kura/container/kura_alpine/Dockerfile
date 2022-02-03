@@ -39,11 +39,12 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
       cp kura/distrib/src/main/sh/extract.sh kura/distrib/src/main/sh/extract_nn.sh && \
       cd /kura && mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS && \
       cd /kura && mvn -B -f kura/pom.xml clean install $MAVEN_PROPS -Pspeedup && \
-      cd /kura && mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-centos-7-nn -nsu && \ 
+      cd /kura && mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-ubuntu-20-nn -nsu && \ 
     ls -la /kura/kura/distrib/target && \
     apk del maven git && \
-    apk --no-cache add procps zip unzip gzip tar psmisc socat dos2unix openssl net-tools which busybox-extras && \
-    /kura/kura/distrib/target/kura_*_intel-up2-centos-7-nn_installer.sh && \
+    apk --no-cache add procps unzip gzip tar psmisc socat dos2unix openssl net-tools which busybox-extras \
+    telnet, bluez-hcidump, bluez, chrony, ntpdate && \
+    /kura/kura/distrib/target/kura_*_intel-up2-ubuntu-20-nn_installer.sh && \
     chmod a+rw -R /opt/eclipse && \
     find /opt/eclipse -type d | xargs chmod a+x && \
     chmod a+rwx /var/log && \

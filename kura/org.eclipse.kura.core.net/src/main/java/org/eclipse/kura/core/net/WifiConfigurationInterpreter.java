@@ -29,10 +29,6 @@ import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.system.SystemService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,12 +60,6 @@ public class WifiConfigurationInterpreter {
 
     private WifiConfigurationInterpreter() {
 
-    }
-
-    protected static SystemService getSystemService() {
-        BundleContext context = FrameworkUtil.getBundle(NetworkConfiguration.class).getBundleContext();
-        ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
-        return context.getService(systemServiceSR);
     }
 
     public static List<NetConfig> populateConfiguration(Map<String, Object> props, String interfaceName)

@@ -53,12 +53,6 @@ public class IpConfigurationInterpreter {
 
     }
 
-    protected static SystemService getSystemService() {
-        BundleContext context = FrameworkUtil.getBundle(NetworkConfiguration.class).getBundleContext();
-        ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
-        return context.getService(systemServiceSR);
-    }
-
     public static List<NetConfig> populateConfiguration(Map<String, Object> props, String interfaceName,
             IPAddress netInterfaceAddress, boolean virtualInterface) throws UnknownHostException {
         List<NetConfig> netConfigs = new ArrayList<>();
@@ -162,6 +156,12 @@ public class IpConfigurationInterpreter {
             }
         }
         return dhcpServerConfigIP4;
+    }
+    
+    private static SystemService getSystemService() {
+        BundleContext context = FrameworkUtil.getBundle(NetworkConfiguration.class).getBundleContext();
+        ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
+        return context.getService(systemServiceSR);
     }
 
     private static List<String> getIp4Domains(Map<String, Object> props, String interfaceName) {

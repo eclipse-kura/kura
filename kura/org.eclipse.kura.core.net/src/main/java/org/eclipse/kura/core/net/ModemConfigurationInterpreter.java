@@ -62,13 +62,7 @@ public class ModemConfigurationInterpreter {
     private ModemConfigurationInterpreter() {
 
     }
-
-    protected static SystemService getSystemService() {
-        BundleContext context = FrameworkUtil.getBundle(NetworkConfiguration.class).getBundleContext();
-        ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
-        return context.getService(systemServiceSR);
-    }
-
+    
     public static List<NetConfig> populateNetInterfaceConfiguration(NetInterfaceAddressConfig netInterfaceAddress,
             Map<String, Object> props, String interfaceName, ModemInterfaceConfigImpl netInterfaceConfig)
             throws KuraException {

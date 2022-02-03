@@ -14,6 +14,8 @@ package org.eclipse.kura.core.net;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,10 +23,15 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.net.NetConfig;
+import org.eclipse.kura.net.NetConfigIP4;
+import org.eclipse.kura.net.NetConfigIP6;
+import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.wifi.WifiBgscan;
 import org.eclipse.kura.net.wifi.WifiBgscanModule;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
+import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -232,5 +239,49 @@ public class WifiConfigurationInterpreterTest {
         WifiConfig wifiConfig = (WifiConfig) netConfigs.get(0);
         
         assertEquals(expected, wifiConfig);
+    }
+    
+    @Test
+    public void testPopulateNetInterfaceConfigurationWifi() throws Throwable {
+        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl("if1");
+        List<WifiInterfaceAddressConfig> interfaceAddresses = new ArrayList<>();
+        interfaceAddresses.add(new WifiInterfaceAddressConfigImpl());
+        netInterfaceConfig.setNetInterfaceAddresses(interfaceAddresses);
+
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("net.interface.if1.type", "WIFI");
+        properties.put("net.interface.if1.up", false);
+        properties.put("net.interface.if1.wifi.capabilities", "CIPHER_CCMP CIPHER_TKIP");
+        properties.put("net.interface.if1.config.wifi.mode", "ADHOC");
+        properties.put("net.interface.if1.config.wifi.master.passphrase", "password");
+        properties.put("net.interface.if1.config.wifi.infra.passphrase", "password");
+
+        WifiInterfaceConfigImpl expected = new WifiInterfaceConfigImpl("if1");
+        expected.setAutoConnect(false);
+        expected.setUp(false);
+        expected.setCapabilities(EnumSet.of(Capability.CIPHER_CCMP, Capability.CIPHER_TKIP));
+
+        List<NetConfig> expectedNetConfigs = new ArrayList<>();
+        
+        WifiConfig netConfig1 = new WifiConfig();
+        netConfig1.setMode(WifiMode.MASTER);
+        netConfig1.setSSID("");
+        netConfig1.setSecurity(WifiSecurity.NONE);
+        netConfig1.setHardwareMode("b");
+        netConfig1.setPasskey("password");
+        expectedNetConfigs.add(netConfig1);
+
+        WifiConfig netConfig2 = new WifiConfig();
+        netConfig2.setMode(WifiMode.INFRA);
+        netConfig2.setSSID("");
+        netConfig2.setSecurity(WifiSecurity.NONE);
+        netConfig2.setHardwareMode("b");
+        netConfig2.setPasskey("password");
+        netConfig2.setBgscan(new WifiBgscan(""));
+        expectedNetConfigs.add(netConfig2);
+        
+        List<NetConfig> netConfigs = WifiConfigurationInterpreter.populateConfiguration(properties, "if1");
+
+        assertEquals(expectedNetConfigs, netConfigs);
     }
 }

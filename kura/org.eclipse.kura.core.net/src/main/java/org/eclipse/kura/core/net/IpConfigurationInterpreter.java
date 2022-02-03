@@ -47,8 +47,6 @@ public class IpConfigurationInterpreter {
 
     private static final String NET_INTERFACE = "net.interface.";
 
-    private static final String GOT_MESSAGE = "got {}: {}";
-
     private IpConfigurationInterpreter() {
 
     }
@@ -99,9 +97,9 @@ public class IpConfigurationInterpreter {
             netConfigs.add(dhcpServerConfigIP4);
         }
 
-        NetConfigIP6 netConfigIP6 = getDhcp6Config(props, interfaceName);
+        NetConfigIP6 netConfigIP6 = getIp6NetConfig(props, interfaceName);
         if (!isNull(netConfigIP6)) {
-            netConfigs.add(getDhcp6Config(props, interfaceName));
+            netConfigs.add(getIp6NetConfig(props, interfaceName));
         }
 
         return netConfigs;
@@ -157,7 +155,7 @@ public class IpConfigurationInterpreter {
         }
         return dhcpServerConfigIP4;
     }
-    
+
     private static SystemService getSystemService() {
         BundleContext context = FrameworkUtil.getBundle(NetworkConfiguration.class).getBundleContext();
         ServiceReference<SystemService> systemServiceSR = context.getServiceReference(SystemService.class);
@@ -268,50 +266,69 @@ public class IpConfigurationInterpreter {
         if (dhcpEnabled) {
             netConfigIP4.setDhcp(true);
         } else {
-            // NetConfigIP4
-            String configIp4 = NET_INTERFACE + interfaceName + ".config.ip4.address";
-            if (props.containsKey(configIp4)) {
-                logger.trace(GOT_MESSAGE, configIp4, props.get(configIp4));
+            IP4Address ip4Address = getIp4StaticAddress(props, interfaceName);
+            if (!isNull(ip4Address)) {
+                netConfigIP4.setAddress(ip4Address);
+            }
 
-                // address
-                String addressIp4 = (String) props.get(configIp4);
-                logger.trace("IPv4 address: {}", addressIp4);
-                if (addressIp4 != null && !addressIp4.isEmpty()) {
-                    IP4Address ip4Address = (IP4Address) IPAddress.parseHostAddress(addressIp4);
-                    netConfigIP4.setAddress(ip4Address);
-                }
+            try {
+                short networkPrefixLength = getIp4StaticPrefix(props, interfaceName);
+                netConfigIP4.setNetworkPrefixLength(networkPrefixLength);
+            } catch (KuraException e) {
+                logger.error("Exception while setting Network Prefix length!", e);
+            }
 
-                // prefix
-                String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
-                short networkPrefixLength = -1;
-                if (props.containsKey(configIp4Prefix)) {
-                    if (props.get(configIp4Prefix) instanceof Short) {
-                        networkPrefixLength = (Short) props.get(configIp4Prefix);
-                    } else if (props.get(configIp4Prefix) instanceof String) {
-                        networkPrefixLength = Short.parseShort((String) props.get(configIp4Prefix));
-                    }
-
-                    try {
-                        netConfigIP4.setNetworkPrefixLength(networkPrefixLength);
-                    } catch (KuraException e) {
-                        logger.error("Exception while setting Network Prefix length!", e);
-                    }
-                }
-
-                // gateway
-                String configIp4Gateway = NET_INTERFACE + interfaceName + ".config.ip4.gateway";
-                if (props.containsKey(configIp4Gateway)) {
-
-                    String gatewayIp4 = (String) props.get(configIp4Gateway);
-                    logger.trace("IPv4 gateway: {}", gatewayIp4);
-                    if (gatewayIp4 != null && !gatewayIp4.isEmpty()) {
-                        IP4Address ip4Gateway = (IP4Address) IPAddress.parseHostAddress(gatewayIp4);
-                        netConfigIP4.setGateway(ip4Gateway);
-                    }
-                }
+            IP4Address ip4Gateway = getIp4StaticGateway(props, interfaceName);
+            if (!isNull(ip4Gateway)) {
+                netConfigIP4.setGateway(ip4Gateway);
             }
         }
         return netConfigIP4;
+    }
+
+    private static IP4Address getIp4StaticGateway(Map<String, Object> props, String interfaceName)
+            throws UnknownHostException {
+        // gateway
+        String configIp4Gateway = NET_INTERFACE + interfaceName + ".config.ip4.gateway";
+        String gatewayIp4 = (String) props.get(configIp4Gateway);
+        IP4Address ip4Gateway = null;
+        if (!isNull(gatewayIp4) && !gatewayIp4.trim().isEmpty()) {
+
+            logger.trace("IPv4 gateway: {}", gatewayIp4);
+
+            ip4Gateway = (IP4Address) IPAddress.parseHostAddress(gatewayIp4);
+        }
+        return ip4Gateway;
+    }
+
+    private static short getIp4StaticPrefix(Map<String, Object> props, String interfaceName) {
+        // prefix
+        String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
+        short networkPrefixLength = -1;
+        Object ip4PrefixObj = props.get(configIp4Prefix);
+        if (!isNull(ip4PrefixObj)) {
+            if (ip4PrefixObj instanceof Short) {
+                networkPrefixLength = (Short) ip4PrefixObj;
+            } else if (ip4PrefixObj instanceof String) {
+                networkPrefixLength = Short.parseShort((String) ip4PrefixObj);
+            }
+
+        }
+        return networkPrefixLength;
+    }
+
+    private static IP4Address getIp4StaticAddress(Map<String, Object> props, String interfaceName)
+            throws UnknownHostException {
+        // NetConfigIP4
+        String configIp4 = NET_INTERFACE + interfaceName + ".config.ip4.address";
+        String addressIp4 = (String) props.get(configIp4);
+        IP4Address ip4Address = null;
+        if (!isNull(addressIp4) && !addressIp4.trim().isEmpty()) {
+            logger.trace("IPv4 address: {}", addressIp4);
+
+            ip4Address = (IP4Address) IPAddress.parseHostAddress(addressIp4);
+        }
+        return ip4Address;
     }
 
     private static boolean isDhcpServerPassDns(Map<String, Object> props, String interfaceName) {
@@ -406,7 +423,7 @@ public class IpConfigurationInterpreter {
         return prefix;
     }
 
-    private static NetConfigIP6 getDhcp6Config(Map<String, Object> props, String interfaceName)
+    private static NetConfigIP6 getIp6NetConfig(Map<String, Object> props, String interfaceName)
             throws UnknownHostException {
 
         String configStatus6 = NetInterfaceStatus.netIPv6StatusDisabled.name();
@@ -430,47 +447,70 @@ public class IpConfigurationInterpreter {
             NetInterfaceStatus status6 = NetInterfaceStatus.valueOf(configStatus6);
             netConfigIP6 = new NetConfigIP6(status6, getAutoConnectProperty(status6), dhcp6Enabled);
 
-            String configIp6 = NET_INTERFACE + interfaceName + ".config.ip6.address";
-            String addressIp6 = (String) props.get(configIp6);
-            if (!isNull(addressIp6) && !addressIp6.trim().isEmpty()) {
-                logger.trace("IPv6 address: {}", addressIp6);
-
-                IP6Address ip6Address = (IP6Address) IPAddress.parseHostAddress(addressIp6);
+            IP6Address ip6Address = getIp6StaticAddress(props, interfaceName);
+            if (!isNull(ip6Address)) {
                 netConfigIP6.setAddress(ip6Address);
             }
 
-            // dns servers
-            String configDNSs6 = NET_INTERFACE + interfaceName + ".config.ip6.dnsServers";
-            String dnsAll = (String) props.get(configDNSs6);
-            if (!isNull(dnsAll) && !dnsAll.trim().isEmpty()) {
-
-                List<IP6Address> dnsIPs = new ArrayList<>();
-                String[] dnss = dnsAll.split(",");
-                for (String dns : dnss) {
-                    logger.trace("IPv6 DNS: {}", dns);
-                    IP6Address dnsIp6 = (IP6Address) IPAddress.parseHostAddress(dns);
-                    dnsIPs.add(dnsIp6);
-                }
-                netConfigIP6.setDnsServers(dnsIPs);
+            List<IP6Address> dns6IPs = getIp6StaticDnsServers(props, interfaceName);
+            if (!dns6IPs.isEmpty()) {
+                netConfigIP6.setDnsServers(dns6IPs);
             }
 
-            // domains
-            String configDomains6 = NET_INTERFACE + interfaceName + ".config.ip6.domains";
-            String domainsAll = (String) props.get(configDomains6);
-            if (!isNull(domainsAll) && !domainsAll.trim().isEmpty()) {
-
-                List<String> domainNames = new ArrayList<>();
-
-                String[] domains = domainsAll.split(",");
-                for (String domain : domains) {
-                    logger.trace("IPv6 Domain: {}", domain);
-                    domainNames.add(domain);
-                }
-                netConfigIP6.setDomains(domainNames);
+            List<String> ip6DomainNames = getIp6StaticDomains(props, interfaceName);
+            if (!ip6DomainNames.isEmpty()) {
+                netConfigIP6.setDomains(ip6DomainNames);
             }
 
         }
         return netConfigIP6;
+    }
+
+    private static List<String> getIp6StaticDomains(Map<String, Object> props, String interfaceName) {
+        // domains
+        String configDomains6 = NET_INTERFACE + interfaceName + ".config.ip6.domains";
+        String domainsAll = (String) props.get(configDomains6);
+        List<String> domainNames = new ArrayList<>();
+        if (!isNull(domainsAll) && !domainsAll.trim().isEmpty()) {
+
+            String[] domains = domainsAll.split(",");
+            for (String domain : domains) {
+                logger.trace("IPv6 Domain: {}", domain);
+                domainNames.add(domain);
+            }
+        }
+        return domainNames;
+    }
+
+    private static List<IP6Address> getIp6StaticDnsServers(Map<String, Object> props, String interfaceName)
+            throws UnknownHostException {
+        // dns servers
+        String configDNSs6 = NET_INTERFACE + interfaceName + ".config.ip6.dnsServers";
+        String dnsAll = (String) props.get(configDNSs6);
+        List<IP6Address> dnsIPs = new ArrayList<>();
+        if (!isNull(dnsAll) && !dnsAll.trim().isEmpty()) {
+
+            String[] dnss = dnsAll.split(",");
+            for (String dns : dnss) {
+                logger.trace("IPv6 DNS: {}", dns);
+                IP6Address dnsIp6 = (IP6Address) IPAddress.parseHostAddress(dns);
+                dnsIPs.add(dnsIp6);
+            }
+        }
+        return dnsIPs;
+    }
+
+    private static IP6Address getIp6StaticAddress(Map<String, Object> props, String interfaceName)
+            throws UnknownHostException {
+        String configIp6 = NET_INTERFACE + interfaceName + ".config.ip6.address";
+        String addressIp6 = (String) props.get(configIp6);
+        IP6Address ip6Address = null;
+        if (!isNull(addressIp6) && !addressIp6.trim().isEmpty()) {
+            logger.trace("IPv6 address: {}", addressIp6);
+
+            ip6Address = (IP6Address) IPAddress.parseHostAddress(addressIp6);
+        }
+        return ip6Address;
     }
 
     private static boolean isDhcpClient4Enabled(Map<String, Object> props, String interfaceName) {

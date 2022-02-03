@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
+import static java.util.Objects.isNull;
+
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -415,8 +417,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             try {
                 List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
                         interfaceName, netInterfaceAddress.getAddress(), isVirtual);
-                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(
-                        netInterfaceAddress, this.properties, interfaceName, modemInterfaceConfig.getPppNum()));
+                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(netInterfaceAddress,
+                        this.properties, interfaceName, modemInterfaceConfig.getPppNum()));
                 ((ModemInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(modemNetConfigs);
             } catch (UnknownHostException | KuraException e) {
                 logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
@@ -511,41 +513,43 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface) {
         String interfaceName = modemInterface.getName();
-        if (this.modemManagerService != null) {
-            String modemPort = this.networkService.getModemUsbPort(interfaceName);
-            if (modemPort == null) {
-                modemPort = interfaceName;
-            }
-            try {
-                this.modemManagerService.withModemService(modemPort, m -> {
-                    if (!m.isPresent()) {
-                        return (Void) null;
-                    }
+        if (isNull(this.modemManagerService)) {
+            return;
+        }
 
-                    final CellularModem modem = m.get();
-
-                    // set modem properties
-                    modemInterface.setSerialNumber(modem.getSerialNumber());
-                    modemInterface.setModel(modem.getModel());
-                    modemInterface.setFirmwareVersion(modem.getRevisionID());
-                    modemInterface.setGpsSupported(modem.isGpsSupported());
-
-                    // set modem driver
-                    UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
-                    if (usbModemDevice != null) {
-                        List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
-                                .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
-                        if (drivers != null && !drivers.isEmpty()) {
-                            UsbModemDriver driver = drivers.get(0);
-                            modemInterface.setDriver(driver.getName());
-                        }
-                    }
-
+        String modemPort = this.networkService.getModemUsbPort(interfaceName);
+        if (modemPort == null) {
+            modemPort = interfaceName;
+        }
+        try {
+            this.modemManagerService.withModemService(modemPort, m -> {
+                if (!m.isPresent()) {
                     return (Void) null;
-                });
-            } catch (KuraException e) {
-                logger.warn("Error getting modem info");
-            }
+                }
+
+                final CellularModem modem = m.get();
+
+                // set modem properties
+                modemInterface.setSerialNumber(modem.getSerialNumber());
+                modemInterface.setModel(modem.getModel());
+                modemInterface.setFirmwareVersion(modem.getRevisionID());
+                modemInterface.setGpsSupported(modem.isGpsSupported());
+
+                // set modem driver
+                UsbModemDevice usbModemDevice = (UsbModemDevice) modemInterface.getUsbDevice();
+                if (usbModemDevice != null) {
+                    List<? extends UsbModemDriver> drivers = SupportedUsbModemsFactoryInfo
+                            .getDeviceDrivers(usbModemDevice.getVendorId(), usbModemDevice.getProductId());
+                    if (drivers != null && !drivers.isEmpty()) {
+                        UsbModemDriver driver = drivers.get(0);
+                        modemInterface.setDriver(driver.getName());
+                    }
+                }
+
+                return (Void) null;
+            });
+        } catch (KuraException e) {
+            logger.warn("Error getting modem info");
         }
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -48,6 +48,10 @@ public class UserConfigUi extends Composite {
     interface UserConfigUiUiBinder extends UiBinder<Widget, UserConfigUi> {
     }
 
+    @UiField
+    InlineRadio passwordChangeRequired;
+    @UiField
+    InlineRadio passwordPasswordChangeNotRequired;
     @UiField
     InlineRadio passwordEnabled;
     @UiField
@@ -142,6 +146,20 @@ public class UserConfigUi extends Composite {
             updatePasswordWidgetState();
         });
 
+        this.passwordChangeRequired.addChangeHandler(e -> {
+            if (!this.userData.isPasswordChangeNeeded()) {
+                this.userData.setPasswordChangeNeeded(true);
+                this.listener.onUserDataChanged(this.userData);
+            }
+        });
+
+        this.passwordPasswordChangeNotRequired.addChangeHandler(e -> {
+            if (this.userData.isPasswordChangeNeeded()) {
+                this.userData.setPasswordChangeNeeded(false);
+                this.listener.onUserDataChanged(this.userData);
+            }
+        });
+
         this.changePassword.addClickHandler(e -> pickPassword());
     }
 
@@ -192,11 +210,16 @@ public class UserConfigUi extends Composite {
 
     public void updatePasswordWidgetState() {
         final boolean isPasswordEnabled = this.userData.isPasswordAuthEnabled();
+        final boolean isPasswordChangeNeeded = this.userData.isPasswordChangeNeeded();
 
         this.passwordEnabled.setValue(isPasswordEnabled);
         this.passwordDisabled.setValue(!isPasswordEnabled);
+        this.passwordChangeRequired.setValue(isPasswordChangeNeeded);
+        this.passwordPasswordChangeNotRequired.setValue(!isPasswordChangeNeeded);
 
         this.changePassword.setEnabled(isPasswordEnabled);
+        this.passwordChangeRequired.setEnabled(isPasswordEnabled);
+        this.passwordPasswordChangeNotRequired.setEnabled(isPasswordEnabled);
     }
 
     private class AssignedPermission {

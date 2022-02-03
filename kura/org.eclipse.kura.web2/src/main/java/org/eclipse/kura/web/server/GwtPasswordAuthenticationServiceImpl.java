@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,7 +20,9 @@ import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
+import org.eclipse.kura.web.session.Attributes;
 import org.eclipse.kura.web.shared.GwtKuraException;
+import org.eclipse.kura.web.shared.model.GwtPasswordAuthenticationResult;
 import org.eclipse.kura.web.shared.service.GwtPasswordAuthenticationService;
 
 public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServlet
@@ -40,9 +42,10 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
     }
 
     @Override
-    public String authenticate(final String username, final String password) throws GwtKuraException {
+    public GwtPasswordAuthenticationResult authenticate(final String username, final String password)
+            throws GwtKuraException {
 
-        final HttpSession session = Console.instance().createSession(getThreadLocalRequest());
+        final HttpSession session = Console.instance().createNewSession(getThreadLocalRequest());
 
         final AuditContext context = AuditContext.currentOrInternal();
         context.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), username);
@@ -58,7 +61,13 @@ public class GwtPasswordAuthenticationServiceImpl extends OsgiRemoteServiceServl
 
             Console.instance().setAuthenticated(session, username, context.copy());
 
-            return this.redirectPath;
+            final boolean needsPasswordChange = this.userManager.isPasswordChangeRequired(username);
+
+            if (needsPasswordChange) {
+                session.setAttribute(Attributes.LOCKED.getValue(), true);
+            }
+
+            return new GwtPasswordAuthenticationResult(needsPasswordChange, this.redirectPath);
 
         } catch (final Exception e) {
             session.invalidate();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -20,23 +20,27 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class GwtUserConfig extends GwtUserData implements IsSerializable {
 
+    private static final String PASSWORD_ENABLED_KEY = "password.enabled";
     private static final String PASSWORD_KEY = "password";
+    private static final String PASSWORD_CHANGE_NEEDED_KEY = "password.change.needed";
     private static final long serialVersionUID = 8795619406606205153L;
 
     public GwtUserConfig() {
     }
 
-    public GwtUserConfig(final String userName, final Set<String> permissions, final boolean isPasswordAuthEnabled) {
+    public GwtUserConfig(final String userName, final Set<String> permissions, final boolean isPasswordAuthEnabled,
+            final boolean isPasswordChangeNeeded) {
         super(userName, permissions);
         setPasswordAuthEnabled(isPasswordAuthEnabled);
+        setPasswordChangeNeeded(isPasswordChangeNeeded);
     }
 
     public boolean isPasswordAuthEnabled() {
-        return this.get("password.enabled");
+        return this.get(PASSWORD_ENABLED_KEY);
     }
 
     public void setPasswordAuthEnabled(final boolean enabled) {
-        set("password.enabled", enabled);
+        set(PASSWORD_ENABLED_KEY, enabled);
     }
 
     public void setNewPassword(final Optional<String> password) {
@@ -49,6 +53,14 @@ public class GwtUserConfig extends GwtUserData implements IsSerializable {
 
     public Optional<String> getNewPassword() {
         return Optional.ofNullable(get(PASSWORD_KEY));
+    }
+
+    public boolean isPasswordChangeNeeded() {
+        return Optional.ofNullable((Boolean) get(PASSWORD_CHANGE_NEEDED_KEY)).orElse(false);
+    }
+
+    public void setPasswordChangeNeeded(final boolean isPasswordChangeNeeded) {
+        set(PASSWORD_CHANGE_NEEDED_KEY, isPasswordChangeNeeded);
     }
 
     @Override

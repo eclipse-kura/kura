@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,20 +53,6 @@ public class GwtUserServiceImpl extends OsgiRemoteServiceServlet implements GwtU
         checkXSRFToken(token);
 
         this.userManager.deleteUser(userName);
-    }
-
-    @Override
-    public void setUserPassword(final GwtXSRFToken token, final String userName, final String password)
-            throws GwtKuraException {
-        checkXSRFToken(token);
-
-        validateUserPassword(password);
-
-        try {
-            this.userManager.setUserPassword(userName, password);
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
     }
 
     @Override

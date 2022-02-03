@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,10 +33,6 @@ public interface GwtUserService extends RemoteService {
 
     @Audit(componentName = "UI User", description = "Delete identity")
     public void deleteUser(GwtXSRFToken token, final String userName) throws GwtKuraException;
-
-    @Audit(componentName = "UI User", description = "Set identity password")
-    public void setUserPassword(GwtXSRFToken token, final String userName, final String password)
-            throws GwtKuraException;
 
     public Set<String> getDefinedPermissions(GwtXSRFToken token) throws GwtKuraException;
 

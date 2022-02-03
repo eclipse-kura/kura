@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.web.Console;
 import org.eclipse.kura.web.UserManager;
+import org.eclipse.kura.web.session.Attributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +95,8 @@ public class SslAuthenticationServlet extends HttpServlet {
             auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), commonName);
 
             console.setAuthenticated(session, commonName, auditContext);
+
+            session.removeAttribute(Attributes.LOCKED.getValue());
 
             auditLogger.info("{} UI Login - Success - Certificate login", auditContext);
             sendRedirect(resp, redirectPath);

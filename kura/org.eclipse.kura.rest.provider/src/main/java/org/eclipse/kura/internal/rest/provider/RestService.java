@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -74,6 +74,7 @@ public class RestService
     private static final String KURA_PERMISSION_PREFIX = "kura.permission.";
     private static final String KURA_PERMISSION_REST_PREFIX = KURA_PERMISSION_PREFIX + "rest.";
     private static final String KURA_USER_PREFIX = "kura.user.";
+    private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -206,6 +207,10 @@ public class RestService
         auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), userName);
 
         final User user = (User) userAdmin.getRole(KURA_USER_PREFIX + userName);
+
+        if ("true".equals(user.getProperties().get(KURA_NEED_PASSWORD_CHANGE))) {
+            return Optional.empty();
+        }
 
         final String passwordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
 

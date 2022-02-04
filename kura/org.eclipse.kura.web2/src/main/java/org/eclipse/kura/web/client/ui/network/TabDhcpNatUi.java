@@ -12,19 +12,24 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.network;
 
+import java.util.List;
+
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter;
 import org.eclipse.kura.web.shared.model.GwtNetIfType;
 import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtNetRouterMode;
 import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
+import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
 import org.gwtbootstrap3.client.ui.Form;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
@@ -37,13 +42,14 @@ import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class TabDhcpNatUi extends Composite implements NetworkTab {
+public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
 
     private static final String ROUTER_OFF_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterOff.name());
     private static final String ROUTER_NAT_MESSAGE = MessageUtils.get(GwtNetRouterMode.netRouterNat.name());
@@ -250,7 +256,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     // enable/disable fields depending on values in other tabs
     private void refreshForm() {
-        // resetValidations();
+        resetValidations();
         GwtWifiConfig wifiConfig = this.wirelessTab.activeConfig;
         String wifiMode = null;
         if (wifiConfig != null) {
@@ -286,12 +292,13 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 this.maxLease.setEnabled(true);
                 this.radio1.setEnabled(true);
                 this.radio2.setEnabled(true);
-                // setValidations();
+                setValidations();
             }
         }
     }
 
-    private void reset() {
+    @Override
+    protected void reset() {
         this.router.setSelectedIndex(0);
         this.begin.setText("");
         this.end.setText("");
@@ -440,7 +447,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.begin.addMouseOutHandler(event -> resetHelp());
         this.begin.addValueChangeHandler(event -> {
             setDirty(true);
-            // setDHCPBeginAddressValidation();
+            setDHCPBeginAddressValidation();
         });
     }
 
@@ -536,7 +543,13 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     }
 
     private void setDHCPSubnetMaskValidation() {
-        if (TabDhcpNatUi.this.subnet.getText().isEmpty() || !TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
+        GwtConfigParameter param = new GwtConfigParameter();
+        param.setRequired(true);
+        param.setType(GwtConfigParameterType.STRING);
+        if (!validateTextBox(param, groupSubnet).isEmpty()) {
+            TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
+        }
+        if (!TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
             TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
         } else {
             TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
@@ -544,7 +557,13 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     }
 
     private void setDHCPEndAddressValidation() {
-        if (TabDhcpNatUi.this.end.getText().isEmpty() || !TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
+        GwtConfigParameter param = new GwtConfigParameter();
+        param.setRequired(true);
+        param.setType(GwtConfigParameterType.STRING);
+        if (!validateTextBox(param, groupEnd).isEmpty()) {
+            TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+        }
+        if (!TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
             TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
         } else {
             checkDhcpRangeValidity();
@@ -552,7 +571,13 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     }
 
     private void setDHCPBeginAddressValidation() {
-        if (TabDhcpNatUi.this.begin.getText().isEmpty() || !TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
+        GwtConfigParameter param = new GwtConfigParameter();
+        param.setRequired(true);
+        param.setType(GwtConfigParameterType.STRING);
+        if (!validateTextBox(param, groupBegin).isEmpty()) {
+            TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
+        }
+        if (!TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
             TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
         } else {
             checkDhcpRangeValidity();
@@ -560,9 +585,11 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     }
 
     private void setMaxLeaseTimeValidation() {
-        if (TabDhcpNatUi.this.maxLease.getText().isEmpty()
-                || !TabDhcpNatUi.this.maxLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
-                || !isPositiveInteger(TabDhcpNatUi.this.maxLease.getText().trim())) {
+        GwtConfigParameter param = new GwtConfigParameter();
+        param.setRequired(true);
+        param.setType(GwtConfigParameterType.INTEGER);
+        param.setMin("1");
+        if (!validateTextBox(param, groupMaxLease).isEmpty()) {
             TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
         } else {
             TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
@@ -570,13 +597,20 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     }
 
     private void setDefaultLeaseTimeValidation() {
-        if (TabDhcpNatUi.this.defaultLease.getText().isEmpty()
-                || !TabDhcpNatUi.this.defaultLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
-                || !isPositiveInteger(TabDhcpNatUi.this.defaultLease.getText().trim())) {
+        GwtConfigParameter param = new GwtConfigParameter();
+        param.setRequired(true);
+        param.setType(GwtConfigParameterType.INTEGER);
+        param.setMin("1");
+        if (!validateTextBox(param, groupDefaultLease).isEmpty()) {
             TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
         } else {
             TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
         }
+    }
+
+    @Override
+    protected void renderForm() {
+        // Do nothing...
     }
 
 }

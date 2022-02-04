@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.net.IP4Address;
@@ -245,7 +244,37 @@ public class IpConfigurationInterpreter {
     private static NetConfigIP4 getIp4NetConfig(Map<String, Object> props, String interfaceName,
             boolean virtualInterface) throws UnknownHostException {
 
-        // Status
+        NetInterfaceStatus status4 = getIp4Status(props, interfaceName, virtualInterface);
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(status4, getAutoConnectProperty(status4));
+
+        boolean dhcpEnabled = isDhcpClient4Enabled(props, interfaceName);
+        if (dhcpEnabled) {
+            netConfigIP4.setDhcp(true);
+        } else {
+            IP4Address ip4Address = getIp4StaticAddress(props, interfaceName);
+            if (!isNull(ip4Address)) {
+                netConfigIP4.setAddress(ip4Address);
+            }
+
+            try {
+                Short networkPrefixLength = getIp4StaticPrefix(props, interfaceName);
+                if (!isNull(networkPrefixLength)) {
+                    netConfigIP4.setNetworkPrefixLength(networkPrefixLength);
+                }
+            } catch (KuraException e) {
+                logger.error("Exception while setting Network Prefix length!", e);
+            }
+
+            IP4Address ip4Gateway = getIp4StaticGateway(props, interfaceName);
+            if (!isNull(ip4Gateway)) {
+                netConfigIP4.setGateway(ip4Gateway);
+            }
+        }
+        return netConfigIP4;
+    }
+
+    private static NetInterfaceStatus getIp4Status(Map<String, Object> props, String interfaceName,
+            boolean virtualInterface) {
         String configStatus4 = null;
         String configStatus4Key = NET_INTERFACE + interfaceName + ".config.ip4.status";
         if (props.containsKey(configStatus4Key)) {
@@ -260,31 +289,8 @@ public class IpConfigurationInterpreter {
             }
         }
         logger.trace("Status Ipv4? {}", configStatus4);
-        NetInterfaceStatus status4 = NetInterfaceStatus.valueOf(configStatus4);
-        NetConfigIP4 netConfigIP4 = new NetConfigIP4(status4, getAutoConnectProperty(status4));
 
-        boolean dhcpEnabled = isDhcpClient4Enabled(props, interfaceName);
-        if (dhcpEnabled) {
-            netConfigIP4.setDhcp(true);
-        } else {
-            IP4Address ip4Address = getIp4StaticAddress(props, interfaceName);
-            if (!isNull(ip4Address)) {
-                netConfigIP4.setAddress(ip4Address);
-            }
-
-            try {
-                short networkPrefixLength = getIp4StaticPrefix(props, interfaceName);
-                netConfigIP4.setNetworkPrefixLength(networkPrefixLength);
-            } catch (KuraException e) {
-                logger.error("Exception while setting Network Prefix length!", e);
-            }
-
-            IP4Address ip4Gateway = getIp4StaticGateway(props, interfaceName);
-            if (!isNull(ip4Gateway)) {
-                netConfigIP4.setGateway(ip4Gateway);
-            }
-        }
-        return netConfigIP4;
+        return NetInterfaceStatus.valueOf(configStatus4);
     }
 
     private static IP4Address getIp4StaticGateway(Map<String, Object> props, String interfaceName)
@@ -302,10 +308,10 @@ public class IpConfigurationInterpreter {
         return ip4Gateway;
     }
 
-    private static short getIp4StaticPrefix(Map<String, Object> props, String interfaceName) throws KuraException {
+    private static Short getIp4StaticPrefix(Map<String, Object> props, String interfaceName) {
         // prefix
         String configIp4Prefix = NET_INTERFACE + interfaceName + ".config.ip4.prefix";
-        short networkPrefixLength = -1;
+        Short networkPrefixLength = null;
         Object ip4PrefixObj = props.get(configIp4Prefix);
         if (!isNull(ip4PrefixObj)) {
             if (ip4PrefixObj instanceof Short) {
@@ -313,11 +319,9 @@ public class IpConfigurationInterpreter {
             } else if (ip4PrefixObj instanceof String) {
                 networkPrefixLength = Short.parseShort((String) ip4PrefixObj);
             }
-
-            return networkPrefixLength;
         }
 
-        throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_UNDEFINED);
+        return networkPrefixLength;
     }
 
     private static IP4Address getIp4StaticAddress(Map<String, Object> props, String interfaceName)

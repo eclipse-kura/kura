@@ -14,6 +14,8 @@ package org.eclipse.kura.internal.json.marshaller.unmarshaller;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.inventory.resources.DockerContainer;
+import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundleRef;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
@@ -23,6 +25,7 @@ import org.eclipse.kura.core.keystore.util.EntryInfo;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.keystore.KeystoreEntryInfoMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonDecoder;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.message.CloudPayloadJsonEncoder;
+import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaDockerContainersMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemBundleRefMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemBundlesMapper;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.system.JsonJavaSystemDeploymentPackagesMapper;
@@ -52,6 +55,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             return JsonJavaSystemBundlesMapper.marshal((SystemBundles) object);
         } else if (object instanceof SystemPackages) {
             return JsonJavaSystemPackagesMapper.marshal((SystemPackages) object);
+        } else if (object instanceof DockerContainers) {
+            return JsonJavaDockerContainersMapper.marshal((DockerContainers) object);
         } else if (object instanceof SystemResourcesInfo) {
             return JsonJavaSystemResourcesMapper.marshal((SystemResourcesInfo) object);
         }
@@ -69,6 +74,8 @@ public class JsonMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
             return (T) KeystoreEntryInfoMapper.unmarshal(s, clazz);
         } else if (clazz.equals(SystemBundleRef.class)) {
             return (T) JsonJavaSystemBundleRefMapper.unmarshal(s);
+        } else if (clazz.equals(DockerContainer.class)) {
+            return (T) JsonJavaDockerContainersMapper.unmarshal(s);
         }
         throw new IllegalArgumentException("Invalid parameter!");
     }

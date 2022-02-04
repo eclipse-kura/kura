@@ -24,7 +24,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     chmod a+x -R /usr/local/bin && \
     apk update && \
     apk --no-cache add git openjdk8 maven && \
-    apk --no-cache add bash zip curl && \
+    apk --no-cache add bash zip curl xmlstarlet && \
     if [ -d /context/.git ]; then \
       mv /context /kura; \
       mv /kura/kura/container/kura_alpine /context; \
@@ -57,6 +57,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     rm -Rf /context /kura /root/.m2 && \
     install -m 0777 -d "${KURA_DIR}/data" && \
     sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
+    xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false ${KURA_DIR}/user/snapshots/snapshot_0.xml && \
     ln -s /bin/bash /usr/bin/bash && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.util.base;
 import static java.util.Objects.requireNonNull;
 
 import java.io.ByteArrayOutputStream;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
@@ -106,6 +105,11 @@ public final class StringUtil {
      */
 
     public static String toHex(String string) {
-        return String.format("%x", new BigInteger(1, string.getBytes(StandardCharsets.UTF_8)));
+        StringBuilder sb = new StringBuilder();
+        for (byte b : string.getBytes(StandardCharsets.UTF_8)) {
+            sb.append(String.format("%02X", b));
+        }
+        return sb.toString();
     }
+
 }

@@ -174,9 +174,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         List<String> resources = extractResources(reqMessage);
 
-        logger.error("GREG: " + resources.get(0));
-        logger.error("GREG: " + resources.toString());
-
         KuraPayload resPayload;
         if (resources.get(0).equals(INVENTORY)) {
             resPayload = doGetInventory();
@@ -220,9 +217,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         final List<String> resources = extractResources(reqMessage);
 
-        logger.error("GREG: " + resources.get(0));
-        logger.error("GREG: " + resources.toString());
-
         try {
             if (START_BUNDLE.equals(resources)) {
                 findFirstMatchingBundle(extractBundleRef(reqMessage)).start();
@@ -250,21 +244,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     @Override
     public KuraMessage doDel(RequestHandlerContext requestContext, KuraMessage reqMessage) throws KuraException {
-        final List<String> resources = extractResources(reqMessage);
-
-        try {
-            if (DELETE_CONTAINER.equals(resources)) {
-                // TODO: add API for removing factory
-                this.dockerService.stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
-                return success();
-            }
-        } catch (final KuraException e) {
-            throw e;
-        } catch (final Exception e) {
-            logger.debug("unexpected exception dispatcing call", e);
-            // this should result in response code 500
-            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
-        }
 
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }

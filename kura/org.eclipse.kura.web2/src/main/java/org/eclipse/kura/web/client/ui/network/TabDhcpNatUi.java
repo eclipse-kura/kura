@@ -250,6 +250,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     // enable/disable fields depending on values in other tabs
     private void refreshForm() {
+        resetValidations();
         GwtWifiConfig wifiConfig = this.wirelessTab.activeConfig;
         String wifiMode = null;
         if (wifiConfig != null) {
@@ -266,15 +267,6 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
             this.radio1.setEnabled(false);
             this.radio2.setEnabled(false);
         } else {
-            this.router.setEnabled(true);
-            this.begin.setEnabled(true);
-            this.end.setEnabled(true);
-            this.subnet.setEnabled(true);
-            this.defaultLease.setEnabled(true);
-            this.maxLease.setEnabled(true);
-            this.radio1.setEnabled(true);
-            this.radio2.setEnabled(true);
-
             String modeValue = this.router.getSelectedItemText();
             if (modeValue.equals(ROUTER_NAT_MESSAGE) || modeValue.equals(ROUTER_OFF_MESSAGE)) {
                 this.router.setEnabled(true);
@@ -294,6 +286,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 this.maxLease.setEnabled(true);
                 this.radio1.setEnabled(true);
                 this.radio2.setEnabled(true);
+                setValidations();
             }
         }
     }
@@ -378,12 +371,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.maxLease.addMouseOutHandler(event -> resetHelp());
         this.maxLease.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.maxLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
-                    || !isPositiveInteger(TabDhcpNatUi.this.maxLease.getText().trim())) {
-                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
-            }
+            setMaxLeaseTimeValidation();
         });
     }
 
@@ -399,12 +387,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.defaultLease.addMouseOutHandler(event -> resetHelp());
         this.defaultLease.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.defaultLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
-                    || !isPositiveInteger(TabDhcpNatUi.this.defaultLease.getText().trim())) {
-                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
-            }
+            setDefaultLeaseTimeValidation();
         });
     }
 
@@ -420,11 +403,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.subnet.addMouseOutHandler(event -> resetHelp());
         this.subnet.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
-                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
-            } else {
-                TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
-            }
+            setDHCPSubnetMaskValidation();
         });
     }
 
@@ -440,11 +419,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.end.addMouseOutHandler(event -> resetHelp());
         this.end.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
-                TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
-            } else {
-                checkDhcpRangeValidity();
-            }
+            setDHCPEndAddressValidation();
         });
     }
 
@@ -460,11 +435,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.begin.addMouseOutHandler(event -> resetHelp());
         this.begin.addValueChangeHandler(event -> {
             setDirty(true);
-            if (!TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
-                TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
-            } else {
-                checkDhcpRangeValidity();
-            }
+            setDHCPBeginAddressValidation();
         });
     }
 
@@ -550,4 +521,57 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         }
         return addressLong;
     }
+
+    private void setValidations() {
+        setDHCPSubnetMaskValidation();
+        setDHCPEndAddressValidation();
+        setDHCPBeginAddressValidation();
+        setMaxLeaseTimeValidation();
+        setDefaultLeaseTimeValidation();
+    }
+
+    private void setDHCPSubnetMaskValidation() {
+        if (TabDhcpNatUi.this.subnet.getText().isEmpty() || !TabDhcpNatUi.this.subnet.getText().matches(REGEX_IPV4)) {
+            TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.ERROR);
+        } else {
+            TabDhcpNatUi.this.groupSubnet.setValidationState(ValidationState.NONE);
+        }
+    }
+
+    private void setDHCPEndAddressValidation() {
+        if (TabDhcpNatUi.this.end.getText().isEmpty() || !TabDhcpNatUi.this.end.getText().matches(REGEX_IPV4)) {
+            TabDhcpNatUi.this.groupEnd.setValidationState(ValidationState.ERROR);
+        } else {
+            checkDhcpRangeValidity();
+        }
+    }
+
+    private void setDHCPBeginAddressValidation() {
+        if (TabDhcpNatUi.this.begin.getText().isEmpty() || !TabDhcpNatUi.this.begin.getText().matches(REGEX_IPV4)) {
+            TabDhcpNatUi.this.groupBegin.setValidationState(ValidationState.ERROR);
+        } else {
+            checkDhcpRangeValidity();
+        }
+    }
+
+    private void setMaxLeaseTimeValidation() {
+        if (TabDhcpNatUi.this.maxLease.getText().isEmpty()
+                || !TabDhcpNatUi.this.maxLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
+                || !isPositiveInteger(TabDhcpNatUi.this.maxLease.getText().trim())) {
+            TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.ERROR);
+        } else {
+            TabDhcpNatUi.this.groupMaxLease.setValidationState(ValidationState.NONE);
+        }
+    }
+
+    private void setDefaultLeaseTimeValidation() {
+        if (TabDhcpNatUi.this.defaultLease.getText().isEmpty()
+                || !TabDhcpNatUi.this.defaultLease.getText().trim().matches(FieldType.NUMERIC.getRegex())
+                || !isPositiveInteger(TabDhcpNatUi.this.defaultLease.getText().trim())) {
+            TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.ERROR);
+        } else {
+            TabDhcpNatUi.this.groupDefaultLease.setValidationState(ValidationState.NONE);
+        }
+    }
+
 }

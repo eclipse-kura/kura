@@ -250,7 +250,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
 
     // enable/disable fields depending on values in other tabs
     private void refreshForm() {
-        resetValidations();
+        // resetValidations();
         GwtWifiConfig wifiConfig = this.wirelessTab.activeConfig;
         String wifiMode = null;
         if (wifiConfig != null) {
@@ -286,7 +286,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
                 this.maxLease.setEnabled(true);
                 this.radio1.setEnabled(true);
                 this.radio2.setEnabled(true);
-                setValidations();
+                // setValidations();
             }
         }
     }
@@ -362,6 +362,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     private void initMaxLeaseTime() {
         // DHCP Max Lease
         this.labelMaxLease.setText(MSGS.netRouterDhcpMaxLease());
+        this.labelMaxLease.setShowRequiredIndicator(true);
         this.maxLease.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
@@ -378,6 +379,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     private void initDefaultLeaseTime() {
         // DHCP Default Lease
         this.labelDefaultLease.setText(MSGS.netRouterDhcpDefaultLease());
+        this.labelDefaultLease.setShowRequiredIndicator(true);
         this.defaultLease.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
@@ -394,6 +396,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     private void initDHCPSubnetMask() {
         // DHCP Subnet Mask
         this.labelSubnet.setText(MSGS.netRouterDhcpSubnetMask());
+        this.labelSubnet.setShowRequiredIndicator(true);
         this.subnet.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
@@ -410,6 +413,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     private void initDHCPEndAddress() {
         // DHCP Ending Address
         this.labelEnd.setText(MSGS.netRouterDhcpEndingAddress());
+        this.labelEnd.setShowRequiredIndicator(true);
         this.end.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
@@ -426,6 +430,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
     private void initDHCPBeginAddress() {
         // DHCP Beginning Address
         this.labelBegin.setText(MSGS.netRouterDhcpBeginningAddress());
+        this.labelBegin.setShowRequiredIndicator(true);
         this.begin.addMouseOverHandler(event -> {
             if (TabDhcpNatUi.this.router.isEnabled()) {
                 TabDhcpNatUi.this.helpText.clear();
@@ -435,7 +440,7 @@ public class TabDhcpNatUi extends Composite implements NetworkTab {
         this.begin.addMouseOutHandler(event -> resetHelp());
         this.begin.addValueChangeHandler(event -> {
             setDirty(true);
-            setDHCPBeginAddressValidation();
+            // setDHCPBeginAddressValidation();
         });
     }
 

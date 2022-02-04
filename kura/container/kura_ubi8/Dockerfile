@@ -42,7 +42,7 @@ ENV \
 
 RUN mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS
 RUN mvn -B -f kura/pom.xml clean install $MAVEN_PROPS -Pspeedup
-RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-centos-7-nn -nsu
+RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-ubuntu-20-nn -nsu
 
 WORKDIR /
 
@@ -69,11 +69,12 @@ RUN true && \
         hostname \
         which \
         findutils \
+
     && \
     microdnf -y clean all && rm -rf /var/cache/yum
 
 
-COPY --from=builder /kura/kura/distrib/target/kura_*_intel-up2-centos-7-nn_installer.sh /installer.sh
+COPY --from=builder /kura/kura/distrib/target/kura_*_intel-up2-ubuntu-20-nn_installer.sh /installer.sh
 
 ENV \
   KURA_DIR=/opt/eclipse/kura \

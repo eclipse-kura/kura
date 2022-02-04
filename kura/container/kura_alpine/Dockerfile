@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.15.0
 
 MAINTAINER Eclipse Kura Developers <kura-dev@eclipse.org>
 LABEL maintainer="Eclipse Kura Developers <kura-dev@eclipse.org>" \
@@ -43,7 +43,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     ls -la /kura/kura/distrib/target && \
     apk del maven git && \
     apk --no-cache add procps unzip gzip tar psmisc socat dos2unix openssl net-tools which busybox-extras \
-    telnet, bluez-hcidump, bluez, chrony, ntpdate && \
+    bluez bluez-deprecated chrony && \
     /kura/kura/distrib/target/kura_*_intel-up2-ubuntu-20-nn_installer.sh && \
     chmod a+rw -R /opt/eclipse && \
     find /opt/eclipse -type d | xargs chmod a+x && \

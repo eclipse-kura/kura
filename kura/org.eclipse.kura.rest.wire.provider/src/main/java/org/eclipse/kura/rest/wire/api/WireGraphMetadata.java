@@ -23,33 +23,33 @@ import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
 public class WireGraphMetadata {
 
     private final List<WireComponentDefinitionDTO> wireComponentDefinitions;
-    private final List<ComponentConfigurationDTO> driverDefinitions;
-    private final List<DriverDescriptorDTO> driverDescriptors;
-    private final List<AdDTO> baseChannelDescriptor;
+    private final List<ComponentConfigurationDTO> driverOCDs;
+    private final List<DriverDescriptorDTO> driverChannelDescriptors;
+    private final List<AdDTO> assetChannelDescriptor;
 
     public WireGraphMetadata(List<WireComponentDefinitionDTO> wireComponentDefinitions,
-            List<ComponentConfigurationDTO> driverDefinitions, List<DriverDescriptorDTO> driverDescriptors,
-            List<AdDTO> baseChannelDescriptor) {
+            List<ComponentConfigurationDTO> driverDefinitions, List<DriverDescriptorDTO> driverChannelDescriptors,
+            List<AdDTO> assetChannelDescriptor) {
         this.wireComponentDefinitions = nonEmptyOrNull(wireComponentDefinitions);
-        this.driverDefinitions = nonEmptyOrNull(driverDefinitions);
-        this.driverDescriptors = nonEmptyOrNull(driverDescriptors);
-        this.baseChannelDescriptor = nonEmptyOrNull(baseChannelDescriptor);
+        this.driverOCDs = nonEmptyOrNull(driverDefinitions);
+        this.driverChannelDescriptors = nonEmptyOrNull(driverChannelDescriptors);
+        this.assetChannelDescriptor = nonEmptyOrNull(assetChannelDescriptor);
     }
 
     public List<WireComponentDefinitionDTO> getWireComponentDefinitions() {
         return Optional.ofNullable(this.wireComponentDefinitions).orElseGet(Collections::emptyList);
     }
 
-    public List<ComponentConfigurationDTO> getDriverDefinitions() {
-        return Optional.ofNullable(this.driverDefinitions).orElseGet(Collections::emptyList);
+    public List<ComponentConfigurationDTO> factoryDriverOCDs() {
+        return Optional.ofNullable(this.driverOCDs).orElseGet(Collections::emptyList);
     }
 
     public List<DriverDescriptorDTO> getDriverDescriptors() {
-        return Optional.ofNullable(this.driverDescriptors).orElseGet(Collections::emptyList);
+        return Optional.ofNullable(this.driverChannelDescriptors).orElseGet(Collections::emptyList);
     }
 
     public List<AdDTO> getBaseChannelDescriptor() {
-        return Optional.ofNullable(this.baseChannelDescriptor).orElseGet(Collections::emptyList);
+        return Optional.ofNullable(this.assetChannelDescriptor).orElseGet(Collections::emptyList);
     }
 
     private static <T> List<T> nonEmptyOrNull(List<T> original) {

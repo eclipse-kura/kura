@@ -868,11 +868,11 @@ public class WireGraphRestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("GET"), "/metadata");
 
         thenRequestSucceeds();
-        thenResponseElementExists(self().field("driverDefinitions")
+        thenResponseElementExists(self().field("driverOCDs")
                 .anyArrayItem(self().field("pid").matching(Json.value(TEST_DRIVER_FACTORY_PID))));
         thenResponseElementExists(self().field("wireComponentDefinitions")
                 .anyArrayItem(self().matching(parse(Snippets.TEST_EMITTER_RECEIVER_DEFINITION))));
-        thenResponseElementIs(parse(Snippets.BASE_CHANNEL_DESCRIPTOR), self().field("baseChannelDescriptor"));
+        thenResponseElementIs(parse(Snippets.BASE_CHANNEL_DESCRIPTOR), self().field("assetChannelDescriptor"));
     }
 
     @Test
@@ -945,31 +945,61 @@ public class WireGraphRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void getDriverDefinitions() {
+    public void getDriverOCDs() {
         givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
-        whenRequestIsPerformed(new MethodSpec("GET"), "/metadata/drivers/definitions");
+        whenRequestIsPerformed(new MethodSpec("GET"), "/metadata/drivers/ocds");
 
         thenRequestSucceeds();
-        thenResponseElementExists(self().field("driverDefinitions")
-                .anyArrayItem(self().matching(Json.parse(Snippets.TEST_DRIVER_DEFINITION))));
+        thenResponseElementExists(
+                self().field("driverOCDs").anyArrayItem(self().matching(Json.parse(Snippets.TEST_DRIVER_DEFINITION))));
     }
 
     @Test
-    public void getDriverDefinitionsByFactoryPid() {
+    public void getDriverOCDsByFactoryPid() {
         givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
-        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/definitions/byFactoryPid",
+        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/ocds/byFactoryPid",
                 "{\"pids\":[\"org.eclipse.kura.util.test.driver.ChannelDescriptorTestDriver\"]}");
 
         thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(Snippets.TEST_DRIVER_DEFINITION),
-                self().field("driverDefinitions").arrayItem(0));
-        thenResponseElementDoesNotExists(self().field("driverDefinitions").arrayItem(1));
+        thenResponseElementIs(Json.parse(Snippets.TEST_DRIVER_DEFINITION), self().field("driverOCDs").arrayItem(0));
+        thenResponseElementDoesNotExists(self().field("driverOCDs").arrayItem(1));
     }
 
     @Test
-    public void getDriverDefinitionsByFactoryPidNotFound() {
+    public void getDriverOCDsByFactoryPidNotFound() {
         givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
-        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/definitions/byFactoryPid",
+        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/ocds/byFactoryPid", "{\"pids\":[\"foo\"]}");
+
+        thenRequestSucceeds();
+        thenResponseBodyEqualsJson("{}");
+    }
+
+    @Test
+    public void getDriverChannelDescriptors() {
+        givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
+        whenRequestIsPerformed(new MethodSpec("GET"), "/metadata/drivers/channelDescriptors");
+
+        thenRequestSucceeds();
+        thenResponseElementExists(self().field("driverChannelDescriptors")
+                .anyArrayItem(self().matching(Json.parse(Snippets.TEST_DRIVER_DESCRIPTOR))));
+    }
+
+    @Test
+    public void getDriverChannelDescriptorsByPid() {
+        givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
+        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/channelDescriptors/byPid",
+                "{\"pids\":[\"testDriver\"]}");
+
+        thenRequestSucceeds();
+        thenResponseElementIs(Json.parse(Snippets.TEST_DRIVER_DESCRIPTOR),
+                self().field("driverChannelDescriptors").arrayItem(0));
+        thenResponseElementDoesNotExists(self().field("driverChannelDescriptors").arrayItem(1));
+    }
+
+    @Test
+    public void getDriverChannelDescriptorsByPidNotFound() {
+        givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
+        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/channelDescriptors/byPid",
                 "{\"pids\":[\"foo\"]}");
 
         thenRequestSucceeds();
@@ -977,42 +1007,11 @@ public class WireGraphRestServiceTest extends AbstractRequestHandlerTest {
     }
 
     @Test
-    public void getDriverDescriptors() {
-        givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
-        whenRequestIsPerformed(new MethodSpec("GET"), "/metadata/drivers/descriptors");
+    public void getAssetChannelDescriptor() {
+        whenRequestIsPerformed(new MethodSpec("GET"), "/metadata/assets/channelDescriptor");
 
         thenRequestSucceeds();
-        thenResponseElementExists(self().field("driverDescriptors")
-                .anyArrayItem(self().matching(Json.parse(Snippets.TEST_DRIVER_DESCRIPTOR))));
-    }
-
-    @Test
-    public void getDriverDescriptorsByPid() {
-        givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
-        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/descriptors/byPid",
-                "{\"pids\":[\"testDriver\"]}");
-
-        thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(Snippets.TEST_DRIVER_DESCRIPTOR),
-                self().field("driverDescriptors").arrayItem(0));
-        thenResponseElementDoesNotExists(self().field("driverDescriptors").arrayItem(1));
-    }
-
-    @Test
-    public void getDriverDescriptorsByPidNotFound() {
-        givenFactoryComponent(TEST_DRIVER_PID, TEST_DRIVER_FACTORY_PID, Collections.emptyMap());
-        whenRequestIsPerformed(new MethodSpec("POST"), "/metadata/drivers/descriptors/byPid", "{\"pids\":[\"foo\"]}");
-
-        thenRequestSucceeds();
-        thenResponseBodyEqualsJson("{}");
-    }
-
-    @Test
-    public void getBaseChannelDescriptor() {
-        whenRequestIsPerformed(new MethodSpec("GET"), "/metadata/assets/baseChannelDescriptor");
-
-        thenRequestSucceeds();
-        thenResponseElementIs(Json.parse(Snippets.BASE_CHANNEL_DESCRIPTOR), self().field("baseChannelDescriptor"));
+        thenResponseElementIs(Json.parse(Snippets.BASE_CHANNEL_DESCRIPTOR), self().field("assetChannelDescriptor"));
     }
 
     @Test

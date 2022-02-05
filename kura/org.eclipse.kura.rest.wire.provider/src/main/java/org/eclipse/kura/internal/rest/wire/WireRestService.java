@@ -531,7 +531,7 @@ public class WireRestService {
 
     @GET
     @RolesAllowed(WIRES_ADMIN_ROLE)
-    @Path("/metadata/drivers/definitions")
+    @Path("/metadata/drivers/ocds")
     @Produces(MediaType.APPLICATION_JSON)
     public WireGraphMetadata getDriverDefinitions() {
 
@@ -546,7 +546,7 @@ public class WireRestService {
 
     @POST
     @RolesAllowed(WIRES_ADMIN_ROLE)
-    @Path("/metadata/drivers/definitions/byFactoryPid")
+    @Path("/metadata/drivers/ocds/byFactoryPid")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public WireGraphMetadata getDriverDefinitionsByPid(final PidSet pidSet) {
@@ -564,7 +564,7 @@ public class WireRestService {
 
     @GET
     @RolesAllowed(WIRES_ADMIN_ROLE)
-    @Path("/metadata/drivers/descriptors")
+    @Path("/metadata/drivers/channelDescriptors")
     @Produces(MediaType.APPLICATION_JSON)
     public WireGraphMetadata getDriverDescriptors() {
         try {
@@ -578,7 +578,7 @@ public class WireRestService {
 
     @POST
     @RolesAllowed(WIRES_ADMIN_ROLE)
-    @Path("/metadata/drivers/descriptors/byPid")
+    @Path("/metadata/drivers/channelDescriptors/byPid")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public WireGraphMetadata getDriverDescriptorsByPid(final PidSet pidSet) {
@@ -596,7 +596,7 @@ public class WireRestService {
 
     @GET
     @RolesAllowed(WIRES_ADMIN_ROLE)
-    @Path("/metadata/assets/baseChannelDescriptor")
+    @Path("/metadata/assets/channelDescriptor")
     @Produces(MediaType.APPLICATION_JSON)
     public WireGraphMetadata getBaseChannelDescriptor() {
         try {

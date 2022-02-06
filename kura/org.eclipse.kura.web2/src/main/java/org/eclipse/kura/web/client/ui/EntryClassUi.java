@@ -409,6 +409,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 return;
             }
             confirmIfUiDirty(() -> {
+                this.wiresBinder.unload();
                 EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
                 EntryClassUi.this.contentPanel.setVisible(true);
                 setHeader(MSGS.driversAndAssetsServices(), null);

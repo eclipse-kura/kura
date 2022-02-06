@@ -159,7 +159,7 @@
 								<b:PanelBody ui:field='systemPanel'
 									b:id="systemPanel">
 									<b:NavPills stacked="true" ui:field="sidenavPills">
-										<b:TabListItem text="{msgs.status}"
+										<b:AnchorListItem text="{msgs.status}"
 											icon="EXCLAMATION" iconFixedWidth="true" ui:field="status" />
 
 										<b:AnchorListItem text="{msgs.device}"

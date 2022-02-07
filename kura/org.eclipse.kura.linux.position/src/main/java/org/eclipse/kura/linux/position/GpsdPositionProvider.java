@@ -62,6 +62,9 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     @Override
     public Position getPosition() {
         GpsdInternalState internalState = internalStateReference.get();
+        if (internalState == null) {
+            return null;
+        }
         return new Position(toRadiansMeasurement(internalState.getLatitude(), internalState.getLatitudeError()),
                 toRadiansMeasurement(internalState.getLongitude(), internalState.getLongitudeError()),
                 toMetersMeasurement(internalState.getAltitude(), internalState.getAltitudeError()),
@@ -72,6 +75,9 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     @Override
     public NmeaPosition getNmeaPosition() {
         GpsdInternalState internalState = internalStateReference.get();
+        if (internalState == null) {
+            return null;
+        }
         return new NmeaPosition(internalState.getLatitude(), internalState.getLongitude(), internalState.getAltitude(),
                 internalState.getSpeed(), internalState.getCourse());
     }

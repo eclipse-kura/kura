@@ -316,7 +316,7 @@ public class DbDataStore implements DataStore {
             int result = -1;
 
             // store message
-            try (PreparedStatement pstmt = c.prepareStatement(this.sqlStore)) {
+            try (PreparedStatement pstmt = c.prepareStatement(this.sqlStore, new String[] { "id" })) {
                 pstmt.setString(1, topic);                                          // topic
                 pstmt.setInt(2, qos);                                               // qos
                 pstmt.setBoolean(3, retain);                                        // retain
@@ -338,8 +338,9 @@ public class DbDataStore implements DataStore {
                 pstmt.setTimestamp(12, null);                                       // droppedOn
                 pstmt.execute();
                 ResultSet rs = pstmt.getGeneratedKeys();
-                rs.next();
-                result = rs.getInt(1);
+                if (rs.next()) {
+                    result = rs.getInt(1);
+                }
             }
 
             c.commit();

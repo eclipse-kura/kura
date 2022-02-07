@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -184,6 +185,15 @@ public class PositionServiceImpl
     public String getNmeaDate() {
         if (this.currentProvider != null) {
             return this.currentProvider.getNmeaDate();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public LocalDateTime getDateTime() {
+        if (this.currentProvider != null) {
+            return this.currentProvider.getDateTime();
         } else {
             return null;
         }

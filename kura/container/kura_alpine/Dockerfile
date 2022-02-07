@@ -1,4 +1,4 @@
-FROM alpine:3.15.0
+FROM alpine:latest
 
 MAINTAINER Eclipse Kura Developers <kura-dev@eclipse.org>
 LABEL maintainer="Eclipse Kura Developers <kura-dev@eclipse.org>" \

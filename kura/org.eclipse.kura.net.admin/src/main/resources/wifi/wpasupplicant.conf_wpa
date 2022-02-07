@@ -7,7 +7,7 @@ country=KURA_COUNTRY_CODE
 # home network; allow all valid ciphers
 network={
     mode=KURA_MODE
-    ssid="KURA_ESSID"
+    ssid=KURA_ESSID
     scan_ssid=1
     key_mgmt=WPA-PSK
     psk=KURA_PASSPHRASE

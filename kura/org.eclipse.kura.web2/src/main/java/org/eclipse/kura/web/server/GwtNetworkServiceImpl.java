@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -55,7 +55,6 @@ import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
-import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemManagerService;
@@ -1018,7 +1017,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             List<WifiHotspotInfo> wifiHotspotInfoList = nas.getWifiHotspotList(interfaceName);
             if (wifiHotspotInfoList != null) {
                 for (WifiHotspotInfo wifiHotspotInfo : wifiHotspotInfoList) {
-                    String ssid = GwtSafeHtmlUtils.htmlEscape(wifiHotspotInfo.getSsid());
+                    String ssid = wifiHotspotInfo.getSsid();
                     // if(!ssid.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
                     // ssid= null;
                     // }

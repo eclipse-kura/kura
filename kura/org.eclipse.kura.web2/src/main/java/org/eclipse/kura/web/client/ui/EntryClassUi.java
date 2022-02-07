@@ -125,7 +125,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @UiField
     PanelBody contentPanelBody;
     @UiField
-    TabListItem status;
+    AnchorListItem status;
     @UiField
     AnchorListItem device;
     @UiField

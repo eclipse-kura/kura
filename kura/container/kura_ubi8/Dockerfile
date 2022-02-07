@@ -41,16 +41,14 @@ ENV \
   MAVEN_PROPS="-DskipTests -Dmaven.artifact.threads=20"
 
 RUN mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS
-RUN mvn -B -f kura/pom.xml clean install $MAVEN_PROPS -Pspeedup
+RUN mvn -B -f kura/pom.xml clean install $MAVEN_PROPS
 RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-ubuntu-20-nn -nsu
 
 WORKDIR /
 
 RUN ls -la /kura/kura/distrib/target
 
-
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
-
 
 RUN true && \
     rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
@@ -84,7 +82,7 @@ ENV \
 
 RUN mkdir -p /usr/local/bin
 
-COPY --from=builder /context/bin/* /usr/local/bin
+COPY --from=builder /context/bin/* /usr/local/bin/
 
 RUN true && \
     /installer.sh && \

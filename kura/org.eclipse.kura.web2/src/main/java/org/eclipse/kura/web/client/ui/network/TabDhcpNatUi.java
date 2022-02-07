@@ -19,6 +19,7 @@ import org.eclipse.kura.web.client.ui.AbstractServicesUi;
 import org.eclipse.kura.web.client.ui.AlertDialog;
 import org.eclipse.kura.web.client.ui.AlertDialog.ConfirmListener;
 import org.eclipse.kura.web.client.ui.AlertDialog.Severity;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.client.util.HelpButton;
 import org.eclipse.kura.web.client.util.MessageUtils;
 import org.eclipse.kura.web.client.util.TextFieldValidator.FieldType;
@@ -30,13 +31,20 @@ import org.eclipse.kura.web.shared.model.GwtSession;
 import org.eclipse.kura.web.shared.model.GwtWifiConfig;
 import org.eclipse.kura.web.shared.model.GwtWifiWirelessMode;
 import org.eclipse.kura.web.shared.model.GwtConfigParameter.GwtConfigParameterType;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtNetworkService;
+import org.eclipse.kura.web.shared.service.GwtNetworkServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.Form;
+import org.gwtbootstrap3.client.ui.FormControlStatic;
 import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.HelpBlock;
 import org.gwtbootstrap3.client.ui.InlineRadio;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.PanelHeader;
+import org.gwtbootstrap3.client.ui.TextArea;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.ValidationState;
 import org.gwtbootstrap3.client.ui.html.Span;
@@ -45,6 +53,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -62,6 +71,8 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
 
     private static final String REGEX_IPV4 = "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b";
     private static final Messages MSGS = GWT.create(Messages.class);
+    private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
+    private final GwtNetworkServiceAsync gwtNetworkService = GWT.create(GwtNetworkService.class);
     private final GwtSession session;
     private final TabTcpIpUi tcpTab;
     private final TabWirelessUi wirelessTab;
@@ -86,6 +97,8 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
     FormLabel labelMaxLease;
     @UiField
     FormLabel labelPass;
+    @UiField
+    FormLabel labelDhcpLease;
 
     @UiField
     ListBox router;
@@ -100,6 +113,9 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
     TextBox defaultLease;
     @UiField
     TextBox maxLease;
+
+    @UiField
+    TextArea dhcpLease;
 
     @UiField
     InlineRadio radio1;
@@ -118,9 +134,15 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
     FormGroup groupDefaultLease;
     @UiField
     FormGroup groupMaxLease;
+    @UiField
+    FormGroup groupDhcpLease;
+    @UiField
+    FormControlStatic dhcpLeaseRead;
 
     @UiField
     HelpBlock helpRouter;
+    @UiField
+    HelpBlock helpDhcpLease;
 
     @UiField
     PanelHeader helpTitle;
@@ -142,6 +164,8 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
     HelpButton maxLeaseHelp;
     @UiField
     HelpButton passHelp;
+    @UiField
+    HelpButton dhcpLeaseHelp;
 
     @UiField
     AlertDialog alertDialog;
@@ -182,7 +206,8 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
                 || this.groupEnd.getValidationState().equals(ValidationState.ERROR)
                 || this.groupSubnet.getValidationState().equals(ValidationState.ERROR)
                 || this.groupDefaultLease.getValidationState().equals(ValidationState.ERROR)
-                || this.groupMaxLease.getValidationState().equals(ValidationState.ERROR));
+                || this.groupMaxLease.getValidationState().equals(ValidationState.ERROR)
+                || this.groupDhcpLease.getValidationState().equals(ValidationState.ERROR));
     }
 
     @Override
@@ -223,7 +248,6 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
                 updatedNetIf.setRouterDhcpMaxLease(Integer.parseInt(this.maxLease.getText()));
             }
             updatedNetIf.setRouterDnsPass(this.radio1.getValue());
-
         }
     }
 
@@ -250,6 +274,8 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
             this.radio1.setValue(this.selectedNetIfConfig.getRouterDnsPass());
             this.radio2.setValue(!this.selectedNetIfConfig.getRouterDnsPass());
 
+            loadDhcpLease();
+
         }
         refreshForm();
     }
@@ -257,6 +283,7 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
     // enable/disable fields depending on values in other tabs
     private void refreshForm() {
         resetValidations();
+        this.dhcpLease.setReadOnly(true);
         GwtWifiConfig wifiConfig = this.wirelessTab.activeConfig;
         String wifiMode = null;
         if (wifiConfig != null) {
@@ -329,6 +356,7 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
         this.defaultLeaseHelp.setHelpText(MSGS.netRouterToolTipDhcpDefaultLeaseTime());
         this.maxLeaseHelp.setHelpText(MSGS.netRouterToolTipDhcpMaxLeaseTime());
         this.passHelp.setHelpText(MSGS.netRouterToolTipPassDns());
+        this.dhcpLeaseHelp.setHelpText(MSGS.netDhcpLeaseHelp());
     }
 
     private void initForm() {
@@ -486,6 +514,20 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
             }
             refreshForm();
         });
+        this.radio2.addMouseOutHandler(event -> resetHelp());
+
+        this.radio1.addValueChangeHandler(event -> setDirty(true));
+        this.radio2.addValueChangeHandler(event -> setDirty(true));
+        this.helpTitle.setText(MSGS.netHelpTitle());
+
+        // Dhcp Lease
+        this.labelDhcpLease.setText(MSGS.netLabelDhcpLease());
+        this.dhcpLease.addMouseOverHandler(event -> {
+            if (TabDhcpNatUi.this.router.isEnabled()) {
+                TabDhcpNatUi.this.helpText.clear();
+                TabDhcpNatUi.this.helpText.add(new Span(MSGS.netDhcpLeaseHelp()));
+            }
+        });
     }
 
     private void resetHelp() {
@@ -613,4 +655,35 @@ public class TabDhcpNatUi extends AbstractServicesUi implements NetworkTab {
         // Do nothing...
     }
 
+    private void loadDhcpLease() {
+        if (this.selectedNetIfConfig != null) {
+            this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    FailureHandler.handle(ex);
+                }
+
+                @Override
+                public void onSuccess(GwtXSRFToken token) {
+                    TabDhcpNatUi.this.gwtNetworkService.getDhcpLeases(token,
+                            new AsyncCallback<List<String>>() {
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    System.out.println("DhcpLease Failure");
+                                }
+                                @Override
+                                public void onSuccess(List<String> leases) {
+                                    String values = "";
+                                    for (String dl : leases) {
+                                        values += dl.toString() + '\n';
+                                    }
+                                    TabDhcpNatUi.this.dhcpLease.setValue(values);
+                                }
+                    });
+                }
+            });
+        }
+    }
 }

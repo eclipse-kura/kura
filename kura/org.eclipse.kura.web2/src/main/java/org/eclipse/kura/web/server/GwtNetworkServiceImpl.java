@@ -40,6 +40,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
@@ -81,6 +82,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.shared.model.GwtDhcpLease;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
@@ -1748,6 +1750,30 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         if (!errors.isEmpty()) {
             logger.warn("password strenght requirements not satisfied: {}", errors);
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        }
+    }
+
+    @Override
+    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        logger.debug("Find Dhcp Lease List");
+        List<String> dhcpLease = new ArrayList<String>();
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            List<DhcpLease> leases = nas.getDhcpLeases();
+
+            for (DhcpLease dl : leases) {
+                logger.debug(dl.toString());
+                GwtDhcpLease dhcp = new GwtDhcpLease();
+                dhcp.setMacAddress(dl.getMacAddress());
+                dhcp.setIpAddress(dl.getIpAddress());
+                dhcp.setHostname(dl.getHostname());
+                dhcpLease.add(dhcp.toString());
+            }
+            return dhcpLease;
+        } catch (KuraException e) {
+            logger.error("Find Dhcp Lease List Exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 }

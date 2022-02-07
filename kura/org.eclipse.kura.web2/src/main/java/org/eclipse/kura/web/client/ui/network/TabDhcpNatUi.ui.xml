@@ -120,9 +120,15 @@
                                         formValue="false" ui:field="radio2" />
                                 </g:FlowPanel>
                             </b:FormGroup>
+                            <b:FormGroup ui:field="groupDhcpLease">
+                                <b:FormLabel for="dhcpLease" ui:field="labelDhcpLease"></b:FormLabel>
+                                <util:HelpButton ui:field="dhcpLeaseHelp" />
+                                <b:HelpBlock color="red" ui:field="helpDhcpLease" />
+                                <b:TextArea b:id="dhcpLease" ui:field="dhcpLease" />
+                                <b:FormControlStatic b:id="dhcpLeaseRead" ui:field="dhcpLeaseRead" />
+                            </b:FormGroup>
                         </b:FieldSet>
                     </b:Form>
-
                 </g:ScrollPanel>
             </b:Row>
         </b:Column>

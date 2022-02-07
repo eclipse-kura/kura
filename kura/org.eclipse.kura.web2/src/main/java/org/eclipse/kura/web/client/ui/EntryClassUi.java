@@ -409,7 +409,6 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 return;
             }
             confirmIfUiDirty(() -> {
-                this.wiresBinder.unload();
                 EntryClassUi.this.setSelectedAnchorListItem(EntryClassUi.this.driversAndAssetsServices);
                 EntryClassUi.this.contentPanel.setVisible(true);
                 setHeader(MSGS.driversAndAssetsServices(), null);
@@ -843,10 +842,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     public void confirmIfUiDirty(final Runnable action) {
         if (isUiDirty()) {
             this.alertDialog.show(MSGS.deviceConfigDirty(), () -> {
+                EntryClassUi.this.wiresBinder.unload();
                 forceTabsCleaning();
                 action.run();
             });
         } else {
+            this.wiresBinder.unload();
             action.run();
         }
     }

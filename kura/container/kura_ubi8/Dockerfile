@@ -53,6 +53,7 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
 
 
 RUN true && \
+    rpm -ivh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     microdnf -y update && \
     microdnf -y install \
         java-1.8.0-openjdk-headless \
@@ -61,6 +62,7 @@ RUN true && \
         unzip \
         gzip \
         tar \
+        xmlstarlet \
         psmisc \
         socat \
         dos2unix \
@@ -69,10 +71,8 @@ RUN true && \
         hostname \
         which \
         findutils \
-
     && \
     microdnf -y clean all && rm -rf /var/cache/yum
-
 
 COPY --from=builder /kura/kura/distrib/target/kura_*_intel-up2-ubuntu-20-nn_installer.sh /installer.sh
 
@@ -98,6 +98,7 @@ RUN true && \
     chmod a+x /usr/local/bin/* && \
     install -m 0777 -d "${KURA_DIR}/data" && \
     sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
+    xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false ${KURA_DIR}/user/snapshots/snapshot_0.xml && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \
     \

@@ -53,9 +53,6 @@
             <esf:property name="service.pid" array="false" encrypted="false" type="String">
                 <esf:value>org.eclipse.kura.clock.ClockService</esf:value>
             </esf:property>
-            <esf:property name="DataService.target" array="false" encrypted="false" type="String">
-                <esf:value>(kura.service.pid=org.eclipse.kura.data.DataService)</esf:value>
-            </esf:property>
         </esf:properties>
     </esf:configuration>
     <esf:configuration pid="org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport">
@@ -173,6 +170,9 @@
             </esf:property>
             <esf:property name="device.display-name" array="false" encrypted="false" type="String">
                 <esf:value>Kura Emulator</esf:value>
+            </esf:property>
+            <esf:property name="DataService.target" array="false" encrypted="false" type="String">
+                <esf:value>(kura.service.pid=org.eclipse.kura.data.DataService)</esf:value>
             </esf:property>
         </esf:properties>
     </esf:configuration>

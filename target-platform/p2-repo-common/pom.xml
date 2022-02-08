@@ -67,8 +67,8 @@
                                     <version>${com.codeminders.hidapi.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache</groupId>
-                                    <artifactId>org.apache.commons.net</artifactId>
+                                    <groupId>commons-net</groupId>
+                                    <artifactId>commons-net</artifactId>
                                     <version>${org.apache.commons.net.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -535,7 +535,7 @@
                                 <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
+                                <move file="target/source/plugins/commons-net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
                                 <move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
                                 <move file="target/source/plugins/protobuf-java.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar" tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar"/>

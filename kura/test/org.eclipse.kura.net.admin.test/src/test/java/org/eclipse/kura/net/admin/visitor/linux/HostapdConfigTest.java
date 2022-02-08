@@ -174,8 +174,6 @@ public class HostapdConfigTest {
             writer.visit(config);
         } catch (KuraException e) {
             assertEquals(KuraErrorCode.INTERNAL_ERROR, e.getCode());
-            assertTrue(e.getCause().getMessage().contains("security"));
-            assertTrue(e.getCause().getMessage().contains(" null"));
         }
 
         File f = new File(TEMP_FILE);

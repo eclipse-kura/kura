@@ -1,17 +1,20 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
+import static java.util.Objects.isNull;
+
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +36,17 @@ import org.eclipse.kura.core.configuration.metatype.Tad;
 import org.eclipse.kura.core.configuration.metatype.Tocd;
 import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.core.net.EthernetInterfaceConfigImpl;
+import org.eclipse.kura.core.net.IpConfigurationInterpreter;
 import org.eclipse.kura.core.net.LoopbackInterfaceConfigImpl;
+import org.eclipse.kura.core.net.ModemConfigurationInterpreter;
+import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.WifiConfigurationInterpreter;
+import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceImpl;
+import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.net.modem.ModemInterfaceImpl;
 import org.eclipse.kura.crypto.CryptoService;
@@ -46,6 +55,7 @@ import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.EthernetInterface;
 import org.eclipse.kura.net.LoopbackInterface;
+import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterface;
 import org.eclipse.kura.net.NetInterfaceAddress;
 import org.eclipse.kura.net.NetInterfaceType;
@@ -56,6 +66,7 @@ import org.eclipse.kura.net.admin.visitor.linux.LinuxWriteVisitor;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemManagerService;
+import org.eclipse.kura.usb.UsbDevice;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.eclipse.kura.usb.UsbNetDevice;
 import org.eclipse.kura.usb.UsbService;
@@ -65,6 +76,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetworkConfigurationServiceImpl implements NetworkConfigurationService, SelfConfiguringComponent {
+
+    private static final String ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION = "Error fetching information for network interface: {}";
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkConfigurationServiceImpl.class);
 
@@ -326,7 +339,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     @Override
-    @SuppressWarnings("checkstyle:lineLength")
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
         NetworkConfiguration networkConfiguration = new NetworkConfiguration();
 
@@ -355,40 +367,24 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
                     NetInterfaceType type = netInterface.getType();
 
+                    UsbDevice usbDevice = IpConfigurationInterpreter.getUsbDeviceInfo(this.properties, interfaceName);
+
                     logger.debug("Getting config for {} type: {}", interfaceName, type);
                     switch (type) {
                     case LOOPBACK:
-                        LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends NetInterfaceAddress>) netInterface;
-                        LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(
-                                activeLoopInterface);
-                        networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
-                        networkConfiguration.populateNetInterfaceConfiguration(loopbackInterfaceConfig,
-                                this.properties);
+                        populateLoopbackConfiguration(networkConfiguration, netInterface, usbDevice);
                         break;
 
                     case ETHERNET:
-                        EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends NetInterfaceAddress>) netInterface;
-                        EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(
-                                activeEthInterface);
-                        networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
-                        networkConfiguration.populateNetInterfaceConfiguration(ethernetInterfaceConfig,
-                                this.properties);
+                        populateEthernetConfiguration(networkConfiguration, netInterface, usbDevice);
                         break;
 
                     case WIFI:
-                        WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-                        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
-                        networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
-                        networkConfiguration.populateNetInterfaceConfiguration(wifiInterfaceConfig, this.properties);
+                        populateWifiConfig(networkConfiguration, netInterface, usbDevice);
                         break;
 
                     case MODEM:
-                        ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
-                        addPropertiesInModemInterface(activeModemInterface);
-                        ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(
-                                activeModemInterface);
-                        networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
-                        networkConfiguration.populateNetInterfaceConfiguration(modemInterfaceConfig, this.properties);
+                        populateModemConfig(networkConfiguration, netInterface, usbDevice);
                         break;
 
                     case UNKNOWN:
@@ -400,12 +396,109 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                         logger.debug("Unsupported type: {} - not adding to configuration. Ignoring it.", type);
                     }
                 } catch (Exception e) {
-                    logger.warn("Error fetching information for network interface: {}", interfaceName, e);
+                    logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
                 }
             }
         }
 
         return networkConfiguration;
+    }
+
+    private void populateModemConfig(NetworkConfiguration networkConfiguration,
+            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
+        String interfaceName = netInterface.getName();
+        ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
+        addPropertiesInModemInterface(activeModemInterface);
+        ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(activeModemInterface);
+
+        boolean isVirtual = modemInterfaceConfig.isVirtual();
+
+        modemInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
+            try {
+                List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
+                        interfaceName, netInterfaceAddress.getAddress(), isVirtual);
+                modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(netInterfaceAddress,
+                        this.properties, interfaceName, modemInterfaceConfig.getPppNum()));
+                ((ModemInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(modemNetConfigs);
+            } catch (UnknownHostException | KuraException e) {
+                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
+            }
+        });
+
+        modemInterfaceConfig.setUsbDevice(usbDevice);
+        networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
+    }
+
+    private void populateWifiConfig(NetworkConfiguration networkConfiguration,
+            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
+        String interfaceName = netInterface.getName();
+        WifiInterfaceImpl<? extends NetInterfaceAddress> activeWifiInterface = (WifiInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
+        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiInterfaceConfigImpl(activeWifiInterface);
+
+        boolean isVirtual = wifiInterfaceConfig.isVirtual();
+
+        wifiInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
+            try {
+                List<NetConfig> wifiNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
+                        interfaceName, netInterfaceAddress.getAddress(), isVirtual);
+                wifiNetConfigs
+                        .addAll(WifiConfigurationInterpreter.populateConfiguration(this.properties, interfaceName));
+                ((WifiInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(wifiNetConfigs);
+                ((WifiInterfaceAddressConfigImpl) netInterfaceAddress)
+                        .setMode(WifiConfigurationInterpreter.getWifiMode(this.properties, interfaceName));
+            } catch (UnknownHostException | KuraException e) {
+                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
+            }
+        });
+
+        wifiInterfaceConfig.setUsbDevice(usbDevice);
+        networkConfiguration.addNetInterfaceConfig(wifiInterfaceConfig);
+    }
+
+    private void populateEthernetConfiguration(NetworkConfiguration networkConfiguration,
+            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
+        String interfaceName = netInterface.getName();
+
+        EthernetInterface<? extends NetInterfaceAddress> activeEthInterface = (EthernetInterface<? extends NetInterfaceAddress>) netInterface;
+        EthernetInterfaceConfigImpl ethernetInterfaceConfig = new EthernetInterfaceConfigImpl(activeEthInterface);
+
+        boolean isVirtual = ethernetInterfaceConfig.isVirtual();
+
+        ethernetInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
+            try {
+                ((NetInterfaceAddressConfigImpl) netInterfaceAddress)
+                        .setNetConfigs(IpConfigurationInterpreter.populateConfiguration(this.properties, interfaceName,
+                                netInterfaceAddress.getAddress(), isVirtual));
+            } catch (UnknownHostException e) {
+                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
+            }
+        });
+
+        ethernetInterfaceConfig.setUsbDevice(usbDevice);
+        networkConfiguration.addNetInterfaceConfig(ethernetInterfaceConfig);
+    }
+
+    private void populateLoopbackConfiguration(NetworkConfiguration networkConfiguration,
+            NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
+        String interfaceName = netInterface.getName();
+
+        LoopbackInterface<? extends NetInterfaceAddress> activeLoopInterface = (LoopbackInterface<? extends NetInterfaceAddress>) netInterface;
+        LoopbackInterfaceConfigImpl loopbackInterfaceConfig = new LoopbackInterfaceConfigImpl(activeLoopInterface);
+
+        boolean isVirtual = loopbackInterfaceConfig.isVirtual();
+
+        loopbackInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
+            try {
+                ((NetInterfaceAddressConfigImpl) netInterfaceAddress)
+                        .setNetConfigs(IpConfigurationInterpreter.populateConfiguration(this.properties, interfaceName,
+                                netInterfaceAddress.getAddress(), isVirtual));
+            } catch (UnknownHostException e) {
+                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
+            }
+        });
+
+        loopbackInterfaceConfig.setUsbDevice(usbDevice);
+        networkConfiguration.addNetInterfaceConfig(loopbackInterfaceConfig);
     }
 
     private boolean shouldSkipNetworkConfiguration(String interfaceName) {
@@ -418,14 +511,17 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         return result;
     }
 
-    private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface)
-            throws KuraException {
+    private void addPropertiesInModemInterface(ModemInterfaceImpl<? extends NetInterfaceAddress> modemInterface) {
         String interfaceName = modemInterface.getName();
-        if (this.modemManagerService != null) {
-            String modemPort = this.networkService.getModemUsbPort(interfaceName);
-            if (modemPort == null) {
-                modemPort = interfaceName;
-            }
+        if (isNull(this.modemManagerService)) {
+            return;
+        }
+
+        String modemPort = this.networkService.getModemUsbPort(interfaceName);
+        if (modemPort == null) {
+            modemPort = interfaceName;
+        }
+        try {
             this.modemManagerService.withModemService(modemPort, m -> {
                 if (!m.isPresent()) {
                     return (Void) null;
@@ -452,6 +548,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
                 return (Void) null;
             });
+        } catch (KuraException e) {
+            logger.warn("Error getting modem info");
         }
     }
 

@@ -82,7 +82,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
     private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
-    private static final List<String> DELETE_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, DELETE);
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";

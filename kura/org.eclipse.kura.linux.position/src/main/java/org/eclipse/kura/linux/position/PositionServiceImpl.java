@@ -12,11 +12,15 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.kura.comm.CommURI;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.position.NmeaPosition;
 import org.eclipse.kura.position.PositionListener;
@@ -24,7 +28,6 @@ import org.eclipse.kura.position.PositionLockedEvent;
 import org.eclipse.kura.position.PositionLostEvent;
 import org.eclipse.kura.position.PositionService;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.io.ConnectionFactory;
 import org.osgi.util.measurement.Measurement;
 import org.osgi.util.measurement.Unit;
 import org.osgi.util.position.Position;
@@ -32,20 +35,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class PositionServiceImpl
-        implements PositionService, ConfigurableComponent, GpsDevice.Listener, GpsDeviceAvailabilityListener {
+        implements PositionService, ConfigurableComponent, GpsDeviceAvailabilityListener, GpsDevice.Listener {
 
     private static final Logger logger = LoggerFactory.getLogger(PositionServiceImpl.class);
 
-    private ConnectionFactory connectionFactory;
     private EventAdmin eventAdmin;
+    private List<PositionProvider> positionProviders = new ArrayList<>();
 
-    private GpsDeviceTracker gpsDeviceTracker;
-    private ModemGpsStatusTracker modemGpsStatusTracker;
+    private PositionProvider currentProvider;
 
     private final Map<String, PositionListener> positionListeners = new ConcurrentHashMap<>();
 
     private PositionServiceOptions options;
-    private GpsDevice gpsDevice;
 
     private boolean hasLock;
     private Position staticPosition;
@@ -57,14 +58,6 @@ public class PositionServiceImpl
     //
     // ----------------------------------------------------------------
 
-    public void setConnectionFactory(final ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-    }
-
-    public void unsetConnectionFactory(final ConnectionFactory connectionFactory) {
-        this.connectionFactory = null;
-    }
-
     public void setEventAdmin(final EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
@@ -73,24 +66,12 @@ public class PositionServiceImpl
         this.eventAdmin = null;
     }
 
-    public void setGpsDeviceTracker(final GpsDeviceTracker tracker) {
-        this.gpsDeviceTracker = tracker;
-        tracker.setListener(this);
+    public void setPositionProviders(PositionProvider positionProvider) {
+        this.positionProviders.add(positionProvider); // ADD NAME TO PROVIDERS
     }
 
-    public void unsetGpsDeviceTracker(final GpsDeviceTracker tracker) {
-        tracker.setListener(null);
-        this.gpsDeviceTracker = null;
-    }
-
-    public void setModemGpsStatusTracker(final ModemGpsStatusTracker modemGpsDeviceTracker) {
-        this.modemGpsStatusTracker = modemGpsDeviceTracker;
-        modemGpsDeviceTracker.setListener(this);
-    }
-
-    public void unsetModemGpsStatusTracker(final ModemGpsStatusTracker modemGpsDeviceTracker) {
-        modemGpsDeviceTracker.setListener(null);
-        this.modemGpsStatusTracker = null;
+    public void unsetPositionProviders(PositionProvider positionProvider) {
+        this.positionProviders.remove(positionProvider);
     }
 
     // ----------------------------------------------------------------
@@ -111,7 +92,7 @@ public class PositionServiceImpl
     protected void deactivate() {
         logger.debug("Deactivating...");
 
-        stop();
+        stopPositionProvider();
 
         logger.info("Deactivating... Done.");
     }
@@ -135,7 +116,8 @@ public class PositionServiceImpl
     }
 
     private synchronized void updateInternal() {
-        stop();
+
+        stopPositionProvider();
 
         if (!this.options.isEnabled()) {
             return;
@@ -146,7 +128,11 @@ public class PositionServiceImpl
                     this.options.getStaticAltitude());
             setLock(true);
         } else {
-            this.gpsDevice = openGpsDevice();
+            try {
+                startPositionProvider();
+            } catch (KuraException e) {
+                logger.error("Unable to start the chosen Position Provider", e);
+            }
         }
     }
 
@@ -158,17 +144,18 @@ public class PositionServiceImpl
 
     @Override
     public Position getPosition() {
-        if (this.gpsDevice != null) {
-            return this.gpsDevice.getPosition();
+        if (this.options.isEnabled() && !this.options.isStatic()) {
+            return this.currentProvider.getPosition();
         } else {
             return this.staticPosition;
         }
+
     }
 
     @Override
     public NmeaPosition getNmeaPosition() {
-        if (this.gpsDevice != null) {
-            return this.gpsDevice.getNmeaPosition();
+        if (this.options.isEnabled() && !this.options.isStatic()) {
+            return this.currentProvider.getNmeaPosition();
         } else {
             return this.staticNmeaPosition;
         }
@@ -182,13 +169,13 @@ public class PositionServiceImpl
         if (this.options.isStatic()) {
             return true;
         }
-        return this.gpsDevice != null && this.gpsDevice.isValidPosition();
+        return this.currentProvider.isLocked();
     }
 
     @Override
     public String getNmeaTime() {
-        if (this.gpsDevice != null) {
-            return this.gpsDevice.getTimeNmea();
+        if (this.currentProvider != null) {
+            return this.currentProvider.getNmeaTime();
         } else {
             return null;
         }
@@ -196,8 +183,17 @@ public class PositionServiceImpl
 
     @Override
     public String getNmeaDate() {
-        if (this.gpsDevice != null) {
-            return this.gpsDevice.getDateNmea();
+        if (this.currentProvider != null) {
+            return this.currentProvider.getNmeaDate();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public LocalDateTime getDateTime() {
+        if (this.currentProvider != null) {
+            return this.currentProvider.getDateTime();
         } else {
             return null;
         }
@@ -215,27 +211,34 @@ public class PositionServiceImpl
 
     @Override
     public String getLastSentence() {
-        if (this.gpsDevice != null) {
-            return this.gpsDevice.getLastSentence();
+        if (this.currentProvider != null) {
+            return this.currentProvider.getLastSentence();
         } else {
             return null;
         }
-    }
-
-    protected GpsDevice getGpsDevice() {
-        return this.gpsDevice;
     }
 
     protected PositionServiceOptions getPositionServiceOptions() {
         return this.options;
     }
 
-    private void stop() {
-        this.gpsDeviceTracker.reset();
+    private void startPositionProvider() throws KuraException {
+        stopPositionProvider();
 
-        if (this.gpsDevice != null) {
-            this.gpsDevice.disconnect();
-            this.gpsDevice = null;
+        this.currentProvider = this.positionProviders.stream()
+                .filter(pp -> pp.getType() == this.options.getPositionProvider()).findAny()
+                .orElseThrow(() -> new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, " provider",
+                        this.options.getPositionProvider()));
+
+        this.currentProvider.init(options, this, this);
+        this.currentProvider.start();
+
+    }
+
+    private void stopPositionProvider() {
+        if (this.currentProvider != null) {
+            this.currentProvider.stop();
+            this.currentProvider = null;
         }
 
         setStaticPosition(0, 0, 0);
@@ -268,46 +271,6 @@ public class PositionServiceImpl
         this.staticPosition = new Position(latitude, longitude, altitude, speed, track);
         this.staticNmeaPosition = new NmeaPosition(latitudeDeg, longitudeDeg, altitudeNmea, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 (char) 0, (char) 0, (char) 0);
-    }
-
-    private GpsDevice openGpsDevice(CommURI uri) {
-
-        uri = this.gpsDeviceTracker.track(uri);
-
-        if (uri == null) {
-            return null;
-        }
-
-        try {
-            return new GpsDevice(this.connectionFactory, uri, this);
-        } catch (Exception e) {
-            logger.warn("Failed to open GPS device: {}", uri, e);
-            return null;
-        }
-    }
-
-    private GpsDevice openGpsDevice() {
-
-        logger.info("Opening GPS device...");
-
-        GpsDevice device = openGpsDevice(this.modemGpsStatusTracker.getGpsDeviceUri());
-
-        if (device != null) {
-            logger.info("Opened modem GPS device");
-            return device;
-        } else {
-            this.modemGpsStatusTracker.reset();
-        }
-
-        device = openGpsDevice(this.options.getGpsDeviceUri());
-
-        if (device != null) {
-            logger.info("Opened GPS device from configuration");
-        } else {
-            logger.info("GPS device not available");
-        }
-
-        return device;
     }
 
     @Override

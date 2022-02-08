@@ -36,6 +36,34 @@
         	default="false"
         	description="Specify static position instead of using GPS"/>
         	
+        <AD id="provider" 
+            name="provider" 
+            type="String"
+            cardinality="0"
+            required="true"
+            default="serial"
+            description="Source for setting the position provider. Verify the availabiliy of the selected provider before activate it.">
+            
+            <Option label="serial" value="serial" />
+            <Option label="gpsd" value="gpsd" />
+            
+        </AD>
+        <AD id="gpsd.host" 
+            name="gpsd.host" 
+            type="String"
+            cardinality="0"
+            required="false"
+            default="localhost"
+            description="Host where the gpsd service is running." />
+            
+        <AD id="gpsd.port" 
+            name="gpsd.port"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            default="2947"
+            description="Port where the gpsd service is running." />
+        	
        	<AD id="latitude"
        		name="latitude"
        		type="Double"

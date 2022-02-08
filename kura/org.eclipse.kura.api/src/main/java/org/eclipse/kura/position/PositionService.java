@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.position;
 
+import java.time.LocalDateTime;
+
 import org.osgi.annotation.versioning.ProviderType;
 import org.osgi.util.position.Position;
 
@@ -60,18 +62,41 @@ public interface PositionService {
      * </ul>
      *
      * @see org.eclipse.kura.position.NmeaPosition NmeaPosition
+     * 
+     * @deprecated Since 2.3 use {@link #getPosition()}. Access to underlying gps data layer is discouraged.
+     * 
      */
+    @Deprecated
     public NmeaPosition getNmeaPosition();
 
     /**
      * Returns the current NMEA time from GGA or ZDA sentence
+     * 
+     * @throws UnsupportedOperetaionException
+     *             {@link PositionServiceProvider} could not support this method.
+     * 
+     * @deprecated Since 2.3 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
+     * 
      */
+    @Deprecated
     public String getNmeaTime();
 
     /**
      * Returns the current NMEA date from ZDA sentence
+     * 
+     * @throws UnsupportedOperetaionException
+     *             {@link PositionServiceProvider} could not support this method.
+     * 
+     * @deprecated Since 2.3 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
+     * 
      */
+    @Deprecated
     public String getNmeaDate();
+
+    /**
+     * Returns the current date from {@link PositionServiceProvider}
+     */
+    public LocalDateTime getDateTime();
 
     /**
      * Returns true if a valid geographic position has been received.
@@ -79,8 +104,10 @@ public interface PositionService {
     public boolean isLocked();
 
     /**
-     * Returns the last sentence received from the gps.
+     * @deprecated since version 2.3
+     *             Returns the last sentence received from the gps.
      */
+    @Deprecated
     public String getLastSentence();
 
     /**

@@ -55,26 +55,40 @@ public class PositionServiceTest {
     private static final class PositionServiceTestFixture {
 
         final EventAdmin eventAdmin;
-        final ConnectionFactory connectionFactory;
-        final ModemGpsStatusTracker modemGpsStatusTracker;
-        final GpsDeviceTracker gpsDeviceTracker;
+
         final PositionServiceImpl ps;
+
+        private SerialDevicePositionProvider positionProvider;
 
         public PositionServiceTestFixture(final String nmeaStrings) throws IOException {
             this.eventAdmin = mock(EventAdmin.class);
-            this.modemGpsStatusTracker = mock(ModemGpsStatusTracker.class);
-            this.gpsDeviceTracker = getMockGpsDeviceTracker();
-            this.connectionFactory = getMockConnectionFactory(nmeaStrings);
+
             this.ps = new PositionServiceImpl();
 
             this.ps.setEventAdmin(this.eventAdmin);
-            this.ps.setModemGpsStatusTracker(this.modemGpsStatusTracker);
-            this.ps.setGpsDeviceTracker(this.gpsDeviceTracker);
-            this.ps.setConnectionFactory(this.connectionFactory);
+            this.positionProvider = getSerialDevicePositionProvider(nmeaStrings);
+            this.ps.setPositionProviders(this.positionProvider);
+
         }
 
         public PositionServiceTestFixture() throws IOException {
             this("");
+        }
+
+        public GpsDevice getGpsDevice() {
+            return this.positionProvider.getGpsDevice();
+        }
+
+        public ConnectionFactory getConnectionFactory() {
+            return this.positionProvider.getConnectionFactory();
+        }
+
+        public GpsDeviceTracker getGpsDeviceTracker() {
+            return this.positionProvider.getGpsDeviceTracker();
+        }
+
+        public ModemGpsStatusTracker getModemGpsStatusTracker() {
+            return this.positionProvider.getModemGpsStatusTracker();
         }
     }
 
@@ -95,6 +109,21 @@ public class PositionServiceTest {
         return connFactoryMock;
     }
 
+    private static SerialDevicePositionProvider getSerialDevicePositionProvider(String nmeaStrings) throws IOException {
+
+        final SerialDevicePositionProvider serialDevicePositionProvider = new SerialDevicePositionProvider();
+
+        GpsDeviceTracker mockGpsDeviceTracker = getMockGpsDeviceTracker();
+        ConnectionFactory mockConnectionFactory = getMockConnectionFactory(nmeaStrings);
+        ModemGpsStatusTracker mockModemGpsStatustracker = mock(ModemGpsStatusTracker.class);
+
+        serialDevicePositionProvider.setGpsDeviceTracker(mockGpsDeviceTracker);
+        serialDevicePositionProvider.setModemGpsStatusTracker(mockModemGpsStatustracker);
+        serialDevicePositionProvider.setConnectionFactory(mockConnectionFactory);
+
+        return serialDevicePositionProvider;
+    }
+
     private Map<String, Object> getDefaultProperties() {
         final Map<String, Object> properties = new HashMap<String, Object>();
 
@@ -105,6 +134,7 @@ public class PositionServiceTest {
         properties.put("stopBits", 0);
         properties.put("parity", 0);
         properties.put("bitsPerWord", 8);
+        properties.put("provider", "serial");
 
         return properties;
     }
@@ -173,6 +203,7 @@ public class PositionServiceTest {
         properties.put("longitude", 15.0);
         properties.put("latitude", 46.0);
         properties.put("altitude", 300.0);
+        properties.put("provider", "serial");
 
         fixture.ps.activate(properties);
 
@@ -192,6 +223,7 @@ public class PositionServiceTest {
         properties.put("latitude", 46.0d);
         properties.put("longitude", 15.0d);
         properties.put("altitude", 300.0d);
+        properties.put("proider", "serial");
 
         fixture.ps.activate(properties);
 
@@ -229,7 +261,7 @@ public class PositionServiceTest {
         assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
         assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
 
-        assertNotNull(fixture.ps.getGpsDevice());
+        assertNotNull(fixture.getGpsDevice());
 
         fixture.ps.deactivate();
     }
@@ -240,6 +272,7 @@ public class PositionServiceTest {
 
         final Map<String, Object> properties = getDefaultProperties();
         properties.put("port", "");
+        properties.put("provider", "serial");
 
         fixture.ps.activate(properties);
 
@@ -249,7 +282,7 @@ public class PositionServiceTest {
         assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
         assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
 
-        assertNull(fixture.ps.getGpsDevice());
+        assertNull(fixture.getGpsDevice());
 
         fixture.ps.deactivate();
     }
@@ -260,6 +293,7 @@ public class PositionServiceTest {
 
         final Map<String, Object> properties = getDefaultProperties();
         properties.put("port", null);
+        properties.put("provider", "serial");
 
         fixture.ps.activate(properties);
 
@@ -269,7 +303,7 @@ public class PositionServiceTest {
         assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
         assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
 
-        assertNull(fixture.ps.getGpsDevice());
+        assertNull(fixture.getGpsDevice());
 
         fixture.ps.deactivate();
     }
@@ -286,12 +320,12 @@ public class PositionServiceTest {
         assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
         assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
 
-        final GpsDevice device = fixture.ps.getGpsDevice();
+        final GpsDevice device = fixture.getGpsDevice();
         assertNotNull(device);
 
         fixture.ps.updated(getDefaultProperties());
 
-        assertTrue(device == fixture.ps.getGpsDevice());
+        assertTrue(device == fixture.getGpsDevice());
 
         fixture.ps.deactivate();
     }
@@ -311,10 +345,10 @@ public class PositionServiceTest {
         assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
         assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
 
-        final GpsDevice device = fixture.ps.getGpsDevice();
+        final GpsDevice device = fixture.getGpsDevice();
         assertNotNull(device);
 
-        verify(fixture.connectionFactory, times(1)).createConnection(argThat(isUri(defaultURI)), eq(1), eq(false));
+        verify(fixture.getConnectionFactory(), times(1)).createConnection(argThat(isUri(defaultURI)), eq(1), eq(false));
         assertEquals("port", device.getCommURI().getPort());
 
         fixture.ps.deactivate();
@@ -328,7 +362,7 @@ public class PositionServiceTest {
         final CommURI modemUri = new CommURI.Builder("modemPort").withBaudRate(115200).withStopBits(0).withDataBits(8)
                 .withParity(0).build();
 
-        when(fixture.modemGpsStatusTracker.getGpsDeviceUri()).thenReturn(modemUri);
+        when(fixture.getModemGpsStatusTracker().getGpsDeviceUri()).thenReturn(modemUri);
 
         fixture.ps.activate(getDefaultProperties());
 
@@ -338,8 +372,8 @@ public class PositionServiceTest {
         assertEquals(0.0, fixture.ps.getPosition().getLongitude().getValue(), EPS);
         assertEquals(0.0, fixture.ps.getPosition().getAltitude().getValue(), EPS);
 
-        assertNotNull(fixture.ps.getGpsDevice());
-        verify(fixture.connectionFactory, times(1)).createConnection(argThat(isUri(modemUri)), eq(1), eq(false));
+        assertNotNull(fixture.getGpsDevice());
+        verify(fixture.getConnectionFactory(), times(1)).createConnection(argThat(isUri(modemUri)), eq(1), eq(false));
 
         fixture.ps.deactivate();
     }
@@ -350,14 +384,14 @@ public class PositionServiceTest {
 
         fixture.ps.activate(getDefaultProperties());
 
-        GpsDevice gps = fixture.ps.getGpsDevice();
+        GpsDevice gps = fixture.getGpsDevice();
 
         assertNotNull(gps);
 
-        when(fixture.gpsDeviceTracker.track(anyObject())).thenReturn(null);
+        when(fixture.getGpsDeviceTracker().track(anyObject())).thenReturn(null);
         fixture.ps.onGpsDeviceAvailabilityChanged();
 
-        assertNull(fixture.ps.getGpsDevice());
+        assertNull(fixture.getGpsDevice());
     }
 
     @Test
@@ -366,15 +400,15 @@ public class PositionServiceTest {
 
         fixture.ps.activate(getDefaultProperties());
 
-        final GpsDevice deviceFromConfig = fixture.ps.getGpsDevice();
+        final GpsDevice deviceFromConfig = fixture.getGpsDevice();
         assertNotNull(deviceFromConfig);
 
-        when(fixture.modemGpsStatusTracker.getGpsDeviceUri()).thenReturn(new CommURI.Builder("modemPort")
+        when(fixture.getModemGpsStatusTracker().getGpsDeviceUri()).thenReturn(new CommURI.Builder("modemPort")
                 .withBaudRate(115200).withStopBits(0).withDataBits(8).withParity(0).build());
 
         fixture.ps.onGpsDeviceAvailabilityChanged();
 
-        final GpsDevice modemDevice = fixture.ps.getGpsDevice();
+        final GpsDevice modemDevice = fixture.getGpsDevice();
         assertNotNull(modemDevice);
 
         assertEquals("port", deviceFromConfig.getCommURI().getPort());
@@ -388,9 +422,10 @@ public class PositionServiceTest {
         final PositionServiceTestFixture fixture = new PositionServiceTestFixture();
 
         Map<String, Object> properties = getDefaultProperties();
+        properties.put("provider", "serial");
 
         fixture.ps.activate(properties);
-        assertNotNull(fixture.ps.getGpsDevice());
+        assertNotNull(fixture.getGpsDevice());
 
         properties.put("static", true);
         properties.put("latitude", 20.0d);
@@ -398,7 +433,7 @@ public class PositionServiceTest {
         properties.put("altitude", 40.0d);
 
         fixture.ps.updated(properties);
-        assertNull(fixture.ps.getGpsDevice());
+        assertNull(fixture.getGpsDevice());
 
         assertTrue(fixture.ps.isLocked());
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -17,7 +17,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response.Status;
 
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class FactoryComponentConfigurationDTO implements Validable {
 
@@ -51,7 +51,8 @@ public class FactoryComponentConfigurationDTO implements Validable {
         if (properties != null) {
             for (final PropertyDTO param : properties.values()) {
                 if (param == null) {
-                    throw FailureHandler.toWebApplicationException(Status.BAD_REQUEST, "propety values cannot be null");
+                    throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
+                            "propety values cannot be null");
                 }
 
                 param.validate();

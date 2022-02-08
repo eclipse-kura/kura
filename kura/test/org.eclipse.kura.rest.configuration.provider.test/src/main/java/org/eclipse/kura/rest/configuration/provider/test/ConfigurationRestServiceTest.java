@@ -153,7 +153,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec("GET"), "/configurableComponents/configurations");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test
@@ -730,7 +730,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
         whenRequestIsPerformed(new MethodSpec("POST"), "/configurableComponents/configurations/byPid",
                 "{\"pids\":[\"foo\"]}");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test
@@ -784,7 +784,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec("POST"), "/snapshots/byId", "{\"id\":12345}");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test
@@ -804,7 +804,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec("POST", "EXEC"), "/snapshots/_write");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test
@@ -823,7 +823,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec("POST", "EXEC"), "/snapshots/_rollback");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test
@@ -842,7 +842,7 @@ public class ConfigurationRestServiceTest extends AbstractRequestHandlerTest {
 
         whenRequestIsPerformed(new MethodSpec("POST", "EXEC"), "/snapshots/byId/_rollback", "{\"id\":12345}");
 
-        thenResponseCodeIs(500);
+        thenResponseCodeIs(400);
     }
 
     @Test

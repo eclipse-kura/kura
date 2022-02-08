@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -38,6 +38,7 @@ import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 import org.eclipse.kura.request.handler.jaxrs.JaxRsRequestHandlerProxy;
 import org.eclipse.kura.request.handler.jaxrs.annotation.EXEC;
 import org.eclipse.kura.rest.configuration.api.ComponentConfigurationDTO;
@@ -46,6 +47,7 @@ import org.eclipse.kura.rest.configuration.api.CreateFactoryComponentConfigurati
 import org.eclipse.kura.rest.configuration.api.DTOUtil;
 import org.eclipse.kura.rest.configuration.api.DeleteFactoryComponentRequest;
 import org.eclipse.kura.rest.configuration.api.FactoryComponentConfigurationDTO;
+import org.eclipse.kura.rest.configuration.api.FailureHandler;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPid;
 import org.eclipse.kura.rest.configuration.api.PidAndFactoryPidSet;
 import org.eclipse.kura.rest.configuration.api.PidSet;
@@ -122,7 +124,7 @@ public class ConfigurationRestService {
             return new SnapshotIdSet(
                     this.configurationService.getSnapshots().stream().collect(Collectors.toCollection(TreeSet::new)));
         } catch (KuraException e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 
@@ -230,7 +232,7 @@ public class ConfigurationRestService {
         try {
             ocds = this.ocdService.getFactoryComponentOCDs();
         } catch (final Exception e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         return DTOUtil.toComponentConfigurationList(ocds, cryptoService, false);
@@ -250,7 +252,7 @@ public class ConfigurationRestService {
             ocds = this.ocdService.getFactoryComponentOCDs().stream()
                     .filter(c -> factoryPids.getPids().contains(c.getPid())).collect(Collectors.toList());
         } catch (final Exception e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         return DTOUtil.toComponentConfigurationList(ocds, cryptoService, false);
@@ -275,7 +277,7 @@ public class ConfigurationRestService {
         try {
             ccs = this.configurationService.getComponentConfigurations();
         } catch (final Exception e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         final Set<PidAndFactoryPid> result = ccs.stream().map(c -> {
@@ -338,7 +340,7 @@ public class ConfigurationRestService {
         try {
             ccs = this.configurationService.getComponentConfigurations();
         } catch (final Exception e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         return DTOUtil.toComponentConfigurationList(ccs, cryptoService, true);
@@ -369,7 +371,7 @@ public class ConfigurationRestService {
             configs = this.configurationService.getComponentConfigurations().stream()
                     .filter(c -> pids.getPids().contains(c.getPid())).collect(Collectors.toList());
         } catch (final Exception e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         return DTOUtil.toComponentConfigurationList(configs, cryptoService, true);
@@ -466,7 +468,7 @@ public class ConfigurationRestService {
 
             return DTOUtil.toComponentConfigurationList(configs, cryptoService, false);
         } catch (KuraException e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 
@@ -486,7 +488,7 @@ public class ConfigurationRestService {
         try {
             return new SnapshotId(this.configurationService.snapshot());
         } catch (KuraException e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 
@@ -506,7 +508,7 @@ public class ConfigurationRestService {
         try {
             return new SnapshotId(this.configurationService.rollback());
         } catch (KuraException e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
     }
 
@@ -529,7 +531,7 @@ public class ConfigurationRestService {
         try {
             this.configurationService.rollback(id.getId());
         } catch (KuraException e) {
-            throw FailureHandler.toWebApplicationException(e);
+            throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
         return Response.ok().build();

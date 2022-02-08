@@ -319,6 +319,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
     @Override
     public void setDirty(boolean flag) {
+        // Not needed
     }
 
     @Override

@@ -6,7 +6,7 @@ Use the following command to run it:
 
     docker run -d -p 8443:443 -t eclipse/kura
 
-Once the image is started you can navigate your browser to http://localhost:8080 and log in using the credentials `admin` : `admin`.
+Once the image is started you can navigate your browser to https://localhost:8443 and log in using the credentials `admin` : `admin`.
 
 ## Making use of Apache Felix File Install
 
@@ -53,7 +53,7 @@ The JMX port defined is 9010 and the Remote debug port is 9011. Both ports are n
 
 ## Re-Building
 
-This Docker container is being built by re-using the Intel UP² UBI 8 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
+This Docker container is being built by re-using the Intel UP² Ubuntu 20.04 image of Kura. It makes a few adjustments to the Kura sources and performs a full build from either a specified Git commit, or from the Git repository which has to be in the context root of the build.
 There is also the possibility to build the Docker container starting from a lightweight Alpine Linux base image, in order to shrink the image to a little more than 200MB.
 
 If you want to re-build this image, check out this repository, move to one of the child directories "kura_alpine" or "kura_ubi8" and simply issue a:

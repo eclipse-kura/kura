@@ -56,9 +56,9 @@ The **DHCP & NAT** tab contains the following configuration parameters:
 
 - **DHCP Subnet Mask** - defines the subnet mask that is assigned to a client.
 
-- **DHCP Default Lease Time** - sets the default time (in seconds) that the client retains the provided IP address.
+- **DHCP Default Lease Time** - sets the default time (in seconds) that the client retains the provided IP address. It must be greater than 0.
 
-- **DHCP Max Lease Time** - sets the maximum time (in seconds) that the client retains the provided IP address.
+- **DHCP Max Lease Time** - sets the maximum time (in seconds) that the client retains the provided IP address. It must be greater than 0.
 
 - **Pass DNS Servers through DHCP** - enables DNS Proxy (i.e., passing DNS servers through DHCP).
 

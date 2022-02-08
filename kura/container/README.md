@@ -6,7 +6,7 @@ Use the following command to run it:
 
     docker run -d -p 8443:443 -t eclipse/kura
 
-Once the image is started you can navigate your browser to http://localhost:8443 and log in using the credentials `admin` : `admin`.
+Once the image is started you can navigate your browser to https://localhost:8443 and log in using the credentials `admin` : `admin`.
 
 ## Making use of Apache Felix File Install
 

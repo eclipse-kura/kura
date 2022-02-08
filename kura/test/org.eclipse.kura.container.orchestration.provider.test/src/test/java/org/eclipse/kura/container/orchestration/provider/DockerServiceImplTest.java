@@ -1,5 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates. All rights reserved.
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.container.orchestration.provider;
 
@@ -18,13 +27,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.container.orchestration.provider.impl.DockerServiceImpl;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.impl.DockerServiceImpl;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.ListContainersCmd;

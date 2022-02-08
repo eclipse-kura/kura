@@ -63,7 +63,7 @@ public interface PositionService {
      *
      * @see org.eclipse.kura.position.NmeaPosition NmeaPosition
      * 
-     * @deprecated Since 2.2 use {@link #getPosition()}. Access to underlying gps data layer is discouraged.
+     * @deprecated Since 2.3 use {@link #getPosition()}. Access to underlying gps data layer is discouraged.
      * 
      */
     @Deprecated
@@ -75,7 +75,7 @@ public interface PositionService {
      * @throws UnsupportedOperetaionException
      *             {@link PositionServiceProvider} could not support this method.
      * 
-     * @deprecated Since 2.2 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
+     * @deprecated Since 2.3 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
      * 
      */
     @Deprecated
@@ -87,7 +87,7 @@ public interface PositionService {
      * @throws UnsupportedOperetaionException
      *             {@link PositionServiceProvider} could not support this method.
      * 
-     * @deprecated Since 2.2 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
+     * @deprecated Since 2.3 use {@link #getDateTime()}. Access to underlying gps data layer is discouraged.
      * 
      */
     @Deprecated

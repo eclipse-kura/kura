@@ -16,7 +16,7 @@
     <description>Management of docker container orchestration engine</description>
 
     <properties>
-        <kura_eth.basedir>${project.basedir}/..</kura_eth.basedir>
+        <kura.basedir>${project.basedir}/..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 

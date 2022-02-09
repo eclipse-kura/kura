@@ -95,6 +95,8 @@ public interface PositionService {
 
     /**
      * Returns the current date from {@link PositionServiceProvider}
+     *
+     * @since 2.3
      */
     public LocalDateTime getDateTime();
 

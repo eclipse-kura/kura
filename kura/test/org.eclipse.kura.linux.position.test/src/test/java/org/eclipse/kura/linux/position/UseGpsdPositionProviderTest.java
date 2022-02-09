@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.linux.position;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -26,6 +27,9 @@ import java.util.Map;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.junit.Test;
+import org.osgi.util.measurement.Measurement;
+import org.osgi.util.measurement.Unit;
+import org.osgi.util.position.Position;
 
 import de.taimos.gpsd4java.backend.GPSdEndpoint;
 import de.taimos.gpsd4java.backend.ResultParser;
@@ -152,6 +156,15 @@ public class UseGpsdPositionProviderTest {
         thenDateTimeIsNotNull();
     }
 
+    @Test
+    public void verifyPositionIsZeroFromDevice1Stream() {
+        givenGpsdPositionProvider();
+        givenProperties(defaultProperties());
+        givenGpsdProviderIsStarted();
+
+        thenPositionIsZero();
+    }
+
     private void givenGpsdPositionProvider() {
         this.gpsdPositionProvider = new GpsdPositionProvider();
     }
@@ -229,6 +242,21 @@ public class UseGpsdPositionProviderTest {
 
     private void thenNmeaPositionIsNotNull() {
         assertNotNull(this.gpsdPositionProvider.getNmeaPosition());
+    }
+
+    private void thenPositionIsZero() {
+        Measurement zeroMesRad = new Measurement(0d, 0d, Unit.rad);
+        Measurement zeroMesMeters = new Measurement(0d, 0d, Unit.m);
+        Measurement zeroMesMetersSecond = new Measurement(0d, 0d, Unit.m_s);
+
+        Position zeroPosition = new Position(zeroMesRad, zeroMesRad, zeroMesMeters, zeroMesMetersSecond, zeroMesRad);
+        Position position = this.gpsdPositionProvider.getPosition();
+
+        assertEquals(zeroPosition.getLongitude(), position.getLongitude());
+        assertEquals(zeroPosition.getAltitude(), position.getAltitude());
+        assertEquals(zeroPosition.getLatitude(), position.getLatitude());
+        assertEquals(zeroPosition.getSpeed(), position.getSpeed());
+        assertEquals(zeroPosition.getTrack(), position.getTrack());
     }
 
     private void thenDateTimeIsNotNull() {

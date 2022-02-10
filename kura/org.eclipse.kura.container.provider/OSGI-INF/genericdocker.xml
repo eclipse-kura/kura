@@ -1,0 +1,14 @@
+<!--
+
+    Copyright (c) 2021 Eurotech and/or its affiliates. All rights reserved.
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ConfigurableGenericDockerService">
+   <implementation class="org.eclipse.kura.container.provider.ConfigurableGenericDockerService"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.container.provider.ConfigurableGenericDockerService"/>
+   
+   <reference cardinality="1..1" interface="org.eclipse.kura.container.orchestration.provider.DockerService" name="DockerService" policy="static" bind="setDockerService" unbind="unsetDockerService"/>
+</scr:component>

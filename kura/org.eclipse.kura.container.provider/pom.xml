@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2021 Eurotech and/or its affiliates. All rights reserved. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+      <groupId>org.eclipse.kura</groupId>
+      <artifactId>kura</artifactId>
+      <version>5.1.0-SNAPSHOT</version>
+    </parent>
+
+  <artifactId>org.eclipse.kura.container.provider</artifactId>
+  <version>1.1.0-SNAPSHOT</version>
+  <packaging>eclipse-plugin</packaging>
+
+
+  <properties>
+    <kura.basedir>${project.basedir}/..</kura.basedir>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/*/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+</properties>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.eclipse.tycho</groupId>
+      <artifactId>tycho-packaging-plugin</artifactId>
+      <version>${tycho-version}</version>
+    </plugin>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jarsigner-plugin</artifactId>
+      <version>1.4</version>
+    </plugin>
+    <plugin>
+	  <groupId>de.dentrassi.maven</groupId>
+	  <artifactId>osgi-dp</artifactId>
+	  <version>0.4.1</version>
+		<executions>
+			<execution>
+				<goals>
+					<goal>build</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+  </plugins>
+  <pluginManagement>
+    <plugins>
+      <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+      <plugin>
+        <groupId>org.eclipse.m2e</groupId>
+        <artifactId>lifecycle-mapping</artifactId>
+        <version>1.0.0</version>
+        <configuration>
+          <lifecycleMappingMetadata>
+            <pluginExecutions>
+              <pluginExecution>
+                <pluginExecutionFilter>
+                  <groupId>
+                    org.codehaus.mojo
+                  </groupId>
+                  <artifactId>
+                    properties-maven-plugin
+                  </artifactId>
+                  <versionRange>
+                    [1.0-alpha-1,)
+                  </versionRange>
+                  <goals>
+                    <goal>read-project-properties</goal>
+                  </goals>
+                </pluginExecutionFilter>
+                <action>
+                  <ignore />
+                </action>
+              </pluginExecution>
+              <pluginExecution>
+                <pluginExecutionFilter>
+                  <groupId>
+                    org.codehaus.mojo
+                  </groupId>
+                  <artifactId>
+                    build-helper-maven-plugin
+                  </artifactId>
+                  <versionRange>
+                    [1.9,)
+                  </versionRange>
+                  <goals>
+                    <goal>
+                      regex-property
+                    </goal>
+                  </goals>
+                </pluginExecutionFilter>
+                <action>
+                  <ignore></ignore>
+                </action>
+              </pluginExecution>
+            </pluginExecutions>
+          </lifecycleMappingMetadata>
+        </configuration>
+      </plugin>
+    </plugins>
+  </pluginManagement>
+</build>
+</project>

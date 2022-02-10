@@ -16,6 +16,7 @@ package org.eclipse.kura.net;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
@@ -255,4 +256,12 @@ public interface NetworkAdminService {
      * @since 2.3
      */
     public boolean isWifiIEEE80211AC(String ifaceName) throws KuraException;
+
+    /**
+     * Obtains the DHCP Lease values
+     * @return list of ipAddresses, macAddresses, hostnames;
+     * @throws KuraException
+     * @since 2.3
+     */
+    public List<DhcpLease> getDhcpLeases() throws KuraException;
 }

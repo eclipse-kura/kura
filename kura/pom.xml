@@ -124,6 +124,8 @@
         
         <module>org.eclipse.kura.rest.wire.provider</module>
 
+        <module>org.eclipse.kura.container.provider</module>
+
         <module>features</module>
         <module>emulator</module>
 

@@ -62,6 +62,14 @@ public class DbDataStore implements DataStore {
     private static final String DATA_SERVICE_REPAIR_ENABLED_PROPNAME = "db.store.repair.enabled";
 
     private static final int PAYLOAD_BYTE_SIZE_THRESHOLD = 200;
+    /**
+     * The error with code 22003 is thrown when a value is out of range when converting to another data type.
+     */
+    private static final int NUMERIC_VALUE_OUT_OF_RANGE_1 = 22003;
+    /**
+     * The error with code 22004 is thrown when a value is out of range when converting to another column's data type.
+     */
+    private static final int NUMERIC_VALUE_OUT_OF_RANGE_2 = 22004;
 
     private H2DbService dbService;
     private final Calendar utcCalendar;
@@ -188,18 +196,23 @@ public class DbDataStore implements DataStore {
     }
 
     private boolean isRepairEnabled() {
-        final BundleContext context = FrameworkUtil.getBundle(DbDataStore.class).getBundleContext();
-        ServiceReference<SystemService> reference = context.getServiceReference(SystemService.class);
-        SystemService systemService = context.getService(reference);
-        if (systemService == null) {
-            return false;
-        }
         try {
-            final String isRepairEnabled = systemService.getProperties()
-                    .getProperty(DATA_SERVICE_REPAIR_ENABLED_PROPNAME);
-            return "true".equalsIgnoreCase(isRepairEnabled);
-        } finally {
-            context.ungetService(reference);
+            final BundleContext context = FrameworkUtil.getBundle(DbDataStore.class).getBundleContext();
+            ServiceReference<SystemService> reference = context.getServiceReference(SystemService.class);
+            SystemService systemService = context.getService(reference);
+            if (systemService == null) {
+                return false;
+            }
+
+            try {
+                final String isRepairEnabled = systemService.getProperties()
+                        .getProperty(DATA_SERVICE_REPAIR_ENABLED_PROPNAME);
+                return "true".equalsIgnoreCase(isRepairEnabled);
+            } finally {
+                context.ungetService(reference);
+            }
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -283,12 +296,11 @@ public class DbDataStore implements DataStore {
             message = storeInternal(topic, payload, qos, retain, priority);
         } catch (KuraStoreException e) {
             // Try to reset the sequence generator and store the message again.
-            // FIXME: it doesn't work but if we restart Kura the sequence generator restarts from 0!
             Throwable cause = e.getCause();
             if (cause instanceof SQLException) {
                 SQLException sqle = (SQLException) cause;
                 int errorCode = sqle.getErrorCode();
-                if (errorCode == 22003) {
+                if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2) {
                     logger.warn("Identity generator limit exceeded. Resetting it...");
                     resetIdentityGenerator();
                     message = storeInternal(topic, payload, qos, retain, priority);
@@ -325,7 +337,7 @@ public class DbDataStore implements DataStore {
                 pstmt.setInt(6, -1);                                                // publishedMessageId
                 pstmt.setTimestamp(7, null);                                        // confirmedOn
 
-                if (payload.length > PAYLOAD_BYTE_SIZE_THRESHOLD) {
+                if (payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
                     pstmt.setBytes(8, payload);                                     // smallPayload
                     pstmt.setNull(9, Types.BLOB);
                 } else {

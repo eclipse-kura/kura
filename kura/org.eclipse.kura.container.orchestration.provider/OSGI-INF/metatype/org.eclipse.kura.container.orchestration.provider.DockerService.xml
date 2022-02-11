@@ -17,7 +17,6 @@
     <OCD id="org.eclipse.kura.container.orchestration.provider.DockerService" name="Docker-API"
         description="The Docker-API connects to locally running docker instance, and allows for container management.">
         
-        <Icon resource="OSGI-INF/Docker.png" size="32"/>
 
         <AD id="dockerService.enabled" name="Enabled" type="Boolean" cardinality="0" required="true" default="false"
             description="Enables the docker connector instance.">

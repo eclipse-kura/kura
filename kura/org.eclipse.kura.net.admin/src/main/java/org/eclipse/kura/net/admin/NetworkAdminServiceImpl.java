@@ -1570,7 +1570,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         return IwCapabilityTool.probeCapabilities(ifaceName, executorService).contains(Capability.VHT);
     }
 
-    public List<DhcpLease> getDhcpLeases() throws KuraException {
+    @Override
+    public List<DhcpLease> getDhcpLeases() {
         return DhcpLeaseTool.probeLeases(this.executorService);
     }
 }

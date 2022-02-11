@@ -271,25 +271,8 @@ public class DbDataStore implements DataStore {
     @Override
     public synchronized DataMessage store(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
-        if (this.dbService == null) {
-            throw new KuraStoreException("DbService instance not attached");
-        }
-        if (topic == null || topic.trim().length() == 0) {
-            throw new IllegalArgumentException(TOPIC_ELEMENT);
-        }
 
-        // Priority 0 are used for life-cycle messages like birth and death certificates.
-        // Priority 1 are used for remove management by Cloudlet applications.
-        // For those messages, bypass the max message count check of the DB cache;
-        // we want to publish those message even if the db is full, so allow their storage.
-        if (priority != 0 && priority != 1) {
-            int count = getMessageCount();
-            logger.debug("Store message count: {}", count);
-            if (count >= this.capacity) {
-                logger.error("Store capacity exceeded");
-                throw new KuraStoreCapacityReachedException("Store capacity exceeded");
-            }
-        }
+        validate(topic, priority);
 
         DataMessage message = null;
         try {
@@ -313,6 +296,28 @@ public class DbDataStore implements DataStore {
         }
 
         return message;
+    }
+
+    private void validate(String topic, int priority) throws KuraStoreException {
+        if (this.dbService == null) {
+            throw new KuraStoreException("DbService instance not attached");
+        }
+        if (topic == null || topic.trim().length() == 0) {
+            throw new IllegalArgumentException(TOPIC_ELEMENT);
+        }
+
+        // Priority 0 are used for life-cycle messages like birth and death certificates.
+        // Priority 1 are used for remove management by Cloudlet applications.
+        // For those messages, bypass the maximum message count check of the DB cache.
+        // We want to publish those message even if the DB is full, so allow their storage.
+        if (priority != 0 && priority != 1) {
+            int count = getMessageCount();
+            logger.debug("Store message count: {}", count);
+            if (count >= this.capacity) {
+                logger.error("Store capacity exceeded");
+                throw new KuraStoreCapacityReachedException("Store capacity exceeded");
+            }
+        }
     }
 
     private synchronized DataMessage storeInternal(String topic, byte[] payload, int qos, boolean retain, int priority)

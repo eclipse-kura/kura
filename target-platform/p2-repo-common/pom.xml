@@ -512,11 +512,6 @@
                                 	<artifactId>gpsd4java</artifactId>
                                 	<version>${com.eurotech.gpsd4java.version}</version>
                                 </artifactItem>
-                                <artifactItem>
-                                	<groupId>org.eclipse.kura</groupId>
-                                	<artifactId>org.eclipse.kura.container.provider</artifactId>
-                                	<version>${org.eclipse.kura.container.provider.version}</version>
-                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -624,7 +619,6 @@
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
-                                <move file="target/source/plugins/org.eclipse.kura.container.provider.jar" tofile="target/source/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.provider.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

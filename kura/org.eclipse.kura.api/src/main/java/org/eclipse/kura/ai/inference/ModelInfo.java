@@ -12,7 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -29,6 +31,7 @@ public class ModelInfo {
     private final String modelName;
     private Optional<String> modelPlatform;
     private Optional<String> version;
+    private final Map<String, Object> parameters;
     private final List<TensorDescriptor> inputDescriptors;
     private final List<TensorDescriptor> outputDescriptors;
 
@@ -37,6 +40,7 @@ public class ModelInfo {
         this.modelName = modelName;
         this.modelPlatform = Optional.empty();
         this.version = Optional.empty();
+        this.parameters = new HashMap<>();
         this.inputDescriptors = inputDescriptors;
         this.outputDescriptors = outputDescriptors;
     }
@@ -59,6 +63,18 @@ public class ModelInfo {
 
     public void setVersion(String version) {
         this.version = Optional.of(version);
+    }
+
+    public Map<String, Object> getParameters() {
+        return this.parameters;
+    }
+
+    public void putParameter(String name, Object parameter) {
+        this.parameters.put(name, parameter);
+    }
+
+    public void deleteParameter(String name) {
+        this.parameters.remove(name);
     }
 
     public List<TensorDescriptor> getInputs() {

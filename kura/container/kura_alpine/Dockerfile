@@ -38,7 +38,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
       `# Replace broken 'nn' script` \
       cp kura/distrib/src/main/sh/extract.sh kura/distrib/src/main/sh/extract_nn.sh && \
       cd /kura && mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS && \
-      cd /kura && mvn -B -f kura/pom.xml clean install $MAVEN_PROPS -Pspeedup && \
+      cd /kura && mvn -B -f kura/pom.xml clean install $MAVEN_PROPS && \
       cd /kura && mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-ubuntu-20-nn -nsu && \ 
     ls -la /kura/kura/distrib/target && \
     apk del maven git && \
@@ -53,7 +53,7 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     \
     cp -av /context/bin/* /usr/local/bin && \
     chmod a+x /usr/local/bin/* && \
-    \
+    cd /root && \
     rm -Rf /context /kura /root/.m2 && \
     install -m 0777 -d "${KURA_DIR}/data" && \
     sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \

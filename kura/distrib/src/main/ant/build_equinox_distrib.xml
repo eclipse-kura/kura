@@ -956,6 +956,23 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.glassfish.hk2.osgi-resource-locator_${osgi-resource-locator.version}.jar@2:start" />
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar@3" />
+
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jna_$jna.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/commons-codec_${commons-codec.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/commons-io_${commons-io.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/commons-compress_${commons-compress.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/commons-lang_${commons-lang.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jackson-databind_${com.fasterxml.jackson.core.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jackson-core_${com.fasterxml.jackson.core.version}.jar@3:start" />
+			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jackson-annotations_${com.fasterxml.jackson.core.version}.jar@3:start" />
 		</propertyfile>
 	</target>
 

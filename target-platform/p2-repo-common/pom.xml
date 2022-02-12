@@ -659,7 +659,6 @@
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
-                                <!-- Container Orchestration  -->
                                 <move file="target/source/plugins/jna.jar" tofile="target/source/plugins/jna_$jna.version}.jar"/>
                                 <move file="target/source/plugins/commons-codec.jar" tofile="target/source/plugins/commons-codec_${commons-codec.version}.jar"/>
                                 <move file="target/source/plugins/commons-io.jar" tofile="target/source/plugins/commons-io_${commons-io.version}.jar"/>

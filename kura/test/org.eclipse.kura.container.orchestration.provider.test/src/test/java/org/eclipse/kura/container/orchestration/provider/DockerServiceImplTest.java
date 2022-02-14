@@ -363,6 +363,7 @@ public class DockerServiceImplTest {
         when(mcont1.getNames()).thenReturn(new String[] { "jim", "/jim" });
         when(mcont1.getImage()).thenReturn("nginx");
         when(mcont1.getPorts()).thenReturn(new ContainerPort[0]);
+        when(mcont1.getState()).thenReturn("running");
         containerListmock.add(mcont1);
 
         Container mcont2 = mock(Container.class);
@@ -371,6 +372,7 @@ public class DockerServiceImplTest {
         when(mcont2.getNames()).thenReturn(new String[] { "frank", "/frank" });
         when(mcont2.getImage()).thenReturn("nginx2");
         when(mcont2.getPorts()).thenReturn(new ContainerPort[0]);
+        when(mcont2.getState()).thenReturn("running");
         containerListmock.add(mcont2);
 
         this.runningContainers = new String[] { mcont1.toString(), mcont2.toString() };

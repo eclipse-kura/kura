@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.container.orchestration.provider;
 
+import java.util.List;
 import org.eclipse.kura.KuraException;
 
 /**
@@ -79,6 +80,28 @@ public interface DockerService {
      */
     public void stopContainer(String id) throws KuraException;
 
+        /**
+     *
+     * Registers Container into internal container tracking mechanism.
+     *
+     * @param containerDescriptor
+     */
+    public void registerContainer(ContainerDescriptor container);
+
+    /**
+     * Un-Registers Container into internal container tracking mechanism.
+     *
+     * @param containerDescriptor
+     */
+    public void unregisterContainer(ContainerDescriptor container);
+
+    /**
+     * lists all tracked docker containers.
+     *
+     * @param containerDescriptor
+     */
+    public List<ContainerDescriptor> listRegisteredContainers();
+    
     /**
      * Equivalent to, docker start <container id>
      *

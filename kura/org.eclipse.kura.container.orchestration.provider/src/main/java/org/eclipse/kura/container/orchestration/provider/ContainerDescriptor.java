@@ -38,6 +38,8 @@ public class ContainerDescriptor {
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
     private Boolean containerPrivilaged;
+    private ContainerStates containerState = ContainerStates.STOPPING;
+    private Boolean isEsfManaged = true;
 
     public static ContainerDescriptor findByName(String name, List<ContainerDescriptor> serviceList) {
         ContainerDescriptor sd = null;
@@ -47,6 +49,18 @@ public class ContainerDescriptor {
             }
         }
         return sd;
+    }
+
+    public ContainerStates getContainerState() {
+        return this.containerState;
+    }
+
+    public void setContainerState(ContainerStates containerState) {
+        this.containerState = containerState;
+    }
+
+    public Boolean getIsEsfManaged() {
+        return this.isEsfManaged;
     }
 
     public String getContainerName() {
@@ -114,6 +128,12 @@ public class ContainerDescriptor {
         resultBuilder = resultBuilder && obj1.containerImageTag.equals(obj2.containerImageTag);
         resultBuilder = resultBuilder && ArrayUtils.isEquals(obj1.containerPortsExternal, obj2.containerPortsExternal);
         resultBuilder = resultBuilder && ArrayUtils.isEquals(obj1.containerPortsInternal, obj2.containerPortsInternal);
+        resultBuilder = resultBuilder && obj1.containerEnvVars.equals(obj2.containerEnvVars);
+        resultBuilder = resultBuilder && obj1.containerDevices.equals(obj2.containerDevices);
+        resultBuilder = resultBuilder && obj1.containerVolumes.equals(obj2.containerVolumes);
+        resultBuilder = resultBuilder && obj1.containerPrivilaged.equals(obj2.containerPrivilaged);
+        resultBuilder = resultBuilder && obj1.containerState.equals(obj2.containerState);
+        resultBuilder = resultBuilder && obj1.isEsfManaged.equals(obj2.isEsfManaged);
 
         return resultBuilder;
     }
@@ -130,9 +150,16 @@ public class ContainerDescriptor {
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
         private Boolean containerPrivilaged = false;
+        private ContainerStates containerState = ContainerStates.STOPPING;
+        private Boolean isEsfManaged = true;
 
         public ContainerDescriptorBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
+            return this;
+        }
+
+        public ContainerDescriptorBuilder setIsEsfManaged(Boolean isEsfManaged) {
+            this.isEsfManaged = isEsfManaged;
             return this;
         }
 
@@ -269,6 +296,11 @@ public class ContainerDescriptor {
             return this;
         }
 
+        public ContainerDescriptorBuilder setContainerState(ContainerStates containerState) {
+            this.containerState = containerState;
+            return this;
+        }
+
         public ContainerDescriptor build() {
             ContainerDescriptor containerDescriptor = new ContainerDescriptor();
 
@@ -284,6 +316,8 @@ public class ContainerDescriptor {
             containerDescriptor.containerDevices = this.containerDevices;
             containerDescriptor.containerVolumes = this.containerVolumes;
             containerDescriptor.containerPrivilaged = this.containerPrivilaged;
+            containerDescriptor.containerState = this.containerState;
+            containerDescriptor.isEsfManaged = this.isEsfManaged;
 
             return containerDescriptor;
         }

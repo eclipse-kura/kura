@@ -93,6 +93,8 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     private NetworkService networkService;
     private CommandExecutorService executorService;
 
+    private String primaryInterfaceMacAddress;
+
     // ----------------------------------------------------------------
     //
     // Dependencies
@@ -598,7 +600,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
     }
 
     private String getPrimaryMacAddressWindows(String primaryNetworkInterfaceName) {
-        String macAddress = null;
+        if (!isNull(this.primaryInterfaceMacAddress)) {
+            return this.primaryInterfaceMacAddress;
+        }
+
         try {
             logger.info("executing: InetAddress.getLocalHost {}", primaryNetworkInterfaceName);
             InetAddress ip = InetAddress.getLocalHost();
@@ -612,15 +617,19 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
             }
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
             byte[] mac = network.getHardwareAddress();
-            macAddress = hardwareAddressToString(mac);
-            logger.info("macAddress {}", macAddress);
+            this.primaryInterfaceMacAddress = hardwareAddressToString(mac);
+            logger.info("macAddress {}", this.primaryInterfaceMacAddress);
         } catch (UnknownHostException | SocketException e) {
             logger.error(e.getLocalizedMessage());
         }
-        return macAddress;
+        return this.primaryInterfaceMacAddress;
     }
 
     private String getPrimaryMacAddressLinux(String primaryNetworkInterfaceName) {
+
+        if (!isNull(this.primaryInterfaceMacAddress)) {
+            return this.primaryInterfaceMacAddress;
+        }
 
         List<NetInterface<? extends NetInterfaceAddress>> interfaces = null;
         try {
@@ -635,10 +644,10 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
                 .filter(iface -> primaryNetworkInterfaceName.equals(iface.getName().split("@")[0])).findFirst();
 
         if (primaryInterface.isPresent()) {
-            return hardwareAddressToString(primaryInterface.get().getHardwareAddress());
-        } else {
-            return null;
+            this.primaryInterfaceMacAddress = hardwareAddressToString(primaryInterface.get().getHardwareAddress());
         }
+
+        return this.primaryInterfaceMacAddress;
     }
 
     /**
@@ -1483,7 +1492,7 @@ public class SystemServiceImpl extends SuperSystemService implements SystemServi
 
         return false;
     }
-    
+
     @Override
     public boolean isLegacyPPPLoggingEnabled() {
         final Optional<String> override = getProperty(KEY_LEGACY_PPP_LOGGING);

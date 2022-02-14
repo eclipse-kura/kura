@@ -508,14 +508,9 @@
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>com.eurotech.framework</groupId>
-                                    <artifactId>com.eurotech.framework.docker.configurable</artifactId>
-                                    <version>${com.eurotech.framework.docker.configurable.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.eurotech.framework</groupId>
-                                    <artifactId>com.eurotech.framework.docker.configurable.generic</artifactId>
-                                    <version>${com.eurotech.framework.docker.configurable.generic.version}</version>
+                                	<groupId>com.eurotech</groupId>
+                                	<artifactId>gpsd4java</artifactId>
+                                	<version>${com.eurotech.gpsd4java.version}</version>
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -623,9 +618,7 @@
                                 <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
-                                <!-- Docker Containers -->
-                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.jar" tofile="target/source/plugins/com.eurotech.framework.docker.configurable_${com.eurotech.framework.docker.configurable.version}.jar"/>
-                                <move file="target/source/plugins/com.eurotech.framework.docker.configurable.generic.jar" tofile="target/source/plugins/com.eurotech.framework.docker.configurable.generic_${com.eurotech.framework.docker.configurable.version.generic}.jar"/>
+                                <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

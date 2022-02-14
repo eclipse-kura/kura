@@ -121,7 +121,7 @@ public class ServiceUtil {
 
             tracker.open();
 
-            configurationService.createFactoryConfiguration(factoryPid, pid, properties, false);
+            configurationService.createFactoryConfiguration(factoryPid, pid, properties, true);
 
             return result.whenComplete((ok, ex) -> tracker.close());
         } catch (final Exception e) {
@@ -170,7 +170,7 @@ public class ServiceUtil {
                 throw e;
             }
 
-            configurationService.deleteFactoryConfiguration(pid, false);
+            configurationService.deleteFactoryConfiguration(pid, true);
 
             return removed.whenComplete((ok, ex) -> tracker.close());
         } catch (final Exception e) {

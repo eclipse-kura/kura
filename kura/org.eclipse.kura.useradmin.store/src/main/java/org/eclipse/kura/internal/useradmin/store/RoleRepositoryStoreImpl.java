@@ -226,38 +226,42 @@ public class RoleRepositoryStoreImpl implements RoleRepositoryStore, UserAdminLi
                 this.executorService.schedule(this::storeNow, this.options.getWriteDelayMs(), TimeUnit.MILLISECONDS));
     }
 
-    private synchronized void storeNow() {
+    private void storeNow() {
+
+        Map<String, Object> properties;
         try {
-            final JsonArray rolesArray = new JsonArray();
-            final JsonArray usersArray = new JsonArray();
-            final JsonArray groupsArray = new JsonArray();
+            synchronized (this) {
 
-            for (final Role role : this.roles.values()) {
-                final int type = role.getType();
+                final JsonArray rolesArray = new JsonArray();
+                final JsonArray usersArray = new JsonArray();
+                final JsonArray groupsArray = new JsonArray();
 
-                if (type == Role.ROLE) {
-                    rolesArray.add(RoleSerializer.serializeRole(role));
-                } else if (type == Role.USER) {
-                    usersArray.add(RoleSerializer.serializeRole(role));
-                } else if (type == Role.GROUP) {
-                    groupsArray.add(RoleSerializer.serializeRole(role));
+                for (final Role role : this.roles.values()) {
+                    final int type = role.getType();
+
+                    if (type == Role.ROLE) {
+                        rolesArray.add(RoleSerializer.serializeRole(role));
+                    } else if (type == Role.USER) {
+                        usersArray.add(RoleSerializer.serializeRole(role));
+                    } else if (type == Role.GROUP) {
+                        groupsArray.add(RoleSerializer.serializeRole(role));
+                    }
                 }
+
+                final RoleRepositoryStoreOptions newOptions = new RoleRepositoryStoreOptions(rolesArray.toString(), //
+                        usersArray.toString(), //
+                        groupsArray.toString(), //
+                        this.options.getWriteDelayMs() //
+                );
+
+                if (newOptions.equals(this.options)) {
+                    logger.info("update would not change current configuration, skipping");
+                    return;
+                }
+
+                properties = newOptions.toProperties();
+                properties.put(INTERNAL_UPDATE_ID_PROP_NAME, getNextUpdateId());
             }
-
-            final RoleRepositoryStoreOptions newOptions = new RoleRepositoryStoreOptions(rolesArray.toString(), //
-                    usersArray.toString(), //
-                    groupsArray.toString(), //
-                    this.options.getWriteDelayMs() //
-            );
-
-            if (newOptions.equals(this.options)) {
-                logger.info("update would not change current configuration, skipping");
-                return;
-            }
-
-            final Map<String, Object> properties = newOptions.toProperties();
-
-            properties.put(INTERNAL_UPDATE_ID_PROP_NAME, getNextUpdateId());
 
             this.configurationService.updateConfiguration(RoleRepositoryStoreImpl.class.getName(), properties);
         } catch (final Exception e) {

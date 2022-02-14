@@ -32,6 +32,7 @@ import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PasswordChangeModal extends Composite {
@@ -49,6 +50,8 @@ public class PasswordChangeModal extends Composite {
     Input confirmNewPassword;
     @UiField
     Button okButton;
+    @UiField
+    FormPanel passwordChangeForm;
 
     private Optional<Callback> callback = Optional.empty();
 
@@ -77,14 +80,20 @@ public class PasswordChangeModal extends Composite {
 
         });
 
-        this.okButton.addClickHandler(e -> {
-            if (!newPassword.validate() || !confirmNewPassword.validate()) {
-                return;
-            }
-
-            passwordChangeModal.hide();
-            callback.ifPresent(c -> c.onPasswordChanged(newPassword.getValue()));
+        this.passwordChangeForm.addSubmitHandler(e -> {
+            e.cancel();
+            trySubmit();
         });
+        this.okButton.addClickHandler(e -> trySubmit());
+    }
+
+    private void trySubmit() {
+        if (!newPassword.validate() || !confirmNewPassword.validate()) {
+            return;
+        }
+
+        passwordChangeModal.hide();
+        callback.ifPresent(c -> c.onPasswordChanged(newPassword.getValue()));
     }
 
     private void validate() {

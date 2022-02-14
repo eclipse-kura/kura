@@ -19,14 +19,9 @@
       <provide interface="org.eclipse.kura.position.PositionService"/>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
+   
+   <reference bind="setPositionProviders" cardinality="1..n" interface="org.eclipse.kura.linux.position.PositionProvider" name="PositionProviders" policy="static" unbind="unsetPositionProviders"/>
+   
    <property name="service.pid" value="org.eclipse.kura.position.PositionService"/>
-   <reference bind="setConnectionFactory" cardinality="1..1" interface="org.osgi.service.io.ConnectionFactory" name="ConnectionFactory" policy="static" unbind="unsetConnectionFactory"/>
-   <reference name="EventAdmin" 
-              cardinality="1..1" 
-              policy="static"
-              bind="setEventAdmin"
-              unbind="unsetEventAdmin"
-              interface="org.osgi.service.event.EventAdmin"/>
-   <reference bind="setModemGpsStatusTracker" cardinality="1..1" interface="org.eclipse.kura.linux.position.ModemGpsStatusTracker" name="ModemGpsStatusTracker" policy="static" unbind="unsetModemGpsStatusTracker"/>
-   <reference bind="setGpsDeviceTracker" cardinality="1..1" interface="org.eclipse.kura.linux.position.GpsDeviceTracker" name="GpsDeviceTracker" policy="static" unbind="unsetGpsDeviceTracker"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unsetEventAdmin"/>
 </scr:component>

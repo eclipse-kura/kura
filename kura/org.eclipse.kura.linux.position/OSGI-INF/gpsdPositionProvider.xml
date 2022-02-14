@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+   Copyright (c) 2022 Eurotech and/or its affiliates and others
+
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
+
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" immediate="false" name="GpsdPositionProvider">
+   <implementation class="org.eclipse.kura.linux.position.GpsdPositionProvider"/>
+   <service>
+      <provide interface="org.eclipse.kura.linux.position.PositionProvider"/>
+      <provide interface="org.eclipse.kura.linux.position.GpsdPositionProvider" />
+   </service>
+   
+   <property name="service.pid" value="org.eclipse.kura.linux.position.GpsdPositionProvider"/>
+</scr:component>

@@ -2,7 +2,7 @@
 
 <!--
 
-    Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -90,22 +90,22 @@
                                     ui:field="subnet" />
                             </b:FormGroup>
 
-                            <b:FormGroup ui:field="groupDefaultL">
-                                <b:FormLabel for="defaultL"
-                                    ui:field="labelDefaultL" />
+                            <b:FormGroup ui:field="groupDefaultLease">
+                                <b:FormLabel for="defaultLease"
+                                    ui:field="labelDefaultLease" />
                                 <util:HelpButton
-                                    ui:field="defaultLHelp" />
-                                <b:TextBox b:id="defaultL"
-                                    ui:field="defaultL" />
+                                    ui:field="defaultLeaseHelp" />
+                                <b:TextBox b:id="defaultLease"
+                                    ui:field="defaultLease" />
                             </b:FormGroup>
 
-                            <b:FormGroup ui:field="groupMax">
-                                <b:FormLabel for="max"
-                                    ui:field="labelMax" />
+                            <b:FormGroup ui:field="groupMaxLease">
+                                <b:FormLabel for="maxLease"
+                                    ui:field="labelMaxLease" />
                                 <util:HelpButton
-                                    ui:field="maxHelp" />
-                                <b:TextBox b:id="max"
-                                    ui:field="max" />
+                                    ui:field="maxLeaseHelp" />
+                                <b:TextBox b:id="maxLease"
+                                    ui:field="maxLease" />
                             </b:FormGroup>
 
                             <b:FormGroup>
@@ -120,9 +120,15 @@
                                         formValue="false" ui:field="radio2" />
                                 </g:FlowPanel>
                             </b:FormGroup>
+                            <b:FormGroup ui:field="groupDhcpLease">
+                                <b:FormLabel for="dhcpLease" ui:field="labelDhcpLease"></b:FormLabel>
+                                <util:HelpButton ui:field="dhcpLeaseHelp" />
+                                <b:HelpBlock color="red" ui:field="helpDhcpLease" />
+                                <b:TextArea b:id="dhcpLease" ui:field="dhcpLease" />
+                                <b:FormControlStatic b:id="dhcpLeaseRead" ui:field="dhcpLeaseRead" />
+                            </b:FormGroup>
                         </b:FieldSet>
                     </b:Form>
-
                 </g:ScrollPanel>
             </b:Row>
         </b:Column>

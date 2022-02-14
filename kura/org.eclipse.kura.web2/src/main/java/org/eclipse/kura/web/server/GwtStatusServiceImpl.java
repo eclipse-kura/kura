@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -74,6 +74,11 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static final String KURA_SERVICE_PID = ConfigurationService.KURA_SERVICE_PID;
     private static final String DATA_SERVICE_REFERENCE_NAME = "DataService";
     private static final String DATA_TRANSPORT_SERVICE_REFERENCE_NAME = "DataTransportService";
+
+    private static final long NETWORK_INFO_REFRESH_TIMEOUT = 30000l;
+
+    private static List<GwtGroupedNVPair> networkStatus;
+    private static long lastUpdate;
 
     @Override
     public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
@@ -253,105 +258,111 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
     }
 
-    private List<GwtGroupedNVPair> getNetworkStatus() throws GwtKuraException {
+    private static List<GwtGroupedNVPair> getNetworkStatus() throws GwtKuraException {
+        long currentTime = System.currentTimeMillis();
+        if (GwtStatusServiceImpl.networkStatus != null
+                && currentTime - GwtStatusServiceImpl.lastUpdate < NETWORK_INFO_REFRESH_TIMEOUT) {
+            return GwtStatusServiceImpl.networkStatus;
+        }
+
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         String nl = "<br />";
         String tab = "&nbsp&nbsp&nbsp&nbsp";
 
         GwtNetworkServiceImpl gwtNetworkService = new GwtNetworkServiceImpl();
 
+        List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
+
         try {
-            List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations();
-            if (gwtNetInterfaceConfigs == null) {
-                return Collections.emptyList();
-            }
-
-            sort(gwtNetInterfaceConfigs, comparing(GwtNetInterfaceConfig::getName, nullsFirst(naturalOrder())));
-
-            for (GwtNetInterfaceConfig gwtNetInterfaceConfig : gwtNetInterfaceConfigs) {
-
-                String currentAddress = gwtNetInterfaceConfig.getIpAddress();
-                String currentSubnetMask = gwtNetInterfaceConfig.getSubnetMask();
-
-                String currentConfigMode;
-                if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
-                    currentConfigMode = "DHCP";
-                } else {
-                    currentConfigMode = "Manual";
-                }
-
-                String currentRouterMode;
-                if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchp) {
-                    currentRouterMode = "DHCPD";
-                } else if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterNat) {
-                    currentRouterMode = "NAT";
-                } else if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchpNat) {
-                    currentRouterMode = "DHCPD & NAT";
-                } else {
-                    currentRouterMode = "";
-                }
-
-                if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
-                    if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
-                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
-                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
-                        pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
-                                gwtNetInterfaceConfig.getStatusEnum().getValue()));
-                    } else {
-                        pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
-                                currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                        + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode));
-                    }
-                } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
-                        && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
-                    String currentWifiMode = ((GwtWifiNetInterfaceConfig) gwtNetInterfaceConfig)
-                            .getWirelessModeEnum() == GwtWifiWirelessMode.netWifiWirelessModeStation ? "Station Mode"
-                                    : "Access Point";
-                    GwtWifiConfig gwtActiveWifiConfig = ((GwtWifiNetInterfaceConfig) gwtNetInterfaceConfig)
-                            .getActiveWifiConfig();
-                    String currentWifiSsid = null;
-                    if (gwtActiveWifiConfig != null) {
-                        currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
-                    }
-                    if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
-                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
-                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
-                        pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
-                                gwtNetInterfaceConfig.getStatusEnum().getValue()));
-                    } else {
-                        pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
-                                currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                        + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode + nl + tab
-                                        + "Wireless Mode:" + currentWifiMode + nl + tab + "SSID: " + currentWifiSsid
-                                        + nl));
-                    }
-                } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
-                    String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
-                    String currentModemPppNum = Integer
-                            .toString(((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getPppNum());
-                    String name = "ppp" + currentModemPppNum + " (" + gwtNetInterfaceConfig.getName() + ")";
-                    if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
-                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
-                            || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
-                        pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
-                                gwtNetInterfaceConfig.getStatusEnum().getValue()));
-                    } else {
-                        pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
-                                currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
-                                        + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
-                                        + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab + "PPP: "
-                                        + currentModemPppNum));
-                    }
-                }
-            }
+            gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations();
         } catch (GwtKuraException e) {
             logger.warn("Get network status failed");
-            throw e;
+            return Collections.emptyList();
         }
 
-        return pairs;
+        sort(gwtNetInterfaceConfigs, comparing(GwtNetInterfaceConfig::getName, nullsFirst(naturalOrder())));
+
+        for (GwtNetInterfaceConfig gwtNetInterfaceConfig : gwtNetInterfaceConfigs) {
+
+            String currentAddress = gwtNetInterfaceConfig.getIpAddress();
+            String currentSubnetMask = gwtNetInterfaceConfig.getSubnetMask();
+
+            String currentConfigMode;
+            if (gwtNetInterfaceConfig.getConfigModeEnum() == GwtNetIfConfigMode.netIPv4ConfigModeDHCP) {
+                currentConfigMode = "DHCP";
+            } else {
+                currentConfigMode = "Manual";
+            }
+
+            String currentRouterMode;
+            if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchp) {
+                currentRouterMode = "DHCPD";
+            } else if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterNat) {
+                currentRouterMode = "NAT";
+            } else if (gwtNetInterfaceConfig.getRouterModeEnum() == GwtNetRouterMode.netRouterDchpNat) {
+                currentRouterMode = "DHCPD & NAT";
+            } else {
+                currentRouterMode = "";
+            }
+
+            if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
+                if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
+                        || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
+                        || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
+                    pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
+                            gwtNetInterfaceConfig.getStatusEnum().getValue()));
+                } else {
+                    pairs.add(new GwtGroupedNVPair("networkStatusEthernet", gwtNetInterfaceConfig.getName(),
+                            currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
+                                    + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode));
+                }
+            } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.WIFI
+                    && !gwtNetInterfaceConfig.getName().startsWith("mon")) {
+                String currentWifiMode = ((GwtWifiNetInterfaceConfig) gwtNetInterfaceConfig)
+                        .getWirelessModeEnum() == GwtWifiWirelessMode.netWifiWirelessModeStation ? "Station Mode"
+                                : "Access Point";
+                GwtWifiConfig gwtActiveWifiConfig = ((GwtWifiNetInterfaceConfig) gwtNetInterfaceConfig)
+                        .getActiveWifiConfig();
+                String currentWifiSsid = null;
+                if (gwtActiveWifiConfig != null) {
+                    currentWifiSsid = gwtActiveWifiConfig.getWirelessSsid();
+                }
+                if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
+                        || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
+                        || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
+                    pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
+                            gwtNetInterfaceConfig.getStatusEnum().getValue()));
+                } else {
+                    pairs.add(new GwtGroupedNVPair("networkStatusWifi", gwtNetInterfaceConfig.getName(),
+                            currentAddress + nl + tab + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
+                                    + currentConfigMode + nl + tab + "Router Mode: " + currentRouterMode + nl + tab
+                                    + "Wireless Mode:" + currentWifiMode + nl + tab + "SSID: " + currentWifiSsid + nl));
+                }
+            } else if (gwtNetInterfaceConfig.getHwTypeEnum() == GwtNetIfType.MODEM) {
+                String currentModemApn = ((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getApn();
+                String currentModemPppNum = Integer
+                        .toString(((GwtModemInterfaceConfig) gwtNetInterfaceConfig).getPppNum());
+                String name = "ppp" + currentModemPppNum + " (" + gwtNetInterfaceConfig.getName() + ")";
+                if (gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusDisabled
+                        || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusUnmanaged
+                        || gwtNetInterfaceConfig.getStatusEnum() == GwtNetIfStatus.netIPv4StatusL2Only) {
+                    pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
+                            gwtNetInterfaceConfig.getStatusEnum().getValue()));
+                } else {
+                    pairs.add(new GwtGroupedNVPair("networkStatusModem", name,
+                            currentAddress + nl + SUBNET_MASK + currentSubnetMask + nl + tab + MODE
+                                    + gwtNetInterfaceConfig.getStatusEnum().getValue() + nl + tab + IP_ACQUISITION
+                                    + currentConfigMode + nl + tab + "APN: " + currentModemApn + nl + tab + "PPP: "
+                                    + currentModemPppNum));
+                }
+            }
+        }
+
+        networkStatus = pairs;
+        lastUpdate = System.currentTimeMillis();
+        return networkStatus;
     }
 
     private List<GwtGroupedNVPair> getPositionStatus() throws GwtKuraException {

@@ -14,6 +14,8 @@ package org.eclipse.kura.emulator.position;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -232,5 +234,10 @@ public class PositionServiceImpl implements PositionService, ConfigurableCompone
     @Override
     public void unregisterListener(String listenerId) {
         // Not supported
+    }
+
+    @Override
+    public LocalDateTime getDateTime() {
+        return LocalDateTime.ofInstant(this.currentTime.toInstant(), ZoneId.systemDefault());
     }
 }

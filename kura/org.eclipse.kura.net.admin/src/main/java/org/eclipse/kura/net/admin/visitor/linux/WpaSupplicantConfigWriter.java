@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -45,6 +45,7 @@ import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
+import org.eclipse.kura.util.base.StringUtil;
 import org.eclipse.kura.util.base.TypeUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -368,7 +369,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         String result;
 
         if (wifiConfig.getSSID() != null) {
-            result = fileAsString.replaceFirst("KURA_ESSID", Matcher.quoteReplacement(wifiConfig.getSSID()));
+            String hexSSID = StringUtil.toHex(wifiConfig.getSSID());
+            result = fileAsString.replaceFirst("KURA_ESSID", hexSSID);
         } else {
             throw KuraException.internalError("the essid can not be null");
         }

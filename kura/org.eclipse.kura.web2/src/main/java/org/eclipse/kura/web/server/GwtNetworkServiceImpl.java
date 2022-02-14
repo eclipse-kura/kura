@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkPair;
+import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.dhcp.DhcpServerCfg;
 import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
@@ -55,7 +56,6 @@ import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
 import org.eclipse.kura.net.modem.ModemConnectionStatus;
-import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemInterface;
 import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemManagerService;
@@ -82,6 +82,7 @@ import org.eclipse.kura.web.server.util.ServiceLocator;
 import org.eclipse.kura.web.shared.GwtKuraErrorCode;
 import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.GwtSafeHtmlUtils;
+import org.eclipse.kura.web.shared.model.GwtDhcpLease;
 import org.eclipse.kura.web.shared.model.GwtFirewallNatEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallOpenPortEntry;
 import org.eclipse.kura.web.shared.model.GwtFirewallPortForwardEntry;
@@ -148,7 +149,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         NetworkAdminService nas = null;
         try {
             nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("Exception", t);
             return gwtNetConfigs;
         }
@@ -156,14 +157,14 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         ModemManagerService modemManagerService = null;
         try {
             modemManagerService = ServiceLocator.getInstance().getService(ModemManagerService.class);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("{ModemManagerService} Exception", t);
         }
 
         WifiClientMonitorService wifiClientMonitorService = null;
         try {
             wifiClientMonitorService = ServiceLocator.getInstance().getService(WifiClientMonitorService.class);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.warn("{WifiClientMonitorService} Exception", t);
         }
 
@@ -1018,7 +1019,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             List<WifiHotspotInfo> wifiHotspotInfoList = nas.getWifiHotspotList(interfaceName);
             if (wifiHotspotInfoList != null) {
                 for (WifiHotspotInfo wifiHotspotInfo : wifiHotspotInfoList) {
-                    String ssid = GwtSafeHtmlUtils.htmlEscape(wifiHotspotInfo.getSsid());
+                    String ssid = wifiHotspotInfo.getSsid();
                     // if(!ssid.matches("[0-9A-Za-z/.@*#:\\ \\_\\-]+")){
                     // ssid= null;
                     // }
@@ -1749,6 +1750,28 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         if (!errors.isEmpty()) {
             logger.warn("password strenght requirements not satisfied: {}", errors);
             throw new GwtKuraException(GwtKuraErrorCode.ILLEGAL_ARGUMENT);
+        }
+    }
+
+    @Override
+    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        List<String> dhcpLease = new ArrayList<>();
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            List<DhcpLease> leases = nas.getDhcpLeases();
+
+            for (DhcpLease dl : leases) {
+                GwtDhcpLease dhcp = new GwtDhcpLease();
+                dhcp.setMacAddress(dl.getMacAddress());
+                dhcp.setIpAddress(dl.getIpAddress());
+                dhcp.setHostname(dl.getHostname());
+                dhcpLease.add(dhcp.toString());
+            }
+            return dhcpLease;
+        } catch (KuraException e) {
+            logger.error("Find Dhcp Lease List Exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
 }

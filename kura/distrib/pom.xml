@@ -572,13 +572,13 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
-<<<<<<< HEAD
                                     <artifactId>org.eclipse.kura.container.orchestration.provider</artifactId>
                                     <version>${org.eclipse.kura.container.orchestration.provider.version}</version>
-=======
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.container.provider</artifactId>
                                     <version>${org.eclipse.kura.container.provider.version}</version>
->>>>>>> ECESF-1393-container-management-container-provider-squashed
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
@@ -725,16 +725,13 @@
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar" tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
-<<<<<<< HEAD
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
-=======
                                 <move file="target/plugins/org.eclipse.kura.container.provider.jar" tofile="target/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar" />
->>>>>>> ECESF-1393-container-management-container-provider-squashed
                             </tasks>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>verify-if-snapshot</id>
+                        <id>verify-if-snapshot</igitd>
                         <phase>install</phase>
                         <goals>
                             <goal>run</goal>

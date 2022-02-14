@@ -195,6 +195,8 @@
 		<antcall target="linux.bluetooth-config" />
 		<antcall target="linux.watchdog-config" />
 
+		<antcall target="container-orchestration-config" />
+
 
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
@@ -743,6 +745,8 @@ fi]]>
 		<antcall target="linux-redhat-jars" />
 		<antcall target="linux-systemd-jars" />
 		<antcall target="nvidia-jetson-nano-jars" />
+
+		<antcall target="container-orchestrator-jars" />
 
 		<echo message="Building Kura Distribution for ${build.name}-jars..." />
 
@@ -1814,6 +1818,8 @@ fi]]>
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar@4:start" />
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 	<target name="container-orchestrator-jar">
@@ -1821,6 +1827,9 @@ fi]]>
 			update="true">
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

@@ -128,6 +128,8 @@
 
         <module>org.eclipse.kura.wire.ai.component.provider</module>
 
+        <module>org.eclipse.kura.container.provider</module>
+
         <module>features</module>
         <module>emulator</module>
 

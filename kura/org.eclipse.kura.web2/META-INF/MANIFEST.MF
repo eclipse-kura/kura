@@ -10,7 +10,6 @@ Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
  org.eclipse.kura.container.orchestration.provider;version="[1.0,2.0)",
- org.eclipse.kura.container.provider;version="[0.0,2.0)",
  com.google.gson;version="2.7.0",
  javax.crypto,
  javax.crypto.spec,

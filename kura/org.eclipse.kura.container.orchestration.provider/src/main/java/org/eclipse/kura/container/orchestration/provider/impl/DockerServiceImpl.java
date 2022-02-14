@@ -25,6 +25,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.provider.DockerService;
+import org.eclipse.kura.container.orchestration.provider.ContainerStates;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +62,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     private DockerServiceOptions currentConfig;
     private List<ContainerDescriptor> containerQueue = new LinkedList<>();
     private final List<ContainerDescriptor> runningContainers = new LinkedList<>();
+    private final List<ContainerDescriptor> registeredContainers = new LinkedList<>();
+
     private DockerClient dockerClient;
     private AuthConfig dockerAuthConfig;
     private CryptoService cryptoService;
@@ -181,30 +184,79 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         avaliableContainers = new ContainerDescriptor[containers.size()];
 
-        int temp = 0;
-        for (Container cont : containers) {
-            int[] externalPorts = new int[] {};
-            int[] internalPorts = new int[] {};
+        if (!containers.isEmpty()) {
+            int temp = 0;
+            for (Container cont : containers) {
 
-            ContainerPort[] tempPorts = cont.getPorts();
-            for (ContainerPort tempPort : tempPorts) {
-                if (tempPort.getIp() != null) {
-                    String ipFormatTest = tempPort.getIp();
-                    if (ipFormatTest != null && ipFormatTest.equals("::")) {
-                        ArrayUtils.add(internalPorts, tempPort.getPrivatePort());
-                        ArrayUtils.add(externalPorts, tempPort.getPublicPort());
-                    }
+                String tag = cont.getImage().split(":")[0];
+                String version = "";
+
+                if (cont.getImage().split(":").length > 1) {
+                    version = cont.getImage().split(":")[1];
                 }
+
+                avaliableContainers[temp] = ContainerDescriptor.builder()
+                        .setContainerName(cont.getNames()[0].replace("/", "")).setContainerImage(tag)
+                        .setContainerImageTag(version).setContainerID(cont.getId())
+                        .setInternalPort(parseInternalPortsFromDockerPs(cont.getPorts()))
+                        .setExternalPort(parseExternalPortsFromDockerPs(cont.getPorts()))
+                        .setContainerState(convertDockerStateToESFState(cont.getState())).setIsEsfManaged(false)
+                        .build();
+                temp++;
             }
-
-            avaliableContainers[temp] = ContainerDescriptor.builder().setContainerName(cont.getNames()[0])
-                    .setContainerImage(cont.getImage()).setContainerID(cont.getId()).setInternalPort(internalPorts)
-                    .setExternalPort(externalPorts).build();
-            temp++;
         }
-
         return avaliableContainers;
 
+    }
+
+    private int[] parseExternalPortsFromDockerPs(ContainerPort[] ports) {
+        int[] externalPorts = new int[] {};
+
+        ContainerPort[] tempPorts = ports;
+        for (ContainerPort tempPort : tempPorts) {
+            if (tempPort.getIp() != null) {
+                String ipFormatTest = tempPort.getIp();
+                if (ipFormatTest != null && ipFormatTest.equals("::")) {
+                    ArrayUtils.add(externalPorts, tempPort.getPublicPort());
+                }
+            }
+        }
+        return externalPorts;
+    }
+
+    private int[] parseInternalPortsFromDockerPs(ContainerPort[] ports) {
+        int[] internalPorts = new int[] {};
+
+        ContainerPort[] tempPorts = ports;
+        for (ContainerPort tempPort : tempPorts) {
+            if (tempPort.getIp() != null) {
+                String ipFormatTest = tempPort.getIp();
+                if (ipFormatTest != null && ipFormatTest.equals("::")) {
+                    ArrayUtils.add(internalPorts, tempPort.getPrivatePort());
+                }
+            }
+        }
+        return internalPorts;
+    }
+
+    private ContainerStates convertDockerStateToESFState(String dockerState) {
+
+        switch (dockerState.trim()) {
+        case "created":
+            return ContainerStates.INSTALLED;
+        case "restarting":
+            return ContainerStates.INSTALLED;
+        case "running":
+            return ContainerStates.ACTIVE;
+        case "paused":
+            return ContainerStates.STOPPING;
+        case "exited":
+            return ContainerStates.STOPPING;
+        case "dead":
+            return ContainerStates.FAILED;
+        default:
+            return ContainerStates.INSTALLED;
+        }
     }
 
     @Override
@@ -376,9 +428,11 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             finalContainerID = commandBuilder.withHostConfig(configuration).exec().getId();
 
             commandBuilder.close();
+            containerDescription.setContainerState(ContainerStates.ACTIVE);
 
         } catch (Exception e) {
             logger.error("failed to create container: {}", e.toString());
+            containerDescription.setContainerState(ContainerStates.FAILED);
         }
 
         return finalContainerID;
@@ -547,44 +601,46 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void startContainer(ContainerDescriptor containerDescription) {
+    public void startContainer(ContainerDescriptor container) {
+        container.setContainerState(ContainerStates.STARTING);
 
         if (testConnection()) {
-            enqueueContainer(containerDescription, this.runningContainers);
+            enqueueContainer(container, this.runningContainers);
 
             try {
-                containerDescription.setContainerId(getContainerIDbyName(containerDescription.getContainerName()));
+                container.setContainerId(getContainerIDbyName(container.getContainerName()));
             } catch (Exception e) {
                 logger.error("Failed to get container name by ID.", e);
             }
 
-            if (containerDescription.getContainerId().isEmpty()) {
+            if (container.getContainerId().isEmpty()) {
                 try {
-                    containerDescription.setContainerId(pullImageAndCreateContainer(containerDescription));
-                    startContainer(containerDescription.getContainerId());
+                    container.setContainerId(pullImageAndCreateContainer(container));
+                    startContainer(container.getContainerId());
+                    container.setContainerState(ContainerStates.ACTIVE);
                     logger.info("Container Started Successfully");
                 } catch (Exception e) {
                     logger.error("Failed to pull and create container.", e);
                 }
             } else {
-                logger.info("{}  Microservice Already exists, starting container",
-                        containerDescription.getContainerImage());
+                logger.info("{}  Microservice Already exists, starting container", container.getContainerImage());
                 try {
-                    startContainer(containerDescription.getContainerId());
+                    startContainer(container.getContainerId());
+                    container.setContainerState(ContainerStates.ACTIVE);
                 } catch (NotModifiedException ex) {
                     logger.info("Container Already running.");
                 }
             }
 
         } else {
-            enqueueContainer(containerDescription, this.containerQueue);
+            enqueueContainer(container, this.containerQueue);
         }
 
     }
 
     @Override
     public void stopContainer(ContainerDescriptor container) {
-
+        container.setContainerState(ContainerStates.STOPPING);
         if (!this.currentConfig.isEnabled()) {
             container.setContainerId(deqeueContainer(container, this.containerQueue));
 
@@ -600,6 +656,11 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 logger.error("Failed to stop {} Microservice", container.getContainerName());
             }
 
+            if (Boolean.FALSE.equals(container.getIsEsfManaged())) {
+                // container is not ESF Managed, and thus should only be stopped and not deleted.
+                return;
+            }
+
             try {
                 logger.info("Deleting {} Microservice", container.getContainerName());
                 deleteContainer(container.getContainerId());
@@ -613,6 +674,38 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             logger.error("Microservice {} does not exist", container.getContainerName());
         }
 
+    }
+
+    @Override
+    public void registerContainer(ContainerDescriptor container) {
+        enqueueContainer(container, this.registeredContainers);
+
+    }
+
+    @Override
+    public void unregisterContainer(ContainerDescriptor container) {
+        deqeueContainer(container, this.registeredContainers);
+    }
+
+    @Override
+    public List<ContainerDescriptor> listRegisteredContainers() {
+        // Add all registered containers
+        List<ContainerDescriptor> cds = new LinkedList<>(this.registeredContainers);
+
+        for (ContainerDescriptor container : listByContainerDescriptor()) {
+            boolean unique = true;
+            for (ContainerDescriptor listCotnainer : cds) {
+                if (container.getContainerId().equals(listCotnainer.getContainerId())) {
+                    unique = false;
+                    break;
+                }
+            }
+            if (unique) {
+                cds.add(container);
+            }
+        }
+
+        return cds;
     }
 
     private void cleanUpAllMicroservices() {

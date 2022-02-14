@@ -33,6 +33,8 @@
                         ui:field="profile" active="true"/>
                     <b:TabListItem dataTarget="#bundlesPanel" text="Bundles"
                         ui:field="bundles" />
+                    <b:TabListItem dataTarget="#dockerContainersPanel" text="Docker Containers"
+                        ui:field="containers" />
                     <b:TabListItem dataTarget="#threadsPanel" text="Threads"
                         ui:field="threads" />
                     <b:TabListItem dataTarget="#packagesPanel" text="System Packages"
@@ -50,6 +52,9 @@
                     </b:TabPane>
                     <b:TabPane b:id="bundlesPanel">
                         <device:BundlesTabUi ui:field="bundlesPanel"></device:BundlesTabUi>
+                    </b:TabPane>
+                    <b:TabPane b:id="dockerContainersPanel">
+                        <device:DockerContainersTabUi ui:field="dockerContainersPanel"></device:DockerContainersTabUi>
                     </b:TabPane>
                     <b:TabPane b:id="threadsPanel">
                         <device:ThreadsTabUi ui:field="threadsPanel"></device:ThreadsTabUi>

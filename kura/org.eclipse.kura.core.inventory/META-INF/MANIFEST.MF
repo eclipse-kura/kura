@@ -8,7 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .
 Bundle-ActivationPolicy: lazy
-Import-Package: org.apache.commons.io;version="1.4.9999",
+Import-Package: org.eclipse.kura.container.orchestration.provider;version="[1.0,2.0)",
+ org.apache.commons.io;version="1.4.9999",
  org.eclipse.kura;version="[1.0,2.0)",
  org.eclipse.kura.cloudconnection.message;version="[1.0,2.0)",
  org.eclipse.kura.cloudconnection.request;version="[1.0,1.1)",
@@ -23,3 +24,4 @@ Import-Package: org.apache.commons.io;version="1.4.9999",
  org.slf4j;version="1.6.4"
 Export-Package: org.eclipse.kura.core.inventory;version="1.0.0",
  org.eclipse.kura.core.inventory.resources;version="1.0.0"
+

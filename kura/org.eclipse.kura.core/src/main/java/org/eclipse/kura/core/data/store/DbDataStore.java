@@ -114,7 +114,7 @@ public class DbDataStore implements DataStore {
         this.sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
                 + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
                 + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
-                + "smallPayload VARBINARY, largePayload BLOB, priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
+                + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
         this.sqlCreateIndex = "CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "
                 + this.sanitizedTableName + " (publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC, qos);";
         this.sqlMessageCount = "SELECT COUNT(*) FROM " + this.sanitizedTableName + ";";

@@ -185,11 +185,12 @@ public class ConfigurableGenericDockerServiceOptions {
         ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
         return Objects.equals(this.containerDevice, other.containerDevice)
                 && Objects.equals(this.containerEnv, other.containerEnv)
-                && Objects.equals(this.containerName, other.containerName)
-                && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
-                && Arrays.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
+                && Objects.equals(this.containerName, other.containerName) && Objects.equals(this.image, other.image)
                 && Objects.equals(this.imageTag, other.imageTag)
-                && Arrays.equals(this.internalPorts, other.internalPorts);
+                && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
+                && Arrays.equals(this.externalPorts, other.externalPorts)
+                && Arrays.equals(this.internalPorts, other.internalPorts)
+                && Objects.equals(this.privilegedMode, other.privilegedMode);
     }
 
     private int[] parsePortString(String ports) {

@@ -60,8 +60,8 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eurotech.framework.docker.ContainerDescriptor;
-import com.eurotech.framework.docker.DockerService;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.DockerService;
 
 public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler {
 

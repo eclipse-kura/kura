@@ -19,8 +19,8 @@ import java.util.Map;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
 
-import com.eurotech.framework.docker.ContainerDescriptor;
-import com.eurotech.framework.docker.ContainerStates;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.ContainerStates;
 
 public class DockerContainer extends SystemResourceInfo {
 

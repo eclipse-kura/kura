@@ -1755,15 +1755,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        logger.debug("Find Dhcp Lease List");
-        List<String> dhcpLease = new ArrayList<String>();
+        List<String> dhcpLease = new ArrayList<>();
 
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
             List<DhcpLease> leases = nas.getDhcpLeases();
 
             for (DhcpLease dl : leases) {
-                logger.debug(dl.toString());
                 GwtDhcpLease dhcp = new GwtDhcpLease();
                 dhcp.setMacAddress(dl.getMacAddress());
                 dhcp.setIpAddress(dl.getIpAddress());

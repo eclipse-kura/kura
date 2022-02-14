@@ -28,13 +28,29 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ModelInfo {
 
+    /** The name of the model */
     private final String modelName;
+    /** An optional string representing the platform used for this model */
     private Optional<String> modelPlatform;
+    /** An optional string representing the version of the model */
     private Optional<String> version;
+    /** A set of key pairs describing the model parameters */
     private final Map<String, Object> parameters;
+    /** The list of {@link TensorDescriptor} of the input tensors */
     private final List<TensorDescriptor> inputDescriptors;
+    /** The list of {@link TensorDescriptor} of the output tensors */
     private final List<TensorDescriptor> outputDescriptors;
 
+    /**
+     * Instantiates a new ModelInfo
+     * 
+     * @param modelName
+     *            the name of the model
+     * @param inputDescriptors
+     *            a list of {@link TensorDescriptor} of the input tensors
+     * @param outputDescriptors
+     *            a list of {@link TensorDescriptor} of the output tensors
+     */
     protected ModelInfo(String modelName, List<TensorDescriptor> inputDescriptors,
             List<TensorDescriptor> outputDescriptors) {
         this.modelName = modelName;

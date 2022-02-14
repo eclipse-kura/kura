@@ -26,10 +26,23 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class Tensor {
 
+    /** the {@link TensorDescriptor} of this tensor */
     private final TensorDescriptor descriptor;
+    /** the type of tensor data as Java class */
     private final Class<?> type;
+    /** the list of data of this tensor */
     private final List<?> data;
 
+    /**
+     * Instantiates a Tensor
+     * 
+     * @param type
+     *            the type of tensor data as Java class
+     * @param descriptor
+     *            the {@link TensorDescriptor} of this tensor
+     * @param data
+     *            the list of data of this tensor
+     */
     public <T> Tensor(Class<T> type, TensorDescriptor descriptor, List<T> data) {
         this.type = type;
         this.descriptor = descriptor;

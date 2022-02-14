@@ -13,7 +13,9 @@
 package org.eclipse.kura.ai.inference;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
@@ -26,16 +28,30 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ModelInfoBuilder {
 
+    /** The name of the model */
     private final String modelName;
+    /** An optional string representing the platform used for this model */
     private Optional<String> modelPlatform;
+    /** An optional string representing the version of the model */
     private Optional<String> version;
+    /** A set of key pairs describing the model parameters */
+    private final Map<String, Object> parameters;
+    /** The list of {@link TensorDescriptor} of the input tensors */
     private final List<TensorDescriptor> inputDescriptors;
+    /** The list of {@link TensorDescriptor} of the output tensors */
     private final List<TensorDescriptor> outputDescriptors;
 
+    /**
+     * Instantiates a builder for a {@link ModelInfo}
+     * 
+     * @param modelName
+     *            the name of the model
+     */
     private ModelInfoBuilder(String modelName) {
         this.modelName = modelName;
         this.modelPlatform = Optional.empty();
         this.version = Optional.empty();
+        this.parameters = new HashMap<>();
         this.inputDescriptors = new ArrayList<>();
         this.outputDescriptors = new ArrayList<>();
     }
@@ -51,6 +67,11 @@ public class ModelInfoBuilder {
 
     public ModelInfoBuilder version(String version) {
         this.version = Optional.of(version);
+        return this;
+    }
+
+    public ModelInfoBuilder parameter(String name, Object parameter) {
+        this.parameters.put(name, parameter);
         return this;
     }
 
@@ -74,6 +95,7 @@ public class ModelInfoBuilder {
         ModelInfo modelInfo = new ModelInfo(this.modelName, this.inputDescriptors, this.outputDescriptors);
         modelInfo.setModelPlatform(this.modelPlatform.get());
         modelInfo.setVersion(this.version.get());
+        this.parameters.forEach(modelInfo::putParameter);
         return modelInfo;
     }
 }

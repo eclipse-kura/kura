@@ -28,12 +28,27 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class TensorDescriptor {
 
+    /** The name of the tensor */
     private final String name;
+    /** A string representing the type of data contained in the tensor */
     private final String type;
+    /** An optional string representing the format of the data */
     private Optional<String> format;
+    /** The shape of the data */
     private final List<Long> shape;
+    /** A set of key pairs describing the tensor parameters */
     private final Map<String, Object> parameters;
 
+    /**
+     * Instantiates a tensor descriptor
+     * 
+     * @param name
+     *            the name of the tensor
+     * @param type
+     *            a string representing the type of data contained in the tensor
+     * @param shape
+     *            the shape of the data
+     */
     public TensorDescriptor(String name, String type, List<Long> shape) {
         this.name = name;
         this.type = type;

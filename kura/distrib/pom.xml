@@ -731,7 +731,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>verify-if-snapshot</igitd>
+                        <id>verify-if-snapshot</id>
                         <phase>install</phase>
                         <goals>
                             <goal>run</goal>

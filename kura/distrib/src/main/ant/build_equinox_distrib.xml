@@ -191,8 +191,6 @@
 		<antcall target="linux.bluetooth-config" />
 		<antcall target="linux.watchdog-config" />
 
-		<antcall target="container-orchestration-config" />
-
 
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
@@ -728,8 +726,6 @@ fi]]>
 		<antcall target="keystore-management-jar" />
 
 		<antcall target="filesystem-logprovider-jar" />
-		
-		<antcall target="container-orchestrator-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -1802,7 +1798,7 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	<target name="container-orchestrator-jar">
+	<target name="container-orchestrator-jars">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
 			update="true">
 			<zipfileset

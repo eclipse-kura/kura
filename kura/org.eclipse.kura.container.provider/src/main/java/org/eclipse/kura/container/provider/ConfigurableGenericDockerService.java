@@ -22,6 +22,8 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.ContainerStates;
 import org.eclipse.kura.container.orchestration.provider.DockerService;
 
 public class ConfigurableGenericDockerService implements ConfigurableComponent {
@@ -31,6 +33,7 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
     public static final String DEFAULT_INSTANCE_PID = APP_ID;
 
     private ConfigurableGenericDockerServiceOptions serviceOptions;
+    private ContainerDescriptor registeredContainerRefrence;
 
     private DockerService dockerService;
 
@@ -52,7 +55,6 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
 
     public void activate(final Map<String, Object> properties) {
         logger.info("activating...");
-
         updated(properties);
 
         logger.info("activating...done");
@@ -68,11 +70,14 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
         if (!isNull(this.serviceOptions) && this.serviceOptions.isEnabled()) {
             stopRunningMicroservice();
         }
+
+        handleContainerRegistry(newProps);
         this.serviceOptions = newProps;
 
         if (this.serviceOptions.isEnabled()) {
             startNewMicroservice();
         }
+
     }
 
     public void deactivate() {
@@ -81,6 +86,10 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
 
         if (this.serviceOptions.isEnabled()) {
             stopRunningMicroservice();
+        }
+
+        if (this.registeredContainerRefrence != null) {
+            this.dockerService.unregisterContainer(this.registeredContainerRefrence);
         }
 
         logger.info("deactivate...done");
@@ -97,7 +106,8 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
             return;
         }
         try {
-            this.dockerService.startContainer(this.serviceOptions.getContainerDescriptor());
+            this.dockerService.startContainer(this.registeredContainerRefrence);
+            this.registeredContainerRefrence.setContainerState(ContainerStates.STARTING);
         } catch (KuraException e) {
             logger.error("Error managing microservice state", e);
         }
@@ -108,9 +118,19 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
             return;
         }
         try {
-            this.dockerService.stopContainer(this.serviceOptions.getContainerDescriptor());
+            this.dockerService.stopContainer(this.registeredContainerRefrence);
+            this.registeredContainerRefrence.setContainerState(ContainerStates.STOPPING);
         } catch (KuraException e) {
             logger.error("Error stopping microservice {}", this.serviceOptions.getContainerName(), e);
         }
+    }
+
+    private void handleContainerRegistry(ConfigurableGenericDockerServiceOptions newProps) {
+        if (this.registeredContainerRefrence != null) {
+            this.dockerService.unregisterContainer(this.registeredContainerRefrence);
+        }
+
+        this.registeredContainerRefrence = newProps.getContainerDescriptor();
+        this.dockerService.registerContainer(this.registeredContainerRefrence);
     }
 }

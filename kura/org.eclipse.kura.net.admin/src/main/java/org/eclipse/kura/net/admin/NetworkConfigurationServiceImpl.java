@@ -208,7 +208,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
-        return this.linuxNetworkUtil.getAllInterfaceNames();
+        return this.networkService.getAllNetworkInterfaceNames();
     }
 
     protected NetInterfaceType getNetworkType(String interfaceName) throws KuraException {

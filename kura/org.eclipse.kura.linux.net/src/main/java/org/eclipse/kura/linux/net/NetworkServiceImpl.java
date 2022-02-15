@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.kura.KuraException;
@@ -101,6 +102,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     public static final String PPP_PEERS_DIR = "/etc/ppp/peers/";
     private static final String PPP = "ppp";
     private static final Integer MAX_PPP_NUMBER = 100;
+    private static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
 
     private static final String[] EVENT_TOPICS = new String[] { UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
             UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC };
@@ -307,7 +309,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
         waitActivated();
 
-        ArrayList<String> interfaceNames = new ArrayList<>();
+        List<String> interfaceNames = new ArrayList<>();
         List<String> allInterfaceNames = this.linuxNetworkUtil.getAllInterfaceNames();
         if (allInterfaceNames != null) {
             interfaceNames.addAll(allInterfaceNames);
@@ -318,6 +320,10 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 interfaceNames.add(generatePppName(pppNumber));
             }
         }
+
+        // remove virtual interface for Access Point
+        interfaceNames = interfaceNames.stream().filter(name -> !name.contains(ACCESS_POINT_INTERFACE_SUFFIX))
+                .collect(Collectors.toList());
 
         return interfaceNames;
     }

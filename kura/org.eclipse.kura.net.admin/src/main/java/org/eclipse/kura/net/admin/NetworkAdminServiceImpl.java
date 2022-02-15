@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -39,8 +39,10 @@ import org.eclipse.kura.linux.net.dhcp.DhcpClientManager;
 import org.eclipse.kura.linux.net.dhcp.DhcpServerManager;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
+import org.eclipse.kura.linux.net.util.DhcpLeaseTool;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.IwCapabilityTool;
+import org.eclipse.kura.linux.net.util.LinuxIfconfig;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.util.ScanTool;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
@@ -60,7 +62,6 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.monitor.InterfaceStateBuilder;
 import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
-import org.eclipse.kura.linux.net.util.DhcpLeaseTool;
 import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
@@ -87,6 +88,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandler {
+
+    private static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
 
     private static final Logger logger = LoggerFactory.getLogger(NetworkAdminServiceImpl.class);
 
@@ -1201,6 +1204,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         WifiMode wifiMode = getWifiMode(ifaceName);
         try {
             if (wifiMode == WifiMode.MASTER) {
+                ifaceName = switchToDedicatedApInterface(ifaceName);
                 startTemporaryWpaSupplicant(ifaceName);
             }
 
@@ -1237,6 +1241,32 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
 
         return wifiHotspotInfoList;
+    }
+
+    private String switchToDedicatedApInterface(String ifaceName) throws KuraException {
+        String dedicatedApInterface = ifaceName + ACCESS_POINT_INTERFACE_SUFFIX;
+        try {
+            LinuxIfconfig dedicatedApInterfaceConfig = this.linuxNetworkUtil
+                    .getInterfaceConfiguration(dedicatedApInterface);
+
+            if (dedicatedApInterfaceConfig != null) {
+                if (!dedicatedApInterfaceConfig.isLinkUp()) {
+                    this.linuxNetworkUtil.setNetworkInterfaceLinkUp(dedicatedApInterface);
+                }
+            } else {
+                this.linuxNetworkUtil.createApNetworkInterface(ifaceName, dedicatedApInterface);
+                this.linuxNetworkUtil.setNetworkInterfaceMacAddress(dedicatedApInterface);
+                this.linuxNetworkUtil.setNetworkInterfaceLinkUp(dedicatedApInterface);
+            }
+
+            return dedicatedApInterface;
+
+        } catch (KuraException e) {
+            logger.error("Unable to switch to reserved AP interface {}, falling back to the default.",
+                    dedicatedApInterface, e);
+        }
+
+        return ifaceName;
     }
 
     @Override

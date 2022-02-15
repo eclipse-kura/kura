@@ -29,7 +29,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class ModelInfoBuilder {
 
     private final String modelName;
-    private Optional<String> modelPlatform;
+    private Optional<String> platform;
     private Optional<String> version;
     private final Map<String, Object> parameters;
     private final List<TensorDescriptor> inputDescriptors;
@@ -37,7 +37,7 @@ public class ModelInfoBuilder {
 
     private ModelInfoBuilder(String modelName) {
         this.modelName = modelName;
-        this.modelPlatform = Optional.empty();
+        this.platform = Optional.empty();
         this.version = Optional.empty();
         this.parameters = new HashMap<>();
         this.inputDescriptors = new ArrayList<>();
@@ -55,14 +55,30 @@ public class ModelInfoBuilder {
     }
 
     /**
+     * Instantiates a builder for a {@link ModelInfo}
+     * 
+     * @param modelInfo
+     * @return a ModelInfoBuilder
+     */
+    public static ModelInfoBuilder fromModelInfo(ModelInfo modelInfo) {
+        ModelInfoBuilder builder = new ModelInfoBuilder(modelInfo.getName());
+        modelInfo.getParameters().forEach(builder::addParameter);
+        modelInfo.getInputs().forEach(builder::addInputDescriptor);
+        modelInfo.getOutputs().forEach(builder::addOutputDescriptor);
+        modelInfo.getPlatform().ifPresent(builder::platform);
+        modelInfo.getVersion().ifPresent(builder::version);
+        return builder;
+    }
+
+    /**
      * Set the model platform
      * 
-     * @param modelPlatform
+     * @param platform
      *            a string representing the platform used for running the model
      * @return a ModelInfoBuilder
      */
-    public ModelInfoBuilder modelPlatform(String modelPlatform) {
-        this.modelPlatform = Optional.of(modelPlatform);
+    public ModelInfoBuilder platform(String modelPlatform) {
+        this.platform = Optional.of(modelPlatform);
         return this;
     }
 
@@ -87,8 +103,20 @@ public class ModelInfoBuilder {
      *            an Object representing the value of the parameter
      * @return a ModelInfoBuilder
      */
-    public ModelInfoBuilder parameter(String name, Object parameter) {
+    public ModelInfoBuilder addParameter(String name, Object parameter) {
         this.parameters.put(name, parameter);
+        return this;
+    }
+
+    /**
+     * Remove a parameter from the model
+     * 
+     * @param name
+     *            the name of the parameter
+     * @return a ModelInfoBuilder
+     */
+    public ModelInfoBuilder removeParameter(String name) {
+        this.parameters.remove(name);
         return this;
     }
 
@@ -99,8 +127,20 @@ public class ModelInfoBuilder {
      *            a {@link TensorDescriptor} for the input tensor
      * @return a ModelInfoBuilder
      */
-    public ModelInfoBuilder inputDescriptor(TensorDescriptor inputDescriptor) {
+    public ModelInfoBuilder addInputDescriptor(TensorDescriptor inputDescriptor) {
         this.inputDescriptors.add(inputDescriptor);
+        return this;
+    }
+
+    /**
+     * Remove a descriptor from the input tensor list
+     * 
+     * @param inputDescriptor
+     *            a {@link TensorDescriptor} for the input tensor
+     * @return a ModelInfoBuilder
+     */
+    public ModelInfoBuilder removeInputDescriptor(TensorDescriptor inputDescriptor) {
+        this.inputDescriptors.remove(inputDescriptor);
         return this;
     }
 
@@ -111,8 +151,20 @@ public class ModelInfoBuilder {
      *            a {@link TensorDescriptor} for the output tensor
      * @return a ModelInfoBuilder
      */
-    public ModelInfoBuilder outputDescriptor(TensorDescriptor outputDescriptor) {
+    public ModelInfoBuilder addOutputDescriptor(TensorDescriptor outputDescriptor) {
         this.outputDescriptors.add(outputDescriptor);
+        return this;
+    }
+
+    /**
+     * Remove a descriptor from the output tensor list
+     * 
+     * @param ioututDescriptor
+     *            a {@link TensorDescriptor} for the input tensor
+     * @return a ModelInfoBuilder
+     */
+    public ModelInfoBuilder removeOutputDescriptor(TensorDescriptor outputDescriptor) {
+        this.outputDescriptors.remove(outputDescriptor);
         return this;
     }
 
@@ -128,10 +180,7 @@ public class ModelInfoBuilder {
         if (this.outputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The output descriptors list cannot be empty");
         }
-        ModelInfo modelInfo = new ModelInfo(this.modelName, this.inputDescriptors, this.outputDescriptors);
-        modelInfo.setModelPlatform(this.modelPlatform.get());
-        modelInfo.setVersion(this.version.get());
-        this.parameters.forEach(modelInfo::putParameter);
-        return modelInfo;
+        return new ModelInfo(this.modelName, this.platform.get(), this.version.get(), this.parameters,
+                this.inputDescriptors, this.outputDescriptors);
     }
 }

@@ -30,7 +30,7 @@ public class TensorDescriptor {
 
     private final String name;
     private final String type;
-    private Optional<String> format;
+    private final Optional<String> format;
     private final List<Long> shape;
     private final Map<String, Object> parameters;
 
@@ -40,7 +40,9 @@ public class TensorDescriptor {
      * @param name
      *            the name of the tensor
      * @param type
-     *            a string representing the type of data contained in the tensor
+     *            a string representing the type of data contained in the tensor.
+     *            Its value is implementation specific, so a user should refer to
+     *            the implementation documentation to figure out the allowed values.
      * @param shape
      *            the shape of the data
      */
@@ -62,7 +64,9 @@ public class TensorDescriptor {
     }
 
     /**
-     * Return the type of data contained in the tensor
+     * Return the type of data contained in the tensor.
+     * Its value is implementation specific, so a user should refer to
+     * the implementation documentation to figure out the allowed values.
      * 
      * @return a string representing the type of data contained in the tensor
      */
@@ -73,6 +77,8 @@ public class TensorDescriptor {
     /**
      * Return the format of the data.
      * It represents how the data are organised or grouped in the tensor.
+     * Its value is implementation specific, so a user should refer to
+     * the implementation documentation to figure out the allowed values.
      * 
      * @return an optional string representing the format of the data in the tensor
      */

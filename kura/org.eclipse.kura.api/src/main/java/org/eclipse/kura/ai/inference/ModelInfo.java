@@ -12,6 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
+import static java.util.Objects.nonNull;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +31,9 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ModelInfo {
 
-    private final String modelName;
-    private Optional<String> modelPlatform;
-    private Optional<String> version;
+    private final String name;
+    private final Optional<String> platform;
+    private final Optional<String> version;
     private final Map<String, Object> parameters;
     private final List<TensorDescriptor> inputDescriptors;
     private final List<TensorDescriptor> outputDescriptors;
@@ -40,17 +43,31 @@ public class ModelInfo {
      * 
      * @param modelName
      *            the name of the model
+     * @param platform
+     *            an optional string representing the model platform
+     * @param version
+     *            an optional string representing the model version
+     * @param parameters
+     *            a map containing the model parameters. It can be empty.
      * @param inputDescriptors
      *            a list of {@link TensorDescriptor} of the input tensors
      * @param outputDescriptors
      *            a list of {@link TensorDescriptor} of the output tensors
      */
-    protected ModelInfo(String modelName, List<TensorDescriptor> inputDescriptors,
-            List<TensorDescriptor> outputDescriptors) {
-        this.modelName = modelName;
-        this.modelPlatform = Optional.empty();
-        this.version = Optional.empty();
-        this.parameters = new HashMap<>();
+    protected ModelInfo(String modelName, String platform, String version, Map<String, Object> parameters,
+            List<TensorDescriptor> inputDescriptors, List<TensorDescriptor> outputDescriptors) {
+        this.name = modelName;
+        if (nonNull(platform) && !platform.isEmpty()) {
+            this.platform = Optional.of(platform);
+        } else {
+            this.platform = Optional.empty();
+        }
+        if (nonNull(platform) && !platform.isEmpty()) {
+            this.version = Optional.of(version);
+        } else {
+            this.version = Optional.empty();
+        }
+        this.parameters = parameters;
         this.inputDescriptors = inputDescriptors;
         this.outputDescriptors = outputDescriptors;
     }
@@ -60,8 +77,8 @@ public class ModelInfo {
      * 
      * @return a string representing the model name
      */
-    public String getModelName() {
-        return this.modelName;
+    public String getName() {
+        return this.name;
     }
 
     /**
@@ -69,18 +86,8 @@ public class ModelInfo {
      * 
      * @return an optional string representing the model platform
      */
-    public Optional<String> getModelPlatform() {
-        return this.modelPlatform;
-    }
-
-    /**
-     * Set the model platform
-     * 
-     * @param modelPlatform
-     *            a string representing the platform used for running this model
-     */
-    public void setModelPlatform(String modelPlatform) {
-        this.modelPlatform = Optional.of(modelPlatform);
+    public Optional<String> getPlatform() {
+        return this.platform;
     }
 
     /**
@@ -93,44 +100,14 @@ public class ModelInfo {
     }
 
     /**
-     * Set the version of the model
-     * 
-     * @param version
-     *            a string representing the version of the model
-     */
-    public void setVersion(String version) {
-        this.version = Optional.of(version);
-    }
-
-    /**
-     * Return the optional parameters assign to the model
+     * Return the optional parameters assigned to the model
      * 
      * @return a map containing the model parameters
      */
     public Map<String, Object> getParameters() {
-        return this.parameters;
-    }
-
-    /**
-     * Add a parameter to the model
-     * 
-     * @param name
-     *            the name of the parameter
-     * @param parameter
-     *            an Object representing the value of the parameter
-     */
-    public void putParameter(String name, Object parameter) {
-        this.parameters.put(name, parameter);
-    }
-
-    /**
-     * Remove the given parameter
-     * 
-     * @param name
-     *            the name of the parameter to be removed
-     */
-    public void deleteParameter(String name) {
-        this.parameters.remove(name);
+        Map<String, Object> parametersCopy = new HashMap<>();
+        this.parameters.forEach(parametersCopy::put);
+        return parametersCopy;
     }
 
     /**
@@ -139,7 +116,9 @@ public class ModelInfo {
      * @return a list of {@link TensorDescriptor} of the input tensors
      */
     public List<TensorDescriptor> getInputs() {
-        return inputDescriptors;
+        List<TensorDescriptor> inputDescriptorCopy = new ArrayList<>();
+        this.inputDescriptors.forEach(inputDescriptorCopy::add);
+        return inputDescriptorCopy;
     }
 
     /**
@@ -148,6 +127,8 @@ public class ModelInfo {
      * @return a list of {@link TensorDescriptor} of the output tensors
      */
     public List<TensorDescriptor> getOutputs() {
-        return outputDescriptors;
+        List<TensorDescriptor> outputDescriptorCopy = new ArrayList<>();
+        this.outputDescriptors.forEach(outputDescriptorCopy::add);
+        return outputDescriptorCopy;
     }
 }

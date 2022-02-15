@@ -117,7 +117,7 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
             generateAds(Tscalar.STRING, "foo", "bar", "foo");
             generateAds(Tscalar.BOOLEAN, "true");
             generateAds(Tscalar.BYTE, "10", "20", "15");
-            // generateAds(Tscalar.CHAR, "b", "l", "c");
+            generateAds(Tscalar.CHAR, "b", "l", "c");
             generateAds(Tscalar.DOUBLE, "13.5", "20.5", "16");
             generateAds(Tscalar.FLOAT, "13.5", "20.5", "16");
             generateAds(Tscalar.INTEGER, "-200000", "300000", "10");
@@ -128,7 +128,7 @@ public class ChannelDescriptorTestDriver implements Driver, ConfigurableComponen
 
             generateOptionAd(Tscalar.STRING, "foo", "bar", "baz");
             generateOptionAd(Tscalar.BYTE, "10", "20", "30");
-            // generateOptionAd(Tscalar.CHAR, "a", "b", "c");
+            generateOptionAd(Tscalar.CHAR, "a", "b", "c");
             generateOptionAd(Tscalar.DOUBLE, "-10.21", "20.123123", "30.23123");
             generateOptionAd(Tscalar.FLOAT, "10.4", "-12.4", "0.5");
             generateOptionAd(Tscalar.INTEGER, "-200000", "300000", "10");

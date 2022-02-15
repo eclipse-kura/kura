@@ -28,25 +28,13 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ModelInfoBuilder {
 
-    /** The name of the model */
     private final String modelName;
-    /** An optional string representing the platform used for this model */
     private Optional<String> modelPlatform;
-    /** An optional string representing the version of the model */
     private Optional<String> version;
-    /** A set of key pairs describing the model parameters */
     private final Map<String, Object> parameters;
-    /** The list of {@link TensorDescriptor} of the input tensors */
     private final List<TensorDescriptor> inputDescriptors;
-    /** The list of {@link TensorDescriptor} of the output tensors */
     private final List<TensorDescriptor> outputDescriptors;
 
-    /**
-     * Instantiates a builder for a {@link ModelInfo}
-     * 
-     * @param modelName
-     *            the name of the model
-     */
     private ModelInfoBuilder(String modelName) {
         this.modelName = modelName;
         this.modelPlatform = Optional.empty();
@@ -56,35 +44,83 @@ public class ModelInfoBuilder {
         this.outputDescriptors = new ArrayList<>();
     }
 
+    /**
+     * Instantiates a builder for a {@link ModelInfo}
+     * 
+     * @param modelName
+     *            the name of the model
+     */
     public static ModelInfoBuilder builder(String modelName) {
         return new ModelInfoBuilder(modelName);
     }
 
+    /**
+     * Set the model platform
+     * 
+     * @param modelPlatform
+     *            a string representing the platform used for running the model
+     * @return a ModelInfoBuilder
+     */
     public ModelInfoBuilder modelPlatform(String modelPlatform) {
         this.modelPlatform = Optional.of(modelPlatform);
         return this;
     }
 
+    /**
+     * Set the version of the model
+     * 
+     * @param version
+     *            a string representing the version of the model
+     * @return a ModelInfoBuilder
+     */
     public ModelInfoBuilder version(String version) {
         this.version = Optional.of(version);
         return this;
     }
 
+    /**
+     * Add a parameter to the model
+     * 
+     * @param name
+     *            the name of the parameter
+     * @param parameter
+     *            an Object representing the value of the parameter
+     * @return a ModelInfoBuilder
+     */
     public ModelInfoBuilder parameter(String name, Object parameter) {
         this.parameters.put(name, parameter);
         return this;
     }
 
+    /**
+     * Add a descriptor of an input tensor
+     * 
+     * @param inputDescriptor
+     *            a {@link TensorDescriptor} for the input tensor
+     * @return a ModelInfoBuilder
+     */
     public ModelInfoBuilder inputDescriptor(TensorDescriptor inputDescriptor) {
         this.inputDescriptors.add(inputDescriptor);
         return this;
     }
 
+    /**
+     * Add a descriptor of an output tensor
+     * 
+     * @param outputDescriptor
+     *            a {@link TensorDescriptor} for the output tensor
+     * @return a ModelInfoBuilder
+     */
     public ModelInfoBuilder outputDescriptor(TensorDescriptor outputDescriptor) {
         this.outputDescriptors.add(outputDescriptor);
         return this;
     }
 
+    /**
+     * Create an instance of ModelInfo
+     * 
+     * @return a {@ModelInfo}
+     */
     public ModelInfo build() {
         if (this.inputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The input descriptors list cannot be empty");

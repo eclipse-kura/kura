@@ -28,17 +28,11 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ModelInfo {
 
-    /** The name of the model */
     private final String modelName;
-    /** An optional string representing the platform used for this model */
     private Optional<String> modelPlatform;
-    /** An optional string representing the version of the model */
     private Optional<String> version;
-    /** A set of key pairs describing the model parameters */
     private final Map<String, Object> parameters;
-    /** The list of {@link TensorDescriptor} of the input tensors */
     private final List<TensorDescriptor> inputDescriptors;
-    /** The list of {@link TensorDescriptor} of the output tensors */
     private final List<TensorDescriptor> outputDescriptors;
 
     /**
@@ -61,42 +55,98 @@ public class ModelInfo {
         this.outputDescriptors = outputDescriptors;
     }
 
+    /**
+     * Return the name of the model
+     * 
+     * @return a string representing the model name
+     */
     public String getModelName() {
         return this.modelName;
     }
 
+    /**
+     * Return the platform used for running this model
+     * 
+     * @return an optional string representing the model platform
+     */
     public Optional<String> getModelPlatform() {
         return this.modelPlatform;
     }
 
+    /**
+     * Set the model platform
+     * 
+     * @param modelPlatform
+     *            a string representing the platform used for running this model
+     */
     public void setModelPlatform(String modelPlatform) {
         this.modelPlatform = Optional.of(modelPlatform);
     }
 
+    /**
+     * Return the version of the model
+     * 
+     * @return an optional string representing the version of the model
+     */
     public Optional<String> getVersion() {
         return this.version;
     }
 
+    /**
+     * Set the version of the model
+     * 
+     * @param version
+     *            a string representing the version of the model
+     */
     public void setVersion(String version) {
         this.version = Optional.of(version);
     }
 
+    /**
+     * Return the optional parameters assign to the model
+     * 
+     * @return a map containing the model parameters
+     */
     public Map<String, Object> getParameters() {
         return this.parameters;
     }
 
+    /**
+     * Add a parameter to the model
+     * 
+     * @param name
+     *            the name of the parameter
+     * @param parameter
+     *            an Object representing the value of the parameter
+     */
     public void putParameter(String name, Object parameter) {
         this.parameters.put(name, parameter);
     }
 
+    /**
+     * Remove the given parameter
+     * 
+     * @param name
+     *            the name of the parameter to be removed
+     */
     public void deleteParameter(String name) {
         this.parameters.remove(name);
     }
 
+    /**
+     * Return the descriptors of the input tensors
+     * 
+     * @return a list of {@link TensorDescriptor} of the input tensors
+     */
     public List<TensorDescriptor> getInputs() {
         return inputDescriptors;
     }
 
+    /**
+     * Return the descriptors of the output tensors
+     * 
+     * @return a list of {@link TensorDescriptor} of the output tensors
+     */
     public List<TensorDescriptor> getOutputs() {
         return outputDescriptors;
     }

@@ -28,15 +28,10 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class TensorDescriptor {
 
-    /** The name of the tensor */
     private final String name;
-    /** A string representing the type of data contained in the tensor */
     private final String type;
-    /** An optional string representing the format of the data */
     private Optional<String> format;
-    /** The shape of the data */
     private final List<Long> shape;
-    /** A set of key pairs describing the tensor parameters */
     private final Map<String, Object> parameters;
 
     /**
@@ -57,34 +52,81 @@ public class TensorDescriptor {
         this.parameters = new HashMap<>();
     }
 
+    /**
+     * Return the name of the tensor
+     * 
+     * @return a string representing the tensor name
+     */
     public String getName() {
         return this.name;
     }
 
+    /**
+     * Return the type of data contained in the tensor
+     * 
+     * @return a string representing the type of data contained in the tensor
+     */
     public String getType() {
         return this.type;
     }
 
+    /**
+     * Return the format of the data.
+     * It represents how the data are organised or grouped in the tensor.
+     * 
+     * @return an optional string representing the format of the data in the tensor
+     */
     public Optional<String> getFormat() {
         return this.format;
     }
 
+    /**
+     * Set the format of the data.
+     * It represents how the data are organised or grouped in the tensor.
+     * 
+     * @param format
+     *            a string representing the format of the data in the tensor
+     */
     public void setFormat(String format) {
         this.format = Optional.of(format);
     }
 
+    /**
+     * Return the shape of the data as the size of a multi-dimensional matrix.
+     *
+     * @return a list of longs representing the shape of the data
+     */
     public List<Long> getShape() {
         return this.shape;
     }
 
+    /**
+     * Return the optional parameters assign to the tensor
+     * 
+     * @return a map containing the tensor parameters
+     */
     public Map<String, Object> getParameters() {
         return this.parameters;
     }
 
+    /**
+     * Add a parameter to the tensor
+     * 
+     * @param name
+     *            the name of the parameter
+     * @param parameter
+     *            an Object representing the value of the parameter
+     */
     public void putParameter(String name, Object parameter) {
         this.parameters.put(name, parameter);
     }
 
+    /**
+     * Remove the given parameter
+     * 
+     * @param name
+     *            the name of the parameter to be removed
+     */
     public void deleteParameter(String name) {
         this.parameters.remove(name);
     }

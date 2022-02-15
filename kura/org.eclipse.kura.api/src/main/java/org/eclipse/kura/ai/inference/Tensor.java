@@ -26,11 +26,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class Tensor {
 
-    /** the {@link TensorDescriptor} of this tensor */
     private final TensorDescriptor descriptor;
-    /** the type of tensor data as Java class */
     private final Class<?> type;
-    /** the list of data of this tensor */
     private final List<?> data;
 
     /**
@@ -49,10 +46,22 @@ public class Tensor {
         this.data = data;
     }
 
+    /**
+     * Return the descriptor of the tensor
+     * 
+     * @return the {@link TensorDescriptor} of the tensor
+     */
     public TensorDescriptor getDescriptor() {
         return this.descriptor;
     }
 
+    /**
+     * Return the data contained in the tensor
+     * 
+     * @param type
+     *            the type of the data as Java class. The type argument must match the type of the tensor.
+     * @return a list of data of the given type
+     */
     @SuppressWarnings("unchecked")
     public <T> Optional<List<T>> getData(Class<T> type) {
         if (this.type == type) {
@@ -62,6 +71,11 @@ public class Tensor {
         }
     }
 
+    /**
+     * Return the type of the tensor
+     * 
+     * @return the {@link Class} of the data contained in the tensor
+     */
     public Class<?> getType() {
         return this.type;
     }

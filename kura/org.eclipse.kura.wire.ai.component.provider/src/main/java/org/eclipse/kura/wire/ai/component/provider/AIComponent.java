@@ -18,9 +18,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.type.DataType;
+import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -91,25 +93,48 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
         logger.info("AIComponent: received envelope.");
 
-        Optional<String> pre = this.options.getPreprocessorModelName();
-        String inf = this.options.getInferenceModelName();
-        Optional<String> post = this.options.getPostprocessorModelName();
+        List<WireRecord> records = wireEnvelope.getRecords();
 
-        if (pre.isPresent()) {
-            logger.info("AIComponent: preprocessing is {}", pre.get());
-        } else {
-            logger.info("AIComponent: preprocessing is not specified");
-        }
+        for (WireRecord record : records) {
+            Map<String, TypedValue<?>> properties = record.getProperties();
 
-        logger.info("AIComponent: inference is {}", inf);
+            for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
+                String channelName = entry.getKey();
+                TypedValue<?> channelValue = entry.getValue();
 
-        if (post.isPresent()) {
-            logger.info("AIComponent: postprocessing is {}", post.get());
-        } else {
-            logger.info("AIComponent: postprocessing is not specified");
+                DataType valueType = channelValue.getType();
+                switch (valueType) {
+                case BOOLEAN:
+                    // TODO
+                    break;
+                case BYTE_ARRAY:
+                    // TODO
+                    break;
+                case DOUBLE:
+                    // TODO
+                    break;
+                case FLOAT:
+                    // TODO
+                    break;
+                case INTEGER:
+                    // TODO
+                    break;
+                case LONG:
+                    // TODO
+                    break;
+                case STRING:
+                    // TODO
+                    break;
+                default:
+                    break;
+                }
+
+            }
+
         }
 
         logger.info("AIComponent: emitting an empty result.");
+
         List<WireRecord> result = Collections.unmodifiableList(new ArrayList<WireRecord>());
         this.wireSupport.emit(result);
     }

@@ -60,6 +60,16 @@ public class LinuxNetworkUtilTest {
         thenNetworkInterfaceLinkIsUP();
     }
 
+    @Test
+    public void setNetworkInterfaceLinkDown() {
+        givenLinuxNetworkUtil();
+        givenLinkStatus("down");
+
+        whenDedicatedInterfaceName("testInterface_ap");
+
+        thenNetworkInterfaceLinkIsDown();
+    }
+
     private void givenLinuxNetworkUtil() {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         this.commandExecutorServiceStub = new CommandExecutorServiceStub(status);
@@ -109,6 +119,16 @@ public class LinuxNetworkUtilTest {
     private void thenNetworkInterfaceLinkIsUP() {
         try {
             this.linuxNetworkUtil.setNetworkInterfaceLinkUp(this.dedicatedInterfaceName);
+            assertArrayEquals(LinuxNetworkUtil.formIpLinkSetStatus(this.dedicatedInterfaceName, this.linkStatus),
+                    this.commandExecutorServiceStub.getLastCommand());
+        } catch (KuraException e) {
+            fail();
+        }
+    }
+
+    private void thenNetworkInterfaceLinkIsDown() {
+        try {
+            this.linuxNetworkUtil.setNetworkInterfaceLinkDown(this.dedicatedInterfaceName);
             assertArrayEquals(LinuxNetworkUtil.formIpLinkSetStatus(this.dedicatedInterfaceName, this.linkStatus),
                     this.commandExecutorServiceStub.getLastCommand());
         } catch (KuraException e) {

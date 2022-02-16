@@ -1157,6 +1157,18 @@ public class LinuxNetworkUtil {
         }
     }
 
+    public void setNetworkInterfaceLinkDown(String ifaceName) throws KuraException {
+        if (Character.isDigit(ifaceName.charAt(0))) {
+            return;
+        }
+
+        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "down"));
+
+        if (!status.getExitStatus().isSuccessful()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);
+        }
+    }
+
     private CommandStatus executeCommand(String[] commandString) {
         Command command = new Command(commandString);
         command.setTimeout(60);

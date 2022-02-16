@@ -1243,6 +1243,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
             if (wifiMode == WifiMode.MASTER) {
                 stopTemporaryWpaSupplicant(ifaceName);
+                stopDedicatedApInterface(ifaceName);
             }
         } catch (Throwable t) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, t, "scan operation has failed");
@@ -1275,6 +1276,10 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
 
         return ifaceName;
+    }
+
+    private void stopDedicatedApInterface(String ifaceName) throws KuraException {
+        this.linuxNetworkUtil.setNetworkInterfaceLinkDown(ifaceName);
     }
 
     @Override

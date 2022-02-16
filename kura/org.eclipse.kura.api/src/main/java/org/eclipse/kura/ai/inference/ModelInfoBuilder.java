@@ -48,7 +48,7 @@ public class ModelInfoBuilder {
     }
 
     /**
-     * Instantiates a builder for a {@link ModelInfo} and initializes it from the supplied argument.
+     * Instantiates a builder for a {@link ModelInfo} and initialises it from the supplied argument.
      * 
      * @param modelInfo
      * @return a {@link ModelInfoBuilder}
@@ -71,8 +71,9 @@ public class ModelInfoBuilder {
      * @return a ModelInfoBuilder
      */
     public ModelInfoBuilder platform(String platform) {
-        if (nonNull(platform) && !platform.isEmpty())
+        if (nonNull(platform) && !platform.isEmpty()) {
             this.platform = Optional.of(platform);
+        }
         return this;
     }
 

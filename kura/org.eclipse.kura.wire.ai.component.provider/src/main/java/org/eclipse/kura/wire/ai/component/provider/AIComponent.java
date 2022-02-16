@@ -19,7 +19,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
+import org.eclipse.kura.KuraIOException;
+import org.eclipse.kura.ai.inference.InferenceEngineModelManagerService;
+import org.eclipse.kura.ai.inference.InferenceEngineService;
+import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -45,6 +50,12 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     private WireSupport wireSupport;
 
     private AIComponentOptions options;
+    private InferenceEngineService inferenceEngineService;
+    private InferenceEngineModelManagerService inferenceEngineModelManagerService;
+
+    private Optional<ModelInfo> preprocModelInfo;
+    private Optional<ModelInfo> inferModelInfo;
+    private Optional<ModelInfo> postprocModelInfo;
 
     /*
      * Load inference engine
@@ -59,6 +70,32 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     public void unbindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == wireHelperService) {
             this.wireHelperService = null;
+        }
+    }
+
+    public void bindInferenceEngineService(final InferenceEngineService inferenceEngineService) {
+        if (this.inferenceEngineService == null) {
+            this.inferenceEngineService = inferenceEngineService;
+        }
+    }
+
+    public void unbindInferenceEngineService(final InferenceEngineService inferenceEngineService) {
+        if (this.inferenceEngineService == inferenceEngineService) {
+            this.inferenceEngineService = inferenceEngineService;
+        }
+    }
+
+    public void bindInferenceEngineModelManagerService(
+            final InferenceEngineModelManagerService inferenceEngineModelManagerService) {
+        if (this.inferenceEngineModelManagerService == null) {
+            this.inferenceEngineModelManagerService = inferenceEngineModelManagerService;
+        }
+    }
+
+    public void unbindInferenceEngineModelManagerService(
+            final InferenceEngineModelManagerService inferenceEngineModelManagerService) {
+        if (this.inferenceEngineModelManagerService == inferenceEngineModelManagerService) {
+            this.inferenceEngineModelManagerService = inferenceEngineModelManagerService;
         }
     }
 
@@ -84,7 +121,36 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
         this.options = new AIComponentOptions(properties);
 
+        String modelName = "";
+        try {
+            if (options.getPreprocessorModelName().isPresent()) {
+                modelName = options.getPreprocessorModelName().get();
+                this.preprocModelInfo = retrieveModelInfo(modelName);
+            }
+
+            modelName = options.getInferenceModelName();
+            this.inferModelInfo = retrieveModelInfo(modelName);
+
+            if (options.getPostprocessorModelName().isPresent()) {
+                modelName = options.getPostprocessorModelName().get();
+                this.postprocModelInfo = retrieveModelInfo(modelName);
+            }
+
+        } catch (KuraIOException e) {
+            logger.error("Error opening model: " + modelName, e);
+            this.deactivate();
+        }
+
         logger.info("Updating AIComponent... Done");
+    }
+
+    private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraIOException {
+        Optional<ModelInfo> info = this.inferenceEngineModelManagerService.getModelInfo(modelName);
+        if (!info.isPresent()) {
+            throw new KuraIOException("Unable to retrieve model info associated to " + modelName);
+        }
+
+        return info;
     }
 
     @Override

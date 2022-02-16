@@ -39,4 +39,16 @@
    	          name="WireHelperService" 
    	          policy="static" 
    	          unbind="unbindWireHelperService"/>
+   <reference bind="bindInferenceEngineService" 
+   	          cardinality="0..1" 
+   	          interface="org.eclipse.kura.ai.inference.InferenceEngineService" 
+   	          name="InferenceEngineService" 
+   	          policy="static" 
+   	          unbind="unbindInferenceEngineService"/>
+   <reference bind="bindInferenceEngineModelManagerService" 
+   	          cardinality="0..1" 
+   	          interface="org.eclipse.kura.ai.inference.InferenceEngineModelManagerService" 
+   	          name="InferenceEngineModelManagerService" 
+   	          policy="static" 
+   	          unbind="unbindInferenceEngineModelManagerService"/>
 </scr:component>

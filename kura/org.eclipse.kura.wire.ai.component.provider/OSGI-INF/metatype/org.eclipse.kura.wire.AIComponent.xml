@@ -18,12 +18,12 @@
          name="AI" 
          description="A wire component that allows to interact with Inference Engines to perform machine learning.">
          
-        <AD id="InferenceEngine.target"
-            name="InferenceEngine Target Filter"
+        <AD id="org.eclipse.kura.ai.inference.InferenceEngineService.target"
+            name="InferenceEngineService Target Filter"
             type="String"
             cardinality="0"
             required="true"
-            default="(kura.service.pid=org.eclipse.kura.INFERENCEAI)"
+            default="(kura.service.pid=changeme)"
             description="Specifies, as an OSGi target filter, the pid of the of the AI Inference Engine instance to be used.">
         </AD>
         

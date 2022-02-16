@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
-import static java.util.Objects.nonNull;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,19 +52,12 @@ public class ModelInfo {
      * @param outputDescriptors
      *            a list of {@link TensorDescriptor} of the output tensors
      */
-    protected ModelInfo(String modelName, String platform, String version, Map<String, Object> parameters,
-            List<TensorDescriptor> inputDescriptors, List<TensorDescriptor> outputDescriptors) {
+    protected ModelInfo(String modelName, Optional<String> platform, Optional<String> version,
+            Map<String, Object> parameters, List<TensorDescriptor> inputDescriptors,
+            List<TensorDescriptor> outputDescriptors) {
         this.name = modelName;
-        if (nonNull(platform) && !platform.isEmpty()) {
-            this.platform = Optional.of(platform);
-        } else {
-            this.platform = Optional.empty();
-        }
-        if (nonNull(platform) && !platform.isEmpty()) {
-            this.version = Optional.of(version);
-        } else {
-            this.version = Optional.empty();
-        }
+        this.platform = platform;
+        this.version = version;
         this.parameters = parameters;
         this.inputDescriptors = inputDescriptors;
         this.outputDescriptors = outputDescriptors;

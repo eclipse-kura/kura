@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import java.util.ArrayList;
@@ -79,8 +80,9 @@ public class ModelInfoBuilder {
      *            a string representing the platform used for running the model
      * @return a ModelInfoBuilder
      */
-    public ModelInfoBuilder platform(String modelPlatform) {
-        this.platform = Optional.of(modelPlatform);
+    public ModelInfoBuilder platform(String platform) {
+        if (nonNull(platform) && !platform.isEmpty())
+            this.platform = Optional.of(platform);
         return this;
     }
 
@@ -92,7 +94,9 @@ public class ModelInfoBuilder {
      * @return a ModelInfoBuilder
      */
     public ModelInfoBuilder version(String version) {
-        this.version = Optional.of(version);
+        if (nonNull(version) && !version.isEmpty()) {
+            this.version = Optional.of(version);
+        }
         return this;
     }
 
@@ -176,7 +180,7 @@ public class ModelInfoBuilder {
      * @return a {@ModelInfo}
      */
     public ModelInfo build() {
-        if (nonNull(this.name) && !this.name.isEmpty()) {
+        if (isNull(this.name) || this.name.isEmpty()) {
             throw new IllegalArgumentException("The name of the model cannot be empty or null");
         }
         if (this.inputDescriptors.isEmpty()) {
@@ -185,7 +189,7 @@ public class ModelInfoBuilder {
         if (this.outputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The output descriptors list cannot be empty");
         }
-        return new ModelInfo(this.name, this.platform.get(), this.version.get(), this.parameters, this.inputDescriptors,
+        return new ModelInfo(this.name, this.platform, this.version, this.parameters, this.inputDescriptors,
                 this.outputDescriptors);
     }
 }

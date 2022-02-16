@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import java.util.HashMap;
@@ -70,7 +71,9 @@ public class TensorDescriptorBuilder {
      * @return a TensorDescriptorBuilder
      */
     public TensorDescriptorBuilder format(String format) {
-        this.format = Optional.of(format);
+        if (nonNull(format) && !format.isEmpty()) {
+            this.format = Optional.of(format);
+        }
         return this;
     }
 
@@ -106,15 +109,15 @@ public class TensorDescriptorBuilder {
      * @return a {TensorDescriptor}
      */
     public TensorDescriptor build() {
-        if (nonNull(this.name) && !this.name.isEmpty()) {
+        if (isNull(this.name) || this.name.isEmpty()) {
             throw new IllegalArgumentException("The name of the tensor cannot be empty or null");
         }
-        if (nonNull(this.type) && !this.type.isEmpty()) {
+        if (isNull(this.type) || this.type.isEmpty()) {
             throw new IllegalArgumentException("The type of the tensor cannot be empty or null");
         }
-        if (nonNull(this.shape) && !this.shape.isEmpty()) {
+        if (isNull(this.shape) || this.shape.isEmpty()) {
             throw new IllegalArgumentException("The shape of the tensor cannot be empty or null");
         }
-        return new TensorDescriptor(this.name, this.type, this.format.get(), this.shape, this.parameters);
+        return new TensorDescriptor(this.name, this.type, this.format, this.shape, this.parameters);
     }
 }

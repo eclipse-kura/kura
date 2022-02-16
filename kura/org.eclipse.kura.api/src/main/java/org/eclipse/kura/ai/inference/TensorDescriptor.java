@@ -12,8 +12,6 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
-import static java.util.Objects.nonNull;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,14 +47,11 @@ public class TensorDescriptor {
      * @param shape
      *            the shape of the data
      */
-    public TensorDescriptor(String name, String type, String format, List<Long> shape, Map<String, Object> parameters) {
+    public TensorDescriptor(String name, String type, Optional<String> format, List<Long> shape,
+            Map<String, Object> parameters) {
         this.name = name;
         this.type = type;
-        if (nonNull(format) && !format.isEmpty()) {
-            this.format = Optional.of(format);
-        } else {
-            this.format = Optional.empty();
-        }
+        this.format = format;
         this.shape = shape;
         this.parameters = parameters;
     }

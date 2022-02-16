@@ -16,6 +16,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.ai.inference.InferenceEngineModelManagerService;
 import org.eclipse.kura.ai.inference.InferenceEngineService;
 import org.eclipse.kura.ai.inference.ModelInfo;
+import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -53,13 +55,9 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     private InferenceEngineService inferenceEngineService;
     private InferenceEngineModelManagerService inferenceEngineModelManagerService;
 
-    private Optional<ModelInfo> preprocModelInfo;
-    private Optional<ModelInfo> inferModelInfo;
-    private Optional<ModelInfo> postprocModelInfo;
-
-    /*
-     * Load inference engine
-     */
+    private Optional<ModelInfo> infoPre;
+    private Optional<ModelInfo> infoInfer;
+    private Optional<ModelInfo> infoPost;
 
     public void bindWireHelperService(final WireHelperService wireHelperService) {
         if (this.wireHelperService == null) {
@@ -122,14 +120,14 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         this.options = new AIComponentOptions(properties);
 
         try {
-            if (options.getPreprocessorModelName().isPresent()) {
-                this.preprocModelInfo = retrieveModelInfo(options.getPreprocessorModelName().get());
+            if (this.options.getPreprocessorModelName().isPresent()) {
+                this.infoPre = retrieveModelInfo(this.options.getPreprocessorModelName().get());
             }
 
-            this.inferModelInfo = retrieveModelInfo(options.getInferenceModelName());
+            this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
 
-            if (options.getPostprocessorModelName().isPresent()) {
-                this.postprocModelInfo = retrieveModelInfo(options.getPostprocessorModelName().get());
+            if (this.options.getPostprocessorModelName().isPresent()) {
+                this.infoPost = retrieveModelInfo(this.options.getPostprocessorModelName().get());
             }
 
         } catch (KuraIOException e) {
@@ -155,7 +153,65 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
         logger.info("AIComponent: received envelope.");
 
-        List<WireRecord> records = wireEnvelope.getRecords();
+        List<Tensor> inputs;
+
+        if (this.infoPre.isPresent()) {
+            inputs = getTensors(this.infoPre.get(), wireEnvelope.getRecords());
+        } else {
+            inputs = getTensors(this.infoPre.get(), wireEnvelope.getRecords());
+        }
+
+        /*
+         * List<WireRecord> records = wireEnvelope.getRecords();
+         * 
+         * for (WireRecord record : records) {
+         * Map<String, TypedValue<?>> properties = record.getProperties();
+         * 
+         * for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
+         * String channelName = entry.getKey();
+         * TypedValue<?> channelValue = entry.getValue();
+         * 
+         * DataType valueType = channelValue.getType();
+         * switch (valueType) {
+         * case BOOLEAN:
+         * // TODO
+         * break;
+         * case BYTE_ARRAY:
+         * // TODO
+         * break;
+         * case DOUBLE:
+         * // TODO
+         * break;
+         * case FLOAT:
+         * // TODO
+         * break;
+         * case INTEGER:
+         * // TODO
+         * break;
+         * case LONG:
+         * // TODO
+         * break;
+         * case STRING:
+         * // TODO
+         * break;
+         * default:
+         * break;
+         * }
+         * 
+         * }
+         * 
+         * }
+         */
+
+        logger.info("AIComponent: emitting an empty result.");
+
+        List<WireRecord> result = Collections.unmodifiableList(new ArrayList<WireRecord>());
+        this.wireSupport.emit(result);
+    }
+
+    private List<Tensor> getTensors(ModelInfo info, List<WireRecord> records) {
+
+        List<Tensor> result = new LinkedList<>();
 
         for (WireRecord record : records) {
             Map<String, TypedValue<?>> properties = record.getProperties();
@@ -195,10 +251,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
         }
 
-        logger.info("AIComponent: emitting an empty result.");
-
-        List<WireRecord> result = Collections.unmodifiableList(new ArrayList<WireRecord>());
-        this.wireSupport.emit(result);
+        return null;
     }
 
     @Override

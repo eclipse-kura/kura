@@ -62,6 +62,7 @@ import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.monitor.InterfaceStateBuilder;
 import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
+import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriterFactory;
 import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
@@ -89,8 +90,6 @@ import org.slf4j.LoggerFactory;
 
 public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandler {
 
-    private static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
-
     private static final Logger logger = LoggerFactory.getLogger(NetworkAdminServiceImpl.class);
 
     private ConfigurationService configurationService;
@@ -114,6 +113,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     private LinuxNetworkUtil linuxNetworkUtil;
     private WpaSupplicantManager wpaSupplicantManager;
     private HostapdManager hostapdManager;
+    private WpaSupplicantConfigWriterFactory wpaSupplicantConfigWriterFactory;
+
+    public NetworkAdminServiceImpl() {
+        this.wpaSupplicantConfigWriterFactory = WpaSupplicantConfigWriterFactory.getDefault();
+    }
+
+    public NetworkAdminServiceImpl(WpaSupplicantConfigWriterFactory wpaSupplicantConfigWriterFactory) {
+        this.wpaSupplicantConfigWriterFactory = wpaSupplicantConfigWriterFactory;
+    }
 
     // ----------------------------------------------------------------
     //
@@ -1244,7 +1252,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     private String switchToDedicatedApInterface(String ifaceName) throws KuraException {
-        String dedicatedApInterface = ifaceName + ACCESS_POINT_INTERFACE_SUFFIX;
+        String dedicatedApInterface = ifaceName + LinuxNetworkUtil.ACCESS_POINT_INTERFACE_SUFFIX;
         try {
             LinuxIfconfig dedicatedApInterfaceConfig = this.linuxNetworkUtil
                     .getInterfaceConfiguration(dedicatedApInterface);
@@ -1289,7 +1297,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         // hack to synchronize with WifiClientMonitorService
         synchronized (this.wifiClientMonitorServiceLock) {
             boolean ret = false;
-            WpaSupplicantConfigWriter wpaSupplicantConfigWriter = new WpaSupplicantConfigWriter();
+            WpaSupplicantConfigWriter wpaSupplicantConfigWriter = this.wpaSupplicantConfigWriterFactory.getInstance();
             wpaSupplicantConfigWriter.setExecutorService(executorService);
             try {
                 // Kill dhcp, hostapd and wpa_supplicant if running
@@ -1455,7 +1463,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private void startTemporaryWpaSupplicant(String ifaceName) throws KuraException {
         reloadKernelModule(ifaceName, WifiMode.INFRA);
-        WpaSupplicantConfigWriter wpaSupplicantConfigWriter = new WpaSupplicantConfigWriter();
+        WpaSupplicantConfigWriter wpaSupplicantConfigWriter = this.wpaSupplicantConfigWriterFactory.getInstance();
         wpaSupplicantConfigWriter.setExecutorService(this.executorService);
         wpaSupplicantConfigWriter.generateTempWpaSupplicantConf();
 

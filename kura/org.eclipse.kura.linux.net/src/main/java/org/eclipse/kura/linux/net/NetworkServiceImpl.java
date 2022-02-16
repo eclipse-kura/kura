@@ -102,7 +102,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     public static final String PPP_PEERS_DIR = "/etc/ppp/peers/";
     private static final String PPP = "ppp";
     private static final Integer MAX_PPP_NUMBER = 100;
-    private static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
 
     private static final String[] EVENT_TOPICS = new String[] { UsbDeviceAddedEvent.USB_EVENT_DEVICE_ADDED_TOPIC,
             UsbDeviceRemovedEvent.USB_EVENT_DEVICE_REMOVED_TOPIC };
@@ -322,7 +321,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
         }
 
         // remove virtual interface for Access Point
-        interfaceNames = interfaceNames.stream().filter(name -> !name.contains(ACCESS_POINT_INTERFACE_SUFFIX))
+        interfaceNames = interfaceNames.stream()
+                .filter(name -> !name.endsWith(LinuxNetworkUtil.ACCESS_POINT_INTERFACE_SUFFIX))
                 .collect(Collectors.toList());
 
         return interfaceNames;

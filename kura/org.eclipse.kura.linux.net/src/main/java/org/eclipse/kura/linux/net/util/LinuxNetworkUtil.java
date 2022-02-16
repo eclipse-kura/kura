@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
 
+    public static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
+
     private static final String ETHTOOL_COMMAND = "ethtool";
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);

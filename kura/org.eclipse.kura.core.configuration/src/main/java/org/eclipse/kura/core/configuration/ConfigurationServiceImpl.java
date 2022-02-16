@@ -1220,10 +1220,10 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
                                                         try {
                                                             logger.debug(
-                                                                    "pid: {}, property name: {}, type: {}, value: {}",
-                                                                    new Object[] { pid, adId, propType, value });
-                                                            Scalar.fromValue(propType);
-                                                            if (!propType.equals(adType)) {
+                                                                    "pid: {}, property name: {}, type: {}, value: {}", pid, adId, propType, value);
+                                                            Scalar propertyScalar = Scalar.fromValue(propType);
+                                                            Scalar adScalar = Scalar.fromValue(adType);
+                                                            if (propertyScalar != adScalar) {
                                                                 logger.error(
                                                                         "Type: {} for property named: {} does not match the AD type: {} for returned Configuration of SelfConfiguringComponent with pid: {}",
                                                                         new Object[] { propType, adId, adType, pid });

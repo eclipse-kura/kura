@@ -207,6 +207,33 @@ public class Snippets {
             + "                    \"isRequired\": true\n" //
             + "                },\n" //
             + "                {\n" //
+            + "                    \"name\": \"CHAR property\",\n" //
+            + "                    \"description\": \"A CHAR property\",\n" //
+            + "                    \"id\": \"CHAR.prop\",\n" //
+            + "                    \"type\": \"CHAR\",\n" //
+            + "                    \"cardinality\": 0,\n" //
+            + "                    \"defaultValue\": \"c\",\n" //
+            + "                    \"isRequired\": true\n" //
+            + "                },\n" //
+            + "                {\n" //
+            + "                    \"name\": \"CHAR property not required\",\n" //
+            + "                    \"description\": \"A CHAR property not required\",\n" //
+            + "                    \"id\": \"CHAR.propnot.required\",\n" //
+            + "                    \"type\": \"CHAR\",\n" //
+            + "                    \"cardinality\": 0,\n" //
+            + "                    \"isRequired\": true\n" //
+            + "                },\n" //
+            + "                {\n" //
+            + "                    \"name\": \"CHAR property with min and max\",\n" //
+            + "                    \"description\": \"A CHAR property with min : b and max : l\",\n" //
+            + "                    \"id\": \"CHAR.prop.min.max\",\n" //
+            + "                    \"type\": \"CHAR\",\n" //
+            + "                    \"cardinality\": 0,\n" //
+            + "                    \"max\": \"l\",\n" //
+            + "                    \"defaultValue\": \"c\",\n" //
+            + "                    \"isRequired\": true\n" //
+            + "                },\n" //
+            + "                {\n" //
             + "                    \"name\": \"DOUBLE property\",\n" //
             + "                    \"description\": \"A DOUBLE property\",\n" //
             + "                    \"id\": \"DOUBLE.prop\",\n" //
@@ -385,6 +412,29 @@ public class Snippets {
             + "                    \"type\": \"BYTE\",\n" //
             + "                    \"cardinality\": 0,\n" //
             + "                    \"defaultValue\": \"10\",\n" //
+            + "                    \"isRequired\": true\n" //
+            + "                },\n" //     
+            + "                {\n" //
+            + "                    \"option\": [\n" //
+            + "                        {\n" //
+            + "                            \"label\": \"Choice 0, value : a\",\n" //
+            + "                            \"value\": \"a\"\n" //
+            + "                        },\n" //
+            + "                        {\n" //
+            + "                            \"label\": \"Choice 1, value : b\",\n" //
+            + "                            \"value\": \"b\"\n" //
+            + "                        },\n" //
+            + "                        {\n" //
+            + "                            \"label\": \"Choice 2, value : c\",\n" //
+            + "                            \"value\": \"c\"\n" //
+            + "                        }\n" //
+            + "                    ],\n" //
+            + "                    \"name\": \"CHAR property with options\",\n" //
+            + "                    \"description\": \"A CHAR property wit options\",\n" //
+            + "                    \"id\": \"CHAR.options\",\n" //
+            + "                    \"type\": \"CHAR\",\n" //
+            + "                    \"cardinality\": 0,\n" //
+            + "                    \"defaultValue\": \"a\",\n" //
             + "                    \"isRequired\": true\n" //
             + "                },\n" //
             + "                {\n" //

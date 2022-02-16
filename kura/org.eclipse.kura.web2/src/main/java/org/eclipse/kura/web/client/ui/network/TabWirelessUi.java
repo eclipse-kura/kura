@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -406,6 +406,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
         if (config instanceof GwtWifiNetInterfaceConfig) {
             this.selectedNetIfConfig = (GwtWifiNetInterfaceConfig) config;
+            logger.severe("config: " + selectedNetIfConfig);
             this.activeConfig = this.selectedNetIfConfig.getActiveWifiConfig();
             logger.severe("active config: " + this.activeConfig);
             logger.severe("wireless mode: " + this.activeConfig.getWirelessMode());
@@ -603,7 +604,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 }
                 this.radio.setEnabled(false);
                 this.groupVerify.setVisible(false);
-                this.channelList.setEnabled(false);
+                this.channelList.setEnabled(true);
 
             } else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 // access point mode
@@ -1232,7 +1233,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
             @Override
             public String getValue(GwtWifiHotspotEntry object) {
-                return object.getSSID();
+                return GwtSafeHtmlUtils.htmlUnescape(object.getSSID());
             }
         };
         col1.setCellStyleNames(STATUS_TABLE_ROW);
@@ -1300,7 +1301,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.ssidSelectionModel.addSelectionChangeHandler(event -> {
             GwtWifiHotspotEntry wifiHotspotEntry = TabWirelessUi.this.ssidSelectionModel.getSelectedObject();
             if (wifiHotspotEntry != null) {
-                TabWirelessUi.this.ssid.setValue(wifiHotspotEntry.getSSID());
+                TabWirelessUi.this.ssid.setValue(GwtSafeHtmlUtils.htmlUnescape(wifiHotspotEntry.getSSID()));
                 String sec = wifiHotspotEntry.getSecurity();
                 for (int i1 = 0; i1 < TabWirelessUi.this.security.getItemCount(); i1++) {
                     if (sec.equals(TabWirelessUi.this.security.getItemText(i1))) {

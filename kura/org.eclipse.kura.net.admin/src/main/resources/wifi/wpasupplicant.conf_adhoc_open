@@ -8,7 +8,7 @@ country=KURA_COUNTRY_CODE
 ap_scan=2
 network={
     mode=KURA_MODE
-    ssid="KURA_ESSID"
+    ssid=KURA_ESSID
     key_mgmt=NONE
     frequency=KURA_FREQUENCY
 }

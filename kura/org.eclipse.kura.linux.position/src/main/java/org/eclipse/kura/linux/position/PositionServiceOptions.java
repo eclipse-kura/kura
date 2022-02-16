@@ -31,6 +31,10 @@ public class PositionServiceOptions {
     private static final Property<Integer> STOP_BITS = new Property<>("stopBits", 1);
     private static final Property<Integer> PARITY = new Property<>("parity", 0);
 
+    private static final Property<String> PROVIDER = new Property<>("provider", PositionProviderType.SERIAL.getValue());
+    private static final Property<String> GPSD_HOST = new Property<>("gpsd.host", "localhost");
+    private static final Property<Integer> GPSD_PORT = new Property<>("gpsd.port", 2947);
+
     private final Map<String, Object> properties;
 
     public PositionServiceOptions(final Map<String, Object> properties) {
@@ -77,6 +81,18 @@ public class PositionServiceOptions {
         return PORT.get(this.properties);
     }
 
+    public PositionProviderType getPositionProvider() {
+        return PositionProviderType.fromValue(PROVIDER.get(this.properties));
+    }
+
+    public String getGpsdHost() {
+        return GPSD_HOST.get(this.properties);
+    }
+
+    public int getGpsdPort() {
+        return GPSD_PORT.get(this.properties);
+    }
+
     public CommURI getGpsDeviceUri() {
         if (getPort().isEmpty()) {
             return null;
@@ -104,8 +120,9 @@ public class PositionServiceOptions {
                 && getStaticLongitude() == other.getStaticLongitude()
                 && getStaticAltitude() == other.getStaticAltitude() && getPort().equals(other.getPort())
                 && getBaudRate() == other.getBaudRate() && getBitsPerWord() == other.getBitsPerWord()
-                && getStopBits() == other.getStopBits() && getParity() == other.getParity();
-
+                && getStopBits() == other.getStopBits() && getParity() == other.getParity()
+                && getPositionProvider().equals(other.getPositionProvider())
+                && getGpsdHost().equals(other.getGpsdHost()) && getGpsdPort() == other.getGpsdPort();
     }
 
     private static final class Property<T> {

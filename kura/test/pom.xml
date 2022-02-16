@@ -200,7 +200,7 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.apache.commons.io</artifactId>
+                                <artifactId>org.apache.commons.commons-io</artifactId>
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -903,6 +903,7 @@
         <module>org.eclipse.kura.log.filesystem.provider.test</module>
         <module>org.eclipse.kura.rest.configuration.provider.test</module>
         <module>org.eclipse.kura.rest.wire.provider.test</module>
+        <module>org.eclipse.kura.util.test.driver</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

@@ -63,4 +63,4 @@ class CommandExecutorServiceStub implements CommandExecutorService {
         }
         returnedStatus.setOutputStream(out);
     }
-};
+}

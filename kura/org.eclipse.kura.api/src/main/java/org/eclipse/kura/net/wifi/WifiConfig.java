@@ -1,18 +1,19 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
  ******************************************************************************/
 package org.eclipse.kura.net.wifi;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class WifiConfig implements NetConfig {
     private String wifiCountryCode;
 
     public WifiConfig() {
-        super();
+        this(WifiMode.UNKNOWN, "", new int[] { 1 }, WifiSecurity.NONE, "", "b", null);
     }
 
     /**
@@ -90,7 +91,7 @@ public class WifiConfig implements NetConfig {
 
     /**
      * @since 2.3
-     * 
+     *
      * @param mode
      *            for the configuration as {@link WifiMode}
      * @param ssid
@@ -108,8 +109,6 @@ public class WifiConfig implements NetConfig {
      */
     public WifiConfig(WifiMode mode, String ssid, int[] channels, WifiSecurity security, String passkey, String hwMode,
             WifiBgscan bgscan) {
-        super();
-
         this.mode = mode;
         this.ssid = ssid;
         this.channels = channels;
@@ -117,8 +116,12 @@ public class WifiConfig implements NetConfig {
         this.passkey = new Password(passkey);
         this.hwMode = hwMode;
         this.bgscan = bgscan;
-        this.channelFrequencies = null;
-        this.wifiCountryCode = null;
+        this.pairwiseCiphers = WifiCiphers.CCMP_TKIP;
+        this.groupCiphers = WifiCiphers.CCMP_TKIP;
+        this.radioMode = WifiRadioMode.RADIO_MODE_80211b;
+        this.ignoreSSID = false;
+        this.channelFrequencies = new ArrayList<>();
+        this.wifiCountryCode = "00";
     }
 
     public WifiMode getMode() {
@@ -246,17 +249,17 @@ public class WifiConfig implements NetConfig {
 
     /**
      * Get the Wi-Fi country code
-     * 
+     *
      * @return Wi-Fi country code in ISO 3166-1 alpha-2
      * @since 2.2
      */
     public String getWifiCountryCode() {
-        return wifiCountryCode;
+        return this.wifiCountryCode;
     }
 
     /**
      * Set the Wi-Fi country code
-     * 
+     *
      * @param wifiCountryCode
      *            Wi-Fi Country code in ISO 3166-1 alpha-2 format
      * @since 2.2
@@ -267,17 +270,17 @@ public class WifiConfig implements NetConfig {
 
     /**
      * Get the list of Wi-Fi channels and frequencies
-     * 
+     *
      * @return List of Wi-Fi channels and frequencies
      * @since 2.2
      */
     public List<WifiChannel> getChannelFrequencies() {
-        return channelFrequencies;
+        return this.channelFrequencies;
     }
 
     /**
      * Set the list of channel frequencies
-     * 
+     *
      * @param channelFrequencies
      *            list of Wi-Fi channels and relative frequencies
      * @since 2.2
@@ -350,16 +353,8 @@ public class WifiConfig implements NetConfig {
 
         WifiConfig other = (WifiConfig) obj;
 
-        if (!compare(this.mode, other.mode)) {
-            return false;
-        }
-        if (!compare(this.ssid, other.ssid)) {
-            return false;
-        }
-        if (!compare(this.driver, other.driver)) {
-            return false;
-        }
-        if (!Arrays.equals(this.channels, other.channels)) {
+        if (!compare(this.mode, other.mode) || !compare(this.ssid, other.ssid) || !compare(this.driver, other.driver)
+                || !Arrays.equals(this.channels, other.channels)) {
             return false;
         }
         if (!compare(this.wifiCountryCode, other.wifiCountryCode)) {

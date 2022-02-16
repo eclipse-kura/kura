@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -14,6 +14,8 @@ package org.eclipse.kura.util.base;
 
 import static java.util.Objects.requireNonNull;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import org.eclipse.kura.annotation.Nullable;
@@ -61,6 +63,51 @@ public final class StringUtil {
                 sb.append(delimiter);
                 sb.append(it.next());
             }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Unescape an UTF-8 string.
+     * 
+     * @param string
+     *            an UTF-8 escaped string.
+     * @return string in UTF-8 with unescaped characters.
+     */
+
+    public static String unescapeUTF8String(final String string) {
+
+        requireNonNull(string, "String cannot be null");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i = 0;
+        while (i < string.length()) {
+            if (string.charAt(i) == '\\') {
+                i += 2;
+                String hexString = string.substring(i, i + 2);
+                baos.write(Integer.parseInt(hexString, 16));
+                i += 2;
+            } else {
+                baos.write(string.charAt(i));
+                i += 1;
+            }
+        }
+
+        return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Covert a string in hexadecimal format.
+     * 
+     * @param string
+     *            string to be converted in hex format.
+     * @return string in hex format.
+     */
+
+    public static String toHex(String string) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : string.getBytes(StandardCharsets.UTF_8)) {
+            sb.append(String.format("%02X", b));
         }
         return sb.toString();
     }

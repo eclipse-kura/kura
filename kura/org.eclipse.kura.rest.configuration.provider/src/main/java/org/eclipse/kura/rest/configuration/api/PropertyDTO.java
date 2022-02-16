@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.metatype.Scalar;
-import org.eclipse.kura.internal.rest.configuration.FailureHandler;
+import org.eclipse.kura.request.handler.jaxrs.DefaultExceptionHandler;
 
 public class PropertyDTO implements Validable {
 
@@ -89,7 +89,7 @@ public class PropertyDTO implements Validable {
         }
 
         if (!isValid) {
-            throw FailureHandler.toWebApplicationException(Status.BAD_REQUEST,
+            throw DefaultExceptionHandler.buildWebApplicationException(Status.BAD_REQUEST,
                     "Invalid property for type " + type + ": " + value);
         }
     }

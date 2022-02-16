@@ -83,4 +83,6 @@ public interface GwtNetworkService extends RemoteService {
             throws GwtKuraException;
 
     public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException;
+
+    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException;
 }

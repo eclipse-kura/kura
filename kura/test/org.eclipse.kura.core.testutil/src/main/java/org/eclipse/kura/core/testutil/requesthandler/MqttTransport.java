@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -54,7 +55,7 @@ public class MqttTransport implements Transport {
 
     private String appId;
 
-    private boolean initialized = false;
+    private AtomicBoolean initialized = new AtomicBoolean(false);
 
     public MqttTransport(final String appId) {
         this.appId = appId;
@@ -62,7 +63,7 @@ public class MqttTransport implements Transport {
 
     @Override
     public void init() {
-        if (initialized) {
+        if (!initialized.compareAndSet(false, true)) {
             return;
         }
 
@@ -101,8 +102,8 @@ public class MqttTransport implements Transport {
                     .createFactoryConfiguration(configurationService, DataTransportService.class, "observer",
                             MQTT_DATA_TRANSPORT_FACTORY_PID, getConfigForLocalBroker("observer"))
                     .get(30, TimeUnit.SECONDS);
-            observerInspector = new DataTransportInspector(observer);
-            final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport);
+            observerInspector = new DataTransportInspector(observer, true);
+            final DataTransportInspector underTestInspector = new DataTransportInspector(mqttDataTransport, false);
 
             final CompletableFuture<Void> underTestConnected = underTestInspector.connected();
 
@@ -116,7 +117,6 @@ public class MqttTransport implements Transport {
 
             observerConnected.get(1, TimeUnit.MINUTES);
 
-            initialized = true;
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -174,17 +174,19 @@ public class MqttTransport implements Transport {
         private Optional<CompletableFuture<Void>> disconnectFuture = Optional.empty();
         private Optional<MessageLookup> messageLookup = Optional.empty();
 
-        DataTransportInspector(final DataTransportService dataTransportService) {
+        DataTransportInspector(final DataTransportService dataTransportService, final boolean subscribe) {
             this.dataTransportService = dataTransportService;
 
             dataTransportService.addDataTransportListener(new DataTransportListener() {
 
                 @Override
                 public void onConnectionEstablished(boolean newSession) {
-                    try {
-                        dataTransportService.subscribe("#", 0);
-                    } catch (Exception e) {
-                        logger.warn("failed to subscribe", e);
+                    if (subscribe) {
+                        try {
+                            dataTransportService.subscribe("#", 0);
+                        } catch (Exception e) {
+                            logger.warn("failed to subscribe", e);
+                        }
                     }
                     if (connectFuture.isPresent()) {
                         connectFuture.get().complete(null);

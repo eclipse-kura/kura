@@ -254,7 +254,7 @@ public class ExecutorUtil {
             logger.debug(COMMAND_MESSAGE + " {} returned error code {}", commandLine, exitStatus, e);
         } catch (IOException e) {
             exitStatus = 1;
-            logger.error(COMMAND_MESSAGE + " {} failed", commandLine, e);
+            logger.debug(COMMAND_MESSAGE + " {} failed", commandLine, e);
         } finally {
             stopStreamHandler(executor);
             commandStatus.setExitStatus(new LinuxExitStatus(exitStatus));

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -20,7 +20,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * The Tensor class represents the input or output of a model
  * for Artificial Intelligence and Machine Learning algorithms
- * 
+ *
  * @since 2.3
  */
 @ProviderType
@@ -32,7 +32,7 @@ public class Tensor {
 
     /**
      * Instantiates a Tensor
-     * 
+     *
      * @param type
      *            the type of tensor data as Java class
      * @param descriptor
@@ -48,7 +48,7 @@ public class Tensor {
 
     /**
      * Return the descriptor of the tensor
-     * 
+     *
      * @return the {@link TensorDescriptor} of the tensor
      */
     public TensorDescriptor getDescriptor() {
@@ -57,7 +57,7 @@ public class Tensor {
 
     /**
      * Return the data contained in the tensor
-     * 
+     *
      * @param type
      *            the type of the data as Java class. The type argument must match the type of the tensor.
      * @return a list of data of the given type
@@ -73,7 +73,7 @@ public class Tensor {
 
     /**
      * Return the type of the tensor
-     * 
+     *
      * @return the {@link Class} of the data contained in the tensor
      */
     public Class<?> getType() {

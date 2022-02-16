@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -49,7 +49,7 @@ public class ModelInfoBuilder {
 
     /**
      * Instantiates a builder for a {@link ModelInfo} and initialises it from the supplied argument.
-     * 
+     *
      * @param modelInfo
      * @return a {@link ModelInfoBuilder}
      */
@@ -65,7 +65,7 @@ public class ModelInfoBuilder {
 
     /**
      * Set the model platform
-     * 
+     *
      * @param platform
      *            a string representing the platform used for running the model
      * @return a ModelInfoBuilder
@@ -79,7 +79,7 @@ public class ModelInfoBuilder {
 
     /**
      * Set the version of the model
-     * 
+     *
      * @param version
      *            a string representing the version of the model
      * @return a ModelInfoBuilder
@@ -93,7 +93,7 @@ public class ModelInfoBuilder {
 
     /**
      * Add a parameter to the model
-     * 
+     *
      * @param name
      *            the name of the parameter
      * @param parameter
@@ -107,7 +107,7 @@ public class ModelInfoBuilder {
 
     /**
      * Remove a parameter from the model
-     * 
+     *
      * @param name
      *            the name of the parameter
      * @return a ModelInfoBuilder
@@ -119,7 +119,7 @@ public class ModelInfoBuilder {
 
     /**
      * Add a descriptor of an input tensor
-     * 
+     *
      * @param inputDescriptor
      *            a {@link TensorDescriptor} for the input tensor
      * @return a ModelInfoBuilder
@@ -131,7 +131,7 @@ public class ModelInfoBuilder {
 
     /**
      * Remove a descriptor from the input tensor list
-     * 
+     *
      * @param inputDescriptor
      *            a {@link TensorDescriptor} for the input tensor
      * @return a ModelInfoBuilder
@@ -143,7 +143,7 @@ public class ModelInfoBuilder {
 
     /**
      * Add a descriptor of an output tensor
-     * 
+     *
      * @param outputDescriptor
      *            a {@link TensorDescriptor} for the output tensor
      * @return a ModelInfoBuilder
@@ -155,7 +155,7 @@ public class ModelInfoBuilder {
 
     /**
      * Remove a descriptor from the output tensor list
-     * 
+     *
      * @param ioututDescriptor
      *            a {@link TensorDescriptor} for the input tensor
      * @return a ModelInfoBuilder
@@ -167,7 +167,7 @@ public class ModelInfoBuilder {
 
     /**
      * Create an instance of ModelInfo
-     * 
+     *
      * @return a {@ModelInfo}
      */
     public ModelInfo build() {

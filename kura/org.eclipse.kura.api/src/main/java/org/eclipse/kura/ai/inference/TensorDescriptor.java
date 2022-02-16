@@ -36,7 +36,7 @@ public class TensorDescriptor {
 
     /**
      * Instantiates a tensor descriptor
-     * 
+     *
      * @param name
      *            the name of the tensor
      * @param type
@@ -57,7 +57,7 @@ public class TensorDescriptor {
 
     /**
      * Instantiates a builder for a {@link TensorDescriptor}
-     * 
+     *
      * @param name
      *            the name of the tensor
      * @param type
@@ -72,8 +72,8 @@ public class TensorDescriptor {
     }
 
     /**
-     * Creates a new {@link TensorDescriptorBuilder} and initializes it from this {@link TensorDescriptor} instance.
-     * 
+     * Creates a new {@link TensorDescriptorBuilder} and initialises it from this {@link TensorDescriptor} instance.
+     *
      * @return a new {@link TensorDescriptorBuilder}
      */
     public TensorDescriptorBuilder toBuilder() {
@@ -82,7 +82,7 @@ public class TensorDescriptor {
 
     /**
      * Return the name of the tensor
-     * 
+     *
      * @return a string representing the tensor name
      */
     public String getName() {
@@ -93,7 +93,7 @@ public class TensorDescriptor {
      * Return the type of data contained in the tensor.
      * Its value is implementation specific, so a user should refer to
      * the implementation documentation to figure out the allowed values.
-     * 
+     *
      * @return a string representing the type of data contained in the tensor
      */
     public String getType() {
@@ -105,7 +105,7 @@ public class TensorDescriptor {
      * It represents how the data are organised or grouped in the tensor.
      * Its value is implementation specific, so a user should refer to
      * the implementation documentation to figure out the allowed values.
-     * 
+     *
      * @return an optional string representing the format of the data in the tensor
      */
     public Optional<String> getFormat() {
@@ -118,16 +118,16 @@ public class TensorDescriptor {
      * @return an unmodifiable list of longs representing the shape of the data
      */
     public List<Long> getShape() {
-        return shape;
+        return this.shape;
     }
 
     /**
      * Return the optional parameters assign to the tensor
-     * 
+     *
      * @return an unmodifiable map containing the tensor parameters
      */
     public Map<String, Object> getParameters() {
-        return parameters;
+        return this.parameters;
     }
 
 }

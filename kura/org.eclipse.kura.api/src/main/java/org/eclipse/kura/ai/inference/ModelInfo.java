@@ -37,7 +37,7 @@ public class ModelInfo {
 
     /**
      * Instantiates a new ModelInfo
-     * 
+     *
      * @param modelName
      *            the name of the model
      * @param platform
@@ -64,7 +64,7 @@ public class ModelInfo {
 
     /**
      * Instantiates a builder for a {@link ModelInfo}
-     * 
+     *
      * @param name
      *            the name of the model
      * @return a {@link ModelInfoBuilder}
@@ -75,7 +75,7 @@ public class ModelInfo {
 
     /**
      * Creates a new {@link ModelInfoBuilder} and initializes it from this {@link ModelInfo} instance.
-     * 
+     *
      * @return a new {@link ModelInfoBuilder}
      */
     public ModelInfoBuilder toBuilder() {
@@ -84,7 +84,7 @@ public class ModelInfo {
 
     /**
      * Return the name of the model
-     * 
+     *
      * @return a string representing the model name
      */
     public String getName() {
@@ -93,7 +93,7 @@ public class ModelInfo {
 
     /**
      * Return the platform used for running this model
-     * 
+     *
      * @return an optional string representing the model platform
      */
     public Optional<String> getPlatform() {
@@ -102,7 +102,7 @@ public class ModelInfo {
 
     /**
      * Return the version of the model
-     * 
+     *
      * @return an optional string representing the version of the model
      */
     public Optional<String> getVersion() {
@@ -111,7 +111,7 @@ public class ModelInfo {
 
     /**
      * Return the optional parameters assigned to the model
-     * 
+     *
      * @return an unmodifiable map containing the model parameters
      */
     public Map<String, Object> getParameters() {
@@ -120,7 +120,7 @@ public class ModelInfo {
 
     /**
      * Return the descriptors of the input tensors
-     * 
+     *
      * @return an unmodifiable list of {@link TensorDescriptor} of the input tensors
      */
     public List<TensorDescriptor> getInputs() {
@@ -129,7 +129,7 @@ public class ModelInfo {
 
     /**
      * Return the descriptors of the output tensors
-     * 
+     *
      * @return an unmodifiable list of {@link TensorDescriptor} of the output tensors
      */
     public List<TensorDescriptor> getOutputs() {

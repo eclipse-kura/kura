@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -21,7 +21,7 @@ import org.osgi.annotation.versioning.ProviderType;
 /**
  * The InferenceEngineModelManagerService interface is a service API for managing models
  * for Artificial Intelligence and Machine Learning algorithms
- * 
+ *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
  */
@@ -32,7 +32,7 @@ public interface InferenceEngineModelManagerService {
      * Load the given model in the inference engine.
      * If the model is not provided, the engine will load it
      * from a standard location in the filesystem.
-     * 
+     *
      * @param modelName
      *            the name of the model
      * @param model
@@ -43,7 +43,7 @@ public interface InferenceEngineModelManagerService {
 
     /**
      * Load a model in the inference engine from the specified path
-     * 
+     *
      * @param modelName
      *            the name of the model
      * @param modelPath
@@ -54,7 +54,7 @@ public interface InferenceEngineModelManagerService {
 
     /**
      * Remove a model from the inference engine
-     * 
+     *
      * @param modelName
      *            the name of the model
      * @throws KuraIOException
@@ -63,7 +63,7 @@ public interface InferenceEngineModelManagerService {
 
     /**
      * Return true if the model is loaded and ready
-     * 
+     *
      * @param modelName
      *            the name of the model
      * @throws KuraIOException
@@ -72,16 +72,16 @@ public interface InferenceEngineModelManagerService {
 
     /*
      * Return the names of the available models
-     * 
+     *
      * @return a List of model names
-     * 
+     *
      * @throws KuraIOException
      */
     public List<String> getModelNames() throws KuraIOException;
 
     /**
      * Return informations about a specified model
-     * 
+     *
      * @return a {@link ModelInfo} that describes a model
      * @throws KuraIOException
      */

@@ -67,9 +67,9 @@
                                     <version>${com.codeminders.hidapi.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache</groupId>
-                                    <artifactId>org.apache.commons.net</artifactId>
-                                    <version>${org.apache.commons.net.version}</version>
+                                    <groupId>commons-net</groupId>
+                                    <artifactId>commons-net</artifactId>
+                                    <version>${org.apache.commons.commons-net.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>com.google.protobuf</groupId>
@@ -197,9 +197,9 @@
                                     <version>${usb4java-javax.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.apache</groupId>
-                                    <artifactId>org.apache.commons.io</artifactId>
-                                    <version>${org.apache.commons.io.version}</version>
+                                    <groupId>commons-io</groupId>
+                                    <artifactId>commons-io</artifactId>
+                                    <version>${org.apache.commons.commons-io.version}</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache</groupId>
@@ -535,7 +535,7 @@
                                 <move file="target/source/plugins/com.codeminders.hidapi.armv6hf.jar" tofile="target/source/plugins/com.codeminders.hidapi.armv6hf_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.x86_64.jar" tofile="target/source/plugins/com.codeminders.hidapi.x86_64_${com.codeminders.hidapi.version}.jar"/>
                                 <move file="target/source/plugins/com.codeminders.hidapi.aarch64.jar" tofile="target/source/plugins/com.codeminders.hidapi.aarch64_${com.codeminders.hidapi.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.commons.net.jar" tofile="target/source/plugins/org.apache.commons.net_${org.apache.commons.net.version}.jar"/>
+                                <move file="target/source/plugins/commons-net.jar" tofile="target/source/plugins/org.apache.commons.commons-net_${org.apache.commons.commons-net.version}.jar"/>
                                 <move file="target/source/plugins/commons-exec.jar" tofile="target/source/plugins/org.apache.commons.exec_${org.apache.commons.exec.version}.jar"/>
                                 <move file="target/source/plugins/protobuf-java.jar" tofile="target/source/plugins/com.google.protobuf_${com.google.protobuf.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.paho.client.mqttv3.jar" tofile="target/source/plugins/org.eclipse.paho.client.mqttv3_${org.eclipse.paho.client.mqttv3.version}.jar"/>
@@ -559,7 +559,7 @@
                                 <move file="target/source/plugins/org.junit.jar" tofile="target/source/plugins/org.junit_${org.junit.version}.jar"/>
                                 <move file="target/source/plugins/commons-fileupload.jar" tofile="target/source/plugins/commons-fileupload.jar_${org.apache.commons.fileupload.version}.jar"/>
                                 <move file="target/source/plugins/usb4java-javax.jar" tofile="target/source/plugins/usb4java-javax_${usb4java-javax.version}.jar"/>
-                                <move file="target/source/plugins/org.apache.commons.io.jar" tofile="target/source/plugins/org.apache.commons.io_${org.apache.commons.io.version}.jar"/>
+                                <move file="target/source/plugins/commons-io.jar" tofile="target/source/plugins/org.apache.commons.commons-io_${org.apache.commons.commons-io.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.commons.lang3.jar" tofile="target/source/plugins/org.apache.commons.lang3_${org.apache.commons.lang3.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm_${org.eclipse.soda.dk.comm.version}.jar"/>
                                 <move file="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf.jar" tofile="target/source/plugins/org.eclipse.soda.dk.comm.armv6hf_${org.eclipse.soda.dk.comm.version}.jar"/>

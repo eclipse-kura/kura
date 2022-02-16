@@ -38,7 +38,7 @@ public class ModelInfoBuilder {
     private final List<TensorDescriptor> inputDescriptors;
     private final List<TensorDescriptor> outputDescriptors;
 
-    private ModelInfoBuilder(String name) {
+    ModelInfoBuilder(String name) {
         this.name = name;
         this.platform = Optional.empty();
         this.version = Optional.empty();
@@ -48,28 +48,18 @@ public class ModelInfoBuilder {
     }
 
     /**
-     * Instantiates a builder for a {@link ModelInfo}
-     * 
-     * @param modelName
-     *            the name of the model
-     */
-    public static ModelInfoBuilder builder(String name) {
-        return new ModelInfoBuilder(name);
-    }
-
-    /**
-     * Instantiates a builder for a {@link ModelInfo}
+     * Instantiates a builder for a {@link ModelInfo} and initializes it from the supplied argument.
      * 
      * @param modelInfo
-     * @return a ModelInfoBuilder
+     * @return a {@link ModelInfoBuilder}
      */
     public static ModelInfoBuilder fromModelInfo(ModelInfo modelInfo) {
         ModelInfoBuilder builder = new ModelInfoBuilder(modelInfo.getName());
-        modelInfo.getParameters().forEach(builder::addParameter);
-        modelInfo.getInputs().forEach(builder::addInputDescriptor);
-        modelInfo.getOutputs().forEach(builder::addOutputDescriptor);
-        modelInfo.getPlatform().ifPresent(builder::platform);
-        modelInfo.getVersion().ifPresent(builder::version);
+        builder.parameters.putAll(modelInfo.getParameters());
+        builder.inputDescriptors.addAll(modelInfo.getInputs());
+        builder.outputDescriptors.addAll(modelInfo.getOutputs());
+        builder.platform = modelInfo.getPlatform();
+        builder.version = modelInfo.getVersion();
         return builder;
     }
 

@@ -12,8 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,8 +51,33 @@ public class TensorDescriptor {
         this.name = name;
         this.type = type;
         this.format = format;
-        this.shape = shape;
-        this.parameters = parameters;
+        this.shape = Collections.unmodifiableList(shape);
+        this.parameters = Collections.unmodifiableMap(parameters);
+    }
+
+    /**
+     * Instantiates a builder for a {@link TensorDescriptor}
+     * 
+     * @param name
+     *            the name of the tensor
+     * @param type
+     *            a string representing the type of data contained in the tensor.
+     *            Its value is implementation specific, so a user should refer to
+     *            the implementation documentation to figure out the allowed values.
+     * @param shape
+     *            the shape of the data as the size of a multi-dimensional matrix
+     */
+    public static TensorDescriptorBuilder builder(String name, String type, List<Long> shape) {
+        return new TensorDescriptorBuilder(name, type, shape);
+    }
+
+    /**
+     * Creates a new {@link TensorDescriptorBuilder} and initializes it from this {@link TensorDescriptor} instance.
+     * 
+     * @return a new {@link TensorDescriptorBuilder}
+     */
+    public TensorDescriptorBuilder toBuilder() {
+        return TensorDescriptorBuilder.fromTensorDescriptor(this);
     }
 
     /**
@@ -91,23 +115,19 @@ public class TensorDescriptor {
     /**
      * Return the shape of the data as the size of a multi-dimensional matrix.
      *
-     * @return a list of longs representing the shape of the data
+     * @return an unmodifiable list of longs representing the shape of the data
      */
     public List<Long> getShape() {
-        List<Long> shapeCopy = new ArrayList<>();
-        this.shape.forEach(shapeCopy::add);
-        return shapeCopy;
+        return shape;
     }
 
     /**
      * Return the optional parameters assign to the tensor
      * 
-     * @return a map containing the tensor parameters
+     * @return an unmodifiable map containing the tensor parameters
      */
     public Map<String, Object> getParameters() {
-        Map<String, Object> parametersCopy = new HashMap<>();
-        this.parameters.forEach(parametersCopy::put);
-        return parametersCopy;
+        return parameters;
     }
 
 }

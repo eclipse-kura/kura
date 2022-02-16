@@ -36,7 +36,7 @@ public class TensorDescriptorBuilder {
     private final List<Long> shape;
     private final Map<String, Object> parameters;
 
-    private TensorDescriptorBuilder(String name, String type, List<Long> shape) {
+    TensorDescriptorBuilder(String name, String type, List<Long> shape) {
         this.name = name;
         this.type = type;
         this.format = Optional.empty();
@@ -45,24 +45,23 @@ public class TensorDescriptorBuilder {
     }
 
     /**
-     * Instantiates a builder for a {@link TensorDescriptor}
+     * Instantiates a builder for a {@link TensorDescriptor} and initializes it from the supplied argument.
      * 
-     * @param name
-     *            the name of the tensor
-     * @param type
-     *            a string representing the type of data contained in the tensor.
-     *            Its value is implementation specific, so a user should refer to
-     *            the implementation documentation to figure out the allowed values.
-     * @param shape
-     *            the shape of the data as the size of a multi-dimensional matrix
+     * @param descriptor
+     * @return a {@link TensorDescriptorBuilder}.
      */
-    public static TensorDescriptorBuilder builder(String name, String type, List<Long> shape) {
-        return new TensorDescriptorBuilder(name, type, shape);
+    public static TensorDescriptorBuilder fromTensorDescriptor(TensorDescriptor descriptor) {
+        final TensorDescriptorBuilder result = new TensorDescriptorBuilder(descriptor.getName(), descriptor.getType(),
+                descriptor.getShape());
+        result.parameters.putAll(descriptor.getParameters());
+        result.format = descriptor.getFormat();
+        return result;
     }
 
     /**
      * Set the format of the data contained in the tensor.
-     * It represents how the data are organised or grouped in the tensor.
+     * It represents how the data are organized or grouped in the tensor
+     * (e.g. in row-major or column-major order).
      * Its value is implementation specific, so a user should refer to
      * the implementation documentation to figure out the allowed values.
      * 

@@ -12,8 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,9 +57,29 @@ public class ModelInfo {
         this.name = modelName;
         this.platform = platform;
         this.version = version;
-        this.parameters = parameters;
-        this.inputDescriptors = inputDescriptors;
-        this.outputDescriptors = outputDescriptors;
+        this.parameters = Collections.unmodifiableMap(parameters);
+        this.inputDescriptors = Collections.unmodifiableList(inputDescriptors);
+        this.outputDescriptors = Collections.unmodifiableList(outputDescriptors);
+    }
+
+    /**
+     * Instantiates a builder for a {@link ModelInfo}
+     * 
+     * @param name
+     *            the name of the model
+     * @return a {@link ModelInfoBuilder}
+     */
+    public static ModelInfoBuilder builder(String name) {
+        return new ModelInfoBuilder(name);
+    }
+
+    /**
+     * Creates a new {@link ModelInfoBuilder} and initializes it from this {@link ModelInfo} instance.
+     * 
+     * @return a new {@link ModelInfoBuilder}
+     */
+    public ModelInfoBuilder toBuilder() {
+        return ModelInfoBuilder.fromModelInfo(this);
     }
 
     /**
@@ -93,33 +112,27 @@ public class ModelInfo {
     /**
      * Return the optional parameters assigned to the model
      * 
-     * @return a map containing the model parameters
+     * @return an unmodifiable map containing the model parameters
      */
     public Map<String, Object> getParameters() {
-        Map<String, Object> parametersCopy = new HashMap<>();
-        this.parameters.forEach(parametersCopy::put);
-        return parametersCopy;
+        return this.parameters;
     }
 
     /**
      * Return the descriptors of the input tensors
      * 
-     * @return a list of {@link TensorDescriptor} of the input tensors
+     * @return an unmodifiable list of {@link TensorDescriptor} of the input tensors
      */
     public List<TensorDescriptor> getInputs() {
-        List<TensorDescriptor> inputDescriptorCopy = new ArrayList<>();
-        this.inputDescriptors.forEach(inputDescriptorCopy::add);
-        return inputDescriptorCopy;
+        return this.inputDescriptors;
     }
 
     /**
      * Return the descriptors of the output tensors
      * 
-     * @return a list of {@link TensorDescriptor} of the output tensors
+     * @return an unmodifiable list of {@link TensorDescriptor} of the output tensors
      */
     public List<TensorDescriptor> getOutputs() {
-        List<TensorDescriptor> outputDescriptorCopy = new ArrayList<>();
-        this.outputDescriptors.forEach(outputDescriptorCopy::add);
-        return outputDescriptorCopy;
+        return this.outputDescriptors;
     }
 }

@@ -121,23 +121,19 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
         this.options = new AIComponentOptions(properties);
 
-        String modelName = "";
         try {
             if (options.getPreprocessorModelName().isPresent()) {
-                modelName = options.getPreprocessorModelName().get();
-                this.preprocModelInfo = retrieveModelInfo(modelName);
+                this.preprocModelInfo = retrieveModelInfo(options.getPreprocessorModelName().get());
             }
 
-            modelName = options.getInferenceModelName();
-            this.inferModelInfo = retrieveModelInfo(modelName);
+            this.inferModelInfo = retrieveModelInfo(options.getInferenceModelName());
 
             if (options.getPostprocessorModelName().isPresent()) {
-                modelName = options.getPostprocessorModelName().get();
-                this.postprocModelInfo = retrieveModelInfo(modelName);
+                this.postprocModelInfo = retrieveModelInfo(options.getPostprocessorModelName().get());
             }
 
         } catch (KuraIOException e) {
-            logger.error("Error opening model: " + modelName, e);
+            logger.error("Error opening model.", e);
             this.deactivate();
         }
 

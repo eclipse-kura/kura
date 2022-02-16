@@ -29,6 +29,7 @@ public interface InferenceEngineStatusService {
      * Check if the inference engine is ready for inferencing
      * 
      * @return true if the server is ready
+     * @throws KuraIOException
      */
     public boolean isEngineReady() throws KuraIOException;
 }

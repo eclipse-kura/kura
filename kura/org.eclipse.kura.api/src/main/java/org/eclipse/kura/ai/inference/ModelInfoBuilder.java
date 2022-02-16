@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
+import static java.util.Objects.nonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,15 +30,15 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ModelInfoBuilder {
 
-    private final String modelName;
+    private final String name;
     private Optional<String> platform;
     private Optional<String> version;
     private final Map<String, Object> parameters;
     private final List<TensorDescriptor> inputDescriptors;
     private final List<TensorDescriptor> outputDescriptors;
 
-    private ModelInfoBuilder(String modelName) {
-        this.modelName = modelName;
+    private ModelInfoBuilder(String name) {
+        this.name = name;
         this.platform = Optional.empty();
         this.version = Optional.empty();
         this.parameters = new HashMap<>();
@@ -50,8 +52,8 @@ public class ModelInfoBuilder {
      * @param modelName
      *            the name of the model
      */
-    public static ModelInfoBuilder builder(String modelName) {
-        return new ModelInfoBuilder(modelName);
+    public static ModelInfoBuilder builder(String name) {
+        return new ModelInfoBuilder(name);
     }
 
     /**
@@ -174,13 +176,16 @@ public class ModelInfoBuilder {
      * @return a {@ModelInfo}
      */
     public ModelInfo build() {
+        if (nonNull(this.name) && !this.name.isEmpty()) {
+            throw new IllegalArgumentException("The name of the model cannot be empty or null");
+        }
         if (this.inputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The input descriptors list cannot be empty");
         }
         if (this.outputDescriptors.isEmpty()) {
             throw new IllegalArgumentException("The output descriptors list cannot be empty");
         }
-        return new ModelInfo(this.modelName, this.platform.get(), this.version.get(), this.parameters,
-                this.inputDescriptors, this.outputDescriptors);
+        return new ModelInfo(this.name, this.platform.get(), this.version.get(), this.parameters, this.inputDescriptors,
+                this.outputDescriptors);
     }
 }

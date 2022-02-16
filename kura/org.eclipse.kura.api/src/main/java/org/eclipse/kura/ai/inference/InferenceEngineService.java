@@ -37,6 +37,7 @@ public interface InferenceEngineService {
      * @param inputData
      *            a list of input {@link Tensor}
      * @return a list of output {@link Tensor}
+     * @throws KuraIOException
      */
     public List<Tensor> infer(ModelInfo modelInfo, List<Tensor> inputData) throws KuraIOException;
 }

@@ -37,6 +37,7 @@ public interface InferenceEngineModelManagerService {
      *            the name of the model
      * @param model
      *            an optional String representing the model
+     * @throws KuraIOException
      */
     public void loadModel(String modelName, Optional<String> model) throws KuraIOException;
 
@@ -47,6 +48,7 @@ public interface InferenceEngineModelManagerService {
      *            the name of the model
      * @param modelPath
      *            the path on the filesystem where the model is stored
+     * @throws KuraIOException
      */
     public void loadModel(String modelName, String modelPath) throws KuraIOException;
 
@@ -55,6 +57,7 @@ public interface InferenceEngineModelManagerService {
      * 
      * @param modelName
      *            the name of the model
+     * @throws KuraIOException
      */
     public void unloadModel(String modelName) throws KuraIOException;
 
@@ -63,6 +66,7 @@ public interface InferenceEngineModelManagerService {
      * 
      * @param modelName
      *            the name of the model
+     * @throws KuraIOException
      */
     public boolean isModelLoaded(String modelName) throws KuraIOException;
 
@@ -70,6 +74,8 @@ public interface InferenceEngineModelManagerService {
      * Return the names of the available models
      * 
      * @return a List of model names
+     * 
+     * @throws KuraIOException
      */
     public List<String> getModelNames() throws KuraIOException;
 
@@ -77,6 +83,7 @@ public interface InferenceEngineModelManagerService {
      * Return informations about a specified model
      * 
      * @return a {@link ModelInfo} that describes a model
+     * @throws KuraIOException
      */
     public Optional<ModelInfo> getModelInfo(String modelName) throws KuraIOException;
 }

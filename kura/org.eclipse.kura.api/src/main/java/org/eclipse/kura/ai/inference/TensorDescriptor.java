@@ -12,6 +12,9 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.inference;
 
+import static java.util.Objects.nonNull;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +49,16 @@ public class TensorDescriptor {
      * @param shape
      *            the shape of the data
      */
-    public TensorDescriptor(String name, String type, List<Long> shape) {
+    public TensorDescriptor(String name, String type, String format, List<Long> shape, Map<String, Object> parameters) {
         this.name = name;
         this.type = type;
-        this.format = Optional.empty();
+        if (nonNull(format) && !format.isEmpty()) {
+            this.format = Optional.of(format);
+        } else {
+            this.format = Optional.empty();
+        }
         this.shape = shape;
-        this.parameters = new HashMap<>();
+        this.parameters = parameters;
     }
 
     /**
@@ -87,23 +94,14 @@ public class TensorDescriptor {
     }
 
     /**
-     * Set the format of the data.
-     * It represents how the data are organised or grouped in the tensor.
-     * 
-     * @param format
-     *            a string representing the format of the data in the tensor
-     */
-    public void setFormat(String format) {
-        this.format = Optional.of(format);
-    }
-
-    /**
      * Return the shape of the data as the size of a multi-dimensional matrix.
      *
      * @return a list of longs representing the shape of the data
      */
     public List<Long> getShape() {
-        return this.shape;
+        List<Long> shapeCopy = new ArrayList<>();
+        this.shape.forEach(shapeCopy::add);
+        return shapeCopy;
     }
 
     /**
@@ -112,28 +110,9 @@ public class TensorDescriptor {
      * @return a map containing the tensor parameters
      */
     public Map<String, Object> getParameters() {
-        return this.parameters;
+        Map<String, Object> parametersCopy = new HashMap<>();
+        this.parameters.forEach(parametersCopy::put);
+        return parametersCopy;
     }
 
-    /**
-     * Add a parameter to the tensor
-     * 
-     * @param name
-     *            the name of the parameter
-     * @param parameter
-     *            an Object representing the value of the parameter
-     */
-    public void putParameter(String name, Object parameter) {
-        this.parameters.put(name, parameter);
-    }
-
-    /**
-     * Remove the given parameter
-     * 
-     * @param name
-     *            the name of the parameter to be removed
-     */
-    public void deleteParameter(String name) {
-        this.parameters.remove(name);
-    }
 }

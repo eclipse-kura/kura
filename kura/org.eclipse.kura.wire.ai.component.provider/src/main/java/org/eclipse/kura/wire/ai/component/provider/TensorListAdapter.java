@@ -22,6 +22,7 @@ import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.type.TypedValue;
+import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireRecord;
 
 public class TensorListAdapter {
@@ -81,7 +82,13 @@ public class TensorListAdapter {
     }
 
     public List<WireRecord> fromTensorList(List<Tensor> tensors) throws KuraIOException {
-        return null;
+        List<WireRecord> output = new LinkedList<>();
+
+        for (Tensor tensor : tensors) {
+            TypedValue<?> typedValue = TypedValues.newTypedValue(null);
+        }
+
+        return output;
     }
 
     /**
@@ -189,8 +196,8 @@ public class TensorListAdapter {
             }
 
             return new Tensor(Byte.class, descriptor, bytesData);
+        default:
+            throw new KuraIOException("Unable to create Tensor: unsupported type.");
         }
-
-        throw new KuraIOException("Unable to create Tensor: unsupported type.");
     }
 }

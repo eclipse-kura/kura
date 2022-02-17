@@ -14,13 +14,8 @@ package org.eclipse.kura.wire.ai.component.provider;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraIOException;
@@ -28,11 +23,7 @@ import org.eclipse.kura.ai.inference.InferenceEngineModelManagerService;
 import org.eclipse.kura.ai.inference.InferenceEngineService;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
-import org.eclipse.kura.ai.inference.TensorDescriptor;
-import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.type.DataType;
-import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -165,14 +156,11 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
                         .fromWireRecords(wireEnvelope.getRecords());
                 tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
             } else {
-                // if the preprocessing model is not given, pass directly to the inference engine
                 tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
                         .fromWireRecords(wireEnvelope.getRecords());
             }
 
             tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
-
-            // we assume that infer returns the tensors in correct format so that post processing can manage it
 
             if (this.infoPost.isPresent()) {
                 tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);

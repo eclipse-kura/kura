@@ -15,6 +15,7 @@ package org.eclipse.kura.wire.ai.component.provider;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +28,8 @@ import org.eclipse.kura.ai.inference.InferenceEngineModelManagerService;
 import org.eclipse.kura.ai.inference.InferenceEngineService;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
+import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
@@ -151,107 +154,38 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     public synchronized void onWireReceive(WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
-        logger.info("AIComponent: received envelope.");
+        logger.info("AIComponent: received envelope. Inference starts...");
 
-        List<Tensor> inputs;
+        try {
+            List<Tensor> tensors;
+            List<WireRecord> result;
 
-        if (this.infoPre.isPresent()) {
-            inputs = getTensors(this.infoPre.get(), wireEnvelope.getRecords());
-        } else {
-            inputs = getTensors(this.infoPre.get(), wireEnvelope.getRecords());
-        }
-
-        /*
-         * List<WireRecord> records = wireEnvelope.getRecords();
-         * 
-         * for (WireRecord record : records) {
-         * Map<String, TypedValue<?>> properties = record.getProperties();
-         * 
-         * for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
-         * String channelName = entry.getKey();
-         * TypedValue<?> channelValue = entry.getValue();
-         * 
-         * DataType valueType = channelValue.getType();
-         * switch (valueType) {
-         * case BOOLEAN:
-         * // TODO
-         * break;
-         * case BYTE_ARRAY:
-         * // TODO
-         * break;
-         * case DOUBLE:
-         * // TODO
-         * break;
-         * case FLOAT:
-         * // TODO
-         * break;
-         * case INTEGER:
-         * // TODO
-         * break;
-         * case LONG:
-         * // TODO
-         * break;
-         * case STRING:
-         * // TODO
-         * break;
-         * default:
-         * break;
-         * }
-         * 
-         * }
-         * 
-         * }
-         */
-
-        logger.info("AIComponent: emitting an empty result.");
-
-        List<WireRecord> result = Collections.unmodifiableList(new ArrayList<WireRecord>());
-        this.wireSupport.emit(result);
-    }
-
-    private List<Tensor> getTensors(ModelInfo info, List<WireRecord> records) {
-
-        List<Tensor> result = new LinkedList<>();
-
-        for (WireRecord record : records) {
-            Map<String, TypedValue<?>> properties = record.getProperties();
-
-            for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
-                String channelName = entry.getKey();
-                TypedValue<?> channelValue = entry.getValue();
-
-                DataType valueType = channelValue.getType();
-                switch (valueType) {
-                case BOOLEAN:
-                    // TODO
-                    break;
-                case BYTE_ARRAY:
-                    // TODO
-                    break;
-                case DOUBLE:
-                    // TODO
-                    break;
-                case FLOAT:
-                    // TODO
-                    break;
-                case INTEGER:
-                    // TODO
-                    break;
-                case LONG:
-                    // TODO
-                    break;
-                case STRING:
-                    // TODO
-                    break;
-                default:
-                    break;
-                }
-
+            if (this.infoPre.isPresent()) {
+                tensors = TensorListAdapter.givenDescriptors(this.infoPre.get().getInputs())
+                        .fromWireRecords(wireEnvelope.getRecords());
+                tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
+            } else {
+                // if the preprocessing model is not given, pass directly to the inference engine
+                tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
+                        .fromWireRecords(wireEnvelope.getRecords());
             }
 
-        }
+            tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
 
-        return null;
+            // we assume that infer returns the tensors in correct format so that post processing can manage it
+
+            if (this.infoPost.isPresent()) {
+                tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);
+                result = TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs()).fromTensorList(tensors);
+            } else {
+                result = TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs()).fromTensorList(tensors);
+            }
+
+            this.wireSupport.emit(result);
+            logger.info("AIComponent: Inference done. Emitting result.");
+        } catch (KuraIOException e) {
+            logger.error("Error processing WireEnvelope.", e);
+        }
     }
 
     @Override

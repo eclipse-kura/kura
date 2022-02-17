@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.kura.KuraException;
@@ -307,7 +308,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
         waitActivated();
 
-        ArrayList<String> interfaceNames = new ArrayList<>();
+        List<String> interfaceNames = new ArrayList<>();
         List<String> allInterfaceNames = this.linuxNetworkUtil.getAllInterfaceNames();
         if (allInterfaceNames != null) {
             interfaceNames.addAll(allInterfaceNames);
@@ -318,6 +319,11 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 interfaceNames.add(generatePppName(pppNumber));
             }
         }
+
+        // remove virtual interface for Access Point
+        interfaceNames = interfaceNames.stream()
+                .filter(name -> !name.endsWith(LinuxNetworkUtil.ACCESS_POINT_INTERFACE_SUFFIX))
+                .collect(Collectors.toList());
 
         return interfaceNames;
     }

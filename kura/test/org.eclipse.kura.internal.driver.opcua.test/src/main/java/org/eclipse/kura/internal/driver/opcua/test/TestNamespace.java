@@ -105,8 +105,8 @@ public class TestNamespace implements Namespace {
             { "XmlElementArray", Identifiers.XmlElement, new Variant(new XmlElement("<a>hello</a>")) },
             { "LocalizedTextArray", Identifiers.LocalizedText, new Variant(LocalizedText.english("localized text")) },
             { "QualifiedNameArray", Identifiers.QualifiedName, new Variant(new QualifiedName(1234, "defg")) },
-            { "NodeIdArray", Identifiers.NodeId, new Variant(new NodeId(1234, "abcd")) } };  
-    
+            { "NodeIdArray", Identifiers.NodeId, new Variant(new NodeId(1234, "abcd")) } };
+
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final SubscriptionModel subscriptionModel;
@@ -125,7 +125,8 @@ public class TestNamespace implements Namespace {
             NodeId folderNodeId = new NodeId(namespaceIndex, IDENTIFIER_HELLO_WORLD);
 
             UaFolderNode folderNode = new UaFolderNode(server.getNodeMap(), folderNodeId,
-                    new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD), LocalizedText.english(IDENTIFIER_HELLO_WORLD));
+                    new QualifiedName(namespaceIndex, IDENTIFIER_HELLO_WORLD),
+                    LocalizedText.english(IDENTIFIER_HELLO_WORLD));
 
             server.getNodeMap().addNode(folderNode);
 
@@ -215,6 +216,18 @@ public class TestNamespace implements Namespace {
             server.getNodeMap().addNode(node);
             scalarTypesFolder.addOrganizes(node);
         }
+
+        UaVariableNode largeIndex = new UaVariableNode.UaVariableNodeBuilder(server.getNodeMap())
+                .setNodeId(new NodeId(namespaceIndex, UInteger.MAX))
+                .setAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
+                .setUserAccessLevel(ubyte(AccessLevel.getMask(AccessLevel.READ_WRITE)))
+                .setBrowseName(new QualifiedName(namespaceIndex, "largeIndex"))
+                .setDisplayName(LocalizedText.english("largeIndex")).setDataType(Identifiers.Int32)
+                .setTypeDefinition(Identifiers.BaseDataVariableType).build();
+
+        largeIndex.setValue(new DataValue(new Variant(1234)));
+
+        server.getNodeMap().addNode(largeIndex);
     }
 
     @Override

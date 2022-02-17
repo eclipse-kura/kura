@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.milo.opcua.stack.core.AttributeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ByteString;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 
 /**
  * OPC-UA specific channel descriptor. The descriptor contains the following
@@ -197,7 +198,7 @@ public final class OpcUaChannelDescriptor implements ChannelDescriptor {
         String nodeIdString = properties.get(NODE_ID_PROP_NAME).toString();
         switch (nodeIdType) {
         case NUMERIC:
-            return new NodeId(nodeNamespaceIndex, Integer.parseInt(nodeIdString));
+            return new NodeId(nodeNamespaceIndex, UInteger.valueOf(nodeIdString));
         case STRING:
             return new NodeId(nodeNamespaceIndex, nodeIdString);
         case GUID:

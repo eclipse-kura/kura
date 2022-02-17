@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.linux.net.util;
 
 import java.io.ByteArrayOutputStream;
@@ -16,6 +28,7 @@ import org.eclipse.kura.executor.Signal;
 class CommandExecutorServiceStub implements CommandExecutorService {
 
     CommandStatus returnedStatus;
+    private String[] lastCommand;
 
     CommandExecutorServiceStub(CommandStatus returnedStatus) {
         this.returnedStatus = returnedStatus;
@@ -23,11 +36,13 @@ class CommandExecutorServiceStub implements CommandExecutorService {
 
     @Override
     public CommandStatus execute(Command command) {
+        this.lastCommand = command.getCommandLine();
         return returnedStatus;
     }
 
     @Override
     public void execute(Command command, Consumer<CommandStatus> callback) {
+        this.lastCommand = command.getCommandLine();
     }
 
     @Override
@@ -62,5 +77,9 @@ class CommandExecutorServiceStub implements CommandExecutorService {
         } catch (Exception e) {
         }
         returnedStatus.setOutputStream(out);
+    }
+
+    public String[] getLastCommand() {
+        return this.lastCommand;
     }
 }

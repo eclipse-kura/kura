@@ -224,6 +224,9 @@
 
 		<!-- Filesystem log provider bundle config -->
 		<antcall target="filesystem-logprovider-config" />
+		
+		<antcall target="container-orchestrator-config" />
+		
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
 			target -->
@@ -723,6 +726,8 @@ fi]]>
 		<antcall target="keystore-management-jar" />
 
 		<antcall target="filesystem-logprovider-jar" />
+		
+		<antcall target="container-orchestrator-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -1780,6 +1785,22 @@ fi]]>
 			update="true">
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.log.filesystem.provider_${org.eclipse.kura.log.filesystem.provider.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+		</zip>
+	</target>
+
+	<target name="container-orchestrator-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+	<target name="container-orchestrator-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip"
+			update="true">
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

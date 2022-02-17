@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 public class LinuxNetworkUtil {
 
+    public static final String ACCESS_POINT_INTERFACE_SUFFIX = "_ap";
+
     private static final String ETHTOOL_COMMAND = "ethtool";
 
     private static final Logger logger = LoggerFactory.getLogger(LinuxNetworkUtil.class);
@@ -67,6 +69,8 @@ public class LinuxNetworkUtil {
     private static final String LINE_MSG = "line: {}";
 
     private static final String ERR_EXECUTING_CMD_MSG = "error executing command --- {} --- exit value={}";
+
+    private static final String FAKE_MAC_ADDRESS = "12:34:56:78:ab:cd";
 
     private final CommandExecutorService executorService;
     private final WifiOptions wifiOptions;
@@ -1045,11 +1049,15 @@ public class LinuxNetworkUtil {
     }
 
     protected static String[] formIwDevIfaceInfoCommand(String ifaceName) {
-        return new String[] { "iw", "dev", ifaceName, "info" };
+        return new String[] { IW, "dev", ifaceName, "info" };
     }
 
     protected static String[] formIwDevIfaceLinkCommand(String ifaceName) {
-        return new String[] { "iw", "dev", ifaceName, "link" };
+        return new String[] { IW, "dev", ifaceName, "link" };
+    }
+
+    protected static String[] formIwDevIfaceInterfaceAddAp(String ifaceName, String apInterfaceName) {
+        return new String[] { IW, "dev", ifaceName, "interface", "add", apInterfaceName, "type", "__ap" };
     }
 
     protected static String[] formIwconfigIfaceCommand(String ifaceName) {
@@ -1070,6 +1078,14 @@ public class LinuxNetworkUtil {
 
     protected static String[] formIpRouteCommand(String ifaceName) {
         return new String[] { IP, "route", "show", "dev", ifaceName };
+    }
+
+    protected static String[] formIpLinkSetStatus(String ifaceName, String linkStatus) {
+        return new String[] { IP, "link", "set", "dev", ifaceName, linkStatus };
+    }
+
+    protected static String[] formIpLinkSetAddress(String ifaceName, String macAddress) {
+        return new String[] { IP, "link", "set", "dev", ifaceName, "address", macAddress };
     }
 
     public boolean isVirtual(String interfaceName) {
@@ -1103,6 +1119,56 @@ public class LinuxNetworkUtil {
         return gateway;
     }
 
+    public void createApNetworkInterface(String ifaceName, String dedicatedApInterface) throws KuraException {
+        if (Character.isDigit(ifaceName.charAt(0))) {
+            return;
+        }
+
+        CommandStatus status = this.executeCommand(formIwDevIfaceInterfaceAddAp(ifaceName, dedicatedApInterface));
+
+        if (!status.getExitStatus().isSuccessful()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                    "Failed to create ap interface " + dedicatedApInterface);
+        }
+    }
+
+    public void setNetworkInterfaceMacAddress(String ifaceName) throws KuraException {
+        if (Character.isDigit(ifaceName.charAt(0))) {
+            return;
+        }
+
+        CommandStatus status = this.executeCommand(formIpLinkSetAddress(ifaceName, FAKE_MAC_ADDRESS));
+
+        if (!status.getExitStatus().isSuccessful()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                    "Failed to set mac address for interface " + ifaceName);
+        }
+    }
+
+    public void setNetworkInterfaceLinkUp(String ifaceName) throws KuraException {
+        if (Character.isDigit(ifaceName.charAt(0))) {
+            return;
+        }
+
+        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "up"));
+
+        if (!status.getExitStatus().isSuccessful()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);
+        }
+    }
+
+    public void setNetworkInterfaceLinkDown(String ifaceName) throws KuraException {
+        if (Character.isDigit(ifaceName.charAt(0))) {
+            return;
+        }
+
+        CommandStatus status = this.executeCommand(formIpLinkSetStatus(ifaceName, "down"));
+
+        if (!status.getExitStatus().isSuccessful()) {
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Failed to set link up for interface " + ifaceName);
+        }
+    }
+
     private CommandStatus executeCommand(String[] commandString) {
         Command command = new Command(commandString);
         command.setTimeout(60);
@@ -1111,4 +1177,5 @@ public class LinuxNetworkUtil {
         command.setErrorStream(new ByteArrayOutputStream());
         return this.executorService.execute(command);
     }
+
 }

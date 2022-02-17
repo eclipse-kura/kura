@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -34,7 +34,7 @@ public class ConsoleOptions {
             new AdBuilder("app.root", "Web Server Entry Point", Tscalar.STRING) //
                     .setDefault("/admin/console") //
                     .setDescription(
-                            "Default Web Server Entry Point for Applications running on the framework's Web Server") //
+                            "This parameter allows to configure the relative path that the user will be redirected to when accessing http(s)://gateway-ip/. Note: this parameter does not change the ESF Web UI relative path, that is always /admin/console.") //
                     .build(), //
             String.class);
 
@@ -118,7 +118,7 @@ public class ConsoleOptions {
     private ConsoleOptions(final Map<String, Object> properties) throws KuraException {
         initProperties();
 
-        for (final SelfConfiguringComponentProperty<?> property : configurationProperties) {
+        for (final SelfConfiguringComponentProperty<?> property : this.configurationProperties) {
             property.update(properties);
         }
 
@@ -150,8 +150,8 @@ public class ConsoleOptions {
     }
 
     public Set<String> getEnabledAuthMethods() {
-        return authenticationMethodProperties.entrySet().stream().filter(e -> e.getValue().get()).map(e -> e.getKey())
-                .collect(Collectors.toSet());
+        return this.authenticationMethodProperties.entrySet().stream().filter(e -> e.getValue().get())
+                .map(e -> e.getKey()).collect(Collectors.toSet());
     }
 
     public Set<Integer> getAllowedPorts() {
@@ -191,24 +191,24 @@ public class ConsoleOptions {
     public GwtConsoleUserOptions getUserOptions() {
         final GwtConsoleUserOptions result = new GwtConsoleUserOptions();
 
-        result.setPasswordMinimumLength(passwordMinLength.get());
-        result.setPasswordRequireDigits(passwordRequireDigits.get());
-        result.setPasswordRequireSpecialChars(passwordRequireSpecialCharacters.get());
-        result.setPasswordRequireBothCases(passwordRequireBothCases.get());
+        result.setPasswordMinimumLength(this.passwordMinLength.get());
+        result.setPasswordRequireDigits(this.passwordRequireDigits.get());
+        result.setPasswordRequireSpecialChars(this.passwordRequireSpecialCharacters.get());
+        result.setPasswordRequireBothCases(this.passwordRequireBothCases.get());
 
         return result;
     }
 
     private void initProperties() {
-        configurationProperties.add(appRoot);
-        configurationProperties.add(sessionMaxInactivityInterval);
-        configurationProperties.add(bannerEnabled);
-        configurationProperties.add(bannerContent);
-        configurationProperties.add(passwordMinLength);
-        configurationProperties.add(passwordRequireDigits);
-        configurationProperties.add(passwordRequireSpecialCharacters);
-        configurationProperties.add(passwordRequireBothCases);
-        configurationProperties.add(allowedPorts);
+        this.configurationProperties.add(this.appRoot);
+        this.configurationProperties.add(this.sessionMaxInactivityInterval);
+        this.configurationProperties.add(this.bannerEnabled);
+        this.configurationProperties.add(this.bannerContent);
+        this.configurationProperties.add(this.passwordMinLength);
+        this.configurationProperties.add(this.passwordRequireDigits);
+        this.configurationProperties.add(this.passwordRequireSpecialCharacters);
+        this.configurationProperties.add(this.passwordRequireBothCases);
+        this.configurationProperties.add(this.allowedPorts);
 
         addAuthenticationMethodProperties();
     }
@@ -223,7 +223,7 @@ public class ConsoleOptions {
 
         final Map<String, Object> properties = new HashMap<>();
 
-        for (final SelfConfiguringComponentProperty<?> property : configurationProperties) {
+        for (final SelfConfiguringComponentProperty<?> property : this.configurationProperties) {
             definition.addAD(property.getAd());
             property.fillValue(properties);
         }
@@ -241,8 +241,8 @@ public class ConsoleOptions {
                                 .build(), //
                 Boolean.class);
 
-        authenticationMethodProperties.put(name, result);
-        configurationProperties.add(result);
+        this.authenticationMethodProperties.put(name, result);
+        this.configurationProperties.add(result);
 
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Red Hat Inc and others
+ * Copyright (c) 2018, 2022 Red Hat Inc and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Red Hat Inc
+ *  heyoulin <heyoulin@gmail.com>
  *******************************************************************************/
 package org.eclipse.kura.wire.camel;
 
@@ -92,12 +93,16 @@ public abstract class AbstractCamelWireComponent extends AbstractWireComponent {
     }
 
     protected void withContext(final Consumer<CamelContext> consumer) {
-        final CamelContext camelContext = this.tracker.getService();
-
-        if (camelContext != null) {
-            consumer.accept(camelContext);
+        if (this.tracker == null) {
+            logger.info("Camel tracker for context: {} is closed. skip processReceive massage", this.contextId);
         } else {
-            logger.warn("Missing Camel context: {}", this.contextId);
+            final CamelContext camelContext = this.tracker.getService();
+
+            if (camelContext != null) {
+                consumer.accept(camelContext);
+            } else {
+                logger.warn("Missing Camel context: {}", this.contextId);
+            }
         }
     }
 }

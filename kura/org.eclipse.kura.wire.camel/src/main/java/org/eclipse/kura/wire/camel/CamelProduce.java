@@ -22,8 +22,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.camel.CamelContext;
 import org.apache.camel.FluentProducerTemplate;
 import org.eclipse.kura.wire.WireEnvelope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CamelProduce extends AbstractReceiverWireComponent {
+
+    private static final Logger logger = LoggerFactory.getLogger(CamelProduce.class);
 
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
 
@@ -44,10 +48,14 @@ public class CamelProduce extends AbstractReceiverWireComponent {
         if (!templateAvailable) {
             createTemplate(context);
         }
-        template //
-                .withBody(envelope) //
-                .to(endpointUri) //
-                .asyncSend();
+        if (template != null) {
+            template //
+                    .withBody(envelope) //
+                    .to(endpointUri) //
+                    .asyncSend();
+        } else {
+            logger.debug("FluentProducerTemplate is changing. Skip send massage and wait next massage");
+        }
     }
 
     @Override
@@ -73,8 +81,11 @@ public class CamelProduce extends AbstractReceiverWireComponent {
             // Since templateAvailable is not class volatile variable there have race condition the other thread
             // already processes this and `templateAvailable` is still old value. So there must have a second check.
             // If already processed destroy first and recreate a new one
-            closeTemplate();
-            template = on(context);
+            if (!isTemplateAvailable(context)) {
+                // Maybe context is not same. But template still non null. close it
+                closeTemplate();
+                template = on(context);
+            }
         } finally {
             wlock.unlock();
         }

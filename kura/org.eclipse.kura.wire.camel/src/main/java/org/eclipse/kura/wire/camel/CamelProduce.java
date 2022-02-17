@@ -29,14 +29,18 @@ public class CamelProduce extends AbstractReceiverWireComponent {
 
     private FluentProducerTemplate template = null;
 
-    private volatile boolean templateAvailable = false;
-
     @Override
     protected void processReceive(final CamelContext context, final String endpointUri, final WireEnvelope envelope)
             throws Exception {
 
-        checkTemplate(context);
-
+        boolean templateAvailable = false;
+        final Lock rlock = this.rwLock.readLock();
+        rlock.lock();
+        try {
+            templateAvailable = isTemplateAvailable(context);
+        } finally {
+            rlock.unlock();
+        }
         if (!templateAvailable) {
             createTemplate(context);
         }
@@ -58,20 +62,17 @@ public class CamelProduce extends AbstractReceiverWireComponent {
         }
     }
 
-    private void checkTemplate(final CamelContext context) {
-        final Lock rlock = this.rwLock.readLock();
-        rlock.lock();
-        try {
-            templateAvailable = template != null && template.getCamelContext() == context;
-        } finally {
-            rlock.unlock();
-        }
+    private boolean isTemplateAvailable(final CamelContext context) {
+        return template != null && template.getCamelContext() == context;
     }
 
     private void createTemplate(final CamelContext context) {
         final Lock wlock = this.rwLock.writeLock();
         wlock.lock();
         try {
+            // Since templateAvailable is not class volatile variable there have race condition the other thread
+            // already processes this and `templateAvailable` is still old value. So there must have a second check.
+            // If already processed destroy first and recreate a new one
             closeTemplate();
             template = on(context);
         } finally {

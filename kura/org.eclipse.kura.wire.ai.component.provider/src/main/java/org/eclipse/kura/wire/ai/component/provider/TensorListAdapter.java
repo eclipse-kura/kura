@@ -13,6 +13,7 @@
 package org.eclipse.kura.wire.ai.component.provider;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,8 @@ public class TensorListAdapter {
     /**
      * 
      * @param descriptors
-     * @return
+     *            the list of {@link TensorDescriptor} to use in this instance
+     * @return the {@link TensorListAdapter} with the descriptors set
      */
     public static TensorListAdapter givenDescriptors(List<TensorDescriptor> descriptors) {
         if (instance == null) {
@@ -55,8 +57,9 @@ public class TensorListAdapter {
     /**
      *
      * @param records
-     * @return a list of {@link Tensor} of shape (1, x),
-     *         where x is 1 if record type is not a String or a ByteArray
+     * @return a list of {@link Tensor} of shape (1, n), where n:
+     *         n=1 if record type is Boolean, Double, Float, Integer, Long
+     *         if record type is a String x or a byte[] x, then n=length(x)
      * @throws KuraIOException
      *             when the expected shapes are not matching the actual ones of the record or
      *             if no descriptor matches the record name
@@ -81,22 +84,29 @@ public class TensorListAdapter {
         return output;
     }
 
-    public List<WireRecord> fromTensorList(List<Tensor> tensors) throws KuraIOException {
+    /**
+     * 
+     * @param tensors
+     *            of shape (1, n), where n:
+     *            n=1 if record type is Boolean, Double, Float, Integer, Long
+     *            if record type is a String x or a byte[] x, then n=length(x)
+     * @return a list of 1 {@link WireRecord}, where each properties entry corresponds to an output tensor
+     */
+    public List<WireRecord> fromTensorList(List<Tensor> tensors) {
         List<WireRecord> output = new LinkedList<>();
 
+        Map<String, TypedValue<?>> properties = new HashMap<>();
         for (Tensor tensor : tensors) {
+            String name = tensor.getDescriptor().getName();
             TypedValue<?> typedValue = TypedValues.newTypedValue(null);
+            properties.put(name, typedValue);
         }
+
+        output.add(new WireRecord(properties));
 
         return output;
     }
 
-    /**
-     * Returns the {@link TensorDescriptor} that matches the given {@code name}
-     * 
-     * @throws KuraIOException
-     *             if no descriptor matches the name
-     */
     private TensorDescriptor getDescriptorByName(String name) throws KuraIOException {
         TensorDescriptor descriptor = null;
         for (int i = 0; i < instance.descriptors.size(); i++) {
@@ -113,11 +123,6 @@ public class TensorListAdapter {
         return descriptor;
     }
 
-    /**
-     * 
-     * @throws KuraIOException
-     *             if the actual shape differs from the expected one
-     */
     private void checkShapes(long expectedX, long expectedY, long actualX, long actualY) throws KuraIOException {
         if (actualX != expectedX || actualY != expectedY) {
             throw new KuraIOException("Incorrect shape: expected (" + expectedX + ", " + expectedY + ") but found "
@@ -125,13 +130,6 @@ public class TensorListAdapter {
         }
     }
 
-    /**
-     * 
-     * @param typedValue
-     * @param descriptor
-     * @return a {@link Tensor} of shape (1, x), where x is 1 unless {@code typedValue} is a String or a ByteArray
-     * @throws KuraIOException
-     */
     private Tensor createTensorFromTypedValue(TypedValue<?> typedValue, TensorDescriptor descriptor)
             throws KuraIOException {
         Object value = typedValue.getValue();

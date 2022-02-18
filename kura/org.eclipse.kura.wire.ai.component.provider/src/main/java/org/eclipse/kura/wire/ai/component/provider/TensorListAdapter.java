@@ -29,12 +29,7 @@ import org.eclipse.kura.wire.WireRecord;
 public class TensorListAdapter {
 
     private static TensorListAdapter instance;
-    private List<WireRecord> wireRecords;
     private List<TensorDescriptor> descriptors;
-
-    private void setWireRecords(List<WireRecord> records) {
-        instance.wireRecords = records;
-    }
 
     private void setDescriptors(List<TensorDescriptor> descriptors) {
         instance.descriptors = descriptors;
@@ -56,29 +51,25 @@ public class TensorListAdapter {
 
     /**
      *
-     * @param records
+     * @param wireRecord
      * @return a list of {@link Tensor} of shape (1, n), where n:
      *         n=1 if record type is Boolean, Double, Float, Integer, Long
-     *         if record type is a String x or a byte[] x, then n=length(x)
+     *         n=length(x) if record type is a String x or a byte[] x
      * @throws KuraIOException
      *             when the expected shapes are not matching the actual ones of the record or
      *             if no descriptor matches the record name
      */
-    public List<Tensor> fromWireRecords(List<WireRecord> records) throws KuraIOException {
-        instance.setWireRecords(records);
-
+    public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraIOException {
         List<Tensor> output = new LinkedList<>();
 
-        for (WireRecord wireRecord : instance.wireRecords) {
-            Map<String, TypedValue<?>> properties = wireRecord.getProperties();
+        Map<String, TypedValue<?>> properties = wireRecord.getProperties();
 
-            // each entry (=channel) becomes a tensor
-            for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
+        // each entry (=channel) becomes a tensor
+        for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
 
-                TensorDescriptor descriptor = getDescriptorByName(entry.getKey());
+            TensorDescriptor descriptor = getDescriptorByName(entry.getKey());
 
-                output.add(createTensorFromTypedValue(entry.getValue(), descriptor));
-            }
+            output.add(createTensorFromTypedValue(entry.getValue(), descriptor));
         }
 
         return output;
@@ -89,12 +80,10 @@ public class TensorListAdapter {
      * @param tensors
      *            of shape (1, n), where n:
      *            n=1 if record type is Boolean, Double, Float, Integer, Long
-     *            if record type is a String x or a byte[] x, then n=length(x)
-     * @return a list of 1 {@link WireRecord}, where each properties entry corresponds to an output tensor
+     *            n=length(x) if record type is a String x or a byte[] x
+     * @return a {@link WireRecord}, where each properties entry corresponds to an output tensor
      */
-    public List<WireRecord> fromTensorList(List<Tensor> tensors) {
-        List<WireRecord> output = new LinkedList<>();
-
+    public WireRecord fromTensorList(List<Tensor> tensors) {
         Map<String, TypedValue<?>> properties = new HashMap<>();
         for (Tensor tensor : tensors) {
             String name = tensor.getDescriptor().getName();
@@ -102,9 +91,7 @@ public class TensorListAdapter {
             properties.put(name, typedValue);
         }
 
-        output.add(new WireRecord(properties));
-
-        return output;
+        return new WireRecord(properties);
     }
 
     private TensorDescriptor getDescriptorByName(String name) throws KuraIOException {

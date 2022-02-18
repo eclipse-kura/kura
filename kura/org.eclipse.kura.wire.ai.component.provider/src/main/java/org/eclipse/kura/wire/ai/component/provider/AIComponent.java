@@ -14,6 +14,7 @@ package org.eclipse.kura.wire.ai.component.provider;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -132,48 +133,46 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         logger.info("Updating AIComponent... Done");
     }
 
-    private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraIOException {
-        Optional<ModelInfo> info = this.inferenceEngineModelManagerService.getModelInfo(modelName);
-        if (!info.isPresent()) {
-            throw new KuraIOException("Unable to retrieve model info associated to " + modelName);
-        }
-
-        return info;
-    }
-
     @Override
     public synchronized void onWireReceive(WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
         logger.info("AIComponent: received envelope. Inference starts...");
 
-        try {
-            List<Tensor> tensors;
-            List<WireRecord> result;
+        List<WireRecord> result = new LinkedList<>();
 
-            if (this.infoPre.isPresent()) {
-                tensors = TensorListAdapter.givenDescriptors(this.infoPre.get().getInputs())
-                        .fromWireRecords(wireEnvelope.getRecords());
-                tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
-            } else {
-                tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
-                        .fromWireRecords(wireEnvelope.getRecords());
+        for (WireRecord wireRecord : wireEnvelope.getRecords()) {
+            try {
+
+                List<Tensor> tensors;
+
+                if (this.infoPre.isPresent()) {
+                    tensors = TensorListAdapter.givenDescriptors(this.infoPre.get().getInputs())
+                            .fromWireRecord(wireRecord);
+                    tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
+                } else {
+                    tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
+                            .fromWireRecord(wireRecord);
+                }
+
+                tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
+
+                if (this.infoPost.isPresent()) {
+                    tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);
+                    result.add(TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs())
+                            .fromTensorList(tensors));
+                } else {
+                    result.add(TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs())
+                            .fromTensorList(tensors));
+                }
+
+            } catch (KuraIOException e) {
+                logger.error("Error processing WireRecord.", e);
             }
-
-            tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
-
-            if (this.infoPost.isPresent()) {
-                tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);
-                result = TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs()).fromTensorList(tensors);
-            } else {
-                result = TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs()).fromTensorList(tensors);
-            }
-
-            this.wireSupport.emit(result);
-            logger.info("AIComponent: Inference done. Emitting result.");
-        } catch (KuraIOException e) {
-            logger.error("Error processing WireEnvelope.", e);
         }
+
+        this.wireSupport.emit(result);
+        logger.info("AIComponent: Inference done. Emitting result.");
     }
 
     @Override
@@ -194,5 +193,14 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     @Override
     public void producersConnected(Wire[] wires) {
         this.wireSupport.producersConnected(wires);
+    }
+
+    private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraIOException {
+        Optional<ModelInfo> info = this.inferenceEngineModelManagerService.getModelInfo(modelName);
+        if (!info.isPresent()) {
+            throw new KuraIOException("Unable to retrieve model info associated to " + modelName);
+        }
+
+        return info;
     }
 }

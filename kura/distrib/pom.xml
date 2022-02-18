@@ -576,6 +576,7 @@
                                     <version>${org.eclipse.kura.container.orchestration.provider.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
                                 </artifactItem>

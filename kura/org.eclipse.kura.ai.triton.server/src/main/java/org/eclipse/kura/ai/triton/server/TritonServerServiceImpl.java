@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.ai.inference.InferenceEngineService;
 import org.eclipse.kura.ai.inference.ModelInfo;
@@ -151,17 +152,18 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             try {
                 while (!isEngineReady()) {
                     if (index++ >= 6) {
+                        logger.warn("Cannot load models since server is not ready.");
                         return;
                     }
                     TritonServerLocalManager.sleepFor(10);
                 }
-            } catch (KuraIOException e) {
-                logger.error("Cannot read engine status", e);
+            } catch (KuraException e) {
+                logger.debug("Cannot read engine status", e);
             }
             this.options.getModels().forEach(modelName -> {
                 try {
                     loadModel(modelName, Optional.empty());
-                } catch (KuraIOException e) {
+                } catch (KuraException e) {
                     logger.error("Cannot load model " + modelName, e);
                 }
             });
@@ -169,7 +171,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public void loadModel(String modelName, Optional<String> modelPath) throws KuraIOException {
+    public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
         RepositoryModelLoadRequest.Builder builder = RepositoryModelLoadRequest.newBuilder();
         builder.setModelName(modelName);
         try {
@@ -180,7 +182,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public void unloadModel(String modelName) throws KuraIOException {
+    public void unloadModel(String modelName) throws KuraException {
         RepositoryModelUnloadRequest.Builder builder = RepositoryModelUnloadRequest.newBuilder();
         builder.setModelName(modelName);
         try {
@@ -192,7 +194,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public boolean isModelLoaded(String modelName) throws KuraIOException {
+    public boolean isModelLoaded(String modelName) throws KuraException {
         boolean isLoaded = false;
 
         ModelReadyRequest.Builder builder = ModelReadyRequest.newBuilder();
@@ -207,7 +209,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public List<String> getModelNames() throws KuraIOException {
+    public List<String> getModelNames() throws KuraException {
         List<String> modelNames = new ArrayList<>();
 
         RepositoryIndexRequest repositoryIndexRequest = RepositoryIndexRequest.getDefaultInstance();
@@ -222,7 +224,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public Optional<ModelInfo> getModelInfo(String modelName) throws KuraIOException {
+    public Optional<ModelInfo> getModelInfo(String modelName) throws KuraException {
         Optional<ModelInfo> modelInfo = Optional.empty();
         ModelMetadataRequest.Builder builder = ModelMetadataRequest.newBuilder();
         builder.setName(modelName);
@@ -253,7 +255,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public boolean isEngineReady() throws KuraIOException {
+    public boolean isEngineReady() throws KuraException {
         boolean isAlive = false;
 
         ServerLiveRequest serverLiveRequest = ServerLiveRequest.getDefaultInstance();
@@ -267,7 +269,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public List<Tensor> infer(ModelInfo modelInfo, List<Tensor> inputData) throws KuraIOException {
+    public List<Tensor> infer(ModelInfo modelInfo, List<Tensor> inputData) throws KuraException {
         List<Tensor> inferenceResults = new ArrayList<>();
 
         ModelInferRequest.Builder inferRequest = ModelInferRequest.newBuilder();

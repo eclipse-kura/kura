@@ -30,9 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.ai.inference.InferenceEngineModelManagerService;
 import org.eclipse.kura.ai.inference.InferenceEngineService;
-import org.eclipse.kura.ai.inference.InferenceEngineStatusService;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.ModelInfoBuilder;
 import org.eclipse.kura.ai.inference.Tensor;
@@ -68,8 +66,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
-public class TritonServerServiceImpl implements InferenceEngineService, InferenceEngineStatusService,
-        InferenceEngineModelManagerService, ConfigurableComponent {
+public class TritonServerServiceImpl implements InferenceEngineService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceImpl.class);
 
@@ -170,7 +167,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Inferenc
     }
 
     @Override
-    public void loadModel(String modelName, Optional<String> model) throws KuraIOException {
+    public void loadModel(String modelName, Optional<String> modelPath) throws KuraIOException {
         RepositoryModelLoadRequest.Builder builder = RepositoryModelLoadRequest.newBuilder();
         builder.setModelName(modelName);
         try {
@@ -178,11 +175,6 @@ public class TritonServerServiceImpl implements InferenceEngineService, Inferenc
         } catch (StatusRuntimeException e) {
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
-    }
-
-    @Override
-    public void loadModel(String modelName, String modelPath) throws KuraIOException {
-        // to do...
     }
 
     @Override

@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.ai.inference.InferenceEngineModelManagerService;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.ai.inference.InferenceEngineService;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
@@ -48,7 +48,6 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
     private AIComponentOptions options;
     private InferenceEngineService inferenceEngineService;
-    private InferenceEngineModelManagerService inferenceEngineModelManagerService;
 
     private Optional<ModelInfo> infoPre;
     private Optional<ModelInfo> infoInfer;
@@ -78,20 +77,6 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         }
     }
 
-    public void bindInferenceEngineModelManagerService(
-            final InferenceEngineModelManagerService inferenceEngineModelManagerService) {
-        if (this.inferenceEngineModelManagerService == null) {
-            this.inferenceEngineModelManagerService = inferenceEngineModelManagerService;
-        }
-    }
-
-    public void unbindInferenceEngineModelManagerService(
-            final InferenceEngineModelManagerService inferenceEngineModelManagerService) {
-        if (this.inferenceEngineModelManagerService == inferenceEngineModelManagerService) {
-            this.inferenceEngineModelManagerService = inferenceEngineModelManagerService;
-        }
-    }
-
     public void activate(final ComponentContext componentContext, final Map<String, Object> properties)
             throws ComponentException {
         logger.info("Activating AIComponent...");
@@ -115,17 +100,20 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         this.options = new AIComponentOptions(properties);
 
         try {
-            if (this.options.getPreprocessorModelName().isPresent()) {
-                this.infoPre = retrieveModelInfo(this.options.getPreprocessorModelName().get());
+            if (this.inferenceEngineService.isEngineReady()) {
+                if (this.options.getPreprocessorModelName().isPresent()) {
+                    this.infoPre = retrieveModelInfo(this.options.getPreprocessorModelName().get());
+                }
+
+                this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
+
+                if (this.options.getPostprocessorModelName().isPresent()) {
+                    this.infoPost = retrieveModelInfo(this.options.getPostprocessorModelName().get());
+                }
+            } else {
+                logger.error("Inference engine not ready. Try again later.");
             }
-
-            this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
-
-            if (this.options.getPostprocessorModelName().isPresent()) {
-                this.infoPost = retrieveModelInfo(this.options.getPostprocessorModelName().get());
-            }
-
-        } catch (KuraIOException e) {
+        } catch (KuraException e) {
             logger.error("Error opening model.", e);
             this.deactivate();
         }
@@ -166,7 +154,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
                             .fromTensorList(tensors));
                 }
 
-            } catch (KuraIOException e) {
+            } catch (KuraException e) {
                 logger.error("Error processing WireRecord.", e);
             }
         }
@@ -195,10 +183,14 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         this.wireSupport.producersConnected(wires);
     }
 
-    private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraIOException {
-        Optional<ModelInfo> info = this.inferenceEngineModelManagerService.getModelInfo(modelName);
+    private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraException {
+        if (this.inferenceEngineService.isModelLoaded(modelName)) {
+            this.inferenceEngineService.loadModel(modelName, Optional.empty());
+        }
+
+        Optional<ModelInfo> info = this.inferenceEngineService.getModelInfo(modelName);
         if (!info.isPresent()) {
-            throw new KuraIOException("Unable to retrieve model info associated to " + modelName);
+            throw new KuraException(KuraErrorCode.INVALID_PARAMETER);
         }
 
         return info;

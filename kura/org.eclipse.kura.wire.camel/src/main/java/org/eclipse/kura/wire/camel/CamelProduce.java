@@ -15,10 +15,6 @@ package org.eclipse.kura.wire.camel;
 
 import static org.apache.camel.builder.DefaultFluentProducerTemplate.on;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.FluentProducerTemplate;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -29,30 +25,34 @@ public class CamelProduce extends AbstractReceiverWireComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(CamelProduce.class);
 
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock(true);
-
     private FluentProducerTemplate template = null;
+
+    @Override
+    protected void bindContext(final CamelContext context) {
+
+        try {
+            closeTemplate();
+            if (context != null) {
+                this.template = on(context);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to bind Camel context", e);
+        }
+
+    }
 
     @Override
     protected void processReceive(final CamelContext context, final String endpointUri, final WireEnvelope envelope)
             throws Exception {
-
-        boolean templateAvailable = false;
-        final Lock rlock = this.rwLock.readLock();
-        rlock.lock();
-        try {
-            templateAvailable = isTemplateAvailable(context);
-        } finally {
-            rlock.unlock();
-        }
-        if (!templateAvailable) {
-            createTemplate(context);
-        }
-        if (template != null) {
-            template //
-                    .withBody(envelope) //
-                    .to(endpointUri) //
-                    .asyncSend();
+        if (template != null && context != null) {
+            try {
+                template //
+                        .withBody(envelope) //
+                        .to(endpointUri) //
+                        .asyncSend();
+            } catch (Exception e) {
+                logger.error("asyncSend error", e);
+            }
         } else {
             logger.debug("FluentProducerTemplate is changing. Skip send massage and wait next massage");
         }
@@ -60,35 +60,7 @@ public class CamelProduce extends AbstractReceiverWireComponent {
 
     @Override
     protected void deactivate() {
-        super.deactivate();
-        final Lock wlock = this.rwLock.writeLock();
-        wlock.lock();
-        try {
-            closeTemplate();
-        } finally {
-            wlock.unlock();
-        }
-    }
-
-    private boolean isTemplateAvailable(final CamelContext context) {
-        return template != null && template.getCamelContext() == context;
-    }
-
-    private void createTemplate(final CamelContext context) {
-        final Lock wlock = this.rwLock.writeLock();
-        wlock.lock();
-        try {
-            // Since templateAvailable is not class volatile variable there have race condition the other thread
-            // already processes this and `templateAvailable` is still old value. So there must have a second check.
-            // If already processed destroy first and recreate a new one
-            if (!isTemplateAvailable(context)) {
-                // Maybe context is not same. But template still non null. close it
-                closeTemplate();
-                template = on(context);
-            }
-        } finally {
-            wlock.unlock();
-        }
+        closeTemplate();
     }
 
     private void closeTemplate() {
@@ -101,5 +73,4 @@ public class CamelProduce extends AbstractReceiverWireComponent {
             }
         }
     }
-
 }

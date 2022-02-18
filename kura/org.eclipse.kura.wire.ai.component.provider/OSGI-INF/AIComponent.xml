@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    
+   Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+   This program and the accompanying materials are made
+   available under the terms of the Eclipse Public License 2.0
+   which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+    Eurotech
+    
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+	configuration-policy="require"
+	activate="activate"
+	deactivate="deactivate"
+	enabled="true"
+	immediate="true"
+	modified="updated"
+	name="org.eclipse.kura.wire.AIComponent">
+   
+   <implementation class="org.eclipse.kura.wire.ai.component.provider.AIComponent"/>
+   <service>
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="org.eclipse.kura.wire.WireComponent"/>
+      <provide interface="org.eclipse.kura.wire.WireEmitter"/>
+      <provide interface="org.eclipse.kura.wire.WireReceiver"/>
+      <provide interface="org.osgi.service.wireadmin.Producer"/>
+      <provide interface="org.osgi.service.wireadmin.Consumer"/>
+   </service>
+   <property name="service.pid" value="org.eclipse.kura.wire.ai"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <reference bind="bindWireHelperService" 
+   	          cardinality="1..1" 
+   	          interface="org.eclipse.kura.wire.WireHelperService" 
+   	          name="WireHelperService" 
+   	          policy="static" 
+   	          unbind="unbindWireHelperService"/>
+</scr:component>

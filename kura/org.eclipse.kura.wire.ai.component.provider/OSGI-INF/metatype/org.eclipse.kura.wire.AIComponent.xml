@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+     
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.wire.AIComponent"
+         name="AI" 
+         description="A wire component that allows to interact with Inference Engines to perform machine learning.">
+         
+        <AD id="InferenceEngine.target"
+            name="InferenceEngine Target Filter"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="(kura.service.pid=org.eclipse.kura.INFERENCEAI)"
+            description="Specifies, as an OSGi target filter, the pid of the of the AI Inference Engine instance to be used.">
+        </AD>
+        
+        <AD id="preprocessor.model.name"
+        	name="preprocessor.model.name"
+        	type="String"
+        	cardinality="0"
+        	required="false"
+        	default=""
+        	description="Specify the model name to be used as a preprocessing step. Leave empty to bypass this step.">
+        </AD>
+        
+        <AD id="inference.model.name"
+        	name="inference.model.name"
+        	type="String"
+        	cardinality="0"
+        	required="true"
+        	default="model_name"
+        	description="Specify the model name to be used for the inference step.">
+        </AD>
+        
+        <AD id="postprocessor.model.name"
+        	name="postprocessor.model.name"
+        	type="String"
+        	cardinality="0"
+        	required="false"
+        	default=""
+        	description="Specify the model name to be used as a postprocessing step. Leave empty to bypass this step.">
+        </AD>
+        
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.wire.AIComponent" factoryPid="org.eclipse.kura.wire.AIComponent">
+        <Object ocdref="org.eclipse.kura.wire.AIComponent"/>
+    </Designate>
+</MetaData>

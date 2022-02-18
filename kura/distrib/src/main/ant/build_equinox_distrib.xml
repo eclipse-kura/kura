@@ -1260,6 +1260,7 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.component.conditional.provider_${org.eclipse.kura.wire.component.conditional.provider.version}.jar@5:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar@5:start" />
+			<entry key="osgi.bundles" operation="+" value=", reference:file:${kura.install.dir}/${$kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 
@@ -1361,6 +1362,9 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.join.provider_${org.eclipse.kura.wire.component.join.provider.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

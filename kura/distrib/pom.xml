@@ -725,11 +725,8 @@
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar" tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
-<<<<<<< HEAD
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
-=======
                                 <move file="target/plugins/org.eclipse.kura.ai.triton.server.jar" tofile="target/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" />
->>>>>>> b4ee25404 (First implementation of Triton inference engine)
                             </tasks>
                         </configuration>
                     </execution>

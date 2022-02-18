@@ -17,7 +17,9 @@ Bundle-ClassPath: .,
  lib/perfmark-api-0.19.0.jar,
  lib/grpc-api-1.33.1.jar
 Bundle-ActivationPolicy: lazy
-Import-Package: com.google.common.util.concurrent;version="25.0.0",
+Import-Package: com.google.common.base;version="25.0.0",
+ com.google.common.io;version="25.0.0",
+ com.google.common.util.concurrent;version="25.0.0",
  com.google.gson;version="2.7.0",
  org.apache.commons.io;version="2.4.0",
  org.eclipse.kura;version="[1.0,2.0)",

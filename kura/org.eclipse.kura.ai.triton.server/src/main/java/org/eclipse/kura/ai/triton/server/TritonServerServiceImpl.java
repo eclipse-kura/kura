@@ -104,7 +104,9 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     public void updated(Map<String, Object> properties) {
         logger.info("Update TritonServerService...");
-        this.tritonServerLocalManager.stop();
+        if (nonNull(this.tritonServerLocalManager)) {
+            this.tritonServerLocalManager.stop();
+        }
         this.options = new TritonServerServiceOptions(properties);
         if (isConfigurationValid()) {
             setGrpcResources();

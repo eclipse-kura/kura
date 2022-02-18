@@ -1617,7 +1617,7 @@ fi]]>
         <propertyfile
             file="${project.build.directory}/${build.output.name}/config.ini">
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar@4" />
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar@4:start" />
         </propertyfile>
     </target>
 	

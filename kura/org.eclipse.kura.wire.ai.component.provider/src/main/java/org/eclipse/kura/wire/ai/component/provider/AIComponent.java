@@ -66,9 +66,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     }
 
     public void bindInferenceEngineService(final InferenceEngineService inferenceEngineService) {
-        if (this.inferenceEngineService == null) {
-            this.inferenceEngineService = inferenceEngineService;
-        }
+        this.inferenceEngineService = inferenceEngineService;
     }
 
     public void unbindInferenceEngineService(final InferenceEngineService inferenceEngineService) {

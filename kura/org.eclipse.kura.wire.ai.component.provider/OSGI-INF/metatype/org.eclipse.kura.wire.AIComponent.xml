@@ -18,7 +18,7 @@
          name="AI" 
          description="A wire component that allows to interact with Inference Engines to perform machine learning.">
          
-        <AD id="org.eclipse.kura.ai.inference.InferenceEngineService.target"
+        <AD id="InferenceEngineService.target"
             name="InferenceEngineService Target Filter"
             type="String"
             cardinality="0"

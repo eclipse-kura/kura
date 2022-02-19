@@ -338,7 +338,7 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptorBuilder setLoggingTypeByString(String containerLoggingType) {
-            return setLoggingType(LoggingType.fromValue(containerLoggingType));
+            return this.setLoggingType(LoggingType.fromValue(containerLoggingType));
         }
 
         public ContainerDescriptor build() {

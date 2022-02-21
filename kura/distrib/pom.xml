@@ -572,6 +572,11 @@
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
+                                    <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
                                     <artifactId>org.eclipse.kura.container.orchestration.provider</artifactId>
                                     <version>${org.eclipse.kura.container.orchestration.provider.version}</version>
                                 </artifactItem>
@@ -725,6 +730,7 @@
                                 <move file="target/plugins/org.eclipse.kura.rest.configuration.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar" tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.wire.ai.component.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.ai.component.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" />
                             </tasks>

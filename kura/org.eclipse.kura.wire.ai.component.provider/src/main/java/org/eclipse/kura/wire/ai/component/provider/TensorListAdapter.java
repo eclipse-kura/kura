@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
@@ -30,6 +32,9 @@ public class TensorListAdapter {
 
     private static TensorListAdapter instance;
     private List<TensorDescriptor> descriptors;
+
+    private TensorListAdapter() {
+    }
 
     private void setDescriptors(List<TensorDescriptor> descriptors) {
         instance.descriptors = descriptors;
@@ -55,86 +60,80 @@ public class TensorListAdapter {
      * @return a list of {@link Tensor} of shape (1, n), where n:
      *         n=1 if record type is Boolean, Double, Float, Integer, Long
      *         n=length(x) if record type is a String x or a byte[] x
-     * @throws KuraIOException
+     * @throws KuraException
      *             when the expected shapes are not matching the actual ones of the record or
      *             if no descriptor matches the record name
      */
-    public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraIOException {
+    public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraException {
         List<Tensor> output = new LinkedList<>();
 
-        Map<String, TypedValue<?>> properties = wireRecord.getProperties();
-
-        // each entry (=channel) becomes a tensor
-        for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
-
-            TensorDescriptor descriptor = getDescriptorByName(entry.getKey());
-
-            output.add(createTensorFromTypedValue(entry.getValue(), descriptor));
+        // each descriptor name must have an entry in the record
+        for (TensorDescriptor descriptor : instance.descriptors) {
+            TypedValue<?> value = getTypedValueByNameFromMap(descriptor.getName(), wireRecord.getProperties());
+            output.add(createTensorFromTypedValue(value, descriptor));
         }
 
         return output;
     }
 
     /**
+     * Each tensor of shape ({@code m}, {@code l}) will be converted to a {@link WireRecord} that will have {@code m} x
+     * {@code l} entries in its properties
      * 
      * @param tensors
-     *            of shape (1, n), where n:
-     *            n=1 if record type is Boolean, Double, Float, Integer, Long
-     *            n=length(x) if record type is a String x or a byte[] x
-     * @return a {@link WireRecord}, where each properties entry corresponds to an output tensor
+     *            the list of {@link Tensor} to convert to a list of {@link WireRecord}
+     * @return a list {@link WireRecord}, one for each tensor
      */
-    public WireRecord fromTensorList(List<Tensor> tensors) {
-        Map<String, TypedValue<?>> properties = new HashMap<>();
+    public List<WireRecord> fromTensorList(List<Tensor> tensors) {
+
+        List<WireRecord> result = new ArrayList<>();
+
         for (Tensor tensor : tensors) {
+            Map<String, TypedValue<?>> properties = new HashMap<>();
             String name = tensor.getDescriptor().getName();
-            TypedValue<?> typedValue = TypedValues.newTypedValue(null);
-            properties.put(name, typedValue);
+            Class<?> tensorType = tensor.getType();
+
+            if (tensor.getData(tensorType).isPresent()) {
+
+                List<?> tensorData = tensor.getData(tensorType).get();
+
+                // unwrap tensor data to map entries
+                for (int dimension = 0; dimension < tensor.getDescriptor().getShape().size(); dimension++) {
+                    for (int i = 0; i < tensor.getDescriptor().getShape().get(dimension); i++) {
+                        TypedValue<?> typedValue = TypedValues.newTypedValue(tensorData.get(i));
+                        properties.put(name, typedValue);
+                    }
+                }
+            }
+
+            result.add(new WireRecord(properties));
         }
 
-        return new WireRecord(properties);
+        return result;
     }
 
-    private TensorDescriptor getDescriptorByName(String name) throws KuraIOException {
-        TensorDescriptor descriptor = null;
-        for (int i = 0; i < instance.descriptors.size(); i++) {
-            if (instance.descriptors.get(i).getName().equals(name)) {
-                descriptor = instance.descriptors.get(i);
-                break;
+    private TypedValue<?> getTypedValueByNameFromMap(String name, Map<String, TypedValue<?>> properties)
+            throws KuraException {
+
+        for (Entry<String, TypedValue<?>> entry : properties.entrySet()) {
+            if (entry.getKey().equals(name)) {
+                return entry.getValue();
             }
         }
-
-        if (descriptor == null) {
-            throw new KuraIOException("No TensorDescriptor found that matches name: " + name + ".");
-        }
-
-        return descriptor;
-    }
-
-    private void checkShapes(long expectedX, long expectedY, long actualX, long actualY) throws KuraIOException {
-        if (actualX != expectedX || actualY != expectedY) {
-            throw new KuraIOException("Incorrect shape: expected (" + expectedX + ", " + expectedY + ") but found "
-                    + "(" + actualX + ", " + actualY + ").");
-        }
+        throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
 
     private Tensor createTensorFromTypedValue(TypedValue<?> typedValue, TensorDescriptor descriptor)
             throws KuraIOException {
         Object value = typedValue.getValue();
-        long shapeX = descriptor.getShape().get(0);
-        long shapeY = descriptor.getShape().get(1);
-
         switch (typedValue.getType()) {
         case BOOLEAN:
-            checkShapes(1, 1, shapeX, shapeY);
-
             List<Boolean> boolData = new ArrayList<>();
             boolData.add((Boolean) value);
 
             return new Tensor(Boolean.class, descriptor, boolData);
         case BYTE_ARRAY:
             byte[] byteArrayValue = (byte[]) value;
-
-            checkShapes(1, byteArrayValue.length, shapeX, shapeY);
 
             List<Byte> byteArrayData = new ArrayList<>();
             for (byte b : byteArrayValue) {
@@ -143,37 +142,27 @@ public class TensorListAdapter {
 
             return new Tensor(Byte.class, descriptor, byteArrayData);
         case DOUBLE:
-            checkShapes(1, 1, shapeX, shapeY);
-
             List<Double> doubleData = new ArrayList<>();
             doubleData.add((Double) value);
 
             return new Tensor(Double.class, descriptor, doubleData);
         case FLOAT:
-            checkShapes(1, 1, shapeX, shapeY);
-
             List<Float> floatData = new ArrayList<>();
             floatData.add((Float) value);
 
             return new Tensor(Float.class, descriptor, floatData);
         case INTEGER:
-            checkShapes(1, 1, shapeX, shapeY);
-
             List<Integer> intData = new ArrayList<>();
             intData.add((Integer) value);
 
             return new Tensor(Integer.class, descriptor, intData);
         case LONG:
-            checkShapes(1, 1, shapeX, shapeY);
-
             List<Long> longData = new ArrayList<>();
             longData.add((Long) value);
 
             return new Tensor(Long.class, descriptor, longData);
         case STRING:
             String stringValue = (String) value;
-
-            checkShapes(1, stringValue.length(), shapeX, shapeY);
 
             List<Byte> bytesData = new ArrayList<>();
             for (char c : stringValue.toCharArray()) {

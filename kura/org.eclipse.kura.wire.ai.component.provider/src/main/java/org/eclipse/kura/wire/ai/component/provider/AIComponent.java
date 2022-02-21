@@ -96,6 +96,9 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         logger.info("Updating AIComponent...");
 
         this.options = new AIComponentOptions(properties);
+        this.infoPre = Optional.empty();
+        this.infoInfer = Optional.empty();
+        this.infoPost = Optional.empty();
 
         try {
             if (this.inferenceEngineService.isEngineReady()) {
@@ -147,10 +150,10 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
                     if (this.infoPost.isPresent()) {
                         tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);
-                        result.add(TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs())
+                        result.addAll(TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs())
                                 .fromTensorList(tensors));
                     } else {
-                        result.add(TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs())
+                        result.addAll(TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs())
                                 .fromTensorList(tensors));
                     }
 

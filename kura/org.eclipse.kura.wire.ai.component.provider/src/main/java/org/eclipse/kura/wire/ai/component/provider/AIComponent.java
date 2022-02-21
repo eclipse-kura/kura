@@ -100,28 +100,32 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         this.infoInfer = Optional.empty();
         this.infoPost = Optional.empty();
 
-        try {
-            if (this.inferenceEngineService.isEngineReady()) {
+        if (this.inferenceEngineService != null) {
+            try {
+                if (this.inferenceEngineService.isEngineReady()) {
 
-                if (this.options.getPreprocessorModelName().isPresent()) {
-                    this.infoPre = retrieveModelInfo(this.options.getPreprocessorModelName().get());
+                    if (this.options.getPreprocessorModelName().isPresent()) {
+                        this.infoPre = retrieveModelInfo(this.options.getPreprocessorModelName().get());
+                    }
+
+                    this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
+
+                    if (this.options.getPostprocessorModelName().isPresent()) {
+                        this.infoPost = retrieveModelInfo(this.options.getPostprocessorModelName().get());
+                    }
+
+                    logger.info("Updating AIComponent... Done");
+
+                } else {
+                    logger.error("Inference engine not ready. Try again later.");
+                    this.deactivate();
                 }
-
-                this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
-
-                if (this.options.getPostprocessorModelName().isPresent()) {
-                    this.infoPost = retrieveModelInfo(this.options.getPostprocessorModelName().get());
-                }
-
-                logger.info("Updating AIComponent... Done");
-
-            } else {
-                logger.error("Inference engine not ready. Try again later.");
+            } catch (KuraException e) {
+                logger.error("Error opening model.", e);
                 this.deactivate();
             }
-        } catch (KuraException e) {
-            logger.error("Error opening model.", e);
-            this.deactivate();
+        } else {
+            logger.info("No InferenceEngineService target found. AIComponent is not started.");
         }
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  *  Eurotech
  *  Amit Kumar Mondal
  *  Red Hat Inc
+ *  heyoulin <heyoulin@gmail.com>
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui;
 
@@ -77,7 +78,6 @@ import org.gwtbootstrap3.client.ui.Panel;
 import org.gwtbootstrap3.client.ui.PanelBody;
 import org.gwtbootstrap3.client.ui.PanelHeader;
 import org.gwtbootstrap3.client.ui.Row;
-import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.gwtbootstrap3.client.ui.constants.IconSize;
 import org.gwtbootstrap3.client.ui.constants.IconType;
@@ -125,7 +125,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @UiField
     PanelBody contentPanelBody;
     @UiField
-    TabListItem status;
+    AnchorListItem status;
     @UiField
     AnchorListItem device;
     @UiField
@@ -842,10 +842,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     public void confirmIfUiDirty(final Runnable action) {
         if (isUiDirty()) {
             this.alertDialog.show(MSGS.deviceConfigDirty(), () -> {
+                EntryClassUi.this.wiresBinder.unload();
                 forceTabsCleaning();
                 action.run();
             });
         } else {
+            this.wiresBinder.unload();
             action.run();
         }
     }

@@ -36,14 +36,6 @@
 	</properties>
 	
 	<build>
-    	<resources>
-            <resource>
-                <directory>${project.build.directory}/generated-sources/protobuf/java</directory>
-            </resource>
-            <resource>
-                <directory>${project.build.directory}/generated-sources/protobuf/grpc-java</directory>
-            </resource>
-        </resources>
         <extensions>
             <extension>
                 <groupId>kr.motd.maven</groupId>
@@ -63,6 +55,7 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
@@ -70,6 +63,25 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/protobuf/java</source>
+                                <source>${project.build.directory}/generated-sources/protobuf/grpc-java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>             
         </plugins>
     </build>
 </project>

@@ -84,7 +84,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
         updated(properties);
 
-        logger.info("ActivatingScript AIComponent... Done");
+        logger.info("Activating AIComponent... Done");
     }
 
     public void deactivate() {
@@ -125,7 +125,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
                 this.deactivate();
             }
         } else {
-            logger.info("No InferenceEngineService target found. AIComponent is not started.");
+            logger.info("No InferenceEngineService target found or not yet resolved. AIComponent is not started.");
         }
     }
 

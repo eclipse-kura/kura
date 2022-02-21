@@ -162,14 +162,10 @@ public class TensorListAdapter {
 
             return new Tensor(Long.class, descriptor, longData);
         case STRING:
-            String stringValue = (String) value;
+            List<String> stringData = new ArrayList<>();
+            stringData.add((String) value);
 
-            List<Byte> bytesData = new ArrayList<>();
-            for (char c : stringValue.toCharArray()) {
-                bytesData.add(Byte.parseByte(Character.toString(c)));
-            }
-
-            return new Tensor(Byte.class, descriptor, bytesData);
+            return new Tensor(String.class, descriptor, stringData);
         default:
             throw new KuraIOException("Unable to create Tensor: unsupported type.");
         }

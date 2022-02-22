@@ -57,12 +57,12 @@ public class TensorListAdapter {
     /**
      *
      * @param wireRecord
-     * @return a list of {@link Tensor} of shape (1, n), where n:
-     *         n=1 if record type is Boolean, Double, Float, Integer, Long
-     *         n=length(x) if record type is a String x or a byte[] x
+     * @return a list of {@link Tensor}, one for each property in the {@code wireRecord}.
+     *         <p>
+     *         Each created {@link Tensor} will contain a data list of length 1 if the type is BOOLEAN, DOUBLE, FLOAT,
+     *         INTEGER, LONG, STRING. In case of BYTE_ARRAY the list is equal to the length of the array.
      * @throws KuraException
-     *             when the expected shapes are not matching the actual ones of the record or
-     *             if no descriptor matches the record name
+     *             if no descriptor matches the record name or the type is not a {@link DataType}
      */
     public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraException {
         List<Tensor> output = new LinkedList<>();
@@ -77,14 +77,17 @@ public class TensorListAdapter {
     }
 
     /**
-     * Each tensor of shape ({@code m}, {@code l}) will be converted to a {@link WireRecord} that will have {@code m} x
-     * {@code l} entries in its properties
      * 
      * @param tensors
-     *            the list of {@link Tensor} to convert to a list of {@link WireRecord}
+     *            the list of {@link Tensor} to convert to a list of {@link WireRecord}.
+     *            <p>
+     *            Each {@link Tensor} must contain a data list of size 1 if the type is BOOLEAN, DOUBLE, FLOAT, INTEGER,
+     *            LONG, STRING. In case of BYTE_ARRAY the list is equal to the length of the array.
      * @return a list {@link WireRecord}, one for each tensor
+     * @throws KuraIOException
+     *             if one of the tensors does not respect the input requirements described above
      */
-    public List<WireRecord> fromTensorList(List<Tensor> tensors) {
+    public List<WireRecord> fromTensorList(List<Tensor> tensors) throws KuraIOException {
 
         List<WireRecord> result = new ArrayList<>();
 
@@ -96,14 +99,19 @@ public class TensorListAdapter {
             if (tensor.getData(tensorType).isPresent()) {
 
                 List<?> tensorData = tensor.getData(tensorType).get();
+                Object data;
 
-                // unwrap tensor data to map entries
-                for (int dimension = 0; dimension < tensor.getDescriptor().getShape().size(); dimension++) {
-                    for (int i = 0; i < tensor.getDescriptor().getShape().get(dimension); i++) {
-                        TypedValue<?> typedValue = TypedValues.newTypedValue(tensorData.get(i));
-                        properties.put(name, typedValue);
+                if (tensorType.isAssignableFrom(Byte.class)) {
+                    data = toPrimitive(tensorData.toArray(new Byte[0]));
+                } else {
+                    if (tensorData.size() != 1) {
+                        throw new KuraIOException("The tensor " + name + " does not contain data of length 1.");
                     }
+                    data = tensorData.get(0);
                 }
+
+                TypedValue<?> typedValue = TypedValues.newTypedValue(data);
+                properties.put(name, typedValue);
             }
 
             result.add(new WireRecord(properties));
@@ -169,5 +177,15 @@ public class TensorListAdapter {
         default:
             throw new KuraIOException("Unable to create Tensor: unsupported type.");
         }
+    }
+
+    private byte[] toPrimitive(Byte[] bytes) {
+        byte[] result = new byte[bytes.length];
+
+        for (int i = 0; i < bytes.length; i++) {
+            result[i] = bytes[i];
+        }
+
+        return result;
     }
 }

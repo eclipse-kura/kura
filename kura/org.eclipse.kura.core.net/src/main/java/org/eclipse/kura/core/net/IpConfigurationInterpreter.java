@@ -59,10 +59,6 @@ public class IpConfigurationInterpreter {
             return netConfigs;
         }
 
-        // build the prefixes for all the properties associated with this interface
-        StringBuilder sbPrefix = new StringBuilder();
-        sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
-
         // POPULATE NetConfigs
         // dhcp4
 

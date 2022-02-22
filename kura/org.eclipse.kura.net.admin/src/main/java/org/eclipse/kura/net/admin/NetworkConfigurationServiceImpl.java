@@ -17,13 +17,17 @@ import static java.util.Objects.isNull;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -89,6 +93,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private static final String CONFIG_MTU = ".config.mtu";
     private static final String NET_INTERFACES = "net.interfaces";
     private static final String MODEM_PORT_REGEX = "^\\d+-\\d+";
+    private static final Pattern PPP_INTERFACE = Pattern.compile("ppp[0-9]+");
+    private static final Pattern COMMA = Pattern.compile(",");
 
     private NetworkService networkService;
     private EventAdmin eventAdmin;
@@ -224,16 +230,17 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         updated(networkConfiguration.getConfigurationProperties());
     }
 
-    public synchronized void updated(Map<String, Object> properties) {
+    public synchronized void updated(Map<String, Object> receivedProperties) {
         try {
-            if (properties != null) {
+            if (receivedProperties != null) {
+                final Map<String, Object> newProperties = migrateModemConfigs(receivedProperties);
                 logger.debug("new properties - updating");
-                logger.debug("modified.interface.names: {}", properties.get("modified.interface.names"));
-                this.properties = properties;
+                logger.debug("modified.interface.names: {}", newProperties.get("modified.interface.names"));
+                this.properties = newProperties;
 
                 Map<String, Object> modifiedProps = new HashMap<>();
-                modifiedProps.putAll(properties);
-                String interfaces = (String) properties.get(NET_INTERFACES);
+                modifiedProps.putAll(newProperties);
+                String interfaces = (String) newProperties.get(NET_INTERFACES);
                 StringTokenizer st = new StringTokenizer(interfaces, ",");
                 while (st.hasMoreTokens()) {
                     String interfaceName = st.nextToken();
@@ -367,7 +374,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
                     NetInterfaceType type = netInterface.getType();
 
-                    UsbDevice usbDevice = IpConfigurationInterpreter.getUsbDeviceInfo(this.properties, interfaceName);
+                    UsbDevice usbDevice = netInterface.getUsbDevice();
 
                     logger.debug("Getting config for {} type: {}", interfaceName, type);
                     switch (type) {
@@ -406,7 +413,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private void populateModemConfig(NetworkConfiguration networkConfiguration,
             NetInterface<? extends NetInterfaceAddress> netInterface, UsbDevice usbDevice) {
-        String interfaceName = netInterface.getName();
+
+        String interfaceConfigName = probeNetInterfaceConfigName(netInterface);
+
         ModemInterfaceImpl<? extends NetInterfaceAddress> activeModemInterface = (ModemInterfaceImpl<? extends NetInterfaceAddress>) netInterface;
         addPropertiesInModemInterface(activeModemInterface);
         ModemInterfaceConfigImpl modemInterfaceConfig = new ModemInterfaceConfigImpl(activeModemInterface);
@@ -416,17 +425,36 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         modemInterfaceConfig.getNetInterfaceAddresses().forEach(netInterfaceAddress -> {
             try {
                 List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(this.properties,
-                        interfaceName, netInterfaceAddress.getAddress(), isVirtual);
+                        interfaceConfigName, netInterfaceAddress.getAddress(), isVirtual);
                 modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(netInterfaceAddress,
-                        this.properties, interfaceName, modemInterfaceConfig.getPppNum()));
+                        this.properties, interfaceConfigName, modemInterfaceConfig.getPppNum()));
                 ((ModemInterfaceAddressConfigImpl) netInterfaceAddress).setNetConfigs(modemNetConfigs);
             } catch (UnknownHostException | KuraException e) {
-                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceName, e);
+                logger.warn(ERROR_FETCHING_NETWORK_INTERFACE_INFORMATION, interfaceConfigName, e);
             }
         });
 
         modemInterfaceConfig.setUsbDevice(usbDevice);
         networkConfiguration.addNetInterfaceConfig(modemInterfaceConfig);
+    }
+
+    private String probeNetInterfaceConfigName(NetInterface<? extends NetInterfaceAddress> netInterface) {
+        final Set<String> interfaceNamesInConfig = getNetworkInterfaceNamesInConfig(this.properties);
+
+        final Optional<String> usbPort = Optional.ofNullable(netInterface.getUsbDevice()).map(UsbDevice::getUsbPort);
+
+        if (usbPort.isPresent() && interfaceNamesInConfig.contains(usbPort.get())) {
+            return usbPort.get();
+        } else if (interfaceNamesInConfig.contains(netInterface.getName())) {
+            return netInterface.getName();
+        }
+        return usbPort.orElse(netInterface.getName());
+    }
+
+    private Set<String> getNetworkInterfaceNamesInConfig(final Map<String, Object> properties) {
+        return Optional.ofNullable(properties).map(p -> p.get(NET_INTERFACES))
+                .map(s -> COMMA.splitAsStream((String) s).collect(Collectors.toCollection(HashSet::new)))
+                .orElseGet(HashSet::new);
     }
 
     private void populateWifiConfig(NetworkConfiguration networkConfiguration,
@@ -1122,5 +1150,54 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     private boolean isUsbPort(String interfaceName) {
         return interfaceName.split("\\.")[0].matches(MODEM_PORT_REGEX);
+    }
+
+    private Map<String, Object> migrateModemConfigs(final Map<String, Object> properties) {
+
+        final Map<String, Object> result = new HashMap<>(properties);
+        final Set<String> interfaceNames = getNetworkInterfaceNamesInConfig(properties);
+        final Set<String> resultInterfaceNames = new HashSet<>();
+
+        for (final String existingInterfaceName : interfaceNames) {
+            if (!PPP_INTERFACE.matcher(existingInterfaceName).matches()) {
+                resultInterfaceNames.add(existingInterfaceName);
+                continue;
+            }
+
+            logger.info("migrating configuration for interface: {}...", existingInterfaceName);
+
+            String prefix = PREFIX + existingInterfaceName + ".";
+
+            final Object usbBusNumber = this.properties.get(prefix + "usb.busNumber");
+            final Object usbDevicePath = this.properties.get(prefix + "usb.devicePath");
+
+            if (!(usbBusNumber instanceof String) || !(usbDevicePath instanceof String)) {
+                logger.warn("failed to determine usb port for {}, skipping", existingInterfaceName);
+            }
+
+            final String migratedInterfaceName = usbBusNumber + "-" + usbDevicePath;
+
+            logger.info("renaming {} to {}", existingInterfaceName, migratedInterfaceName);
+
+            final String migratedPrefix = PREFIX + migratedInterfaceName + ".";
+
+            for (final Entry<String, Object> e : this.properties.entrySet()) {
+                final String key = e.getKey();
+
+                if (key.startsWith(prefix)) {
+                    final String suffix = key.substring(prefix.length());
+
+                    result.put(migratedPrefix + suffix, e.getValue());
+                }
+            }
+
+            resultInterfaceNames.add(migratedInterfaceName);
+
+            logger.info("migrating configuration for interface: {}...done", existingInterfaceName);
+
+        }
+
+        result.put(NET_INTERFACES, resultInterfaceNames.stream().collect(Collectors.joining(",")));
+        return result;
     }
 }

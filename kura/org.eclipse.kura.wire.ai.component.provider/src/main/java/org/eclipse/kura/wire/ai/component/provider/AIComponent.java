@@ -43,7 +43,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
     private static final Logger logger = LoggerFactory.getLogger(AIComponent.class);
 
-    private volatile WireHelperService wireHelperService;
+    private WireHelperService wireHelperService;
     private WireSupport wireSupport;
 
     private AIComponentOptions options;
@@ -133,43 +133,23 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     public synchronized void onWireReceive(WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
-        for (WireRecord wireRecord : wireEnvelope.getRecords()) {
-            try {
+        if (this.inferenceEngineService != null) {
 
-                if (this.inferenceEngineService.isEngineReady()) {
+            for (WireRecord wireRecord : wireEnvelope.getRecords()) {
+                try {
 
-                    List<Tensor> tensors;
-                    List<WireRecord> result = new LinkedList<>();
-
-                    if (this.infoPre.isPresent()) {
-                        tensors = TensorListAdapter.givenDescriptors(this.infoPre.get().getInputs())
-                                .fromWireRecord(wireRecord);
-                        tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
-                    } else {
-                        tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
-                                .fromWireRecord(wireRecord);
+                    Optional<List<WireRecord>> inferenceResult = inferenceProcess(wireRecord);
+                    if (inferenceResult.isPresent()) {
+                        this.wireSupport.emit(inferenceResult.get());
                     }
 
-                    tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
-
-                    if (this.infoPost.isPresent()) {
-                        tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);
-                        result.addAll(TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs())
-                                .fromTensorList(tensors));
-                    } else {
-                        result.addAll(TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs())
-                                .fromTensorList(tensors));
-                    }
-
-                    this.wireSupport.emit(result);
-
-                } else {
-                    logger.error("Inference engine not ready.");
+                } catch (KuraException e) {
+                    logger.error("Error processing WireRecord.", e);
                 }
-
-            } catch (KuraException e) {
-                logger.error("Error processing WireRecord.", e);
             }
+
+        } else {
+            logger.info("No InferenceEngineService target found or not yet resolved. AIComponent is not started.");
         }
 
     }
@@ -205,5 +185,37 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         }
 
         return info;
+    }
+
+    private Optional<List<WireRecord>> inferenceProcess(WireRecord wireRecord) throws KuraException {
+        if (this.inferenceEngineService.isEngineReady()) {
+
+            List<Tensor> tensors;
+            List<WireRecord> result = new LinkedList<>();
+
+            if (this.infoPre.isPresent()) {
+                tensors = TensorListAdapter.givenDescriptors(this.infoPre.get().getInputs()).fromWireRecord(wireRecord);
+                tensors = this.inferenceEngineService.infer(this.infoPre.get(), tensors);
+            } else {
+                tensors = TensorListAdapter.givenDescriptors(this.infoInfer.get().getInputs())
+                        .fromWireRecord(wireRecord);
+            }
+
+            tensors = this.inferenceEngineService.infer(this.infoInfer.get(), tensors);
+
+            if (this.infoPost.isPresent()) {
+                tensors = this.inferenceEngineService.infer(this.infoPost.get(), tensors);
+                result.addAll(
+                        TensorListAdapter.givenDescriptors(this.infoPost.get().getOutputs()).fromTensorList(tensors));
+            } else {
+                result.addAll(
+                        TensorListAdapter.givenDescriptors(this.infoInfer.get().getOutputs()).fromTensorList(tensors));
+            }
+
+            return Optional.of(result);
+        } else {
+            logger.error("Inference engine not ready.");
+            return Optional.empty();
+        }
     }
 }

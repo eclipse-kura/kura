@@ -101,7 +101,7 @@ public class TensorListAdapter {
                 List<?> tensorData = tensor.getData(tensorType).get();
                 Object data;
 
-                if (tensorType.isInstance(Byte.class)) {
+                if (tensorType.isAssignableFrom(Byte.class)) {
                     data = toByteArray(tensorData);
                 } else {
                     if (tensorData.size() != 1) {

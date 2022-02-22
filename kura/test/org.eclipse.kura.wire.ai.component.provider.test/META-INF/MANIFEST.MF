@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.wire.ai.component.provider.test
+Bundle-SymbolicName: org.eclipse.kura.wire.ai.component.provider.test
+Bundle-Version: 5.1.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-License: Eclipse Public License v2.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Fragment-Host: org.eclipse.kura.wire.ai.component.provider
+Import-Package: com.eclipsesource.json;version="0.9.5",
+ org.apache.commons.io;version="2.4.0",
+ org.junit;version="4.12.0",
+ org.junit.runner;version="4.12.0",
+ org.junit.runners;version="4.12.0",
+ org.mockito;version="1.10.19",
+ org.mockito.invocation;version="1.10.19",
+ org.mockito.stubbing;version="1.10.19",
+ org.osgi.framework;version="1.10.0",
+ org.osgi.service.cm;version="1.6.0",
+ org.osgi.util.tracker;version="1.5.2",
+ org.slf4j;version="1.7.25"

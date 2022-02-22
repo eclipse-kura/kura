@@ -328,7 +328,7 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptorBuilder setLoggerParameters(Map<String, String> paramMap) {
-            this.containerVolumes = new HashMap<>(paramMap);
+            this.containerLoggerParameters = new HashMap<>(paramMap);
             return this;
         }
 
@@ -338,7 +338,7 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptorBuilder setLoggingTypeByString(String containerLoggingType) {
-            return this.setLoggingType(LoggingType.fromValue(containerLoggingType));
+            return this.setLoggingType(LoggingType.fromValue(containerLoggingType.toLowerCase()));
         }
 
         public ContainerDescriptor build() {

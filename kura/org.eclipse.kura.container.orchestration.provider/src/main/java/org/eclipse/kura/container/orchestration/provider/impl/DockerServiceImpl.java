@@ -444,10 +444,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     private HostConfig containerLogConfigurationHandler(ContainerDescriptor containerDescription,
             HostConfig configuration) {
 
-        LogConfig lc = new LogConfig();
-
-        lc.setType(containerDescription.getContainerLoggingType());
-        lc.setConfig(containerDescription.getLoggerParameters());
+        LogConfig lc = new LogConfig(containerDescription.getContainerLoggingType(),
+                containerDescription.getLoggerParameters());
 
         configuration.withLogConfig(lc);
 

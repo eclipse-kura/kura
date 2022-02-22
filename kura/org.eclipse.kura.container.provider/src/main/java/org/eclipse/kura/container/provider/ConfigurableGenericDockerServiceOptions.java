@@ -95,7 +95,7 @@ public class ConfigurableGenericDockerServiceOptions {
     private Map<String, String> parseLoggingParams(String loggingString) {
         Map<String, String> map = new HashMap<>();
 
-        if (this.containerVolumeString.isEmpty()) {
+        if (loggingString.isEmpty()) {
             return map;
         }
 
@@ -179,7 +179,7 @@ public class ConfigurableGenericDockerServiceOptions {
     }
 
     public String getLoggingType() {
-        return this.getLoggingType();
+        return this.containerLoggerType;
     }
 
     public Map<String, String> getLoggerParameters() {
@@ -226,7 +226,7 @@ public class ConfigurableGenericDockerServiceOptions {
                 && Objects.equals(this.privilegedMode, other.privilegedMode)
                 && Objects.equals(this.isEnabled(), other.isEnabled())
                 && Objects.equals(this.containerLoggerType, other.containerLoggerType)
-                && Objects.equals(this.containerLoggingParameters, other.containerLoggingParameters);
+                && this.containerLoggingParameters.equals(other.containerLoggingParameters);
     }
 
     private int[] parsePortString(String ports) {

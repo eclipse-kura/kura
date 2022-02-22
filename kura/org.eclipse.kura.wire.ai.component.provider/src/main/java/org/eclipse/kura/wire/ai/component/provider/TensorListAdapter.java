@@ -101,8 +101,8 @@ public class TensorListAdapter {
                 List<?> tensorData = tensor.getData(tensorType).get();
                 Object data;
 
-                if (tensorType.isAssignableFrom(Byte.class)) {
-                    data = toPrimitive(tensorData.toArray(new Byte[0]));
+                if (tensorType.isInstance(Byte.class)) {
+                    data = toByteArray(tensorData);
                 } else {
                     if (tensorData.size() != 1) {
                         throw new KuraIOException("The tensor " + name + " does not contain data of length 1.");
@@ -179,11 +179,15 @@ public class TensorListAdapter {
         }
     }
 
-    private byte[] toPrimitive(Byte[] bytes) {
-        byte[] result = new byte[bytes.length];
+    private byte[] toByteArray(List<?> bytes) {
+        byte[] result = new byte[bytes.size()];
 
-        for (int i = 0; i < bytes.length; i++) {
-            result[i] = bytes[i];
+        for (int i = 0; i < bytes.size(); i++) {
+            if (bytes.get(i) instanceof Byte) {
+                result[i] = (byte) bytes.get(i);
+            } else {
+                result[i] = Byte.parseByte(bytes.get(i).toString());
+            }
         }
 
         return result;

@@ -141,7 +141,7 @@ public class AIComponentTest {
 
         whenOnWireReceive(this.inputEnvelope);
 
-        thenExceptionsOccurred();
+        thenNoExceptionsOccurred();
     }
 
     /*

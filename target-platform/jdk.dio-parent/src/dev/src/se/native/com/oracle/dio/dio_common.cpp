@@ -455,12 +455,9 @@ JNIEXPORT void JNICALL Java_com_oracle_dio_impl_Handle_close
  * Class:     com_oracle_dio_impl_Handle
  * Method:    tryLock
  */
-JNIEXPORT void JNICALL Java_com_oracle_dio_impl_Handle_tryLock
+JNIEXPORT jboolean JNICALL Java_com_oracle_dio_impl_Handle_tryLock
   (JNIEnv* env, jobject obj, jint timeout) {
-    device_reference device = getDeviceReferenceFromHandleObject(env, obj);
-    if (device != INVALID_DEVICE_REFERENCE) {
-        //  add an implementation
-    }
+    return true;
 }
 
 /*

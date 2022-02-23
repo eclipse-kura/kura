@@ -29,6 +29,7 @@
 #include "javacall_memory.h"
 #include <getopt.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>

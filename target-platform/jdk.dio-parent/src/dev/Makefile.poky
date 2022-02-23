@@ -150,7 +150,7 @@ TARGET_CXX_FLAGS := -fPIC $(CXXFLAGS) -DJAVACALL_REPORT_LEVEL=4 -DENABLE_DEVICEA
 TARGET_LD_FLAGS:=   \
           -shared \
           -lpthread -lrt \
-           -lstdc++ -lc -Wl
+           -lstdc++ -lc
 
 ALL_TARGETS := dirs $(LIB_NAME).jar lib$(LIB_NAME).so device-io
 

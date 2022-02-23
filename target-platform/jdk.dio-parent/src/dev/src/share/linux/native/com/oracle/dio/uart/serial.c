@@ -24,6 +24,7 @@
  */
 
 #include "serial.h"
+#include <sys/eventfd.h>
 
 typedef void *(thread_func)(void*);
 

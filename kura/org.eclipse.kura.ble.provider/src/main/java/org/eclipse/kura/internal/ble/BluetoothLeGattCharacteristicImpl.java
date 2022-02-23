@@ -1,18 +1,21 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.internal.ble;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +40,7 @@ import com.github.hypfvieh.bluetooth.wrapper.BluetoothGattDescriptor;
 public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharacteristic {
 
     private final BluetoothGattCharacteristic characteristic;
+    private final Collection<AbstractPropertiesChangedHandler> handlers = new LinkedList<>();
 
     public BluetoothLeGattCharacteristicImpl(BluetoothGattCharacteristic characteristic) {
         this.characteristic = characteristic;
@@ -86,15 +90,17 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
 
     @Override
     public void enableValueNotifications(Consumer<byte[]> callback) throws KuraBluetoothNotificationException {
+        final AbstractPropertiesChangedHandler handler = new AbstractPropertiesChangedHandler() {
+
+            @Override
+            public void handle(PropertiesChanged props) {
+                handleValueNotification(callback, props);
+            }
+
+        };
+        handlers.add(handler);
         try {
-            getDeviceManager().registerPropertyHandler(new AbstractPropertiesChangedHandler() {
-
-                @Override
-                public void handle(PropertiesChanged props) {
-                    handleValueNotification(callback, props);
-                }
-
-            });
+            getDeviceManager().registerPropertyHandler(handler);
             this.characteristic.startNotify();
         } catch (DBusException e) {
             throw new KuraBluetoothNotificationException(e, "Notification can't be enabled");
@@ -122,8 +128,13 @@ public class BluetoothLeGattCharacteristicImpl implements BluetoothLeGattCharact
     public void disableValueNotifications() throws KuraBluetoothNotificationException {
         try {
             this.characteristic.stopNotify();
+            for (Iterator<AbstractPropertiesChangedHandler> it = handlers.iterator(); it.hasNext();) {
+                AbstractPropertiesChangedHandler handler = it.next();
+                getDeviceManager().unRegisterPropertyHandler(handler);
+                it.remove();
+            }
         } catch (DBusException e) {
-            throw new KuraBluetoothNotificationException(e, "Notification can't be disabled");
+            throw new KuraBluetoothNotificationException(e, "Notifications can't be disabled");
         }
     }
 

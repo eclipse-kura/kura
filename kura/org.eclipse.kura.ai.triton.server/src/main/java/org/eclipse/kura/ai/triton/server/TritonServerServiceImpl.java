@@ -80,9 +80,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     private GRPCInferenceServiceBlockingStub grpcStub;
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
-        if (this.commandExecutorService == null) {
-            this.commandExecutorService = executorService;
-        }
+        this.commandExecutorService = executorService;
     }
 
     protected void activate(Map<String, Object> properties) {
@@ -198,7 +196,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             ModelReadyResponse modelReadyResponse = this.grpcStub.modelReady(builder.build());
             isLoaded = modelReadyResponse.getReady();
         } catch (StatusRuntimeException e) {
-            throw new KuraIOException(e, "Cannot unload the model " + modelName);
+            throw new KuraIOException(e, "Cannot check if the model " + modelName + " is loaded");
         }
         return isLoaded;
     }

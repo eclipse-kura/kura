@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.ai.triton.server;
 
 import static java.util.Objects.nonNull;

@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-
 package org.eclipse.kura.ai.triton.server;
 
 import static java.util.Objects.requireNonNull;
@@ -53,8 +52,8 @@ public class TritonServerServiceOptions {
                 throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER, PROPERTY_PORTS);
             }
 
-            for (int i = 0; i < ports.length; ++i) {
-                requireNonNull(ports[i], "port cannot be null");
+            for (Integer port : ports) {
+                requireNonNull(port, "port cannot be null");
             }
 
             this.httpPort = ports[0];

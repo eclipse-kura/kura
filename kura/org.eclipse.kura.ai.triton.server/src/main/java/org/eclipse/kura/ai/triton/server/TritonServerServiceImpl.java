@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
@@ -79,14 +80,8 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     private GRPCInferenceServiceBlockingStub grpcStub;
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
-        if (isNull(this.commandExecutorService)) {
+        if (this.commandExecutorService == null) {
             this.commandExecutorService = executorService;
-        }
-    }
-
-    public void unsetCommandExecutorService(CommandExecutorService executorService) {
-        if (this.commandExecutorService == executorService) {
-            this.commandExecutorService = null;
         }
     }
 
@@ -347,7 +342,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         DataType modelInputType = DataType.valueOf(input.getDescriptor().getType());
         switch (modelInputType) {
         case BOOL:
-            addBoolInputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Boolean.class, inputDataBuilder::addAllBoolContents);
             break;
         case UINT8:
             addUint8InputData(input, inputDataBuilder);
@@ -362,22 +357,22 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             addInt16InputData(input, inputDataBuilder);
             break;
         case UINT32:
-            addUint32InputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Integer.class, inputDataBuilder::addAllUintContents);
             break;
         case INT32:
-            addInt32InputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Integer.class, inputDataBuilder::addAllIntContents);
             break;
         case UINT64:
-            addUint64InputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Long.class, inputDataBuilder::addAllUint64Contents);
             break;
         case INT64:
-            addInt64InputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Long.class, inputDataBuilder::addAllInt64Contents);
             break;
         case FP32:
-            addFp32InputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Float.class, inputDataBuilder::addAllFp32Contents);
             break;
         case FP64:
-            addFp64InputData(input, inputDataBuilder);
+            addDataTypeInputData(input, Double.class, inputDataBuilder::addAllFp64Contents);
             break;
         case BYTES:
             addBytesInputData(input, inputDataBuilder);
@@ -397,6 +392,11 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         return inputBuilder;
     }
 
+    private <T> void addDataTypeInputData(Tensor input, Class<T> clazz, Consumer<List<T>> dataConsumer) {
+        dataConsumer.accept(input.getData(clazz).orElseThrow(() -> new IllegalArgumentException(
+                "Expected a list of " + clazz.getSimpleName() + " but got a list of " + input.getType())));
+    }
+
     private void addBytesInputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
         if (input.getType().isAssignableFrom(Byte.class)) {
             Optional<List<Byte>> inputData = input.getData(Byte.class);
@@ -409,60 +409,6 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             });
         } else {
             throw new IllegalArgumentException("Expected a list of bytes but got a list of " + input.getType());
-        }
-    }
-
-    private void addFp64InputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Double.class)) {
-            Optional<List<Double>> inputData = input.getData(Double.class);
-            inputData.ifPresent(inputDataBuilder::addAllFp64Contents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of doubles but got a list of " + input.getType());
-        }
-    }
-
-    private void addFp32InputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Float.class)) {
-            Optional<List<Float>> inputData = input.getData(Float.class);
-            inputData.ifPresent(inputDataBuilder::addAllFp32Contents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of floats but got a list of " + input.getType());
-        }
-    }
-
-    private void addInt64InputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Long.class)) {
-            Optional<List<Long>> inputData = input.getData(Long.class);
-            inputData.ifPresent(inputDataBuilder::addAllInt64Contents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of longs but got a list of " + input.getType());
-        }
-    }
-
-    private void addUint64InputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Long.class)) {
-            Optional<List<Long>> inputData = input.getData(Long.class);
-            inputData.ifPresent(inputDataBuilder::addAllUint64Contents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of longs but got a list of " + input.getType());
-        }
-    }
-
-    private void addInt32InputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Integer.class)) {
-            Optional<List<Integer>> inputData = input.getData(Integer.class);
-            inputData.ifPresent(inputDataBuilder::addAllIntContents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of integers but got a list of " + input.getType());
-        }
-    }
-
-    private void addUint32InputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Integer.class)) {
-            Optional<List<Integer>> inputData = input.getData(Integer.class);
-            inputData.ifPresent(inputDataBuilder::addAllUintContents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of integers but got a list of " + input.getType());
         }
     }
 
@@ -531,15 +477,6 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         } else {
             throw new IllegalArgumentException(
                     "Expected a list of bytes or integers but got a list of " + input.getType());
-        }
-    }
-
-    private void addBoolInputData(Tensor input, InferTensorContents.Builder inputDataBuilder) {
-        if (input.getType().isAssignableFrom(Boolean.class)) {
-            Optional<List<Boolean>> inputData = input.getData(Boolean.class);
-            inputData.ifPresent(inputDataBuilder::addAllBoolContents);
-        } else {
-            throw new IllegalArgumentException("Expected a list of booleans but got a list of " + input.getType());
         }
     }
 

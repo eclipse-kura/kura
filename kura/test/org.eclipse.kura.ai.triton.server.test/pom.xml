@@ -30,6 +30,16 @@
         <kura.basedir>${project.basedir}/../..</kura.basedir>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
+    
+    <dependencies>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-testing-proto</artifactId>
+            <version>1.33.1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/grpc-testing-1.33.1.jar</systemPath>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

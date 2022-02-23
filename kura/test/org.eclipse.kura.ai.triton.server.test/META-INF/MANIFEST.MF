@@ -16,6 +16,7 @@ Import-Package: javax.annotation;version="1.3.5",
  org.junit.runner;version="4.12.0",
  org.junit.runners;version="4.12.0",
  org.mockito;version="1.10.19",
+ org.mockito.stubbing;version="1.10.19",
  org.osgi.framework;version="1.7"
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,

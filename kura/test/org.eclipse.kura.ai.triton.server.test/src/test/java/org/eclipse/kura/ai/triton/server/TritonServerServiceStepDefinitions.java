@@ -16,7 +16,11 @@ package org.eclipse.kura.ai.triton.server;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,12 +30,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
 import org.junit.Before;
 import org.junit.Rule;
 
@@ -65,9 +73,20 @@ public abstract class TritonServerServiceStepDefinitions {
     protected TritonServerServiceImpl tritonServerService;
     protected boolean methodCalled;
     protected boolean exceptionCaught;
-    protected Optional<ModelInfo> modelInfo = Optional.empty();
+    protected Optional<ModelInfo> modelInfo;
 
-    private List<String> tritonModelRepoStub = Arrays.asList("myModel");
+    private List<String> tritonModelRepoStub;
+
+    private Command startTritonServerCmd = new Command(new String[] { "tritonserver",
+            "--model-repository=/fake-repository-path", "--backend-directory=/fake-backends-path", "--http-port=4001",
+            "--grpc-port=4002", "--metrics-port=4003", "--model-control-mode=explicit", "2>&1", "|", "systemd-cat",
+            "-t tritonserver", "-p info" });
+
+    public TritonServerServiceStepDefinitions() {
+        this.startTritonServerCmd.setExecuteInAShell(true);
+        this.tritonModelRepoStub = Arrays.asList("myModel");
+        this.modelInfo = Optional.empty();
+    }
 
     @Rule
     public final GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
@@ -75,9 +94,14 @@ public abstract class TritonServerServiceStepDefinitions {
     protected List<String> modelsFound = new ArrayList<>();
     private List<Tensor> tensorList = new ArrayList<>();
     private boolean isEngineReady;
+    private CommandExecutorService ces;
 
     protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub);
+        this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
+    }
+
+    protected void givenTritonServerServiceImplNotActive() throws IOException {
+        this.tritonServerService = createTritonServerServiceImpl(null, tritonModelRepoStub, false);
     }
 
     protected void whenLoadModel(String modelName) throws KuraIOException {
@@ -136,8 +160,36 @@ public abstract class TritonServerServiceStepDefinitions {
         }
     }
 
+    protected void whenTritonServerIsActivated(Map<String, Object> properties) {
+        try {
+            this.tritonServerService.activate(properties);
+        } catch (KuraRuntimeException kre) {
+            this.exceptionCaught = true;
+        }
+    }
+
+    protected void whenDeactivateIsInvokedOnTritonServer() {
+        try {
+            this.tritonServerService.deactivate();
+        } catch (KuraRuntimeException kre) {
+            this.exceptionCaught = true;
+        }
+    }
+
+    protected void whenUpdatedIsInvokedOnTritonServer(Map<String, Object> properties) {
+        try {
+            this.tritonServerService.updated(properties);
+        } catch (KuraRuntimeException kre) {
+            this.exceptionCaught = true;
+        }
+    }
+
     protected void thenExceptionIsCaught() {
         assertTrue(this.exceptionCaught);
+    }
+
+    protected void thenNoExceptionIsCaught() {
+        assertFalse(this.exceptionCaught);
     }
 
     protected void thenModelIsLoaded() {
@@ -168,13 +220,53 @@ public abstract class TritonServerServiceStepDefinitions {
         assertFalse(this.tensorList.isEmpty());
     }
 
+    protected void thenAfterWaiting(long millisecondsToWait) throws InterruptedException {
+        Thread.sleep(millisecondsToWait);
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void thenTritonStartServerCommandIsExecuted() {
+        verify(this.ces).execute(eq(this.startTritonServerCmd), any(Consumer.class));
+    }
+
     protected Map<String, Object> defaultProperties() {
 
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("server.address", "localhost");
-        properties.put("server.ports", "4000,4001,4002");
-        properties.put("enable.local", "false");
+        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
+        properties.put("enable.local", Boolean.FALSE);
+
+        return properties;
+    }
+
+    protected Map<String, Object> updatedProperties() {
+
+        Map<String, Object> properties = new HashMap<>();
+
+        properties.put("server.address", "localhost");
+        properties.put("server.ports", new Integer[] { 4001, 4002, 4003 });
+        properties.put("enable.local", Boolean.FALSE);
+
+        return properties;
+    }
+
+    protected Map<String, Object> invalidProperties() {
+        Map<String, Object> properties = new HashMap<>();
+
+        properties.put("server.ports", new Integer[] { 4000, 4001 });
+        properties.put("enable.local", Boolean.FALSE);
+
+        return properties;
+    }
+
+    protected Map<String, Object> enableLocalServerProperties() {
+        Map<String, Object> properties = new HashMap<>();
+
+        properties.put("server.ports", new Integer[] { 4001, 4002, 4003 });
+        properties.put("enable.local", Boolean.TRUE);
+        properties.put("local.backends.path", "/fake-backends-path");
+        properties.put("local.model.repository.path", "/fake-repository-path");
 
         return properties;
     }
@@ -231,11 +323,18 @@ public abstract class TritonServerServiceStepDefinitions {
     }
 
     private TritonServerServiceImpl createTritonServerServiceImpl(Map<String, Object> properties,
-            List<String> tritonModelRepoStub) throws IOException {
+            List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
         TritonServerServiceImpl tritonServerServiceImpl = new TritonServerServiceImpl();
 
-        tritonServerServiceImpl.activate(properties);
+        this.ces = mock(CommandExecutorService.class);
+        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
+
+        tritonServerServiceImpl.setCommandExecutorService(ces);
+
+        if (activate) {
+            tritonServerServiceImpl.activate(properties);
+        }
 
         GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = mock(
                 GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase.class,

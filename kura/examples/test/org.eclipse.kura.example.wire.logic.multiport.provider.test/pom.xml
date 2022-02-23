@@ -402,7 +402,7 @@
                             </requirement>
                             <requirement>
                                 <type>p2-installable-unit</type>
-                                <id>jakarta.annotation-api</id>
+                                <id>com.eclipsesource.jaxrs.jersey-min</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

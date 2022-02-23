@@ -478,11 +478,6 @@
                                     <version>${jakarta.xml.soap-api.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>jakarta.annotation</groupId>
-                                    <artifactId>jakarta.annotation-api</artifactId>
-                                    <version>${jakarta.annotation-api.version}</version>
-                                </artifactItem>
-                                <artifactItem>
                                     <groupId>com.sun.xml.bind</groupId>
                                     <artifactId>jaxb-osgi</artifactId>
                                     <version>${jaxb-osgi.version}</version>
@@ -591,7 +586,6 @@
                                 <move file="target/source/plugins/jakarta.activation-api.jar" tofile="target/source/plugins/jakarta.activation-api_${jakarta.activation-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.xml.ws-api.jar" tofile="target/source/plugins/jakarta.xml.ws-api_${jakarta.xml.ws-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.xml.soap-api.jar" tofile="target/source/plugins/jakarta.xml.soap-api_${jakarta.xml.soap-api.version}.jar"/>
-                                <move file="target/source/plugins/jakarta.annotation-api.jar" tofile="target/source/plugins/jakarta.annotation-api_${jakarta.annotation-api.version}.jar"/>
                                 <move file="target/source/plugins/jaxb-osgi.jar" tofile="target/source/plugins/jaxb-osgi_${jaxb-osgi.version}.jar"/>
                                 <move file="target/source/plugins/osgi-resource-locator.jar" tofile="target/source/plugins/osgi-resource-locator_${osgi-resource-locator.version}.jar"/>
                                 <move file="target/source/plugins/bluez-dbus-osgi.jar" tofile="target/source/plugins/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar"/>

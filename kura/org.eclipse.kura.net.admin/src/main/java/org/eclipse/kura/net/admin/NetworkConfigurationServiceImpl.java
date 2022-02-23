@@ -1186,8 +1186,15 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
                 if (key.startsWith(prefix)) {
                     final String suffix = key.substring(prefix.length());
+                    final String migratedPropertyKey = migratedPrefix + suffix;
 
-                    result.put(migratedPrefix + suffix, e.getValue());
+                    final Object existingProperty = this.properties.get(migratedPropertyKey);
+
+                    if (existingProperty != null) {
+                        result.put(migratedPropertyKey, existingProperty);
+                    } else {
+                        result.put(migratedPropertyKey, e.getValue());
+                    }
                 }
             }
 

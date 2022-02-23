@@ -100,32 +100,11 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         this.infoInfer = Optional.empty();
         this.infoPost = Optional.empty();
 
-        if (this.inferenceEngineService != null) {
-            try {
-                if (this.inferenceEngineService.isEngineReady()) {
-
-                    if (this.options.getPreprocessorModelName().isPresent()) {
-                        this.infoPre = retrieveModelInfo(this.options.getPreprocessorModelName().get());
-                    }
-
-                    this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
-
-                    if (this.options.getPostprocessorModelName().isPresent()) {
-                        this.infoPost = retrieveModelInfo(this.options.getPostprocessorModelName().get());
-                    }
-
-                    logger.info("Updating AIComponent... Done");
-
-                } else {
-                    logger.error("Inference engine not ready. Try again later.");
-                    this.deactivate();
-                }
-            } catch (KuraException e) {
-                logger.error("Error opening model.", e);
-                this.deactivate();
-            }
-        } else {
-            logger.info("No InferenceEngineService target found or not yet resolved. AIComponent is not started.");
+        try {
+            loadModelInfos();
+            logger.info("Updating AIComponent... Done");
+        } catch (KuraException e) {
+            logger.error("Inference Engine error.", e);
         }
     }
 
@@ -133,23 +112,17 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     public synchronized void onWireReceive(WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
-        if (this.inferenceEngineService != null) {
+        for (WireRecord wireRecord : wireEnvelope.getRecords()) {
+            try {
 
-            for (WireRecord wireRecord : wireEnvelope.getRecords()) {
-                try {
-
-                    Optional<List<WireRecord>> inferenceResult = inferenceProcess(wireRecord);
-                    if (inferenceResult.isPresent()) {
-                        this.wireSupport.emit(inferenceResult.get());
-                    }
-
-                } catch (KuraException e) {
-                    logger.error("Error processing WireRecord.", e);
+                Optional<List<WireRecord>> inferenceResult = inferenceProcess(wireRecord);
+                if (inferenceResult.isPresent()) {
+                    this.wireSupport.emit(inferenceResult.get());
                 }
-            }
 
-        } else {
-            logger.info("No InferenceEngineService target found or not yet resolved. AIComponent is not started.");
+            } catch (KuraException e) {
+                logger.error("Error processing WireRecord.", e);
+            }
         }
 
     }
@@ -174,6 +147,26 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
         this.wireSupport.producersConnected(wires);
     }
 
+    private void loadModelInfos() throws KuraException {
+        if (this.inferenceEngineService != null && this.inferenceEngineService.isEngineReady()) {
+            Optional<String> namePre = this.options.getPreprocessorModelName();
+            if (namePre.isPresent() && !this.infoPre.isPresent()) {
+                this.infoPre = retrieveModelInfo(namePre.get());
+            }
+
+            if (!this.infoInfer.isPresent()) {
+                this.infoInfer = retrieveModelInfo(this.options.getInferenceModelName());
+            }
+
+            Optional<String> namePost = this.options.getPostprocessorModelName();
+            if (namePost.isPresent() && !this.infoPost.isPresent()) {
+                this.infoPost = retrieveModelInfo(namePost.get());
+            }
+        } else {
+            logger.info("Selected InferenceEngineService not ready yet.");
+        }
+    }
+
     private Optional<ModelInfo> retrieveModelInfo(String modelName) throws KuraException {
         if (this.inferenceEngineService.isModelLoaded(modelName)) {
             this.inferenceEngineService.loadModel(modelName, Optional.empty());
@@ -188,7 +181,9 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
     }
 
     private Optional<List<WireRecord>> inferenceProcess(WireRecord wireRecord) throws KuraException {
-        if (this.inferenceEngineService.isEngineReady()) {
+        if (this.inferenceEngineService != null && this.inferenceEngineService.isEngineReady()) {
+
+            loadModelInfos();
 
             List<Tensor> tensors;
             List<WireRecord> result = new LinkedList<>();
@@ -214,7 +209,7 @@ public class AIComponent implements WireEmitter, WireReceiver, ConfigurableCompo
 
             return Optional.of(result);
         } else {
-            logger.error("Inference engine not ready.");
+            logger.info("Selected InferenceEngineService not ready yet.");
             return Optional.empty();
         }
     }

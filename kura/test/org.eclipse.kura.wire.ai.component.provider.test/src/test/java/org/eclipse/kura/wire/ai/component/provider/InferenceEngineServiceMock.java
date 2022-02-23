@@ -51,13 +51,7 @@ public class InferenceEngineServiceMock implements InferenceEngineService {
         for (ModelInfo model : this.models) {
             for (TensorDescriptor outDesc : model.getOutputs()) {
                 List<Object> tensorData = new ArrayList<>();
-
-                for (int dimensions = 0; dimensions < outDesc.getShape().size(); dimensions++) {
-                    for (int i = 0; i < outDesc.getShape().get(dimensions); i++) {
-                        tensorData.add((Object) 0);
-                    }
-                }
-
+                tensorData.add((Object) 0);
                 inferResult.add(new Tensor(Object.class, outDesc, tensorData));
             }
         }

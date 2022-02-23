@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.wire.ai.component.provider;
 
 import static org.junit.Assert.assertFalse;
@@ -192,9 +191,7 @@ public class AIComponentTest {
     private void givenInputEnvelope() {
         List<WireRecord> records = new ArrayList<>();
         Map<String, TypedValue<?>> recordProps = new HashMap<String, TypedValue<?>>() {
-
             private static final long serialVersionUID = 1L;
-
             {
                 put("IN_INT", TypedValues.newIntegerValue(10));
                 put("IN_BOOL", TypedValues.newBooleanValue(false));
@@ -207,14 +204,12 @@ public class AIComponentTest {
         };
 
         records.add(new WireRecord(recordProps));
-
         this.inputEnvelope = new WireEnvelope("example_asset_pid", records);
     }
 
     private void givenModelInfo(String modelName) {
         List<Long> inputShape = new ArrayList<>();
         List<Long> outputShape = new ArrayList<>();
-
         inputShape.add((long) 1);
         outputShape.add((long) 1);
 
@@ -295,5 +290,4 @@ public class AIComponentTest {
 
         this.exceptionsOccurred = false;
     }
-
 }

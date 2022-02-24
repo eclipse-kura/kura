@@ -119,19 +119,6 @@ public class AIComponentTest {
     }
 
     @Test
-    public void missingModelsShouldNotActivate() {
-        givenInferenceEngine();
-        givenInputEnvelope();
-        givenWireProperties("preprocessor", "infer", "postprocessor");
-        givenActivate();
-
-        whenOnWireReceive(this.inputEnvelope);
-
-        thenInferIsCalled(0);
-        thenExceptionsOccurred();
-    }
-
-    @Test
     public void missingInferenceEngineShouldNotActivate() {
         givenInferenceEngineNotBound();
         givenInputEnvelope();

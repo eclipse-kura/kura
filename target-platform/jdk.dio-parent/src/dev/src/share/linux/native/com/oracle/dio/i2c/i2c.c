@@ -27,6 +27,8 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h> 
 #include <stdio.h>
 #include <errno.h>
 

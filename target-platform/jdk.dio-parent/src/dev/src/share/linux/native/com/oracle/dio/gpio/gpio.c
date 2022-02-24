@@ -24,6 +24,7 @@
  */
 
 #include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <pthread.h>
 #include <sys/epoll.h>

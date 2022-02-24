@@ -403,12 +403,41 @@ public abstract class TritonServerServiceStepDefinitions {
                         TritonServerServiceStepDefinitions.this.methodCalled = true;
 
                         List<InferOutputTensor> outputTensor = new ArrayList<>();
-                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("FP64").setName("name")
-                                .setContents(InferTensorContents.newBuilder().addFp64Contents(34.76).build())
-                                .addShape(1).setShape(0, 1).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("FP64").setName("name1")
+                                .setContents(InferTensorContents.newBuilder().addFp64Contents(34.76d).build())
+                                .addShape(0).setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("BOOL").setName("name2")
+                                .setContents(InferTensorContents.newBuilder().addBoolContents(true).build()).addShape(1)
+                                .setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("BYTES").setName("name3")
+                                .setContents(InferTensorContents.newBuilder()
+                                        .addBytesContents(ByteString.copyFrom(new byte[] { 10, 20, -10, -20 })).build())
+                                .addShape(0).setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("FP32").setName("name4")
+                                .setContents(InferTensorContents.newBuilder().addFp32Contents(134.76f).build())
+                                .addShape(1).setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("INT64").setName("name5")
+                                .setContents(InferTensorContents.newBuilder().addInt64Contents(56436l).build())
+                                .addShape(0).setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("INT32").setName("name6")
+                                .setContents(InferTensorContents.newBuilder().addIntContents(45465).build()).addShape(0)
+                                .setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("UINT64").setName("name7")
+                                .setContents(InferTensorContents.newBuilder().addUint64Contents(536456l).build())
+                                .addShape(1).setShape(0, 0).build());
+                        outputTensor.add(InferOutputTensor.newBuilder().setDatatype("UINT32").setName("name8")
+                                .setContents(InferTensorContents.newBuilder().addUintContents(53645).build())
+                                .addShape(0).setShape(0, 0).build());
 
                         List<ByteString> rawOutputTensor = new ArrayList<>();
-                        rawOutputTensor.add(ByteString.copyFrom(convertDoubleToByteArray(34.76)));
+                        rawOutputTensor.add(ByteString.copyFrom(convertDoubleToByteArray(34.76d)));
+                        rawOutputTensor.add(ByteString.copyFrom(convertBooleanToByteArray(true)));
+                        rawOutputTensor.add(ByteString.copyFrom(new byte[] { 10, 20, -10, -20 }));
+                        rawOutputTensor.add(ByteString.copyFrom(convertFloatToByteArray(134.76f)));
+                        rawOutputTensor.add(ByteString.copyFrom(convertLongToByteArray(56436l)));
+                        rawOutputTensor.add(ByteString.copyFrom(convertIntegerToByteArray(45465)));
+                        rawOutputTensor.add(ByteString.copyFrom(convertLongToByteArray(536456l)));
+                        rawOutputTensor.add(ByteString.copyFrom(convertIntegerToByteArray(53645)));
 
                         ModelInferResponse response = ModelInferResponse.newBuilder().addAllOutputs(outputTensor)
                                 .addAllRawOutputContents(rawOutputTensor).build();
@@ -447,15 +476,50 @@ public abstract class TritonServerServiceStepDefinitions {
         this.modelInfo = Optional.empty();
         this.tensorList.clear();
         this.isEngineReady = false;
+
+        if (this.tritonServerService != null) {
+            this.tritonServerService.deactivate();
+        }
     }
 
-    private byte[] convertDoubleToByteArray(Double number) {
+    private byte[] convertDoubleToByteArray(Double value) {
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(Double.BYTES);
-
-        byteBuffer.putDouble(number);
-
+        byteBuffer.putDouble(value);
         return byteBuffer.array();
+    }
 
+    private byte[] convertFloatToByteArray(Float value) {
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Float.BYTES);
+        byteBuffer.putFloat(value);
+        return byteBuffer.array();
+    }
+
+    // private byte[] convertByteToByteArray(Byte value) {
+    //
+    // ByteBuffer byteBuffer = ByteBuffer.allocate(Byte.BYTES);
+    // byteBuffer.put(value);
+    // byte[] a = byteBuffer.array();
+    // return a;
+    // }
+
+    private byte[] convertBooleanToByteArray(Boolean value) {
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(1);
+        byteBuffer.put(value ? (byte) 1 : (byte) 0);
+        return byteBuffer.array();
+    }
+
+    private byte[] convertLongToByteArray(Long value) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+        byteBuffer.putLong(value);
+        return byteBuffer.array();
+    }
+
+    private byte[] convertIntegerToByteArray(Integer value) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(Integer.BYTES);
+        byteBuffer.putInt(value);
+        return byteBuffer.array();
     }
 }

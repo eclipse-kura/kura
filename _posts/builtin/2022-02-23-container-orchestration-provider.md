@@ -7,7 +7,7 @@ categories: [builtin]
 # What is the Container Orchestration Provider?
 The Container Orchestration Provider allows Kura to manage Docker. With this tool you can arbitrarily pull and deploy containerized software packages and run them on your gateway. This Provider allows the user to create, configure, start, and stop containers all from the browser. The bundle will also restart containers, if the gateway is restarted.
 
-The Container Orchestration service is composed by two bundles, one that exposes APIs for container management and one that implements those APIs. This API is exposed so that you can leverage it to implement containerization in your own Kura plugins.
+The Container Orchestration service is composed of two bundles, one that exposes APIs for container management and one that implements those APIs. This API is exposed so that you can leverage it to implement containerization in your own Kura plugins.
 
 ***
 
@@ -18,7 +18,7 @@ For this bundle to function appropriately, the gateway must have docker installe
 
 ## Starting the Service
 
-To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string which tells the service where to find the docker engine (best left to the default value). Optionally a user can provide a Repository/Registry URL and respective credentials so that containers will be pulled from a alternative source such as AWS-ECR.
+To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string that tells the service where to find the docker engine (best left to the default value). Optionally a user can provide a Repository/Registry URL and respective credentials so that containers will be pulled from an alternative source such as AWS-ECR.
 
 ![Container-API]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/enable_api.png)
 
@@ -42,9 +42,9 @@ Containers may be configured using the following fields:
   
 - **Image Tag** - Describes the version of the docker image that will be used to create the container.
   
-- **Internal Ports** - This field accepts a comma separated list of ports which will be internally exposed on the spun up docker container.
+- **Internal Ports** - This field accepts a comma separated list of ports that will be internally exposed on the spun up docker container.
   
-- **External Ports** - This field accepts a comma separated list of ports which will be externally exposed on the host machine.
+- **External Ports** - This field accepts a comma separated list of ports that will be externally exposed on the host machine.
   
 - **Privileged Mode** - This flag if enabled will give the container root capabilities to all devices on the host system. Please be aware that setting this flag can be dangerous, and must only be used in exceptional situations.
   
@@ -52,7 +52,7 @@ Containers may be configured using the following fields:
   
 - **Volume Mount (optional)** - This field accepts a comma separated list of system-to-container file mounts. This allows for the container to access files on the host machine.
   
-- **Peripheral Device (optional)** - This field accepts a comma separated list of device paths. This parameter allows for devices to be passed though from the host to the container.
+- **Peripheral Device (optional)** - This field accepts a comma separated list of device paths. This parameter allows for devices to be passed through from the host to the container.
 
 - **Logger Type** - This field provides a dropdown selection of supported container logging drivers.
   
@@ -69,7 +69,7 @@ To stop the container without deleting the component, set the **Enabled** field 
 
 ## Container Management Dashboard
 
-The Container Orchestration service also provides the user with a intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with Kura and those created manually though the command line interface. To utilize this dashboard the **org.eclipse.container.orchestration.provider** (Docker-API) must be enabled, and the dashboard can be opened by navigating to **Device > Docker Containers**.
+The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with Kura and those created manually through the command line interface. To utilize this dashboard the **org.eclipse.container.orchestration.provider** (Docker-API) must be enabled, and the dashboard can be opened by navigating to **Device > Docker Containers**.
 
 ![Stop-Container]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/container_inventory.png)
 
@@ -101,7 +101,7 @@ This operation lists all the containers installed in the gateway.
 * Response Payload:
   * Installed containers serialized in JSON format
 
-The following JSON message is an example what this request outputs:
+The following JSON message is an example of what this request outputs:
     
     {
       "containers":
@@ -121,7 +121,7 @@ The container JSON message is comprised of the following elements:
 
 ## Start Container
 
-This operation allows to start a container installed on the gateway.
+This operation allows starting a container installed on the gateway.
 * Request Topic
   * $EDC/account_name/client_id/INVENTORY-V1/EXEC/containers/_start
 * Request Payload
@@ -140,7 +140,7 @@ This operation allows to start a container installed on the gateway.
 
 ## JSON identifier/payload for start and stop requests
 
-The requests for starting and stopping a container require the application to include a JSON object in request payload for selecting the target container. Docker enforces unique container names on a gateway, and thus they can reliably be used as a identifier.
+The requests for starting and stopping a container require the application to include a JSON object in request payload for selecting the target container. Docker enforces unique container names on a gateway, and thus they can reliably be used as an identifier.
 
 Example 1:
     

@@ -7,7 +7,7 @@ categories: [builtin]
 # What is the Container Orchestration Provider?
 The Container Orchestration Provider allows Kura to manage Docker. With this tool you can arbitrarily pull and deploy containerized software packages and run them on your gateway. This Provider allows the user to create, configure, start, and stop containers all from the browser. The bundle will also restart containers, if the gateway is restarted.
 
-Container Orchestration service is composed by two bundles, one that exposes APIs for container management and one that implements those APIs. This API is exposed so that you can leverage it to implement containerization in your own Kura plugins.
+The Container Orchestration service is composed by two bundles, one that exposes APIs for container management and one that implements those APIs. This API is exposed so that you can leverage it to implement containerization in your own Kura plugins.
 
 ***
 
@@ -18,7 +18,7 @@ For this bundle to function appropriately, the gateway must have docker installe
 
 ## Starting the Service
 
-To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string which tells the service where to find the docker engine (best left to the default value).
+To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string which tells the service where to find the docker engine (best left to the default value). Optionally a user can provide a Repository/Registery URL and respective credentials so that containers will be pulled from a alternative source such as AWS-ECR.
 
 ![Container-API]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/enable_api.png)
 

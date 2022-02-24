@@ -18,7 +18,7 @@ For this bundle to function appropriately, the gateway must have docker installe
 
 ## Starting the Service
 
-To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string which tells the service where to find the docker engine (best left to the default value). Optionally a user can provide a Repository/Registery URL and respective credentials so that containers will be pulled from a alternative source such as AWS-ECR.
+To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string which tells the service where to find the docker engine (best left to the default value). Optionally a user can provide a Repository/Registry URL and respective credentials so that containers will be pulled from a alternative source such as AWS-ECR.
 
 ![Container-API]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/enable_api.png)
 

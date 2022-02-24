@@ -21,6 +21,7 @@ import org.eclipse.kura.bluetooth.le.BluetoothLeAdapter;
 import org.eclipse.kura.bluetooth.le.BluetoothLeService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.system.SystemService;
 import org.freedesktop.dbus.exceptions.DBusException;
 import org.osgi.service.component.ComponentContext;
 
@@ -33,6 +34,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     private DeviceManager deviceManager;
     private CommandExecutorService executorService;
+    private SystemService systemService;
 
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
@@ -44,9 +46,19 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         }
     }
 
+    public void setSystemService(SystemService systemService) {
+        this.systemService = systemService;
+    }
+
+    public void unsetSystemService(SystemService systemService) {
+        if (this.systemService != systemService) {
+            this.systemService = null;
+        }
+    }
+
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
-        if (!startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
+        if (!startBluetoothSuppressed() && !startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
             startBluetoothDaemon();
         }
         try {
@@ -108,6 +120,12 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         } else {
             return false;
         }
+    }
+
+    private boolean startBluetoothSuppressed() {
+        // Allow to disable the bluetooth service start, e.g. when running inside a container
+        String value = this.systemService.getProperties().getProperty("kura.ble.suppressBluetoothDaemonStart");
+        return Boolean.parseBoolean(value);
     }
 
     private boolean execute(String commandLine) {

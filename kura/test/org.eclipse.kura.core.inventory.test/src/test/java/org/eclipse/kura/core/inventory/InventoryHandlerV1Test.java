@@ -34,7 +34,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
-import org.eclipse.kura.core.inventory.resources.DockerContainer;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor.ContainerDescriptorBuilder;
+import org.eclipse.kura.container.orchestration.provider.DockerService;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
@@ -72,12 +74,13 @@ public class InventoryHandlerV1Test {
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
-    
+
     private static final String TEST_JSON = "testJson";
-    
-    private DockerContainer DockerContainer1;
-    private DockerContainer DockerContainer2;
-    
+
+    private ContainerDescriptor DockerContainer1;
+    private ContainerDescriptor DockerContainer2;
+
+    private DockerService MockDockerService;
 
     @Test(expected = KuraException.class)
     public void testDoGetNoResources() throws KuraException, NoSuchFieldException {
@@ -935,49 +938,56 @@ public class InventoryHandlerV1Test {
 
         return message;
     }
-    
-    //-----------------------------------------//
-    // Start of Docker Contianer Related Tests //
-    //-----------------------------------------//
-    
+
+    // -----------------------------------------//
+    // Start of Container Related Tests //
+    // -----------------------------------------//
+
     @Test
     public void testStartContainerWithoutVersion() throws BundleException, KuraException {
         givenTwoDockerContainers();
 
-        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START), "{\"name\":\"dockerContainer1\"}");
-        
+        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START),
+                "{\"name\":\"dockerContainer1\"}");
+
         thenCheckIfContainerOneHasStarted();
     }
-    
+
     @Test
     public void testStopContainerWithoutVersion() throws BundleException, KuraException {
         givenTwoDockerContainers();
 
-        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP), "{\"name\":\"dockerContainer1\"}");
-        
+        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP),
+                "{\"name\":\"dockerContainer1\"}");
+
         thenCheckIfContainerOneHasStopped();
-        
+
     }
-    
-    //---------------------------------------//
-    // End of Docker Contianer Related Tests //
-    //---------------------------------------//
-    
+
+    // ---------------------------------------//
+    // End of Container Related Tests //
+    // ---------------------------------------//
+
     /**
      * given
      */
     private void givenTwoDockerContainers() {
-        DockerContainer1 = mockDockerContainer("dockerContainer1", "nginx:latest");
-        DockerContainer2 = mockDockerContainer("dockerContainer2", "nginx:alpine");
+        DockerContainer1 = new ContainerDescriptorBuilder().setContainerName("dockerContainer1")
+                .setContainerImage("nginx").setContainerID("1234").build();
+        DockerContainer2 = new ContainerDescriptorBuilder().setContainerName("dockerContainer2")
+                .setContainerImage("nginx").setContainerID("124344").build();
     }
-    
+
     /**
      * when
      */
-    
+
     private void givenTheFollowingJsonKuraPayload(String[] request, String payload) {
         InventoryHandlerV1 handler = new InventoryHandlerV1();
-        handler.activate(mockComponentContext(Arrays.asList(DockerContainer1, DockerContainer2)));
+
+        MockDockerService = mock(DockerService.class);
+
+        handler.setDockerService(MockDockerService);
 
         final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
                 requestMessage(request, payload));
@@ -985,26 +995,27 @@ public class InventoryHandlerV1Test {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
                 ((KuraResponsePayload) response.getPayload()).getResponseCode());
     }
-    
-    
+
     /**
      * then
+     * 
+     * @throws KuraException
      */
-    
-    private void thenCheckIfContainerOneHasStarted() {
-        Mockito.verify(DockerContainer1, times(1)).start();
-        Mockito.verify(DockerContainer1, times(0)).stop();
-        Mockito.verify(DockerContainer2, times(0)).start();
-        Mockito.verify(DockerContainer2, times(0)).stop();
+
+    private void thenCheckIfContainerOneHasStarted() throws KuraException {
+        Mockito.verify(MockDockerService, times(1)).startContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(0)).stopContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(0)).startContainer(DockerContainer2);
+        Mockito.verify(MockDockerService, times(0)).stopContainer(DockerContainer2);
     }
-    
-    private void thenCheckIfContainerOneHasStopped() {
-        Mockito.verify(DockerContainer1, times(0)).start();
-        Mockito.verify(DockerContainer1, times(1)).stop();
-        Mockito.verify(DockerContainer2, times(0)).start();
-        Mockito.verify(DockerContainer2, times(0)).stop();
+
+    private void thenCheckIfContainerOneHasStopped() throws KuraException {
+        Mockito.verify(MockDockerService, times(0)).startContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(1)).stopContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(0)).startContainer(DockerContainer2);
+        Mockito.verify(MockDockerService, times(0)).stopContainer(DockerContainer2);
     }
-    
+
     @SuppressWarnings("unchecked")
     private ComponentContext mockComponentContext(final List<Bundle> bundles) {
         final Bundle[] asArray = bundles.toArray(new Bundle[bundles.size()]);
@@ -1038,13 +1049,5 @@ public class InventoryHandlerV1Test {
 
         return result;
     }
-    
-    private Bundle mockDockerContainer(final String symbolicName, final String version) {
-        final Bundle result = mock(Bundle.class);
 
-        when(result.getContainerName()).thenReturn(symbolicName);
-        when(result.getVersion()).thenReturn(new Version(version));
-
-        return result;
-    }
 }

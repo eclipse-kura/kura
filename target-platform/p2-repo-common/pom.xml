@@ -503,9 +503,20 @@
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+<<<<<<< HEAD
                                     <groupId>com.eurotech</groupId>
                                     <artifactId>gpsd4java</artifactId>
                                     <version>${com.eurotech.gpsd4java.version}</version>
+=======
+                                    <groupId>com.eurotech.framework</groupId>
+                                    <artifactId>com.eurotech.framework.docker.configurable</artifactId>
+                                    <version>${com.eurotech.framework.docker.configurable.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>com.eurotech.framework</groupId>
+                                    <artifactId>com.eurotech.framework.docker.configurable.generic</artifactId>
+                                    <version>${com.eurotech.framework.docker.configurable.generic.version}</version>
+>>>>>>> 522af9fd0 (sqashing original commits to fix email for eclipse)
                                 </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>

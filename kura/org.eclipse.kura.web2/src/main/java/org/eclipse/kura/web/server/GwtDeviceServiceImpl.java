@@ -27,6 +27,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.DockerService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
@@ -41,9 +43,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.DockerService;
 
 public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements GwtDeviceService {
 
@@ -229,6 +228,15 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             }
         }
         return new ArrayList<>(pairs);
+    }
+
+    @Override
+    public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+
+        return dockerService != null;
     }
 
     @Override

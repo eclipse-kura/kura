@@ -57,4 +57,8 @@ public interface GwtDeviceService extends RemoteService {
 
     @Audit(componentName = "UI Device", description = "Stop container")
     public void stopContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException;
+
+    @Audit(componentName = "UI Device", description = "check if container orchestrator is active")
+    public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken token) throws GwtKuraException;
+
 }

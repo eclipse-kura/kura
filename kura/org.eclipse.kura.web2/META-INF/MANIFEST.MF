@@ -9,7 +9,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: com.eclipsesource.json;version="0.9.5",
- org.eclipse.kura.container.orchestration.provider;version="[1.0,2.0)",
  com.google.gson;version="2.7.0",
  javax.crypto,
  javax.crypto.spec,
@@ -42,6 +41,7 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
  org.eclipse.kura.command;version="[1.1,2.0)",
  org.eclipse.kura.configuration;version="[1.2,2.0)",
  org.eclipse.kura.configuration.metatype;version="[1.1,2.0)",
+ org.eclipse.kura.container.orchestration.provider;version="[1.0.0,2.0.0)";resolution:=optional,
  org.eclipse.kura.core.configuration;version="[2.0,3.0)",
  org.eclipse.kura.core.configuration.metatype;version="[1.0,2.0)",
  org.eclipse.kura.core.keystore.util;version="[1.0,2.0)",

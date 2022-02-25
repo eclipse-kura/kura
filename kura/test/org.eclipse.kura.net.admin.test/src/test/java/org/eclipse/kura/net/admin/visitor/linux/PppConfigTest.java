@@ -334,7 +334,7 @@ public class PppConfigTest {
                 + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
 
         List<String> expectedPeersFileContent = Arrays
-                .asList(new String[] { "921600", "unit 2", "logfile /var/log/kura-IK41VE_1-1.3", "debug",
+                .asList(new String[] { "921600", "logfile /var/log/kura-IK41VE_1-1.3", "debug",
                         "connect 'chat -v -f /tmp/kura/ppp/scripts/chat_IK41VE_1-1.3'",
                         "disconnect 'chat -v -f /tmp/kura/ppp/scripts/disconnect_IK41VE_1-1.3'", "modem", "lock",
                         "noauth", "noipdefault", "defaultroute", "usepeerdns", "noproxyarp", "novj", "novjccomp",
@@ -347,11 +347,11 @@ public class PppConfigTest {
         String peersFileContent = readFile(this.PPP_DIR + this.PPP_PEERS_DIR + this.MODEM_MODEL + "_"
                 + this.USB_BUS_NUMBER + "-" + this.USB_DEVICE_PATH);
 
-        List<String> expectedPeersFileContent = Arrays.asList(new String[] { "921600", "unit 2", "debug",
-                "connect 'chat -v -f /tmp/kura/ppp/scripts/chat_IK41VE_1-1.3'",
-                "disconnect 'chat -v -f /tmp/kura/ppp/scripts/disconnect_IK41VE_1-1.3'", "modem", "lock", "noauth",
-                "noipdefault", "defaultroute", "usepeerdns", "noproxyarp", "novj", "novjccomp", "nobsdcomp",
-                "nodeflate", "nomagic", "opersist", "maxfail 0", "connect-delay 1000" });
+        List<String> expectedPeersFileContent = Arrays.asList(
+                new String[] { "921600", "debug", "connect 'chat -v -f /tmp/kura/ppp/scripts/chat_IK41VE_1-1.3'",
+                        "disconnect 'chat -v -f /tmp/kura/ppp/scripts/disconnect_IK41VE_1-1.3'", "modem", "lock",
+                        "noauth", "noipdefault", "defaultroute", "usepeerdns", "noproxyarp", "novj", "novjccomp",
+                        "nobsdcomp", "nodeflate", "nomagic", "opersist", "maxfail 0", "connect-delay 1000" });
 
         expectedPeersFileContent.forEach(s -> assertTrue(peersFileContent.contains(s)));
     }

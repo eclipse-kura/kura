@@ -824,11 +824,6 @@ public class PppPeer {
                 writer.println(this.baudRate);
             }
 
-            if (this.pppUnitNumber != -1) {
-                writer.print("unit ");
-                writer.println(this.pppUnitNumber);
-            }
-
             // set logfile
             if (this.logfile != null) {
                 writer.print("logfile ");

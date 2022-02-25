@@ -75,6 +75,10 @@ public class InventoryHandlerV1Test {
     private static final String START = "_start";
     private static final String STOP = "_stop";
 
+
+    private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
+    private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+
     private static final String TEST_JSON = "testJson";
 
     private ContainerDescriptor DockerContainer1;
@@ -947,7 +951,7 @@ public class InventoryHandlerV1Test {
     public void testStartContainerWithoutVersion() throws BundleException, KuraException {
         givenTwoDockerContainers();
 
-        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START),
+        givenTheFollowingJsonKuraPayload(START_CONTAINER,
                 "{\"name\":\"dockerContainer1\"}");
 
         thenCheckIfContainerOneHasStarted();
@@ -957,7 +961,7 @@ public class InventoryHandlerV1Test {
     public void testStopContainerWithoutVersion() throws BundleException, KuraException {
         givenTwoDockerContainers();
 
-        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP),
+        givenTheFollowingJsonKuraPayload(STOP_CONTAINER,
                 "{\"name\":\"dockerContainer1\"}");
 
         thenCheckIfContainerOneHasStopped();
@@ -982,15 +986,21 @@ public class InventoryHandlerV1Test {
      * when
      */
 
-    private void givenTheFollowingJsonKuraPayload(String[] request, String payload) {
+    private void givenTheFollowingJsonKuraPayload(List<String> request, String payload) throws BundleException, KuraException {
+
+        final Bundle foo = mockBundle("foo", "1.0");
+        final Bundle bar = mockBundle("bar", "2.0");
+
         InventoryHandlerV1 handler = new InventoryHandlerV1();
 
+        handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
+        
         MockDockerService = mock(DockerService.class);
 
         handler.setDockerService(MockDockerService);
 
         final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
-                requestMessage(request, payload));
+                requestMessage(Arrays.asList("containers", "_stop"), "{\"name\":\"foo\"}"));
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
                 ((KuraResponsePayload) response.getPayload()).getResponseCode());

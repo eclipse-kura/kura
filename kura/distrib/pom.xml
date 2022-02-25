@@ -575,6 +575,11 @@
                                     <artifactId>org.eclipse.kura.container.orchestration.provider</artifactId>
                                     <version>${org.eclipse.kura.container.orchestration.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
+                                    <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -721,6 +726,7 @@
                                 <move file="target/plugins/org.eclipse.kura.request.handler.jaxrs.jar" tofile="target/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.wire.ai.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -1949,6 +1955,7 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider_${org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
 
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -2242,6 +2249,12 @@
                                             <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.driver.ble.xdk</artifactId>
                                             <version>${org.eclipse.kura.driver.ble.xdk.version}</version>
+                                            <type>dp</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
+                                            <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>

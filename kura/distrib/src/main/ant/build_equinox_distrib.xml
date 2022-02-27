@@ -195,9 +195,6 @@
 		<antcall target="linux.bluetooth-config" />
 		<antcall target="linux.watchdog-config" />
 
-		<antcall target="container-orchestration-config" />
-
-
 		<!-- Added Camel bundles configs -->
 		<antcall target="camel-config" />
 
@@ -745,8 +742,6 @@ fi]]>
 		<antcall target="linux-redhat-jars" />
 		<antcall target="linux-systemd-jars" />
 		<antcall target="nvidia-jetson-nano-jars" />
-
-		<antcall target="container-orchestrator-jars" />
 
 		<echo message="Building Kura Distribution for ${build.name}-jars..." />
 

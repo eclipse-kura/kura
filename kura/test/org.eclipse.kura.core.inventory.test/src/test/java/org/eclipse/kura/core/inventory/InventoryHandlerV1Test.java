@@ -993,14 +993,17 @@ public class InventoryHandlerV1Test {
 
         InventoryHandlerV1 handler = new InventoryHandlerV1();
 
-        handler.activate(mockComponentContext(Arrays.asList(foo, bar)));
         
         MockDockerService = mock(DockerService.class);
-
+        
+        when(MockDockerService.listRegisteredContainers()).thenReturn(Arrays.asList(DockerContainer1, DockerContainer2));
+        
+        
         handler.setDockerService(MockDockerService);
+        handler.activate(mock(ComponentContext.class));
 
         final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
-                requestMessage(Arrays.asList("containers", "_stop"), "{\"name\":\"foo\"}"));
+                requestMessage(request, payload));
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
                 ((KuraResponsePayload) response.getPayload()).getResponseCode());

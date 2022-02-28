@@ -1,0 +1,18 @@
+name: "tf_autoencoder_fp32"
+backend: "tensorflow"
+max_batch_size: 0
+input [
+    {
+    name: "INPUT0"
+    data_type: TYPE_FP32
+    dims: [ 1, 10 ]
+    }
+]
+output [
+    {
+    name: "OUTPUT0"
+    data_type: TYPE_FP32
+    dims: [ -1, 10 ]
+    }
+]
+version_policy: { all { }}

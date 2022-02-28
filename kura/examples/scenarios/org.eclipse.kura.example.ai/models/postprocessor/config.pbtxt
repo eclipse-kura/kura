@@ -1,0 +1,32 @@
+name: "postprocessor"
+backend: "python"
+
+input [
+  {
+    name: "RECONSTR0"
+    data_type: TYPE_FP32
+    dims: [ 1, 10 ]
+  }
+]
+input [
+  {
+    name: "ORIG0"
+    data_type: TYPE_FP32
+    dims: [ 1, 10 ]
+  }
+]
+output [
+  {
+    name: "ANOMALY_SCORE0"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  }
+]
+output [
+  {
+    name: "ANOMALY0"
+    data_type: TYPE_BOOL
+    dims: [ 1 ]
+  }
+]
+instance_group [{ kind: KIND_CPU }]

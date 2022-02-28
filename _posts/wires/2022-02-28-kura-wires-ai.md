@@ -38,7 +38,7 @@ In the following, two example configurations for Triton Inference Engine models 
 
 ### Input Specification Example
 
-Following, an example of a model configuration for the Nvidia™ Triton Inference Engine. It expects the input from the `WireEnvelope` that contains a record with properties:
+Following, an example of a [model configuration for the Nvidia™ Triton Inference Engine](https://github.com/triton-inference-server/server/blob/main/docs/model_configuration.md). It expects the input from the `WireEnvelope` that contains a record with properties:
 - `ACCELERATION` of type `Float`
 - `CHANNEL_0` of type `Integer`
 - `STREAM` of type `byte[]`

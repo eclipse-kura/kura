@@ -261,7 +261,6 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             
         } catch(Exception e){
             logger.error("Failed To List Containers: {}", e);
-            throw new GwtKuraException("Please Enable Container Orchestrator API.");
         }
 
         return new ArrayList<>(pairs);

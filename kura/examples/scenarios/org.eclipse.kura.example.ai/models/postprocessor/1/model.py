@@ -8,7 +8,6 @@
 #
 # Contributors:
 #  Eurotech
-#  Red Hat Inc
 
 import numpy as np
 import json

@@ -10,7 +10,6 @@
 #
 # Contributors:
 #  Eurotech
-#  Red Hat Inc
 
 import argparse
 import os.path

@@ -243,21 +243,26 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public List<GwtGroupedNVPair> findContainers(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
-
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
-                .toArray(ContainerDescriptor[]::new);
-        if (containers != null) {
-            for (ContainerDescriptor container : containers) {
-                GwtGroupedNVPair pair = new GwtGroupedNVPair();
-                pair.setId(container.getContainerName());
-                pair.setName(container.getContainerImage());
-                pair.setStatus(containerStateToString(container));
-                pair.setVersion(container.getContainerImageTag().split(":")[0]);
-                pair.set("isFrameworkManaged", container.getIsEsfManaged());
-                pairs.add(pair);
+        try {
+            DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+            ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+                    .toArray(ContainerDescriptor[]::new);
+            if (containers != null) {
+                for (ContainerDescriptor container : containers) {
+                    GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                    pair.setId(container.getContainerName());
+                    pair.setName(container.getContainerImage());
+                    pair.setStatus(containerStateToString(container));
+                    pair.setVersion(container.getContainerImageTag().split(":")[0]);
+                    pair.set("isFrameworkManaged", container.getIsEsfManaged());
+                    pairs.add(pair);
+                }
             }
+            
+        } catch(Exception e){
+            logger.error("Failed To List Containers: {}", e);
         }
+
         return new ArrayList<>(pairs);
     }
 

@@ -6,9 +6,11 @@ categories: [wires]
 
 The component allows interacting with an `InferenceEngineService` to perform machine learning-related operations.
 
-In a normal machine learning flow, the input is preprocessed before it is given to the inference algorithm, and the result is processed again to be adapted to the rest of the pipeline.
+An `InferenceEngineService` is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Triton Inference Server](https://developer.nvidia.com/nvidia-triton-inference-server). 
 
-An `InferenceEngineService` is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Triton Inference Server](https://developer.nvidia.com/nvidia-triton-inference-server). Once these models are loaded in the engine, the AI wire component allows to specify the name of the models that are used in the **pre-processing**, **infer**, and **post-processing** steps. Only the **infer** model name is mandatory so that it is possible to just use the strictly necessary steps.
+In a normal machine learning flow, the input is preprocessed before it is given to the machine learning algorithm, and the result is processed again to be adapted to the rest of the pipeline.
+
+Once these models are loaded in the engine, the AI wire component allows to specify the name of the models that are used in the **pre-processing**, **infer**, and **post-processing** steps. Only the **infer** model name is mandatory so that it is possible to just use the strictly necessary steps in case the pre/post-processing is performed directly by the **infer** step.
 
 ![ai_wires]({{ site.baseurl }}/assets/images/wires/AIComponentConfig.png)
 

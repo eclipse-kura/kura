@@ -18,7 +18,7 @@ The AI wire component takes a `WireEnvelope` as an input, it processes its recor
 
 The 3 inference steps are applied on each `WireRecord` contained in the input `WireEnvelope`.
 
-The inputs and outputs will have assigned the corresponding Kura `DataType`, which can be one of:
+The inputs and outputs will be assigned to the corresponding Kura `DataType`, which can be one of:
 - `BOOLEAN`
 - `DOUBLE`
 - `FLOAT`

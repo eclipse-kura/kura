@@ -88,6 +88,7 @@ public class DevicePanelUi extends Composite {
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
         this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
 
+        this.containers.setVisible(false); //hidden by default
         checkIfContainerOrchestratorIsAvaliable();
     }
 
@@ -119,12 +120,12 @@ public class DevicePanelUi extends Composite {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        DevicePanelUi.this.containers.setEnabled(false);
+                        DevicePanelUi.this.containers.setVisible(false);
                     }
 
                     @Override
                     public void onSuccess(Boolean result) {
-                        DevicePanelUi.this.containers.setEnabled(result);
+                        DevicePanelUi.this.containers.setVisible(result);
                     }
                 });
             }

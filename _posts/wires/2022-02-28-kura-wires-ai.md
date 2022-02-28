@@ -8,7 +8,7 @@ The component allows interacting with an `InferenceEngineService` to perform mac
 
 In a normal machine learning flow, the input is preprocessed before it is given to the inference algorithm, and the result is processed again to be adapted to the rest of the pipeline.
 
-An `InferenceEngineService` works based on models that describe the inputs and outputs of the algorithm, as well as the algorithm itself. Once these models are loaded in the engine, the AI wire component allows to specify the name of the models that are used in the **pre-processing**, **infer**, and **post-processing** steps. Only the **infer** model name is mandatory so that it is possible to just use the strictly necessary steps.
+An `InferenceEngineService` is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Triton Inference Server](https://developer.nvidia.com/nvidia-triton-inference-server). Once these models are loaded in the engine, the AI wire component allows to specify the name of the models that are used in the **pre-processing**, **infer**, and **post-processing** steps. Only the **infer** model name is mandatory so that it is possible to just use the strictly necessary steps.
 
 ![ai_wires]({{ site.baseurl }}/assets/images/wires/AIComponentConfig.png)
 

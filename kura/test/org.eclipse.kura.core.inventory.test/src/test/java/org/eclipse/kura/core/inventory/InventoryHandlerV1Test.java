@@ -1110,7 +1110,6 @@ public class InventoryHandlerV1Test {
      */
 
      private void thenCheckIfContainerMatchesJSON(){
-         System.out.println("Greg: " + Docker_Container_JSON);
          assertEquals("{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\"}]}", Docker_Container_JSON);
      }
 

@@ -49,6 +49,7 @@ import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
+import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -82,14 +83,14 @@ public class InventoryHandlerV1Test {
     private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
     private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
 
-    private static final String TEST_JSON = "testJson";
+    private static String TEST_JSON = "testJson";
+    private static String TEST_XML = "testXML";
 
     private ContainerDescriptor DockerContainer1;
     private ContainerDescriptor DockerContainer2;
 
     private DockerService MockDockerService;
 
-    private String Docker_Container_JSON;
     private DockerContainer Docker_Container_Object;
     private DockerContainers Docker_Containers_Object;
 
@@ -955,7 +956,7 @@ public class InventoryHandlerV1Test {
     // -----------------------------------------//
 
     @Test
-    public void testContainerMarshaling() throws BundleException, KuraException {
+    public void testContainerMarshalingJSON() throws BundleException, KuraException {
         givenTwoDockerContainers();
         giventheFollowingContainerSetupToMarshal();
 
@@ -965,12 +966,22 @@ public class InventoryHandlerV1Test {
     }
 
     @Test
-    public void testContainerUnMarshaling() throws BundleException, KuraException {
+    public void testContainerUnMarshalingJSON() throws BundleException, KuraException {
         givenTheFollowingJson();
 
         whenAJsonIsPassedToMarshaler();
 
         thenCheckIfJsonMatchesContainer();
+    }
+
+    @Test
+    public void testContainerMarshalingXML() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingContainerSetupToMarshal();
+
+        whenContainersArePassedToMarshalerXML();
+
+        thenCheckIfContainerMatchesXML();
     }
 
     @Test
@@ -1037,8 +1048,8 @@ public class InventoryHandlerV1Test {
     // }
     // ]
     // }
-        //Docker_Container_JSON = "{\"containers\": [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
-        Docker_Container_JSON = "{\"name\":\"test\",\"version\":\"nginx:latest\"}";
+        //TEST_JSON = "{\"containers\": [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
+        TEST_JSON = "{\"name\":\"test\",\"version\":\"nginx:latest\"}";
     }
 
     /**
@@ -1046,12 +1057,17 @@ public class InventoryHandlerV1Test {
      */
     private void whenContainersArePassedToMarshaler() throws BundleException, KuraException{
         JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
-        Docker_Container_JSON = marsh.marshal(Docker_Containers_Object);
+        TEST_JSON = marsh.marshal(Docker_Containers_Object);
+    }
+
+    private void whenContainersArePassedToMarshalerXML() throws BundleException, KuraException{
+        XmlMarshallUnmarshallImpl marsh = new XmlMarshallUnmarshallImpl();
+        TEST_XML = marsh.marshal(Docker_Containers_Object);
     }
 
     private void whenAJsonIsPassedToMarshaler() throws BundleException, KuraException {
         JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
-        Docker_Container_Object = marsh.unmarshal(Docker_Container_JSON, DockerContainer.class);
+        Docker_Container_Object = marsh.unmarshal(TEST_JSON, DockerContainer.class);
     }
 
     private void whenTheFollowingJsonKuraPayloadDoExec(List<String> request, String payload) throws BundleException, KuraException {
@@ -1110,8 +1126,25 @@ public class InventoryHandlerV1Test {
      */
 
      private void thenCheckIfContainerMatchesJSON(){
-         assertEquals("{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\"}]}", Docker_Container_JSON);
+         assertEquals("{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\"}]}", TEST_JSON);
      }
+
+     private void thenCheckIfContainerMatchesXML(){
+         /**
+          * <[<?xml version="1.0" encoding="UTF-8"?>
+            <containers>
+                <container>
+                    <name>dockerContainer1</name>
+                    <version>nginx:latest</version>
+                </container>
+            </containers>
+]>
+          */
+          String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version></container></containers>";
+          System.out.println("Greg 1: " + containerXMLExpected.replaceAll("\\s+",""));
+          System.out.println("Greg 2: " + TEST_XML.replaceAll("\\s+",""));
+        assertEquals(containerXMLExpected.replaceAll("\\s+",""), TEST_XML.replaceAll("\\s+",""));
+    }
 
     private void thenCheckIfJsonMatchesContainer(){
         assertEquals("test", Docker_Container_Object.getContainerName());

@@ -158,7 +158,7 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
                 // </resource>
                 // </inventory>
 
-                new XmlJavaSystemResourcesMapper().marshal(doc, object);
+                new XmlJavaDockerContainersMapper().marshal(doc, object);
             }
 
             // write the content into xml file

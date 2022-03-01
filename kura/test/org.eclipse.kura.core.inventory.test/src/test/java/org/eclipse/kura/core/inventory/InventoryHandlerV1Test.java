@@ -16,6 +16,7 @@ import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageCons
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor.ContainerDescriptorBuilder;
 import org.eclipse.kura.container.orchestration.provider.DockerService;
+import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
@@ -988,22 +990,25 @@ public class InventoryHandlerV1Test {
 
     private void givenTheFollowingJsonKuraPayload(List<String> request, String payload) throws BundleException, KuraException {
 
-        final Bundle foo = mockBundle("foo", "1.0");
-        final Bundle bar = mockBundle("bar", "2.0");
-
-        InventoryHandlerV1 handler = new InventoryHandlerV1();
+        InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
 
         
-        MockDockerService = mock(DockerService.class);
+        MockDockerService = mock(DockerService.class, Mockito.RETURNS_DEEP_STUBS);
         
         when(MockDockerService.listRegisteredContainers()).thenReturn(Arrays.asList(DockerContainer1, DockerContainer2));
         
+        KuraMessage theMessage = requestMessage(request, payload);
         
         handler.setDockerService(MockDockerService);
-        handler.activate(mock(ComponentContext.class));
+        handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
-                requestMessage(request, payload));
+        //convert ContainerDescriptor to a DockerContainer
+        DockerContainer testContainer = new DockerContainer(this.DockerContainer1);
+
+        doReturn(testContainer).when(handler).unmarshal(payload, DockerContainer.class);
+        
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
+        theMessage);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
                 ((KuraResponsePayload) response.getPayload()).getResponseCode());

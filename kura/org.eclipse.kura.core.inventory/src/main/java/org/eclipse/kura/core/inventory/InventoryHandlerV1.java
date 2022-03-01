@@ -476,7 +476,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         return result;
     }
 
-    private <T> T unmarshal(final String str, final Class<T> classz) throws KuraException {
+    public <T> T unmarshal(final String str, final Class<T> classz) throws KuraException {
         T result = null;
         ServiceReference<Unmarshaller>[] unmarshallerSRs = getJsonMarshallers(Unmarshaller.class);
         try {

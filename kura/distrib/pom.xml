@@ -1976,12 +1976,10 @@
                                         <delete dir="${project.build.directory}/staging/emulator/target" />
                                         <delete file="${project.build.directory}/staging/emulator/emulator-assembly.xml" />
                                         <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Core_Test.launch" />
-                                        <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_Linux.launch" />
-                                        <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_OSX.launch" />
+                                        <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator.launch" />
                                         <copy file="RELEASE_NOTES.txt" todir="${project.build.directory}/staging/emulator/src/main/resources" />
                                         <mkdir dir="${project.build.directory}/staging/emulator/launch_configs" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_Linux.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_OSX.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
+                                        <copy file="src/main/resources/common/Kura_Emulator.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
 
                                         <!-- Add SSL Keystore -->
                                         <copy file="src/main/resources/common/cacerts.ks" todir="${project.build.directory}/staging/emulator/src/main/resources" />

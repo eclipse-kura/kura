@@ -14,7 +14,15 @@ This section provides Eclipse Kura&trade; quick installation procedures for the 
 
 {% include alerts.html message="This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
 
-This quickstart has been tested using the Ubuntu 18.04.6 LTS for arm64 architecture flashed on the SD card through [Etcher](https://www.balena.io/etcher).
+This quickstart has been tested using the following image:
+
+<pre>jetson-nano-jp46-sd-card-image.zip</pre>
+
+downloaded from
+
+<pre>https://developer.nvidia.com/jetson-nano-sd-card-image</pre>
+
+and with the image burned on a SD card with [Etcher](https://www.balena.io/etcher/)
 
 The official images can be found on the [Jetson Nano Developer Kit Getting Starteg Guide](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write). Further information on the Ubuntu installation for the NVIDIA Jetson Nano&trade; can be found [here](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro).
 

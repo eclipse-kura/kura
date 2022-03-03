@@ -112,6 +112,12 @@ systemctl mask systemd-networkd
 systemctl mask networkd-dispatcher
 systemctl mask systemd-networkd-wait-online
 
+#disable DNS-related services - kura is the network manager
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

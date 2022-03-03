@@ -102,6 +102,16 @@ systemctl disable isc-dhcp-server
 systemctl stop NetworkManager.service
 systemctl disable NetworkManager.service
 
+#disable netplan - kura is the network manager
+systemctl disable systemd-networkd.socket
+systemctl disable systemd-networkd
+systemctl disable networkd-dispatcher
+systemctl disable systemd-networkd-wait-online
+systemctl mask systemd-networkd.socket
+systemctl mask systemd-networkd
+systemctl mask networkd-dispatcher
+systemctl mask systemd-networkd-wait-online
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

@@ -15,11 +15,13 @@ categories: [intro]
 This section provides Eclipse Kura&trade; quick installation procedures for the
 Raspberry Pi.
 
-{% include alerts.html message="This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
+{% include alerts.html message="This quickstart will install the version of Kura with the administrative web UI and network configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)" %}
 
 This quickstart has been tested using the Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the sd card through [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
 
-The official images could be also found on the [Project Page](https://ubuntu.com/download/raspberry-pi) . Further information on the Ubuntu installation for Raspberry Pi could be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi).
+The official images can be also found on the [Project Page](https://ubuntu.com/download/raspberry-pi). Further information on the Ubuntu installation for Raspberry Pi can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi).
+
+{% include alerts.html message="Please note that, at the time of this writing, only 64 bit OS image is supported." %}
 
 ## Enable SSH Access
 

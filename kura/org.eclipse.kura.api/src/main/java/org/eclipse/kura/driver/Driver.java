@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,13 +10,16 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- *
+ *  heyoulin <heyoulin@gmail.com>
  *******************************************************************************/
 package org.eclipse.kura.driver;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
 import org.osgi.annotation.versioning.ProviderType;
@@ -170,8 +173,34 @@ public interface Driver {
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
      *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      */
-    public void registerChannelListener(Map<String, Object> channelConfig, ChannelListener listener)
-            throws ConnectionException;
+    public default void registerChannelListener(Map<String, Object> channelConfig, ChannelListener listener)
+            throws ConnectionException {
+        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
+
+    /**
+     * Registers channel listeners for the provided channel configurations for
+     * monitor operation on it.
+     *
+     * @param listenerChannelConfigs
+     *            the channel listener and configuration of map
+     * @throws ConnectionException
+     *             if the connection to the field device is interrupted
+     * @throws NullPointerException
+     *             any of the arguments is null
+     * @throws org.eclipse.kura.KuraRuntimeException
+     *             if the method is not implemented by the driver then specific
+     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown
+     *             {@link org.eclipse.kura.KuraRuntimeException}
+     */
+    public default void registerChannelListeners(final Map<ChannelListener, Map<String, Object>> listenerChannelConfigs)
+            throws ConnectionException {
+
+        for (Map.Entry<ChannelListener, Map<String, Object>> entry : listenerChannelConfigs.entrySet()) {
+            registerChannelListener(entry.getValue(), entry.getKey());
+        }
+    }
 
     /**
      * Unregisters a already registered channel listener which has been
@@ -188,7 +217,33 @@ public interface Driver {
      *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
      *             needs to be set in the thrown {@link org.eclipse.kura.KuraRuntimeException}
      */
-    public void unregisterChannelListener(ChannelListener listener) throws ConnectionException;
+    public default void unregisterChannelListener(ChannelListener listener) throws ConnectionException {
+        throw new KuraRuntimeException(KuraErrorCode.OPERATION_NOT_SUPPORTED);
+    }
+
+    /**
+     * Unregisters multiple already registered channel listeners which have been
+     * registered for a monitor operation.
+     *
+     * @param listeners
+     *            the listeners to unregister
+     * @throws ConnectionException
+     *             if the connection to the field device is interrupted
+     * @throws NullPointerException
+     *             if the argument is null
+     * @throws org.eclipse.kura.KuraRuntimeException
+     *             if the method is not implemented by the driver then specific
+     *             error code {@code KuraErrorCode#OPERATION_NOT_SUPPORTED}
+     *             needs to be set in the thrown
+     *             {@link org.eclipse.kura.KuraRuntimeException}
+     */
+    public default void unregisterChannelListeners(final Collection<ChannelListener> listeners)
+            throws ConnectionException {
+        for (ChannelListener listener : listeners) {
+            unregisterChannelListener(listener);
+        }
+
+    }
 
     /**
      * Writes the data channels that correspond to the given channel records. The

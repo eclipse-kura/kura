@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+/*******************************************************************************
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,18 +10,21 @@
  * Contributors:
  *  Eurotech
  *  Amit Kumar Mondal
- */
+ *  heyoulin <heyoulin@gmail.com>
+ *******************************************************************************/
 package org.eclipse.kura.internal.driver.opcua;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.channel.ChannelRecord;
 import org.eclipse.kura.channel.listener.ChannelListener;
@@ -191,14 +194,20 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     /** {@inheritDoc} */
     @Override
-    public void registerChannelListener(final Map<String, Object> channelConfig, final ChannelListener listener)
+    public void registerChannelListeners(final Map<ChannelListener, Map<String, Object>> listenerChannelConfigs)
             throws ConnectionException {
-        final ListenRequest listenRequest = ListenRequest.extractListenRequest(channelConfig, listener);
+        List<ListenRequest> listenRequests = listenerChannelConfigs.entrySet().stream()
+                .map(lc -> ListenRequest.extractListenRequest(lc.getValue(), lc.getKey())).collect(Collectors.toList());
+        List<ListenRequest> treeListenRequests = listenRequests.stream()
+                .filter(req -> req.getParameters() instanceof TreeListenParams).collect(Collectors.toList());
+        List<ListenRequest> nodeListenRequests = listenRequests.stream()
+                .filter(req -> !(req.getParameters() instanceof TreeListenParams)).collect(Collectors.toList());
 
-        if (listenRequest.getParameters() instanceof TreeListenParams) {
-            this.subtreeListenerRegistrations.registerListener(listenRequest);
-        } else {
-            this.nodeListeneresRegistrations.registerListener(listenRequest);
+        if (!treeListenRequests.isEmpty()) {
+            this.subtreeListenerRegistrations.registerListeners(treeListenRequests);
+        }
+        if (!nodeListenRequests.isEmpty()) {
+            this.nodeListeneresRegistrations.registerListeners(nodeListenRequests);
         }
 
         connectAsync();
@@ -206,9 +215,9 @@ public final class OpcUaDriver implements Driver, ConfigurableComponent {
 
     /** {@inheritDoc} */
     @Override
-    public void unregisterChannelListener(final ChannelListener listener) throws ConnectionException {
-        this.nodeListeneresRegistrations.unregisterListener(listener);
-        this.subtreeListenerRegistrations.unregisterListener(listener);
+    public void unregisterChannelListeners(final Collection<ChannelListener> listeners) throws ConnectionException {
+        this.nodeListeneresRegistrations.unregisterListeners(listeners);
+        this.subtreeListenerRegistrations.unregisterListeners(listeners);
     }
 
     /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,19 +9,23 @@
  * 
  * Contributors:
  *  Eurotech
+ *  heyoulin <heyoulin@gmail.com>
  *******************************************************************************/
 package org.eclipse.kura.asset.provider;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.kura.asset.provider.BaseAsset.ChannelListenerRegistration;
 import org.eclipse.kura.channel.Channel;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.listener.ChannelListener;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.PreparedRead;
 import org.slf4j.Logger;
@@ -84,46 +88,50 @@ public class DriverState {
     private void setChannelListenersInternal(final Set<ChannelListenerRegistration> targetState,
             final Map<String, Channel> channels) {
 
-        final Iterator<ChannelListenerRegistration> iter = this.attachedListeners.iterator();
-
-        while (iter.hasNext()) {
-            final ChannelListenerRegistration reg = iter.next();
-
-            if (!targetState.contains(reg)) {
-                detach(iter, reg);
-            }
+        List<ChannelListenerRegistration> tobeRemoved = this.attachedListeners.stream()
+                .filter(reg -> !targetState.contains(reg)).collect(Collectors.toList());
+        if (!tobeRemoved.isEmpty()) {
+            this.detach(tobeRemoved);
         }
 
-        for (final ChannelListenerRegistration reg : targetState) {
-
+        Map<Channel, ChannelListenerRegistration> regChannels = targetState.stream().filter(reg -> {
             if (this.attachedListeners.contains(reg)) {
-                continue;
+                return false;
             }
 
             final Channel channel = channels.get(reg.getChannelName());
 
-            if (channel != null && channel.isEnabled()) {
-                attach(reg, channel);
-            }
+            return channel != null && channel.isEnabled();
+        }).collect(Collectors.toMap(reg -> channels.get(reg.getChannelName()), reg -> reg));
+        if (!regChannels.isEmpty()) {
+            attach(regChannels);
         }
+
     }
 
-    private void attach(final ChannelListenerRegistration reg, final Channel channel) {
+    private void attach(final Map<Channel, ChannelListenerRegistration> regChannels) {
         try {
             logger.debug("Registering Channel Listener for monitoring...");
-            this.driver.registerChannelListener(channel.getConfiguration(), reg.getChannelListener());
-            this.attachedListeners.add(reg);
+            Map<ChannelListener, Map<String, Object>> listenerChannelConfigs = regChannels.entrySet().stream()
+                    .collect(Collectors.toMap(regChannel -> regChannel.getValue().getChannelListener(),
+                            regChannel -> regChannel.getKey().getConfiguration()));
+            this.driver.registerChannelListeners(listenerChannelConfigs);
+            Set<ChannelListenerRegistration> regs = regChannels.entrySet().stream().map(Entry::getValue)
+                    .collect(Collectors.toSet());
+            this.attachedListeners.addAll(regs);
             logger.debug("Registering Channel Listener for monitoring...done");
         } catch (Exception e) {
             logger.warn("Failed to register channel listener", e);
         }
     }
 
-    private void detach(final Iterator<ChannelListenerRegistration> iter, final ChannelListenerRegistration reg) {
+    private void detach(final Collection<ChannelListenerRegistration> registrations) {
         try {
             logger.debug("Unregistering Asset Listener...");
-            this.driver.unregisterChannelListener(reg.getChannelListener());
-            iter.remove();
+            Collection<ChannelListener> listeners = registrations.stream()
+                    .map(ChannelListenerRegistration::getChannelListener).collect(Collectors.toSet());
+            this.driver.unregisterChannelListeners(listeners);
+            this.attachedListeners.removeAll(registrations);
             logger.debug("Unregistering Asset Listener...done");
         } catch (Exception e) {
             logger.warn("Failed to unregister channel listener", e);

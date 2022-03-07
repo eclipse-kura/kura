@@ -119,14 +119,13 @@ systemctl stop resolvconf.service
 systemctl disable resolvconf.service
 
 #disable NTP service
-if command -v timedatectl > /dev/null ;
-  then
+if command -v timedatectl > /dev/null ; then
     timedatectl set-ntp false
 fi
 
 #disable time synch at network start
 if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
-	chmod -x /etc/network/if-up.d/ntpdate
+    chmod -x /etc/network/if-up.d/ntpdate
 fi
 
 #prevent time sync services from starting

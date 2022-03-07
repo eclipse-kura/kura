@@ -118,6 +118,18 @@ systemctl disable systemd-resolved.service
 systemctl stop resolvconf.service
 systemctl disable resolvconf.service
 
+#disable NTP service
+if command -v timedatectl > /dev/null ;
+  then
+    timedatectl set-ntp false
+fi
+
+#prevent time sync services from starting
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+systemctl stop chrony
+systemctl disable chrony
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

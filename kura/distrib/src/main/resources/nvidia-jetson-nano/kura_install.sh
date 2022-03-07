@@ -125,6 +125,8 @@ if command -v timedatectl > /dev/null ;
 fi
 
 #prevent time sync services from starting
+systemctl stop systemd-timedated
+systemctl disable systemd-timedated
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
 systemctl stop chrony

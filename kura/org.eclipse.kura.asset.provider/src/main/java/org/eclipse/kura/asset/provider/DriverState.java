@@ -93,10 +93,10 @@ public class DriverState {
         List<ChannelListenerRegistration> tobeRemoved = this.attachedListeners.stream()
                 .filter(reg -> !targetState.contains(reg)).collect(Collectors.toList());
         if (!tobeRemoved.isEmpty()) {
-            detach(tobeRemoved);
+            this.detach(tobeRemoved);
         }
 
-        Map<Channel, ChannelListenerRegistration> regChannels = targetState.stream().filter(reg -> {
+        Map<ChannelListenerRegistration, Channel> regChannels = targetState.stream().filter(reg -> {
             if (this.attachedListeners.contains(reg)) {
                 return false;
             }
@@ -104,21 +104,21 @@ public class DriverState {
             final Channel channel = channels.get(reg.getChannelName());
 
             return channel != null && channel.isEnabled();
-        }).collect(Collectors.toMap(reg -> channels.get(reg.getChannelName()), reg -> reg));
+        }).collect(Collectors.toMap(reg -> reg, reg -> channels.get(reg.getChannelName())));
         if (!regChannels.isEmpty()) {
             attach(regChannels);
         }
 
     }
 
-    private void attach(final Map<Channel, ChannelListenerRegistration> regChannels) {
+    private void attach(final Map<ChannelListenerRegistration, Channel> regChannels) {
         logger.debug("Registering Channel Listener for monitoring...");
         Map<ChannelListenerRegistration, Map<String, Object>> listenerChannelConfigs = regChannels.entrySet().stream()
-                .collect(Collectors.toMap(Entry::getValue, regChannel -> regChannel.getKey().getConfiguration()));
+                .collect(Collectors.toMap(Entry::getKey, regChannel -> regChannel.getValue().getConfiguration()));
         try {
             this.driver.registerChannelListeners(listenerChannelConfigs.entrySet().stream().collect(Collectors.toMap(
                     listenerChannelConfig -> listenerChannelConfig.getKey().getChannelListener(), Entry::getValue)));
-            Set<ChannelListenerRegistration> regs = regChannels.entrySet().stream().map(Entry::getValue)
+            Set<ChannelListenerRegistration> regs = regChannels.entrySet().stream().map(Entry::getKey)
                     .collect(Collectors.toSet());
             this.attachedListeners.addAll(regs);
         } catch (KuraRuntimeException kuraError) {

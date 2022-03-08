@@ -37,7 +37,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -441,12 +440,6 @@ public class BaseAsset implements Asset, SelfConfiguringComponent {
         if (this.channelListeners.contains(reg)) {
             return;
         }
-        
-        Set<ChannelListenerRegistration> toRemove = this.channelListeners.stream()
-                .filter(regLister -> channelName.equals(regLister.getChannelName())).collect(Collectors.toSet());
-
-        this.channelListeners.removeAll(toRemove);
-
 
         this.channelListeners.add(reg);
 

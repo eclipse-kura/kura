@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.channel.ChannelFlag;
 import org.eclipse.kura.channel.ChannelRecord;
+import org.eclipse.kura.channel.ChannelStatus;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.driver.Driver;
 import org.eclipse.kura.driver.Driver.ConnectionException;
@@ -88,9 +89,7 @@ public class OpcUaDriverTest {
         List<String> endpointAddresses = new ArrayList<>();
         endpointAddresses.add("localhost");
         OpcUaServerConfig config = new OpcUaServerConfigBuilder().setBindPort(12685).setApplicationUri("opcsvr")
-                .setBindAddresses(bindAddresses)
-                .setEndpointAddresses(endpointAddresses)
-                .setServerName("opcsvr")
+                .setBindAddresses(bindAddresses).setEndpointAddresses(endpointAddresses).setServerName("opcsvr")
                 .setApplicationName(LocalizedText.english("opcsvr")).setCertificateManager(certificateManager)
                 .setCertificateValidator(certificateValidator)
                 .setUserTokenPolicies(Arrays.asList(OpcUaServerConfig.USER_TOKEN_POLICY_ANONYMOUS)).build();
@@ -187,14 +186,18 @@ public class OpcUaDriverTest {
     }
 
     private void assertSuccess(ChannelRecord record) {
-        assertEquals(ChannelFlag.SUCCESS, record.getChannelStatus().getChannelFlag());
+        assertEquals(new ChannelStatus(ChannelFlag.SUCCESS), record.getChannelStatus());
     }
 
     private ChannelRecord createReadRecord(String nodeId, DataType valueType) {
+        return createReadRecord(nodeId, "STRING", valueType);
+    }
+
+    private ChannelRecord createReadRecord(String nodeId, String nodIdType, DataType valueType) {
         ChannelRecord record = ChannelRecord.createReadRecord("test", valueType);
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put("node.namespace.index", "2");
-        channelConfig.put("node.id.type", "STRING");
+        channelConfig.put("node.id.type", nodIdType);
         channelConfig.put("opcua.type", VariableType.DEFINED_BY_JAVA_TYPE.name());
         channelConfig.put("node.id", nodeId);
         channelConfig.put("attribute", "Value");
@@ -203,10 +206,14 @@ public class OpcUaDriverTest {
     }
 
     private ChannelRecord createWriteRecord(String nodeId, TypedValue<?> value, VariableType opcuaType) {
+        return createWriteRecord(nodeId, "STRING", value, opcuaType);
+    }
+
+    private ChannelRecord createWriteRecord(String nodeId, String type, TypedValue<?> value, VariableType opcuaType) {
         ChannelRecord record = ChannelRecord.createWriteRecord("test", value);
         Map<String, Object> channelConfig = new HashMap<>();
         channelConfig.put("node.namespace.index", "2");
-        channelConfig.put("node.id.type", "STRING");
+        channelConfig.put("node.id.type", type);
         channelConfig.put("opcua.type", opcuaType.name());
         channelConfig.put("node.id", nodeId);
         channelConfig.put("attribute", "Value");
@@ -234,11 +241,26 @@ public class OpcUaDriverTest {
         assertEquals(expectedValue, readRecord.getValue());
     }
 
+    private void testRead(String nodeId, String nodeIdType, TypedValue<?> expectedValue) throws ConnectionException {
+        final ChannelRecord readRecord = createReadRecord(nodeId, nodeIdType, expectedValue.getType());
+        driver.read(Arrays.asList(readRecord));
+        assertSuccess(readRecord);
+        assertEquals(expectedValue, readRecord.getValue());
+    }
+
     private void testReadWrite(String nodeId, TypedValue<?> value, VariableType opcuaType) throws ConnectionException {
         final ChannelRecord writeRecord = createWriteRecord(nodeId, value, opcuaType);
         driver.write(Arrays.asList(writeRecord));
         assertSuccess(writeRecord);
         testRead(nodeId, value);
+    }
+
+    private void testReadWrite(String nodeId, String type, TypedValue<?> value, VariableType opcuaType)
+            throws ConnectionException {
+        final ChannelRecord writeRecord = createWriteRecord(nodeId, type, value, opcuaType);
+        driver.write(Arrays.asList(writeRecord));
+        assertSuccess(writeRecord);
+        testRead(nodeId, type, value);
     }
 
     private void testRead(String nodeId, Number number, EnumSet<DataType> types) throws ConnectionException {
@@ -425,6 +447,15 @@ public class OpcUaDriverTest {
         testRead(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x00, 0x00, 0x00, 0x00 }));
         testReadWrite(nodeId, TypedValues.newByteArrayValue(new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x09, (byte) 0xaa, (byte) 0xbb, (byte) 0xcc, (byte) 0xdd, (byte) 0xee, (byte) 0xff }), opcuaType);
+    }
+
+    @Test
+    public void testLargeIndex() throws ConnectionException {
+        final String nodeId = Long.toString(0xffffffffL);
+        final VariableType opcuaType = VariableType.INT32;
+
+        testRead(nodeId, "NUMERIC", TypedValues.newLongValue(1234));
+        testReadWrite(nodeId, "NUMERIC", TypedValues.newLongValue(12345), opcuaType);
     }
 
     public void bindCfgSvc(ConfigurationService cfgSvc) {

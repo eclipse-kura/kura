@@ -604,7 +604,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 }
                 this.radio.setEnabled(false);
                 this.groupVerify.setVisible(false);
-                this.channelList.setEnabled(false);
+                this.channelList.setEnabled(true);
 
             } else if (WIFI_MODE_ACCESS_POINT_MESSAGE.equals(this.wireless.getSelectedItemText())) {
                 // access point mode

@@ -15,6 +15,7 @@ package org.eclipse.kura.linux.net.ppp;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -46,8 +47,12 @@ public class PppLinux {
     }
 
     public void connect(String iface, String port) throws KuraException {
+        connect(iface, port, OptionalInt.empty());
+    }
 
-        String[] cmd = formConnectCommand(iface, port);
+    public void connect(String iface, String port, OptionalInt pppNetInterfaceNumber) throws KuraException {
+
+        String[] cmd = formConnectCommand(iface, port, pppNetInterfaceNumber);
         Command command = new Command(cmd);
         command.setTimeout(60);
         CommandStatus status = this.executorService.execute(command);
@@ -58,7 +63,12 @@ public class PppLinux {
 
     public void disconnect(String iface, String port) throws KuraException {
 
-        Pid pid = getPid(iface, port);
+        disconnect(iface, port, OptionalInt.empty());
+    }
+
+    public void disconnect(String iface, String port, OptionalInt pppNetInterfaceNumber) throws KuraException {
+
+        Pid pid = getPid(iface, port, pppNetInterfaceNumber);
         if (pid.getPid() >= 0) {
             logger.info("stopping {} pid={}", iface, pid);
 
@@ -72,13 +82,22 @@ public class PppLinux {
 
     public boolean isPppProcessRunning(String iface, String port) {
 
-        return getPid(iface, port).getPid() > 0;
+        return isPppProcessRunning(iface, port, OptionalInt.empty());
+    }
+
+    public boolean isPppProcessRunning(String iface, String port, OptionalInt pppNetInterfaceNumber) {
+
+        return getPid(iface, port, pppNetInterfaceNumber).getPid() > 0;
     }
 
     public boolean isPppProcessRunning(String iface, String port, int tout) {
+        return isPppProcessRunning(iface, port, OptionalInt.empty(), tout);
+    }
+
+    public boolean isPppProcessRunning(String iface, String port, OptionalInt pppNetInterfaceNumber, int tout) {
 
         if (tout <= 0L) {
-            return isPppProcessRunning(iface, port);
+            return isPppProcessRunning(iface, port, pppNetInterfaceNumber);
         }
 
         boolean isPppRunning = false;
@@ -90,7 +109,7 @@ public class PppLinux {
 
         while (dif < timeout) {
 
-            isPppRunning = isPppProcessRunning(iface, port);
+            isPppRunning = isPppProcessRunning(iface, port, pppNetInterfaceNumber);
             if (isPppRunning) {
                 break;
             }
@@ -108,14 +127,18 @@ public class PppLinux {
         return isPppRunning;
     }
 
-    private Pid getPid(String iface, String port) {
+    private Pid getPid(String iface, String port, OptionalInt pppNetInterfaceNumber) {
         Pid pid = new LinuxPid(-1);
         synchronized (lock) {
-            String[] command = formConnectCommand(iface, port);
+            String[] command = formConnectCommand(iface, port, pppNetInterfaceNumber);
             // Filter the pid whose command exactly matches the connectCommand
-            List<Pid> pids = this.executorService.getPids(command).entrySet().stream()
-                    .filter(entry -> entry.getKey().equals(String.join(" ", command))).map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
+            List<Pid> pids = this.executorService.getPids(command).entrySet().stream().filter(entry -> {
+                if (pppNetInterfaceNumber.isPresent()) {
+                    return entry.getKey().equals(String.join(" ", command));
+                } else {
+                    return entry.getKey().startsWith(String.join(" ", command));
+                }
+            }).map(Map.Entry::getValue).collect(Collectors.toList());
             if (!pids.isEmpty()) {
                 pid = pids.get(0);
             }
@@ -137,7 +160,12 @@ public class PppLinux {
         }
     }
 
-    private static String[] formConnectCommand(String peer, String port) {
-        return new String[] { PPP_DAEMON, port, "call", peer };
+    private static String[] formConnectCommand(String peer, String port, OptionalInt pppNetInterfaceNumber) {
+        if (pppNetInterfaceNumber.isPresent()) {
+            return new String[] { PPP_DAEMON, port, "call", peer, "unit",
+                    Integer.toString(pppNetInterfaceNumber.getAsInt()) };
+        } else {
+            return new String[] { PPP_DAEMON, port, "call", peer };
+        }
     }
 }

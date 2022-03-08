@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.kura.KuraException;
@@ -111,7 +112,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     private static final long TOGGLE_MODEM_TASK_EXECUTION_DELAY = 2; // in min
 
     private final Map<String, UsbModemDevice> detectedUsbModems = new ConcurrentHashMap<>();
-    private final Map<String, Integer> validUsbModemsPppNumbers = new ConcurrentHashMap<>();
+    private final Map<String, Integer> assignedPppNumbers = new ConcurrentHashMap<>();
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     private final AtomicBoolean activated = new AtomicBoolean(false);
 
@@ -217,7 +218,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     if (hasCorrectNumberOfResources(modemInfo, usbModem)) {
                         logger.info("activate () :: posting ModemAddedEvent ... {}", usbModem);
                         this.eventAdmin.postEvent(new ModemAddedEvent(usbModem));
-                        this.validUsbModemsPppNumbers.put(usbModem.getUsbPort(), generatePppNumber());
+                        this.assignedPppNumbers.computeIfAbsent(usbModem.getUsbPort(), k -> generatePppNumber());
                     } else {
                         logger.warn(
                                 "activate() :: modem doesn't have correct number of resources, will try to toggle it ...");
@@ -238,16 +239,18 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     }
 
     private int generatePppNumber() {
-        OptionalInt pppNumber = IntStream.range(0, MAX_PPP_NUMBER)
-                .filter(i -> !this.validUsbModemsPppNumbers.containsValue(i)).findFirst();
-        if (pppNumber.isPresent()) {
-            return pppNumber.getAsInt();
-        } else {
-            throw new IllegalArgumentException("Failed to generate ppp number");
+        synchronized (this.assignedPppNumbers) {
+            OptionalInt pppNumber = IntStream.range(0, MAX_PPP_NUMBER)
+                    .filter(i -> !this.assignedPppNumbers.containsValue(i)).findFirst();
+            if (pppNumber.isPresent()) {
+                return pppNumber.getAsInt();
+            } else {
+                throw new IllegalArgumentException("Failed to generate ppp number");
+            }
         }
     }
 
-    private String generatePppName(int pppNumber) {
+    private String pppInterfaceNameFromPPPNumber(int pppNumber) {
         return PPP + pppNumber;
     }
 
@@ -272,6 +275,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     logger.debug("activate() :: Adding block resource: {} for {}", deviceNode, device.getUsbPort());
                 }
                 this.detectedUsbModems.put(device.getUsbPort(), usbModem);
+                this.assignedPppNumbers.computeIfAbsent(device.getUsbPort(), k -> generatePppNumber());
             }
         }
     }
@@ -307,17 +311,22 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
     public List<String> getAllNetworkInterfaceNames() throws KuraException {
         waitActivated();
 
-        ArrayList<String> interfaceNames = new ArrayList<>();
+        List<String> interfaceNames = new ArrayList<>();
         List<String> allInterfaceNames = this.linuxNetworkUtil.getAllInterfaceNames();
         if (allInterfaceNames != null) {
             interfaceNames.addAll(allInterfaceNames);
         }
 
-        for (Integer pppNumber : this.validUsbModemsPppNumbers.values()) {
-            if (!interfaceNames.contains(generatePppName(pppNumber))) {
-                interfaceNames.add(generatePppName(pppNumber));
+        for (Integer pppNumber : this.assignedPppNumbers.values()) {
+            if (!interfaceNames.contains(pppInterfaceNameFromPPPNumber(pppNumber))) {
+                interfaceNames.add(pppInterfaceNameFromPPPNumber(pppNumber));
             }
         }
+
+        // remove virtual interface for Access Point
+        interfaceNames = interfaceNames.stream()
+                .filter(name -> !name.endsWith(LinuxNetworkUtil.ACCESS_POINT_INTERFACE_SUFFIX))
+                .collect(Collectors.toList());
 
         return interfaceNames;
     }
@@ -342,7 +351,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             }
         }
 
-        for (Entry<String, Integer> modemEntry : this.validUsbModemsPppNumbers.entrySet()) {
+        for (Entry<String, Integer> modemEntry : this.assignedPppNumbers.entrySet()) {
             UsbModemDevice usbModem = this.detectedUsbModems.get(modemEntry.getKey());
             if (usbModem != null) {
                 for (NetInterface<?> netInterface : getInterfacesForUsbDevice(netInterfaces, usbModem.getUsbPort())) {
@@ -593,7 +602,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                 .remove(event.getProperty(UsbDeviceEvent.USB_EVENT_USB_PORT_PROPERTY));
         if (usbModem != null) {
             logger.info("handleEvent() :: Removing modem: {}", usbModem);
-            this.validUsbModemsPppNumbers.remove(usbModem.getUsbPort());
 
             Map<String, String> properties = new HashMap<>();
             properties.put(UsbDeviceEvent.USB_EVENT_BUS_NUMBER_PROPERTY, usbModem.getUsbBusNumber());
@@ -625,6 +633,7 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
             UsbModemDevice usbModem = getUsbModemDevice(event, modemInfo);
             configureUsbModemDevice(event, usbModem);
             this.detectedUsbModems.put(usbModem.getUsbPort(), usbModem);
+            this.assignedPppNumbers.computeIfAbsent(usbModem.getUsbPort(), k -> generatePppNumber());
 
             // At this point, we should have some modems - display them
             logger.info("handleEvent() :: Modified modem (Added resource): {}", usbModem);
@@ -639,7 +648,6 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
                     && usbModem.getBlockDevs().size() == modemInfo.getNumBlockDevs()) {
                 logger.info("handleEvent() :: posting ModemAddedEvent -- USB_EVENT_DEVICE_ADDED_TOPIC: {}", usbModem);
                 this.eventAdmin.postEvent(new ModemAddedEvent(usbModem));
-                this.validUsbModemsPppNumbers.put(usbModem.getUsbPort(), generatePppNumber());
             }
         }
     }
@@ -906,8 +914,8 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     @Override
     public String getModemUsbPort(String pppInterfaceName) {
-        for (Entry<String, Integer> entry : this.validUsbModemsPppNumbers.entrySet()) {
-            if (generatePppName(entry.getValue()).equals(pppInterfaceName)) {
+        for (Entry<String, Integer> entry : this.assignedPppNumbers.entrySet()) {
+            if (pppInterfaceNameFromPPPNumber(entry.getValue()).equals(pppInterfaceName)) {
                 return entry.getKey();
             }
         }
@@ -926,16 +934,13 @@ public class NetworkServiceImpl implements NetworkService, EventHandler {
 
     @Override
     public String getModemPppInterfaceName(String usbPath) {
-        return generatePppName(this.validUsbModemsPppNumbers.get(usbPath));
+        return pppInterfaceNameFromPPPNumber(
+                this.assignedPppNumbers.computeIfAbsent(usbPath, k -> generatePppNumber()));
     }
 
     @Override
     public Optional<ModemDevice> getModemDevice(String usbPath) {
-        Optional<ModemDevice> modem = Optional.empty();
-        if (this.validUsbModemsPppNumbers.containsKey(usbPath)) {
-            modem = Optional.of(this.detectedUsbModems.get(usbPath));
-        }
-        return modem;
+        return Optional.ofNullable(this.detectedUsbModems.get(usbPath));
     }
 
     private boolean isVirtual(String interfaceName) {

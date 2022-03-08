@@ -245,7 +245,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
             @Override
             public String getValue(GwtGroupedNVPair object) {
-                if ((boolean) object.get("isEsfManaged")) {
+                if ((boolean) object.get("isFrameworkManaged")) {
                     return MSGS.trueLabel();
                 } else {
                     return MSGS.falseLabel();
@@ -253,9 +253,9 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
         };
         col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        TextHeader isEsfManaged = new TextHeader(MSGS.deviceTabContainerIsEsfManagedHeading());
-        isEsfManaged.setHeaderStyleNames(ROW_HEADER_STYLE);
-        bundlesGrid2.addColumn(col5, isEsfManaged);
+        TextHeader isFrameworkManaged = new TextHeader(MSGS.deviceTabContainerIsFrameworkManagedHeading());
+        isFrameworkManaged.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col5, isFrameworkManaged);
 
         dataProvider.addDataDisplay(bundlesGrid2);
     }

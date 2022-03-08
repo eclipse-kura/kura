@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -60,6 +61,16 @@ public class DbDataStore implements DataStore {
 
     private static final String DATA_SERVICE_REPAIR_ENABLED_PROPNAME = "db.store.repair.enabled";
 
+    private static final int PAYLOAD_BYTE_SIZE_THRESHOLD = 200;
+    /**
+     * The error with code 22003 is thrown when a value is out of range when converting to another data type.
+     */
+    private static final int NUMERIC_VALUE_OUT_OF_RANGE_1 = 22003;
+    /**
+     * The error with code 22004 is thrown when a value is out of range when converting to another column's data type.
+     */
+    private static final int NUMERIC_VALUE_OUT_OF_RANGE_2 = 22004;
+
     private H2DbService dbService;
     private final Calendar utcCalendar;
     private ScheduledExecutorService houseKeeperExecutor;
@@ -91,7 +102,6 @@ public class DbDataStore implements DataStore {
     private final String sqlDropPrimaryKey;
     private final String sqlDeleteDuplicates;
     private final String sqlCreatePrimaryKey;
-    private final String sqlGetGreatestId;
 
     // package level constructor to be invoked only by the factory
     public DbDataStore(String table) {
@@ -104,21 +114,24 @@ public class DbDataStore implements DataStore {
         this.sqlCreateTable = "CREATE TABLE IF NOT EXISTS " + this.sanitizedTableName
                 + " (id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY, topic VARCHAR(32767 CHARACTERS), qos INTEGER, retain BOOLEAN, "
                 + "createdOn TIMESTAMP, publishedOn TIMESTAMP, publishedMessageId INTEGER, confirmedOn TIMESTAMP, "
-                + "payload BLOB, priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
+                + "smallPayload VARBINARY, largePayload BLOB(16777216), priority INTEGER, sessionId VARCHAR(32767 CHARACTERS), droppedOn TIMESTAMP);";
         this.sqlCreateIndex = "CREATE INDEX IF NOT EXISTS " + sanitizeSql(this.tableName + "_nextMsg") + " ON "
                 + this.sanitizedTableName + " (publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC, qos);";
         this.sqlMessageCount = "SELECT COUNT(*) FROM " + this.sanitizedTableName + ";";
         this.sqlResetId = ALTER_TABLE + this.sanitizedTableName + " ALTER COLUMN id RESTART WITH 1;";
+
         this.sqlStore = "INSERT INTO " + this.sanitizedTableName
-                + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, payload, priority, "
-                + "sessionId, droppedOn) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                + " (topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, smallPayload, largePayload, priority, "
+                + "sessionId, droppedOn) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         this.sqlGetMessage = "SELECT id, topic, qos, retain, createdOn, publishedOn, publishedMessageId, confirmedOn, "
-                + "payload, priority, sessionId, droppedOn FROM " + this.sanitizedTableName + " WHERE id = ?";
+                + "smallPayload, largePayload, priority, sessionId, droppedOn FROM " + this.sanitizedTableName
+                + " WHERE id = ?";
         this.sqlGetNextMessage = "SELECT a.id, a.topic, a.qos, a.retain, a.createdOn, a.publishedOn, "
-                + "a.publishedMessageId, a.confirmedOn, a.payload, a.priority, a.sessionId, a.droppedOn FROM "
+                + "a.publishedMessageId, a.confirmedOn, a.smallPayload, a.largePayload, a.priority, a.sessionId, a.droppedOn FROM "
                 + this.sanitizedTableName + " AS a JOIN (SELECT id, publishedOn FROM " + this.sanitizedTableName
                 + " ORDER BY publishedOn ASC NULLS FIRST, priority ASC, createdOn ASC LIMIT 1) AS b "
                 + "WHERE a.id = b.id AND b.publishedOn IS NULL;";
+
         this.sqlSetPublished = UPDATE + this.sanitizedTableName
                 + " SET publishedOn = ?, publishedMessageId = ?, sessionId = ? WHERE id = ?;";
         this.sqlSetPublished2 = UPDATE + this.sanitizedTableName + " SET publishedOn = ? WHERE id = ?;";
@@ -146,7 +159,6 @@ public class DbDataStore implements DataStore {
         this.sqlDeleteDuplicates = DELETE_FROM + this.sanitizedTableName + " WHERE id IN (SELECT id FROM "
                 + this.sanitizedTableName + " GROUP BY id HAVING COUNT(*) > 1);";
         this.sqlCreatePrimaryKey = ALTER_TABLE + this.sanitizedTableName + " ADD PRIMARY KEY (id);";
-        this.sqlGetGreatestId = "SELECT MAX(ID) FROM " + this.sanitizedTableName + ";";
     }
 
     private String sanitizeSql(final String string) {
@@ -184,18 +196,23 @@ public class DbDataStore implements DataStore {
     }
 
     private boolean isRepairEnabled() {
-        final BundleContext context = FrameworkUtil.getBundle(DbDataStore.class).getBundleContext();
-        ServiceReference<SystemService> reference = context.getServiceReference(SystemService.class);
-        SystemService systemService = context.getService(reference);
-        if (systemService == null) {
-            return false;
-        }
         try {
-            final String isRepairEnabled = systemService.getProperties()
-                    .getProperty(DATA_SERVICE_REPAIR_ENABLED_PROPNAME);
-            return "true".equalsIgnoreCase(isRepairEnabled);
-        } finally {
-            context.ungetService(reference);
+            final BundleContext context = FrameworkUtil.getBundle(DbDataStore.class).getBundleContext();
+            ServiceReference<SystemService> reference = context.getServiceReference(SystemService.class);
+            SystemService systemService = context.getService(reference);
+            if (systemService == null) {
+                return false;
+            }
+
+            try {
+                final String isRepairEnabled = systemService.getProperties()
+                        .getProperty(DATA_SERVICE_REPAIR_ENABLED_PROPNAME);
+                return "true".equalsIgnoreCase(isRepairEnabled);
+            } finally {
+                context.ungetService(reference);
+            }
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -254,37 +271,19 @@ public class DbDataStore implements DataStore {
     @Override
     public synchronized DataMessage store(String topic, byte[] payload, int qos, boolean retain, int priority)
             throws KuraStoreException {
-        if (this.dbService == null) {
-            throw new KuraStoreException("DbService instance not attached");
-        }
-        if (topic == null || topic.trim().length() == 0) {
-            throw new IllegalArgumentException(TOPIC_ELEMENT);
-        }
 
-        // Priority 0 are used for life-cycle messages like birth and death certificates.
-        // Priority 1 are used for remove management by Cloudlet applications.
-        // For those messages, bypass the max message count check of the DB cache;
-        // we want to publish those message even if the db is full, so allow their storage.
-        if (priority != 0 && priority != 1) {
-            int count = getMessageCount();
-            logger.debug("Store message count: {}", count);
-            if (count >= this.capacity) {
-                logger.error("Store capacity exceeded");
-                throw new KuraStoreCapacityReachedException("Store capacity exceeded");
-            }
-        }
+        validate(topic, priority);
 
         DataMessage message = null;
         try {
             message = storeInternal(topic, payload, qos, retain, priority);
         } catch (KuraStoreException e) {
             // Try to reset the sequence generator and store the message again.
-            // FIXME: it doesn't work but if we restart Kura the sequence generator restarts from 0!
             Throwable cause = e.getCause();
             if (cause instanceof SQLException) {
                 SQLException sqle = (SQLException) cause;
                 int errorCode = sqle.getErrorCode();
-                if (errorCode == 22003) {
+                if (errorCode == NUMERIC_VALUE_OUT_OF_RANGE_1 || errorCode == NUMERIC_VALUE_OUT_OF_RANGE_2) {
                     logger.warn("Identity generator limit exceeded. Resetting it...");
                     resetIdentityGenerator();
                     message = storeInternal(topic, payload, qos, retain, priority);
@@ -297,6 +296,28 @@ public class DbDataStore implements DataStore {
         }
 
         return message;
+    }
+
+    private void validate(String topic, int priority) throws KuraStoreException {
+        if (this.dbService == null) {
+            throw new KuraStoreException("DbService instance not attached");
+        }
+        if (topic == null || topic.trim().length() == 0) {
+            throw new IllegalArgumentException(TOPIC_ELEMENT);
+        }
+
+        // Priority 0 are used for life-cycle messages like birth and death certificates.
+        // Priority 1 are used for remove management by Cloudlet applications.
+        // For those messages, bypass the maximum message count check of the DB cache.
+        // We want to publish those message even if the DB is full, so allow their storage.
+        if (priority != 0 && priority != 1) {
+            int count = getMessageCount();
+            logger.debug("Store message count: {}", count);
+            if (count >= this.capacity) {
+                logger.error("Store capacity exceeded");
+                throw new KuraStoreCapacityReachedException("Store capacity exceeded");
+            }
+        }
     }
 
     private synchronized DataMessage storeInternal(String topic, byte[] payload, int qos, boolean retain, int priority)
@@ -312,25 +333,29 @@ public class DbDataStore implements DataStore {
             int result = -1;
 
             // store message
-            try (PreparedStatement pstmt = c.prepareStatement(this.sqlStore)) {
-                pstmt.setString(1, topic);              // topic
-                pstmt.setInt(2, qos);               // qos
-                pstmt.setBoolean(3, retain);                // retain
-                pstmt.setTimestamp(4, now, this.utcCalendar); // createdOn
-                pstmt.setTimestamp(5, null);                // publishedOn
-                pstmt.setInt(6, -1);                 // publishedMessageId
-                pstmt.setTimestamp(7, null);                // confirmedOn
-                pstmt.setBinaryStream(8, new ByteArrayInputStream(payload));         // payload
-                pstmt.setInt(9, priority);            // priority
-                pstmt.setString(10, null);               // sessionId
-                pstmt.setTimestamp(11, null);               // droppedOn
-                pstmt.execute();
-            }
+            try (PreparedStatement pstmt = c.prepareStatement(this.sqlStore, new String[] { "id" })) {
+                pstmt.setString(1, topic);                                          // topic
+                pstmt.setInt(2, qos);                                               // qos
+                pstmt.setBoolean(3, retain);                                        // retain
+                pstmt.setTimestamp(4, now, this.utcCalendar);                       // createdOn
+                pstmt.setTimestamp(5, null);                                        // publishedOn
+                pstmt.setInt(6, -1);                                                // publishedMessageId
+                pstmt.setTimestamp(7, null);                                        // confirmedOn
 
-            // retrieve message id
-            try (PreparedStatement cstmt = c.prepareStatement(this.sqlGetGreatestId);
-                    ResultSet rs = cstmt.executeQuery()) {
-                if (rs != null && rs.next()) {
+                if (payload.length < PAYLOAD_BYTE_SIZE_THRESHOLD) {
+                    pstmt.setBytes(8, payload);                                     // smallPayload
+                    pstmt.setNull(9, Types.BLOB);
+                } else {
+                    pstmt.setNull(8, Types.VARBINARY);
+                    pstmt.setBinaryStream(9, new ByteArrayInputStream(payload));    // largePayload
+                }
+
+                pstmt.setInt(10, priority);                                         // priority
+                pstmt.setString(11, null);                                          // sessionId
+                pstmt.setTimestamp(12, null);                                       // droppedOn
+                pstmt.execute();
+                ResultSet rs = pstmt.getGeneratedKeys();
+                if (rs.next()) {
                     result = rs.getInt(1);
                 }
             }
@@ -591,7 +616,13 @@ public class DbDataStore implements DataStore {
 
     private DataMessage buildDataMessage(ResultSet rs) throws SQLException {
         DataMessage.Builder builder = buildDataMessageBuilder(rs);
-        builder = builder.withPayload(rs.getBytes("payload"));
+
+        byte[] payload = rs.getBytes("smallPayload");
+        if (payload == null) {
+            payload = rs.getBytes("largePayload");
+        }
+
+        builder = builder.withPayload(payload);
         return builder.build();
     }
 

@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 import org.eclipse.kura.util.configuration.Property;
+
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 
 public class ConfigurableGenericDockerServiceOptions {
 
@@ -40,7 +41,7 @@ public class ConfigurableGenericDockerServiceOptions {
     private static final Property<String> CONTAINER_LOGGER_PARAMETERS = new Property<>("container.loggerParameters",
             "");
     private static final Property<String> CONTAINER_LOGGING_TYPE = new Property<>("container.loggingType", "default");
-
+  
     private final boolean enabled;
     private final String image;
     private final String imageTag;

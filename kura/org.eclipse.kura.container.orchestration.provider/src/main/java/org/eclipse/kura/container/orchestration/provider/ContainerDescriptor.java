@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
-
 import com.github.dockerjava.api.model.LogConfig.LoggingType;
 
 /**
@@ -168,6 +167,9 @@ public class ContainerDescriptor {
         private ContainerStates containerState = ContainerStates.STOPPING;
         private Boolean isEsfManaged = true;
         private LoggingType containerLoggingType = LoggingType.DEFAULT;
+        private Boolean containerPrivilaged = false;
+        private ContainerStates containerState = ContainerStates.STOPPING;
+        private Boolean isEsfManaged = true;
 
         public ContainerDescriptorBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;

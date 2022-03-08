@@ -16,6 +16,7 @@ import static org.eclipse.kura.cloudconnection.request.RequestHandlerMessageCons
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -34,7 +35,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor.ContainerDescriptorBuilder;
+import org.eclipse.kura.container.orchestration.provider.DockerService;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
+import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackage;
@@ -44,6 +49,7 @@ import org.eclipse.kura.core.inventory.resources.SystemPackages;
 import org.eclipse.kura.core.inventory.resources.SystemResourcesInfo;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.internal.json.marshaller.unmarshaller.JsonMarshallUnmarshallImpl;
+import org.eclipse.kura.internal.xml.marshaller.unmarshaller.XmlMarshallUnmarshallImpl;
 import org.eclipse.kura.marshalling.Unmarshaller;
 import org.eclipse.kura.message.KuraRequestPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
@@ -72,12 +78,21 @@ public class InventoryHandlerV1Test {
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
-    
-    private static final String TEST_JSON = "testJson";
-    
-    private DockerContainer DockerContainer1;
-    private DockerContainer DockerContainer2;
-    
+
+
+    private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
+    private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+
+    private static String TEST_JSON = "testJson";
+    private static String TEST_XML = "testXML";
+
+    private ContainerDescriptor DockerContainer1;
+    private ContainerDescriptor DockerContainer2;
+
+    private DockerService MockDockerService;
+
+    private DockerContainer Docker_Container_Object;
+    private DockerContainers Docker_Containers_Object;
 
     @Test(expected = KuraException.class)
     public void testDoGetNoResources() throws KuraException, NoSuchFieldException {
@@ -489,7 +504,7 @@ public class InventoryHandlerV1Test {
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK, resPayload.getResponseCode());
         assertEquals(TEST_JSON, new String(resPayload.getBody(), Charset.forName("UTF-8")));
     }
-
+    
     @Test
     public void testDoGetBundlesBundleStopping() throws KuraException, NoSuchFieldException {
         Bundle[] bundles = new Bundle[1];
@@ -953,58 +968,224 @@ public class InventoryHandlerV1Test {
     public void testStopContainerWithoutVersion() throws BundleException, KuraException {
         givenTwoDockerContainers();
 
-        givenTheFollowingJsonKuraPayload(Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP), "{\"name\":\"dockerContainer1\"}");
-        
-        thenCheckIfContainerOneHasStopped();
-        
+    // -----------------------------------------//
+    // Start of Container Related Tests //
+    // -----------------------------------------//
+
+    @Test
+    public void testContainerMarshalingJSON() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingContainerSetupToMarshal();
+
+        whenContainersArePassedToMarshaler();
+
+        thenCheckIfContainerMatchesJSON();
     }
-    
-    //---------------------------------------//
-    // End of Docker Contianer Related Tests //
-    //---------------------------------------//
-    
+
+    @Test
+    public void testContainerUnMarshalingJSON() throws BundleException, KuraException {
+        givenTheFollowingJson();
+
+        whenAJsonIsPassedToMarshaler();
+
+        thenCheckIfJsonMatchesContainer();
+    }
+
+    @Test
+    public void testContainerMarshalingXML() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingContainerSetupToMarshal();
+
+        whenContainersArePassedToMarshalerXML();
+
+        thenCheckIfContainerMatchesXML();
+    }
+
+    @Test
+    public void testListContainerDoGet() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonKuraPayloadDoGet(Arrays.asList(RESOURCE_DOCKER_CONTAINERS),
+                "");
+
+        thenCheckIfContainerWereListed();
+    }
+
+    @Test
+    public void testStartContainerWithoutVersion() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonKuraPayloadDoExec(START_CONTAINER,
+                "{\"name\":\"dockerContainer1\"}");
+
+        thenCheckIfContainerOneHasStarted();
+    }
+
+    @Test
+    public void testStopContainerWithoutVersion() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonKuraPayloadDoExec(STOP_CONTAINER,
+                "{\"name\":\"dockerContainer1\"}");
+
+        thenCheckIfContainerOneHasStopped();
+
+    }
+
+    // ---------------------------------------//
+    // End of Container Related Tests //
+    // ---------------------------------------//
+
     /**
      * given
      */
-    private void givenTwoDockerContainers() {
-        DockerContainer1 = mockDockerContainer("dockerContainer1", "nginx:latest");
-        DockerContainer2 = mockDockerContainer("dockerContainer2", "nginx:alpine");
-    }
     
+     private void giventheFollowingContainerSetupToMarshal(){
+        
+        Docker_Container_Object = new DockerContainer(DockerContainer1);
+
+        Docker_Containers_Object = new DockerContainers(Arrays.asList(Docker_Container_Object));
+     }
+
+    private void givenTwoDockerContainers() {
+        DockerContainer1 = new ContainerDescriptorBuilder().setContainerName("dockerContainer1")
+                .setContainerImage("nginx").setContainerImageTag("latest").setContainerID("1234").build();
+        DockerContainer2 = new ContainerDescriptorBuilder().setContainerName("dockerContainer2")
+                .setContainerImage("nginx").setContainerID("124344").build();
+    }
+
+    private void givenTheFollowingJson() {
+
+    // {
+    // "containers": [
+    // {
+    // "name" : "rfkill",
+    // "version": "nginx:latest",
+    // type": "DOCKER",
+    // }
+    // ]
+    // }
+        //TEST_JSON = "{\"containers\": [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
+        TEST_JSON = "{\"name\":\"test\",\"version\":\"nginx:latest\"}";
+    }
+
     /**
      * when
      */
-    
-    private void givenTheFollowingJsonKuraPayload(String[] request, String payload) {
-        InventoryHandlerV1 handler = new InventoryHandlerV1();
-        handler.activate(mockComponentContext(Arrays.asList(DockerContainer1, DockerContainer2)));
+    private void whenContainersArePassedToMarshaler() throws BundleException, KuraException{
+        JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
+        TEST_JSON = marsh.marshal(Docker_Containers_Object);
+    }
 
-        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class),
-                requestMessage(request, payload));
+    private void whenContainersArePassedToMarshalerXML() throws BundleException, KuraException{
+        XmlMarshallUnmarshallImpl marsh = new XmlMarshallUnmarshallImpl();
+        TEST_XML = marsh.marshal(Docker_Containers_Object);
+    }
+
+    private void whenAJsonIsPassedToMarshaler() throws BundleException, KuraException {
+        JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
+        Docker_Container_Object = marsh.unmarshal(TEST_JSON, DockerContainer.class);
+    }
+
+    private void whenTheFollowingJsonKuraPayloadDoExec(List<String> request, String payload) throws BundleException, KuraException {
+
+        InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
+
+        
+        MockDockerService = mock(DockerService.class, Mockito.RETURNS_DEEP_STUBS);
+        
+        when(MockDockerService.listRegisteredContainers()).thenReturn(Arrays.asList(DockerContainer1, DockerContainer2));
+        
+        KuraMessage theMessage = requestMessage(request, payload);
+        
+        handler.setDockerService(MockDockerService);
+        handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
+
+        //convert ContainerDescriptor to a DockerContainer
+        DockerContainer testContainer = new DockerContainer(this.DockerContainer1);
+
+        doReturn(testContainer).when(handler).unmarshal(payload, DockerContainer.class);
+        
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
+        theMessage);
 
         assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
                 ((KuraResponsePayload) response.getPayload()).getResponseCode());
     }
     
-    
+    private void whenTheFollowingJsonKuraPayloadDoGet(List<String> request, String payload) throws BundleException, KuraException {
+
+        InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
+
+        
+        MockDockerService = mock(DockerService.class, Mockito.RETURNS_DEEP_STUBS);
+        
+        when(MockDockerService.listRegisteredContainers()).thenReturn(Arrays.asList(DockerContainer1, DockerContainer2));
+        
+        KuraMessage theMessage = requestMessage(request, payload);
+        
+        handler.setDockerService(MockDockerService);
+        handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
+
+        //convert ContainerDescriptor to a DockerContainer
+        DockerContainer testContainer = new DockerContainer(this.DockerContainer1);
+
+        doReturn(testContainer).when(handler).unmarshal(payload, DockerContainer.class);
+        
+        final KuraMessage response = handler.doGet(null,
+        theMessage);
+    }
+
     /**
      * then
+     * 
+     * @throws KuraException
      */
-    
-    private void thenCheckIfContainerOneHasStarted() {
-        Mockito.verify(DockerContainer1, times(1)).start();
-        Mockito.verify(DockerContainer1, times(0)).stop();
-        Mockito.verify(DockerContainer2, times(0)).start();
-        Mockito.verify(DockerContainer2, times(0)).stop();
+
+     private void thenCheckIfContainerMatchesJSON(){
+         assertEquals("{\"containers\":[{\"name\":\"dockerContainer1\",\"version\":\"nginx:latest\",\"type\":\"DOCKER\"}]}", TEST_JSON);
+     }
+
+     private void thenCheckIfContainerMatchesXML(){
+         /**
+          * <[<?xml version="1.0" encoding="UTF-8"?>
+            <containers>
+                <container>
+                    <name>dockerContainer1</name>
+                    <version>nginx:latest</version>
+                </container>
+            </containers>
+]>
+          */
+          String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version></container></containers>";
+          System.out.println("Greg 1: " + containerXMLExpected.replaceAll("\\s+",""));
+          System.out.println("Greg 2: " + TEST_XML.replaceAll("\\s+",""));
+        assertEquals(containerXMLExpected.replaceAll("\\s+",""), TEST_XML.replaceAll("\\s+",""));
     }
-    
-    private void thenCheckIfContainerOneHasStopped() {
-        Mockito.verify(DockerContainer1, times(0)).start();
-        Mockito.verify(DockerContainer1, times(1)).stop();
-        Mockito.verify(DockerContainer2, times(0)).start();
-        Mockito.verify(DockerContainer2, times(0)).stop();
+
+    private void thenCheckIfJsonMatchesContainer(){
+        assertEquals("test", Docker_Container_Object.getContainerName());
+        
     }
-    
+
+    private void thenCheckIfContainerWereListed() throws KuraException {
+        Mockito.verify(MockDockerService, times(1)).listRegisteredContainers();
+    }
+
+    private void thenCheckIfContainerOneHasStarted() throws KuraException {
+        Mockito.verify(MockDockerService, times(1)).startContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(0)).stopContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(0)).startContainer(DockerContainer2);
+        Mockito.verify(MockDockerService, times(0)).stopContainer(DockerContainer2);
+    }
+
+    private void thenCheckIfContainerOneHasStopped() throws KuraException {
+        Mockito.verify(MockDockerService, times(0)).startContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(1)).stopContainer(DockerContainer1);
+        Mockito.verify(MockDockerService, times(0)).startContainer(DockerContainer2);
+        Mockito.verify(MockDockerService, times(0)).stopContainer(DockerContainer2);
+    }
+
     @SuppressWarnings("unchecked")
     private ComponentContext mockComponentContext(final List<Bundle> bundles) {
         final Bundle[] asArray = bundles.toArray(new Bundle[bundles.size()]);
@@ -1038,13 +1219,5 @@ public class InventoryHandlerV1Test {
 
         return result;
     }
-    
-    private Bundle mockDockerContainer(final String symbolicName, final String version) {
-        final Bundle result = mock(Bundle.class);
 
-        when(result.getContainerName()).thenReturn(symbolicName);
-        when(result.getVersion()).thenReturn(new Version(version));
-
-        return result;
-    }
 }

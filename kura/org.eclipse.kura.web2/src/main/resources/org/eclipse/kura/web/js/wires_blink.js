@@ -2,11 +2,22 @@ var BlinkEffect = function (composer) {
 	this.composer = composer
 }
 
+BlinkEffect.prototype.closeEventSource = function() {
+	if (this.eventSource) {
+		this.eventSource.close();
+		this.eventSource = null;
+		var xmlHttp = new XMLHttpRequest();
+		xmlHttp.open("GET", "/admin/sse?session=" + this.eventSourceSessionId
+				+ "&logout=" + this.eventSourceSessionId, true);
+		xmlHttp.send(null);
+	}
+}
+
 BlinkEffect.prototype.setEnabled = function (enabled) {
 	if (typeof EventSource == "undefined") {
 		return;
 	}
-	
+	this.closeEventSource();
 	if (enabled) {
 		this.eventSourceSessionId = new Date().getTime();
 		this.eventSource = new EventSource("/admin/sse?session="
@@ -24,14 +35,7 @@ BlinkEffect.prototype.setEnabled = function (enabled) {
 				}
 			});
 		};
-	} else if (this.eventSource) {
-		this.eventSource.close();
-		this.eventSource = null;
-		var xmlHttp = new XMLHttpRequest();
-		xmlHttp.open("GET", "/admin/sse?session=" + this.eventSourceSessionId
-				+ "&logout=" + this.eventSourceSessionId, true);
-		xmlHttp.send(null);
-	}
+	} 
 }
 
 BlinkEffect.prototype.fireTransition  = function(c, port) {

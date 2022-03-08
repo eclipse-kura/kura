@@ -158,7 +158,7 @@
                             <autoStart>true</autoStart>
                         </bundle>
                         <bundle>
-                            <id>org.apache.commons.io</id>
+                            <id>org.apache.commons.commons-io</id>
                             <level>4</level>
                             <autoStart>true</autoStart>
                         </bundle>
@@ -311,7 +311,7 @@
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
-                            <artifactId>org.apache.commons.io</artifactId>
+                            <artifactId>org.apache.commons.commons-io</artifactId>
                         </dependency>
                         <dependency>
                             <type>p2-installable-unit</type>
@@ -406,7 +406,7 @@
                             </requirement>
                             <requirement>
                                 <type>p2-installable-unit</type>
-                                <id>jakarta.annotation-api</id>
+                                <id>com.eclipsesource.jaxrs.jersey-min</id>
                                 <versionRange>0.0.0</versionRange>
                             </requirement>
                             <requirement>

@@ -12,6 +12,10 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin.modem;
 
+import java.util.OptionalInt;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -26,9 +30,12 @@ public class Ppp implements IModemLinkService {
 
     private static final Logger logger = LoggerFactory.getLogger(Ppp.class);
 
+    private static final Pattern PPP_INRERFACE_PATTERN = Pattern.compile("ppp([0-9]+)");
+
     private static final Object LOCK = new Object();
     private final String interfaceName;
     private final String pppInterfaceName;
+    private final int pppInterfaceNumber;
     private final String port;
     private final CommandExecutorService executorService;
     private final PppLinux pppLinux;
@@ -37,6 +44,12 @@ public class Ppp implements IModemLinkService {
     public Ppp(String interfaceName, String pppInterfaceName, String port, CommandExecutorService executorService) {
         this.interfaceName = interfaceName;
         this.pppInterfaceName = pppInterfaceName;
+        final Matcher matcher = PPP_INRERFACE_PATTERN.matcher(pppInterfaceName);
+        if (matcher.matches()) {
+            this.pppInterfaceNumber = Integer.parseInt(matcher.group(1));
+        } else {
+            throw new IllegalArgumentException("Cannot determine ppp interface number");
+        }
         this.port = port;
         this.executorService = executorService;
         this.pppLinux = new PppLinux(executorService);
@@ -45,14 +58,20 @@ public class Ppp implements IModemLinkService {
 
     @Override
     public void connect() throws KuraException {
-        this.pppLinux.connect(this.interfaceName, this.port);
+        // stop for existing pppd instances for the given interfaceName and port and possibly another ppp interface
+        if (pppLinux.isPppProcessRunning(interfaceName, port)) {
+            logger.info("found existing pppd instance for {} {}, stopping it", interfaceName, port);
+            pppLinux.disconnect(interfaceName, port);
+        }
+
+        this.pppLinux.connect(this.interfaceName, this.port, OptionalInt.of(this.pppInterfaceNumber));
     }
 
     @Override
     public void disconnect() throws KuraException {
 
         logger.info("disconnecting :: stopping PPP monitor ...");
-        this.pppLinux.disconnect(this.interfaceName, this.port);
+        this.pppLinux.disconnect(this.interfaceName, this.port, OptionalInt.of(this.pppInterfaceNumber));
 
         try {
             LinuxDns linuxDns = LinuxDns.getInstance();
@@ -83,7 +102,8 @@ public class Ppp implements IModemLinkService {
     public PppState getPppState() throws KuraException {
         synchronized (LOCK) {
             final PppState pppState;
-            final boolean pppdRunning = this.pppLinux.isPppProcessRunning(this.interfaceName, this.port);
+            final boolean pppdRunning = this.pppLinux.isPppProcessRunning(this.interfaceName, this.port,
+                    OptionalInt.of(this.pppInterfaceNumber));
             final String ip = getIPaddress();
 
             if (pppdRunning && ip != null) {

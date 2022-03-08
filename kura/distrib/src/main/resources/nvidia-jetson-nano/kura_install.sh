@@ -1,22 +1,21 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+# Copyright (c) 2022 Eurotech and/or its affiliates and others
 #
-#  This program and the accompanying materials are made
-#  available under the terms of the Eclipse Public License 2.0
-#  which is available at https://www.eclipse.org/legal/epl-2.0/
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
 #
-#  SPDX-License-Identifier: EPL-2.0
+# SPDX-License-Identifier: EPL-2.0
 #
-#  Contributors:
-#   Eurotech
-#
+# Contributors:
+#  Eurotech
 
 INSTALL_DIR=/opt/eclipse
 
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
-        
+
 #set up Kura init
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
@@ -85,7 +84,7 @@ if [ ! -f "/etc/bind/rndc.key" ] ; then
 fi
 chown bind:bind /etc/bind/rndc.key
 chmod 600 /etc/bind/rndc.key
-        
+
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
@@ -97,6 +96,44 @@ systemctl disable dhcpcd
 # disable isc-dhcp-server service - kura is the network manager
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
+
+# disable NetworkManager.service - kura is the network manager
+systemctl stop NetworkManager.service
+systemctl disable NetworkManager.service
+
+#disable netplan - kura is the network manager
+systemctl disable systemd-networkd.socket
+systemctl disable systemd-networkd
+systemctl disable networkd-dispatcher
+systemctl disable systemd-networkd-wait-online
+systemctl mask systemd-networkd.socket
+systemctl mask systemd-networkd
+systemctl mask networkd-dispatcher
+systemctl mask systemd-networkd-wait-online
+
+#disable DNS-related services - kura is the network manager
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
+
+#disable NTP service
+if command -v timedatectl > /dev/null ; then
+    timedatectl set-ntp false
+fi
+
+#disable time synch at network start
+if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
+    chmod -x /etc/network/if-up.d/ntpdate
+fi
+
+#prevent time sync services from starting
+systemctl stop systemd-timedated
+systemctl disable systemd-timedated
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+systemctl stop chrony
+systemctl disable chrony
 
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
@@ -121,4 +158,4 @@ else
     done
 fi
 
-keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit  
+keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

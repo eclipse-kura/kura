@@ -19,11 +19,14 @@ import java.util.Map;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.provider.ContainerStates;
 import org.eclipse.kura.container.orchestration.provider.DockerService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class ConfigurableGenericDockerService implements ConfigurableComponent {
 

@@ -13,14 +13,22 @@
 package org.eclipse.kura.web.client.ui.device;
 
 import org.eclipse.kura.web.client.messages.Messages;
+import org.eclipse.kura.web.client.ui.EntryClassUi;
 import org.eclipse.kura.web.client.ui.Tab;
+import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtXSRFToken;
+import org.eclipse.kura.web.shared.service.GwtDeviceService;
+import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenService;
+import org.eclipse.kura.web.shared.service.GwtSecurityTokenServiceAsync;
 import org.gwtbootstrap3.client.ui.TabListItem;
 import org.gwtbootstrap3.client.ui.html.Span;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -79,6 +87,8 @@ public class DevicePanelUi extends Composite {
         this.packages.addClickHandler(new Tab.RefreshHandler(this.packagesPanel));
         this.systemProperties.addClickHandler(new Tab.RefreshHandler(this.systemPropertiesPanel));
         this.containers.addClickHandler(new Tab.RefreshHandler(this.dockerContainersPanel));
+        this.containers.setVisible(false); //hidden by default
+        checkIfContainerOrchestratorIsAvaliable();
     }
 
     public void initDevicePanel() {
@@ -89,4 +99,37 @@ public class DevicePanelUi extends Composite {
     public void setSession(GwtSession currentSession) {
         this.session = currentSession;
     }
+
+
+    public void checkIfContainerOrchestratorIsAvaliable() {
+
+        final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
+        final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
+
+        securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(caught);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                deviceService.checkIfContainerOrchestratorIsActive(token, new AsyncCallback<Boolean>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        DevicePanelUi.this.containers.setVisible(false);
+                    }
+
+                    @Override
+                    public void onSuccess(Boolean result) {
+                        DevicePanelUi.this.containers.setVisible(result);
+                    }
+                });
+            }
+        });
+    }
+
 }

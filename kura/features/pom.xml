@@ -56,11 +56,13 @@
         <module>org.eclipse.kura.driver.opcua</module>
         <module>org.eclipse.kura.driver.s7plc</module>
         <module>org.eclipse.kura.driver.ble.sensortag</module>
-	<module>org.eclipse.kura.driver.ble.xdk</module>
+	    <module>org.eclipse.kura.driver.ble.xdk</module>
         <module>org.eclipse.kura.driver.eddystone</module>
         <module>org.eclipse.kura.driver.ibeacon</module>
         <module>org.eclipse.kura.wire.script.filter</module>
         <module>org.eclipse.kura.driver.gpio</module>
+        <module>org.eclipse.kura.wire.ai.component.provider</module>
+        <module>org.eclipse.kura.ai.triton.server</module>
     </modules>
 
     <profiles>

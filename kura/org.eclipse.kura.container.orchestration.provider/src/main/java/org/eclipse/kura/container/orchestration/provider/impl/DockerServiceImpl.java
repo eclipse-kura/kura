@@ -440,7 +440,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         return finalContainerID;
     }
-
+  
     private HostConfig containerLogConfigurationHandler(ContainerDescriptor containerDescription,
             HostConfig configuration) {
 
@@ -671,7 +671,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             }
 
             if (Boolean.FALSE.equals(container.getIsEsfManaged())) {
-                // container is not ESF Managed, and thus should only be stopped and not deleted.
+                // container is not Framework Managed, and thus should only be stopped and not deleted.
                 return;
             }
 

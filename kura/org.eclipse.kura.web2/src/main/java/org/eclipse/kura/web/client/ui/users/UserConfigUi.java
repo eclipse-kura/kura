@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.users;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,6 +35,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
@@ -115,15 +118,22 @@ public class UserConfigUi extends Composite {
             }
         };
 
+        nameColumn.setSortable(true);
+
+        this.dataProvider.addDataDisplay(this.permissionTable);
+
         this.permissionTable.addColumn(assignedColumn, MSGS.usersPermissionAssigned());
         this.permissionTable.addColumn(nameColumn, MSGS.usersPermissionName());
-        this.dataProvider.addDataDisplay(this.permissionTable);
+        this.permissionTable.getColumnSortList().push(nameColumn);
+        this.permissionTable.addColumnSortHandler(permissionNameSortHandler(nameColumn));
 
         final List<AssignedPermission> tableContent = this.dataProvider.getList();
 
         for (final String permission : definedPermissions) {
             tableContent.add(new AssignedPermission(permission, userData.getPermissions().contains(permission)));
         }
+
+        ColumnSortEvent.fire(this.permissionTable, this.permissionTable.getColumnSortList());
     }
 
     public void initPasswordWidgets() {
@@ -161,6 +171,13 @@ public class UserConfigUi extends Composite {
         });
 
         this.changePassword.addClickHandler(e -> pickPassword());
+    }
+
+    private ListHandler<AssignedPermission> permissionNameSortHandler(TextColumn<AssignedPermission> nameColumn) {
+        ListHandler<AssignedPermission> handler = new ListHandler<>(this.dataProvider.getList());
+        handler.setComparator(nameColumn, Comparator.comparing(AssignedPermission::getName));
+
+        return handler;
     }
 
     private void pickPassword() {

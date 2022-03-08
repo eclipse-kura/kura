@@ -200,7 +200,7 @@
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
-                                <artifactId>org.apache.commons.io</artifactId>
+                                <artifactId>org.apache.commons.commons-io</artifactId>
                             </dependency>
                             <dependency>
                                 <type>p2-installable-unit</type>
@@ -608,7 +608,7 @@
                                 </requirement>
                                 <requirement>
                                     <type>p2-installable-unit</type>
-                                    <id>jakarta.annotation-api</id>
+                                    <id>com.eclipsesource.jaxrs.jersey-min</id>
                                     <versionRange>0.0.0</versionRange>
                                 </requirement>
                                 <requirement>
@@ -905,7 +905,9 @@
         <module>org.eclipse.kura.rest.wire.provider.test</module>
         <module>org.eclipse.kura.util.test.driver</module>
         <module>org.eclipse.kura.container.orchestration.provider.test</module>
+        <module>org.eclipse.kura.wire.ai.component.provider.test</module>
         <module>org.eclipse.kura.container.provider.test</module>
+        <module>org.eclipse.kura.ai.triton.server.test</module>
         <!--
         <module>org.eclipse.kura.raspberrypi.sensehat.test</module>
         -->

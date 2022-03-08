@@ -27,6 +27,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.DockerService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
@@ -232,24 +234,38 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     }
 
     @Override
+    public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+
+        return dockerService != null;
+    }
+
+    @Override
     public List<GwtGroupedNVPair> findContainers(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
-
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
-                .toArray(ContainerDescriptor[]::new);
-        if (containers != null) {
-            for (ContainerDescriptor container : containers) {
-                GwtGroupedNVPair pair = new GwtGroupedNVPair();
-                pair.setId(container.getContainerName());
-                pair.setName(container.getContainerImage());
-                pair.setStatus(containerStateToString(container));
-                pair.setVersion(container.getContainerImageTag().split(":")[0]);
-                pair.set("isEsfManaged", container.getIsEsfManaged());
-                pairs.add(pair);
+        try {
+            DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+            ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+                    .toArray(ContainerDescriptor[]::new);
+            if (containers != null) {
+                for (ContainerDescriptor container : containers) {
+                    GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                    pair.setId(container.getContainerName());
+                    pair.setName(container.getContainerImage());
+                    pair.setStatus(containerStateToString(container));
+                    pair.setVersion(container.getContainerImageTag().split(":")[0]);
+                    pair.set("isFrameworkManaged", container.getIsEsfManaged());
+                    pairs.add(pair);
+                }
             }
+            
+        } catch(Exception e){
+            logger.error("Failed To List Containers: {}", e);
         }
+
         return new ArrayList<>(pairs);
     }
 

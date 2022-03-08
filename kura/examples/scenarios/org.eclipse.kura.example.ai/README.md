@@ -125,6 +125,9 @@ Excpected models folder structure:
 
 ```bash
 models
+├── ensemble_pipeline
+│   ├── 1
+│   └── config.pbtxt
 ├── postprocessor
 │   ├── 1
 │   │   └── model.py

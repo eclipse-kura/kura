@@ -784,7 +784,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private void logIntoRemoteRepository() {
 
-        // Decode password
+        //Decode password
         String decodedPassword;
         try {
             decodedPassword = String

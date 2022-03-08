@@ -99,7 +99,25 @@ Eclipse will also report some errors at this point. See the next section to reso
 
 ### Workspace Setup
 
-Click the arrow next to the *target-definition* project in the workspace and double-click **kura-equinox_3.11.1.target** to open it.
+This section will guide the users to configure the development workspace environment.
+
+#### JRE Configuration
+
+The latest Eclipse IDEs require and configure, by default, a Java 11 environment.
+In order to be able to leverage and develop using the new workspace for ESF, the user will be required to perform a one-time operation to specify to the IDE a Java 8 JDK.
+Opening the Eclipse preferences and selecting the Installed JREs in the Java section, the user has to select an installed Java 8 instance.
+
+![JRE Selection]({{ site.baseurl }}/assets/images/kura_setup/jre_selection.png)
+
+After applying the configuration change, the user will be prompted to align also the compiler options. To do so, selecting the Compiler entry in the Java section, the user has to select 1.8 from the list of available Java versions.
+
+![Compiler Configuration]({{ site.baseurl }}/assets/images/kura_setup/compiler_config.png)
+
+After applying the changes, the user will be prompted to recompile the environment.
+
+#### Target Definition Setup
+
+Click the arrow next to the *target-definition* project in the workspace and double-click **kura-equinox_3.16.0.target** to open it.
 
 ![Image 7]({{ site.baseurl }}/assets/images/kura_setup/image007.png)
 

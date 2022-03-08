@@ -144,6 +144,10 @@
 				</not>
 			</and>
 		</condition>
+		
+        <condition property="is.nvidia.jetson.nano">
+            <contains string="${build.name}" substring="nvidia-jetson-nano" />
+        </condition>
 
 		<condition property="is.nvidia.jetson.nano">
 			<contains string="${build.name}" substring="nvidia-jetson-nano" />
@@ -249,6 +253,7 @@
 		<antcall target="linux-redhat-config" />
 		<antcall target="linux-systemd-config" />
 		<antcall target="ai-wire-config" />
+		<antcall target="nvidia-triton-server-config" />
 
 		<!-- Add mToolkit to config.ini -->
 		<propertyfile
@@ -1608,6 +1613,14 @@ fi]]>
 		</propertyfile>
 	</target>
 
+    <target name="nvidia-triton-server-config" if="is.nvidia.jetson.nano">
+        <propertyfile
+            file="${project.build.directory}/${build.output.name}/config.ini">
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar@4:start" />
+        </propertyfile>
+    </target>
+	
 	<target name="emulator-jars" if="is.nn">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
 			update="true">
@@ -1674,6 +1687,9 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>
 

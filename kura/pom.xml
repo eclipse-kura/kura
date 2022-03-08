@@ -123,8 +123,8 @@
         <module>org.eclipse.kura.request.handler.jaxrs</module>
         
         <module>org.eclipse.kura.rest.wire.provider</module>
-        
         <module>org.eclipse.kura.container.orchestration.provider</module>
+        <module>org.eclipse.kura.ai.triton.server</module>
 
         <module>org.eclipse.kura.wire.ai.component.provider</module>
 

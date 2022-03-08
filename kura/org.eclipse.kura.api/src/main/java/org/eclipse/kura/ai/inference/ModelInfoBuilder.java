@@ -130,6 +130,18 @@ public class ModelInfoBuilder {
     }
 
     /**
+     * Add a descriptor list of an input tensor
+     *
+     * @param inputDescriptors
+     *            a List of {@link TensorDescriptor} for the input tensor
+     * @return a ModelInfoBuilder
+     */
+    public ModelInfoBuilder addAllInputDescriptor(List<TensorDescriptor> inputDescriptors) {
+        this.inputDescriptors.addAll(inputDescriptors);
+        return this;
+    }
+
+    /**
      * Remove a descriptor from the input tensor list
      *
      * @param inputDescriptor
@@ -150,6 +162,18 @@ public class ModelInfoBuilder {
      */
     public ModelInfoBuilder addOutputDescriptor(TensorDescriptor outputDescriptor) {
         this.outputDescriptors.add(outputDescriptor);
+        return this;
+    }
+
+    /**
+     * Add a descriptor list of an output tensor
+     *
+     * @param outputDescriptors
+     *            a List of {@link TensorDescriptor} for the output tensor
+     * @return a ModelInfoBuilder
+     */
+    public ModelInfoBuilder addAllOutputDescriptor(List<TensorDescriptor> outputDescriptors) {
+        this.outputDescriptors.addAll(outputDescriptors);
         return this;
     }
 

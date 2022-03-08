@@ -123,7 +123,7 @@ docker run --rm \
 
 > **Note**: This demo leverages the `ensemble`, `python` and `tensorflow` backends of the Triton Inference Server, only containers built with these backends will work.
 
-Excpected models folder structure:
+Expected models folder structure:
 
 ```bash
 models

@@ -121,6 +121,8 @@ docker run --rm \
     tritonserver --model-repository=/models --model-control-mode=explicit
 ```
 
+> **Note**: This demo leverages the `ensemble`, `python` and `tensorflow` backends of the Triton Inference Server, only containers built with these backends will work.
+
 Excpected models folder structure:
 
 ```bash

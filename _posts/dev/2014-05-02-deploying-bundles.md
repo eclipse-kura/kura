@@ -64,11 +64,9 @@ Windows). To deploy the code to a running system, see the section
 In the Eclipse workspace, locate the **org.eclipse.kura.emulator**
 project. Expand it to show the src/main/resources folder.
 
-Right-click the correct **Kura_Emulator_*[OS]*.launch** file,
-depending on which operating system you are running (where “*[OS]*” is
-“Linux” for a Linux system or “OSX” for a OS X system). In the context
+Right-click the **Kura_Emulator.launch** file. In the context
 menu, select the **Run as** option, and select the
-**Kura_Emulator_*[OS]***. This will start Kura running locally and
+**Kura_Emulator***. This will start Kura running locally and
 will display a Console window in the bottom pane in Eclipse. The Console
 window will show the OSGi diagnostics as various bundles start and
 execute.

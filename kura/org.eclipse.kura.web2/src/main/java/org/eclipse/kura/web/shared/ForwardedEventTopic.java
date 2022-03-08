@@ -33,6 +33,10 @@ public enum ForwardedEventTopic {
     BUNDLE_RESOLVED("org/osgi/framework/BundleEvent/RESOLVED"),
     BUNDLE_UNRESOLVED("org/osgi/framework/BundleEvent/UNRESOLVED"),
 
+    DOCKER_STARTED("com/eurotech/framework/docker/configurable/STARTED"),
+    DOCKER_STOPPED("com/eurotech/framework/configurable/STOPPED"),
+    DOCKER_RUNNING("com/eurotech/framework/configurable/RUNNING"),
+
     ROLE_CREATED("org/osgi/service/useradmin/UserAdmin/ROLE_CREATED"),
     ROLE_CHANGED("org/osgi/service/useradmin/UserAdmin/ROLE_CHANGED"),
     ROLE_REMOVED("org/osgi/service/useradmin/UserAdmin/ROLE_REMOVED"),

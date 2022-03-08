@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.kura.util.configuration.Property;
-
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.util.configuration.Property;
 
 public class ConfigurableGenericDockerServiceOptions {
 
@@ -38,6 +37,9 @@ public class ConfigurableGenericDockerServiceOptions {
     private static final Property<String> CONTAINER_VOLUME = new Property<>("container.volume", "");
     private static final Property<String> CONTAINER_DEVICE = new Property<>("container.device", "");
     private static final Property<Boolean> CONTAINER_PRIVILEGED = new Property<>("container.privileged", false);
+    private static final Property<String> CONTAINER_LOGGER_PARAMETERS = new Property<>("container.loggerParameters",
+            "");
+    private static final Property<String> CONTAINER_LOGGING_TYPE = new Property<>("container.loggingType", "default");
 
     private final boolean enabled;
     private final String image;
@@ -50,6 +52,8 @@ public class ConfigurableGenericDockerServiceOptions {
     private final String containerDevice;
     private final boolean privilegedMode;
     private final Map<String, String> containerVolumes;
+    private final Map<String, String> containerLoggingParameters;
+    private final String containerLoggerType;
 
     public ConfigurableGenericDockerServiceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -67,6 +71,8 @@ public class ConfigurableGenericDockerServiceOptions {
         this.containerVolumes = parseVolume(this.containerVolumeString);
         this.containerDevice = CONTAINER_DEVICE.get(properties);
         this.privilegedMode = CONTAINER_PRIVILEGED.get(properties);
+        this.containerLoggerType = CONTAINER_LOGGING_TYPE.get(properties);
+        this.containerLoggingParameters = parseLoggingParams(CONTAINER_LOGGER_PARAMETERS.get(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -78,6 +84,23 @@ public class ConfigurableGenericDockerServiceOptions {
 
         for (String entry : volumeString.trim().split(",")) {
             String[] tempEntry = entry.split(":");
+            if (tempEntry.length == 2) {
+                map.put(tempEntry[0].trim(), tempEntry[1].trim());
+            }
+        }
+
+        return map;
+    }
+
+    private Map<String, String> parseLoggingParams(String loggingString) {
+        Map<String, String> map = new HashMap<>();
+
+        if (loggingString.isEmpty()) {
+            return map;
+        }
+
+        for (String entry : loggingString.trim().split(",")) {
+            String[] tempEntry = entry.split("=");
             if (tempEntry.length == 2) {
                 map.put(tempEntry[0].trim(), tempEntry[1].trim());
             }
@@ -155,12 +178,21 @@ public class ConfigurableGenericDockerServiceOptions {
         return this.privilegedMode;
     }
 
+    public String getLoggingType() {
+        return this.containerLoggerType;
+    }
+
+    public Map<String, String> getLoggerParameters() {
+        return this.containerLoggingParameters;
+    }
+
     public ContainerDescriptor getContainerDescriptor() {
         return ContainerDescriptor.builder().setContainerName(getContainerName()).setContainerImage(getContainerImage())
                 .setContainerImageTag(getContainerImageTag()).setExternalPort(getContainerPortsExternal())
                 .setInternalPort(getContainerPortsInternal()).addEnvVar(getContainerEnvList())
-                .setVolume(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
-                .setDeviceList(getContainerDeviceList()).build();
+                .setVolume(getContainerVolumeList()).setPrivilegedMode(getPrivilegedMode())
+                .setDeviceList(getContainerDeviceList()).setLoggingTypeByString(getLoggingType())
+                .setLoggerParameters(getLoggerParameters()).build();
     }
 
     @Override
@@ -170,7 +202,8 @@ public class ConfigurableGenericDockerServiceOptions {
         result = prime * result + Arrays.hashCode(this.externalPorts);
         result = prime * result + Arrays.hashCode(this.internalPorts);
         result = prime * result + Objects.hash(this.containerDevice, this.containerEnv, this.containerName,
-                this.containerVolumes, this.enabled, this.image, this.imageTag);
+                this.containerVolumes, this.enabled, this.image, this.imageTag, this.externalPorts, this.internalPorts,
+                this.containerEnv, this.containerLoggingParameters, this.containerLoggerType);
         return result;
     }
 
@@ -187,10 +220,13 @@ public class ConfigurableGenericDockerServiceOptions {
                 && Objects.equals(this.containerEnv, other.containerEnv)
                 && Objects.equals(this.containerName, other.containerName) && Objects.equals(this.image, other.image)
                 && Objects.equals(this.imageTag, other.imageTag)
-                && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
+                && Objects.equals(this.containerVolumes, other.containerVolumes)
                 && Arrays.equals(this.externalPorts, other.externalPorts)
                 && Arrays.equals(this.internalPorts, other.internalPorts)
-                && Objects.equals(this.privilegedMode, other.privilegedMode);
+                && Objects.equals(this.privilegedMode, other.privilegedMode)
+                && Objects.equals(this.isEnabled(), other.isEnabled())
+                && Objects.equals(this.containerLoggerType, other.containerLoggerType)
+                && this.containerLoggingParameters.equals(other.containerLoggingParameters);
     }
 
     private int[] parsePortString(String ports) {

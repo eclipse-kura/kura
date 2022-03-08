@@ -49,6 +49,31 @@
         <AD id="container.device" name="Peripheral Device"
             description="Used to pass physical devices to a container. Example: /dev/gpiomem, /dev/ttyUSB0. (Generally Requires privileged mode to be enabled.)" type="String" cardinality="1"
             required="false" default="" />
+
+        <AD id="container.loggingType" 
+            name="Logger Type"
+            description="Used to pass physical devices to a container. Example: /dev/gpiomem, /dev/ttyUSB0. (Generally Requires privileged mode to be enabled.)" type="String" cardinality="0"
+            required="true" 
+            default="DEFAULT">
+            <Option label="NONE" value="NONE" />
+            <Option label="DEFAULT" value="DEFAULT" />
+            <Option label="LOCAL" value="LOCAL" />
+            <Option label="ETWLOGS" value="ETWLOGS" />
+            <Option label="JSON_FILE" value="JSON_FILE" />
+            <Option label="SYSLOG" value="SYSLOG" />
+            <Option label="JOURNALD" value="JOURNALD" />
+            <Option label="GELF" value="GELF" />
+            <Option label="FLUENTD" value="FLUENTD" />
+            <Option label="AWSLOGS" value="AWSLOGS" />
+            <Option label="DB" value="DB" />
+            <Option label="SPLUNK" value="SPLUNK" />
+            <Option label="GCPLOGS" value="GCPLOGS" />
+            <Option label="LOKI" value="LOKI" />
+         </AD>
+            
+        <AD id="container.loggerParameters" name="Logger Parameters"
+            description="Used to pass logger-parameters to a container. Example: max-buffer-size=4m, labels=location." type="String" cardinality="1"
+            required="false" default="" />
             
 
     </OCD>

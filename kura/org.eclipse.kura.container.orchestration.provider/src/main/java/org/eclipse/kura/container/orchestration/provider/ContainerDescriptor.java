@@ -22,6 +22,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.github.dockerjava.api.model.LogConfig.LoggingType;
+
 /**
  * Object which represents a container. Used to track running containers.
  *
@@ -37,6 +39,8 @@ public class ContainerDescriptor {
     private List<String> containerEnvVars;
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
+    private Map<String, String> containerLoggerParameters;
+    private LoggingType containerLoggingType;
     private Boolean containerPrivilaged;
     private ContainerStates containerState = ContainerStates.STOPPING;
     private Boolean isEsfManaged = true;
@@ -103,8 +107,16 @@ public class ContainerDescriptor {
         return this.containerVolumes;
     }
 
+    public Map<String, String> getLoggerParameters() {
+        return this.containerLoggerParameters;
+    }
+
     public Boolean getContainerPrivileged() {
         return this.containerPrivilaged;
+    }
+
+    public LoggingType getContainerLoggingType() {
+        return this.containerLoggingType;
     }
 
     /**
@@ -134,6 +146,8 @@ public class ContainerDescriptor {
         resultBuilder = resultBuilder && obj1.containerPrivilaged.equals(obj2.containerPrivilaged);
         resultBuilder = resultBuilder && obj1.containerState.equals(obj2.containerState);
         resultBuilder = resultBuilder && obj1.isEsfManaged.equals(obj2.isEsfManaged);
+        resultBuilder = resultBuilder && obj1.containerLoggerParameters.equals(obj2.containerLoggerParameters);
+        resultBuilder = resultBuilder && obj1.containerLoggingType.equals(obj2.containerLoggingType);
 
         return resultBuilder;
     }
@@ -149,9 +163,11 @@ public class ContainerDescriptor {
         private List<String> containerEnvVars = new LinkedList<>();
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
+        private Map<String, String> containerLoggerParameters = new HashMap<>();
         private Boolean containerPrivilaged = false;
         private ContainerStates containerState = ContainerStates.STOPPING;
         private Boolean isEsfManaged = true;
+        private LoggingType containerLoggingType = LoggingType.DEFAULT;
 
         public ContainerDescriptorBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -301,6 +317,30 @@ public class ContainerDescriptor {
             return this;
         }
 
+        public ContainerDescriptorBuilder addLoggerParameter(String variableName, String variableData) {
+            this.containerVolumes.put(variableName, variableData);
+            return this;
+        }
+
+        public ContainerDescriptorBuilder addLoggerParameters(Map<String, String> paramMap) {
+            this.containerVolumes.putAll(paramMap);
+            return this;
+        }
+
+        public ContainerDescriptorBuilder setLoggerParameters(Map<String, String> paramMap) {
+            this.containerLoggerParameters = new HashMap<>(paramMap);
+            return this;
+        }
+
+        public ContainerDescriptorBuilder setLoggingType(LoggingType containerLoggingType) {
+            this.containerLoggingType = containerLoggingType;
+            return this;
+        }
+
+        public ContainerDescriptorBuilder setLoggingTypeByString(String containerLoggingType) {
+            return this.setLoggingType(LoggingType.fromValue(containerLoggingType.toLowerCase()));
+        }
+
         public ContainerDescriptor build() {
             ContainerDescriptor containerDescriptor = new ContainerDescriptor();
 
@@ -318,6 +358,8 @@ public class ContainerDescriptor {
             containerDescriptor.containerPrivilaged = this.containerPrivilaged;
             containerDescriptor.containerState = this.containerState;
             containerDescriptor.isEsfManaged = this.isEsfManaged;
+            containerDescriptor.containerLoggerParameters = this.containerLoggerParameters;
+            containerDescriptor.containerLoggingType = this.containerLoggingType;
 
             return containerDescriptor;
         }

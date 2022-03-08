@@ -43,6 +43,7 @@ import com.github.dockerjava.api.model.Device;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.LogConfig;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
@@ -420,6 +421,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
             configuration = containerPortManagementHandler(containerDescription, configuration);
 
+            configuration = containerLogConfigurationHandler(containerDescription, configuration);
+
             if (containerDescription.getContainerPrivileged() != null
                     && containerDescription.getContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.getContainerPrivileged());
@@ -436,6 +439,17 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         }
 
         return finalContainerID;
+    }
+
+    private HostConfig containerLogConfigurationHandler(ContainerDescriptor containerDescription,
+            HostConfig configuration) {
+
+        LogConfig lc = new LogConfig(containerDescription.getContainerLoggingType(),
+                containerDescription.getLoggerParameters());
+
+        configuration.withLogConfig(lc);
+
+        return configuration;
     }
 
     private HostConfig containerPortManagementHandler(ContainerDescriptor containerDescription,
@@ -657,7 +671,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             }
 
             if (Boolean.FALSE.equals(container.getIsEsfManaged())) {
-                // container is not Framework Managed, and thus should only be stopped and not deleted.
+                // container is not ESF Managed, and thus should only be stopped and not deleted.
                 return;
             }
 

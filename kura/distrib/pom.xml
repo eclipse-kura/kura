@@ -580,6 +580,16 @@
                                     <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
                                     <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.container.provider</artifactId>
+                                    <version>${org.eclipse.kura.container.provider.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
+                                    <version>${org.eclipse.kura.ai.triton.server.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/plugins</outputDirectory>
@@ -727,6 +737,8 @@
                                 <move file="target/plugins/org.eclipse.kura.rest.wire.provider.jar" tofile="target/plugins/org.eclipse.kura.rest.wire.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.container.orchestration.provider.jar" tofile="target/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.ai.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.container.provider.jar" tofile="target/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.ai.triton.server.jar" tofile="target/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" />
                             </tasks>
                         </configuration>
                     </execution>
@@ -1939,7 +1951,9 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.web2_${org.eclipse.kura.web2.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" failonerror="false" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.useradmin.store_${org.eclipse.kura.useradmin.store.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <!-- Add REST bundles-->
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.request.handler.jaxrs_${org.eclipse.kura.request.handler.jaxrs.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.provider_${org.eclipse.kura.rest.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.configuration.provider_${org.eclipse.kura.rest.configuration.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.rest.asset.provider_${org.eclipse.kura.rest.asset.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <!-- Add Artemis bundles-->
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.broker.artemis.core_${org.eclipse.kura.broker.artemis.core.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
@@ -1956,6 +1970,7 @@
 
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.cloudconnection.raw.mqtt.provider_${org.eclipse.kura.cloudconnection.raw.mqtt.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.wire.ai.component.provider_${org.eclipse.kura.wire.ai.component.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
+                                        <copy file="${project.build.directory}/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                     </target>
                                 </configuration>
                             </execution>
@@ -1976,12 +1991,10 @@
                                         <delete dir="${project.build.directory}/staging/emulator/target" />
                                         <delete file="${project.build.directory}/staging/emulator/emulator-assembly.xml" />
                                         <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Core_Test.launch" />
-                                        <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_Linux.launch" />
-                                        <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator_OSX.launch" />
+                                        <delete file="${project.build.directory}/staging/emulator/src/main/resources/Kura_Emulator.launch" />
                                         <copy file="RELEASE_NOTES.txt" todir="${project.build.directory}/staging/emulator/src/main/resources" />
                                         <mkdir dir="${project.build.directory}/staging/emulator/launch_configs" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_Linux.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
-                                        <copy file="src/main/resources/common/Kura_Emulator_OSX.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
+                                        <copy file="src/main/resources/common/Kura_Emulator.launch" todir="${project.build.directory}/staging/emulator/launch_configs" />
 
                                         <!-- Add SSL Keystore -->
                                         <copy file="src/main/resources/common/cacerts.ks" todir="${project.build.directory}/staging/emulator/src/main/resources" />
@@ -2255,6 +2268,12 @@
                                             <groupId>org.eclipse.kura.feature</groupId>
                                             <artifactId>org.eclipse.kura.wire.ai.component.provider</artifactId>
                                             <version>${org.eclipse.kura.wire.ai.component.provider.version}</version>
+                                       <type>dp</type>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura.feature</groupId>
+                                            <artifactId>org.eclipse.kura.ai.triton.server</artifactId>
+                                            <version>${org.eclipse.kura.ai.triton.server.version}</version>
                                             <type>dp</type>
                                         </artifactItem>
                                     </artifactItems>

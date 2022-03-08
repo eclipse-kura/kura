@@ -27,6 +27,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
+import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.DockerService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
@@ -228,6 +230,100 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         return new ArrayList<>(pairs);
     }
 
+    @Override
+    public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+
+        return dockerService != null;
+    }
+
+    @Override
+    public List<GwtGroupedNVPair> findContainers(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
+        try {
+            DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+            ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+                    .toArray(ContainerDescriptor[]::new);
+            if (containers != null) {
+                for (ContainerDescriptor container : containers) {
+                    GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                    pair.setId(container.getContainerName());
+                    pair.setName(container.getContainerImage());
+                    pair.setStatus(containerStateToString(container));
+                    pair.setVersion(container.getContainerImageTag().split(":")[0]);
+                    pair.set("isFrameworkManaged", container.getIsEsfManaged());
+                    pairs.add(pair);
+                }
+            }
+            
+        } catch(Exception e){
+            logger.error("Failed To List Containers: {}", e);
+        }
+
+        return new ArrayList<>(pairs);
+    }
+
+    @Override
+    public void startContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+                .toArray(ContainerDescriptor[]::new);
+
+        logger.info("Starting container with name: {}", containerName);
+
+        if (containers != null) {
+            for (ContainerDescriptor container : containers) {
+                if (container.getContainerName().equals(containerName)) {
+                    try {
+                        dockerService.startContainer(container);
+                    } catch (KuraException e) {
+                        logger.error("Could not start container with name: {}", containerName);
+                        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+                    }
+                    return;
+                }
+            }
+        }
+        // Bundle was not found, throw error
+        logger.error("Could not find container with name: {}", containerName);
+        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+    }
+
+    @Override
+    public void stopContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+
+        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+                .toArray(ContainerDescriptor[]::new);
+
+        logger.info("Stopping container with name: {}", containerName);
+
+        if (containers != null) {
+            for (ContainerDescriptor container : containers) {
+                if (container.getContainerName().equals(containerName)) {
+                    try {
+                        dockerService.stopContainer(container);
+                    } catch (KuraException e) {
+                        logger.error("Could not stop container with name: {}", containerName);
+                        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+                    }
+                    return;
+                }
+            }
+        }
+        // Bundle was not found, throw error
+        logger.error("Could not find container with name: {}", containerName);
+        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+
+    }
+
     private boolean isSigned(Bundle bundle) {
         return !bundle.getSignerCertificates(Bundle.SIGNERS_ALL).isEmpty();
     }
@@ -347,9 +443,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      * </ol>
      *
      * @param bundle
-     *            the bundle which name to retrieve
+     *                   the bundle which name to retrieve
      * @param locale
-     *            the locale, in which the bundle name is requested
+     *                   the locale, in which the bundle name is requested
      * @return the bundle name - see the description of the method for more
      *         details.
      */
@@ -372,9 +468,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      * available.
      *
      * @param bundle
-     *            the bundle which header to retrieve
+     *                       the bundle which header to retrieve
      * @param headerName
-     *            the name of the header to retrieve
+     *                       the name of the header to retrieve
      * @return the header or empty string if it is not set
      */
     private static String getHeaderValue(Bundle bundle, String headerName) {
@@ -398,6 +494,21 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         case Bundle.STOPPING:
             return "bndStopping";
         case Bundle.UNINSTALLED:
+            return "bndUninstalled";
+        default:
+            return "bndUnknown";
+        }
+    }
+
+    private String containerStateToString(final ContainerDescriptor container) {
+        switch (container.getContainerState()) {
+        case STARTING:
+            return "bndInstalled";
+        case ACTIVE:
+            return "bndActive";
+        case FAILED:
+            return "bndUninstalled";
+        case STOPPING:
             return "bndUninstalled";
         default:
             return "bndUnknown";

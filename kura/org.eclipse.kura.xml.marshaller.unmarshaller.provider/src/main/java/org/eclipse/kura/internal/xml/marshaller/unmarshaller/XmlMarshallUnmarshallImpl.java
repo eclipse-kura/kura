@@ -36,6 +36,7 @@ import org.eclipse.kura.configuration.metatype.MetaData;
 import org.eclipse.kura.core.configuration.XmlComponentConfigurations;
 import org.eclipse.kura.core.configuration.XmlSnapshotIdResult;
 import org.eclipse.kura.core.configuration.metatype.Tmetadata;
+import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundles;
 import org.eclipse.kura.core.inventory.resources.SystemDeploymentPackages;
 import org.eclipse.kura.core.inventory.resources.SystemPackages;
@@ -146,6 +147,18 @@ public class XmlMarshallUnmarshallImpl implements Marshaller, Unmarshaller {
                 // </inventory>
 
                 new XmlJavaSystemResourcesMapper().marshal(doc, object);
+            } else if (object instanceof DockerContainers) {
+                // Expected resulting xml:
+                // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                // <inventory>
+                // <resource>
+                // <name>example_container</name>
+                // <version>imageName:imagetag</version>
+                // <type>DOCKER</type>
+                // </resource>
+                // </inventory>
+
+                new XmlJavaDockerContainersMapper().marshal(doc, object);
             }
 
             // write the content into xml file

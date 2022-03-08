@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.container.orchestration.provider.DockerService" name="Docker-API"
+        description="The Docker-API connects to locally running docker instance, and allows for container management.">
+        
+
+        <AD id="dockerService.enabled" name="Enabled" type="Boolean" cardinality="0" required="true" default="false"
+            description="Enables the docker connector instance.">
+        </AD>
+
+        <AD id="dockerService.dockerHost" name="Docker Host URL"
+            description="Docker Host URL: tcp://localhost:2376 or unix:///var/run/docker.sock" type="String"
+            cardinality="-1" required="true" default="unix:///var/run/docker.sock" />
+        
+         <AD id="dockerService.repository.enabled" name="Enable Credentials" type="Boolean" cardinality="0" required="true" default="false"
+            description="Enables the usage of authenticated docker-repositories.">
+        </AD>
+        
+        <AD id="dockerService.repository.hostname" name="Repository URL (Leave blank for docker-hub)"
+            description="Url for docker repository. Leave blank for docker hub." type="String"
+            cardinality="0" required="false" default="" />
+            
+        <AD id="dockerService.repository.username" name="Username"
+            description="Username for docker repository." type="String"
+            cardinality="0" required="false" default="" />
+            
+        <AD id="dockerService.repository.password" name="Password"
+            description="Password for docker repository." type="Password"
+            cardinality="0" required="false" default="" />
+        
+    </OCD>
+
+    <Designate pid="org.eclipse.kura.container.orchestration.provider.DockerService">
+        <Object ocdref="org.eclipse.kura.container.orchestration.provider.DockerService" />
+    </Designate>
+</MetaData>

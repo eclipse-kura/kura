@@ -115,7 +115,7 @@ After applying the configuration change, the user will be prompted to align also
 
 After applying the changes, the user will be prompted to recompile the environment.
 
-#### Traget Definition Setup
+#### Target Definition Setup
 
 Click the arrow next to the *target-definition* project in the workspace and double-click **kura-equinox_3.16.0.target** to open it.
 

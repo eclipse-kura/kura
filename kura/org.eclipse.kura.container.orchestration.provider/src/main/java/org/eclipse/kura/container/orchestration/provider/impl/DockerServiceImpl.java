@@ -362,7 +362,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             containerDescription.setContainerId(""); // clear container ID
             logger.info("Attempting to pull image: {}. \n Authentication is set to: {}",
                     containerDescription.getContainerName(), withAuth);
-                    itemDownloadingStatus = "";
+            itemDownloadingStatus = "";
             PullImageCmd pullRequest = this.dockerClient.pullImageCmd(containerDescription.getContainerImage())
                     .withTag(containerDescription.getContainerImageTag());
 
@@ -375,7 +375,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 @Override
                 public void onNext(PullResponseItem item) {
                     super.onNext(item);
-                    if (!itemDownloadingStatus.equals(item.getStatus())){
+                    if (!itemDownloadingStatus.equals(item.getStatus())) {
                         logger.info("Container Layer Pull State: {}", item.getStatus());
                         itemDownloadingStatus = item.getStatus();
                     }

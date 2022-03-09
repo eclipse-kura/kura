@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -47,7 +47,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
                     && rule.getSourcePortRange().equals("10100:10200");
         }));
     }
-    
+
     @Test
     public void addLocalRuleSourceSinglePortTest() throws KuraException {
         setUpMock();
@@ -117,7 +117,7 @@ public class LinuxFirewallTest extends FirewallTestUtils {
                     && rule.getSourcePortRange().equals("10100:10200");
         }));
     }
-    
+
     @Test
     public void addPortForwardSourceSinglePortTest() throws KuraException {
         setUpMock();

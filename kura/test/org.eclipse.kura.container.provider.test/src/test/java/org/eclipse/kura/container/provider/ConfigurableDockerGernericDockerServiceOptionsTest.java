@@ -23,9 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.junit.Test;
 
 public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
@@ -39,6 +38,8 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private static final String DEFAULT_CONTAINER_PATH_DESTINATION = "";
     private static final String DEFAULT_CONTAINER_PATH_FILE_PATH = "";
     private static final String DEFAULT_CONTAINER_DEVICE = "";
+    private static final String DEFAULT_CONTAINER_LOGGER_PARAMETERS = "";
+    private static final String DEFAULT_CONTAINER_LOGGING_TYPE = "default";
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -49,6 +50,8 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private static final String CONTAINER_ENABLED = "container.enabled";
     private static final String CONTAINER_DEVICE = "container.device";
     private static final String CONTAINER_VOLUME = "container.volume";
+    private static final String CONTAINER_LOGGER_PARAMETERS = "container.loggerParameters";
+    private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
 
     private Map<String, Object> properties;
 
@@ -385,6 +388,8 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         this.properties.put(CONTAINER_VOLUME,
                 DEFAULT_CONTAINER_PATH_FILE_PATH + ":" + DEFAULT_CONTAINER_PATH_DESTINATION);
         this.properties.put(CONTAINER_DEVICE, DEFAULT_CONTAINER_DEVICE);
+        this.properties.put(CONTAINER_LOGGING_TYPE, DEFAULT_CONTAINER_LOGGING_TYPE);
+        this.properties.put(CONTAINER_LOGGER_PARAMETERS, DEFAULT_CONTAINER_LOGGER_PARAMETERS);
     }
 
     private void givenDifferentProperties() {
@@ -398,6 +403,8 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         this.newProperties.put(CONTAINER_ENV, "");
         this.newProperties.put(CONTAINER_VOLUME, "diffrent:diffrent");
         this.newProperties.put(CONTAINER_DEVICE, "");
+        this.properties.put(CONTAINER_LOGGING_TYPE, "journald");
+        this.properties.put(CONTAINER_LOGGER_PARAMETERS, "label=true");
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {

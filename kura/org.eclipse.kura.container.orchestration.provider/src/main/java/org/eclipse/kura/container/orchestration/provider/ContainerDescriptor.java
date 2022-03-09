@@ -318,12 +318,12 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptorBuilder addLoggerParameter(String variableName, String variableData) {
-            this.containerVolumes.put(variableName, variableData);
+            this.containerLoggerParameters.put(variableName, variableData);
             return this;
         }
 
         public ContainerDescriptorBuilder addLoggerParameters(Map<String, String> paramMap) {
-            this.containerVolumes.putAll(paramMap);
+            this.containerLoggerParameters.putAll(paramMap);
             return this;
         }
 
@@ -338,7 +338,38 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptorBuilder setLoggingTypeByString(String containerLoggingType) {
-            return this.setLoggingType(LoggingType.fromValue(containerLoggingType.toLowerCase()));
+
+            switch (containerLoggingType.toUpperCase().trim()) {
+            case "NONE":
+                return this.setLoggingType(LoggingType.NONE);
+            case "LOCAL":
+                return this.setLoggingType(LoggingType.LOCAL);
+            case "ETWLOGS":
+                return this.setLoggingType(LoggingType.ETWLOGS);
+            case "JSON_FILE":
+                return this.setLoggingType(LoggingType.JSON_FILE);
+            case "SYSLOG":
+                return this.setLoggingType(LoggingType.SYSLOG);
+            case "JOURNALD":
+                return this.setLoggingType(LoggingType.JOURNALD);
+            case "GELF":
+                return this.setLoggingType(LoggingType.GELF);
+            case "FLUENTD":
+                return this.setLoggingType(LoggingType.FLUENTD);
+            case "AWSLOGS":
+                return this.setLoggingType(LoggingType.AWSLOGS);
+            case "DB":
+                return this.setLoggingType(LoggingType.DB);
+            case "SPLUNK":
+                return this.setLoggingType(LoggingType.SPLUNK);
+            case "GCPLOGS":
+                return this.setLoggingType(LoggingType.GCPLOGS);
+            case "LOKI":
+                return this.setLoggingType(LoggingType.LOKI);
+            default:
+                return this.setLoggingType(LoggingType.DEFAULT);
+
+            }
         }
 
         public ContainerDescriptor build() {

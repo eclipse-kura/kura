@@ -119,7 +119,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 return;
             }
 
-            logger.info("Connection Succsessful");
+            logger.info("Connection Successful");
 
             logger.info("Populating running container list");
             populateRunningQueue();

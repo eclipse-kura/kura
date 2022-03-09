@@ -135,6 +135,10 @@ systemctl disable systemd-timesyncd
 systemctl stop chrony
 systemctl disable chrony
 
+#disable wpa_supplicant
+systemctl stop wpa_supplicant
+systemctl disable wpa_supplicant
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

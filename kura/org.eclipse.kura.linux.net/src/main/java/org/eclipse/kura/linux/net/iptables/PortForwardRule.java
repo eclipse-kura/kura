@@ -391,6 +391,9 @@ public class PortForwardRule {
      * @return the sourcePortRange
      */
     public String getSourcePortRange() {
+        if (this.sourcePortStart == this.sourcePortEnd && this.sourcePortStart == 0) {
+            return null;
+        }
         return this.sourcePortStart + ":" + this.sourcePortEnd;
     }
 

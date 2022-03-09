@@ -135,6 +135,10 @@ systemctl disable systemd-timesyncd
 systemctl stop chrony
 systemctl disable chrony
 
+#disable ModemManager
+systemctl stop ModemManager
+systemctl disable ModemManager
+
 #disable wpa_supplicant
 systemctl stop wpa_supplicant
 systemctl disable wpa_supplicant

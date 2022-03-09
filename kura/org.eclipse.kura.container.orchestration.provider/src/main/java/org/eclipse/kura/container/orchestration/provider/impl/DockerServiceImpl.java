@@ -119,7 +119,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 return;
             }
 
-            logger.info("Connection Succsessful");
+            logger.info("Connection Successful");
 
             logger.info("Populating running container list");
             populateRunningQueue();
@@ -289,6 +289,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     @Override
     public void startContainer(String id) {
+        logger.info("Starting {} Microservice", containerDescription.getContainerName());
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
@@ -328,7 +329,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         boolean imageStatus = doesImageExist(containerDescription);
 
-        logger.info("Image Does {} exist: {}", containerDescription.getContainerImage(), imageStatus);
+        logger.info(" Does image {} exist?: {}", containerDescription.getContainerImage(), imageStatus);
 
         if (imageStatus) {
             try {
@@ -572,8 +573,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     private void enqueueContainer(ContainerDescriptor containerDescription, List<ContainerDescriptor> containerList) {
-        logger.info("Starting {} Microservice", containerDescription.getContainerName());
-
         // try to grab existing container using service name as UUID
         ContainerDescriptor containerDescriptorFromQueue = ContainerDescriptor
                 .findByName(containerDescription.getContainerName(), containerList);
@@ -602,6 +601,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     @Override
     public void startContainer(ContainerDescriptor container) {
+        logger.info("Starting {} Microservice", containerDescription.getContainerName());
         container.setContainerState(ContainerStates.STARTING);
 
         if (testConnection()) {
@@ -664,7 +664,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             try {
                 logger.info("Deleting {} Microservice", container.getContainerName());
                 deleteContainer(container.getContainerId());
-                logger.info("Succsesfully deleted {} Microservice", container.getContainerName());
+                logger.info("Successfully deleted {} Microservice", container.getContainerName());
                 container.setContainerId("");
             } catch (Exception e) {
                 logger.error("Failed to delete {} Microservice", container.getContainerName());

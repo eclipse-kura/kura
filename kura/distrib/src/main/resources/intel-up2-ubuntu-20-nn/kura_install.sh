@@ -43,10 +43,6 @@ ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 systemctl stop apparmor
 systemctl disable apparmor
 
-#set up recover default configuration script
-cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
-chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
-
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 

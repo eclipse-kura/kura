@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -18,7 +18,7 @@ import org.eclipse.kura.net.firewall.RuleType;
 
 /**
  * Creates an iptables command for a Port Forward Rule, allowing an incoming port to be forwarded to destinationIP/port.
- * 
+ *
  */
 public class PortForwardRule {
 
@@ -35,7 +35,8 @@ public class PortForwardRule {
     private String permittedNetwork;
     private int permittedNetworkMask;
     private String permittedMAC;
-    private String sourcePortRange;
+    private int sourcePortStart;
+    private int sourcePortEnd;
 
     /**
      * Constructor of <code>PortForwardRule</code> object.
@@ -74,7 +75,8 @@ public class PortForwardRule {
         this.permittedNetworkMask = 0;
         this.permittedNetwork = null;
         this.permittedMAC = null;
-        this.sourcePortRange = null;
+        this.sourcePortStart = 0;
+        this.sourcePortEnd = 0;
     }
 
     public PortForwardRule inboundIface(String inboundIface) {
@@ -128,8 +130,25 @@ public class PortForwardRule {
     }
 
     public PortForwardRule sourcePortRange(String sourcePortRange) {
-        this.sourcePortRange = sourcePortRange;
+        parsePortRange(sourcePortRange);
         return this;
+    }
+
+    private void parsePortRange(String sourcePortRange) {
+        if (sourcePortRange != null) {
+            int start;
+            int end;
+            if (sourcePortRange.contains(":")) {
+                String[] ports = sourcePortRange.split(":");
+                start = Integer.parseInt(ports[0]);
+                end = Integer.parseInt(ports[1]);
+            } else {
+                start = Integer.parseInt(sourcePortRange);
+                end = start;
+            }
+            this.sourcePortStart = start;
+            this.sourcePortEnd = end;
+        }
     }
 
     /**
@@ -143,15 +162,9 @@ public class PortForwardRule {
     }
 
     public NatPreroutingChainRule getNatPreroutingChainRule() {
-        int srcPortFirst = 0;
-        int srcPortLast = 0;
-        if (this.sourcePortRange != null) {
-            srcPortFirst = Integer.parseInt(this.sourcePortRange.split(":")[0]);
-            srcPortLast = Integer.parseInt(this.sourcePortRange.split(":")[1]);
-        }
         return new NatPreroutingChainRule().inputInterface(this.inboundIface).protocol(this.protocol)
-                .externalPort(this.inPort).internalPort(this.outPort).srcPortFirst(srcPortFirst)
-                .srcPortLast(srcPortLast).dstIpAddress(this.address).permittedNetwork(this.permittedNetwork)
+                .externalPort(this.inPort).internalPort(this.outPort).srcPortFirst(this.sourcePortStart)
+                .srcPortLast(this.sourcePortEnd).dstIpAddress(this.address).permittedNetwork(this.permittedNetwork)
                 .permittedNetworkMask(this.permittedNetworkMask).permittedMacAddress(this.permittedMAC)
                 .type(RuleType.PORT_FORWARDING);
     }
@@ -164,16 +177,10 @@ public class PortForwardRule {
     }
 
     public FilterForwardChainRule getFilterForwardChainRule() {
-        int srcPortFirst = 0;
-        int srcPortLast = 0;
-        if (this.sourcePortRange != null) {
-            srcPortFirst = Integer.parseInt(this.sourcePortRange.split(":")[0]);
-            srcPortLast = Integer.parseInt(this.sourcePortRange.split(":")[1]);
-        }
         return new FilterForwardChainRule().inputInterface(this.inboundIface).outputInterface(this.outboundIface)
                 .srcNetwork(this.permittedNetwork).srcMask((short) this.permittedNetworkMask).dstNetwork(this.address)
                 .dstMask((short) 32).protocol(this.protocol).permittedMacAddress(this.permittedMAC)
-                .srcPortFirst(srcPortFirst).srcPortLast(srcPortLast).type(RuleType.PORT_FORWARDING);
+                .srcPortFirst(this.sourcePortStart).srcPortLast(this.sourcePortEnd).type(RuleType.PORT_FORWARDING);
     }
 
     @Override
@@ -384,7 +391,7 @@ public class PortForwardRule {
      * @return the sourcePortRange
      */
     public String getSourcePortRange() {
-        return this.sourcePortRange;
+        return this.sourcePortStart + ":" + this.sourcePortEnd;
     }
 
     /**
@@ -394,7 +401,7 @@ public class PortForwardRule {
      *            the sourcePortRange to set
      */
     public void setSourcePortRange(String sourcePortRange) {
-        this.sourcePortRange = sourcePortRange;
+        parsePortRange(sourcePortRange);
     }
 
     @Override
@@ -412,7 +419,8 @@ public class PortForwardRule {
                 && compareObjects(this.permittedNetwork, other.permittedNetwork)
                 && this.permittedNetworkMask == other.permittedNetworkMask
                 && compareObjects(this.permittedMAC, other.permittedMAC)
-                && compareObjects(this.sourcePortRange, other.sourcePortRange);
+                && compareObjects(this.sourcePortStart, other.sourcePortStart)
+                && compareObjects(this.sourcePortEnd, other.sourcePortEnd);
     }
 
     private boolean compareObjects(Object obj1, Object obj2) {
@@ -439,7 +447,8 @@ public class PortForwardRule {
         result = prime * result + (this.permittedNetwork == null ? 0 : this.permittedNetwork.hashCode());
         result = prime * result + this.permittedNetworkMask;
         result = prime * result + (this.permittedMAC == null ? 0 : this.permittedMAC.hashCode());
-        result = prime * result + (this.sourcePortRange == null ? 0 : this.sourcePortRange.hashCode());
+        result = prime * result + this.sourcePortStart;
+        result = prime * result + this.sourcePortEnd;
 
         return result;
     }

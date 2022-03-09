@@ -120,7 +120,7 @@ The majority of the profile can be used as is, the attributes that must be edite
 
 * \<id> - This is the profile ID and must be unique
 * \<property name="buid.name"> - This is used to name the output artifacts
-* \<property naeme="target.device"> - Kura uses this to occasionally run specific code for a specific target
+* \<property name="target.device"> - Kura uses this to occasionally run specific code for a specific target
 * \<property name="kura.os.version"> - Similar to target.device, this is sometimes used for executing specific code
 * \<property name="kura.arch"> - This is used to identify the correct native libraries to load
 * \<property name="kura.mem.size"> - This sets the Xms, Xmx, and MaxPermSize Java VM memory properties
@@ -143,9 +143,9 @@ Each file in the new directory should be reviewed and edited to match the new ta
 * kura.properties - This file contains various system properties. The values should be examined and updated to match the new target.
 * kura_install.sh - This is the base installer script. For most situations it should not be edited.
 * kura_upgrade.sh - This is the base upgrade script. For most situations it should not be edited.
-* kuranet.conf - This file contains basic information about the available network interfaces. Interfaces should be added or removed as needed using the original file as a template.
+* kuranet.conf - This file contains basic information about the available network interfaces. Interfaces should be added or removed as needed using the original file as a template. Since <b>Kura 5.0.0</b> this file is not more used and should not be copied.
 * log4j.properties - This file contains settings for the logger utility. The provided settings should work fine in most cases.
-* recover_dflt_kura_config.sh - Helper utility to assist in recovering configurations. This file should not be edited.
+* recover_dflt_kura_config.sh - Helper utility to assist in recovering configurations. This file should not be edited. Since <b>Kura 5.1.0</b> this file is not more used and should not be copied.
 * snapshot_0.xml - This is the main configuration file for Kura. A good practice is to use the copied configuration file to start Kura for the first time. After Kura has been configured to the desired
 starting conditions, the updated snapshot file can be obtained through the management UI (Settings -> Snapshots) or from the /opt/eclipse/kura/data/snapshots directory. The latest snapshot will have the largest numeric value. This updated file can then be renamed to snapshot_0.xml and copied over to the hardware directory.
 

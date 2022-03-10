@@ -4,10 +4,14 @@ Description:
 This major release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces TODO
 
 Changes:
+  * TODO
 
 Target Environments:
+  * TODO
 
 Known Issues :
   * The intel-up2-centos-7, intel-up2-ubuntu-18, rock960-ubuntu-16 and nvidia-jetson-nano don't support the Unprivileged Command Service (see #3598)
+  * TODO
 
 Changelog:
+  * TODO

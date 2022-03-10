@@ -40,6 +40,9 @@ cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/ma
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
+systemctl stop apparmor
+systemctl disable apparmor
+
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
 cp ${INSTALL_DIR}/kura/install/network.interfaces ${INSTALL_DIR}/kura/.data/interfaces
@@ -128,22 +131,9 @@ systemctl mask systemd-networkd
 systemctl mask networkd-dispatcher
 systemctl mask systemd-networkd-wait-online
 
-
 #disable wpa_supplicant
 systemctl stop wpa_supplicant
 systemctl disable wpa_supplicant
-
-#disable dhclient apparmor profile
-ln -s /etc/apparmor.d/sbin.dhclient /etc/apparmor.d/disable/
-apparmor_parser -R /etc/apparmor.d/sbin.dhclient
-
-#disable dhcpd apparmor profile
-ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable/
-apparmor_parser -R /etc/apparmor.d/usr.sbin.dhcpd
-
-#disable dhcpd named profile
-ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
-apparmor_parser -R /etc/apparmor.d/usr.sbin.named
 
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"

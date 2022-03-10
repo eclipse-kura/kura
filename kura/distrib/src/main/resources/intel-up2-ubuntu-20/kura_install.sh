@@ -137,6 +137,10 @@ systemctl mask systemd-networkd
 systemctl mask networkd-dispatcher
 systemctl mask systemd-networkd-wait-online
 
+#disable ModemManager
+systemctl stop ModemManager
+systemctl disable ModemManager
+
 #disable wpa_supplicant
 systemctl stop wpa_supplicant
 systemctl disable wpa_supplicant

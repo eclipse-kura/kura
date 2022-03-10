@@ -28,9 +28,9 @@ final class H2DbWireRecordStoreOptions {
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
 
-    private static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
+    protected static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
 
-    private static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
+    protected static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
 
     private static final String TABLE_NAME = "table.name";
 

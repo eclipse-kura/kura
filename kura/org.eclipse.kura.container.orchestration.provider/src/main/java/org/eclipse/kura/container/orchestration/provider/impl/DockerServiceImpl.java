@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -289,7 +289,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     @Override
     public void startContainer(String id) {
-        logger.info("Starting {} Microservice", containerDescription.getContainerName());
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
@@ -601,7 +600,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     @Override
     public void startContainer(ContainerDescriptor container) {
-        logger.info("Starting {} Microservice", containerDescription.getContainerName());
+        logger.info("Starting {} Microservice", container.getContainerName());
         container.setContainerState(ContainerStates.STARTING);
 
         if (testConnection()) {

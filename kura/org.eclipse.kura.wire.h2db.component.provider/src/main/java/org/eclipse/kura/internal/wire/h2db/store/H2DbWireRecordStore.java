@@ -89,6 +89,9 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
     private static final String[] TABLE_TYPE = new String[] { "TABLE" };
 
+    private static final String NULL_TABLE_NAME_ERROR_MSG = "Table name cannot be null";
+    private static final String NULL_WIRE_RECORD_ERROR_MSG = "";
+
     private H2DbServiceHelper dbHelper;
 
     private H2DbService dbService;
@@ -197,9 +200,22 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     private void truncate(final int noOfRecordsToKeep) {
         final String tableName = this.wireRecordStoreOptions.getTableName();
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
-        final int tableSize = this.wireRecordStoreOptions.getMaximumTableSize();
+        final int maxTableSize = this.wireRecordStoreOptions.getMaximumTableSize();
 
         try {
+
+            int entriesToDeleteCount;
+            if (maxTableSize < noOfRecordsToKeep) {
+                logger.info("{} > {}, using {} = {}.", H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
+                        H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
+                        H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE);
+                entriesToDeleteCount = getTableSize() - maxTableSize;
+            } else {
+                entriesToDeleteCount = maxTableSize - noOfRecordsToKeep;
+            }
+
+            logger.debug("Entries to delete: {}.", entriesToDeleteCount);
+
             this.dbHelper.withConnection(c -> {
                 final String catalog = c.getCatalog();
                 final DatabaseMetaData dbMetaData = c.getMetaData();
@@ -212,11 +228,11 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                         } else {
                             logger.info("Partially emptying table {}", sqlTableName);
                             this.dbHelper.execute(c, MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
-                                    Integer.toString(tableSize - noOfRecordsToKeep)));
+                                    Integer.toString(entriesToDeleteCount)));
                         }
                     }
                 }
-                return (Void) null;
+                return null;
             });
         } catch (final SQLException sqlException) {
             logger.error("Error in truncating the table {}...", sqlTableName, sqlException);
@@ -278,7 +294,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      *             if the provided argument is null
      */
     private void store(final WireRecord wireRecord) {
-        requireNonNull(wireRecord, "Wire Record cannot be null");
+        requireNonNull(wireRecord, NULL_WIRE_RECORD_ERROR_MSG);
         int retryCount = 0;
         final String tableName = this.wireRecordStoreOptions.getTableName();
         do {
@@ -339,7 +355,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      *             if the provided argument is null
      */
     private void reconcileTable(final String tableName) throws SQLException {
-        requireNonNull(tableName, "Table name cannot be null");
+        requireNonNull(tableName, NULL_TABLE_NAME_ERROR_MSG);
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
 
         this.dbHelper.withConnection(c -> {
@@ -356,14 +372,14 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                             "(TIMESTAMP DESC)");
                 }
             }
-            return (Void) null;
+            return null;
         });
     }
 
     private void createIndex(String indexname, String table, String order) throws SQLException {
         this.dbHelper.withConnection(c -> {
             this.dbHelper.execute(c, MessageFormat.format(SQL_CREATE_TABLE_INDEX, indexname, table, order));
-            return (Void) null;
+            return null;
         });
         logger.info("Index {} created, order is {}", indexname, order);
     }
@@ -381,8 +397,8 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      *             if any of the provided arguments is null
      */
     private void reconcileColumns(final String tableName, final WireRecord wireRecord) throws SQLException {
-        requireNonNull(tableName, "Table name cannot be null");
-        requireNonNull(wireRecord, "Wire Record cannot be null");
+        requireNonNull(tableName, NULL_TABLE_NAME_ERROR_MSG);
+        requireNonNull(wireRecord, NULL_WIRE_RECORD_ERROR_MSG);
 
         final Map<String, Integer> columns = CollectionUtil.newHashMap();
 
@@ -416,7 +432,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                 }
             }
 
-            return (Void) null;
+            return null;
         });
     }
 
@@ -433,8 +449,8 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      *             if any of the provided arguments is null
      */
     private void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException {
-        requireNonNull(tableName, "Table name cannot be null");
-        requireNonNull(wireRecord, "Wire Record cannot be null");
+        requireNonNull(tableName, NULL_TABLE_NAME_ERROR_MSG);
+        requireNonNull(wireRecord, NULL_WIRE_RECORD_ERROR_MSG);
 
         final Map<String, TypedValue<?>> wireRecordProperties = wireRecord.getProperties();
 
@@ -443,7 +459,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                     new Date().getTime())) {
                 stmt.execute();
                 c.commit();
-                return (Void) null;
+                return null;
             }
 
         });

@@ -375,9 +375,28 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 @Override
                 public void onNext(PullResponseItem item) {
                     super.onNext(item);
+                    int progressPercent = 0;
                     if (!itemDownloadingStatus.equals(item.getStatus())) {
-                        logger.info("Container Layer Pull State: {}", item.getStatus());
+                        try {
+                            progressPercent = (int) ((item.getProgressDetail().getTotal()
+                                    / item.getProgressDetail().getCurrent()) * 100);
+                        } catch (Exception e) {
+
+                        }
+                        logger.info("Pulling {}:{}, State: {}, Progress: {}%, {}",
+                                containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
+                                item.getStatus(), progressPercent, item.getStream());
                         itemDownloadingStatus = item.getStatus();
+                    }
+
+                    if (item.isErrorIndicated()) {
+                        logger.error("Unable To Pull image {}:{} because : {}", item.getErrorDetail(),
+                                containerDescription.getContainerImage(), containerDescription.getContainerImageTag());
+                    }
+
+                    if (item.isPullSuccessIndicated()) {
+                        logger.info("Image pull of {}:{} was succsessful", containerDescription.getContainerImage(),
+                                containerDescription.getContainerImageTag());
                     }
                 }
 

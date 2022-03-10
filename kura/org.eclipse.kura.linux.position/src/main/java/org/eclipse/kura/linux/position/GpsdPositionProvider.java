@@ -184,9 +184,10 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         internalState.setTime(tpv.getTimestamp());
         internalState.setMode(tpv.getMode());
 
-        boolean isLastPositionValid = this.internalStateReference.get() != null
-                && this.internalStateReference.get().isValid();
-        
+        GpsdInternalState oldInternalState = internalStateReference.getAndSet(internalState);
+
+        boolean isLastPositionValid = oldInternalState != null && oldInternalState.isValid();
+
         boolean isNewPositionValid = internalState.isValid();
 
         if (this.gpsDeviceListener != null && isNewPositionValid != isLastPositionValid) {
@@ -194,7 +195,6 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
             logger.info("Lock Status changed: {}", internalState);
         }
 
-        internalStateReference.set(internalState);
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {

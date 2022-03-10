@@ -378,14 +378,13 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                     int progressPercent = 0;
                     if (!itemDownloadingStatus.equals(item.getStatus())) {
                         try {
-                            progressPercent = (int) ((item.getProgressDetail().getTotal()
-                                    / item.getProgressDetail().getCurrent()) * 100);
+                            progressPercent = (int) ((item.getProgressDetail().getTotal() / item.getProgressDetail().getCurrent()));
                         } catch (Exception e) {
 
                         }
-                        logger.info("Pulling {}:{}, State: {}, Progress: {}%, {}",
-                                containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
-                                item.getStatus(), progressPercent, item.getStream());
+                        logger.info("Pulling {}:{} Layer {}, State: {}, Progress: {}%",
+                            containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
+                            item.getId(), item.getStatus(), progressPercent);
                         itemDownloadingStatus = item.getStatus();
                     }
 

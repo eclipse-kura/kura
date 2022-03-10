@@ -135,7 +135,7 @@ systemctl disable systemd-timesyncd
 systemctl stop chrony
 systemctl disable chrony
 
-#create lease database if file is missing
+#create lease database file if missing
 if [ ! -f "/var/lib/dhcp/dhcpd.leases" ] ; then
     touch /var/lib/dhcp/dhcpd.leases
 fi

@@ -273,5 +273,16 @@
                 </b:Panel>
             </b:ModalBody>
         </b:Modal>
+        <b:Modal closable="true" dataKeyboard="false" dataBackdrop="STATIC" ui:field="regDomModal" b:id="regDomModal">
+            <b:ModalBody>
+                <b:Panel>
+                    <b:PanelBody>
+                        <b:Alert type="DANGER" ui:field="unavailableChannelError">
+                            <b.html:Text ui:field="unavailableChannelErrorText" />
+                        </b:Alert>
+                    </b:PanelBody>
+                </b:Panel>
+            </b:ModalBody>
+        </b:Modal>        
     </b:Container>
 </ui:UiBinder> 

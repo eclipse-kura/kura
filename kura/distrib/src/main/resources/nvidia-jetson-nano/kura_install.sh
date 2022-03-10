@@ -72,6 +72,25 @@ systemctl enable firewall
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+#disable NTP service
+if command -v timedatectl > /dev/null ; then
+    timedatectl set-ntp false
+fi
+
+#disable time synch at network start
+if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
+    chmod -x /etc/network/if-up.d/ntpdate
+fi
+
+#prevent time sync services from starting
+systemctl stop systemd-timedated
+systemctl disable systemd-timedated
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+# Prevent time sync with chrony from starting.
+systemctl stop chrony
+systemctl disable chrony
+
 #set up networking configuration
 cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf ${INSTALL_DIR}/kura/.data/dhcpd-eth0.conf
@@ -120,24 +139,6 @@ systemctl stop systemd-resolved.service
 systemctl disable systemd-resolved.service
 systemctl stop resolvconf.service
 systemctl disable resolvconf.service
-
-#disable NTP service
-if command -v timedatectl > /dev/null ; then
-    timedatectl set-ntp false
-fi
-
-#disable time synch at network start
-if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
-    chmod -x /etc/network/if-up.d/ntpdate
-fi
-
-#prevent time sync services from starting
-systemctl stop systemd-timedated
-systemctl disable systemd-timedated
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
-systemctl stop chrony
-systemctl disable chrony
 
 #disable ModemManager
 systemctl stop ModemManager

@@ -39,6 +39,9 @@ cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/ma
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
+systemctl stop apparmor
+systemctl disable apparmor
+
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
 cp ${INSTALL_DIR}/kura/install/network.interfaces ${INSTALL_DIR}/kura/.data/interfaces

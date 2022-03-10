@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2020, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -49,6 +49,24 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     }
 
     @Test
+    public void addLocalRuleSourceSinglePortTest() throws KuraException {
+        setUpMock();
+        LinuxFirewall linuxFirewall = LinuxFirewall.getInstance(executorServiceMock);
+        try {
+            linuxFirewall.addLocalRule(5400, "tcp", null, null, "eth0", null, "00:11:22:33:44:55:66", "10100");
+        } catch (KuraIOException e) {
+            // do nothing...
+        }
+
+        assertTrue(linuxFirewall.getLocalRules().stream().anyMatch(rule -> {
+            return rule.getPort() == 5400 && rule.getProtocol().equals("tcp")
+                    && rule.getPermittedInterfaceName().equals("eth0")
+                    && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
+                    && rule.getSourcePortRange().equals("10100");
+        }));
+    }
+
+    @Test
     public void addLocalRulesTest() throws KuraException {
         setUpMock();
         LinuxFirewall linuxFirewall = LinuxFirewall.getInstance(executorServiceMock);
@@ -57,6 +75,9 @@ public class LinuxFirewallTest extends FirewallTestUtils {
             rules.add(new LocalRule(5400, "tcp",
                     new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0), "eth0", null,
                     "00:11:22:33:44:55:66", "10100:10200"));
+            rules.add(new LocalRule(5400, "tcp",
+                    new NetworkPair<>((IP4Address) IPAddress.parseHostAddress("0.0.0.0"), (short) 0), "eth0", null,
+                    "00:11:22:33:44:55:66", "10100"));
             linuxFirewall.addLocalRules(rules);
         } catch (KuraIOException | UnknownHostException e) {
             // do nothing...
@@ -68,10 +89,16 @@ public class LinuxFirewallTest extends FirewallTestUtils {
                     && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
                     && rule.getSourcePortRange().equals("10100:10200");
         }));
+        assertTrue(linuxFirewall.getLocalRules().stream().anyMatch(rule -> {
+            return rule.getPort() == 5400 && rule.getProtocol().equals("tcp")
+                    && rule.getPermittedInterfaceName().equals("eth0")
+                    && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
+                    && rule.getSourcePortRange().equals("10100");
+        }));
     }
 
     @Test
-    public void addPortForwardTest() throws KuraException {
+    public void addPortForwardSourceRangeTest() throws KuraException {
         setUpMock();
         LinuxFirewall linuxFirewall = LinuxFirewall.getInstance(executorServiceMock);
         try {
@@ -92,6 +119,27 @@ public class LinuxFirewallTest extends FirewallTestUtils {
     }
 
     @Test
+    public void addPortForwardSourceSinglePortTest() throws KuraException {
+        setUpMock();
+        LinuxFirewall linuxFirewall = LinuxFirewall.getInstance(executorServiceMock);
+        try {
+            linuxFirewall.addPortForwardRule("eth0", "eth1", "172.16.0.1", "tcp", 3040, 4050, true, "172.16.0.100",
+                    "32", "00:11:22:33:44:55:66", "10100");
+        } catch (KuraIOException e) {
+            // do nothing...
+        }
+
+        assertTrue(linuxFirewall.getPortForwardRules().stream().anyMatch(rule -> {
+            return rule.getInboundIface().equals("eth0") && rule.getOutboundIface().equals("eth1")
+                    && rule.getAddress().equals("172.16.0.1") && rule.getProtocol().equals("tcp")
+                    && rule.getInPort() == 3040 && rule.getOutPort() == 4050 && rule.isMasquerade()
+                    && rule.getPermittedNetwork().equals("172.16.0.100") && rule.getPermittedNetworkMask() == 32
+                    && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
+                    && rule.getSourcePortRange().equals("10100:10100");
+        }));
+    }
+
+    @Test
     public void addPortForwardRulesTest() throws KuraException {
         setUpMock();
         LinuxFirewall linuxFirewall = LinuxFirewall.getInstance(executorServiceMock);
@@ -101,7 +149,12 @@ public class LinuxFirewallTest extends FirewallTestUtils {
                     .address("172.16.0.1").protocol("tcp").inPort(3040).outPort(4050).masquerade(true)
                     .permittedNetwork("172.16.0.100").permittedNetworkMask(32).permittedMAC("00:11:22:33:44:55:66")
                     .sourcePortRange("10100:10200");
+            PortForwardRule portForwardRule2 = new PortForwardRule().inboundIface("eth0").outboundIface("eth1")
+                    .address("172.16.0.1").protocol("tcp").inPort(3040).outPort(4050).masquerade(true)
+                    .permittedNetwork("172.16.0.100").permittedNetworkMask(32).permittedMAC("00:11:22:33:44:55:66")
+                    .sourcePortRange("10100");
             rules.add(portForwardRule);
+            rules.add(portForwardRule2);
             linuxFirewall.addPortForwardRules(rules);
         } catch (KuraIOException e) {
             // do nothing...
@@ -114,6 +167,14 @@ public class LinuxFirewallTest extends FirewallTestUtils {
                     && rule.getPermittedNetwork().equals("172.16.0.100") && rule.getPermittedNetworkMask() == 32
                     && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
                     && rule.getSourcePortRange().equals("10100:10200");
+        }));
+        assertTrue(linuxFirewall.getPortForwardRules().stream().anyMatch(rule -> {
+            return rule.getInboundIface().equals("eth0") && rule.getOutboundIface().equals("eth1")
+                    && rule.getAddress().equals("172.16.0.1") && rule.getProtocol().equals("tcp")
+                    && rule.getInPort() == 3040 && rule.getOutPort() == 4050 && rule.isMasquerade()
+                    && rule.getPermittedNetwork().equals("172.16.0.100") && rule.getPermittedNetworkMask() == 32
+                    && rule.getPermittedMAC().equals("00:11:22:33:44:55:66")
+                    && rule.getSourcePortRange().equals("10100:10100");
         }));
     }
 

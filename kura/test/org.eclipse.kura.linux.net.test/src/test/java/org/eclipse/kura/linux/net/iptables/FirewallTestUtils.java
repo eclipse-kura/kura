@@ -242,13 +242,22 @@ public class FirewallTestUtils {
                 "iptables -A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 --dport 5400 -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
+                "iptables -A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100 --dport 5400 -j ACCEPT"
+                        .split(" ")));
+        testCommandList.add(new Command(
                 "iptables -A forward-kura -i eth1 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT".split(" ")));
         testCommandList.add(new Command("iptables -A forward-kura -i eth0 -o eth1 -j ACCEPT".split(" ")));
         testCommandList.add(new Command(
                 "iptables -A forward-kura-ipf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
+                "iptables -A forward-kura-ipf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10100 -j ACCEPT"
+                        .split(" ")));
+        testCommandList.add(new Command(
                 "iptables -A forward-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 -j ACCEPT"
+                        .split(" ")));
+        testCommandList.add(new Command(
+                "iptables -A forward-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -i eth0 -o eth1 -p tcp -m tcp -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10100 -j ACCEPT"
                         .split(" ")));
         testCommandList.add(new Command(
                 "iptables -A forward-kura-pf -s 172.16.0.1/32 -i eth1 -o eth0 -p tcp -m state --state RELATED,ESTABLISHED -j ACCEPT"
@@ -258,6 +267,9 @@ public class FirewallTestUtils {
                         .split(" ")));
         testCommandList.add(new Command(
                 "iptables -t nat -A prerouting-kura-pf -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10200 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050"
+                        .split(" ")));
+        testCommandList.add(new Command(
+                "iptables -t nat -A prerouting-kura-pf -s 172.16.0.100/32 -i eth0 -p tcp -m mac --mac-source 00:11:22:33:44:55:66 -m tcp --sport 10100:10100 --dport 3040 -j DNAT --to-destination 172.16.0.1:4050"
                         .split(" ")));
         testCommandList.add(new Command(
                 "iptables -t nat -A postrouting-kura-pf -s 172.16.0.100/32 -d 172.16.0.1/32 -o eth1 -p tcp -j MASQUERADE"
@@ -273,6 +285,9 @@ public class FirewallTestUtils {
                         .split(" ")));
         testCommandList.add(new Command(
                 "iptables -A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100:10200 --dport 5400 -j ACCEPT"
+                        .split(" ")));
+        testCommandList.add(new Command(
+                "iptables -A input-kura -p tcp -s 0.0.0.0/0 -i eth0 -m mac --mac-source 00:11:22:33:44:55:66 --sport 10100 --dport 5400 -j ACCEPT"
                         .split(" ")));
         testCommandList.stream().forEach(c -> c.setExecuteInAShell(true));
         testCommandList.stream().forEach(c -> when(executorServiceMock.execute(c)).thenReturn(successStatus));

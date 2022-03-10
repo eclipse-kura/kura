@@ -122,7 +122,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     public Set<String> getAdditionalFilterRules() {
-        return additionalFilterRules;
+        return this.additionalFilterRules;
     }
 
     public void setAdditionalFilterRules(Set<String> additionalFilterRules) {
@@ -130,7 +130,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     public Set<String> getAdditionalNatRules() {
-        return additionalNatRules;
+        return this.additionalNatRules;
     }
 
     public void setAdditionalNatRules(Set<String> additionalNatRules) {
@@ -138,7 +138,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     public Set<String> getAdditionalMangleRules() {
-        return additionalMangleRules;
+        return this.additionalMangleRules;
     }
 
     public void setAdditionalMangleRules(Set<String> additionalMangleRules) {
@@ -669,10 +669,7 @@ public class IptablesConfig extends IptablesConfigConstants {
     }
 
     private void readInputChain(String line) {
-        if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.equals(line)) {
-            return;
-        }
-        if (ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
+        if (ALLOW_ALL_TRAFFIC_TO_LOOPBACK.equals(line) || ALLOW_ONLY_INCOMING_TO_OUTGOING.equals(line)) {
             return;
         }
         // Ignore flooding protection rules

@@ -204,17 +204,17 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
         try {
 
-            int entriesToDeleteCount;
+            int entriesToDeleteCount = getTableSize() + 1; // +1 to make room for the new record
             if (maxTableSize < noOfRecordsToKeep) {
                 logger.info("{} > {}, using {} = {}.", H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
                         H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
                         H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE);
-                entriesToDeleteCount = getTableSize() - maxTableSize;
+                entriesToDeleteCount -= maxTableSize;
             } else {
-                entriesToDeleteCount = maxTableSize - noOfRecordsToKeep;
+                entriesToDeleteCount -= noOfRecordsToKeep;
             }
 
-            logger.debug("Entries to delete: {}.", entriesToDeleteCount);
+            final String limit = Integer.toString(entriesToDeleteCount);
 
             this.dbHelper.withConnection(c -> {
                 final String catalog = c.getCatalog();
@@ -227,8 +227,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
                             this.dbHelper.execute(c, MessageFormat.format(SQL_TRUNCATE_TABLE, sqlTableName));
                         } else {
                             logger.info("Partially emptying table {}", sqlTableName);
-                            this.dbHelper.execute(c, MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName,
-                                    Integer.toString(entriesToDeleteCount)));
+                            this.dbHelper.execute(c, MessageFormat.format(SQL_DELETE_RANGE_TABLE, sqlTableName, limit));
                         }
                     }
                 }

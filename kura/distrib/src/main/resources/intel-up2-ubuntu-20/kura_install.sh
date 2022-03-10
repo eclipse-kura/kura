@@ -142,6 +142,12 @@ systemctl mask systemd-networkd
 systemctl mask networkd-dispatcher
 systemctl mask systemd-networkd-wait-online
 
+#disable DNS-related services - kura is the network manager
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
+
 #disable ModemManager
 systemctl stop ModemManager
 systemctl disable ModemManager

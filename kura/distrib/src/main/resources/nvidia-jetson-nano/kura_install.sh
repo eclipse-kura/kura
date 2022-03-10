@@ -10,6 +10,7 @@
 #
 # Contributors:
 #  Eurotech
+#
 
 INSTALL_DIR=/opt/eclipse
 

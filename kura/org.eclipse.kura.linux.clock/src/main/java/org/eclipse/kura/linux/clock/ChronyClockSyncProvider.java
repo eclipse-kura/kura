@@ -213,7 +213,7 @@ public class ChronyClockSyncProvider implements ClockSyncProvider {
                 logger.debug("No new clock stepping event");
             }
         } else {
-            logger.warn("Unable to get system clock status from system journal. {}",
+            logger.info("Chrony stepping not found in system journal (may be not requested). {}",
                     journalClockUpdateRead.getErrorStream());
         }
 

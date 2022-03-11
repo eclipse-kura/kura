@@ -90,16 +90,12 @@ do
     rm $FILE
 done
 
-#remove NTP servers advertised over DHCP
-if [ -f "/run/ntpdate.dhcp" ] ; then
-    rm /run/ntpdate.dhcp
-fi
-if [ -f "/run/systemd/timesyncd.conf.d/01-dhclient.conf" ] ; then
-    rm /run/systemd/timesyncd.conf.d/01-dhclient.conf
-fi
-if ls /var/lib/dhcp/chrony.servers.* 1> /dev/null 2>&1; then
-    rm /var/lib/dhcp/chrony.servers.*
-fi
+#remove already captured NTP servers
+NTP_SERVER_FILES="/run/ntpdate.dhcp /run/systemd/timesyncd.conf.d/01-dhclient.conf /var/lib/dhcp/chrony.servers.*"
+for FILE in $(ls $NTP_SERVER_FILES 2>/dev/null)
+do
+    rm $FILE
+done
 
 #prevent time sync services from starting
 systemctl stop systemd-timedated

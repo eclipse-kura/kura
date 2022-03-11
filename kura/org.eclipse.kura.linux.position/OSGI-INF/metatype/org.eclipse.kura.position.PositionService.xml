@@ -63,6 +63,16 @@
             required="false"
             default="2947"
             description="Port where the gpsd service is running." />
+            
+       <AD id="gpsd.max.fix.validity.interval.seconds"  
+            name="gpsd.max.fix.validity.interval.seconds"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="60"
+            min="0"
+            description="With some GPS receivers GPSD does not report to the clients that GPS fix has been lost. This parameter enables the following workaround: if no position updates are received from GPSD after the value of this parameter in seconds since last update, then the PositionService will assume that the GPS fix has been lost. Set to 0 to disable this feature.">
+        </AD>
         	
        	<AD id="latitude"
        		name="latitude"

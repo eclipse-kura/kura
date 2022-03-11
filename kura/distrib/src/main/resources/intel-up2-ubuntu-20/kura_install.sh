@@ -1,15 +1,15 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+# Copyright (c) 2022 Eurotech and/or its affiliates and others
 #
-#  This program and the accompanying materials are made
-#  available under the terms of the Eclipse Public License 2.0
-#  which is available at https://www.eclipse.org/legal/epl-2.0/
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
 #
-#  SPDX-License-Identifier: EPL-2.0
+# SPDX-License-Identifier: EPL-2.0
 #
-#  Contributors:
-#   Eurotech
+# Contributors:
+#  Eurotech
 #
 
 INSTALL_DIR=/opt/eclipse
@@ -38,7 +38,7 @@ fi
 #set up users and grant permissions to them
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
-${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i 
+${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
 systemctl stop apparmor
 systemctl disable apparmor
@@ -81,20 +81,27 @@ fi
 # Prevent time sync services from starting
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
 # Prevent time sync with chrony from starting.
 systemctl stop chrony
 systemctl disable chrony
 
 #set up networking configuration
 mac_addr=$(head -1 /sys/class/net/enp2s0/address | tr '[:lower:]' '[:upper:]')
-sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlp4s0.conf
-cp /etc/hostapd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/hostapd-wlp4s0.conf
 
 cp ${INSTALL_DIR}/kura/install/dhcpd-enp2s0.conf /etc/dhcpd-enp2s0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-enp2s0.conf ${INSTALL_DIR}/kura/.data/dhcpd-enp2s0.conf
 
-cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf /etc/dhcpd-wlp4s0.conf
-cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlp4s0.conf
+#check if wlp4s0 exists
+ethtool wlp4s0 1> /dev/null 2> /dev/null
+if [ $? -eq 0 ] ; then
+    sed "s/^ssid=kura_gateway.*/ssid=kura_gateway_${mac_addr}/" < ${INSTALL_DIR}/kura/install/hostapd.conf > /etc/hostapd-wlp4s0.conf
+    cp /etc/hostapd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/hostapd-wlp4s0.conf
+
+    cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf /etc/dhcpd-wlp4s0.conf
+    cp ${INSTALL_DIR}/kura/install/dhcpd-wlp4s0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlp4s0.conf
+fi
 
 #set up bind/named
 cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
@@ -121,15 +128,29 @@ systemctl disable dhcpcd
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
 
+# disable NetworkManager.service - kura is the network manager
+systemctl stop NetworkManager.service
+systemctl disable NetworkManager.service
+
 #disable netplan
-systemctl disable systemd-networkd.socket 
+systemctl disable systemd-networkd.socket
 systemctl disable systemd-networkd
 systemctl disable networkd-dispatcher
 systemctl disable systemd-networkd-wait-online
-systemctl mask systemd-networkd.socket 
+systemctl mask systemd-networkd.socket
 systemctl mask systemd-networkd
 systemctl mask networkd-dispatcher
 systemctl mask systemd-networkd-wait-online
+
+#disable DNS-related services - kura is the network manager
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
+
+#disable ModemManager
+systemctl stop ModemManager
+systemctl disable ModemManager
 
 #disable wpa_supplicant
 systemctl stop wpa_supplicant
@@ -158,4 +179,4 @@ else
  done
 fi
 
-keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit  
+keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

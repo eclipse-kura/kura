@@ -82,17 +82,13 @@ if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
     chmod -x /etc/network/if-up.d/ntpdate
 fi
 
-#disable populating chrony config with the NTP servers
-#advertised over DHCP
-if [ -f "/etc/dhcp/dhclient-exit-hooks.d/ntpdate" ] ; then
-    rm /etc/dhcp/dhclient-exit-hooks.d/ntpdate
-fi
-if [ -f "/etc/dhcp/dhclient-exit-hooks.d/timesyncd" ] ; then
-    rm /etc/dhcp/dhclient-exit-hooks.d/timesyncd
-fi
-if [ -f "/etc/dhcp/dhclient-exit-hooks.d/chrony" ] ; then
-    rm /etc/dhcp/dhclient-exit-hooks.d/chrony
-fi
+#disable hook script populating chrony
+#config with the NTP servers advertised over DHCP
+NTP_DHCP_HOOK_SCRIPTS="/etc/dhcp/dhclient-exit-hooks.d/ntpdate /etc/dhcp/dhclient-exit-hooks.d/timesyncd /etc/dhcp/dhclient-exit-hooks.d/chrony"
+for FILE in $NTP_DHCP_HOOK_SCRIPTS
+do
+    rm $FILE
+done
 
 #remove NTP servers advertised over DHCP
 if [ -f "/run/ntpdate.dhcp" ] ; then

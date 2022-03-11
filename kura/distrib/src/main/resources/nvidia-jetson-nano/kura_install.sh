@@ -82,6 +82,17 @@ if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
     chmod -x /etc/network/if-up.d/ntpdate
 fi
 
+#disable populating chrony config with the NTP servers
+#advertised over DHCP
+if [ -f "/etc/dhcp/dhclient-exit-hooks.d/ntpdate" ] ; then
+    rm /etc/dhcp/dhclient-exit-hooks.d/ntpdate
+fi
+
+#remove NTP servers advertised over DHCP
+if [ -f "/run/ntpdate.dhcp" ] ; then
+    rm /run/ntpdate.dhcp
+fi
+
 #prevent time sync services from starting
 systemctl stop systemd-timedated
 systemctl disable systemd-timedated

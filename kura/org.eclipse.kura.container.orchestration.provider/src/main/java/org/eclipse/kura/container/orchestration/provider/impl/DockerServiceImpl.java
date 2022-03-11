@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.eclipse.kura.KuraErrorCode;
+import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.provider.ContainerStates;
@@ -34,7 +36,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
-import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
@@ -200,7 +201,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                         .setContainerImageTag(version).setContainerID(cont.getId())
                         .setInternalPort(parseInternalPortsFromDockerPs(cont.getPorts()))
                         .setExternalPort(parseExternalPortsFromDockerPs(cont.getPorts()))
-                        .setContainerState(convertDockerStateToESFState(cont.getState())).setIsEsfManaged(false)
+                        .setContainerState(convertDockerStateToFrameworkState(cont.getState())).setIsEsfManaged(false)
                         .build();
                 temp++;
             }
@@ -239,7 +240,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         return internalPorts;
     }
 
-    private ContainerStates convertDockerStateToESFState(String dockerState) {
+    private ContainerStates convertDockerStateToFrameworkState(String dockerState) {
 
         switch (dockerState.trim()) {
         case "created":
@@ -326,34 +327,23 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     @Override
     public String pullImageAndCreateContainer(ContainerDescriptor containerDescription) {
 
-        boolean imageStatus = doesImageExist(containerDescription);
+        boolean imageAvailableLocally = doesImageExist(containerDescription);
 
-        logger.info(" Does image {} exist?: {}", containerDescription.getContainerImage(), imageStatus);
-
-        if (imageStatus) {
-            try {
-                containerDescription.setContainerId(createContainer(containerDescription));
-
-            } catch (Exception e) {
-                logger.error("could not create container {}:{}", containerDescription.getContainerName(), e);
-            }
-
-        } else {
+        if (!imageAvailableLocally) {
             imagePullHelper(containerDescription, this.currentConfig.isRepositoryEnabled());
+        }
+
+        try {
+            logger.info("Creating container {}", containerDescription.getContainerName());
+            containerDescription.setContainerId(createContainer(containerDescription));
+
+        } catch (Exception e) {
+            logger.error("could not create container {}:{}", containerDescription.getContainerName(), e);
         }
 
         return containerDescription.getContainerId();
     }
 
-    /**
-     *
-     * Helper method for pulling containers before creating containers. When using
-     * an authenticated repo, docker-java will only try to check the authenticated
-     * repo. This method will first check the authenticated repo and attempt to
-     * pull, if no luck it will then pull from docker hub.
-     *
-     * @param containerDescription
-     */
     private void imagePullHelper(ContainerDescriptor containerDescription, boolean withAuth) {
 
         try {
@@ -376,14 +366,9 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 }
 
             }).awaitCompletion();
-            logger.info("Creating container {}", containerDescription.getContainerName());
 
-            if (containerDescription.getContainerId().isEmpty()) {
-                containerDescription.setContainerId(createContainer(containerDescription));
-
-            }
         } catch (InterruptedException e) {
-            logger.error("error pulling {}: {}", containerDescription.getContainerName(), e);
+            logger.error("Interrupted while pulling {}: {}", containerDescription.getContainerName(), e);
             Thread.currentThread().interrupt();
         }
     }
@@ -599,7 +584,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void startContainer(ContainerDescriptor container) {
+    public void startContainer(ContainerDescriptor container) throws KuraException {
         logger.info("Starting {} Microservice", container.getContainerName());
         container.setContainerState(ContainerStates.STARTING);
 
@@ -615,21 +600,13 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             if (container.getContainerId().isEmpty()) {
                 try {
                     container.setContainerId(pullImageAndCreateContainer(container));
-                    startContainer(container.getContainerId());
-                    container.setContainerState(ContainerStates.ACTIVE);
-                    logger.info("Container Started Successfully");
                 } catch (Exception e) {
-                    logger.error("Failed to pull and create container.", e);
-                }
-            } else {
-                logger.info("{}  Microservice Already exists, starting container", container.getContainerImage());
-                try {
-                    startContainer(container.getContainerId());
-                    container.setContainerState(ContainerStates.ACTIVE);
-                } catch (NotModifiedException ex) {
-                    logger.info("Container Already running.");
+                    throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
                 }
             }
+            startContainer(container.getContainerId());
+            container.setContainerState(ContainerStates.ACTIVE);
+            logger.info("Container Started Successfully");
 
         } else {
             enqueueContainer(container, this.containerQueue);
@@ -655,7 +632,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 logger.error("Failed to stop {} Microservice", container.getContainerName());
             }
 
-            if (Boolean.FALSE.equals(container.getIsEsfManaged())) {
+            if (Boolean.FALSE.equals(container.isFrameworkManaged())) {
                 // container is not Framework Managed, and thus should only be stopped and not deleted.
                 return;
             }
@@ -719,7 +696,11 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private void startUpAllQueuedMicroservices() {
         for (ContainerDescriptor containerName : this.containerQueue) {
-            startContainer(containerName);
+            try {
+                startContainer(containerName);
+            } catch (KuraException e) {
+                logger.error("Unable to start container: {}", containerName);
+            }
         }
     }
 

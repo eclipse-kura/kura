@@ -254,7 +254,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     pair.setName(container.getContainerImage());
                     pair.setStatus(containerStateToString(container));
                     pair.setVersion(container.getContainerImageTag().split(":")[0]);
-                    pair.set("isFrameworkManaged", container.getIsEsfManaged());
+                    pair.set("isFrameworkManaged", container.isFrameworkManaged());
                     pairs.add(pair);
                 }
             }

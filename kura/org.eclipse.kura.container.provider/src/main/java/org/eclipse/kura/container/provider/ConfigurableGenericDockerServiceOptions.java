@@ -1,12 +1,12 @@
 /*******************************************************************************
   * Copyright (c) 2022 Eurotech and/or its affiliates and others
-  * 
+  *
   * This program and the accompanying materials are made
   * available under the terms of the Eclipse Public License 2.0
   * which is available at https://www.eclipse.org/legal/epl-2.0/
-  * 
+  *
   * SPDX-License-Identifier: EPL-2.0
-  * 
+  *
   * Contributors:
   *  Eurotech
   *******************************************************************************/
@@ -20,11 +20,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-
-import org.eclipse.kura.util.configuration.Property;
 
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.util.configuration.Property;
 
 public class ConfigurableGenericDockerServiceOptions {
 
@@ -38,6 +36,10 @@ public class ConfigurableGenericDockerServiceOptions {
     private static final Property<String> CONTAINER_VOLUME = new Property<>("container.volume", "");
     private static final Property<String> CONTAINER_DEVICE = new Property<>("container.device", "");
     private static final Property<Boolean> CONTAINER_PRIVILEGED = new Property<>("container.privileged", false);
+    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRIES = new Property<>(
+            "container.image.download.retries", 5);
+    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = new Property<>(
+            "container.image.download.interval", 30000);
 
     private final boolean enabled;
     private final String image;
@@ -50,6 +52,8 @@ public class ConfigurableGenericDockerServiceOptions {
     private final String containerDevice;
     private final boolean privilegedMode;
     private final Map<String, String> containerVolumes;
+    private final int maxDownloadRetries;
+    private final int retryInterval;
 
     public ConfigurableGenericDockerServiceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -67,6 +71,8 @@ public class ConfigurableGenericDockerServiceOptions {
         this.containerVolumes = parseVolume(this.containerVolumeString);
         this.containerDevice = CONTAINER_DEVICE.get(properties);
         this.privilegedMode = CONTAINER_PRIVILEGED.get(properties);
+        this.maxDownloadRetries = CONTAINER_IMAGE_DOWNLOAD_RETRIES.get(properties);
+        this.retryInterval = CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL.get(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -155,42 +161,24 @@ public class ConfigurableGenericDockerServiceOptions {
         return this.privilegedMode;
     }
 
+    public boolean isUnlimitedRetries() {
+        return this.maxDownloadRetries == 0;
+    }
+
+    public int getMaxDownloadRetries() {
+        return this.maxDownloadRetries;
+    }
+    
+    public int getRetryInterval() {
+        return this.retryInterval;
+    }
+
     public ContainerDescriptor getContainerDescriptor() {
         return ContainerDescriptor.builder().setContainerName(getContainerName()).setContainerImage(getContainerImage())
                 .setContainerImageTag(getContainerImageTag()).setExternalPort(getContainerPortsExternal())
                 .setInternalPort(getContainerPortsInternal()).addEnvVar(getContainerEnvList())
                 .setVolume(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).build();
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(this.externalPorts);
-        result = prime * result + Arrays.hashCode(this.internalPorts);
-        result = prime * result + Objects.hash(this.containerDevice, this.containerEnv, this.containerName,
-                this.containerVolumes, this.enabled, this.image, this.imageTag);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
-        return Objects.equals(this.containerDevice, other.containerDevice)
-                && Objects.equals(this.containerEnv, other.containerEnv)
-                && Objects.equals(this.containerName, other.containerName) && Objects.equals(this.image, other.image)
-                && Objects.equals(this.imageTag, other.imageTag)
-                && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
-                && Arrays.equals(this.externalPorts, other.externalPorts)
-                && Arrays.equals(this.internalPorts, other.internalPorts)
-                && Objects.equals(this.privilegedMode, other.privilegedMode);
     }
 
     private int[] parsePortString(String ports) {
@@ -206,6 +194,101 @@ public class ConfigurableGenericDockerServiceOptions {
         }
 
         return tempArray;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (this.containerDevice == null ? 0 : this.containerDevice.hashCode());
+        result = prime * result + (this.containerEnv == null ? 0 : this.containerEnv.hashCode());
+        result = prime * result + (this.containerName == null ? 0 : this.containerName.hashCode());
+        result = prime * result + (this.containerVolumeString == null ? 0 : this.containerVolumeString.hashCode());
+        result = prime * result + (this.containerVolumes == null ? 0 : this.containerVolumes.hashCode());
+        result = prime * result + (this.enabled ? 1231 : 1237);
+        result = prime * result + Arrays.hashCode(this.externalPorts);
+        result = prime * result + (this.image == null ? 0 : this.image.hashCode());
+        result = prime * result + (this.imageTag == null ? 0 : this.imageTag.hashCode());
+        result = prime * result + Arrays.hashCode(this.internalPorts);
+        result = prime * result + this.maxDownloadRetries;
+        result = prime * result + (this.privilegedMode ? 1231 : 1237);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if ((obj == null) || (getClass() != obj.getClass())) {
+            return false;
+        }
+        ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
+        if (this.containerDevice == null) {
+            if (other.containerDevice != null) {
+                return false;
+            }
+        } else if (!this.containerDevice.equals(other.containerDevice)) {
+            return false;
+        }
+        if (this.containerEnv == null) {
+            if (other.containerEnv != null) {
+                return false;
+            }
+        } else if (!this.containerEnv.equals(other.containerEnv)) {
+            return false;
+        }
+        if (this.containerName == null) {
+            if (other.containerName != null) {
+                return false;
+            }
+        } else if (!this.containerName.equals(other.containerName)) {
+            return false;
+        }
+        if (this.containerVolumeString == null) {
+            if (other.containerVolumeString != null) {
+                return false;
+            }
+        } else if (!this.containerVolumeString.equals(other.containerVolumeString)) {
+            return false;
+        }
+        if (this.containerVolumes == null) {
+            if (other.containerVolumes != null) {
+                return false;
+            }
+        } else if (!this.containerVolumes.equals(other.containerVolumes)) {
+            return false;
+        }
+        if (this.enabled != other.enabled) {
+            return false;
+        }
+        if (!Arrays.equals(this.externalPorts, other.externalPorts)) {
+            return false;
+        }
+        if (this.image == null) {
+            if (other.image != null) {
+                return false;
+            }
+        } else if (!this.image.equals(other.image)) {
+            return false;
+        }
+        if (this.imageTag == null) {
+            if (other.imageTag != null) {
+                return false;
+            }
+        } else if (!this.imageTag.equals(other.imageTag)) {
+            return false;
+        }
+        if (!Arrays.equals(this.internalPorts, other.internalPorts)) {
+            return false;
+        }
+        if (this.maxDownloadRetries != other.maxDownloadRetries) {
+            return false;
+        }
+        if (this.privilegedMode != other.privilegedMode) {
+            return false;
+        }
+        return true;
     }
 
 }

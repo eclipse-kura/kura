@@ -59,7 +59,7 @@ public class DockerContainer extends SystemResourceInfo {
         containerPrivilaged = container.getContainerPrivileged();
         containerState = container.getContainerState();
 
-        isEsfManaged = container.getIsEsfManaged();
+        isEsfManaged = container.isFrameworkManaged();
 
     }
 

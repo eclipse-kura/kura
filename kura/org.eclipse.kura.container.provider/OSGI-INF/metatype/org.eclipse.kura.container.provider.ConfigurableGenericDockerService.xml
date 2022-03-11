@@ -25,6 +25,24 @@
         <AD id="container.image.tag" name="Image tag"
             description="Describes which image version that should be pulled from docker hub." type="String"
             cardinality="1" required="true" default="latest" />
+        
+        <AD id="container.image.download.retries" 
+            name="Image Download Retries" 
+            description="The number of retries to pull the container image. Set to 0 for unlimited retries"
+            type="Integer" 
+            cardinality="1" 
+            min="0"
+            required="true" 
+            default="5" />
+            
+        <AD id="container.image.download.interval" 
+            name="Image Download Retry Interval" 
+            description="The interval (in milliseconds) between retries to pull the container image"
+            type="Integer" 
+            cardinality="1" 
+            min="0"
+            required="true" 
+            default="30000" />
 
         <AD id="container.ports.internal" name="Internal ports"
             description="A comma seperated list of ports. Note, the number of internal ports must be equal to the number of external ports. Example: 80, 443." type="String" cardinality="1" required="true"

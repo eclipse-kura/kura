@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -39,7 +39,7 @@ public class ContainerDescriptor {
     private Map<String, String> containerVolumes;
     private Boolean containerPrivilaged;
     private ContainerStates containerState = ContainerStates.STOPPING;
-    private Boolean isEsfManaged = true;
+    private Boolean isFrameworkManaged = true;
 
     public static ContainerDescriptor findByName(String name, List<ContainerDescriptor> serviceList) {
         ContainerDescriptor sd = null;
@@ -55,12 +55,8 @@ public class ContainerDescriptor {
         return this.containerState;
     }
 
-    public void setContainerState(ContainerStates containerState) {
-        this.containerState = containerState;
-    }
-
-    public Boolean getIsEsfManaged() {
-        return this.isEsfManaged;
+    public Boolean isFrameworkManaged() {
+        return this.isFrameworkManaged;
     }
 
     public String getContainerName() {
@@ -77,10 +73,6 @@ public class ContainerDescriptor {
 
     public String getContainerId() {
         return this.containerID;
-    }
-
-    public void setContainerId(String id) {
-        this.containerID = id;
     }
 
     public int[] getContainerPortsExternal() {
@@ -105,6 +97,14 @@ public class ContainerDescriptor {
 
     public Boolean getContainerPrivileged() {
         return this.containerPrivilaged;
+    }
+
+    public void setContainerState(ContainerStates containerState) {
+        this.containerState = containerState;
+    }
+
+    public void setContainerId(String id) {
+        this.containerID = id;
     }
 
     /**
@@ -133,7 +133,7 @@ public class ContainerDescriptor {
         resultBuilder = resultBuilder && obj1.containerVolumes.equals(obj2.containerVolumes);
         resultBuilder = resultBuilder && obj1.containerPrivilaged.equals(obj2.containerPrivilaged);
         resultBuilder = resultBuilder && obj1.containerState.equals(obj2.containerState);
-        resultBuilder = resultBuilder && obj1.isEsfManaged.equals(obj2.isEsfManaged);
+        resultBuilder = resultBuilder && obj1.isFrameworkManaged.equals(obj2.isFrameworkManaged);
 
         return resultBuilder;
     }
@@ -151,7 +151,7 @@ public class ContainerDescriptor {
         private Map<String, String> containerVolumes = new HashMap<>();
         private Boolean containerPrivilaged = false;
         private ContainerStates containerState = ContainerStates.STOPPING;
-        private Boolean isEsfManaged = true;
+        private Boolean isFrameworkManaged = true;
 
         public ContainerDescriptorBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -159,7 +159,7 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptorBuilder setIsEsfManaged(Boolean isEsfManaged) {
-            this.isEsfManaged = isEsfManaged;
+            this.isFrameworkManaged = isEsfManaged;
             return this;
         }
 
@@ -317,7 +317,7 @@ public class ContainerDescriptor {
             containerDescriptor.containerVolumes = this.containerVolumes;
             containerDescriptor.containerPrivilaged = this.containerPrivilaged;
             containerDescriptor.containerState = this.containerState;
-            containerDescriptor.isEsfManaged = this.isEsfManaged;
+            containerDescriptor.isFrameworkManaged = this.isFrameworkManaged;
 
             return containerDescriptor;
         }

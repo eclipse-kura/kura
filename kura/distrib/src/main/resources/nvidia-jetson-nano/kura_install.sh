@@ -82,20 +82,8 @@ if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
     chmod -x /etc/network/if-up.d/ntpdate
 fi
 
-#disable hook script populating chrony
-#config with the NTP servers advertised over DHCP
-NTP_DHCP_HOOK_SCRIPTS="/etc/dhcp/dhclient-exit-hooks.d/ntpdate /etc/dhcp/dhclient-exit-hooks.d/timesyncd /etc/dhcp/dhclient-exit-hooks.d/chrony"
-for FILE in $NTP_DHCP_HOOK_SCRIPTS
-do
-    rm $FILE
-done
-
-#remove already captured NTP servers
-NTP_SERVER_FILES="/run/ntpdate.dhcp /run/systemd/timesyncd.conf.d/01-dhclient.conf /var/lib/dhcp/chrony.servers.*"
-for FILE in $(ls $NTP_SERVER_FILES 2>/dev/null)
-do
-    rm $FILE
-done
+#disable asking NTP servers to the DHCP server
+sed -i "s/, ntp-servers//g" /etc/dhcp/dhclient.conf
 
 #prevent time sync services from starting
 systemctl stop systemd-timedated

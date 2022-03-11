@@ -87,10 +87,22 @@ fi
 if [ -f "/etc/dhcp/dhclient-exit-hooks.d/ntpdate" ] ; then
     rm /etc/dhcp/dhclient-exit-hooks.d/ntpdate
 fi
+if [ -f "/etc/dhcp/dhclient-exit-hooks.d/timesyncd" ] ; then
+    rm /etc/dhcp/dhclient-exit-hooks.d/timesyncd
+fi
+if [ -f "/etc/dhcp/dhclient-exit-hooks.d/chrony" ] ; then
+    rm /etc/dhcp/dhclient-exit-hooks.d/chrony
+fi
 
 #remove NTP servers advertised over DHCP
 if [ -f "/run/ntpdate.dhcp" ] ; then
     rm /run/ntpdate.dhcp
+fi
+if [ -f "/run/systemd/timesyncd.conf.d/01-dhclient.conf" ] ; then
+    rm /run/systemd/timesyncd.conf.d/01-dhclient.conf
+fi
+if ls /var/lib/dhcp/chrony.servers.* 1> /dev/null 2>&1; then
+    rm /var/lib/dhcp/chrony.servers.*
 fi
 
 #prevent time sync services from starting

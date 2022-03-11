@@ -202,8 +202,9 @@ public class H2DbWireRecordStoreTest {
         resultSet.next();
         int count = resultSet.getInt(1);
         assertEquals("Unexpected number of records", maxSize, count);
-        
-        resultSet = connection.prepareStatement("SELECT ID FROM " + tableName + " ORDER BY ID ASC LIMIT 1").executeQuery();
+
+        resultSet = connection.prepareStatement("SELECT ID FROM " + tableName + " ORDER BY ID ASC LIMIT 1")
+                .executeQuery();
         resultSet.next();
         int oldID = resultSet.getInt(1);
 
@@ -221,12 +222,13 @@ public class H2DbWireRecordStoreTest {
         resultSet = connection.prepareStatement("SELECT count(*) FROM " + tableName).executeQuery();
         resultSet.next();
         count = resultSet.getInt(1);
-        assertEquals("Unexpected number of records", cleanupSize + 5L, count);
-        
-        resultSet = connection.prepareStatement("SELECT ID FROM " + tableName + " ORDER BY ID ASC LIMIT 1").executeQuery();
+        assertEquals("Unexpected number of records", cleanupSize + 4L, count);
+
+        resultSet = connection.prepareStatement("SELECT ID FROM " + tableName + " ORDER BY ID ASC LIMIT 1")
+                .executeQuery();
         resultSet.next();
         int newID = resultSet.getInt(1);
-        
+
         assertTrue("Cleanup remove failure", newID > oldID);
     }
 

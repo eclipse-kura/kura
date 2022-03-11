@@ -375,28 +375,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 @Override
                 public void onNext(PullResponseItem item) {
                     super.onNext(item);
-                    int progressPercent = 0;
-                    if (!itemDownloadingStatus.equals(item.getStatus())) {
-                        try {
-                            progressPercent = (int) ((item.getProgressDetail().getTotal() / item.getProgressDetail().getCurrent()));
-                        } catch (Exception e) {
+                    createLoggerMessageForContainerPull(item, containerDescription);
 
-                        }
-                        logger.info("Pulling {}:{} Layer {}, State: {}, Progress: {}%",
-                            containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
-                            item.getId(), item.getStatus(), progressPercent);
-                        itemDownloadingStatus = item.getStatus();
-                    }
-
-                    if (item.isErrorIndicated()) {
-                        logger.error("Unable To Pull image {}:{} because : {}", item.getErrorDetail(),
-                                containerDescription.getContainerImage(), containerDescription.getContainerImageTag());
-                    }
-
-                    if (item.isPullSuccessIndicated()) {
-                        logger.info("Image pull of {}:{} was succsessful", containerDescription.getContainerImage(),
-                                containerDescription.getContainerImageTag());
-                    }
                 }
 
             }).awaitCompletion();
@@ -409,6 +389,33 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         } catch (InterruptedException e) {
             logger.error("error pulling {}: {}", containerDescription.getContainerName(), e);
             Thread.currentThread().interrupt();
+        }
+    }
+
+    public void createLoggerMessageForContainerPull(PullResponseItem item, ContainerDescriptor containerDescription) {
+
+        int progressPercent;
+        if (!itemDownloadingStatus.equals(item.getStatus())) {
+            try {
+                progressPercent = (int) ((item.getProgressDetail().getTotal() / item.getProgressDetail().getCurrent()));
+            } catch (Exception e) {
+                progressPercent = 0;
+            }
+
+            logger.info("Pulling {}:{} Layer {}, State: {}, Progress: {}%",
+                containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
+                item.getId(), item.getStatus(), progressPercent);
+            itemDownloadingStatus = item.getStatus();
+        }
+
+        if (item.isErrorIndicated()) {
+            logger.error("Unable To Pull image {}:{} because : {}", item.getErrorDetail(),
+                    containerDescription.getContainerImage(), containerDescription.getContainerImageTag());
+        }
+
+        if (item.isPullSuccessIndicated()) {
+            logger.info("Image pull of {}:{} was succsessful", containerDescription.getContainerImage(),
+                    containerDescription.getContainerImageTag());
         }
     }
 
@@ -564,7 +571,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     }
 
-    private boolean doesImageExist(ContainerDescriptor containerDescription) {
+    public boolean doesImageExist(ContainerDescriptor containerDescription) {
 
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);

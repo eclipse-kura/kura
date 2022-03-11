@@ -37,6 +37,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.command.ListImagesCmd;
+import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
 import com.github.dockerjava.api.model.Image;
@@ -72,6 +73,7 @@ public class DockerServiceImplTest {
     private Map<String, Object> properties;
     private String createdContainerID;
 
+    private PullResponseItem pullResponseItem;
     @Test
     public void testServiceActivateEmptyProperties() throws KuraException {
         // Should use default properties
@@ -267,6 +269,18 @@ public class DockerServiceImplTest {
         thenTestIfNewContainerDoesNotExists();
     }
 
+    @Test
+    public void testContainerPullLogger(){
+        givenFullProperties(true);
+        givenDockerServiceImpl();
+        givenForcedProperties();
+        givenDockerClient();
+
+        whenContainerPullLoggerCreatorisTested();
+
+        thenCheckIfPullInformationWasUsed();
+    }
+
     /**
      * givens
      */
@@ -440,6 +454,21 @@ public class DockerServiceImplTest {
         this.dockerService.stopContainer(this.runnignContainerDescriptor[0]);
     }
 
+
+    private void whenContainerPullLoggerCreatorisTested(){
+        this.dockerService = Mockito.spy(this.dockerService);
+
+        ContainerDescriptor mcontCD1 = ContainerDescriptor.builder().setContainerID("645y5634t35")
+        .setContainerName("test_container").setContainerImage("nginx").setContainerImageTag("latest").build();
+
+        pullResponseItem = mock(PullResponseItem.class);
+        this.dockerService.createLoggerMessageForContainerPull(pullResponseItem, mcontCD1);
+    }
+
+    /**
+     * Then
+     */
+
     private void thenNotStoppedMicroservice() throws KuraException {
         verify(this.localDockerClient, times(0)).removeContainerCmd(any(String.class));
     }
@@ -475,6 +504,12 @@ public class DockerServiceImplTest {
 
     private void thenTestIfNewContainerDoesNotExists() {
         assertNotEquals(this.createdContainerID, this.runnignContainerDescriptor[0].getContainerId());
+    }
+
+    private void thenCheckIfPullInformationWasUsed(){
+        verify(pullResponseItem, times(1)).getId();
+        verify(pullResponseItem, times(1)).isErrorIndicated();
+        verify(pullResponseItem, times(1)).isPullSuccessIndicated();
     }
 
 }

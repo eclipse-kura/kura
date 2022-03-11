@@ -37,7 +37,7 @@ public class ContainerDescriptor {
     private List<String> containerEnvVars;
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
-    private Boolean containerPrivilaged;
+    private Boolean containerPrivileged;
     private ContainerStates containerState = ContainerStates.STOPPING;
     private Boolean isFrameworkManaged = true;
 
@@ -96,7 +96,7 @@ public class ContainerDescriptor {
     }
 
     public Boolean getContainerPrivileged() {
-        return this.containerPrivilaged;
+        return this.containerPrivileged;
     }
 
     public void setContainerState(ContainerStates containerState) {
@@ -131,7 +131,7 @@ public class ContainerDescriptor {
         resultBuilder = resultBuilder && obj1.containerEnvVars.equals(obj2.containerEnvVars);
         resultBuilder = resultBuilder && obj1.containerDevices.equals(obj2.containerDevices);
         resultBuilder = resultBuilder && obj1.containerVolumes.equals(obj2.containerVolumes);
-        resultBuilder = resultBuilder && obj1.containerPrivilaged.equals(obj2.containerPrivilaged);
+        resultBuilder = resultBuilder && obj1.containerPrivileged.equals(obj2.containerPrivileged);
         resultBuilder = resultBuilder && obj1.containerState.equals(obj2.containerState);
         resultBuilder = resultBuilder && obj1.isFrameworkManaged.equals(obj2.isFrameworkManaged);
 
@@ -158,8 +158,8 @@ public class ContainerDescriptor {
             return this;
         }
 
-        public ContainerDescriptorBuilder setIsEsfManaged(Boolean isEsfManaged) {
-            this.isFrameworkManaged = isEsfManaged;
+        public ContainerDescriptorBuilder setFrameworkManaged(Boolean isFrameworkManaged) {
+            this.isFrameworkManaged = isFrameworkManaged;
             return this;
         }
 
@@ -315,7 +315,7 @@ public class ContainerDescriptor {
             containerDescriptor.containerEnvVars = this.containerEnvVars;
             containerDescriptor.containerDevices = this.containerDevices;
             containerDescriptor.containerVolumes = this.containerVolumes;
-            containerDescriptor.containerPrivilaged = this.containerPrivilaged;
+            containerDescriptor.containerPrivileged = this.containerPrivilaged;
             containerDescriptor.containerState = this.containerState;
             containerDescriptor.isFrameworkManaged = this.isFrameworkManaged;
 

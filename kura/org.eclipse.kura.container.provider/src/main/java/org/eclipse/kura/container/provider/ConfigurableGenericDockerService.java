@@ -24,10 +24,11 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.provider.DockerService;
+import org.eclipse.kura.container.orchestration.provider.DockerServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigurableGenericDockerService implements ConfigurableComponent {
+public class ConfigurableGenericDockerService implements ConfigurableComponent, DockerServiceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurableGenericDockerService.class);
     private static final String APP_ID = "org.eclipse.kura.container.provider.ConfigurableGenericDockerService";
@@ -42,10 +43,12 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
 
     public void setDockerService(DockerService dockerService) {
         this.dockerService = dockerService;
+        this.dockerService.registerListener(this);
     }
 
     public void unsetDockerService(DockerService dockerService) {
         if (this.dockerService == dockerService) {
+            this.dockerService.unregisterListener(this);
             this.dockerService = null;
         }
     }
@@ -74,7 +77,6 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
             stopRunningMicroservice();
         }
 
-        handleContainerRegistry(newProps);
         this.serviceOptions = newProps;
 
         if (this.serviceOptions.isEnabled()) {
@@ -93,10 +95,6 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
             stopRunningMicroservice();
         }
 
-        if (this.registeredContainerRefrence != null) {
-            this.dockerService.unregisterContainer(this.registeredContainerRefrence);
-        }
-
         logger.info("deactivate...done");
     }
 
@@ -110,6 +108,8 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
         boolean unlimitedRetries = this.serviceOptions.isUnlimitedRetries();
         int maxRetries = this.serviceOptions.getMaxDownloadRetries();
         int retryInterval = this.serviceOptions.getRetryInterval();
+
+        this.registeredContainerRefrence = this.serviceOptions.getContainerDescriptor();
 
         int retries = 0;
         while (unlimitedRetries || retries < maxRetries) {
@@ -144,12 +144,20 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent {
         }
     }
 
-    private void handleContainerRegistry(ConfigurableGenericDockerServiceOptions newProps) {
-        if (this.registeredContainerRefrence != null) {
-            this.dockerService.unregisterContainer(this.registeredContainerRefrence);
-        }
+    @Override
+    public void onConnect() {
+        //stopRunningMicroservice();
+        startNewMicroservice();
+    }
 
-        this.registeredContainerRefrence = newProps.getContainerDescriptor();
-        this.dockerService.registerContainer(this.registeredContainerRefrence);
+    @Override
+    public void onDisconnect() {
+        //stopRunningMicroservice();
+        
+    }
+
+    @Override
+    public void onDisabled() {
+        stopRunningMicroservice();
     }
 }

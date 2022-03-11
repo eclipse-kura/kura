@@ -23,25 +23,33 @@ import org.eclipse.kura.KuraException;
 public interface DockerService {
 
     /**
-     * Lists all available containers, like running 'Docker ps -a'
-     *
-     * @return
-     */
-    public String[] listContainers();
-
-    /**
      * Lists all available containers by id only, like running 'Docker ps -a'
      *
      * @return
      */
-    public String[] listContainersByID();
+    public List<String> listContainersIds();
 
     /**
      * Lists all running containers by string of ID's
      *
      * @return
      */
-    public ContainerDescriptor[] listByContainerDescriptor();
+    public List<ContainerDescriptor> listContainerDescriptors();
+    
+    /**
+    *
+    * @param imageName
+    * @throws KuraException
+    */
+   public void pullImage(String imageName, String imageTag) throws KuraException;
+
+   /**
+    *
+    * @param imageName
+    * @param timeOutSecconds
+    * @throws KuraException
+    */
+   public void pullImage(String imageName, String imageTag, int timeOutSecconds) throws KuraException;
 
     /**
      * Finds the id of the container with specified name. if cannot be found empty string will be returned.
@@ -49,7 +57,9 @@ public interface DockerService {
      * @param name
      * @return
      */
-    public String getContainerIDbyName(String name);
+    public String getContainerIdByName(String name);
+    
+    public ContainerDescriptor getContainerDescriptorByName(String name);
 
     /**
      *
@@ -80,28 +90,6 @@ public interface DockerService {
      */
     public void stopContainer(String id) throws KuraException;
 
-        /**
-     *
-     * Registers Container into internal container tracking mechanism.
-     *
-     * @param containerDescriptor
-     */
-    public void registerContainer(ContainerDescriptor container);
-
-    /**
-     * Un-Registers Container into internal container tracking mechanism.
-     *
-     * @param containerDescriptor
-     */
-    public void unregisterContainer(ContainerDescriptor container);
-
-    /**
-     * lists all tracked docker containers.
-     *
-     * @param containerDescriptor
-     */
-    public List<ContainerDescriptor> listRegisteredContainers();
-    
     /**
      * Equivalent to, docker start <container id>
      *
@@ -109,28 +97,8 @@ public interface DockerService {
      * @throws KuraException
      */
     public void deleteContainer(String id) throws KuraException;
-
-    /**
-     *
-     * @param imageName
-     * @throws KuraException
-     */
-    public void pullImage(String imageName) throws KuraException;
-
-    /**
-     *
-     * @param imageName
-     * @param timeOutSecconds
-     * @throws KuraException
-     */
-    public void pullImage(String imageName, int timeOutSecconds) throws KuraException;
-
-    /**
-     *
-     * @param containerDescription
-     * @return
-     * @throws KuraException
-     */
-    public String pullImageAndCreateContainer(ContainerDescriptor containerDescription) throws KuraException;
-
+    
+    public void registerListener(DockerServiceListener dockerListener);
+    
+    public void unregisterListener(DockerServiceListener dockerListener);
 }

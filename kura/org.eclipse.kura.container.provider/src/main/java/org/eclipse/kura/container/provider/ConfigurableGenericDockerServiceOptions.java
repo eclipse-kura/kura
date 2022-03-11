@@ -178,7 +178,7 @@ public class ConfigurableGenericDockerServiceOptions {
                 .setContainerImageTag(getContainerImageTag()).setExternalPort(getContainerPortsExternal())
                 .setInternalPort(getContainerPortsInternal()).addEnvVar(getContainerEnvList())
                 .setVolume(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
-                .setDeviceList(getContainerDeviceList()).build();
+                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).build();
     }
 
     private int[] parsePortString(String ports) {

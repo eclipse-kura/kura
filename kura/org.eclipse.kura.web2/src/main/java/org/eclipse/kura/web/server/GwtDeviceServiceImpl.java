@@ -245,7 +245,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
             DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-            ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+            ContainerDescriptor[] containers = dockerService.listContainerDescriptors().stream()
                     .toArray(ContainerDescriptor[]::new);
             if (containers != null) {
                 for (ContainerDescriptor container : containers) {
@@ -271,7 +271,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
 
         DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+        ContainerDescriptor[] containers = dockerService.listContainerDescriptors().stream()
                 .toArray(ContainerDescriptor[]::new);
 
         logger.info("Starting container with name: {}", containerName);
@@ -300,7 +300,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
 
-        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
+        ContainerDescriptor[] containers = dockerService.listContainerDescriptors().stream()
                 .toArray(ContainerDescriptor[]::new);
 
         logger.info("Stopping container with name: {}", containerName);

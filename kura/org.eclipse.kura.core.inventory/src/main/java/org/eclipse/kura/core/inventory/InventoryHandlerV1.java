@@ -373,7 +373,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         if (this.dockerService != null) {
             try {
                 logger.info("Creating docker invenetory");
-                List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
+                List<ContainerDescriptor> containers = this.dockerService.listContainerDescriptors();
                 containers.stream().forEach(
                         container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
                                 container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
@@ -430,7 +430,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
+            List<ContainerDescriptor> containers = this.dockerService.listContainerDescriptors();
 
             List<DockerContainer> containersList = new ArrayList<>();
             containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
@@ -558,7 +558,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 DockerContainer.class);
 
         try {
-            List<ContainerDescriptor> containerList = this.dockerService.listRegisteredContainers();
+            List<ContainerDescriptor> containerList = this.dockerService.listContainerDescriptors();
 
             for (ContainerDescriptor container : containerList) {
                 if (container.getContainerName().equals(dc.getContainerName())) {
@@ -591,7 +591,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     }
 
     private ContainerDescriptor findFirstMatchingContainer(final ContainerDescriptor ref) throws KuraException {
-        for (final ContainerDescriptor container : this.dockerService.listRegisteredContainers()) {
+        for (final ContainerDescriptor container : this.dockerService.listContainerDescriptors()) {
             if (container.getContainerName().equals(ref.getContainerName())) {
                 return container;
             }

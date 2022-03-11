@@ -1,22 +1,22 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+# Copyright (c) 2022 Eurotech and/or its affiliates and others
 #
-#  This program and the accompanying materials are made
-#  available under the terms of the Eclipse Public License 2.0
-#  which is available at https://www.eclipse.org/legal/epl-2.0/
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
 #
-#  SPDX-License-Identifier: EPL-2.0
+# SPDX-License-Identifier: EPL-2.0
 #
-#  Contributors:
-#   Eurotech
+# Contributors:
+#  Eurotech
 #
 
 INSTALL_DIR=/opt/eclipse
 
 #create known kura install location
 ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
-        
+
 #set up Kura init
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
@@ -39,6 +39,9 @@ fi
 cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
+
+systemctl stop apparmor
+systemctl disable apparmor
 
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
@@ -78,6 +81,8 @@ fi
 # Prevent time sync services from starting
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
 # Prevent time sync with chrony from starting.
 systemctl stop chrony
 systemctl disable chrony
@@ -105,7 +110,7 @@ if [ ! -f "/etc/bind/rndc.key" ] ; then
 fi
 chown bind:bind /etc/bind/rndc.key
 chmod 600 /etc/bind/rndc.key
-        
+
 #set up logrotate - no need to restart as it is a cronjob
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
@@ -118,32 +123,33 @@ systemctl disable dhcpcd
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
 
+# disable NetworkManager.service - kura is the network manager
+systemctl stop NetworkManager.service
+systemctl disable NetworkManager.service
+
 #disable netplan
-systemctl disable systemd-networkd.socket 
+systemctl disable systemd-networkd.socket
 systemctl disable systemd-networkd
 systemctl disable networkd-dispatcher
 systemctl disable systemd-networkd-wait-online
-systemctl mask systemd-networkd.socket 
+systemctl mask systemd-networkd.socket
 systemctl mask systemd-networkd
 systemctl mask networkd-dispatcher
 systemctl mask systemd-networkd-wait-online
 
+#disable DNS-related services - kura is the network manager
+systemctl stop systemd-resolved.service
+systemctl disable systemd-resolved.service
+systemctl stop resolvconf.service
+systemctl disable resolvconf.service
+
+#disable ModemManager
+systemctl stop ModemManager
+systemctl disable ModemManager
 
 #disable wpa_supplicant
 systemctl stop wpa_supplicant
 systemctl disable wpa_supplicant
-
-#disable dhclient apparmor profile
-ln -s /etc/apparmor.d/sbin.dhclient /etc/apparmor.d/disable/
-apparmor_parser -R /etc/apparmor.d/sbin.dhclient
-
-#disable dhcpd apparmor profile
-ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable/
-apparmor_parser -R /etc/apparmor.d/usr.sbin.dhcpd
-
-#disable dhcpd named profile
-ln -s /etc/apparmor.d/usr.sbin.named /etc/apparmor.d/disable/
-apparmor_parser -R /etc/apparmor.d/usr.sbin.named
 
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf* /etc/wpa_supplicant*.conf* /etc/hostapd*.conf*"
@@ -168,4 +174,4 @@ else
     done
 fi
 
-keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit  
+keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

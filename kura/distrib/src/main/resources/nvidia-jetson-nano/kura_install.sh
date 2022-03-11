@@ -10,6 +10,7 @@
 #
 # Contributors:
 #  Eurotech
+#
 
 INSTALL_DIR=/opt/eclipse
 
@@ -39,6 +40,9 @@ cp ${INSTALL_DIR}/kura/install/manage_kura_users.sh ${INSTALL_DIR}/kura/.data/ma
 chmod 700 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh
 ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 
+systemctl stop apparmor
+systemctl disable apparmor
+
 #set up default networking file
 cp ${INSTALL_DIR}/kura/install/network.interfaces /etc/network/interfaces
 cp ${INSTALL_DIR}/kura/install/network.interfaces ${INSTALL_DIR}/kura/.data/interfaces
@@ -67,6 +71,25 @@ systemctl enable firewall
 
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
+
+#disable NTP service
+if command -v timedatectl > /dev/null ; then
+    timedatectl set-ntp false
+fi
+
+#disable time synch at network start
+if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
+    chmod -x /etc/network/if-up.d/ntpdate
+fi
+
+#prevent time sync services from starting
+systemctl stop systemd-timedated
+systemctl disable systemd-timedated
+systemctl stop systemd-timesyncd
+systemctl disable systemd-timesyncd
+# Prevent time sync with chrony from starting.
+systemctl stop chrony
+systemctl disable chrony
 
 #set up networking configuration
 cp ${INSTALL_DIR}/kura/install/dhcpd-eth0.conf /etc/dhcpd-eth0.conf
@@ -117,23 +140,13 @@ systemctl disable systemd-resolved.service
 systemctl stop resolvconf.service
 systemctl disable resolvconf.service
 
-#disable NTP service
-if command -v timedatectl > /dev/null ; then
-    timedatectl set-ntp false
-fi
+#disable ModemManager
+systemctl stop ModemManager
+systemctl disable ModemManager
 
-#disable time synch at network start
-if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
-    chmod -x /etc/network/if-up.d/ntpdate
-fi
-
-#prevent time sync services from starting
-systemctl stop systemd-timedated
-systemctl disable systemd-timedated
-systemctl stop systemd-timesyncd
-systemctl disable systemd-timesyncd
-systemctl stop chrony
-systemctl disable chrony
+#disable wpa_supplicant
+systemctl stop wpa_supplicant
+systemctl disable wpa_supplicant
 
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"

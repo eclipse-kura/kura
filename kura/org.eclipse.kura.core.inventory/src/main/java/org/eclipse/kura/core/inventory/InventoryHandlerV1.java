@@ -57,9 +57,7 @@ import org.osgi.service.deploymentadmin.DeploymentPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
-
-{
+public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(InventoryHandlerV1.class);
     public static final String APP_ID = "INVENTORY-V1";

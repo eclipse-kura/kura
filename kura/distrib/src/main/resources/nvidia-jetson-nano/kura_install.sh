@@ -148,6 +148,11 @@ systemctl disable ModemManager
 systemctl stop wpa_supplicant
 systemctl disable wpa_supplicant
 
+#create lease database file if missing
+if [ ! -f "/var/lib/dhcp/dhcpd.leases" ] ; then
+    touch /var/lib/dhcp/dhcpd.leases
+fi
+
 #assigning possible .conf files ownership to kurad
 PATTERN="/etc/dhcpd*.conf* /etc/resolv.conf*"
 for FILE in $(ls $PATTERN 2>/dev/null)

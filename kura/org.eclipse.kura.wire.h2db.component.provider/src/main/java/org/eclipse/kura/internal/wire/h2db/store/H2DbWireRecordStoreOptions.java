@@ -32,7 +32,7 @@ final class H2DbWireRecordStoreOptions {
 
     protected static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
 
-    private static final String TABLE_NAME = "table.name";
+    protected static final String TABLE_NAME = "table.name";
 
     private final Map<String, Object> properties;
 

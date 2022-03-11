@@ -45,6 +45,8 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     private AtomicReference<GpsdInternalState> internalStateReference;
     private PositionServiceOptions configuration;
 
+    private Listener gpsDeviceListener;
+
     @Override
     public void start() {
         if (this.gpsEndpoint != null) {
@@ -123,6 +125,7 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
         this.configuration = configuration;
         this.internalStateReference = new AtomicReference<>();
+        this.gpsDeviceListener = gpsDeviceListener;
 
         this.gpsEndpoint = new GPSdEndpoint(configuration.getGpsdHost(), configuration.getGpsdPort());
         this.gpsEndpoint.addListener(this);
@@ -181,19 +184,30 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         internalState.setTime(tpv.getTimestamp());
         internalState.setMode(tpv.getMode());
 
-        internalStateReference.set(internalState);
+        GpsdInternalState oldInternalState = internalStateReference.getAndSet(internalState);
+
+        boolean isLastPositionValid = oldInternalState != null && oldInternalState.isValid();
+
+        boolean isNewPositionValid = internalState.isValid();
+
+        if (this.gpsDeviceListener != null && isNewPositionValid != isLastPositionValid) {
+            this.gpsDeviceListener.onLockStatusChanged(isNewPositionValid);
+            logger.info("Lock Status changed: {}", internalState);
+        }
+
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {
-        return new Measurement(toRadians(value), Double.isNaN(error) ? 0.0d : toRadians(error), Unit.rad);
+        return new Measurement(toRadians(Double.isNaN(value) ? 0.0d : value),
+                Double.isNaN(error) ? 0.0d : toRadians(error), Unit.rad);
     }
 
     private Measurement toMetersMeasurement(double value, double error) {
-        return new Measurement(value, Double.isNaN(error) ? 0.0d : error, Unit.m);
+        return new Measurement(Double.isNaN(value) ? 0.0d : value, Double.isNaN(error) ? 0.0d : error, Unit.m);
     }
 
     private Measurement toMetersPerSecondMeasurement(double value, double error) {
-        return new Measurement(value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
+        return new Measurement(Double.isNaN(value) ? 0.0d : value, Double.isNaN(error) ? 0.0d : error, Unit.m_s);
     }
 
     private class GpsdInternalState {
@@ -305,6 +319,18 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
         public ENMEAMode getMode() {
             return this.mode;
+        }
+
+        public boolean isValid() {
+            return (this.mode == ENMEAMode.TwoDimensional || this.mode == ENMEAMode.ThreeDimensional);
+        }
+
+        @Override
+        public String toString() {
+            return "GpsdInternalState [latitude=" + latitude + ", latitudeError=" + latitudeError + ", longitude="
+                    + longitude + ", longitudeError=" + longitudeError + ", altitude=" + altitude + ", altitudeError="
+                    + altitudeError + ", speed=" + speed + ", speedError=" + speedError + ", course=" + course
+                    + ", courseError=" + courseError + ", timestamp=" + timestamp + ", mode=" + mode + "]";
         }
 
     }

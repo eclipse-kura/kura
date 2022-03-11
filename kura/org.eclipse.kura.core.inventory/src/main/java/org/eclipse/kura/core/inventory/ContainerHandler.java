@@ -9,7 +9,6 @@
  *
  * Contributors:
  *  Eurotech
- *  Red Hat Inc
  *******************************************************************************/
 package org.eclipse.kura.core.inventory;
 

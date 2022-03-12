@@ -276,11 +276,9 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         }
 
         logger.info("Starting {} Microservice", container.getContainerName());
-        container.setContainerState(ContainerStates.STARTING);
 
         Optional<String> containerId = getContainerIdByName(container.getContainerName());
 
-        try {
             if (!containerId.isPresent()) {
                 pullImage(container.getContainerImage(), container.getContainerImageTag(), 120);
                 containerId = createContainer(container);
@@ -288,13 +286,9 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
             container.setContainerId(containerId.orElse(""));
             startContainer(container.getContainerId());
-            container.setContainerState(ContainerStates.ACTIVE);
 
             logger.info("Container Started Successfully");
-        } catch (KuraException e) {
-            container.setContainerState(ContainerStates.FAILED);
-            throw e;
-        }
+       
 
     }
 
@@ -311,8 +305,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         if (isNull(container)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
-
-        container.setContainerState(ContainerStates.STOPPING);
 
         if (!container.getContainerId().isEmpty()) {
 
@@ -449,7 +441,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         } catch (Exception e) {
             logger.error("failed to create container", e);
-            containerDescription.setContainerState(ContainerStates.FAILED);
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
         } finally {
             if (!isNull(commandBuilder)) {

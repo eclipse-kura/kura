@@ -104,11 +104,6 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
     }
 
     @Override
-    public void setContainerState(ContainerStates containerState) {
-        this.containerState = containerState;
-    }
-
-    @Override
     public void setContainerId(String id) {
         this.containerID = id;
     }

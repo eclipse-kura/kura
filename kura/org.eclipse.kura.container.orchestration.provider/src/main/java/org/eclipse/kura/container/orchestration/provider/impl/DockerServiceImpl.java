@@ -279,16 +279,15 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         Optional<String> containerId = getContainerIdByName(container.getContainerName());
 
-            if (!containerId.isPresent()) {
-                pullImage(container.getContainerImage(), container.getContainerImageTag(), 120);
-                containerId = createContainer(container);
-            }
+        if (!containerId.isPresent()) {
+            pullImage(container.getContainerImage(), container.getContainerImageTag(), 120);
+            containerId = createContainer(container);
+        }
 
-            container.setContainerId(containerId.orElse(""));
-            startContainer(container.getContainerId());
+        container.setContainerId(containerId.orElse(""));
+        startContainer(container.getContainerId());
 
-            logger.info("Container Started Successfully");
-       
+        logger.info("Container Started Successfully");
 
     }
 
@@ -305,12 +304,14 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         if (isNull(container)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
+        
+        Optional<String> containerId = getContainerIdByName(container.getContainerName());
 
-        if (!container.getContainerId().isEmpty()) {
+        if (containerId.isPresent()) {
 
             try {
                 logger.info("Stopping {} Microservice", container.getContainerName());
-                stopContainer(container.getContainerId());
+                stopContainer(containerId.get());
             } catch (Exception e) {
                 logger.error("Failed to stop {} Microservice", container.getContainerName());
             }
@@ -333,11 +334,13 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         if (isNull(containerDescriptor)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
+        
+        Optional<String> containerId = getContainerIdByName(containerDescriptor.getContainerName());
 
-        if (!containerDescriptor.getContainerId().isEmpty()) {
+        if (containerId.isPresent()) {
             try {
                 logger.info("Deleting {} Microservice", containerDescriptor.getContainerName());
-                deleteContainer(containerDescriptor.getContainerId());
+                deleteContainer(containerId.get());
                 logger.info("Successfully deleted {} Microservice", containerDescriptor.getContainerName());
                 containerDescriptor.setContainerId("");
             } catch (Exception e) {

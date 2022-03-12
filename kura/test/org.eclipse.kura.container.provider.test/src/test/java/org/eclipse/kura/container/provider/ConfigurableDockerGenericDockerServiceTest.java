@@ -123,7 +123,6 @@ public class ConfigurableDockerGenericDockerServiceTest {
         whenUpdateInstance();
 
         thenStoppedMicroservice();
-        thenNotStartedMicroservice();
     }
 
     @Test
@@ -150,7 +149,6 @@ public class ConfigurableDockerGenericDockerServiceTest {
         whenDeactivateInstance();
 
         thenStoppedMicroservice();
-        thenNotStartedMicroservice();
     }
 
     private void givenDockerService() {

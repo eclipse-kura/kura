@@ -75,7 +75,7 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
         this.serviceOptions = newProps;
 
         if (this.serviceOptions.isEnabled()) {
-            this.dockerService.registerListener(this);
+            this.dockerService.registerListener(this, this.serviceOptions.getContainerName());
             this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
         } else {
             stopRunningMicroservice();
@@ -139,6 +139,7 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
     private void stopRunningMicroservice() {
         try {
             this.dockerService.stopContainer(this.serviceOptions.getContainerDescriptor());
+            this.dockerService.deleteContainer(this.serviceOptions.getContainerDescriptor());
         } catch (KuraException e) {
             logger.error("Error stopping microservice {}", this.serviceOptions.getContainerName(), e);
         }

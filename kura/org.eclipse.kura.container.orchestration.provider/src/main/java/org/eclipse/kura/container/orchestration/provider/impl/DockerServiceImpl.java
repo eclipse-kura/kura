@@ -16,9 +16,11 @@ import static java.util.Objects.isNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -57,13 +59,14 @@ import com.github.dockerjava.transport.DockerHttpClient;
 
 public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
+    private static final String CONTAINER_DESCRIPTOR_CANNOT_BE_NULL = "ContainerDescriptor cannot be null!";
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
     private static final Logger logger = LoggerFactory.getLogger(DockerServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
 
     private DockerServiceOptions currentConfig;
-    
-    private final List<DockerServiceListener> dockerServiceListeners = new ArrayList<>();
+
+    private final Map<DockerServiceListener, String> dockerServiceListeners = new HashMap<>();
 
     private DockerClient dockerClient;
     private AuthConfig dockerAuthConfig;
@@ -147,26 +150,38 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
-        if (!containers.isEmpty()) {
-            for (Container cont : containers) {
+        containers.forEach(container -> result.add(ContainerDescriptor.builder()
+                .setContainerName(getContainerName(container)).setContainerImage(getContainerTag(container))
+                .setContainerImageTag(getContainerVersion(container)).setContainerID(container.getId())
+                .setInternalPort(parseInternalPortsFromDockerPs(container.getPorts()))
+                .setExternalPort(parseExternalPortsFromDockerPs(container.getPorts()))
+                .setContainerState(convertDockerStateToFrameworkState(container.getState()))
+                .setFrameworkManaged(isFrameworkManaged(container)).build()));
 
-                String tag = cont.getImage().split(":")[0];
-                String version = "";
-
-                if (cont.getImage().split(":").length > 1) {
-                    version = cont.getImage().split(":")[1];
-                }
-
-                result.add(ContainerDescriptor.builder().setContainerName(cont.getNames()[0].replace("/", ""))
-                        .setContainerImage(tag).setContainerImageTag(version).setContainerID(cont.getId())
-                        .setInternalPort(parseInternalPortsFromDockerPs(cont.getPorts()))
-                        .setExternalPort(parseExternalPortsFromDockerPs(cont.getPorts()))
-                        .setContainerState(convertDockerStateToFrameworkState(cont.getState()))
-                        .setFrameworkManaged(false).build());
-            }
-        }
         return result;
 
+    }
+
+    private Boolean isFrameworkManaged(Container container) {
+        String containerName = getContainerName(container);
+        return this.dockerServiceListeners.values().stream()
+                .anyMatch(registeredContainerName -> registeredContainerName.equals(containerName));
+    }
+
+    private String getContainerName(Container container) {
+        return container.getNames()[0].replace("/", "");
+    }
+
+    private String getContainerVersion(Container container) {
+        String version = "";
+        if (container.getImage().split(":").length > 1) {
+            version = container.getImage().split(":")[1];
+        }
+        return version;
+    }
+
+    private String getContainerTag(Container container) {
+        return container.getImage().split(":")[0];
     }
 
     private int[] parseExternalPortsFromDockerPs(ContainerPort[] ports) {
@@ -220,7 +235,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public String getContainerIdByName(String name) {
+    public Optional<String> getContainerIdByName(String name) {
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
@@ -231,12 +246,57 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             String[] containerNames = cont.getNames();
             for (String containerName : containerNames) {
                 if (containerName.equals("/" + name)) { // docker API seems to put a '/' in front of the names
-                    return cont.getId();
+                    return Optional.of(cont.getId());
                 }
             }
         }
 
-        return "";
+        return Optional.empty();
+    }
+
+    @Override
+    public void startContainer(String id) throws KuraException {
+        if (!testConnection()) {
+            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+        }
+        try {
+            this.dockerClient.startContainerCmd(id).exec();
+        } catch (Exception e) {
+            logger.error("Could not start container {}. It could be already running or not exist at all", id);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+        }
+    }
+
+    @Override
+    public void startContainer(ContainerDescriptor container) throws KuraException {
+        if (isNull(container)) {
+            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
+        }
+        if (!testConnection()) {
+            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, "Unable to connect to the container service");
+        }
+
+        logger.info("Starting {} Microservice", container.getContainerName());
+        container.setContainerState(ContainerStates.STARTING);
+
+        Optional<String> containerId = getContainerIdByName(container.getContainerName());
+
+        try {
+            if (!containerId.isPresent()) {
+                pullImage(container.getContainerImage(), container.getContainerImageTag(), 120);
+                containerId = createContainer(container);
+            }
+
+            container.setContainerId(containerId.orElse(""));
+            startContainer(container.getContainerId());
+            container.setContainerState(ContainerStates.ACTIVE);
+
+            logger.info("Container Started Successfully");
+        } catch (KuraException e) {
+            container.setContainerState(ContainerStates.FAILED);
+            throw e;
+        }
+
     }
 
     @Override
@@ -248,15 +308,25 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void startContainer(String id) {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+    public void stopContainer(ContainerDescriptor container) {
+        if (isNull(container)) {
+            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
-        try {
-            this.dockerClient.startContainerCmd(id).exec();
-        } catch (Exception e) {
-            logger.error("Could not start container {}. It could be already running or not exist at all", id);
+
+        container.setContainerState(ContainerStates.STOPPING);
+
+        if (!container.getContainerId().isEmpty()) {
+
+            try {
+                logger.info("Stopping {} Microservice", container.getContainerName());
+                stopContainer(container.getContainerId());
+            } catch (Exception e) {
+                logger.error("Failed to stop {} Microservice", container.getContainerName());
+            }
+        } else {
+            logger.error("Microservice {} does not exist", container.getContainerName());
         }
+
     }
 
     @Override
@@ -268,27 +338,49 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSecconds) {
-        boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
+    public void deleteContainer(ContainerDescriptor containerDescriptor) throws KuraException {
+        if (isNull(containerDescriptor)) {
+            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
+        }
 
-        if (!imageAvailableLocally) {
-            imagePullHelper(imageName, imageTag, timeOutSecconds, this.currentConfig.isRepositoryEnabled());
+        if (!containerDescriptor.getContainerId().isEmpty()) {
+            try {
+                logger.info("Deleting {} Microservice", containerDescriptor.getContainerName());
+                deleteContainer(containerDescriptor.getContainerId());
+                logger.info("Successfully deleted {} Microservice", containerDescriptor.getContainerName());
+                containerDescriptor.setContainerId("");
+            } catch (Exception e) {
+                logger.error("Failed to delete {} Microservice", containerDescriptor.getContainerName());
+            }
+
+        } else {
+            logger.error("Microservice {} does not exist", containerDescriptor.getContainerName());
         }
     }
 
-    private String pullImageAndCreateContainer(ContainerDescriptor containerDescription) {
+    @Override
+    public void pullImage(String imageName, String imageTag, int timeOutSecconds) throws KuraException {
+        boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
 
-        pullImage(containerDescription.getContainerImage(), containerDescription.getContainerImageTag(), 120);
-
-        try {
-            logger.info("Creating container {}", containerDescription.getContainerName());
-            containerDescription.setContainerId(createContainer(containerDescription));
-
-        } catch (Exception e) {
-            logger.error("could not create container {}:{}", containerDescription.getContainerName(), e);
+        if (!imageAvailableLocally) {
+            try {
+                imagePullHelper(imageName, imageTag, timeOutSecconds, this.currentConfig.isRepositoryEnabled());
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
+            }
         }
+    }
 
-        return containerDescription.getContainerId();
+    @Override
+    public void registerListener(DockerServiceListener dockerListener, String containerName) {
+        this.dockerServiceListeners.put(dockerListener, containerName);
+
+    }
+
+    @Override
+    public void unregisterListener(DockerServiceListener dockerListener) {
+        this.dockerServiceListeners.remove(dockerListener);
+
     }
 
     private void imagePullHelper(String imageName, String imageTag, int timeOutSecconds, boolean withAuth) {
@@ -317,8 +409,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         }
     }
 
-    private String createContainer(ContainerDescriptor containerDescription) {
-        String finalContainerID = "";
+    private Optional<String> createContainer(ContainerDescriptor containerDescription) throws KuraException {
         if (!testConnection()) {
             throw new IllegalStateException("failed to reach docker engine");
         }
@@ -355,19 +446,17 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 configuration = configuration.withPrivileged(containerDescription.getContainerPrivileged());
             }
 
-            finalContainerID = commandBuilder.withHostConfig(configuration).exec().getId();
+            return Optional.of(commandBuilder.withHostConfig(configuration).exec().getId());
 
-            containerDescription.setContainerState(ContainerStates.ACTIVE);
         } catch (Exception e) {
-            logger.error("failed to create container: {}", e.toString());
+            logger.error("failed to create container", e);
             containerDescription.setContainerState(ContainerStates.FAILED);
+            throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
         } finally {
             if (!isNull(commandBuilder)) {
                 commandBuilder.close();
             }
         }
-
-        return finalContainerID;
     }
 
     private HostConfig containerPortManagementHandler(ContainerDescriptor containerDescription,
@@ -498,76 +587,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         if (testConnection()) {
             disconnect();
-            dockerServiceListeners.forEach(DockerServiceListener::onDisabled);
+            this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onDisabled);
         }
-    }
-
-    @Override
-    public void startContainer(ContainerDescriptor container) throws KuraException {
-        if (isNull(container)) {
-            throw new IllegalArgumentException("ContainerDescriptor cannot be null!");
-        }
-        
-        logger.info("Starting {} Microservice", container.getContainerName());
-        container.setContainerState(ContainerStates.STARTING);
-
-        if (testConnection()) {
-
-            try {
-                container.setContainerId(getContainerIdByName(container.getContainerName()));
-            } catch (Exception e) {
-                logger.error("Failed to get container name by ID.", e);
-            }
-
-            if (container.getContainerId().isEmpty()) {
-                try {
-                    container.setContainerId(pullImageAndCreateContainer(container));
-                } catch (Exception e) {
-                    throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
-                }
-            }
-            startContainer(container.getContainerId());
-            container.setContainerState(ContainerStates.ACTIVE);
-            logger.info("Container Started Successfully");
-
-        }
-    }
-
-    @Override
-    public void stopContainer(ContainerDescriptor container) {
-        if (isNull(container)) {
-            throw new IllegalArgumentException("ContainerDescriptor cannot be null!");
-        }
-        
-        container.setContainerState(ContainerStates.STOPPING);
-        
-        if (!container.getContainerId().isEmpty()) {
-
-            try {
-                logger.info("Stopping {} Microservice", container.getContainerName());
-                stopContainer(container.getContainerId());
-            } catch (Exception e) {
-                logger.error("Failed to stop {} Microservice", container.getContainerName());
-            }
-
-            if (Boolean.FALSE.equals(container.isFrameworkManaged())) {
-                // container is not Framework Managed, and thus should only be stopped and not deleted.
-                return;
-            }
-
-            try {
-                logger.info("Deleting {} Microservice", container.getContainerName());
-                deleteContainer(container.getContainerId());
-                logger.info("Successfully deleted {} Microservice", container.getContainerName());
-                container.setContainerId("");
-            } catch (Exception e) {
-                logger.error("Failed to delete {} Microservice", container.getContainerName());
-            }
-
-        } else {
-            logger.error("Microservice {} does not exist", container.getContainerName());
-        }
-
     }
 
     public boolean connect() {
@@ -586,14 +607,14 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             logIntoRemoteRepository();
         }
 
-        dockerServiceListeners.forEach(DockerServiceListener::onConnect);
+        this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onConnect);
         return testConnection();
     }
 
     private void disconnect() {
         if (testConnection()) {
             try {
-                dockerServiceListeners.forEach(DockerServiceListener::onDisconnect);
+                this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onDisconnect);
                 this.dockerClient.close();
             } catch (IOException e) {
                 logger.error(e.toString());
@@ -634,23 +655,4 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                     .withPassword(decodedPassword).withRegistryAddress(this.currentConfig.getRepositoryUrl());
         }
     }
-
-    @Override
-    public ContainerDescriptor getContainerDescriptorByName(String name) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void registerListener(DockerServiceListener dockerListener) {
-        dockerServiceListeners.add(dockerListener);
-        
-    }
-
-    @Override
-    public void unregisterListener(DockerServiceListener dockerListener) {
-        dockerServiceListeners.remove(dockerListener);
-        
-    }
-
 }

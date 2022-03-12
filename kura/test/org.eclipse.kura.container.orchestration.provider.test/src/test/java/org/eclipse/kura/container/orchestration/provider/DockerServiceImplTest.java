@@ -70,7 +70,6 @@ public class DockerServiceImplTest {
     private ContainerDescriptor[] runningContainerDescriptor;
 
     private Map<String, Object> properties;
-    private String createdContainerID;
 
     @Test
     public void testServiceActivateEmptyProperties() throws KuraException {
@@ -462,7 +461,7 @@ public class DockerServiceImplTest {
     }
 
     private void thenGetFirstContainerIDbyName() {
-        assertEquals(this.dockerService.getContainerIdByName(this.runningContainerDescriptor[0].getContainerName()),
+        assertEquals(this.dockerService.getContainerIdByName(this.runningContainerDescriptor[0].getContainerName()).orElse(""),
                 this.runningContainerDescriptor[0].getContainerId());
     }
 

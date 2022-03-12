@@ -168,7 +168,7 @@ public class ConfigurableGenericDockerServiceOptions {
     public int getMaxDownloadRetries() {
         return this.maxDownloadRetries;
     }
-    
+
     public int getRetryInterval() {
         return this.retryInterval;
     }
@@ -220,7 +220,7 @@ public class ConfigurableGenericDockerServiceOptions {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
@@ -259,10 +259,7 @@ public class ConfigurableGenericDockerServiceOptions {
         } else if (!this.containerVolumes.equals(other.containerVolumes)) {
             return false;
         }
-        if (this.enabled != other.enabled) {
-            return false;
-        }
-        if (!Arrays.equals(this.externalPorts, other.externalPorts)) {
+        if ((this.enabled != other.enabled) || !Arrays.equals(this.externalPorts, other.externalPorts)) {
             return false;
         }
         if (this.image == null) {

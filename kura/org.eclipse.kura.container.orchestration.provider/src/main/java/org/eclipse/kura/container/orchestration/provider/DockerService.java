@@ -13,6 +13,8 @@
 package org.eclipse.kura.container.orchestration.provider;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.eclipse.kura.KuraException;
 
 /**
@@ -50,9 +52,7 @@ public interface DockerService {
      * @param name
      * @return
      */
-    public String getContainerIdByName(String name);
-    
-    public ContainerDescriptor getContainerDescriptorByName(String name);
+    public Optional<String> getContainerIdByName(String name);
 
     /**
      *
@@ -91,7 +91,9 @@ public interface DockerService {
      */
     public void deleteContainer(String id) throws KuraException;
     
-    public void registerListener(DockerServiceListener dockerListener);
+    public void deleteContainer(ContainerDescriptor containerDescriptor) throws KuraException;
+    
+    public void registerListener(DockerServiceListener dockerListener, String containerName);
     
     public void unregisterListener(DockerServiceListener dockerListener);
 }

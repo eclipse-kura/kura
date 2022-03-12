@@ -58,8 +58,6 @@ public interface ContainerDescriptor {
 
     public Boolean getContainerPrivileged();
 
-    public void setContainerId(String id);
-
     public static int compare(ContainerDescriptor obj1, ContainerDescriptor obj2) {
         return obj1.getContainerImage().compareTo(obj2.getContainerImage());
     }

@@ -284,8 +284,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             containerId = createContainer(container);
         }
 
-        container.setContainerId(containerId.orElse(""));
-        startContainer(container.getContainerId());
+        startContainer(containerId.orElse(""));
 
         logger.info("Container Started Successfully");
 
@@ -304,7 +303,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         if (isNull(container)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
-        
+
         Optional<String> containerId = getContainerIdByName(container.getContainerName());
 
         if (containerId.isPresent()) {
@@ -334,7 +333,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         if (isNull(containerDescriptor)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
-        
+
         Optional<String> containerId = getContainerIdByName(containerDescriptor.getContainerName());
 
         if (containerId.isPresent()) {
@@ -342,7 +341,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 logger.info("Deleting {} Microservice", containerDescriptor.getContainerName());
                 deleteContainer(containerId.get());
                 logger.info("Successfully deleted {} Microservice", containerDescriptor.getContainerName());
-                containerDescriptor.setContainerId("");
             } catch (Exception e) {
                 logger.error("Failed to delete {} Microservice", containerDescriptor.getContainerName());
             }
@@ -611,7 +609,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
                 this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onDisconnect);
                 this.dockerClient.close();
             } catch (IOException e) {
-                logger.error(e.toString());
+                logger.error("Error disconnecting", e);
             }
         }
     }

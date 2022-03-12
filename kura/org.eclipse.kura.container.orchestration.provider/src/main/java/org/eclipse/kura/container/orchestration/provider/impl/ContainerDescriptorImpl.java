@@ -103,11 +103,6 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
         return this.containerPrivileged;
     }
 
-    @Override
-    public void setContainerId(String id) {
-        this.containerID = id;
-    }
-
     /**
      * Creates a builder for creating a new {@link ContainerDescriptor} instance.
      *

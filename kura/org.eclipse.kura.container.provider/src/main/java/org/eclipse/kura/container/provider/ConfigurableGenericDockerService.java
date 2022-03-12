@@ -90,9 +90,9 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
 
         this.executor.shutdown();
 
-        // if (this.serviceOptions.isEnabled()) {
-        // stopRunningMicroservice();
-        // }
+        if (this.serviceOptions.isEnabled()) {
+            stopRunningMicroservice();
+        }
         this.dockerService.unregisterListener(this);
 
         logger.info("deactivate...done");

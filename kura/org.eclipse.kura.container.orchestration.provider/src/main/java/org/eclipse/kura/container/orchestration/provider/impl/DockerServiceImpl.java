@@ -77,12 +77,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         this.cryptoService = cryptoService;
     }
 
-    public void unsetCryptoService(CryptoService cryptoService) {
-        if (this.cryptoService == cryptoService) {
-            this.cryptoService = null;
-        }
-    }
-
     public void activate(Map<String, Object> properties) {
         logger.info("Bundle {} is starting with config!", APP_ID);
         if (!isNull(properties)) {

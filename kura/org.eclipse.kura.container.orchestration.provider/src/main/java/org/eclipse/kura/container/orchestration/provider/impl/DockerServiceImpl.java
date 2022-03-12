@@ -274,11 +274,6 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag) {
-        pullImage(imageName, imageTag, 120);
-    }
-
-    @Override
     public void pullImage(String imageName, String imageTag, int timeOutSecconds) {
         boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
 
@@ -289,7 +284,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private String pullImageAndCreateContainer(ContainerDescriptor containerDescription) {
 
-        pullImage(containerDescription.getContainerImage(), containerDescription.getContainerImageTag());
+        pullImage(containerDescription.getContainerImage(), containerDescription.getContainerImageTag(), 120);
 
         try {
             logger.info("Creating container {}", containerDescription.getContainerName());
@@ -515,6 +510,10 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     @Override
     public void startContainer(ContainerDescriptor container) throws KuraException {
+        if (isNull(container)) {
+            throw new IllegalArgumentException("ContainerDescriptor cannot be null!");
+        }
+        
         logger.info("Starting {} Microservice", container.getContainerName());
         container.setContainerState(ContainerStates.STARTING);
 
@@ -542,6 +541,10 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     @Override
     public void stopContainer(ContainerDescriptor container) {
+        if (isNull(container)) {
+            throw new IllegalArgumentException("ContainerDescriptor cannot be null!");
+        }
+        
         container.setContainerState(ContainerStates.STOPPING);
         
         if (!container.getContainerId().isEmpty()) {

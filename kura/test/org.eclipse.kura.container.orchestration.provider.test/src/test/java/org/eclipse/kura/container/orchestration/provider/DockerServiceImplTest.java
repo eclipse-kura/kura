@@ -1,26 +1,25 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.container.orchestration.provider;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -67,7 +66,7 @@ public class DockerServiceImplTest {
 
     // for tests
     private String[] runningContainers;
-    private ContainerDescriptor[] runnignContainerDescriptor;
+    private ContainerDescriptor[] runningContainerDescriptor;
 
     private Map<String, Object> properties;
     private String createdContainerID;
@@ -230,7 +229,7 @@ public class DockerServiceImplTest {
         givenDockerClient();
 
         whenMockforContainerCreation();
-        whenCreateContainer();
+        whenRunContainer();
 
         thenTestIfNewContainerExists();
     }
@@ -243,7 +242,6 @@ public class DockerServiceImplTest {
 
         whenDockerClientMockListNoContainers();
         whenMockforContainerCreation();
-        whenCreateContainer();
         whenRunContainer();
         whenPropertiesChangeAfterInit(true);
         whenUpdateInstance();
@@ -260,7 +258,6 @@ public class DockerServiceImplTest {
 
         whenDockerClientMockSomeContainers();
         whenMockforContainerCreation();
-        whenCreateContainer();
         whenRunContainer();
         whenStopContainer();
 
@@ -347,7 +344,7 @@ public class DockerServiceImplTest {
     private void whenDockerClientMockHasNoContainers() {
         List<Container> containerListmock = new LinkedList<>();
         this.runningContainers = new String[0];
-        this.runnignContainerDescriptor = new ContainerDescriptor[0];
+        this.runningContainerDescriptor = new ContainerDescriptor[0];
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
         when(this.mockedListContainersCmd.withShowAll(true)).thenReturn(this.mockedListContainersCmd);
@@ -383,7 +380,7 @@ public class DockerServiceImplTest {
         new ContainerDescriptor();
         ContainerDescriptor mcontCD2 = ContainerDescriptor.builder().setContainerID(mcont2.getId())
                 .setContainerName(mcont2.getNames()[0]).setContainerImage(mcont2.getImage()).build();
-        this.runnignContainerDescriptor = new ContainerDescriptor[] { mcontCD1, mcontCD2 };
+        this.runningContainerDescriptor = new ContainerDescriptor[] { mcontCD1, mcontCD2 };
 
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
@@ -408,7 +405,7 @@ public class DockerServiceImplTest {
         ContainerDescriptor mcontCD1 = ContainerDescriptor.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
 
-        this.runnignContainerDescriptor = new ContainerDescriptor[] { mcontCD1 };
+        this.runningContainerDescriptor = new ContainerDescriptor[] { mcontCD1 };
 
         CreateContainerCmd CCC = mock(CreateContainerCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.createContainerCmd(mcontCD1.getContainerImage())).thenReturn(CCC);
@@ -426,18 +423,14 @@ public class DockerServiceImplTest {
 
     }
 
-    private void whenCreateContainer() {
-        this.createdContainerID = this.dockerService.pullImageAndCreateContainer(this.runnignContainerDescriptor[0]);
-    }
-
-    private void whenRunContainer() {
+    private void whenRunContainer() throws KuraException {
         // startContainer
-        this.dockerService.startContainer(this.runnignContainerDescriptor[0]);
+        this.dockerService.startContainer(this.runningContainerDescriptor[0]);
     }
 
     private void whenStopContainer() {
         // startContainer
-        this.dockerService.stopContainer(this.runnignContainerDescriptor[0]);
+        this.dockerService.stopContainer(this.runningContainerDescriptor[0]);
     }
 
     private void thenNotStoppedMicroservice() throws KuraException {
@@ -449,32 +442,32 @@ public class DockerServiceImplTest {
     }
 
     private void thenContainerListEqualsExpectedStringArray() {
-        assertArrayEquals(this.dockerService.listContainers(), this.runningContainers);
+        assertEquals(this.dockerService.listContainersIds(), Arrays.asList(this.runningContainers));
     }
 
     private void thenContainerListByIdEqualsExpectedStringArray() {
-        assertArrayEquals(this.dockerService.listContainersByID(), this.runningContainers);
+        assertEquals(this.dockerService.listContainersIds(), Arrays.asList(this.runningContainers));
     }
 
     private void thenContainerListByContainerDescriptorEqualsExpectedStringArray() {
-        if (this.runnignContainerDescriptor.length > 0) {
-            assertEquals(this.dockerService.listByContainerDescriptor().length, this.runnignContainerDescriptor.length);
+        if (this.runningContainerDescriptor.length > 0) {
+            assertEquals(this.dockerService.listContainerDescriptors().size(), this.runningContainerDescriptor.length);
         } else {
-            assertArrayEquals(this.dockerService.listByContainerDescriptor(), this.runnignContainerDescriptor);
+            assertEquals(this.dockerService.listContainerDescriptors(), Arrays.asList(this.runningContainerDescriptor));
         }
     }
 
     private void thenGetFirstContainerIDbyName() {
-        assertEquals(this.dockerService.getContainerIDbyName(this.runnignContainerDescriptor[0].getContainerName()),
-                this.runnignContainerDescriptor[0].getContainerId());
+        assertEquals(this.dockerService.getContainerIdByName(this.runningContainerDescriptor[0].getContainerName()),
+                this.runningContainerDescriptor[0].getContainerId());
     }
 
     private void thenTestIfNewContainerExists() {
-        assertEquals(this.createdContainerID, this.runnignContainerDescriptor[0].getContainerId());
+        assertEquals(1, this.dockerService.listContainerDescriptors().size());
     }
 
     private void thenTestIfNewContainerDoesNotExists() {
-        assertNotEquals(this.createdContainerID, this.runnignContainerDescriptor[0].getContainerId());
+        assertEquals(0, this.dockerService.listContainerDescriptors().size());
     }
 
 }

@@ -13,8 +13,6 @@
 
 package org.eclipse.kura.container.provider;
 
-import static java.util.Objects.isNull;
-
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,18 +35,15 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     private ConfigurableGenericDockerServiceOptions serviceOptions;
-    private ContainerDescriptor registeredContainerRefrence;
 
     private DockerService dockerService;
 
     public void setDockerService(DockerService dockerService) {
         this.dockerService = dockerService;
-        this.dockerService.registerListener(this);
     }
 
     public void unsetDockerService(DockerService dockerService) {
         if (this.dockerService == dockerService) {
-            this.dockerService.unregisterListener(this);
             this.dockerService = null;
         }
     }
@@ -73,14 +68,18 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
             return;
         }
 
-        if (!isNull(this.serviceOptions) && this.serviceOptions.isEnabled()) {
-            stopRunningMicroservice();
-        }
+        // if (!isNull(this.serviceOptions) && this.serviceOptions.isEnabled()) {
+        // stopRunningMicroservice();
+        // }
 
         this.serviceOptions = newProps;
 
         if (this.serviceOptions.isEnabled()) {
-            this.executor.schedule(this::startNewMicroservice, 0, TimeUnit.SECONDS);
+            this.dockerService.registerListener(this);
+            this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
+        } else {
+            stopRunningMicroservice();
+            this.dockerService.unregisterListener(this);
         }
 
     }
@@ -91,9 +90,10 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
 
         this.executor.shutdown();
 
-        if (this.serviceOptions.isEnabled()) {
-            stopRunningMicroservice();
-        }
+        // if (this.serviceOptions.isEnabled()) {
+        // stopRunningMicroservice();
+        // }
+        this.dockerService.unregisterListener(this);
 
         logger.info("deactivate...done");
     }
@@ -104,18 +104,18 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
     //
     // ----------------------------------------------------------------
 
-    private void startNewMicroservice() {
+    private void startMicroservice() {
         boolean unlimitedRetries = this.serviceOptions.isUnlimitedRetries();
         int maxRetries = this.serviceOptions.getMaxDownloadRetries();
         int retryInterval = this.serviceOptions.getRetryInterval();
 
-        this.registeredContainerRefrence = this.serviceOptions.getContainerDescriptor();
+        ContainerDescriptor registeredContainerRefrence = this.serviceOptions.getContainerDescriptor();
 
         int retries = 0;
         while (unlimitedRetries || retries < maxRetries) {
             logger.info("Tentative number: {}", retries);
             try {
-                this.dockerService.startContainer(this.registeredContainerRefrence);
+                this.dockerService.startContainer(registeredContainerRefrence);
                 return;
             } catch (KuraException e) {
                 logger.error("Error managing microservice state", e);
@@ -138,7 +138,7 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
 
     private void stopRunningMicroservice() {
         try {
-            this.dockerService.stopContainer(this.registeredContainerRefrence);
+            this.dockerService.stopContainer(this.serviceOptions.getContainerDescriptor());
         } catch (KuraException e) {
             logger.error("Error stopping microservice {}", this.serviceOptions.getContainerName(), e);
         }
@@ -146,14 +146,14 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
 
     @Override
     public void onConnect() {
-        //stopRunningMicroservice();
-        startNewMicroservice();
+        // stopRunningMicroservice();
+        startMicroservice();
     }
 
     @Override
     public void onDisconnect() {
-        //stopRunningMicroservice();
-        
+        // stopRunningMicroservice();
+
     }
 
     @Override

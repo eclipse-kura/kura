@@ -35,13 +35,6 @@ public interface DockerService {
      * @return
      */
     public List<ContainerDescriptor> listContainerDescriptors();
-    
-    /**
-    *
-    * @param imageName
-    * @throws KuraException
-    */
-   public void pullImage(String imageName, String imageTag) throws KuraException;
 
    /**
     *

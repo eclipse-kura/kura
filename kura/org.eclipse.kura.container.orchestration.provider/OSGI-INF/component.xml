@@ -17,7 +17,7 @@
    <implementation class="org.eclipse.kura.container.orchestration.provider.impl.DockerServiceImpl"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
-      <provide interface="org.eclipse.kura.container.orchestration.provider.DockerService"/>
+      <provide interface="org.eclipse.kura.container.orchestration.DockerService"/>
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.container.orchestration.provider.DockerService"/>
    <reference name="CryptoService" 

@@ -138,9 +138,10 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
 
     private void stopRunningMicroservice() {
         try {
-            this.dockerService.stopContainer(this.serviceOptions.getContainerDescriptor());
-            this.dockerService.deleteContainer(this.serviceOptions.getContainerDescriptor());
-        } catch (KuraException e) {
+            ContainerDescriptor containerDescriptor = this.serviceOptions.getContainerDescriptor();
+            this.dockerService.stopContainer(containerDescriptor);
+            this.dockerService.deleteContainer(containerDescriptor);
+        } catch (Exception e) {
             logger.error("Error stopping microservice {}", this.serviceOptions.getContainerName(), e);
         }
     }

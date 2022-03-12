@@ -22,11 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.DockerService;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.DockerService;
 
 public class ConfigurableDockerGenericDockerServiceTest {
 

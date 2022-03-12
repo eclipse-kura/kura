@@ -10,13 +10,20 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
+package org.eclipse.kura.container.orchestration.listener;
 
-package org.eclipse.kura.container.orchestration.provider;
+import org.osgi.annotation.versioning.ConsumerType;
 
-public enum ContainerStates {
-    STARTING,
-    INSTALLED,
-    ACTIVE,
-    FAILED,
-    STOPPING,
+/**
+ * @since 2.3
+ */
+@ConsumerType
+public interface DockerServiceListener {
+    
+    public void onConnect();
+    
+    public void onDisconnect();
+    
+    public void onDisabled();
+
 }

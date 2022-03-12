@@ -15,13 +15,14 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
 import org.eclipse.kura.util.configuration.Property;
 
 public class ConfigurableGenericDockerServiceOptions {
@@ -45,8 +46,8 @@ public class ConfigurableGenericDockerServiceOptions {
     private final String image;
     private final String imageTag;
     private final String containerName;
-    private final int[] internalPorts;
-    private final int[] externalPorts;
+    private final List<Integer> internalPorts;
+    private final List<Integer> externalPorts;
     private final String containerEnv;
     private final String containerVolumeString;
     private final String containerDevice;
@@ -137,11 +138,11 @@ public class ConfigurableGenericDockerServiceOptions {
         return this.containerName;
     }
 
-    public int[] getContainerPortsInternal() {
+    public List<Integer> getContainerPortsInternal() {
         return this.internalPorts;
     }
 
-    public int[] getContainerPortsExternal() {
+    public List<Integer> getContainerPortsExternal() {
         return this.externalPorts;
     }
 
@@ -174,23 +175,22 @@ public class ConfigurableGenericDockerServiceOptions {
     }
 
     public ContainerDescriptor getContainerDescriptor() {
-        return ContainerDescriptor.builder().setContainerName(getContainerName()).setContainerImage(getContainerImage())
-                .setContainerImageTag(getContainerImageTag()).setExternalPort(getContainerPortsExternal())
-                .setInternalPort(getContainerPortsInternal()).addEnvVar(getContainerEnvList())
-                .setVolume(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
-                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).build();
+        return ContainerDescriptorImpl.builder().setContainerName(getContainerName())
+                .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
+                .setExternalPort(getContainerPortsExternal()).setInternalPort(getContainerPortsInternal())
+                .addEnvVar(getContainerEnvList()).setVolume(getContainerVolumeList())
+                .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
+                .setFrameworkManaged(true).build();
     }
 
-    private int[] parsePortString(String ports) {
-        int[] tempArray = new int[] {};
-        if (ports.isEmpty()) {
-            return tempArray;
-        }
+    private List<Integer> parsePortString(String ports) {
+        List<Integer> tempArray = new ArrayList<>();
+        if (!ports.isEmpty()) {
+            String[] tempString = ports.trim().replace(" ", "").split(",");
 
-        String[] tempString = ports.trim().replace(" ", "").split(",");
-        tempArray = new int[tempString.length];
-        for (int i = 0; i < tempString.length; i++) {
-            tempArray[i] = Integer.parseInt(tempString[i].trim().replace("-", ""));
+            for (String element : tempString) {
+                tempArray.add(Integer.parseInt(element.trim().replace("-", "")));
+            }
         }
 
         return tempArray;
@@ -206,12 +206,13 @@ public class ConfigurableGenericDockerServiceOptions {
         result = prime * result + (this.containerVolumeString == null ? 0 : this.containerVolumeString.hashCode());
         result = prime * result + (this.containerVolumes == null ? 0 : this.containerVolumes.hashCode());
         result = prime * result + (this.enabled ? 1231 : 1237);
-        result = prime * result + Arrays.hashCode(this.externalPorts);
+        result = prime * result + (this.externalPorts == null ? 0 : this.externalPorts.hashCode());
         result = prime * result + (this.image == null ? 0 : this.image.hashCode());
         result = prime * result + (this.imageTag == null ? 0 : this.imageTag.hashCode());
-        result = prime * result + Arrays.hashCode(this.internalPorts);
+        result = prime * result + (this.internalPorts == null ? 0 : this.internalPorts.hashCode());
         result = prime * result + this.maxDownloadRetries;
         result = prime * result + (this.privilegedMode ? 1231 : 1237);
+        result = prime * result + this.retryInterval;
         return result;
     }
 
@@ -220,7 +221,7 @@ public class ConfigurableGenericDockerServiceOptions {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
@@ -259,7 +260,14 @@ public class ConfigurableGenericDockerServiceOptions {
         } else if (!this.containerVolumes.equals(other.containerVolumes)) {
             return false;
         }
-        if ((this.enabled != other.enabled) || !Arrays.equals(this.externalPorts, other.externalPorts)) {
+        if (this.enabled != other.enabled) {
+            return false;
+        }
+        if (this.externalPorts == null) {
+            if (other.externalPorts != null) {
+                return false;
+            }
+        } else if (!this.externalPorts.equals(other.externalPorts)) {
             return false;
         }
         if (this.image == null) {
@@ -276,13 +284,20 @@ public class ConfigurableGenericDockerServiceOptions {
         } else if (!this.imageTag.equals(other.imageTag)) {
             return false;
         }
-        if (!Arrays.equals(this.internalPorts, other.internalPorts)) {
+        if (this.internalPorts == null) {
+            if (other.internalPorts != null) {
+                return false;
+            }
+        } else if (!this.internalPorts.equals(other.internalPorts)) {
             return false;
         }
         if (this.maxDownloadRetries != other.maxDownloadRetries) {
             return false;
         }
         if (this.privilegedMode != other.privilegedMode) {
+            return false;
+        }
+        if (this.retryInterval != other.retryInterval) {
             return false;
         }
         return true;

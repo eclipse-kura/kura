@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -17,25 +17,29 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
 import org.junit.Test;
 
 public class ContainerDescriptorTest {
 
     private static final String H2_DB_NAME = "Kura_H2DB";
     private static final String H2_DB_IMAGE = "joedoe/h2db";
-    private static final int[] H2_DB_PORTS_EXTERNAL = new int[] { 1521, 81 };
-    private static final int[] H2_DB_PORTS_INTERNAL = new int[] { 1521, 81 };
+    private static final List<Integer> H2_DB_PORTS_EXTERNAL = new ArrayList<>(Arrays.asList(1521, 81));
+    private static final List<Integer> H2_DB_PORTS_INTERNAL = new ArrayList<>(Arrays.asList(1521, 81));
     private final String device = "testDevice";
     private final String volume = "TestVolume";
     private final String path = "~/path/test/";
-    private final int[] ports = { 10, 20, 30 }; // plus 40
-    private final int[] finalPorts = { 10, 20, 30, 40 };
+    private final List<Integer> ports = new ArrayList<>(Arrays.asList(10, 20, 30));
+    private final List<Integer> finalPorts = new ArrayList<>(Arrays.asList(10, 20, 30, 40));
     private ContainerDescriptor firstContainer;
     private ContainerDescriptor seccondContainer;
     private ContainerDescriptor thirdContainer;
@@ -122,14 +126,14 @@ public class ContainerDescriptorTest {
     // given
     private void givenContainerOne() {
 
-        this.firstContainer = ContainerDescriptor.builder().setContainerImageTag(H2_DB_NAME)
+        this.firstContainer = ContainerDescriptorImpl.builder().setContainerImageTag(H2_DB_NAME)
                 .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setExternalPort(H2_DB_PORTS_EXTERNAL)
                 .setInternalPort(H2_DB_PORTS_INTERNAL).setContainerID("1d4f4v4x").build();
     }
 
     private void givenContainerTwoDiffrent() {
 
-        this.seccondContainer = ContainerDescriptor.builder().setContainerImageTag(H2_DB_NAME)
+        this.seccondContainer = ContainerDescriptorImpl.builder().setContainerImageTag(H2_DB_NAME)
                 .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setContainerImageTag("diffrent")
                 .setExternalPort(H2_DB_PORTS_EXTERNAL).setInternalPort(H2_DB_PORTS_INTERNAL).setContainerID("4f3gh4ds4")
                 .build();
@@ -149,7 +153,7 @@ public class ContainerDescriptorTest {
 
     // when
     private void whenContainerOneAppened() {
-        this.firstContainer = ContainerDescriptor.builder().setContainerImageTag(H2_DB_NAME)
+        this.firstContainer = ContainerDescriptorImpl.builder().setContainerImageTag(H2_DB_NAME)
                 .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setExternalPort(H2_DB_PORTS_EXTERNAL)
                 .setInternalPort(H2_DB_PORTS_INTERNAL).addDevice(this.device).addVolume(this.volume, this.path)
                 .setInternalPort(this.ports).addInternalPort(40).setExternalPort(this.ports).addExternalPort(40)
@@ -160,24 +164,24 @@ public class ContainerDescriptorTest {
         this.testContainerList = new LinkedList<>();
         this.testContainerList.add(this.firstContainer);
         this.testContainerList.add(this.seccondContainer);
-        this.testContainerList.add(ContainerDescriptor.builder().setContainerName("randomTestName")
+        this.testContainerList.add(ContainerDescriptorImpl.builder().setContainerName("randomTestName")
                 .setContainerImage(H2_DB_IMAGE).build());
     }
 
     private void whenContainerTrioIsCreated() {
         // Using Set
-        this.firstContainer = ContainerDescriptor.builder().setContainerName("abc")
+        this.firstContainer = ContainerDescriptorImpl.builder().setContainerName("abc")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolume(this.volumes)
                 .setEnvVar(this.envVar).setDeviceList(this.devices).build();
 
         // Using Add by item
-        this.seccondContainer = ContainerDescriptor.builder().setContainerName("def")
+        this.seccondContainer = ContainerDescriptorImpl.builder().setContainerName("def")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).addVolume("test", "~/test/test")
                 .addDevice("/dev/gpio1").addDevice("/dev/gpio2").addEnvVar("test=test").addEnvVar("test2=test2")
                 .build();
 
         // Using add by list
-        this.thirdContainer = ContainerDescriptor.builder().setContainerName("ghi")
+        this.thirdContainer = ContainerDescriptorImpl.builder().setContainerName("ghi")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).addVolume(this.volumes)
                 .addEnvVar(this.envVar).addDevice(this.devices).build();
     }

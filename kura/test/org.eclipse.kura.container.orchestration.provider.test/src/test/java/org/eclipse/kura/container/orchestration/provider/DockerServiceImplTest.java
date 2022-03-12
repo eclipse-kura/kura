@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
 import org.eclipse.kura.container.orchestration.provider.impl.DockerServiceImpl;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -378,10 +380,10 @@ public class DockerServiceImplTest {
         this.runningContainers = new String[] { mcont1.toString(), mcont2.toString() };
 
         // Build Respective CD's
-        ContainerDescriptor mcontCD1 = ContainerDescriptor.builder().setContainerID(mcont1.getId())
+        ContainerDescriptor mcontCD1 = ContainerDescriptorImpl.builder().setContainerID(mcont1.getId())
                 .setContainerName(mcont1.getNames()[0]).setContainerImage(mcont1.getImage()).build();
-        new ContainerDescriptor();
-        ContainerDescriptor mcontCD2 = ContainerDescriptor.builder().setContainerID(mcont2.getId())
+        new ContainerDescriptorImpl();
+        ContainerDescriptor mcontCD2 = ContainerDescriptorImpl.builder().setContainerID(mcont2.getId())
                 .setContainerName(mcont2.getNames()[0]).setContainerImage(mcont2.getImage()).build();
         this.runningContainerDescriptor = new ContainerDescriptor[] { mcontCD1, mcontCD2 };
 
@@ -405,7 +407,7 @@ public class DockerServiceImplTest {
     private void whenMockforContainerCreation() {
 
         // Build Respective CD's
-        ContainerDescriptor mcontCD1 = ContainerDescriptor.builder().setContainerID("1d3dewf34r5")
+        ContainerDescriptor mcontCD1 = ContainerDescriptorImpl.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
 
         this.runningContainerDescriptor = new ContainerDescriptor[] { mcontCD1 };
@@ -461,8 +463,8 @@ public class DockerServiceImplTest {
     }
 
     private void thenGetFirstContainerIDbyName() {
-        assertEquals(this.dockerService.getContainerIdByName(this.runningContainerDescriptor[0].getContainerName()).orElse(""),
-                this.runningContainerDescriptor[0].getContainerId());
+        assertEquals(this.dockerService.getContainerIdByName(this.runningContainerDescriptor[0].getContainerName())
+                .orElse(""), this.runningContainerDescriptor[0].getContainerId());
     }
 
     private void thenTestIfNewContainerExists() {

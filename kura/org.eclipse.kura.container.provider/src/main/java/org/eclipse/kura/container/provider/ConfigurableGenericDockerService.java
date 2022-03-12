@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.DockerService;
-import org.eclipse.kura.container.orchestration.provider.DockerServiceListener;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.DockerService;
+import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

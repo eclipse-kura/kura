@@ -23,14 +23,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.ContainerStates;
-import org.eclipse.kura.container.orchestration.provider.DockerService;
-import org.eclipse.kura.container.orchestration.provider.DockerServiceListener;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerStates;
+import org.eclipse.kura.container.orchestration.DockerService;
+import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -150,7 +149,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
-        containers.forEach(container -> result.add(ContainerDescriptor.builder()
+        containers.forEach(container -> result.add(ContainerDescriptorImpl.builder()
                 .setContainerName(getContainerName(container)).setContainerImage(getContainerTag(container))
                 .setContainerImageTag(getContainerVersion(container)).setContainerID(container.getId())
                 .setInternalPort(parseInternalPortsFromDockerPs(container.getPorts()))
@@ -184,30 +183,30 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         return container.getImage().split(":")[0];
     }
 
-    private int[] parseExternalPortsFromDockerPs(ContainerPort[] ports) {
-        int[] externalPorts = new int[] {};
+    private List<Integer> parseExternalPortsFromDockerPs(ContainerPort[] ports) {
+        List<Integer> externalPorts = new ArrayList<>();
 
         ContainerPort[] tempPorts = ports;
         for (ContainerPort tempPort : tempPorts) {
             if (tempPort.getIp() != null) {
                 String ipFormatTest = tempPort.getIp();
                 if (ipFormatTest != null && ipFormatTest.equals("::")) {
-                    ArrayUtils.add(externalPorts, tempPort.getPublicPort());
+                    externalPorts.add(tempPort.getPublicPort());
                 }
             }
         }
         return externalPorts;
     }
 
-    private int[] parseInternalPortsFromDockerPs(ContainerPort[] ports) {
-        int[] internalPorts = new int[] {};
+    private List<Integer> parseInternalPortsFromDockerPs(ContainerPort[] ports) {
+        List<Integer> internalPorts = new ArrayList<>();
 
         ContainerPort[] tempPorts = ports;
         for (ContainerPort tempPort : tempPorts) {
             if (tempPort.getIp() != null) {
                 String ipFormatTest = tempPort.getIp();
                 if (ipFormatTest != null && ipFormatTest.equals("::")) {
-                    ArrayUtils.add(internalPorts, tempPort.getPrivatePort());
+                    internalPorts.add(tempPort.getPrivatePort());
                 }
             }
         }
@@ -464,17 +463,18 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         if (containerDescription.getContainerPortsInternal() != null
                 && containerDescription.getContainerPortsExternal() != null
-                && containerDescription.getContainerPortsExternal().length == containerDescription
-                        .getContainerPortsInternal().length) {
+                && containerDescription.getContainerPortsExternal().size() == containerDescription
+                        .getContainerPortsInternal().size()) {
             List<ExposedPort> exposedPorts = new LinkedList<>();
             Ports portbindings = new Ports();
 
-            for (int index = 0; index < containerDescription.getContainerPortsInternal().length; index++) {
+            for (int index = 0; index < containerDescription.getContainerPortsInternal().size(); index++) {
 
-                ExposedPort tempExposedPort = new ExposedPort(containerDescription.getContainerPortsInternal()[index]);
+                ExposedPort tempExposedPort = new ExposedPort(
+                        containerDescription.getContainerPortsInternal().get(index));
                 exposedPorts.add(tempExposedPort);
                 portbindings.bind(tempExposedPort,
-                        Binding.bindPort(containerDescription.getContainerPortsExternal()[index]));
+                        Binding.bindPort(containerDescription.getContainerPortsExternal().get(index)));
             }
 
             commandBuilder.withPortBindings(portbindings);

@@ -11,29 +11,31 @@
  *  Eurotech
  *******************************************************************************/
 
-package org.eclipse.kura.container.orchestration.provider;
+package org.eclipse.kura.container.orchestration.provider.impl;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ArrayUtils;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerStates;
 
 /**
  * Object which represents a container. Used to track running containers.
  *
  */
-public class ContainerDescriptor {
+public class ContainerDescriptorImpl implements ContainerDescriptor {
 
     private String containerName;
     private String containerImage;
     private String containerImageTag;
     private String containerID;
-    private int[] containerPortsExternal;
-    private int[] containerPortsInternal;
+    private List<Integer> containerPortsExternal;
+    private List<Integer> containerPortsInternal;
     private List<String> containerEnvVars;
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
@@ -41,68 +43,72 @@ public class ContainerDescriptor {
     private ContainerStates containerState = ContainerStates.STOPPING;
     private Boolean isFrameworkManaged = true;
 
-    public static ContainerDescriptor findByName(String name, List<ContainerDescriptor> serviceList) {
-        ContainerDescriptor sd = null;
-        for (ContainerDescriptor container : serviceList) {
-            if (container.containerName.equals(name)) {
-                return container;
-            }
-        }
-        return sd;
-    }
-
+    @Override
     public ContainerStates getContainerState() {
         return this.containerState;
     }
 
+    @Override
     public Boolean isFrameworkManaged() {
         return this.isFrameworkManaged;
     }
 
+    @Override
     public String getContainerName() {
         return this.containerName;
     }
 
+    @Override
     public String getContainerImage() {
         return this.containerImage;
     }
 
+    @Override
     public String getContainerImageTag() {
         return this.containerImageTag;
     }
 
+    @Override
     public String getContainerId() {
         return this.containerID;
     }
 
-    public int[] getContainerPortsExternal() {
+    @Override
+    public List<Integer> getContainerPortsExternal() {
         return this.containerPortsExternal;
     }
 
-    public int[] getContainerPortsInternal() {
+    @Override
+    public List<Integer> getContainerPortsInternal() {
         return this.containerPortsInternal;
     }
 
+    @Override
     public List<String> getContainerEnvVars() {
         return this.containerEnvVars;
     }
 
+    @Override
     public List<String> getContainerDevices() {
         return this.containerDevices;
     }
 
+    @Override
     public Map<String, String> getContainerVolumes() {
         return this.containerVolumes;
     }
 
+    @Override
     public Boolean getContainerPrivileged() {
         return this.containerPrivileged;
     }
 
+    @Override
     public void setContainerState(ContainerStates containerState) {
         this.containerState = containerState;
     }
 
+    @Override
     public void setContainerId(String id) {
         this.containerID = id;
     }
@@ -116,36 +122,14 @@ public class ContainerDescriptor {
         return new ContainerDescriptorBuilder();
     }
 
-    public static int compare(ContainerDescriptor obj1, ContainerDescriptor obj2) {
-        return obj1.containerImage.compareTo(obj2.containerImage);
-    }
-
-    public static boolean equals(ContainerDescriptor obj1, ContainerDescriptor obj2) {
-        boolean resultBuilder;
-
-        resultBuilder = obj1.containerName.equals(obj2.containerName);
-        resultBuilder = resultBuilder && obj1.containerImage.equals(obj2.containerImage);
-        resultBuilder = resultBuilder && obj1.containerImageTag.equals(obj2.containerImageTag);
-        resultBuilder = resultBuilder && ArrayUtils.isEquals(obj1.containerPortsExternal, obj2.containerPortsExternal);
-        resultBuilder = resultBuilder && ArrayUtils.isEquals(obj1.containerPortsInternal, obj2.containerPortsInternal);
-        resultBuilder = resultBuilder && obj1.containerEnvVars.equals(obj2.containerEnvVars);
-        resultBuilder = resultBuilder && obj1.containerDevices.equals(obj2.containerDevices);
-        resultBuilder = resultBuilder && obj1.containerVolumes.equals(obj2.containerVolumes);
-        resultBuilder = resultBuilder && obj1.containerPrivileged.equals(obj2.containerPrivileged);
-        resultBuilder = resultBuilder && obj1.containerState.equals(obj2.containerState);
-        resultBuilder = resultBuilder && obj1.isFrameworkManaged.equals(obj2.isFrameworkManaged);
-
-        return resultBuilder;
-    }
-
     public static final class ContainerDescriptorBuilder {
 
         private String containerName;
         private String containerImage;
         private String containerImageTag = "latest";
         private String containerID = "";
-        private int[] containerPortsExternal = new int[] {};
-        private int[] containerPortsInternal = new int[] {};
+        private List<Integer> containerPortsExternal = new ArrayList<>();
+        private List<Integer> containerPortsInternal = new ArrayList<>();
         private List<String> containerEnvVars = new LinkedList<>();
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
@@ -178,49 +162,33 @@ public class ContainerDescriptor {
             return this;
         }
 
-        public ContainerDescriptorBuilder setExternalPort(int[] containerPortsExternal) {
-            this.containerPortsExternal = containerPortsExternal.clone();
+        public ContainerDescriptorBuilder setExternalPort(List<Integer> containerPortsExternal) {
+            this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
         }
 
-        public ContainerDescriptorBuilder setInternalPort(int[] containerPortsInternal) {
-            this.containerPortsInternal = containerPortsInternal.clone();
+        public ContainerDescriptorBuilder setInternalPort(List<Integer> containerPortsInternal) {
+            this.containerPortsInternal = new ArrayList<>(containerPortsInternal);
             return this;
         }
 
         public ContainerDescriptorBuilder addExternalPort(int port) {
-            if (this.containerPortsExternal == null) {
-                this.containerPortsExternal = new int[] { port };
-            } else {
-                this.containerPortsExternal = ArrayUtils.add(this.containerPortsExternal, port);
-            }
+            this.containerPortsExternal.add(port);
             return this;
         }
 
         public ContainerDescriptorBuilder addInternalPort(int port) {
-            if (this.containerPortsInternal == null) {
-                this.containerPortsInternal = new int[] { port };
-            } else {
-                this.containerPortsInternal = ArrayUtils.add(this.containerPortsInternal, port);
-            }
+            this.containerPortsInternal.add(port);
             return this;
         }
 
-        public ContainerDescriptorBuilder addExternalPorts(int[] containerPortsExternal) {
-            if (this.containerPortsExternal == null) {
-                this.containerPortsExternal = containerPortsExternal.clone();
-            } else {
-                this.containerPortsExternal = ArrayUtils.addAll(this.containerPortsExternal, containerPortsExternal);
-            }
+        public ContainerDescriptorBuilder addExternalPorts(List<Integer> containerPortsExternal) {
+            this.containerPortsExternal.addAll(containerPortsExternal);
             return this;
         }
 
-        public ContainerDescriptorBuilder addInternalPorts(int[] containerPortsInternal) {
-            if (this.containerPortsInternal == null) {
-                this.containerPortsInternal = containerPortsInternal.clone();
-            } else {
-                this.containerPortsInternal = ArrayUtils.addAll(this.containerPortsInternal, containerPortsInternal);
-            }
+        public ContainerDescriptorBuilder addInternalPorts(List<Integer> containerPortsInternal) {
+            this.containerPortsInternal.addAll(containerPortsInternal);
             return this;
         }
 
@@ -302,7 +270,7 @@ public class ContainerDescriptor {
         }
 
         public ContainerDescriptor build() {
-            ContainerDescriptor containerDescriptor = new ContainerDescriptor();
+            ContainerDescriptorImpl containerDescriptor = new ContainerDescriptorImpl();
 
             containerDescriptor.containerName = requireNonNull(this.containerName,
                     "Request Container Name cannot be null");

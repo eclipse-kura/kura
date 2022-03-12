@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https:www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,11 +16,10 @@ package org.eclipse.kura.core.inventory.resources;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerStates;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
-
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.ContainerStates;
 
 public class DockerContainer extends SystemResourceInfo {
 
@@ -28,8 +27,8 @@ public class DockerContainer extends SystemResourceInfo {
     private String containerImage;
     private String containerImageTag;
     private String containerID;
-    private int[] containerPortsExternal;
-    private int[] containerPortsInternal;
+    private List<Integer> containerPortsExternal;
+    private List<Integer> containerPortsInternal;
     private List<String> containerEnvVars;
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
@@ -47,19 +46,19 @@ public class DockerContainer extends SystemResourceInfo {
         super(container.getContainerName(), container.getContainerImage() + ":" + container.getContainerImageTag(),
                 SystemResourceType.DOCKER);
 
-        containerName = container.getContainerName();
-        containerImage = container.getContainerImage();
-        containerImageTag = container.getContainerImageTag();
-        containerID = container.getContainerId();
-        containerPortsExternal = container.getContainerPortsExternal();
-        containerPortsInternal = container.getContainerPortsInternal();
-        containerEnvVars = container.getContainerEnvVars();
-        containerDevices = container.getContainerDevices();
-        containerVolumes = container.getContainerVolumes();
-        containerPrivilaged = container.getContainerPrivileged();
-        containerState = container.getContainerState();
+        this.containerName = container.getContainerName();
+        this.containerImage = container.getContainerImage();
+        this.containerImageTag = container.getContainerImageTag();
+        this.containerID = container.getContainerId();
+        this.containerPortsExternal = container.getContainerPortsExternal();
+        this.containerPortsInternal = container.getContainerPortsInternal();
+        this.containerEnvVars = container.getContainerEnvVars();
+        this.containerDevices = container.getContainerDevices();
+        this.containerVolumes = container.getContainerVolumes();
+        this.containerPrivilaged = container.getContainerPrivileged();
+        this.containerState = container.getContainerState();
 
-        isEsfManaged = container.isFrameworkManaged();
+        this.isEsfManaged = container.isFrameworkManaged();
 
     }
 
@@ -95,11 +94,11 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerID = id;
     }
 
-    public int[] getContainerPortsExternal() {
+    public List<Integer> getContainerPortsExternal() {
         return this.containerPortsExternal;
     }
 
-    public int[] getContainerPortsInternal() {
+    public List<Integer> getContainerPortsInternal() {
         return this.containerPortsInternal;
     }
 

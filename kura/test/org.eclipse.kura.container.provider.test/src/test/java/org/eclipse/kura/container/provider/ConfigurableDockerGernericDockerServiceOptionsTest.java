@@ -1,29 +1,30 @@
 /*******************************************************************************
   * Copyright (c) 2022 Eurotech and/or its affiliates and others
-  * 
+  *
   * This program and the accompanying materials are made
   * available under the terms of the Eclipse Public License 2.0
   * which is available at https://www.eclipse.org/legal/epl-2.0/
-  * 
+  *
   * SPDX-License-Identifier: EPL-2.0
-  * 
+  *
   * Contributors:
   *  Eurotech
   *******************************************************************************/
 package org.eclipse.kura.container.provider;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
 import org.junit.Test;
 
 public class ConfigurableDockerGernericDockerServiceOptionsTest {
@@ -54,7 +55,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private static final String CONTAINER_PRIVILEGED = "container.privileged";
     private static final String CONTAINER_IMAGE_DOWNLOAD_RETRIES = "container.image.download.retries";
     private static final String CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = "container.image.download.interval";
-    
+
     private Map<String, Object> properties;
 
     private ConfigurableGenericDockerServiceOptions cgdso;
@@ -66,7 +67,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private List<String> containerEnv;
     private Map<String, String> containerVolumes;
     private List<String> containerDevice;
-    private int[] portsAvailable;
+    private List<Integer> portsAvailable;
     private boolean equals;
     private int hashCode;
     private boolean privilegedMode;
@@ -77,11 +78,11 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private int imageDownloadRetries;
     private int imageDownloadRetryInterval;
     private boolean unlimitedRetries;
-    
+
     @Test(expected = IllegalArgumentException.class)
     public void testNullProperties() {
         givenNullProperties();
-        
+
         whenConfigurableGenericDockerServiceOptionsCreated();
     }
 
@@ -253,7 +254,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
         thenContainerDevice("test");
     }
-    
+
     @Test
     public void testPrivilegedModeDefault() {
 
@@ -277,7 +278,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
         thenPrivilegedMode(true);
     }
-    
+
     @Test
     public void testImageDownloadRetriesDefault() {
 
@@ -301,7 +302,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
         thenImageDownloadRetries(100);
     }
-    
+
     @Test
     public void testImageDownloadUnlimitedRetriesDefault() {
 
@@ -325,7 +326,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
         thenIsTrue(this.unlimitedRetries);
     }
-    
+
     @Test
     public void testImageDownloadRetryIntervalDefault() {
 
@@ -354,7 +355,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     public void shouldSupportMultipleExternalPortsInOneString() {
 
         String ports = "22, 56, 77, 567, 4455";
-        int[] portResult = { 22, 56, 77, 567, 4455 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22, 56, 77, 567, 4455));
 
         givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_EXTERNAL, ports);
@@ -370,7 +371,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     public void shouldSupportSingleExternalPortsInOneString() {
 
         String ports = "22";
-        int[] portResult = { 22 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22));
 
         givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_EXTERNAL, ports);
@@ -386,7 +387,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     public void shouldSupportSingleBrokenExternalPortsInOneString() {
 
         String ports = "22,";
-        int[] portResult = { 22 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22));
 
         givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_EXTERNAL, ports);
@@ -401,7 +402,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testMultipleInternalPortsInOneString() {
         String ports = "22, 56, 77, 567, 4455";
-        int[] portResult = { 22, 56, 77, 567, 4455 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22, 56, 77, 567, 4455));
 
         givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_INTERNAL, ports);
@@ -415,7 +416,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testMultipleBrokenInternalPortsInOneString() {
         String ports = "56 ,";
-        int[] portResult = { 56 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(56));
 
         givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_INTERNAL, ports);
@@ -429,7 +430,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testSingleInternalPortsInOneString() {
         String ports = "56";
-        int[] portResult = { 56 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(56));
 
         givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_INTERNAL, ports);
@@ -474,7 +475,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         thenIsNotEqual();
         thenIsNotSameHashCode();
     }
-    
+
     @Test
     public void testOptionsDifferEmptyProperties() {
         givenDefaultProperties();
@@ -496,11 +497,11 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
         thenIsNotNullContainerDescriptor();
     }
-    
+
     private void givenNullProperties() {
         this.properties = null;
     }
-    
+
     private void givenEmptyNewProperties() {
         this.newProperties = new HashMap<>();
     }
@@ -555,15 +556,15 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private void givenContainerEnv(String value) {
         this.properties.put(CONTAINER_ENV, value);
     }
-    
+
     private void givenPrivilegedMode(boolean value) {
         this.properties.put(CONTAINER_PRIVILEGED, value);
     }
-    
+
     private void givenImageDownloadRetries(int value) {
         this.properties.put(CONTAINER_IMAGE_DOWNLOAD_RETRIES, value);
     }
-    
+
     private void givenImageDownloadRetryInterval(int value) {
         this.properties.put(CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL, value);
     }
@@ -579,7 +580,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private void givenPortsConfiguration(String portProperty, String Ports) {
         this.properties.put(portProperty, Ports);
     }
-    
+
     private void whenConfigurableGenericDockerServiceOptionsCreated() {
         this.cgdso = new ConfigurableGenericDockerServiceOptions(this.properties);
     }
@@ -603,19 +604,19 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private void whenGetContainerEnv() {
         this.containerEnv = this.cgdso.getContainerEnvList();
     }
-    
+
     private void whenGetPrivilegedMode() {
         this.privilegedMode = this.cgdso.getPrivilegedMode();
     }
-    
+
     private void whenGetImageDownloadRetries() {
         this.imageDownloadRetries = this.cgdso.getMaxDownloadRetries();
     }
-    
+
     private void whenGetIsUnlimitedRetries() {
         this.unlimitedRetries = this.cgdso.isUnlimitedRetries();
     }
-    
+
     private void whenGetImageDownloadRetryInterval() {
         this.imageDownloadRetryInterval = this.cgdso.getRetryInterval();
     }
@@ -675,15 +676,15 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private void thenPrivilegedMode(boolean expectedValue) {
         assertEquals(expectedValue, this.privilegedMode);
     }
-    
+
     private void thenImageDownloadRetries(int expectedValue) {
         assertEquals(expectedValue, this.imageDownloadRetries);
     }
-    
+
     private void thenImageDownloadRetryInterval(int expectedValue) {
         assertEquals(expectedValue, this.imageDownloadRetryInterval);
     }
-    
+
     private void thenContainerVolume(String expectedSourceValue, String expectedDestinationValue) {
         assertTrue(this.containerVolumes.containsKey(expectedSourceValue));
         assertTrue(this.containerVolumes.containsValue(expectedDestinationValue));
@@ -701,8 +702,8 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         assertTrue(this.containerDevice.isEmpty());
     }
 
-    private void thenPortResult(int[] portResult) {
-        assertArrayEquals(portResult, this.portsAvailable);
+    private void thenPortResult(List<Integer> portResult) {
+        assertEquals(portResult, this.portsAvailable);
     }
 
     private void thenIsEqual() {
@@ -712,7 +713,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private void thenIsNotEqual() {
         assertFalse(this.equals);
     }
-    
+
     private void thenIsTrue(boolean expectedValue) {
         assertTrue(expectedValue);
     }

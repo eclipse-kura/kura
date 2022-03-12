@@ -10,18 +10,23 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.container.orchestration.provider;
+package org.eclipse.kura.container.orchestration;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * API for directly accessing docker containers.
+ * 
  *
  * @noimplement This interface is not intended to be implemented by clients.
+ * @since 2.3
  */
+@ProviderType
 public interface DockerService {
 
     /**

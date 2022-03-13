@@ -12,13 +12,13 @@
  *******************************************************************************/
 package org.eclipse.kura.container.orchestration.listener;
 
-import org.eclipse.kura.container.orchestration.DockerService;
 import org.osgi.annotation.versioning.ConsumerType;
 
 /**
  * Listener interface to be implemented by applications that needs to be notified of events in the
- * {@link DockerService}.
- * All registered listeners are called synchronously by the {@link DockerService} at the
+ * {@link org.eclipse.kura.container.orchestration.DockerService}.
+ * All registered listeners are called synchronously by the
+ * {@link org.eclipse.kura.container.orchestration.DockerService} at the
  * occurrence of the event.
  * It expected that implementers of this interface do NOT perform long running tasks in the implementation of this
  * interface.

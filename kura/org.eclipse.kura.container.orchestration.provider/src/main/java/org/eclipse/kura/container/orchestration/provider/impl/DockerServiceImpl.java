@@ -27,7 +27,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerStates;
+import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.DockerService;
 import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
 import org.eclipse.kura.crypto.CryptoService;
@@ -213,23 +213,23 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         return internalPorts;
     }
 
-    private ContainerStates convertDockerStateToFrameworkState(String dockerState) {
+    private ContainerState convertDockerStateToFrameworkState(String dockerState) {
 
         switch (dockerState.trim()) {
         case "created":
-            return ContainerStates.INSTALLED;
+            return ContainerState.INSTALLED;
         case "restarting":
-            return ContainerStates.INSTALLED;
+            return ContainerState.INSTALLED;
         case "running":
-            return ContainerStates.ACTIVE;
+            return ContainerState.ACTIVE;
         case "paused":
-            return ContainerStates.STOPPING;
+            return ContainerState.STOPPING;
         case "exited":
-            return ContainerStates.STOPPING;
+            return ContainerState.STOPPING;
         case "dead":
-            return ContainerStates.FAILED;
+            return ContainerState.FAILED;
         default:
-            return ContainerStates.INSTALLED;
+            return ContainerState.INSTALLED;
         }
     }
 
@@ -267,7 +267,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void startContainer(ContainerDescriptor container) throws KuraException {
+    public String startContainer(ContainerDescriptor container) throws KuraException {
         if (isNull(container)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
@@ -288,6 +288,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         logger.info("Container Started Successfully");
 
+        return containerId.orElse("");
     }
 
     @Override
@@ -299,55 +300,11 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void stopContainer(ContainerDescriptor container) {
-        if (isNull(container)) {
-            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
-        }
-
-        Optional<String> containerId = getContainerIdByName(container.getContainerName());
-
-        if (containerId.isPresent()) {
-
-            try {
-                logger.info("Stopping {} Microservice", container.getContainerName());
-                stopContainer(containerId.get());
-            } catch (Exception e) {
-                logger.error("Failed to stop {} Microservice", container.getContainerName());
-            }
-        } else {
-            logger.error("Microservice {} does not exist", container.getContainerName());
-        }
-
-    }
-
-    @Override
     public void deleteContainer(String id) {
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
         this.dockerClient.removeContainerCmd(id).exec();
-    }
-
-    @Override
-    public void deleteContainer(ContainerDescriptor containerDescriptor) throws KuraException {
-        if (isNull(containerDescriptor)) {
-            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
-        }
-
-        Optional<String> containerId = getContainerIdByName(containerDescriptor.getContainerName());
-
-        if (containerId.isPresent()) {
-            try {
-                logger.info("Deleting {} Microservice", containerDescriptor.getContainerName());
-                deleteContainer(containerId.get());
-                logger.info("Successfully deleted {} Microservice", containerDescriptor.getContainerName());
-            } catch (Exception e) {
-                logger.error("Failed to delete {} Microservice", containerDescriptor.getContainerName());
-            }
-
-        } else {
-            logger.error("Microservice {} does not exist", containerDescriptor.getContainerName());
-        }
     }
 
     @Override

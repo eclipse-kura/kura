@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Jens Reimann <jreimann@redhat.com>
@@ -16,7 +16,6 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -196,8 +195,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Properties kuraProps = systemService.getProperties();
         SortedSet kuraKeys = new TreeSet(kuraProps.keySet());
-        for (Iterator ki = kuraKeys.iterator(); ki.hasNext();) {
-            Object key = ki.next();
+        for (Object key : kuraKeys) {
             pairs.add(new GwtGroupedNVPair("propsKura", key.toString(), kuraProps.get(key).toString()));
         }
         return new ArrayList<>(pairs);
@@ -258,8 +256,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     pairs.add(pair);
                 }
             }
-            
-        } catch(Exception e){
+
+        } catch (Exception e) {
             logger.error("Failed To List Containers: {}", e);
         }
 
@@ -309,7 +307,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             for (ContainerDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
-                        dockerService.stopContainer(container);
+                        dockerService.stopContainer(container.getContainerId());
                     } catch (KuraException e) {
                         logger.error("Could not stop container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
@@ -443,9 +441,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      * </ol>
      *
      * @param bundle
-     *                   the bundle which name to retrieve
+     *            the bundle which name to retrieve
      * @param locale
-     *                   the locale, in which the bundle name is requested
+     *            the locale, in which the bundle name is requested
      * @return the bundle name - see the description of the method for more
      *         details.
      */
@@ -468,9 +466,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      * available.
      *
      * @param bundle
-     *                       the bundle which header to retrieve
+     *            the bundle which header to retrieve
      * @param headerName
-     *                       the name of the header to retrieve
+     *            the name of the header to retrieve
      * @return the header or empty string if it is not set
      */
     private static String getHeaderValue(Bundle bundle, String headerName) {

@@ -24,39 +24,106 @@ import java.util.Map;
  */
 public interface ContainerDescriptor {
 
-    public static ContainerDescriptor findByName(String name, List<ContainerDescriptor> serviceList) {
+    /**
+     * Returns the container status as {@link ContainerState}
+     *
+     * @return
+     */
+    public ContainerState getContainerState();
+
+    /**
+     * The method will provide information if the container is or not managed by the framework
+     *
+     * @return <code>true</code> if the framework manages the container. <code>false</code> otherwise
+     */
+    public Boolean isFrameworkManaged();
+
+    /**
+     * Returns the container name
+     *
+     * @return
+     */
+    public String getContainerName();
+
+    /**
+     * Returns the base image for the associated container
+     *
+     * @return
+     */
+    public String getContainerImage();
+
+    /**
+     * Returns the image tag for the associated container
+     *
+     * @return
+     */
+    public String getContainerImageTag();
+
+    /**
+     * Returns the containerID
+     *
+     * @return
+     */
+    public String getContainerId();
+
+    /**
+     * Returns the list of external ports that will be mapped to the given container
+     *
+     * @return
+     */
+    public List<Integer> getContainerPortsExternal();
+
+    /**
+     * Returns the list of internal ports that will be mapped to the given container
+     *
+     * @return
+     */
+    public List<Integer> getContainerPortsInternal();
+
+    /**
+     * Returns the list of environment properties that will be passed to the container
+     *
+     * @return
+     */
+    public List<String> getContainerEnvVars();
+
+    /**
+     * Returns the list of devices that will be mapped to the container
+     *
+     * @return
+     */
+    public List<String> getContainerDevices();
+
+    /**
+     * Returns a map that identifies the volumes and the internal container mapping
+     *
+     * @return
+     */
+    public Map<String, String> getContainerVolumes();
+
+    /**
+     * Returns a boolean representing if the container runs or will run in privileged mode.
+     *
+     * @return
+     */
+    public Boolean getContainerPrivileged();
+
+    /**
+     * Static method that will extract the {@link ContainerDescriptor} matching the given name in the given list
+     *
+     * @param name
+     * @param serviceList
+     * @return
+     */
+    public static ContainerDescriptor findByName(String name, List<ContainerDescriptor> containerDescriptors) {
         ContainerDescriptor sd = null;
-        for (ContainerDescriptor container : serviceList) {
+        for (ContainerDescriptor container : containerDescriptors) {
             if (container.getContainerName().equals(name)) {
                 return container;
             }
         }
         return sd;
     }
-
-    public ContainerStates getContainerState();
-
-    public Boolean isFrameworkManaged();
-
-    public String getContainerName();
-
-    public String getContainerImage();
-
-    public String getContainerImageTag();
-
-    public String getContainerId();
-
-    public List<Integer> getContainerPortsExternal();
-
-    public List<Integer> getContainerPortsInternal();
-
-    public List<String> getContainerEnvVars();
-
-    public List<String> getContainerDevices();
-
-    public Map<String, String> getContainerVolumes();
-
-    public Boolean getContainerPrivileged();
 
     public static int compare(ContainerDescriptor obj1, ContainerDescriptor obj2) {
         return obj1.getContainerImage().compareTo(obj2.getContainerImage());

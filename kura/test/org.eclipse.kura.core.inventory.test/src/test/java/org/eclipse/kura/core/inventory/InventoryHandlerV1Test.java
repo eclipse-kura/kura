@@ -1157,16 +1157,16 @@ public class InventoryHandlerV1Test {
 
     private void thenCheckIfContainerOneHasStarted() throws KuraException {
         Mockito.verify(this.mockDockerService, times(1)).startContainer(this.dockerContainer1);
-        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer1);
+        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer1.getContainerId());
         Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2);
-        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2);
+        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2.getContainerId());
     }
 
     private void thenCheckIfContainerOneHasStopped() throws KuraException {
         Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer1);
-        Mockito.verify(this.mockDockerService, times(1)).stopContainer(this.dockerContainer1);
+        Mockito.verify(this.mockDockerService, times(1)).stopContainer(this.dockerContainer1.getContainerId());
         Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2);
-        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2);
+        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2.getContainerId());
     }
 
     @SuppressWarnings("unchecked")

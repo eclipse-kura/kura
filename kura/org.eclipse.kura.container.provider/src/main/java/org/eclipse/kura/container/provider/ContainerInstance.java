@@ -13,6 +13,8 @@
 
 package org.eclipse.kura.container.provider;
 
+import static java.util.Objects.isNull;
+
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,6 +39,8 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
     private ContainerInstanceOptions serviceOptions;
 
     private DockerService dockerService;
+
+    private String containerId;
 
     public void setDockerService(DockerService dockerService) {
         this.dockerService = dockerService;
@@ -68,17 +72,15 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
             return;
         }
 
-        // if (!isNull(this.serviceOptions) && this.serviceOptions.isEnabled()) {
-        // stopRunningMicroservice();
-        // }
-
         this.serviceOptions = newProps;
 
         if (this.serviceOptions.isEnabled()) {
             this.dockerService.registerListener(this, this.serviceOptions.getContainerName());
             this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
         } else {
-            stopRunningMicroservice();
+            if (!isNull(this.containerId)) {
+                stopRunningMicroservice();
+            }
             this.dockerService.unregisterListener(this);
         }
 
@@ -115,7 +117,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
         while (unlimitedRetries || retries < maxRetries) {
             logger.info("Tentative number: {}", retries);
             try {
-                this.dockerService.startContainer(registeredContainerRefrence);
+                this.containerId = this.dockerService.startContainer(registeredContainerRefrence);
                 return;
             } catch (KuraException e) {
                 logger.error("Error managing microservice state", e);
@@ -138,9 +140,8 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
     private void stopRunningMicroservice() {
         try {
-            ContainerDescriptor containerDescriptor = this.serviceOptions.getContainerDescriptor();
-            this.dockerService.stopContainer(containerDescriptor);
-            this.dockerService.deleteContainer(containerDescriptor);
+            this.dockerService.stopContainer(this.containerId);
+            this.dockerService.deleteContainer(this.containerId);
         } catch (Exception e) {
             logger.error("Error stopping microservice {}", this.serviceOptions.getContainerName(), e);
         }

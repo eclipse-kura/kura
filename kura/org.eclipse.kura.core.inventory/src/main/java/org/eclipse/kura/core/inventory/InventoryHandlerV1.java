@@ -237,7 +237,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.dockerService.stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                this.dockerService
+                        .stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
                 return success();
             }
         } catch (final KuraException e) {

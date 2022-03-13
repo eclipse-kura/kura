@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.container.orchestration.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerStates;
+import org.eclipse.kura.container.orchestration.ContainerState;
 
 /**
  * Object which represents a container. Used to track running containers.
@@ -40,11 +40,11 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
     private Boolean containerPrivileged;
-    private ContainerStates containerState = ContainerStates.STOPPING;
+    private ContainerState containerState = ContainerState.STOPPING;
     private Boolean isFrameworkManaged = true;
 
     @Override
-    public ContainerStates getContainerState() {
+    public ContainerState getContainerState() {
         return this.containerState;
     }
 
@@ -124,7 +124,7 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
         private Boolean containerPrivilaged = false;
-        private ContainerStates containerState = ContainerStates.STOPPING;
+        private ContainerState containerState = ContainerState.STOPPING;
         private Boolean isFrameworkManaged = true;
 
         public ContainerDescriptorBuilder setContainerName(String serviceName) {
@@ -254,7 +254,7 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
             return this;
         }
 
-        public ContainerDescriptorBuilder setContainerState(ContainerStates containerState) {
+        public ContainerDescriptorBuilder setContainerState(ContainerState containerState) {
             this.containerState = containerState;
             return this;
         }

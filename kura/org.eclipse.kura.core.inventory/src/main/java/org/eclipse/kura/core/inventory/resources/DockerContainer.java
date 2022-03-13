@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.container.orchestration.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerStates;
+import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
 
@@ -33,7 +33,7 @@ public class DockerContainer extends SystemResourceInfo {
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
     private Boolean containerPrivilaged;
-    private ContainerStates containerState;
+    private ContainerState containerState;
 
     private Boolean isEsfManaged;
 
@@ -118,11 +118,11 @@ public class DockerContainer extends SystemResourceInfo {
         return this.containerPrivilaged;
     }
 
-    public ContainerStates getContainerState() {
+    public ContainerState getContainerState() {
         return this.containerState;
     }
 
-    public void setContainerState(ContainerStates containerState) {
+    public void setContainerState(ContainerState containerState) {
         this.containerState = containerState;
     }
 

@@ -72,6 +72,7 @@ public class DockerServiceImplTest {
     private ContainerDescriptor[] runningContainerDescriptor;
 
     private Map<String, Object> properties;
+    private String containerId;
 
     @Test
     public void testServiceActivateEmptyProperties() throws KuraException {
@@ -430,12 +431,12 @@ public class DockerServiceImplTest {
 
     private void whenRunContainer() throws KuraException {
         // startContainer
-        this.dockerService.startContainer(this.runningContainerDescriptor[0]);
+        this.containerId = this.dockerService.startContainer(this.runningContainerDescriptor[0]);
     }
 
     private void whenStopContainer() {
         // startContainer
-        this.dockerService.stopContainer(this.runningContainerDescriptor[0]);
+        this.dockerService.stopContainer(this.containerId);
     }
 
     private void thenNotStoppedMicroservice() throws KuraException {

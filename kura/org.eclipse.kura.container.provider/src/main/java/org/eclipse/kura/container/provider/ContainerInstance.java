@@ -26,15 +26,15 @@ import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigurableGenericDockerService implements ConfigurableComponent, DockerServiceListener {
+public class ContainerInstance implements ConfigurableComponent, DockerServiceListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurableGenericDockerService.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
     private static final String APP_ID = "org.eclipse.kura.container.provider.ConfigurableGenericDockerService";
     public static final String DEFAULT_INSTANCE_PID = APP_ID;
 
     private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    private ConfigurableGenericDockerServiceOptions serviceOptions;
+    private ContainerInstanceOptions serviceOptions;
 
     private DockerService dockerService;
 
@@ -62,7 +62,7 @@ public class ConfigurableGenericDockerService implements ConfigurableComponent, 
     }
 
     public void updated(Map<String, Object> properties) {
-        ConfigurableGenericDockerServiceOptions newProps = new ConfigurableGenericDockerServiceOptions(properties);
+        ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
         if (newProps.equals(this.serviceOptions)) {
             return;

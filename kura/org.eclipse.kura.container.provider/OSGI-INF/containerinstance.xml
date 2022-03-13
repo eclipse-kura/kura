@@ -10,12 +10,12 @@
  	Contributors:
  	 Eurotech
  -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ConfigurableGenericDockerService">
-   <implementation class="org.eclipse.kura.container.provider.ConfigurableGenericDockerService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" enabled="true" activate="activate" configuration-policy="require" deactivate="deactivate" modified="updated" name="org.eclipse.kura.container.provider.ContainerInstance">
+   <implementation class="org.eclipse.kura.container.provider.ContainerInstance"/>
    <service>
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
-   <property name="service.pid" value="org.eclipse.kura.container.provider.ConfigurableGenericDockerService"/>
+   <property name="service.pid" value="org.eclipse.kura.container.provider.ContainerInstance"/>
    
    <reference cardinality="1..1" interface="org.eclipse.kura.container.orchestration.DockerService" name="DockerService" policy="static" bind="setDockerService" unbind="unsetDockerService"/>
 </scr:component>

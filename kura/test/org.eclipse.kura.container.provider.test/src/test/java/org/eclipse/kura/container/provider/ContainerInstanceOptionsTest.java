@@ -27,7 +27,7 @@ import java.util.Map;
 import org.eclipse.kura.container.orchestration.ContainerDescriptor;
 import org.junit.Test;
 
-public class ConfigurableDockerGernericDockerServiceOptionsTest {
+public class ContainerInstanceOptionsTest {
 
     private static final boolean DEFAULT_ENABLED = false;
     private static final String DEFAULT_PORTS_EXTERNAL = "";
@@ -58,7 +58,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     private Map<String, Object> properties;
 
-    private ConfigurableGenericDockerServiceOptions cgdso;
+    private ContainerInstanceOptions cgdso;
 
     private boolean enabled;
     private String image;
@@ -458,7 +458,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
-        whenGetEquals(new ConfigurableGenericDockerServiceOptions(this.properties));
+        whenGetEquals(new ContainerInstanceOptions(this.properties));
 
         thenIsEqual();
         thenIsNotSameHashCode();
@@ -470,7 +470,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         givenDifferentProperties();
         givenConfigurableGenericDockerServiceOptions();
 
-        whenGetEquals(new ConfigurableGenericDockerServiceOptions(this.newProperties));
+        whenGetEquals(new ContainerInstanceOptions(this.newProperties));
 
         thenIsNotEqual();
         thenIsNotSameHashCode();
@@ -482,7 +482,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         givenEmptyNewProperties();
         givenConfigurableGenericDockerServiceOptions();
 
-        whenGetEquals(new ConfigurableGenericDockerServiceOptions(this.newProperties));
+        whenGetEquals(new ContainerInstanceOptions(this.newProperties));
 
         thenIsNotEqual();
         thenIsNotSameHashCode();
@@ -534,7 +534,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
-        this.cgdso = new ConfigurableGenericDockerServiceOptions(this.properties);
+        this.cgdso = new ContainerInstanceOptions(this.properties);
     }
 
     private void givenEnabled(boolean b) {
@@ -582,7 +582,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     }
 
     private void whenConfigurableGenericDockerServiceOptionsCreated() {
-        this.cgdso = new ConfigurableGenericDockerServiceOptions(this.properties);
+        this.cgdso = new ContainerInstanceOptions(this.properties);
     }
 
     private void whenIsEnabled() {
@@ -637,11 +637,11 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         this.portsAvailable = this.cgdso.getContainerPortsInternal();
     }
 
-    private void whenGetEquals(ConfigurableGenericDockerServiceOptions options) {
+    private void whenGetEquals(ContainerInstanceOptions options) {
         this.equals = this.cgdso.equals(options);
     }
 
-    private void whenGetHashCode(ConfigurableGenericDockerServiceOptions options) {
+    private void whenGetHashCode(ContainerInstanceOptions options) {
         this.hashCode = options.hashCode();
     }
 

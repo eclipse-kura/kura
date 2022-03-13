@@ -25,7 +25,7 @@ import org.eclipse.kura.container.orchestration.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
 import org.eclipse.kura.util.configuration.Property;
 
-public class ConfigurableGenericDockerServiceOptions {
+public class ContainerInstanceOptions {
 
     private static final Property<Boolean> IS_ENABLED = new Property<>("container.enabled", false);
     private static final Property<String> CONTAINER_IMAGE = new Property<>("container.image", "nginx");
@@ -56,7 +56,7 @@ public class ConfigurableGenericDockerServiceOptions {
     private final int maxDownloadRetries;
     private final int retryInterval;
 
-    public ConfigurableGenericDockerServiceOptions(final Map<String, Object> properties) {
+    public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
             throw new IllegalArgumentException("Properties cannot be null!");
         }
@@ -224,7 +224,7 @@ public class ConfigurableGenericDockerServiceOptions {
         if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
-        ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
+        ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
         if (this.containerDevice == null) {
             if (other.containerDevice != null) {
                 return false;

@@ -27,7 +27,7 @@ import org.eclipse.kura.container.orchestration.DockerService;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class ConfigurableDockerGenericDockerServiceTest {
+public class ContainerInstanceTest {
 
     private static final String CONTAINER_PATH_FILE_PATH = "container.path.filePath";
     private static final String CONTAINER_PATH_DESTINATION = "container.path.destination";
@@ -43,7 +43,7 @@ public class ConfigurableDockerGenericDockerServiceTest {
 
     private DockerService dockerService;
     private Map<String, Object> properties;
-    private ConfigurableGenericDockerService configurableGenericDockerService;
+    private ContainerInstance configurableGenericDockerService;
 
     @Test(expected = IllegalArgumentException.class)
     public void testServiceActivateNullProperties() throws KuraException {
@@ -175,7 +175,7 @@ public class ConfigurableDockerGenericDockerServiceTest {
     }
 
     private void givenConfigurableGenericDockerService() {
-        this.configurableGenericDockerService = new ConfigurableGenericDockerService();
+        this.configurableGenericDockerService = new ContainerInstance();
     }
 
     private void givenActivateInstance() {

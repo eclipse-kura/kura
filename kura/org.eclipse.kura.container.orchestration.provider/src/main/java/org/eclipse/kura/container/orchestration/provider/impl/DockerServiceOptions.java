@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -29,6 +29,8 @@ public class DockerServiceOptions {
     private static final Property<String> REPOSITORY_URL = new Property<>("dockerService.repository.hostname", "");
     private static final Property<String> REPOSITORY_USERNAME = new Property<>("dockerService.repository.username", "");
     private static final Property<String> REPOSITORY_PASSWORD = new Property<>("dockerService.repository.password", "");
+    private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>(
+            "dockerService.default.download.timeout", 120);
 
     private final boolean enabled;
     private final String hostUrl;
@@ -36,6 +38,7 @@ public class DockerServiceOptions {
     private final String repositoryURL;
     private final String repositoryUsername;
     private final String repositoryPassword;
+    private final int imagesDownloadTimeout;
 
     public DockerServiceOptions(final Map<String, Object> properties) {
 
@@ -49,6 +52,7 @@ public class DockerServiceOptions {
         this.repositoryURL = REPOSITORY_URL.get(properties);
         this.repositoryUsername = REPOSITORY_USERNAME.get(properties);
         this.repositoryPassword = REPOSITORY_PASSWORD.get(properties);
+        this.imagesDownloadTimeout = IMAGES_DOWNLOAD_TIMEOUT.get(properties);
     }
 
     public boolean isEnabled() {
@@ -73,6 +77,10 @@ public class DockerServiceOptions {
 
     public String getRepositoryPassword() {
         return this.repositoryPassword;
+    }
+    
+    public int getImagesDownloadTimeout() {
+        return this.imagesDownloadTimeout;
     }
 
     @Override

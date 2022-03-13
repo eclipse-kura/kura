@@ -280,7 +280,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         Optional<String> containerId = getContainerIdByName(container.getContainerName());
 
         if (!containerId.isPresent()) {
-            pullImage(container.getContainerImage(), container.getContainerImageTag(), 120);
+            pullImage(container.getContainerImage(), container.getContainerImageTag(),
+                    this.currentConfig.getImagesDownloadTimeout());
             containerId = createContainer(container);
         }
 

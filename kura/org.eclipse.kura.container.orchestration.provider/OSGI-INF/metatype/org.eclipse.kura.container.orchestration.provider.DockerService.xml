@@ -24,7 +24,7 @@
 
         <AD id="dockerService.dockerHost" name="Docker Host URL"
             description="Docker Host URL: tcp://localhost:2376 or unix:///var/run/docker.sock" type="String"
-            cardinality="-1" required="true" default="unix:///var/run/docker.sock" />
+            cardinality="0" required="true" default="unix:///var/run/docker.sock" />
         
          <AD id="dockerService.repository.enabled" name="Enable Credentials" type="Boolean" cardinality="0" required="true" default="false"
             description="Enables the usage of authenticated docker-repositories.">
@@ -41,6 +41,15 @@
         <AD id="dockerService.repository.password" name="Password"
             description="Password for docker repository." type="Password"
             cardinality="0" required="false" default="" />
+            
+        <AD id="dockerService.default.download.timeout" 
+            name="Images Download Timeout"
+            description="Default images download timeout. Value specified in seconds" 
+            type="Integer"
+            cardinality="0" 
+            required="true" 
+            min="1"
+            default="120" />
         
     </OCD>
 

@@ -273,7 +273,7 @@
                 </b:Panel>
             </b:ModalBody>
         </b:Modal>
-        <b:Modal closable="true" dataKeyboard="false" dataBackdrop="STATIC" ui:field="regDomModal" b:id="regDomModal">
+        <b:Modal closable="true" dataKeyboard="false" dataBackdrop="STATIC" ui:field="regDomErrorModal" b:id="regDomErrorModal">
             <b:ModalBody>
                 <b:Panel>
                     <b:PanelBody>

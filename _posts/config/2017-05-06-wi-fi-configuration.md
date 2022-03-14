@@ -28,8 +28,6 @@ The **Wireless** tab contains the following configuration parameters:
   - 802.11b (2.4Ghz only)
   - 802.11a (either in 2.4Ghz or 5Ghz depending on the choosen channel)
 
-
-
 - **Wireless Security** - sets the security protocol for the wireless network.
   - None - No Wi-Fi security
   - WEP - Wired Equivalent Privacy
@@ -88,9 +86,9 @@ The **Wireless** tab contains the following configuration parameters:
   - In _Station_ mode, does not scan for the SSID before attempting to associate.
 
 
-- **Channels table** - allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: [List of WLAN channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels). Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip.
+- **Channels list** - allows the selection of desired channel frequencies. The availability of the desired frequency is subject to the Regdom set on the device. For a list of limitations in different countries you can consult the following page: [List of WLAN channels](https://en.wikipedia.org/wiki/List_of_WLAN_channels). Channels marked as No Irradiation and Radar Detection can be used only if DFS (Dynamic Frequency Selection) is supported by the Wi-Fi chip.
   - In _Access Point_ mode, only one channel may be selected.
-  - In _Station_ mode, a user may select multiple channels to scan. Note that choosing to scan multiple channels increases the time it takes to associate with an access point.
+  - In _Station_ mode, the list of available channels depends on the selected Radio Mode. The selected radio mode also affects the ability to select a network in the scan window (if the channel associated with the network is not enabled in the regulatory domain an error message will be shown).
 
 ![]({{ site.baseurl }}/assets/images/config/NetWiFi.png)
 

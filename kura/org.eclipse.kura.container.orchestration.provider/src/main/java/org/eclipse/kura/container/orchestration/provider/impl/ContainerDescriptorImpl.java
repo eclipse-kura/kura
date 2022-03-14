@@ -49,7 +49,7 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
     }
 
     @Override
-    public Boolean isFrameworkManaged() {
+    public boolean isFrameworkManaged() {
         return this.isFrameworkManaged;
     }
 
@@ -99,7 +99,7 @@ public class ContainerDescriptorImpl implements ContainerDescriptor {
     }
 
     @Override
-    public Boolean getContainerPrivileged() {
+    public boolean getContainerPrivileged() {
         return this.containerPrivileged;
     }
 

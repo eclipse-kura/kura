@@ -282,6 +282,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
                     } catch (KuraException e) {
                         logger.error("Could not start container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+                    } catch (InterruptedException e) {
+                        logger.error("Interrupted while starting container with name: {}", containerName);
+                        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                     }
                     return;
                 }

@@ -36,7 +36,7 @@ public interface ContainerDescriptor {
      *
      * @return <code>true</code> if the framework manages the container. <code>false</code> otherwise
      */
-    public Boolean isFrameworkManaged();
+    public boolean isFrameworkManaged();
 
     /**
      * Returns the container name
@@ -106,7 +106,7 @@ public interface ContainerDescriptor {
      *
      * @return
      */
-    public Boolean getContainerPrivileged();
+    public boolean getContainerPrivileged();
 
     /**
      * Static method that will extract the {@link ContainerDescriptor} matching the given name in the given list
@@ -140,9 +140,9 @@ public interface ContainerDescriptor {
         resultBuilder = resultBuilder && obj1.getContainerEnvVars().equals(obj2.getContainerEnvVars());
         resultBuilder = resultBuilder && obj1.getContainerDevices().equals(obj2.getContainerDevices());
         resultBuilder = resultBuilder && obj1.getContainerVolumes().equals(obj2.getContainerVolumes());
-        resultBuilder = resultBuilder && obj1.getContainerPrivileged().equals(obj2.getContainerPrivileged());
+        resultBuilder = resultBuilder && obj1.getContainerPrivileged() == obj2.getContainerPrivileged();
         resultBuilder = resultBuilder && obj1.getContainerState().equals(obj2.getContainerState());
-        resultBuilder = resultBuilder && obj1.isFrameworkManaged().equals(obj2.isFrameworkManaged());
+        resultBuilder = resultBuilder && obj1.isFrameworkManaged() == obj2.isFrameworkManaged();
 
         return resultBuilder;
     }

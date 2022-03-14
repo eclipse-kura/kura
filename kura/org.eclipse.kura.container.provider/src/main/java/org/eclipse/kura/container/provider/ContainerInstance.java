@@ -13,13 +13,12 @@
 
 package org.eclipse.kura.container.provider;
 
-import static java.util.Objects.isNull;
-
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
@@ -35,20 +34,17 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
     private static final String APP_ID = "org.eclipse.kura.container.provider.ConfigurableGenericDockerService";
     public static final String DEFAULT_INSTANCE_PID = APP_ID;
 
-    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-
-    private ContainerInstanceOptions serviceOptions;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private DockerService dockerService;
 
-    private String containerId;
-    private ScheduledFuture<?> startupFuture;
+    private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 
-    public void setDockerService(DockerService dockerService) {
+    public void setDockerService(final DockerService dockerService) {
         this.dockerService = dockerService;
     }
 
-    public void unsetDockerService(DockerService dockerService) {
+    public void unsetDockerService(final DockerService dockerService) {
         if (this.dockerService == dockerService) {
             this.dockerService = null;
         }
@@ -70,33 +66,21 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
     public void updated(Map<String, Object> properties) {
         ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
-        if (newProps.equals(this.serviceOptions)) {
-            return;
-        }
-
-        this.serviceOptions = newProps;
-
-        if (this.serviceOptions.isEnabled()) {
-            this.dockerService.registerListener(this, this.serviceOptions.getContainerName());
-            this.startupFuture = this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
+        if (newProps.isEnabled()) {
+            this.dockerService.registerListener(this);
         } else {
-            if (!isNull(this.containerId)) {
-                deleteRunningMicroservice();
-            }
             this.dockerService.unregisterListener(this);
         }
 
+        updateState(s -> s.onConfigurationUpdated(newProps));
     }
 
     public void deactivate() {
         logger.info("deactivate...");
-        logger.info("cleaning up related container: {}", this.serviceOptions.getContainerName());
+
+        updateState(State::onDisabled);
 
         this.executor.shutdown();
-
-        if (this.serviceOptions.isEnabled()) {
-            deleteRunningMicroservice();
-        }
         this.dockerService.unregisterListener(this);
 
         logger.info("deactivate...done");
@@ -108,61 +92,220 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
     //
     // ----------------------------------------------------------------
 
-    private void startMicroservice() {
-        boolean unlimitedRetries = this.serviceOptions.isUnlimitedRetries();
-        int maxRetries = this.serviceOptions.getMaxDownloadRetries();
-        int retryInterval = this.serviceOptions.getRetryInterval();
-
-        ContainerDescriptor registeredContainerRefrence = this.serviceOptions.getContainerDescriptor();
-
-        int retries = 0;
-        while (unlimitedRetries || retries < maxRetries) {
-            logger.info("Tentative number: {}", retries);
-            try {
-                this.containerId = this.dockerService.startContainer(registeredContainerRefrence);
-                return;
-            } catch (KuraException e) {
-                logger.error("Error managing microservice state", e);
-            }
-
-            if (!unlimitedRetries) {
-                retries++;
-            }
-
-            try {
-                Thread.sleep(retryInterval);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-
-        }
-
-        logger.warn("Unable to start microservice...giving up");
-    }
-
-    private void deleteRunningMicroservice() {
-        try {
-            this.dockerService.stopContainer(this.containerId);
-            this.dockerService.deleteContainer(this.containerId);
-        } catch (Exception e) {
-            logger.error("Error stopping microservice {}", this.serviceOptions.getContainerName(), e);
-        }
-    }
-
     @Override
     public void onConnect() {
-        if (isNull(this.startupFuture) || this.startupFuture.isDone()) {
-            this.startupFuture = this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
-        }
+        updateState(State::onConnect);
     }
 
     @Override
     public void onDisconnect() {
-        this.executor.shutdownNow();
+        //
     }
 
     @Override
     public void onDisabled() {
-        deleteRunningMicroservice();
+        updateState(State::onDisabled);
     }
+
+    private synchronized void updateState(final UnaryOperator<State> update) {
+        final State previous = this.state;
+        final State newState = update.apply(previous);
+        logger.info("State update: {} -> {}", previous.getClass().getSimpleName(), newState.getClass().getSimpleName());
+
+        this.state = newState;
+    }
+
+    private interface State {
+
+        public default State onConnect() {
+            return this;
+        }
+
+        public default State onConfigurationUpdated(final ContainerInstanceOptions options) {
+            return this;
+        }
+
+        public default State onContanierReady(final String containerId) {
+            return this;
+        }
+
+        public default State onStartupFailure() {
+            return this;
+        }
+
+        public default State onDisabled() {
+            return this;
+        }
+
+    }
+
+    private class Disabled implements State {
+
+        private ContainerInstanceOptions options;
+
+        public Disabled(ContainerInstanceOptions options) {
+            this.options = options;
+        }
+
+        @Override
+        public State onConfigurationUpdated(ContainerInstanceOptions options) {
+            if (options.isEnabled()) {
+                return new Starting(options);
+            } else {
+                return new Disabled(options);
+            }
+        }
+
+        @Override
+        public State onConnect() {
+            if (this.options.isEnabled()) {
+                return new Starting(this.options);
+            } else {
+                return this;
+            }
+        }
+
+    }
+
+    private class Starting implements State {
+
+        private final ContainerInstanceOptions options;
+        private final Future<?> startupFuture;
+
+        public Starting(final ContainerInstanceOptions options) {
+            this.options = options;
+            this.startupFuture = executor.submit(() -> startMicroservice(options));
+        }
+
+        @Override
+        public State onConfigurationUpdated(ContainerInstanceOptions newOptions) {
+            if (newOptions.equals(this.options)) {
+                return this;
+            }
+
+            startupFuture.cancel(true);
+
+            if (newOptions.isEnabled()) {
+                return new Starting(newOptions);
+            } else {
+                return new Disabled(newOptions);
+            }
+        }
+
+        @Override
+        public State onContanierReady(final String containerId) {
+            return new Created(options, containerId);
+        }
+
+        @Override
+        public State onStartupFailure() {
+            return new Failed(options);
+        }
+
+        @Override
+        public State onDisabled() {
+            startupFuture.cancel(true);
+            return new Disabled(this.options);
+        }
+
+        private void startMicroservice(final ContainerInstanceOptions options) {
+            boolean unlimitedRetries = options.isUnlimitedRetries();
+            int maxRetries = options.getMaxDownloadRetries();
+            int retryInterval = options.getRetryInterval();
+
+            ContainerDescriptor registeredContainerRefrence = options.getContainerDescriptor();
+
+            int retries = 0;
+            while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
+                try {
+                    logger.info("Tentative number: {}", retries);
+
+                    if (retries > 0) {
+                        Thread.sleep(retryInterval);
+                    }
+
+                    final String containerId = dockerService.startContainer(registeredContainerRefrence);
+
+                    updateState(s -> s.onContanierReady(containerId));
+                    return;
+
+                } catch (InterruptedException e) {
+                    logger.info("interrupted exiting");
+                    Thread.currentThread().interrupt();
+                    return;
+                } catch (KuraException e) {
+                    logger.error("Error managing microservice state", e);
+                    if (!unlimitedRetries) {
+                        retries++;
+                    }
+                }
+            }
+
+            updateState(State::onStartupFailure);
+
+            logger.warn("Unable to start microservice...giving up");
+        }
+    }
+
+    private class Failed implements State {
+
+        final ContainerInstanceOptions options;
+
+        public Failed(ContainerInstanceOptions options) {
+            this.options = options;
+        }
+
+        @Override
+        public State onConfigurationUpdated(ContainerInstanceOptions newOptions) {
+            return new Starting(newOptions);
+        }
+
+        @Override
+        public State onConnect() {
+            return new Starting(options);
+        }
+    }
+
+    private class Created implements State {
+
+        private final ContainerInstanceOptions options;
+        private final String containerId;
+
+        public Created(ContainerInstanceOptions options, String containerId) {
+            this.options = options;
+            this.containerId = containerId;
+        }
+
+        private void deleteContainer() {
+            try {
+                dockerService.stopContainer(this.containerId);
+                dockerService.deleteContainer(this.containerId);
+            } catch (Exception e) {
+                logger.error("Error stopping microservice {}", options.getContainerName(), e);
+            }
+        }
+
+        @Override
+        public State onConfigurationUpdated(ContainerInstanceOptions options) {
+            if (options.equals(this.options)) {
+                return this;
+            }
+
+            deleteContainer();
+
+            if (options.isEnabled()) {
+                return new Starting(options);
+            } else {
+                return new Disabled(this.options);
+            }
+        }
+
+        @Override
+        public State onDisabled() {
+            deleteContainer();
+            return new Disabled(this.options);
+        }
+
+    }
+
 }

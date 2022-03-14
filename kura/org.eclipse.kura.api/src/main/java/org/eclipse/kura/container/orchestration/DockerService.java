@@ -52,7 +52,8 @@ public interface DockerService {
      * @throws KuraException
      *             if the pull operation fails
      */
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds) throws KuraException;
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds)
+            throws KuraException, InterruptedException;
 
     /**
      * Returns the id of the container corresponding to the specified name. If no container can be found an
@@ -75,7 +76,7 @@ public interface DockerService {
      * @throws KuraException
      *             is thrown if the image pull or container creation and start fail
      */
-    public String startContainer(ContainerDescriptor containerDescriptor) throws KuraException;
+    public String startContainer(ContainerDescriptor containerDescriptor) throws KuraException, InterruptedException;
 
     /**
      * Starts a container identified by the specified ID
@@ -108,12 +109,12 @@ public interface DockerService {
     public void deleteContainer(String id) throws KuraException;
 
     /**
-     * Adds a new {@link DockerServiceListener} and tracks the corresponding containerName
+     * Adds a new {@link DockerServiceListener}
      *
      * @param dockerListener
      * @param containerName
      */
-    public void registerListener(DockerServiceListener dockerListener, String containerName);
+    public void registerListener(DockerServiceListener dockerListener);
 
     /**
      * Removes the {@link DockerServiceListener} specified as parameter

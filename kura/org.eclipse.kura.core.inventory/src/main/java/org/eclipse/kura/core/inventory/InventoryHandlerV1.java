@@ -241,6 +241,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             }
         } catch (final KuraException e) {
             throw e;
+        } catch (final InterruptedException e) {
+            logger.debug("interrupted while dispatching call", e);
+            Thread.currentThread().interrupt();
+            // this should result in response code 500
+            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
         } catch (final Exception e) {
             logger.debug("unexpected exception dispatcing call", e);
             // this should result in response code 500

@@ -227,7 +227,7 @@ public class DockerServiceImplTest {
 
     @Test
     @Ignore
-    public void testCreateContainer() throws KuraException {
+    public void testCreateContainer() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenDockerServiceImpl();
         givenDockerClient();
@@ -240,7 +240,7 @@ public class DockerServiceImplTest {
 
     @Test
     @Ignore
-    public void testCreateContainerOfflineQueue() throws KuraException {
+    public void testCreateContainerOfflineQueue() throws KuraException, InterruptedException {
         givenFullProperties(false);
         givenDockerServiceImpl();
         givenDockerClient();
@@ -256,7 +256,7 @@ public class DockerServiceImplTest {
 
     @Test
     @Ignore
-    public void testStopContainer() throws KuraException {
+    public void testStopContainer() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenDockerServiceImpl();
         givenForcedProperties();
@@ -429,7 +429,7 @@ public class DockerServiceImplTest {
 
     }
 
-    private void whenRunContainer() throws KuraException {
+    private void whenRunContainer() throws KuraException, InterruptedException {
         // startContainer
         this.containerId = this.dockerService.startContainer(this.runningContainerDescriptor[0]);
     }

@@ -16,11 +16,13 @@ import static java.util.Objects.isNull;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraErrorCode;
@@ -65,7 +67,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private DockerServiceOptions currentConfig;
 
-    private final Map<DockerServiceListener, String> dockerServiceListeners = new HashMap<>();
+    private final Set<DockerServiceListener> dockerServiceListeners = new HashSet<>();
+    private final Set<FrameworkManagedContainer> frameworkManagedContainers = new HashSet<>();
 
     private DockerClient dockerClient;
     private AuthConfig dockerAuthConfig;
@@ -163,8 +166,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private Boolean isFrameworkManaged(Container container) {
         String containerName = getContainerName(container);
-        return this.dockerServiceListeners.values().stream()
-                .anyMatch(registeredContainerName -> registeredContainerName.equals(containerName));
+        return this.frameworkManagedContainers.contains(containerName);
     }
 
     private String getContainerName(Container container) {
@@ -267,7 +269,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public String startContainer(ContainerDescriptor container) throws KuraException {
+    public String startContainer(ContainerDescriptor container) throws KuraException, InterruptedException {
         if (isNull(container)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
@@ -289,6 +291,11 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         logger.info("Container Started Successfully");
 
+        if (container.isFrameworkManaged()) {
+            this.frameworkManagedContainers
+                    .add(new FrameworkManagedContainer(container.getContainerName(), containerId.orElse("")));
+        }
+
         return containerId.orElse("");
     }
 
@@ -306,15 +313,19 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
         this.dockerClient.removeContainerCmd(id).exec();
+        this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSecconds) throws KuraException {
+    public void pullImage(String imageName, String imageTag, int timeOutSecconds)
+            throws KuraException, InterruptedException {
         boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
 
         if (!imageAvailableLocally) {
             try {
                 imagePullHelper(imageName, imageTag, timeOutSecconds, this.currentConfig.isRepositoryEnabled());
+            } catch (InterruptedException e) {
+                throw e;
             } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
             }
@@ -322,8 +333,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void registerListener(DockerServiceListener dockerListener, String containerName) {
-        this.dockerServiceListeners.put(dockerListener, containerName);
+    public void registerListener(DockerServiceListener dockerListener) {
+        this.dockerServiceListeners.add(dockerListener);
 
     }
 
@@ -333,30 +344,26 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     }
 
-    private void imagePullHelper(String imageName, String imageTag, int timeOutSecconds, boolean withAuth) {
+    private void imagePullHelper(String imageName, String imageTag, int timeOutSecconds, boolean withAuth)
+            throws InterruptedException {
 
-        try {
-            logger.info("Attempting to pull image: {}. \n Authentication is set to: {}", imageName, withAuth);
-            PullImageCmd pullRequest = this.dockerClient.pullImageCmd(imageName).withTag(imageTag);
+        logger.info("Attempting to pull image: {}. \n Authentication is set to: {}", imageName, withAuth);
+        PullImageCmd pullRequest = this.dockerClient.pullImageCmd(imageName).withTag(imageTag);
 
-            if (withAuth) {
-                pullRequest.withAuthConfig(this.dockerAuthConfig);
+        if (withAuth) {
+            pullRequest.withAuthConfig(this.dockerAuthConfig);
+        }
+
+        pullRequest.exec(new PullImageResultCallback() {
+
+            @Override
+            public void onNext(PullResponseItem item) {
+                super.onNext(item);
+                logger.info("Downloading: {}", item.getStatus());
             }
 
-            pullRequest.exec(new PullImageResultCallback() {
+        }).awaitCompletion(timeOutSecconds, TimeUnit.SECONDS);
 
-                @Override
-                public void onNext(PullResponseItem item) {
-                    super.onNext(item);
-                    logger.info("Downloading: {}", item.getStatus());
-                }
-
-            }).awaitCompletion(timeOutSecconds, TimeUnit.SECONDS);
-
-        } catch (InterruptedException e) {
-            logger.error("Interrupted while pulling {}: {}", imageName, e);
-            Thread.currentThread().interrupt();
-        }
     }
 
     private Optional<String> createContainer(ContainerDescriptor containerDescription) throws KuraException {
@@ -391,8 +398,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
             configuration = containerPortManagementHandler(containerDescription, configuration);
 
-            if (containerDescription.getContainerPrivileged() != null
-                    && containerDescription.getContainerPrivileged()) {
+            if (containerDescription.getContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.getContainerPrivileged());
             }
 
@@ -536,8 +542,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     private void cleanUpDocker() {
 
         if (testConnection()) {
+            this.dockerServiceListeners.forEach(DockerServiceListener::onDisabled);
             disconnect();
-            this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onDisabled);
         }
     }
 
@@ -557,14 +563,18 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             logIntoRemoteRepository();
         }
 
-        this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onConnect);
-        return testConnection();
+        final boolean connected = testConnection();
+
+        if (connected) {
+            this.dockerServiceListeners.forEach(DockerServiceListener::onConnect);
+        }
+        return connected;
     }
 
     private void disconnect() {
         if (testConnection()) {
             try {
-                this.dockerServiceListeners.keySet().forEach(DockerServiceListener::onDisconnect);
+                this.dockerServiceListeners.forEach(DockerServiceListener::onDisconnect);
                 this.dockerClient.close();
             } catch (IOException e) {
                 logger.error("Error disconnecting", e);
@@ -604,5 +614,37 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             this.dockerAuthConfig = new AuthConfig().withUsername(this.currentConfig.getRepositoryUsername())
                     .withPassword(decodedPassword).withRegistryAddress(this.currentConfig.getRepositoryUrl());
         }
+    }
+
+    private static class FrameworkManagedContainer {
+
+        private String name;
+        private String id;
+
+        public FrameworkManagedContainer(String name, String id) {
+            this.name = name;
+            this.id = id;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            FrameorkManagedContainer other = (FrameorkManagedContainer) obj;
+            return Objects.equals(id, other.id) && Objects.equals(name, other.name);
+        }
+
     }
 }

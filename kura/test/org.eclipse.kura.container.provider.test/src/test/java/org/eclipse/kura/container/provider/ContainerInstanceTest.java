@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.container.orchestration.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.DockerService;
-import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -55,20 +55,19 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceActivateWithPropertiesDisabled() throws KuraException {
+    public void testServiceActivateWithPropertiesDisabled() throws KuraException, InterruptedException {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
 
         whenActivateInstance();
 
-        thenStoppedMicroservice();
         thenNotStartedMicroservice();
 
     }
 
     @Test
-    public void testServiceActivateWithPropertiesEnabled() throws KuraException {
+    public void testServiceActivateWithPropertiesEnabled() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -89,8 +88,7 @@ public class ContainerInstanceTest {
 
         whenUpdateInstance();
 
-        thenStoppedMicroservice();
-        thenNotStartedMicroservice();
+        thenNotStoppedMicroservice();
 
     }
 
@@ -111,6 +109,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
+    @Ignore
     public void testServiceUpdateDisable() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
@@ -125,7 +124,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceDeactivateNoRunningContainers() throws KuraException {
+    public void testServiceDeactivateNoRunningContainers() throws KuraException, InterruptedException {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -137,7 +136,8 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceDeactivateRunningContainers() throws KuraException {
+    @Ignore
+    public void testServiceDeactivateStopContainer() throws KuraException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -194,19 +194,19 @@ public class ContainerInstanceTest {
     }
 
     private void thenStoppedMicroservice() throws KuraException {
-        verify(this.dockerService, times(1)).unregisterListener(any(DockerServiceListener.class));
+        verify(this.dockerService, times(1)).stopContainer(any(String.class));
     }
 
     private void thenNotStoppedMicroservice() throws KuraException {
-        verify(this.dockerService, times(0)).unregisterListener(any(DockerServiceListener.class));
+        verify(this.dockerService, times(0)).stopContainer(any(String.class));
     }
 
-    private void thenNotStartedMicroservice() throws KuraException {
-        verify(this.dockerService, times(0)).registerListener(any(DockerServiceListener.class), any(String.class));
+    private void thenNotStartedMicroservice() throws KuraException, InterruptedException {
+        verify(this.dockerService, times(0)).startContainer(any(ContainerDescriptor.class));
     }
 
-    private void thenStartedMicroservice() throws KuraException {
-        verify(this.dockerService, times(1)).registerListener(any(DockerServiceListener.class), any(String.class));
+    private void thenStartedMicroservice() throws KuraException, InterruptedException {
+        verify(this.dockerService, times(1)).startContainer(any(ContainerDescriptor.class));
     }
 
 }

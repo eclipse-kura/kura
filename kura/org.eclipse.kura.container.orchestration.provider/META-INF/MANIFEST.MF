@@ -36,4 +36,3 @@ Bundle-ClassPath: .,
  lib/jackson-core.jar,
  lib/jackson-databind.jar,
  lib/jna.jar
-Export-Package: org.eclipse.kura.container.orchestration.provider.impl;version="1.0.0"

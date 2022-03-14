@@ -14,9 +14,8 @@
 package org.eclipse.kura.core.inventory.resources;
 
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemResourceType;
@@ -29,10 +28,6 @@ public class DockerContainer extends SystemResourceInfo {
     private String containerID;
     private List<Integer> containerPortsExternal;
     private List<Integer> containerPortsInternal;
-    private List<String> containerEnvVars;
-    private List<String> containerDevices;
-    private Map<String, String> containerVolumes;
-    private Boolean containerPrivilaged;
     private ContainerState containerState;
 
     private Boolean isFrameworkManaged;
@@ -42,7 +37,7 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerName = name;
     }
 
-    public DockerContainer(ContainerDescriptor container) {
+    public DockerContainer(ContainerInstanceDescriptor container) {
         super(container.getContainerName(), container.getContainerImage() + ":" + container.getContainerImageTag(),
                 SystemResourceType.DOCKER);
 
@@ -52,10 +47,6 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerID = container.getContainerId();
         this.containerPortsExternal = container.getContainerPortsExternal();
         this.containerPortsInternal = container.getContainerPortsInternal();
-        this.containerEnvVars = container.getContainerEnvVars();
-        this.containerDevices = container.getContainerDevices();
-        this.containerVolumes = container.getContainerVolumes();
-        this.containerPrivilaged = container.getContainerPrivileged();
         this.containerState = container.getContainerState();
 
         this.isFrameworkManaged = container.isFrameworkManaged();
@@ -100,22 +91,6 @@ public class DockerContainer extends SystemResourceInfo {
 
     public List<Integer> getContainerPortsInternal() {
         return this.containerPortsInternal;
-    }
-
-    public List<String> getContainerEnvVars() {
-        return this.containerEnvVars;
-    }
-
-    public List<String> getContainerDevices() {
-        return this.containerDevices;
-    }
-
-    public Map<String, String> getContainerVolumes() {
-        return this.containerVolumes;
-    }
-
-    public Boolean getContainerPrivileged() {
-        return this.containerPrivilaged;
     }
 
     public ContainerState getContainerState() {

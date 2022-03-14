@@ -21,8 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.util.configuration.Property;
 
 public class ContainerInstanceOptions {
@@ -174,11 +173,11 @@ public class ContainerInstanceOptions {
         return this.retryInterval;
     }
 
-    public ContainerDescriptor getContainerDescriptor() {
-        return ContainerDescriptorImpl.builder().setContainerName(getContainerName())
+    public ContainerConfiguration getContainerDescriptor() {
+        return ContainerConfiguration.builder().setContainerName(getContainerName())
                 .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
-                .setExternalPort(getContainerPortsExternal()).setInternalPort(getContainerPortsInternal())
-                .addEnvVar(getContainerEnvList()).setVolume(getContainerVolumeList())
+                .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())
+                .setEnvVars(getContainerEnvList()).setVolumes(getContainerVolumeList())
                 .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
                 .setFrameworkManaged(true).build();
     }

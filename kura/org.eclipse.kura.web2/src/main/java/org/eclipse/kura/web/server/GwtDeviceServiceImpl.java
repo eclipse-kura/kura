@@ -26,7 +26,7 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.DockerService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
@@ -243,10 +243,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
             DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-            ContainerDescriptor[] containers = dockerService.listContainerDescriptors().stream()
-                    .toArray(ContainerDescriptor[]::new);
+            List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
             if (containers != null) {
-                for (ContainerDescriptor container : containers) {
+                for (ContainerInstanceDescriptor container : containers) {
                     GwtGroupedNVPair pair = new GwtGroupedNVPair();
                     pair.setId(container.getContainerName());
                     pair.setName(container.getContainerImage());
@@ -258,7 +257,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             }
 
         } catch (Exception e) {
-            logger.error("Failed To List Containers: {}", e);
+            logger.error("Failed To List Containers", e);
         }
 
         return new ArrayList<>(pairs);
@@ -269,21 +268,17 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
 
         DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-        ContainerDescriptor[] containers = dockerService.listContainerDescriptors().stream()
-                .toArray(ContainerDescriptor[]::new);
+        List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
 
         logger.info("Starting container with name: {}", containerName);
 
         if (containers != null) {
-            for (ContainerDescriptor container : containers) {
+            for (ContainerInstanceDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
-                        dockerService.startContainer(container);
+                        dockerService.startContainer(container.getContainerId());
                     } catch (KuraException e) {
                         logger.error("Could not start container with name: {}", containerName);
-                        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-                    } catch (InterruptedException e) {
-                        logger.error("Interrupted while starting container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
                     }
                     return;
@@ -301,13 +296,12 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
 
-        ContainerDescriptor[] containers = dockerService.listContainerDescriptors().stream()
-                .toArray(ContainerDescriptor[]::new);
+        List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
 
         logger.info("Stopping container with name: {}", containerName);
 
         if (containers != null) {
-            for (ContainerDescriptor container : containers) {
+            for (ContainerInstanceDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
                         dockerService.stopContainer(container.getContainerId());
@@ -501,7 +495,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
     }
 
-    private String containerStateToString(final ContainerDescriptor container) {
+    private String containerStateToString(final ContainerInstanceDescriptor container) {
         switch (container.getContainerState()) {
         case STARTING:
             return "bndInstalled";

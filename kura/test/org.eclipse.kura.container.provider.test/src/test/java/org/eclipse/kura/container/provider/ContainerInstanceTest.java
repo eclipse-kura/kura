@@ -26,7 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.DockerService;
 import org.junit.Test;
 
@@ -50,7 +50,7 @@ public class ContainerInstanceTest {
     private CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
     @Test(expected = IllegalArgumentException.class)
-    public void testServiceActivateNullProperties() throws KuraException {
+    public void testServiceActivateNullProperties() {
         givenNullProperties();
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -71,7 +71,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceActivateWithPropertiesEnabled() throws KuraException, InterruptedException {
+    public void testServiceActivateWithPropertiesEnabled() throws KuraException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -84,7 +84,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceUpdateSameProperties() throws KuraException, InterruptedException {
+    public void testServiceUpdateSameProperties() throws KuraException {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -97,7 +97,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceUpdateEnable() throws KuraException, InterruptedException {
+    public void testServiceUpdateEnable() {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -111,7 +111,7 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    public void testServiceUpdateDisable() throws KuraException, InterruptedException {
+    public void testServiceUpdateDisable() throws KuraException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
@@ -153,7 +153,7 @@ public class ContainerInstanceTest {
         this.dockerService = mock(DockerService.class);
         this.configurableGenericDockerService.setDockerService(this.dockerService);
         try {
-            when(this.dockerService.startContainer((ContainerDescriptor) any())).thenAnswer(i -> {
+            when(this.dockerService.startContainer((ContainerConfiguration) any())).thenAnswer(i -> {
                 this.containerStarted.complete(null);
                 return "1234";
             });
@@ -206,7 +206,7 @@ public class ContainerInstanceTest {
         this.configurableGenericDockerService.activate(this.properties);
     }
 
-    private void whenUpdateInstance() throws InterruptedException {
+    private void whenUpdateInstance() {
         this.configurableGenericDockerService.updated(this.properties);
     }
 
@@ -223,7 +223,7 @@ public class ContainerInstanceTest {
     }
 
     private void thenNotStartedMicroservice() throws KuraException, InterruptedException {
-        verify(this.dockerService, times(0)).startContainer(any(ContainerDescriptor.class));
+        verify(this.dockerService, times(0)).startContainer(any(ContainerConfiguration.class));
     }
 
     private void thenStartedMicroservice() {

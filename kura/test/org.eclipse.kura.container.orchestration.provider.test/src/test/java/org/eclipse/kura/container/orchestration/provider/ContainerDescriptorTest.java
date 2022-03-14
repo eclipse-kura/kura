@@ -19,13 +19,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
 import org.junit.Test;
 
@@ -40,10 +43,10 @@ public class ContainerDescriptorTest {
     private final String path = "~/path/test/";
     private final List<Integer> ports = new ArrayList<>(Arrays.asList(10, 20, 30));
     private final List<Integer> finalPorts = new ArrayList<>(Arrays.asList(10, 20, 30, 40));
-    private ContainerDescriptor firstContainer;
-    private ContainerDescriptor seccondContainer;
-    private ContainerDescriptor thirdContainer;
-    private List<ContainerDescriptor> testContainerList;
+    private ContainerConfiguration firstContainer;
+    private ContainerConfiguration seccondContainer;
+    private ContainerConfiguration thirdContainer;
+    private List<ContainerInstanceDescriptor> testContainerList;
     private Map<String, String> volumes;
     private List<String> devices;
     private List<String> envVar;
@@ -170,20 +173,21 @@ public class ContainerDescriptorTest {
 
     private void whenContainerTrioIsCreated() {
         // Using Set
-        this.firstContainer = ContainerDescriptorImpl.builder().setContainerName("abc")
-                .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolume(this.volumes)
-                .setEnvVar(this.envVar).setDeviceList(this.devices).build();
+        this.firstContainer = ContainerConfiguration.builder().setContainerName("abc")
+                .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolumes(this.volumes)
+                .setEnvVars(this.envVar).setDeviceList(this.devices).build();
 
         // Using Add by item
-        this.seccondContainer = ContainerDescriptorImpl.builder().setContainerName("def")
-                .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).addVolume("test", "~/test/test")
-                .addDevice("/dev/gpio1").addDevice("/dev/gpio2").addEnvVar("test=test").addEnvVar("test2=test2")
-                .build();
+        this.seccondContainer = ContainerConfiguration.builder().setContainerName("def")
+                .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE)
+                .setVolumes(Collections.singletonMap("test", "~/test/test"))
+                .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
+                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
 
         // Using add by list
-        this.thirdContainer = ContainerDescriptorImpl.builder().setContainerName("ghi")
-                .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).addVolume(this.volumes)
-                .addEnvVar(this.envVar).addDevice(this.devices).build();
+        this.thirdContainer = ContainerConfiguration.builder().setContainerName("ghi")
+                .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolumes(this.volumes)
+                .setEnvVars(this.envVar).setDeviceList(this.devices).build();
     }
 
     // then

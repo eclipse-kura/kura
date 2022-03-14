@@ -28,7 +28,8 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.DockerService;
 import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
@@ -144,19 +145,19 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public List<ContainerDescriptor> listContainerDescriptors() {
-        List<ContainerDescriptor> result = new ArrayList<>();
+    public List<ContainerInstanceDescriptor> listContainerDescriptors() {
+        List<ContainerInstanceDescriptor> result = new ArrayList<>();
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
-        containers.forEach(container -> result.add(ContainerDescriptorImpl.builder()
+        containers.forEach(container -> result.add(ContainerInstanceDescriptor.builder()
                 .setContainerName(getContainerName(container)).setContainerImage(getContainerTag(container))
                 .setContainerImageTag(getContainerVersion(container)).setContainerID(container.getId())
-                .setInternalPort(parseInternalPortsFromDockerPs(container.getPorts()))
-                .setExternalPort(parseExternalPortsFromDockerPs(container.getPorts()))
+                .setInternalPorts(parseInternalPortsFromDockerPs(container.getPorts()))
+                .setExternalPorts(parseExternalPortsFromDockerPs(container.getPorts()))
                 .setContainerState(convertDockerStateToFrameworkState(container.getState()))
                 .setFrameworkManaged(isFrameworkManaged(container)).build()));
 
@@ -269,7 +270,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public String startContainer(ContainerDescriptor container) throws KuraException, InterruptedException {
+    public String startContainer(ContainerConfiguration container) throws KuraException, InterruptedException {
         if (isNull(container)) {
             throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
         }
@@ -366,7 +367,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     }
 
-    private Optional<String> createContainer(ContainerDescriptor containerDescription) throws KuraException {
+    private Optional<String> createContainer(ContainerConfiguration containerDescription) throws KuraException {
         if (!testConnection()) {
             throw new IllegalStateException("failed to reach docker engine");
         }
@@ -414,7 +415,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         }
     }
 
-    private HostConfig containerPortManagementHandler(ContainerDescriptor containerDescription,
+    private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
             HostConfig commandBuilder) {
 
         if (containerDescription.getContainerPortsInternal() != null
@@ -443,7 +444,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         return commandBuilder;
     }
 
-    private CreateContainerCmd containerEnviromentVariablesHandler(ContainerDescriptor containerDescription,
+    private CreateContainerCmd containerEnviromentVariablesHandler(ContainerConfiguration containerDescription,
             CreateContainerCmd commandBuilder) {
 
         if (containerDescription.getContainerEnvVars().isEmpty()) {
@@ -465,7 +466,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     }
 
-    private HostConfig containerVolumeMangamentHandler(ContainerDescriptor containerDescription,
+    private HostConfig containerVolumeMangamentHandler(ContainerConfiguration containerDescription,
             HostConfig hostConfiguration) {
 
         if (containerDescription.getContainerVolumes().isEmpty()) {
@@ -494,7 +495,8 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     }
 
-    private HostConfig containerDevicesHandler(ContainerDescriptor containerDescription, HostConfig hostConfiguration) {
+    private HostConfig containerDevicesHandler(ContainerConfiguration containerDescription,
+            HostConfig hostConfiguration) {
 
         if (containerDescription.getContainerDevices().isEmpty()) {
             return hostConfiguration;

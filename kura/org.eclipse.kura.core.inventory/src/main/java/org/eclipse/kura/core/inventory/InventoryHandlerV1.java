@@ -31,7 +31,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.DockerService;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
@@ -226,7 +226,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.dockerService.startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                this.dockerService
+                        .startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
 
                 return success();
             } else if (STOP_CONTAINER.equals(resources)) {
@@ -241,11 +242,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             }
         } catch (final KuraException e) {
             throw e;
-        } catch (final InterruptedException e) {
-            logger.debug("interrupted while dispatching call", e);
-            Thread.currentThread().interrupt();
-            // this should result in response code 500
-            throw new KuraException(KuraErrorCode.SERVICE_UNAVAILABLE);
         } catch (final Exception e) {
             logger.debug("unexpected exception dispatcing call", e);
             // this should result in response code 500
@@ -377,7 +373,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         if (this.dockerService != null) {
             try {
                 logger.info("Creating docker invenetory");
-                List<ContainerDescriptor> containers = this.dockerService.listContainerDescriptors();
+                List<ContainerInstanceDescriptor> containers = this.dockerService.listContainerDescriptors();
                 containers.stream().forEach(
                         container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
                                 container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
@@ -434,7 +430,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ContainerDescriptor> containers = this.dockerService.listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containers = this.dockerService.listContainerDescriptors();
 
             List<DockerContainer> containersList = new ArrayList<>();
             containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
@@ -548,7 +544,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         return unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), SystemBundleRef.class);
     }
 
-    private ContainerDescriptor extractContainerRef(final KuraMessage message) throws KuraException {
+    private ContainerInstanceDescriptor extractContainerRef(final KuraMessage message) throws KuraException {
         final KuraPayload payload = message.getPayload();
 
         final byte[] body = payload.getBody();
@@ -562,9 +558,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 DockerContainer.class);
 
         try {
-            List<ContainerDescriptor> containerList = this.dockerService.listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containerList = this.dockerService.listContainerDescriptors();
 
-            for (ContainerDescriptor container : containerList) {
+            for (ContainerInstanceDescriptor container : containerList) {
                 if (container.getContainerName().equals(dc.getContainerName())) {
                     return container;
                 }
@@ -594,8 +590,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
 
-    private ContainerDescriptor findFirstMatchingContainer(final ContainerDescriptor ref) throws KuraException {
-        for (final ContainerDescriptor container : this.dockerService.listContainerDescriptors()) {
+    private ContainerInstanceDescriptor findFirstMatchingContainer(final ContainerInstanceDescriptor ref)
+            throws KuraException {
+        for (final ContainerInstanceDescriptor container : this.dockerService.listContainerDescriptors()) {
             if (container.getContainerName().equals(ref.getContainerName())) {
                 return container;
             }

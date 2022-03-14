@@ -36,11 +36,11 @@ public interface DockerService {
     public List<String> listContainersIds();
 
     /**
-     * Lists all available containers returning the corresponding {@link ContainerDescriptor}s
+     * Lists all available containers returning the corresponding {@link ContainerInstanceDescriptor}s
      *
-     * @return a list of {@link ContainerDescriptor}s representing the available containers
+     * @return a list of {@link ContainerInstanceDescriptor}s representing the available containers
      */
-    public List<ContainerDescriptor> listContainerDescriptors();
+    public List<ContainerInstanceDescriptor> listContainerDescriptors();
 
     /**
      * Allows to pull the required image, using the specified tag. The image will be downloaded respecting the
@@ -67,16 +67,18 @@ public interface DockerService {
     public Optional<String> getContainerIdByName(String name);
 
     /**
-     * Starts a container identified by the values provided in the {@link ContainerDescriptor} object. If the requested
+     * Starts a container identified by the values provided in the {@link ContainerConfiguration} object. If the
+     * requested
      * image does not exists, it will be downloaded. A String representing the container ID will be returned if the
      * operation of container creation and start succeed.
      *
-     * @param containerDescriptor
+     * @param containerConfiguration
      * @return a String representing the container ID created
      * @throws KuraException
      *             is thrown if the image pull or container creation and start fail
      */
-    public String startContainer(ContainerDescriptor containerDescriptor) throws KuraException, InterruptedException;
+    public String startContainer(ContainerConfiguration containerConfiguration)
+            throws KuraException, InterruptedException;
 
     /**
      * Starts a container identified by the specified ID

@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.DockerService;
 import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
 import org.slf4j.Logger;
@@ -213,7 +213,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
             int maxRetries = options.getMaxDownloadRetries();
             int retryInterval = options.getRetryInterval();
 
-            ContainerDescriptor registeredContainerRefrence = options.getContainerDescriptor();
+            ContainerConfiguration registeredContainerRefrence = options.getContainerDescriptor();
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {

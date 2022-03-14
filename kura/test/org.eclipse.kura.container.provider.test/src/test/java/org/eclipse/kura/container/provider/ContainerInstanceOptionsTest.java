@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.junit.Test;
 
 public class ContainerInstanceOptionsTest {
@@ -72,7 +72,7 @@ public class ContainerInstanceOptionsTest {
     private int hashCode;
     private boolean privilegedMode;
 
-    private ContainerDescriptor containerDescriptor;
+    private ContainerConfiguration containerDescriptor;
 
     private Map<String, Object> newProperties;
     private int imageDownloadRetries;

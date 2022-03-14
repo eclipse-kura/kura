@@ -232,8 +232,8 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
             checkFuture.cancel(false);
 
             final long intervalNanos = Duration.ofSeconds(validityInterval.getAsInt()).toNanos();
-            checkFuture = executor.schedule(() -> this.checkFixValidity(intervalNanos), validityInterval.getAsInt() + 1,
-                    TimeUnit.SECONDS);
+            checkFuture = executor.schedule(() -> this.checkFixValidity(intervalNanos),
+                    validityInterval.getAsInt() + 1L, TimeUnit.SECONDS);
         }
     }
 

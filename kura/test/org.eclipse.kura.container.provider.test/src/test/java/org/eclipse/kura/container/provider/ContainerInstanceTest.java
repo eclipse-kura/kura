@@ -13,18 +13,21 @@
 
 package org.eclipse.kura.container.provider;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerDescriptor;
 import org.eclipse.kura.container.orchestration.DockerService;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ContainerInstanceTest {
@@ -44,6 +47,7 @@ public class ContainerInstanceTest {
     private DockerService dockerService;
     private Map<String, Object> properties;
     private ContainerInstance configurableGenericDockerService;
+    private CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
     @Test(expected = IllegalArgumentException.class)
     public void testServiceActivateNullProperties() throws KuraException {
@@ -93,7 +97,6 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    @Ignore
     public void testServiceUpdateEnable() throws KuraException, InterruptedException {
         givenFullProperties(false);
         givenConfigurableGenericDockerService();
@@ -103,19 +106,17 @@ public class ContainerInstanceTest {
 
         whenUpdateInstance();
 
-        thenNotStoppedMicroservice();
         thenStartedMicroservice();
 
     }
 
     @Test
-    @Ignore
     public void testServiceUpdateDisable() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
         givenActivateInstance();
-        givenDockerService();
+        givenStartedContainer();
         givenFullProperties(false);
 
         whenUpdateInstance();
@@ -136,13 +137,12 @@ public class ContainerInstanceTest {
     }
 
     @Test
-    @Ignore
     public void testServiceDeactivateStopContainer() throws KuraException {
         givenFullProperties(true);
         givenConfigurableGenericDockerService();
         givenDockerService();
         givenActivateInstance();
-        givenDockerService();
+        givenStartedContainer();
 
         whenDeactivateInstance();
 
@@ -152,6 +152,16 @@ public class ContainerInstanceTest {
     private void givenDockerService() {
         this.dockerService = mock(DockerService.class);
         this.configurableGenericDockerService.setDockerService(this.dockerService);
+        try {
+            when(this.dockerService.startContainer((ContainerDescriptor) any())).thenAnswer(i -> {
+                this.containerStarted.complete(null);
+                return "1234";
+            });
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            // no need
+        }
     }
 
     private void givenNullProperties() {
@@ -175,6 +185,17 @@ public class ContainerInstanceTest {
 
     private void givenConfigurableGenericDockerService() {
         this.configurableGenericDockerService = new ContainerInstance();
+    }
+
+    private void givenStartedContainer() {
+        try {
+            this.containerStarted.get(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            fail("interrupted while waiting container startup");
+        } catch (final Exception e) {
+            fail("container not started");
+        }
     }
 
     private void givenActivateInstance() {
@@ -205,8 +226,8 @@ public class ContainerInstanceTest {
         verify(this.dockerService, times(0)).startContainer(any(ContainerDescriptor.class));
     }
 
-    private void thenStartedMicroservice() throws KuraException, InterruptedException {
-        verify(this.dockerService, times(1)).startContainer(any(ContainerDescriptor.class));
+    private void thenStartedMicroservice() {
+        givenStartedContainer();
     }
 
 }

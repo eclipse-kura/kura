@@ -90,7 +90,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     private static final String[] TABLE_TYPE = new String[] { "TABLE" };
 
     private static final String NULL_TABLE_NAME_ERROR_MSG = "Table name cannot be null";
-    private static final String NULL_WIRE_RECORD_ERROR_MSG = "";
+    private static final String NULL_WIRE_RECORD_ERROR_MSG = "WireRecord cannot be null";
 
     private H2DbServiceHelper dbHelper;
 

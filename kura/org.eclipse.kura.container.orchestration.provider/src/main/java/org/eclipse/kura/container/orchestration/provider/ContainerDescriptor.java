@@ -40,7 +40,7 @@ public class ContainerDescriptor {
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
     private Map<String, String> containerLoggerParameters;
-    private LoggingType containerLoggingType;
+    private String containerLoggingType;
     private Boolean containerPrivilaged;
     private ContainerStates containerState = ContainerStates.STOPPING;
     private Boolean isEsfManaged = true;
@@ -167,7 +167,7 @@ public class ContainerDescriptor {
         private Boolean containerPrivilaged = false;
         private ContainerStates containerState = ContainerStates.STOPPING;
         private Boolean isEsfManaged = true;
-        private LoggingType containerLoggingType = LoggingType.DEFAULT;
+        private String containerLoggingType = "DEFAULT";
 
         public ContainerDescriptorBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -332,44 +332,8 @@ public class ContainerDescriptor {
             return this;
         }
 
-        public ContainerDescriptorBuilder setLoggingType(LoggingType containerLoggingType) {
-            this.containerLoggingType = containerLoggingType;
-            return this;
-        }
-
         public ContainerDescriptorBuilder setLoggingTypeByString(String containerLoggingType) {
-
-            switch (containerLoggingType.toUpperCase().trim()) {
-            case "NONE":
-                return this.setLoggingType(LoggingType.NONE);
-            case "LOCAL":
-                return this.setLoggingType(LoggingType.LOCAL);
-            case "ETWLOGS":
-                return this.setLoggingType(LoggingType.ETWLOGS);
-            case "JSON_FILE":
-                return this.setLoggingType(LoggingType.JSON_FILE);
-            case "SYSLOG":
-                return this.setLoggingType(LoggingType.SYSLOG);
-            case "JOURNALD":
-                return this.setLoggingType(LoggingType.JOURNALD);
-            case "GELF":
-                return this.setLoggingType(LoggingType.GELF);
-            case "FLUENTD":
-                return this.setLoggingType(LoggingType.FLUENTD);
-            case "AWSLOGS":
-                return this.setLoggingType(LoggingType.AWSLOGS);
-            case "DB":
-                return this.setLoggingType(LoggingType.DB);
-            case "SPLUNK":
-                return this.setLoggingType(LoggingType.SPLUNK);
-            case "GCPLOGS":
-                return this.setLoggingType(LoggingType.GCPLOGS);
-            case "LOKI":
-                return this.setLoggingType(LoggingType.LOKI);
-            default:
-                return this.setLoggingType(LoggingType.DEFAULT);
-
-            }
+            this.containerLoggingType = containerLoggingType;
         }
 
         public ContainerDescriptor build() {

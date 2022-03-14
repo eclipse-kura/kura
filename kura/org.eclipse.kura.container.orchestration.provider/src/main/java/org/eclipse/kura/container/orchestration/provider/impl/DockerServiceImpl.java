@@ -44,6 +44,7 @@ import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.LogConfig;
+import com.github.dockerjava.api.model.LogConfig.LoggingType;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
@@ -443,7 +444,51 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private HostConfig containerLogConfigurationHandler(ContainerDescriptor containerDescription,
             HostConfig configuration) {
-
+        LoggingType lt;
+        switch (containerLoggingType.toUpperCase().trim()) {
+        case "NONE":
+            lt = LoggingType.NONE;
+            break;
+        case "LOCAL":
+            lt = LoggingType.LOCAL;
+            break;
+        case "ETWLOGS":
+            lt = LoggingType.ETWLOGS;
+            break;
+        case "JSON_FILE":
+            lt = LoggingType.JSON_FILE;
+            break;
+        case "SYSLOG":
+            lt = LoggingType.SYSLOG;
+            break;
+        case "JOURNALD":
+            lt = LoggingType.JOURNALD;
+            break;
+        case "GELF":
+            lt = LoggingType.GELF;
+            break;
+        case "FLUENTD":
+            lt = LoggingType.FLUENTD;
+            break;
+        case "AWSLOGS":
+            lt = LoggingType.AWSLOGS;
+            break;
+        case "DB":
+            lt = LoggingType.DB;
+            break;
+        case "SPLUNK":
+            lt = LoggingType.SPLUNK;
+            break;
+        case "GCPLOGS":
+            lt = LoggingType.GCPLOGS;
+            break;
+        case "LOKI":
+            lt = LoggingType.LOKI;
+            break;
+        default:
+            lt = LoggingType.DEFAULT;
+            break;
+        }
         LogConfig lc = new LogConfig(containerDescription.getContainerLoggingType(),
                 containerDescription.getLoggerParameters());
 
@@ -784,7 +829,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private void logIntoRemoteRepository() {
 
-        //Decode password
+        // Decode password
         String decodedPassword;
         try {
             decodedPassword = String

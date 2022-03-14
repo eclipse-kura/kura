@@ -15,8 +15,15 @@ package org.eclipse.kura.linux.position;
 import static java.lang.Math.toRadians;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.OptionalInt;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.linux.position.GpsDevice.Listener;
@@ -40,17 +47,26 @@ import de.taimos.gpsd4java.types.subframes.SUBFRAMEObject;
 public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     private static final Logger logger = LoggerFactory.getLogger(GpsdPositionProvider.class);
+    private final AtomicReference<GpsdInternalState> internalStateReference = new AtomicReference<>(
+            new GpsdInternalState());
 
     private GPSdEndpoint gpsEndpoint;
-    private AtomicReference<GpsdInternalState> internalStateReference;
     private PositionServiceOptions configuration;
 
     private Listener gpsDeviceListener;
+    private ScheduledExecutorService executor;
+    private Future<?> checkFuture = CompletableFuture.completedFuture(null);
 
     @Override
     public void start() {
         if (this.gpsEndpoint != null) {
             this.gpsEndpoint.start();
+        }
+
+        final OptionalInt validityInterval = this.configuration.getGpsdMaxValidityInterval();
+
+        if (validityInterval.isPresent() && executor == null) {
+            executor = Executors.newSingleThreadScheduledExecutor();
         }
     }
 
@@ -59,15 +75,24 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         if (this.gpsEndpoint != null) {
             this.gpsEndpoint.stop();
         }
+
+        if (executor != null) {
+            executor.shutdown();
+
+            try {
+                executor.awaitTermination(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted while waiting fix validity check executor shutdown", e);
+                Thread.currentThread().interrupt();
+            }
+
+            executor = null;
+        }
     }
 
     @Override
     public Position getPosition() {
         GpsdInternalState internalState = internalStateReference.get();
-        if (internalState == null) {
-            return new Position(toRadiansMeasurement(0, 0), toRadiansMeasurement(0, 0), toMetersMeasurement(0, 0),
-                    toMetersPerSecondMeasurement(0, 0), toRadiansMeasurement(0, 0));
-        }
         return new Position(toRadiansMeasurement(internalState.getLatitude(), internalState.getLatitudeError()),
                 toRadiansMeasurement(internalState.getLongitude(), internalState.getLongitudeError()),
                 toMetersMeasurement(internalState.getAltitude(), internalState.getAltitudeError()),
@@ -78,9 +103,6 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     @Override
     public NmeaPosition getNmeaPosition() {
         GpsdInternalState internalState = internalStateReference.get();
-        if (internalState == null) {
-            return null;
-        }
         return new NmeaPosition(internalState.getLatitude(), internalState.getLongitude(), internalState.getAltitude(),
                 internalState.getSpeed(), internalState.getCourse());
     }
@@ -122,9 +144,10 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     @Override
     public void init(PositionServiceOptions configuration, Listener gpsDeviceListener,
             GpsDeviceAvailabilityListener gpsDeviceAvailabilityListener) {
+        stop();
 
         this.configuration = configuration;
-        this.internalStateReference = new AtomicReference<>();
+        this.internalStateReference.set(new GpsdInternalState());
         this.gpsDeviceListener = gpsDeviceListener;
 
         this.gpsEndpoint = new GPSdEndpoint(configuration.getGpsdHost(), configuration.getGpsdPort());
@@ -167,34 +190,63 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
     }
 
     @Override
-    public void handleTPV(TPVObject tpv) {
+    public synchronized void handleTPV(TPVObject tpv) {
 
-        GpsdInternalState internalState = new GpsdInternalState();
+        final GpsdInternalState oldInternalState = internalStateReference.get();
 
-        internalState.setLatitude(tpv.getLatitude());
-        internalState.setLatitudeError(tpv.getLatitudeError());
-        internalState.setLongitude(tpv.getLongitude());
-        internalState.setLongitudeError(tpv.getLongitudeError());
-        internalState.setAltitude(tpv.getAltitude());
-        internalState.setAltitudeError(tpv.getAltitudeError());
-        internalState.setSpeed(tpv.getSpeed());
-        internalState.setSpeedError(tpv.getSpeedError());
-        internalState.setCourse(tpv.getCourse());
-        internalState.setCourseError(tpv.getCourseError());
-        internalState.setTime(tpv.getTimestamp());
-        internalState.setMode(tpv.getMode());
+        final GpsdInternalState tpvState = new GpsdInternalState(tpv);
 
-        GpsdInternalState oldInternalState = internalStateReference.getAndSet(internalState);
+        final GpsdInternalState newState;
 
-        boolean isLastPositionValid = oldInternalState != null && oldInternalState.isValid();
+        if (!tpvState.isValid()) {
+            if (oldInternalState.isValid()) {
+                newState = new GpsdInternalState(oldInternalState);
+                newState.setMode(tpvState.getMode());
+            } else {
+                newState = oldInternalState;
+            }
+        } else {
+            newState = tpvState;
 
-        boolean isNewPositionValid = internalState.isValid();
+            restartCheckTask();
+        }
+
+        internalStateReference.set(newState);
+
+        boolean isLastPositionValid = oldInternalState.isValid();
+
+        boolean isNewPositionValid = newState.isValid();
 
         if (this.gpsDeviceListener != null && isNewPositionValid != isLastPositionValid) {
             this.gpsDeviceListener.onLockStatusChanged(isNewPositionValid);
-            logger.info("Lock Status changed: {}", internalState);
+            logger.info("Lock Status changed: {}", newState);
         }
 
+    }
+
+    private void restartCheckTask() {
+        final OptionalInt validityInterval = this.configuration.getGpsdMaxValidityInterval();
+
+        if (validityInterval.isPresent()) {
+
+            checkFuture.cancel(false);
+
+            final long intervalNanos = Duration.ofSeconds(validityInterval.getAsInt()).toNanos();
+            checkFuture = executor.schedule(() -> this.checkFixValidity(intervalNanos), validityInterval.getAsInt() + 1,
+                    TimeUnit.SECONDS);
+        }
+    }
+
+    private synchronized void checkFixValidity(final long validityIntervalNanos) {
+        final GpsdInternalState currentState = this.internalStateReference.get();
+
+        final long now = System.nanoTime();
+
+        if (now - currentState.getCreationInstantNanos() > validityIntervalNanos) {
+            final TPVObject obj = new TPVObject();
+            obj.setMode(ENMEAMode.NoFix);
+            handleTPV(obj);
+        }
     }
 
     private Measurement toRadiansMeasurement(double value, double error) {
@@ -212,6 +264,8 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
     private class GpsdInternalState {
 
+        private final long creationInstantNanos;
+
         private double latitude;
         private double latitudeError;
         private double longitude;
@@ -224,6 +278,42 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
         private double courseError;
         private double timestamp;
         private ENMEAMode mode = ENMEAMode.NotSeen;
+
+        public GpsdInternalState() {
+            this.creationInstantNanos = System.nanoTime();
+        }
+
+        public GpsdInternalState(final TPVObject tpv) {
+            this.setLatitude(tpv.getLatitude());
+            this.setLatitudeError(tpv.getLatitudeError());
+            this.setLongitude(tpv.getLongitude());
+            this.setLongitudeError(tpv.getLongitudeError());
+            this.setAltitude(tpv.getAltitude());
+            this.setAltitudeError(tpv.getAltitudeError());
+            this.setSpeed(tpv.getSpeed());
+            this.setSpeedError(tpv.getSpeedError());
+            this.setCourse(tpv.getCourse());
+            this.setCourseError(tpv.getCourseError());
+            this.setTime(tpv.getTimestamp());
+            this.setMode(tpv.getMode());
+            this.creationInstantNanos = System.nanoTime();
+        }
+
+        public GpsdInternalState(final GpsdInternalState other) {
+            this.latitude = other.latitude;
+            this.latitudeError = other.latitudeError;
+            this.longitude = other.longitude;
+            this.longitudeError = other.longitudeError;
+            this.altitude = other.altitude;
+            this.altitudeError = other.altitudeError;
+            this.speed = other.speed;
+            this.speedError = other.speedError;
+            this.course = other.course;
+            this.courseError = other.courseError;
+            this.timestamp = other.timestamp;
+            this.mode = other.mode;
+            this.creationInstantNanos = other.creationInstantNanos;
+        }
 
         public void setCourseError(double value) {
             this.courseError = value;
@@ -323,6 +413,10 @@ public class GpsdPositionProvider implements PositionProvider, IObjectListener {
 
         public boolean isValid() {
             return (this.mode == ENMEAMode.TwoDimensional || this.mode == ENMEAMode.ThreeDimensional);
+        }
+
+        public long getCreationInstantNanos() {
+            return creationInstantNanos;
         }
 
         @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,6 +15,7 @@ package org.eclipse.kura.linux.position;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.OptionalInt;
 
 import org.eclipse.kura.comm.CommURI;
 
@@ -34,6 +35,8 @@ public class PositionServiceOptions {
     private static final Property<String> PROVIDER = new Property<>("provider", PositionProviderType.SERIAL.getValue());
     private static final Property<String> GPSD_HOST = new Property<>("gpsd.host", "localhost");
     private static final Property<Integer> GPSD_PORT = new Property<>("gpsd.port", 2947);
+    private static final Property<Integer> GPSD_MAX_FIX_VALIDITY_INTERVAL = new Property<>(
+            "gpsd.max.fix.validity.interval.seconds", 60);
 
     private final Map<String, Object> properties;
 
@@ -93,6 +96,15 @@ public class PositionServiceOptions {
         return GPSD_PORT.get(this.properties);
     }
 
+    public OptionalInt getGpsdMaxValidityInterval() {
+        final int maxValidity = GPSD_MAX_FIX_VALIDITY_INTERVAL.get(this.properties);
+        if (maxValidity <= 0) {
+            return OptionalInt.empty();
+        } else {
+            return OptionalInt.of(maxValidity);
+        }
+    }
+
     public CommURI getGpsDeviceUri() {
         if (getPort().isEmpty()) {
             return null;
@@ -122,7 +134,8 @@ public class PositionServiceOptions {
                 && getBaudRate() == other.getBaudRate() && getBitsPerWord() == other.getBitsPerWord()
                 && getStopBits() == other.getStopBits() && getParity() == other.getParity()
                 && getPositionProvider().equals(other.getPositionProvider())
-                && getGpsdHost().equals(other.getGpsdHost()) && getGpsdPort() == other.getGpsdPort();
+                && getGpsdHost().equals(other.getGpsdHost()) && getGpsdPort() == other.getGpsdPort()
+                && getGpsdMaxValidityInterval().equals(other.getGpsdMaxValidityInterval());
     }
 
     private static final class Property<T> {

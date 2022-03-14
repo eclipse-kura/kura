@@ -166,7 +166,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     private Boolean isFrameworkManaged(Container container) {
         String containerName = getContainerName(container);
-        return this.frameworkManagedContainers.contains(containerName);
+        return this.frameworkManagedContainers.stream().allMatch(c -> c.name.equals(containerName));
     }
 
     private String getContainerName(Container container) {
@@ -642,7 +642,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            FrameorkManagedContainer other = (FrameorkManagedContainer) obj;
+            FrameworkManagedContainer other = (FrameworkManagedContainer) obj;
             return Objects.equals(id, other.id) && Objects.equals(name, other.name);
         }
 

@@ -396,15 +396,15 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
         int progressPercent;
         if (!itemDownloadingStatus.equals(item.getStatus())) {
-            try {
-                progressPercent = (int) ((item.getProgressDetail().getTotal() / item.getProgressDetail().getCurrent()));
-            } catch (Exception e) {
-                progressPercent = 0;
-            }
 
-            logger.info("Pulling {}:{} Layer {}, State: {}, Progress: {}%",
-                containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
-                item.getId(), item.getStatus(), progressPercent);
+            if (item.getId() != null){
+                logger.info("Pulling {}:{} Layer {}, State: {}",
+                    containerDescription.getContainerImage(), containerDescription.getContainerImageTag(),
+                    item.getId(), item.getStatus());
+            } else {
+                logger.info("Pulling {}:{}, State: {}",
+                    containerDescription.getContainerImage(), containerDescription.getContainerImageTag(), item.getStatus());
+            }
             itemDownloadingStatus = item.getStatus();
         }
 
@@ -414,8 +414,14 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         }
 
         if (item.isPullSuccessIndicated()) {
-            logger.info("Image pull of {}:{} was succsessful", containerDescription.getContainerImage(),
-                    containerDescription.getContainerImageTag());
+
+            if (item.getId() != null){
+                logger.info("Image pull of {}:{}, Layer: {}, was succsessful", containerDescription.getContainerImage(),
+                        containerDescription.getContainerImageTag(), item.getId());
+            }else {
+                logger.info("Image pull of {}:{} was succsessful", containerDescription.getContainerImage(),
+                        containerDescription.getContainerImageTag());
+            }
         }
     }
 

@@ -118,6 +118,9 @@ chmod 600 /etc/bind/rndc.key
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
+#set up systemd-tmpfiles
+cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
+
 # disable dhcpcd service - kura is the network manager
 systemctl stop dhcpcd
 systemctl disable dhcpcd

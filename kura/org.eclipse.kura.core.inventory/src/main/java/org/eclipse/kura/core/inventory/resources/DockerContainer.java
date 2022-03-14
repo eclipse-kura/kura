@@ -35,7 +35,7 @@ public class DockerContainer extends SystemResourceInfo {
     private Boolean containerPrivilaged;
     private ContainerState containerState;
 
-    private Boolean isEsfManaged;
+    private Boolean isFrameworkManaged;
 
     public DockerContainer(String name, String version) {
         super(name, version, SystemResourceType.DOCKER);
@@ -58,7 +58,7 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerPrivilaged = container.getContainerPrivileged();
         this.containerState = container.getContainerState();
 
-        this.isEsfManaged = container.isFrameworkManaged();
+        this.isFrameworkManaged = container.isFrameworkManaged();
 
     }
 
@@ -126,8 +126,8 @@ public class DockerContainer extends SystemResourceInfo {
         this.containerState = containerState;
     }
 
-    public Boolean getIsEsfManaged() {
-        return this.isEsfManaged;
+    public Boolean isFrameworkManaged() {
+        return this.isFrameworkManaged;
     }
 
 }

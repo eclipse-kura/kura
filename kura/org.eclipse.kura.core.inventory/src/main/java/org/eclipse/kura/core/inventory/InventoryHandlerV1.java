@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
@@ -74,7 +73,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
-    private static final String DELETE = "_delete";
 
     private static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
     private static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
@@ -313,7 +311,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             String s = marshal(xdps);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error("Error getting resource {}: {}", RESOURCE_DEPLOYMENT_PACKAGES, e);
         }
@@ -344,7 +342,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             String s = marshal(systemBundles);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error(ERROR_GETTING_RESOURCE, RESOURCE_BUNDLES, e);
         }
@@ -392,7 +390,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             String s = marshal(systemResourcesInfo);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e1) {
             logger.error("Error getting inventory", e1);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -414,7 +412,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
             String s = marshal(systemPackages);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error(ERROR_GETTING_RESOURCE, RESOURCE_SYSTEM_PACKAGES, e);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -439,7 +437,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             DockerContainers dockerContainers = new DockerContainers(containersList);
             String s = marshal(dockerContainers);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error(ERROR_GETTING_RESOURCE, RESOURCE_SYSTEM_PACKAGES, e);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);

@@ -18,6 +18,7 @@ import static java.util.Objects.isNull;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
@@ -41,6 +42,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
     private DockerService dockerService;
 
     private String containerId;
+    private ScheduledFuture<?> startupFuture;
 
     public void setDockerService(DockerService dockerService) {
         this.dockerService = dockerService;
@@ -76,10 +78,10 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
         if (this.serviceOptions.isEnabled()) {
             this.dockerService.registerListener(this, this.serviceOptions.getContainerName());
-            this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
+            this.startupFuture = this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
         } else {
             if (!isNull(this.containerId)) {
-                stopRunningMicroservice();
+                deleteRunningMicroservice();
             }
             this.dockerService.unregisterListener(this);
         }
@@ -93,7 +95,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
         this.executor.shutdown();
 
         if (this.serviceOptions.isEnabled()) {
-            stopRunningMicroservice();
+            deleteRunningMicroservice();
         }
         this.dockerService.unregisterListener(this);
 
@@ -138,7 +140,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
         logger.warn("Unable to start microservice...giving up");
     }
 
-    private void stopRunningMicroservice() {
+    private void deleteRunningMicroservice() {
         try {
             this.dockerService.stopContainer(this.containerId);
             this.dockerService.deleteContainer(this.containerId);
@@ -149,18 +151,18 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
     @Override
     public void onConnect() {
-        // stopRunningMicroservice();
-        startMicroservice();
+        if (isNull(this.startupFuture) || this.startupFuture.isDone()) {
+            this.startupFuture = this.executor.schedule(this::startMicroservice, 0, TimeUnit.SECONDS);
+        }
     }
 
     @Override
     public void onDisconnect() {
-        // stopRunningMicroservice();
-
+        this.executor.shutdownNow();
     }
 
     @Override
     public void onDisabled() {
-        stopRunningMicroservice();
+        deleteRunningMicroservice();
     }
 }

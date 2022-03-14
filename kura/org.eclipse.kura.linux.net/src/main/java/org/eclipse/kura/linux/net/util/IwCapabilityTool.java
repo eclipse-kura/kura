@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2019, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -142,7 +142,6 @@ public class IwCapabilityTool {
         final int exitValue = status.getExitStatus().getExitCode();
 
         if (!status.getExitStatus().isSuccessful()) {
-            logger.warn("error executing command --- {} --- exit value = {}", commandLine, exitValue);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, commandLine, exitValue);
         }
 
@@ -233,7 +232,6 @@ public class IwCapabilityTool {
         CommandStatus status = executorService.execute(command);
         int exitValue = status.getExitStatus().getExitCode();
         if (!status.getExitStatus().isSuccessful()) {
-            logger.warn("error executing command --- iw reg get --- exit value = {}", exitValue);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, String.join(" ", cmd), exitValue);
         }
         String commandOutput = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray());

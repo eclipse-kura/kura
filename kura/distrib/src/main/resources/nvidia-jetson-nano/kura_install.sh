@@ -166,6 +166,13 @@ do
   chown kurad:kurad $FILE
 done
 
+# set up kura files permissions
+chmod 700 ${INSTALL_DIR}/kura/bin/*.sh
+chown -R kurad:kurad /opt/eclipse
+chmod -R go-rwx /opt/eclipse
+chmod a+rx /opt/eclipse    
+find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
+
 # execute patch_sysctl.sh from installer install folder
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh
 ${INSTALL_DIR}/kura/install/patch_sysctl.sh ${INSTALL_DIR}/kura/install/sysctl.kura.conf /etc/sysctl.conf

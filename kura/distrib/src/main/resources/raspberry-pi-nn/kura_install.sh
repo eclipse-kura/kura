@@ -58,6 +58,13 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 
+# set up kura files permissions
+chmod 700 ${INSTALL_DIR}/kura/bin/*.sh
+chown -R kurad:kurad /opt/eclipse
+chmod -R go-rwx /opt/eclipse
+chmod a+rx /opt/eclipse    
+find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
+
 #set up recover default configuration script
 cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh

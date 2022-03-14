@@ -1673,6 +1673,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName,
             GwtWifiRadioMode radioMode) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
         logger.debug("Find Frequency Network Service impl");
         List<GwtWifiChannelFrequency> channels = new ArrayList<>();
 
@@ -1716,6 +1718,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
         logger.info("Get Wifi Country Code impl");
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
@@ -1728,6 +1732,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         try {
             return nas.isWifiIEEE80211AC(ifaceName);
@@ -1755,6 +1761,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
         List<String> dhcpLease = new ArrayList<>();
 
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);

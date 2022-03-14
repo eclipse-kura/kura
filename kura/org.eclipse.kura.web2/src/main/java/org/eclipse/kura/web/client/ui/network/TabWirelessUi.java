@@ -316,7 +316,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
     @UiField
     HelpButton countryCodeHelp;
     @UiField
-    Modal regDomModal;
+    Modal regDomErrorModal;
     @UiField
     Alert unavailableChannelError;
     @UiField
@@ -331,7 +331,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
         initForm();
         initHelpButtons();
-        initRegDomModal();
+        initRegDomErrorModal();
         setPasswordValidation();
 
         this.tcpTab.status.addChangeHandler(event -> {
@@ -434,7 +434,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
             channelToSelect = config.getChannels().get(0);
         }
 
-        this.channelList.setSelectedIndex(geChannelIndexFromValue(channelToSelect));
+        this.channelList.setSelectedIndex(getChannelIndexFromValue(channelToSelect));
 
     }
 
@@ -1100,10 +1100,10 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         logger.severe("init done.");
     }
 
-    private void initRegDomModal() {
-        this.regDomModal.setTitle(MSGS.error());
+    private void initRegDomErrorModal() {
+        this.regDomErrorModal.setTitle(MSGS.error());
         this.unavailableChannelErrorText.setText(MSGS.netWifiChannelMissingError());
-        this.regDomModal.addHideHandler(evt -> this.setDirty(true));
+        this.regDomErrorModal.addHideHandler(evt -> this.setDirty(true));
     }
 
     private List<GwtWifiHotspotEntry> getChannelFrequencyByIndex(int selectedIndex) {
@@ -1296,6 +1296,17 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         this.ssidSelectionModel.addSelectionChangeHandler(event -> {
             GwtWifiHotspotEntry wifiHotspotEntry = TabWirelessUi.this.ssidSelectionModel.getSelectedObject();
             if (wifiHotspotEntry != null) {
+                int channelToSelect = getChannelIndexFromValue(wifiHotspotEntry.getChannel());
+
+                if (channelToSelect < 0) {
+                    this.regDomErrorModal.show();
+                    logger.info("SSID Selected channel not in regdom: " + wifiHotspotEntry.getChannel());
+                } else {
+                    this.channelList.setSelectedIndex(channelToSelect);
+                    this.activeConfig.setChannels(Collections.singletonList(wifiHotspotEntry.getChannel()));
+                    logger.info("SSID Selected channel: " + wifiHotspotEntry.getChannel());
+                }
+
                 TabWirelessUi.this.ssid.setValue(GwtSafeHtmlUtils.htmlUnescape(wifiHotspotEntry.getSSID()));
                 String sec = wifiHotspotEntry.getSecurity();
                 for (int i1 = 0; i1 < TabWirelessUi.this.security.getItemCount(); i1++) {
@@ -1323,17 +1334,6 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                 }
 
                 TabWirelessUi.this.ssidModal.hide();
-
-                int channelToSelect = geChannelIndexFromValue(wifiHotspotEntry.getChannel());
-
-                if (channelToSelect < 0) {
-                    this.regDomModal.show();
-                    logger.info("SSID Selected channel not in regdom: " + wifiHotspotEntry.getChannel());
-                } else {
-                    this.channelList.setSelectedIndex(channelToSelect);
-                    this.activeConfig.setChannels(Collections.singletonList(wifiHotspotEntry.getChannel()));
-                    logger.info("SSID Selected channel: " + wifiHotspotEntry.getChannel());
-                }
 
             }
         });
@@ -1435,13 +1435,13 @@ public class TabWirelessUi extends Composite implements NetworkTab {
         }
     }
 
-    private int geChannelIndexFromValue(int channelValue) {
+    private int getChannelIndexFromValue(int channelValue) {
 
         if (channelValue == 0) {
             return 0;
         }
 
-        for (int i = 1; i < this.channelList.getItemCount(); i++) {
+        for (int i = 0; i < this.channelList.getItemCount(); i++) {
             String value = this.channelList.getItemText(i);
             String[] values = value.split(" ");
             int channel = Integer.parseInt(values[1]);
@@ -1682,7 +1682,7 @@ public class TabWirelessUi extends Composite implements NetworkTab {
 
                                     int channel = TabWirelessUi.this.activeConfig.getChannels().get(0);
 
-                                    int selectedChannelIndex = geChannelIndexFromValue(channel);
+                                    int selectedChannelIndex = getChannelIndexFromValue(channel);
                                     int channelIndex = selectedChannelIndex == -1 ? 0 : selectedChannelIndex;
 
                                     logger.fine("Setting channel to: " + channel);

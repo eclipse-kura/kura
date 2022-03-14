@@ -78,6 +78,9 @@ if command -v timedatectl > /dev/null ;
     timedatectl set-ntp false
 fi
 
+#disable asking NTP servers to the DHCP server
+sed -i "s/, ntp-servers//g" /etc/dhcp/dhclient.conf
+
 # Prevent time sync services from starting
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd

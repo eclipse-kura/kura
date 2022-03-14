@@ -82,6 +82,9 @@ if [ -f "/etc/network/if-up.d/ntpdate" ] ; then
     chmod -x /etc/network/if-up.d/ntpdate
 fi
 
+#disable asking NTP servers to the DHCP server
+sed -i "s/, ntp-servers//g" /etc/dhcp/dhclient.conf
+
 #prevent time sync services from starting
 systemctl stop systemd-timedated
 systemctl disable systemd-timedated

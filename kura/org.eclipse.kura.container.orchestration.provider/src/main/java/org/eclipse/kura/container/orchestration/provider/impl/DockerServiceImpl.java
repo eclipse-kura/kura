@@ -192,7 +192,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         for (ContainerPort tempPort : tempPorts) {
             if (tempPort.getIp() != null) {
                 String ipFormatTest = tempPort.getIp();
-                if (ipFormatTest != null && ipFormatTest.equals("::")) {
+                if (ipFormatTest != null && (ipFormatTest.equals("::") || ipFormatTest.equals("0.0.0.0"))) {
                     externalPorts.add(tempPort.getPublicPort());
                 }
             }
@@ -207,7 +207,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         for (ContainerPort tempPort : tempPorts) {
             if (tempPort.getIp() != null) {
                 String ipFormatTest = tempPort.getIp();
-                if (ipFormatTest != null && ipFormatTest.equals("::")) {
+                if (ipFormatTest != null && (ipFormatTest.equals("::") || ipFormatTest.equals("0.0.0.0"))) {
                     internalPorts.add(tempPort.getPrivatePort());
                 }
             }

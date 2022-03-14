@@ -14,6 +14,9 @@ package org.eclipse.kura.net.dhcp;
 
 import org.osgi.annotation.versioning.ProviderType;
 
+/**
+ * @since 2.3
+ */
 @ProviderType
 public class DhcpLease {
     private String macAddress;

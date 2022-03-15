@@ -370,11 +370,28 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             @Override
             public void onNext(PullResponseItem item) {
                 super.onNext(item);
-                logger.info("Downloading: {}", item.getStatus());
+                createLoggerMessageForContainerPull(item, imageName, imageTag);
+
             }
 
         }).awaitCompletion(timeOutSecconds, TimeUnit.SECONDS);
 
+    }
+
+    private void createLoggerMessageForContainerPull(PullResponseItem item, String imageName, String imageTag) {
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Pulling {}:{} Layer {}, State: {}", imageName, imageTag, item.getId(), item.getStatus());
+        }
+
+        if (item.isErrorIndicated()) {
+            logger.error("Unable To Pull image {}:{} because : {}", item.getErrorDetail(), imageName, imageTag);
+        }
+
+        if (item.isPullSuccessIndicated()) {
+
+            logger.info("Image pull of {}:{}, Layer: {}, was succsessful", imageName, imageTag, item.getId());
+        }
     }
 
     private String createContainer(ContainerConfiguration containerDescription) throws KuraException {
@@ -630,8 +647,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private static class FrameworkManagedContainer {
 
-        private String name;
-        private String id;
+        private final String name;
+        private final String id;
 
         public FrameworkManagedContainer(String name, String id) {
             this.name = name;
@@ -640,7 +657,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, name);
+            return Objects.hash(this.id, this.name);
         }
 
         @Override
@@ -648,14 +665,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if ((obj == null) || (getClass() != obj.getClass())) {
                 return false;
             }
             FrameworkManagedContainer other = (FrameworkManagedContainer) obj;
-            return Objects.equals(id, other.id) && Objects.equals(name, other.name);
+            return Objects.equals(this.id, other.id) && Objects.equals(this.name, other.name);
         }
 
     }

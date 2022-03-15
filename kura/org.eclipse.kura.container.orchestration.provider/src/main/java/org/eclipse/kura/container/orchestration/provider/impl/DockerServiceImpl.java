@@ -367,7 +367,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     }
 
-    private Optional<String> createContainer(ContainerConfiguration containerDescription) throws KuraException {
+    public Optional<String> createContainer(ContainerConfiguration containerDescription) throws KuraException {
         if (!testConnection()) {
             throw new IllegalStateException("failed to reach docker engine");
         }
@@ -584,7 +584,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         }
     }
 
-    private boolean testConnection() {
+    public boolean testConnection() {
         boolean canConnect = false;
         try {
             this.dockerClient.pingCmd().exec();

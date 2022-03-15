@@ -20,15 +20,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.provider.impl.DockerServiceImpl;
+import org.eclipse.kura.util.configuration.Property;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Answers;
@@ -55,6 +57,10 @@ public class DockerServiceImplTest {
     private static final String REPOSITORY_USERNAME = "dockerService.repository.username";
     private static final String REPOSITORY_PASSWORD = "dockerService.repository.password";
 
+    private static final String IMAGES_DOWNLOAD_TIMEOUT = "dockerService.default.download.timeout";
+    private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 120;
+
+
     private static final boolean DEFAULT_REPOSITORY_ENABLED = false;
     private static final String DEFAULT_REPOSITORY_URL = "";
     private static final String DEFAULT_REPOSITORY_USERNAME = "";
@@ -69,7 +75,9 @@ public class DockerServiceImplTest {
 
     // for tests
     private String[] runningContainers;
-    private ContainerDescriptor[] runningContainerDescriptor;
+    private ContainerInstanceDescriptor[] runningContainerDescriptor;
+    
+    private ContainerConfiguration containerConfig1;
 
     private Map<String, Object> properties;
     private String containerId;
@@ -226,12 +234,12 @@ public class DockerServiceImplTest {
     }
 
     @Test
-    @Ignore
     public void testCreateContainer() throws KuraException, InterruptedException {
         givenFullProperties(true);
         givenDockerServiceImpl();
         givenDockerClient();
 
+        whenDockerClientMockSomeContainers();
         whenMockforContainerCreation();
         whenRunContainer();
 
@@ -239,27 +247,9 @@ public class DockerServiceImplTest {
     }
 
     @Test
-    @Ignore
-    public void testCreateContainerOfflineQueue() throws KuraException, InterruptedException {
-        givenFullProperties(false);
-        givenDockerServiceImpl();
-        givenDockerClient();
-
-        whenDockerClientMockListNoContainers();
-        whenMockforContainerCreation();
-        whenRunContainer();
-        whenPropertiesChangeAfterInit(true);
-        whenUpdateInstance();
-
-        thenTestIfNewContainerExists();
-    }
-
-    @Test
-    @Ignore
     public void testStopContainer() throws KuraException, InterruptedException {
         givenFullProperties(true);
-        givenDockerServiceImpl();
-        givenForcedProperties();
+        givenDockerServiceImplSpy();
         givenDockerClient();
 
         whenDockerClientMockSomeContainers();
@@ -269,6 +259,18 @@ public class DockerServiceImplTest {
 
         thenTestIfNewContainerDoesNotExists();
     }
+    
+    @Test(expected=KuraException.class)
+    public void testCreateContainerWithoutStart() throws KuraException, InterruptedException {
+        givenFullProperties(true);
+        givenDockerServiceImplSpy();
+        givenDockerClient();
+
+        whenDockerClientMockSomeContainers();
+        whenMockforContainerCreation();
+        
+        thenForceContainerCreation();
+    }
 
     /**
      * givens
@@ -276,6 +278,12 @@ public class DockerServiceImplTest {
 
     private void givenDockerServiceImpl() {
         this.dockerService = new DockerServiceImpl();
+    }
+    
+    private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
+        this.dockerService = Mockito.spy(new DockerServiceImpl());
+        Mockito.doReturn(true).when(this.dockerService).testConnection();
+    	Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class));
     }
 
     private void givenDockerClient() {
@@ -301,6 +309,7 @@ public class DockerServiceImplTest {
         this.properties.put(REPOSITORY_URL, DEFAULT_REPOSITORY_URL);
         this.properties.put(REPOSITORY_USERNAME, DEFAULT_REPOSITORY_USERNAME);
         this.properties.put(REPOSITORY_PASSWORD, DEFAULT_REPOSITORY_PASSWORD);
+        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
     }
 
     private void givenFullProperties(boolean b, boolean customRepoEnabled) {
@@ -313,6 +322,7 @@ public class DockerServiceImplTest {
         this.properties.put(REPOSITORY_URL, DEFAULT_REPOSITORY_URL);
         this.properties.put(REPOSITORY_USERNAME, DEFAULT_REPOSITORY_USERNAME);
         this.properties.put(REPOSITORY_PASSWORD, DEFAULT_REPOSITORY_PASSWORD);
+        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
     }
 
     private void givenAuthWithRepoAndCredentials() {
@@ -325,10 +335,7 @@ public class DockerServiceImplTest {
         this.properties.put(REPOSITORY_URL, "testrepo.net");
         this.properties.put(REPOSITORY_USERNAME, "Tester");
         this.properties.put(REPOSITORY_PASSWORD, "ng4#$fuhn834F84nf8nw8GF3");
-    }
-
-    private void givenForcedProperties() {
-        this.dockerService.updated(this.properties);
+        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
     }
 
     /**
@@ -350,7 +357,7 @@ public class DockerServiceImplTest {
     private void whenDockerClientMockHasNoContainers() {
         List<Container> containerListmock = new LinkedList<>();
         this.runningContainers = new String[0];
-        this.runningContainerDescriptor = new ContainerDescriptor[0];
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[0];
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
         when(this.mockedListContainersCmd.withShowAll(true)).thenReturn(this.mockedListContainersCmd);
@@ -381,12 +388,13 @@ public class DockerServiceImplTest {
         this.runningContainers = new String[] { mcont1.toString(), mcont2.toString() };
 
         // Build Respective CD's
-        ContainerDescriptor mcontCD1 = ContainerDescriptorImpl.builder().setContainerID(mcont1.getId())
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID(mcont1.getId())
                 .setContainerName(mcont1.getNames()[0]).setContainerImage(mcont1.getImage()).build();
-        new ContainerDescriptorImpl();
-        ContainerDescriptor mcontCD2 = ContainerDescriptorImpl.builder().setContainerID(mcont2.getId())
+        
+        ContainerInstanceDescriptor mcontCD2 = ContainerInstanceDescriptor.builder().setContainerID(mcont2.getId())
                 .setContainerName(mcont2.getNames()[0]).setContainerImage(mcont2.getImage()).build();
-        this.runningContainerDescriptor = new ContainerDescriptor[] { mcontCD1, mcontCD2 };
+        
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1, mcontCD2 };
 
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
@@ -408,10 +416,17 @@ public class DockerServiceImplTest {
     private void whenMockforContainerCreation() {
 
         // Build Respective CD's
-        ContainerDescriptor mcontCD1 = ContainerDescriptorImpl.builder().setContainerID("1d3dewf34r5")
+    	ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
+    	
+    	
+    	containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setContainerImage("nginx").setVolumes(Collections.singletonMap("test", "~/test/test"))
+                .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
+                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
+    	
+    	
 
-        this.runningContainerDescriptor = new ContainerDescriptor[] { mcontCD1 };
+        this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
 
         CreateContainerCmd CCC = mock(CreateContainerCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.createContainerCmd(mcontCD1.getContainerImage())).thenReturn(CCC);
@@ -431,7 +446,7 @@ public class DockerServiceImplTest {
 
     private void whenRunContainer() throws KuraException, InterruptedException {
         // startContainer
-        this.containerId = this.dockerService.startContainer(this.runningContainerDescriptor[0]);
+        this.containerId = this.dockerService.startContainer(containerConfig1);
     }
 
     private void whenStopContainer() {
@@ -469,11 +484,15 @@ public class DockerServiceImplTest {
     }
 
     private void thenTestIfNewContainerExists() {
-        assertEquals(1, this.dockerService.listContainerDescriptors().size());
+        assertEquals(2, this.dockerService.listContainerDescriptors().size());
     }
 
     private void thenTestIfNewContainerDoesNotExists() {
-        assertEquals(0, this.dockerService.listContainerDescriptors().size());
+        assertEquals(2, this.dockerService.listContainerDescriptors().size());
+    }
+    
+    private void thenForceContainerCreation() throws KuraException {
+        this.dockerService.createContainer(containerConfig1);
     }
 
 }

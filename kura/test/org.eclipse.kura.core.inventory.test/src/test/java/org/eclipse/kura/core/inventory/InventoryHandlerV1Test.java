@@ -35,9 +35,9 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.DockerService;
-import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl.ContainerDescriptorBuilder;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -86,8 +86,10 @@ public class InventoryHandlerV1Test {
     private static String TEST_JSON = "testJson";
     private static String TEST_XML = "testXML";
 
-    private ContainerDescriptor dockerContainer1;
-    private ContainerDescriptor dockerContainer2;
+    private ContainerInstanceDescriptor dockerContainer1;
+    private ContainerInstanceDescriptor dockerContainer2;
+    private ContainerConfiguration dockerContainer1Config;
+    private ContainerConfiguration dockerContainer2Config;
 
     private DockerService mockDockerService;
 
@@ -994,7 +996,7 @@ public class InventoryHandlerV1Test {
     }
 
     @Test
-    public void testStartContainerWithoutVersion() throws BundleException, KuraException {
+    public void testStartContainerWithoutVersion() throws BundleException, KuraException, InterruptedException {
         givenTwoDockerContainers();
 
         whenTheFollowingJsonKuraPayloadDoExec(START_CONTAINER, "{\"name\":\"dockerContainer1\"}");
@@ -1003,7 +1005,7 @@ public class InventoryHandlerV1Test {
     }
 
     @Test
-    public void testStopContainerWithoutVersion() throws BundleException, KuraException {
+    public void testStopContainerWithoutVersion() throws BundleException, KuraException, InterruptedException {
         givenTwoDockerContainers();
 
         whenTheFollowingJsonKuraPayloadDoExec(STOP_CONTAINER, "{\"name\":\"dockerContainer1\"}");
@@ -1028,10 +1030,15 @@ public class InventoryHandlerV1Test {
     }
 
     private void givenTwoDockerContainers() {
-        this.dockerContainer1 = new ContainerDescriptorBuilder().setContainerName("dockerContainer1")
+        this.dockerContainer1 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer1")
                 .setContainerImage("nginx").setContainerImageTag("latest").setContainerID("1234").build();
-        this.dockerContainer2 = new ContainerDescriptorBuilder().setContainerName("dockerContainer2")
+        this.dockerContainer2 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer2")
                 .setContainerImage("nginx").setContainerID("124344").build();
+        
+        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
+                .setContainerImage("nginx").setContainerImageTag("latest").build();
+        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
+                .setContainerImage("nginx").build();
     }
 
     private void givenTheFollowingJson() {
@@ -1141,8 +1148,6 @@ public class InventoryHandlerV1Test {
          * ]>
          */
         String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version></container></containers>";
-        System.out.println("Greg 1: " + containerXMLExpected.replaceAll("\\s+", ""));
-        System.out.println("Greg 2: " + TEST_XML.replaceAll("\\s+", ""));
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 
@@ -1155,17 +1160,17 @@ public class InventoryHandlerV1Test {
         Mockito.verify(this.mockDockerService, times(1)).listContainerDescriptors();
     }
 
-    private void thenCheckIfContainerOneHasStarted() throws KuraException {
-        Mockito.verify(this.mockDockerService, times(1)).startContainer(this.dockerContainer1);
+    private void thenCheckIfContainerOneHasStarted() throws KuraException, InterruptedException {
+        Mockito.verify(this.mockDockerService, times(1)).startContainer(this.dockerContainer1.getContainerId());
         Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer1.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2);
+        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2.getContainerId());
         Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2.getContainerId());
     }
 
-    private void thenCheckIfContainerOneHasStopped() throws KuraException {
-        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer1);
+    private void thenCheckIfContainerOneHasStopped() throws KuraException, InterruptedException {
+        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer1.getContainerId());
         Mockito.verify(this.mockDockerService, times(1)).stopContainer(this.dockerContainer1.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2);
+        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2.getContainerId());
         Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2.getContainerId());
     }
 

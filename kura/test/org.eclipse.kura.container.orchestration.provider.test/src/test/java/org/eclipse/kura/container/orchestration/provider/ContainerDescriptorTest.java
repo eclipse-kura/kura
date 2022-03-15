@@ -27,9 +27,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
-import org.eclipse.kura.container.orchestration.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.provider.impl.ContainerDescriptorImpl;
 import org.junit.Test;
 
 public class ContainerDescriptorTest {
@@ -43,10 +40,10 @@ public class ContainerDescriptorTest {
     private final String path = "~/path/test/";
     private final List<Integer> ports = new ArrayList<>(Arrays.asList(10, 20, 30));
     private final List<Integer> finalPorts = new ArrayList<>(Arrays.asList(10, 20, 30, 40));
-    private ContainerConfiguration firstContainer;
-    private ContainerConfiguration seccondContainer;
-    private ContainerConfiguration thirdContainer;
-    private List<ContainerInstanceDescriptor> testContainerList;
+    private ContainerConfiguration firstContainerConfig;
+    private ContainerConfiguration seccondContainerConfig;
+    private ContainerConfiguration thirdContainerConfig;
+    private List<ContainerConfiguration> testContainerList;
     private Map<String, String> volumes;
     private List<String> devices;
     private List<String> envVar;
@@ -57,15 +54,6 @@ public class ContainerDescriptorTest {
         givenContainerOne();
 
         thenCompareContainerOneToExpectedOutput();
-    }
-
-    @Test
-    public void testSupportOfAppendingParameters() {
-        givenContainerOne();
-
-        whenContainerOneAppened();
-
-        thenCompareContainerOneToExpectedOutputAfterAppend();
     }
 
     @Test
@@ -129,16 +117,16 @@ public class ContainerDescriptorTest {
     // given
     private void givenContainerOne() {
 
-        this.firstContainer = ContainerDescriptorImpl.builder().setContainerImageTag(H2_DB_NAME)
-                .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setExternalPort(H2_DB_PORTS_EXTERNAL)
-                .setInternalPort(H2_DB_PORTS_INTERNAL).setContainerID("1d4f4v4x").build();
+        this.firstContainerConfig = ContainerConfiguration.builder().setContainerImageTag(H2_DB_NAME)
+                .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setExternalPorts(H2_DB_PORTS_EXTERNAL)
+                .setInternalPorts(H2_DB_PORTS_INTERNAL).build();
     }
 
     private void givenContainerTwoDiffrent() {
 
-        this.seccondContainer = ContainerDescriptorImpl.builder().setContainerImageTag(H2_DB_NAME)
+        this.seccondContainerConfig = ContainerConfiguration.builder().setContainerImageTag(H2_DB_NAME)
                 .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setContainerImageTag("diffrent")
-                .setExternalPort(H2_DB_PORTS_EXTERNAL).setInternalPort(H2_DB_PORTS_INTERNAL).setContainerID("4f3gh4ds4")
+                .setExternalPorts(H2_DB_PORTS_EXTERNAL).setInternalPorts(H2_DB_PORTS_INTERNAL)
                 .build();
     }
 
@@ -154,89 +142,80 @@ public class ContainerDescriptorTest {
         this.envVar.add("test2=test2");
     }
 
-    // when
-    private void whenContainerOneAppened() {
-        this.firstContainer = ContainerDescriptorImpl.builder().setContainerImageTag(H2_DB_NAME)
-                .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setExternalPort(H2_DB_PORTS_EXTERNAL)
-                .setInternalPort(H2_DB_PORTS_INTERNAL).addDevice(this.device).addVolume(this.volume, this.path)
-                .setInternalPort(this.ports).addInternalPort(40).setExternalPort(this.ports).addExternalPort(40)
-                .build();
-    }
-
     private void whenContainersAreInList() {
         this.testContainerList = new LinkedList<>();
-        this.testContainerList.add(this.firstContainer);
-        this.testContainerList.add(this.seccondContainer);
-        this.testContainerList.add(ContainerDescriptorImpl.builder().setContainerName("randomTestName")
+        this.testContainerList.add(this.firstContainerConfig);
+        this.testContainerList.add(this.seccondContainerConfig);
+        this.testContainerList.add(ContainerConfiguration.builder().setContainerName("randomTestName")
                 .setContainerImage(H2_DB_IMAGE).build());
     }
 
     private void whenContainerTrioIsCreated() {
         // Using Set
-        this.firstContainer = ContainerConfiguration.builder().setContainerName("abc")
+        this.firstContainerConfig = ContainerConfiguration.builder().setContainerName("abc")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolumes(this.volumes)
                 .setEnvVars(this.envVar).setDeviceList(this.devices).build();
 
         // Using Add by item
-        this.seccondContainer = ContainerConfiguration.builder().setContainerName("def")
+        this.seccondContainerConfig = ContainerConfiguration.builder().setContainerName("def")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE)
                 .setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
                 .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
 
         // Using add by list
-        this.thirdContainer = ContainerConfiguration.builder().setContainerName("ghi")
+        this.thirdContainerConfig = ContainerConfiguration.builder().setContainerName("ghi")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolumes(this.volumes)
                 .setEnvVars(this.envVar).setDeviceList(this.devices).build();
     }
 
     // then
     private void thenCompareContainerOneToExpectedOutput() {
-        assertEquals(H2_DB_NAME, this.firstContainer.getContainerName());
-        assertEquals(H2_DB_IMAGE, this.firstContainer.getContainerImage());
-        assertTrue(ArrayUtils.isEquals(H2_DB_PORTS_EXTERNAL, this.firstContainer.getContainerPortsExternal()));
-        assertTrue(ArrayUtils.isEquals(H2_DB_PORTS_INTERNAL, this.firstContainer.getContainerPortsInternal()));
+        assertEquals(H2_DB_NAME, this.firstContainerConfig.getContainerName());
+        assertEquals(H2_DB_IMAGE, this.firstContainerConfig.getContainerImage());
+        assertTrue(ArrayUtils.isEquals(H2_DB_PORTS_EXTERNAL, this.firstContainerConfig.getContainerPortsExternal()));
+        assertTrue(ArrayUtils.isEquals(H2_DB_PORTS_INTERNAL, this.firstContainerConfig.getContainerPortsInternal()));
     }
 
     private void thenCompareContainerOneToExpectedOutputAfterAppend() {
-        assertEquals(H2_DB_NAME, this.firstContainer.getContainerName());
-        assertEquals(H2_DB_IMAGE, this.firstContainer.getContainerImage());
-        assertTrue(ArrayUtils.isEquals(this.finalPorts, this.firstContainer.getContainerPortsExternal()));
-        assertTrue(ArrayUtils.isEquals(this.finalPorts, this.firstContainer.getContainerPortsInternal()));
-        assertEquals(this.device, this.firstContainer.getContainerDevices().get(0));
-        assertEquals(this.path, this.firstContainer.getContainerVolumes().get(this.volume));
+        assertEquals(H2_DB_NAME, this.firstContainerConfig.getContainerName());
+        assertEquals(H2_DB_IMAGE, this.firstContainerConfig.getContainerImage());
+        assertTrue(ArrayUtils.isEquals(this.finalPorts, this.firstContainerConfig.getContainerPortsExternal()));
+        assertTrue(ArrayUtils.isEquals(this.finalPorts, this.firstContainerConfig.getContainerPortsInternal()));
+        assertEquals(this.device, this.firstContainerConfig.getContainerDevices().get(0));
+        assertEquals(this.path, this.firstContainerConfig.getContainerVolumes().get(this.volume));
     }
 
     private void thenFirstContainerDoesntEqualSeccond() {
-        assertFalse(ContainerDescriptor.equals(this.firstContainer, this.seccondContainer));
+        assertFalse(firstContainerConfig.equals(this.firstContainerConfig, this.seccondContainerConfig));
     }
 
     private void thenFindContainerInLists() {
-        assertEquals(this.firstContainer, ContainerDescriptor.findByName(H2_DB_NAME, this.testContainerList));
+        assertEquals(this.firstContainerConfig, ContainerConfiguration.findByName(H2_DB_NAME, this.testContainerList));
     }
 
     private void thenTestExpectedPrivilegedFlagOnContainerTrio() {
-        assertEquals(this.firstContainer.getContainerPrivileged(), this.privilegedMode);
-        assertEquals(this.seccondContainer.getContainerPrivileged(), this.privilegedMode);
-        assertEquals(this.thirdContainer.getContainerPrivileged(), this.privilegedMode);
+        assertEquals(this.firstContainerConfig.getContainerPrivileged(), this.privilegedMode);
+        assertEquals(this.seccondContainerConfig.getContainerPrivileged(), this.privilegedMode);
+        assertEquals(this.thirdContainerConfig.getContainerPrivileged(), this.privilegedMode);
     }
 
     private void thenTestExpectedContainerVolumesOnContainerTrio() {
-        assertEquals(this.firstContainer.getContainerVolumes(), this.volumes);
-        assertEquals(this.seccondContainer.getContainerVolumes(), this.volumes);
-        assertEquals(this.thirdContainer.getContainerVolumes(), this.volumes);
+        assertEquals(this.firstContainerConfig.getContainerVolumes(), this.volumes);
+        assertEquals(this.seccondContainerConfig.getContainerVolumes(), this.volumes);
+        assertEquals(this.thirdContainerConfig.getContainerVolumes(), this.volumes);
     }
 
     private void thenTestExpectedContainerEnvVarsOnContainerTrio() {
-        assertEquals(this.firstContainer.getContainerEnvVars(), this.envVar);
-        assertEquals(this.seccondContainer.getContainerEnvVars(), this.envVar);
-        assertEquals(this.thirdContainer.getContainerEnvVars(), this.envVar);
+        assertEquals(this.firstContainerConfig.getContainerEnvVars(), this.envVar);
+        assertEquals(this.seccondContainerConfig.getContainerEnvVars(), this.envVar);
+        assertEquals(this.thirdContainerConfig.getContainerEnvVars(), this.envVar);
     }
 
     private void thenTestExpectedContainerDevicesOnContainerTrio() {
-        assertEquals(this.firstContainer.getContainerDevices(), this.devices);
-        assertEquals(this.seccondContainer.getContainerDevices(), this.devices);
-        assertEquals(this.thirdContainer.getContainerDevices(), this.devices);
+        assertEquals(this.firstContainerConfig.getContainerDevices(), this.devices);
+        assertEquals(this.seccondContainerConfig.getContainerDevices(), this.devices);
+        assertEquals(this.thirdContainerConfig.getContainerDevices(), this.devices);
     }
 
 }

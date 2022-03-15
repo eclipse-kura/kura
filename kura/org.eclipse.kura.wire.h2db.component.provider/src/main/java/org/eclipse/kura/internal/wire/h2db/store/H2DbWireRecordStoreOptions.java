@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,11 +28,11 @@ final class H2DbWireRecordStoreOptions {
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
 
-    private static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
+    protected static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
 
-    private static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
+    protected static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
 
-    private static final String TABLE_NAME = "table.name";
+    protected static final String TABLE_NAME = "table.name";
 
     private final Map<String, Object> properties;
 

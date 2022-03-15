@@ -40,6 +40,9 @@ public class ContainerInstanceOptions {
             "container.image.download.retries", 5);
     private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = new Property<>(
             "container.image.download.interval", 30000);
+    private static final Property<String> CONTAINER_LOGGER_PARAMETERS = new Property<>("container.loggerParameters",
+            "");
+    private static final Property<String> CONTAINER_LOGGING_TYPE = new Property<>("container.loggingType", "default");
 
     private final boolean enabled;
     private final String image;
@@ -54,6 +57,8 @@ public class ContainerInstanceOptions {
     private final Map<String, String> containerVolumes;
     private final int maxDownloadRetries;
     private final int retryInterval;
+    private final Map<String, String> containerLoggingParameters;
+    private final String containerLoggerType;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -73,6 +78,8 @@ public class ContainerInstanceOptions {
         this.privilegedMode = CONTAINER_PRIVILEGED.get(properties);
         this.maxDownloadRetries = CONTAINER_IMAGE_DOWNLOAD_RETRIES.get(properties);
         this.retryInterval = CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL.get(properties);
+        this.containerLoggerType = CONTAINER_LOGGING_TYPE.get(properties);
+        this.containerLoggingParameters = parseLoggingParams(CONTAINER_LOGGER_PARAMETERS.get(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -84,6 +91,23 @@ public class ContainerInstanceOptions {
 
         for (String entry : volumeString.trim().split(",")) {
             String[] tempEntry = entry.split(":");
+            if (tempEntry.length == 2) {
+                map.put(tempEntry[0].trim(), tempEntry[1].trim());
+            }
+        }
+
+        return map;
+    }
+    
+    private Map<String, String> parseLoggingParams(String loggingString) {
+        Map<String, String> map = new HashMap<>();
+
+        if (loggingString.isEmpty()) {
+            return map;
+        }
+
+        for (String entry : loggingString.trim().split(",")) {
+            String[] tempEntry = entry.split("=");
             if (tempEntry.length == 2) {
                 map.put(tempEntry[0].trim(), tempEntry[1].trim());
             }
@@ -172,6 +196,14 @@ public class ContainerInstanceOptions {
     public int getRetryInterval() {
         return this.retryInterval;
     }
+    
+    public String getLoggingType() {
+        return this.containerLoggerType;
+    }
+
+    public Map<String, String> getLoggerParameters() {
+        return this.containerLoggingParameters;
+    }
 
     public ContainerConfiguration getContainerDescriptor() {
         return ContainerConfiguration.builder().setContainerName(getContainerName())
@@ -179,7 +211,8 @@ public class ContainerInstanceOptions {
                 .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())
                 .setEnvVars(getContainerEnvList()).setVolumes(getContainerVolumeList())
                 .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
-                .setFrameworkManaged(true).build();
+                .setFrameworkManaged(true).setLoggingTypeByString(getLoggingType())
+                .setLoggerParameters(getLoggerParameters()).build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -196,110 +229,100 @@ public class ContainerInstanceOptions {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.containerDevice == null ? 0 : this.containerDevice.hashCode());
-        result = prime * result + (this.containerEnv == null ? 0 : this.containerEnv.hashCode());
-        result = prime * result + (this.containerName == null ? 0 : this.containerName.hashCode());
-        result = prime * result + (this.containerVolumeString == null ? 0 : this.containerVolumeString.hashCode());
-        result = prime * result + (this.containerVolumes == null ? 0 : this.containerVolumes.hashCode());
-        result = prime * result + (this.enabled ? 1231 : 1237);
-        result = prime * result + (this.externalPorts == null ? 0 : this.externalPorts.hashCode());
-        result = prime * result + (this.image == null ? 0 : this.image.hashCode());
-        result = prime * result + (this.imageTag == null ? 0 : this.imageTag.hashCode());
-        result = prime * result + (this.internalPorts == null ? 0 : this.internalPorts.hashCode());
-        result = prime * result + this.maxDownloadRetries;
-        result = prime * result + (this.privilegedMode ? 1231 : 1237);
-        result = prime * result + this.retryInterval;
-        return result;
-    }
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((containerDevice == null) ? 0 : containerDevice.hashCode());
+		result = prime * result + ((containerEnv == null) ? 0 : containerEnv.hashCode());
+		result = prime * result + ((containerLoggerType == null) ? 0 : containerLoggerType.hashCode());
+		result = prime * result + ((containerLoggingParameters == null) ? 0 : containerLoggingParameters.hashCode());
+		result = prime * result + ((containerName == null) ? 0 : containerName.hashCode());
+		result = prime * result + ((containerVolumeString == null) ? 0 : containerVolumeString.hashCode());
+		result = prime * result + ((containerVolumes == null) ? 0 : containerVolumes.hashCode());
+		result = prime * result + (enabled ? 1231 : 1237);
+		result = prime * result + ((externalPorts == null) ? 0 : externalPorts.hashCode());
+		result = prime * result + ((image == null) ? 0 : image.hashCode());
+		result = prime * result + ((imageTag == null) ? 0 : imageTag.hashCode());
+		result = prime * result + ((internalPorts == null) ? 0 : internalPorts.hashCode());
+		result = prime * result + maxDownloadRetries;
+		result = prime * result + (privilegedMode ? 1231 : 1237);
+		result = prime * result + retryInterval;
+		return result;
+	}
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if ((obj == null) || (getClass() != obj.getClass())) {
-            return false;
-        }
-        ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
-        if (this.containerDevice == null) {
-            if (other.containerDevice != null) {
-                return false;
-            }
-        } else if (!this.containerDevice.equals(other.containerDevice)) {
-            return false;
-        }
-        if (this.containerEnv == null) {
-            if (other.containerEnv != null) {
-                return false;
-            }
-        } else if (!this.containerEnv.equals(other.containerEnv)) {
-            return false;
-        }
-        if (this.containerName == null) {
-            if (other.containerName != null) {
-                return false;
-            }
-        } else if (!this.containerName.equals(other.containerName)) {
-            return false;
-        }
-        if (this.containerVolumeString == null) {
-            if (other.containerVolumeString != null) {
-                return false;
-            }
-        } else if (!this.containerVolumeString.equals(other.containerVolumeString)) {
-            return false;
-        }
-        if (this.containerVolumes == null) {
-            if (other.containerVolumes != null) {
-                return false;
-            }
-        } else if (!this.containerVolumes.equals(other.containerVolumes)) {
-            return false;
-        }
-        if (this.enabled != other.enabled) {
-            return false;
-        }
-        if (this.externalPorts == null) {
-            if (other.externalPorts != null) {
-                return false;
-            }
-        } else if (!this.externalPorts.equals(other.externalPorts)) {
-            return false;
-        }
-        if (this.image == null) {
-            if (other.image != null) {
-                return false;
-            }
-        } else if (!this.image.equals(other.image)) {
-            return false;
-        }
-        if (this.imageTag == null) {
-            if (other.imageTag != null) {
-                return false;
-            }
-        } else if (!this.imageTag.equals(other.imageTag)) {
-            return false;
-        }
-        if (this.internalPorts == null) {
-            if (other.internalPorts != null) {
-                return false;
-            }
-        } else if (!this.internalPorts.equals(other.internalPorts)) {
-            return false;
-        }
-        if (this.maxDownloadRetries != other.maxDownloadRetries) {
-            return false;
-        }
-        if (this.privilegedMode != other.privilegedMode) {
-            return false;
-        }
-        if (this.retryInterval != other.retryInterval) {
-            return false;
-        }
-        return true;
-    }
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
+		if (containerDevice == null) {
+			if (other.containerDevice != null)
+				return false;
+		} else if (!containerDevice.equals(other.containerDevice))
+			return false;
+		if (containerEnv == null) {
+			if (other.containerEnv != null)
+				return false;
+		} else if (!containerEnv.equals(other.containerEnv))
+			return false;
+		if (containerLoggerType == null) {
+			if (other.containerLoggerType != null)
+				return false;
+		} else if (!containerLoggerType.equals(other.containerLoggerType))
+			return false;
+		if (containerLoggingParameters == null) {
+			if (other.containerLoggingParameters != null)
+				return false;
+		} else if (!containerLoggingParameters.equals(other.containerLoggingParameters))
+			return false;
+		if (containerName == null) {
+			if (other.containerName != null)
+				return false;
+		} else if (!containerName.equals(other.containerName))
+			return false;
+		if (containerVolumeString == null) {
+			if (other.containerVolumeString != null)
+				return false;
+		} else if (!containerVolumeString.equals(other.containerVolumeString))
+			return false;
+		if (containerVolumes == null) {
+			if (other.containerVolumes != null)
+				return false;
+		} else if (!containerVolumes.equals(other.containerVolumes))
+			return false;
+		if (enabled != other.enabled)
+			return false;
+		if (externalPorts == null) {
+			if (other.externalPorts != null)
+				return false;
+		} else if (!externalPorts.equals(other.externalPorts))
+			return false;
+		if (image == null) {
+			if (other.image != null)
+				return false;
+		} else if (!image.equals(other.image))
+			return false;
+		if (imageTag == null) {
+			if (other.imageTag != null)
+				return false;
+		} else if (!imageTag.equals(other.imageTag))
+			return false;
+		if (internalPorts == null) {
+			if (other.internalPorts != null)
+				return false;
+		} else if (!internalPorts.equals(other.internalPorts))
+			return false;
+		if (maxDownloadRetries != other.maxDownloadRetries)
+			return false;
+		if (privilegedMode != other.privilegedMode)
+			return false;
+		if (retryInterval != other.retryInterval)
+			return false;
+		return true;
+	}
 
 }

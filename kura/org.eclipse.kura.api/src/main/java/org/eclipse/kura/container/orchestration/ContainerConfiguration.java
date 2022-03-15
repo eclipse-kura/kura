@@ -39,6 +39,8 @@ public class ContainerConfiguration {
     private Map<String, String> containerVolumes;
     private Boolean containerPrivileged;
     private Boolean isFrameworkManaged = true;
+    private Map<String, String> containerLoggerParameters;
+    private String containerLoggingType;
 
     /**
      * The method will provide information if the container is or not managed by the framework
@@ -129,6 +131,21 @@ public class ContainerConfiguration {
     public boolean getContainerPrivileged() {
         return containerPrivileged;
     }
+    /**
+     * Returns a Map that identifies configured logger parameters.
+     * @return
+     */
+    public Map<String, String> getLoggerParameters() {
+        return this.containerLoggerParameters;
+    }
+    
+    /**
+     * returns a string identifying which logger driver to use.
+     * @return
+     */
+    public String getContainerLoggingType() {
+        return this.containerLoggingType;
+    }
 
     /**
      * Static method that will extract the {@link ContainerConfiguration} matching the given name in the given list
@@ -164,6 +181,8 @@ public class ContainerConfiguration {
         resultBuilder = resultBuilder && obj1.getContainerVolumes().equals(obj2.getContainerVolumes());
         resultBuilder = resultBuilder && obj1.getContainerPrivileged() == obj2.getContainerPrivileged();
         resultBuilder = resultBuilder && obj1.isFrameworkManaged() == obj2.isFrameworkManaged();
+        resultBuilder = resultBuilder && obj1.containerLoggerParameters.equals(obj2.containerLoggerParameters);
+        resultBuilder = resultBuilder && obj1.containerLoggingType.equals(obj2.containerLoggingType);
 
         return resultBuilder;
     }
@@ -189,6 +208,8 @@ public class ContainerConfiguration {
         private Map<String, String> containerVolumes = new HashMap<>();
         private Boolean containerPrivilaged = false;
         private Boolean isFrameworkManaged = true;
+        private Map<String, String> containerLoggerParameters;
+        private String containerLoggingType;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -234,6 +255,16 @@ public class ContainerConfiguration {
             this.containerVolumes = new HashMap<>(volumeMap);
             return this;
         }
+        
+        public ContainerConfigurationBuilder setLoggerParameters(Map<String, String> paramMap) {
+            this.containerLoggerParameters = new HashMap<>(paramMap);
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setLoggingTypeByString(String containerLoggingType) {
+            this.containerLoggingType = containerLoggingType;
+            return this;
+        }
 
         public ContainerConfigurationBuilder setPrivilegedMode(Boolean containerPrivilaged) {
             this.containerPrivilaged = containerPrivilaged;
@@ -253,6 +284,8 @@ public class ContainerConfiguration {
             result.containerVolumes = this.containerVolumes;
             result.containerPrivileged = this.containerPrivilaged;
             result.isFrameworkManaged = this.isFrameworkManaged;
+            result.containerLoggerParameters = this.containerLoggerParameters;
+            result.containerLoggingType = this.containerLoggingType;
 
             return result;
         }

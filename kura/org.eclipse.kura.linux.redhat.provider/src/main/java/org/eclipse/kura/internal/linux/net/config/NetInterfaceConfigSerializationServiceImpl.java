@@ -236,21 +236,23 @@ public class NetInterfaceConfigSerializationServiceImpl implements NetInterfaceC
         }
 
         // move tmp configuration file into its final destination
-        copyConfigFile(srcFile, dstFile);
+        copyAndDeleteTmpConfigFile(srcFile, dstFile);
     }
 
-    private void copyConfigFile(File srcFile, File dstFile) throws KuraException {
+    private void copyAndDeleteTmpConfigFile(File tmpSrcFile, File dstFile) throws KuraException {
         try {
-            if (!FileUtils.contentEquals(srcFile, dstFile)) {
+            if (!FileUtils.contentEquals(tmpSrcFile, dstFile)) {
                 // File.renameTo performs rather badly on Windows, if the file already exists
-                Files.move(Paths.get(srcFile.getAbsolutePath()), Paths.get(dstFile.getAbsolutePath()),
+                Files.move(Paths.get(tmpSrcFile.getAbsolutePath()), Paths.get(dstFile.getAbsolutePath()),
                         StandardCopyOption.REPLACE_EXISTING);
             } else {
                 logger.info("Not rewriting network interfaces file because it is the same");
             }
+
+            Files.deleteIfExists(Paths.get(tmpSrcFile.getAbsolutePath()));
         } catch (IOException e) {
             throw new KuraIOException(e,
-                    "Failed to rename tmp config file " + srcFile.getName() + " to " + dstFile.getName());
+                    "Failed to rename tmp config file " + tmpSrcFile.getName() + " to " + dstFile.getName());
         }
     }
 }

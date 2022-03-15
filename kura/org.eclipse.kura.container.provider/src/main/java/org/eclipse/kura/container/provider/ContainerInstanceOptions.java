@@ -1,12 +1,12 @@
 /*******************************************************************************
   * Copyright (c) 2022 Eurotech and/or its affiliates and others
-  * 
+  *
   * This program and the accompanying materials are made
   * available under the terms of the Eclipse Public License 2.0
   * which is available at https://www.eclipse.org/legal/epl-2.0/
-  * 
+  *
   * SPDX-License-Identifier: EPL-2.0
-  * 
+  *
   * Contributors:
   *  Eurotech
   *******************************************************************************/
@@ -15,18 +15,17 @@ package org.eclipse.kura.container.provider;
 
 import static java.util.Objects.isNull;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.util.configuration.Property;
 
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-
-public class ConfigurableGenericDockerServiceOptions {
+public class ContainerInstanceOptions {
 
     private static final Property<Boolean> IS_ENABLED = new Property<>("container.enabled", false);
     private static final Property<String> CONTAINER_IMAGE = new Property<>("container.image", "nginx");
@@ -38,20 +37,26 @@ public class ConfigurableGenericDockerServiceOptions {
     private static final Property<String> CONTAINER_VOLUME = new Property<>("container.volume", "");
     private static final Property<String> CONTAINER_DEVICE = new Property<>("container.device", "");
     private static final Property<Boolean> CONTAINER_PRIVILEGED = new Property<>("container.privileged", false);
+    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRIES = new Property<>(
+            "container.image.download.retries", 5);
+    private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = new Property<>(
+            "container.image.download.interval", 30000);
 
     private final boolean enabled;
     private final String image;
     private final String imageTag;
     private final String containerName;
-    private final int[] internalPorts;
-    private final int[] externalPorts;
+    private final List<Integer> internalPorts;
+    private final List<Integer> externalPorts;
     private final String containerEnv;
     private final String containerVolumeString;
     private final String containerDevice;
     private final boolean privilegedMode;
     private final Map<String, String> containerVolumes;
+    private final int maxDownloadRetries;
+    private final int retryInterval;
 
-    public ConfigurableGenericDockerServiceOptions(final Map<String, Object> properties) {
+    public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
             throw new IllegalArgumentException("Properties cannot be null!");
         }
@@ -67,6 +72,8 @@ public class ConfigurableGenericDockerServiceOptions {
         this.containerVolumes = parseVolume(this.containerVolumeString);
         this.containerDevice = CONTAINER_DEVICE.get(properties);
         this.privilegedMode = CONTAINER_PRIVILEGED.get(properties);
+        this.maxDownloadRetries = CONTAINER_IMAGE_DOWNLOAD_RETRIES.get(properties);
+        this.retryInterval = CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL.get(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -131,11 +138,11 @@ public class ConfigurableGenericDockerServiceOptions {
         return this.containerName;
     }
 
-    public int[] getContainerPortsInternal() {
+    public List<Integer> getContainerPortsInternal() {
         return this.internalPorts;
     }
 
-    public int[] getContainerPortsExternal() {
+    public List<Integer> getContainerPortsExternal() {
         return this.externalPorts;
     }
 
@@ -155,23 +162,45 @@ public class ConfigurableGenericDockerServiceOptions {
         return this.privilegedMode;
     }
 
-    public ContainerDescriptor getContainerDescriptor() {
-        return ContainerDescriptor.builder().setContainerName(getContainerName()).setContainerImage(getContainerImage())
-                .setContainerImageTag(getContainerImageTag()).setExternalPort(getContainerPortsExternal())
-                .setInternalPort(getContainerPortsInternal()).addEnvVar(getContainerEnvList())
-                .setVolume(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
-                .setDeviceList(getContainerDeviceList()).build();
+    public boolean isUnlimitedRetries() {
+        return this.maxDownloadRetries == 0;
+    }
+
+    public int getMaxDownloadRetries() {
+        return this.maxDownloadRetries;
+    }
+
+    public int getRetryInterval() {
+        return this.retryInterval;
+    }
+
+    public ContainerConfiguration getContainerConfiguration() {
+        return ContainerConfiguration.builder().setContainerName(getContainerName())
+                .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
+                .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())
+                .setEnvVars(getContainerEnvList()).setVolumes(getContainerVolumeList())
+                .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
+                .setFrameworkManaged(true).build();
+    }
+
+    private List<Integer> parsePortString(String ports) {
+        List<Integer> tempArray = new ArrayList<>();
+        if (!ports.isEmpty()) {
+            String[] tempString = ports.trim().replace(" ", "").split(",");
+
+            for (String element : tempString) {
+                tempArray.add(Integer.parseInt(element.trim().replace("-", "")));
+            }
+        }
+
+        return tempArray;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(this.externalPorts);
-        result = prime * result + Arrays.hashCode(this.internalPorts);
-        result = prime * result + Objects.hash(this.containerDevice, this.containerEnv, this.containerName,
-                this.containerVolumes, this.enabled, this.image, this.imageTag);
-        return result;
+        return Objects.hash(this.containerDevice, this.containerEnv, this.containerName, this.containerVolumeString,
+                this.containerVolumes, this.enabled, this.externalPorts, this.image, this.imageTag, this.internalPorts,
+                this.maxDownloadRetries, this.privilegedMode, this.retryInterval);
     }
 
     @Override
@@ -179,33 +208,20 @@ public class ConfigurableGenericDockerServiceOptions {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof ContainerInstanceOptions)) {
             return false;
         }
-        ConfigurableGenericDockerServiceOptions other = (ConfigurableGenericDockerServiceOptions) obj;
+        ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
         return Objects.equals(this.containerDevice, other.containerDevice)
                 && Objects.equals(this.containerEnv, other.containerEnv)
-                && Objects.equals(this.containerName, other.containerName) && Objects.equals(this.image, other.image)
-                && Objects.equals(this.imageTag, other.imageTag)
+                && Objects.equals(this.containerName, other.containerName)
+                && Objects.equals(this.containerVolumeString, other.containerVolumeString)
                 && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
-                && Arrays.equals(this.externalPorts, other.externalPorts)
-                && Arrays.equals(this.internalPorts, other.internalPorts)
-                && Objects.equals(this.privilegedMode, other.privilegedMode);
-    }
-
-    private int[] parsePortString(String ports) {
-        int[] tempArray = new int[] {};
-        if (ports.isEmpty()) {
-            return tempArray;
-        }
-
-        String[] tempString = ports.trim().replace(" ", "").split(",");
-        tempArray = new int[tempString.length];
-        for (int i = 0; i < tempString.length; i++) {
-            tempArray[i] = Integer.parseInt(tempString[i].trim().replace("-", ""));
-        }
-
-        return tempArray;
+                && Objects.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
+                && Objects.equals(this.imageTag, other.imageTag)
+                && Objects.equals(this.internalPorts, other.internalPorts)
+                && this.maxDownloadRetries == other.maxDownloadRetries && this.privilegedMode == other.privilegedMode
+                && this.retryInterval == other.retryInterval;
     }
 
 }

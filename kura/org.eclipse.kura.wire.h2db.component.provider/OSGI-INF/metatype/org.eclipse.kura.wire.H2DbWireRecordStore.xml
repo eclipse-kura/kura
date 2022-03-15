@@ -34,7 +34,7 @@
             required="true"
             default="10000"
             description="Maximum table size"
-            min="0">
+            min="1">
         </AD>
         
         <AD id="cleanup.records.keep"

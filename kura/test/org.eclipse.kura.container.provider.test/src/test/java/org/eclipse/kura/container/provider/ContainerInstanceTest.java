@@ -47,7 +47,7 @@ public class ContainerInstanceTest {
     private ContainerOrchestrationService dockerService;
     private Map<String, Object> properties;
     private ContainerInstance configurableGenericDockerService;
-    private CompletableFuture<Void> containerStarted = new CompletableFuture<>();
+    private final CompletableFuture<Void> containerStarted = new CompletableFuture<>();
 
     @Test(expected = IllegalArgumentException.class)
     public void testServiceActivateNullProperties() {
@@ -151,7 +151,7 @@ public class ContainerInstanceTest {
 
     private void givenDockerService() {
         this.dockerService = mock(ContainerOrchestrationService.class);
-        this.configurableGenericDockerService.setDockerService(this.dockerService);
+        this.configurableGenericDockerService.setContainerOrchestrationService(this.dockerService);
         try {
             when(this.dockerService.startContainer((ContainerConfiguration) any())).thenAnswer(i -> {
                 this.containerStarted.complete(null);

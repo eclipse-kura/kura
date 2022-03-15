@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
@@ -32,8 +31,8 @@ import org.eclipse.kura.cloudconnection.request.RequestHandler;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.DockerService;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -74,7 +73,6 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
-    private static final String DELETE = "_delete";
 
     private static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
     private static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
@@ -91,7 +89,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     private SystemService systemService;
     private BundleContext bundleContext;
 
-    private DockerService dockerService;
+    private ContainerOrchestrationService dockerService;
 
     // ----------------------------------------------------------------
     //
@@ -99,11 +97,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
-    public void setDockerService(DockerService dockerService) {
+    public void setDockerService(ContainerOrchestrationService dockerService) {
         this.dockerService = dockerService;
     }
 
-    public void unsetDockerService(DockerService dockerService) {
+    public void unsetDockerService(ContainerOrchestrationService dockerService) {
         if (this.dockerService == dockerService) {
             this.dockerService = null;
         }
@@ -228,7 +226,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.dockerService.startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                this.dockerService
+                        .startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
 
                 return success();
             } else if (STOP_CONTAINER.equals(resources)) {
@@ -237,7 +236,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                     return notFound();
                 }
 
-                this.dockerService.stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)));
+                this.dockerService
+                        .stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
                 return success();
             }
         } catch (final KuraException e) {
@@ -312,7 +312,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             String s = marshal(xdps);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error("Error getting resource {}: {}", RESOURCE_DEPLOYMENT_PACKAGES, e);
         }
@@ -343,7 +343,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             String s = marshal(systemBundles);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error(ERROR_GETTING_RESOURCE, RESOURCE_BUNDLES, e);
         }
@@ -373,7 +373,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         if (this.dockerService != null) {
             try {
                 logger.info("Creating docker invenetory");
-                List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
+                List<ContainerInstanceDescriptor> containers = this.dockerService.listContainerDescriptors();
                 containers.stream().forEach(
                         container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
                                 container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
@@ -391,7 +391,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         try {
             String s = marshal(systemResourcesInfo);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e1) {
             logger.error("Error getting inventory", e1);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -413,7 +413,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
             String s = marshal(systemPackages);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error(ERROR_GETTING_RESOURCE, RESOURCE_SYSTEM_PACKAGES, e);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -430,7 +430,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ContainerDescriptor> containers = this.dockerService.listRegisteredContainers();
+            List<ContainerInstanceDescriptor> containers = this.dockerService.listContainerDescriptors();
 
             List<DockerContainer> containersList = new ArrayList<>();
             containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
@@ -438,7 +438,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             DockerContainers dockerContainers = new DockerContainers(containersList);
             String s = marshal(dockerContainers);
             respPayload.setTimestamp(new Date());
-            respPayload.setBody(s.getBytes(Charsets.UTF_8));
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             logger.error(ERROR_GETTING_RESOURCE, RESOURCE_SYSTEM_PACKAGES, e);
             respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
@@ -544,7 +544,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         return unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8), SystemBundleRef.class);
     }
 
-    private ContainerDescriptor extractContainerRef(final KuraMessage message) throws KuraException {
+    private ContainerInstanceDescriptor extractContainerRef(final KuraMessage message) throws KuraException {
         final KuraPayload payload = message.getPayload();
 
         final byte[] body = payload.getBody();
@@ -558,9 +558,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 DockerContainer.class);
 
         try {
-            List<ContainerDescriptor> containerList = this.dockerService.listRegisteredContainers();
+            List<ContainerInstanceDescriptor> containerList = this.dockerService.listContainerDescriptors();
 
-            for (ContainerDescriptor container : containerList) {
+            for (ContainerInstanceDescriptor container : containerList) {
                 if (container.getContainerName().equals(dc.getContainerName())) {
                     return container;
                 }
@@ -590,8 +590,9 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
 
-    private ContainerDescriptor findFirstMatchingContainer(final ContainerDescriptor ref) throws KuraException {
-        for (final ContainerDescriptor container : this.dockerService.listRegisteredContainers()) {
+    private ContainerInstanceDescriptor findFirstMatchingContainer(final ContainerInstanceDescriptor ref)
+            throws KuraException {
+        for (final ContainerInstanceDescriptor container : this.dockerService.listContainerDescriptors()) {
             if (container.getContainerName().equals(ref.getContainerName())) {
                 return container;
             }

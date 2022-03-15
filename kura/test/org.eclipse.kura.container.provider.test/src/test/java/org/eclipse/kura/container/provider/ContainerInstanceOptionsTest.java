@@ -1,33 +1,33 @@
 /*******************************************************************************
   * Copyright (c) 2022 Eurotech and/or its affiliates and others
-  * 
+  *
   * This program and the accompanying materials are made
   * available under the terms of the Eclipse Public License 2.0
   * which is available at https://www.eclipse.org/legal/epl-2.0/
-  * 
+  *
   * SPDX-License-Identifier: EPL-2.0
-  * 
+  *
   * Contributors:
   *  Eurotech
   *******************************************************************************/
 package org.eclipse.kura.container.provider;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.junit.Test;
 
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-
-public class ConfigurableDockerGernericDockerServiceOptionsTest {
+public class ContainerInstanceOptionsTest {
 
     private static final boolean DEFAULT_ENABLED = false;
     private static final String DEFAULT_PORTS_EXTERNAL = "";
@@ -39,6 +39,9 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private static final String DEFAULT_CONTAINER_PATH_DESTINATION = "";
     private static final String DEFAULT_CONTAINER_PATH_FILE_PATH = "";
     private static final String DEFAULT_CONTAINER_DEVICE = "";
+    private static final boolean DEFAULT_CCONTAINER_PRIVILEGED = false;
+    private static final int DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRIES = 5;
+    private static final int DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = 30000;
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -49,10 +52,13 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private static final String CONTAINER_ENABLED = "container.enabled";
     private static final String CONTAINER_DEVICE = "container.device";
     private static final String CONTAINER_VOLUME = "container.volume";
+    private static final String CONTAINER_PRIVILEGED = "container.privileged";
+    private static final String CONTAINER_IMAGE_DOWNLOAD_RETRIES = "container.image.download.retries";
+    private static final String CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = "container.image.download.interval";
 
     private Map<String, Object> properties;
 
-    private ConfigurableGenericDockerServiceOptions cgdso;
+    private ContainerInstanceOptions cgdso;
 
     private boolean enabled;
     private String image;
@@ -61,18 +67,29 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     private List<String> containerEnv;
     private Map<String, String> containerVolumes;
     private List<String> containerDevice;
-    private int[] portsAvailable;
+    private List<Integer> portsAvailable;
     private boolean equals;
     private int hashCode;
+    private boolean privilegedMode;
 
-    private ContainerDescriptor containerDescriptor;
+    private ContainerConfiguration containerDescriptor;
 
     private Map<String, Object> newProperties;
+    private int imageDownloadRetries;
+    private int imageDownloadRetryInterval;
+    private boolean unlimitedRetries;
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testNullProperties() {
+        givenNullProperties();
+
+        whenConfigurableGenericDockerServiceOptionsCreated();
+    }
 
     @Test
     public void testEnabledDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenIsEnabled();
@@ -84,7 +101,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testEnabled() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenEnabled(true);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -97,7 +114,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testImageDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetImage();
@@ -109,7 +126,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testImage() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenImage("test");
         givenConfigurableGenericDockerServiceOptions();
 
@@ -121,7 +138,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testImageTagDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetImageTag();
@@ -133,7 +150,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testImageTag() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenImageTag("test");
         givenConfigurableGenericDockerServiceOptions();
 
@@ -145,7 +162,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerNameDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetContainerName();
@@ -157,7 +174,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerName() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenContainerName("test");
         givenConfigurableGenericDockerServiceOptions();
 
@@ -169,7 +186,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerEnvDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetContainerEnv();
@@ -181,7 +198,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerEnv() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenContainerEnv("test=123");
         givenConfigurableGenericDockerServiceOptions();
 
@@ -193,7 +210,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerVolumeDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetContainerVolume();
@@ -205,7 +222,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerVolume() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenContainerVolume("test", "test");
         givenConfigurableGenericDockerServiceOptions();
 
@@ -217,7 +234,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerDeviceDefault() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetContainerDevice();
@@ -229,7 +246,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testContainerDevice() {
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenContainerDevice("test");
         givenConfigurableGenericDockerServiceOptions();
 
@@ -239,12 +256,108 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     }
 
     @Test
+    public void testPrivilegedModeDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetPrivilegedMode();
+
+        thenPrivilegedMode(DEFAULT_CCONTAINER_PRIVILEGED);
+
+    }
+
+    @Test
+    public void testPrivilegedMode() {
+
+        givenDefaultProperties();
+        givenPrivilegedMode(true);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetPrivilegedMode();
+
+        thenPrivilegedMode(true);
+    }
+
+    @Test
+    public void testImageDownloadRetriesDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetImageDownloadRetries();
+
+        thenImageDownloadRetries(DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRIES);
+
+    }
+
+    @Test
+    public void testImageDownloadRetries() {
+
+        givenDefaultProperties();
+        givenImageDownloadRetries(100);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetImageDownloadRetries();
+
+        thenImageDownloadRetries(100);
+    }
+
+    @Test
+    public void testImageDownloadUnlimitedRetriesDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetIsUnlimitedRetries();
+
+        thenIsFalse(this.unlimitedRetries);
+
+    }
+
+    @Test
+    public void testImageDownloadUnlimitedRetries() {
+
+        givenDefaultProperties();
+        givenImageDownloadRetries(0);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetIsUnlimitedRetries();
+
+        thenIsTrue(this.unlimitedRetries);
+    }
+
+    @Test
+    public void testImageDownloadRetryIntervalDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetImageDownloadRetryInterval();
+
+        thenImageDownloadRetryInterval(DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL);
+
+    }
+
+    @Test
+    public void testImageDownloadRetryInterval() {
+
+        givenDefaultProperties();
+        givenImageDownloadRetryInterval(100);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetImageDownloadRetryInterval();
+
+        thenImageDownloadRetryInterval(100);
+    }
+
+    @Test
     public void shouldSupportMultipleExternalPortsInOneString() {
 
         String ports = "22, 56, 77, 567, 4455";
-        int[] portResult = { 22, 56, 77, 567, 4455 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22, 56, 77, 567, 4455));
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_EXTERNAL, ports);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -258,9 +371,9 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     public void shouldSupportSingleExternalPortsInOneString() {
 
         String ports = "22";
-        int[] portResult = { 22 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22));
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_EXTERNAL, ports);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -274,9 +387,9 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     public void shouldSupportSingleBrokenExternalPortsInOneString() {
 
         String ports = "22,";
-        int[] portResult = { 22 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22));
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_EXTERNAL, ports);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -289,9 +402,9 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testMultipleInternalPortsInOneString() {
         String ports = "22, 56, 77, 567, 4455";
-        int[] portResult = { 22, 56, 77, 567, 4455 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(22, 56, 77, 567, 4455));
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_INTERNAL, ports);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -303,9 +416,9 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testMultipleBrokenInternalPortsInOneString() {
         String ports = "56 ,";
-        int[] portResult = { 56 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(56));
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_INTERNAL, ports);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -317,9 +430,9 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     @Test
     public void testSingleInternalPortsInOneString() {
         String ports = "56";
-        int[] portResult = { 56 };
+        List<Integer> portResult = new ArrayList<>(Arrays.asList(56));
 
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenPortsConfiguration(CONTAINER_PORTS_INTERNAL, ports);
         givenConfigurableGenericDockerServiceOptions();
 
@@ -330,7 +443,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     @Test
     public void testOptionsEqualsSameObject() {
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetEquals(this.cgdso);
@@ -342,10 +455,10 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     @Test
     public void testOptionsEqualsNewSameObject() {
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
-        whenGetEquals(new ConfigurableGenericDockerServiceOptions(this.properties));
+        whenGetEquals(new ContainerInstanceOptions(this.properties));
 
         thenIsEqual();
         thenIsNotSameHashCode();
@@ -353,11 +466,23 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     @Test
     public void testOptionsEqualsDifferentObject() {
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenDifferentProperties();
         givenConfigurableGenericDockerServiceOptions();
 
-        whenGetEquals(new ConfigurableGenericDockerServiceOptions(this.newProperties));
+        whenGetEquals(new ContainerInstanceOptions(this.newProperties));
+
+        thenIsNotEqual();
+        thenIsNotSameHashCode();
+    }
+
+    @Test
+    public void testOptionsDifferEmptyProperties() {
+        givenDefaultProperties();
+        givenEmptyNewProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetEquals(new ContainerInstanceOptions(this.newProperties));
 
         thenIsNotEqual();
         thenIsNotSameHashCode();
@@ -365,7 +490,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     @Test
     public void testGetContainerDescriptor() {
-        givenEmptyProperties();
+        givenDefaultProperties();
         givenConfigurableGenericDockerServiceOptions();
 
         whenGetContainerDescriptor();
@@ -373,7 +498,15 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         thenIsNotNullContainerDescriptor();
     }
 
-    private void givenEmptyProperties() {
+    private void givenNullProperties() {
+        this.properties = null;
+    }
+
+    private void givenEmptyNewProperties() {
+        this.newProperties = new HashMap<>();
+    }
+
+    private void givenDefaultProperties() {
         this.properties = new HashMap<>();
         this.properties.put(CONTAINER_ENABLED, DEFAULT_ENABLED);
         this.properties.put(CONTAINER_IMAGE, DEFAULT_IMAGE);
@@ -401,7 +534,7 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
-        this.cgdso = new ConfigurableGenericDockerServiceOptions(this.properties);
+        this.cgdso = new ContainerInstanceOptions(this.properties);
     }
 
     private void givenEnabled(boolean b) {
@@ -424,6 +557,18 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         this.properties.put(CONTAINER_ENV, value);
     }
 
+    private void givenPrivilegedMode(boolean value) {
+        this.properties.put(CONTAINER_PRIVILEGED, value);
+    }
+
+    private void givenImageDownloadRetries(int value) {
+        this.properties.put(CONTAINER_IMAGE_DOWNLOAD_RETRIES, value);
+    }
+
+    private void givenImageDownloadRetryInterval(int value) {
+        this.properties.put(CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL, value);
+    }
+
     private void givenContainerVolume(String source, String dest) {
         this.properties.put(CONTAINER_VOLUME, source + ":" + dest);
     }
@@ -434,6 +579,10 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     private void givenPortsConfiguration(String portProperty, String Ports) {
         this.properties.put(portProperty, Ports);
+    }
+
+    private void whenConfigurableGenericDockerServiceOptionsCreated() {
+        this.cgdso = new ContainerInstanceOptions(this.properties);
     }
 
     private void whenIsEnabled() {
@@ -456,6 +605,22 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         this.containerEnv = this.cgdso.getContainerEnvList();
     }
 
+    private void whenGetPrivilegedMode() {
+        this.privilegedMode = this.cgdso.getPrivilegedMode();
+    }
+
+    private void whenGetImageDownloadRetries() {
+        this.imageDownloadRetries = this.cgdso.getMaxDownloadRetries();
+    }
+
+    private void whenGetIsUnlimitedRetries() {
+        this.unlimitedRetries = this.cgdso.isUnlimitedRetries();
+    }
+
+    private void whenGetImageDownloadRetryInterval() {
+        this.imageDownloadRetryInterval = this.cgdso.getRetryInterval();
+    }
+
     private void whenGetContainerVolume() {
         this.containerVolumes = this.cgdso.getContainerVolumeList();
     }
@@ -472,16 +637,16 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         this.portsAvailable = this.cgdso.getContainerPortsInternal();
     }
 
-    private void whenGetEquals(ConfigurableGenericDockerServiceOptions options) {
+    private void whenGetEquals(ContainerInstanceOptions options) {
         this.equals = this.cgdso.equals(options);
     }
 
-    private void whenGetHashCode(ConfigurableGenericDockerServiceOptions options) {
+    private void whenGetHashCode(ContainerInstanceOptions options) {
         this.hashCode = options.hashCode();
     }
 
     private void whenGetContainerDescriptor() {
-        this.containerDescriptor = this.cgdso.getContainerDescriptor();
+        this.containerDescriptor = this.cgdso.getContainerConfiguration();
     }
 
     private void thenEnabledStateIs(boolean b) {
@@ -508,6 +673,18 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         assertTrue(this.containerEnv.isEmpty());
     }
 
+    private void thenPrivilegedMode(boolean expectedValue) {
+        assertEquals(expectedValue, this.privilegedMode);
+    }
+
+    private void thenImageDownloadRetries(int expectedValue) {
+        assertEquals(expectedValue, this.imageDownloadRetries);
+    }
+
+    private void thenImageDownloadRetryInterval(int expectedValue) {
+        assertEquals(expectedValue, this.imageDownloadRetryInterval);
+    }
+
     private void thenContainerVolume(String expectedSourceValue, String expectedDestinationValue) {
         assertTrue(this.containerVolumes.containsKey(expectedSourceValue));
         assertTrue(this.containerVolumes.containsValue(expectedDestinationValue));
@@ -525,8 +702,8 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
         assertTrue(this.containerDevice.isEmpty());
     }
 
-    private void thenPortResult(int[] portResult) {
-        assertArrayEquals(portResult, this.portsAvailable);
+    private void thenPortResult(List<Integer> portResult) {
+        assertEquals(portResult, this.portsAvailable);
     }
 
     private void thenIsEqual() {
@@ -535,6 +712,14 @@ public class ConfigurableDockerGernericDockerServiceOptionsTest {
 
     private void thenIsNotEqual() {
         assertFalse(this.equals);
+    }
+
+    private void thenIsTrue(boolean expectedValue) {
+        assertTrue(expectedValue);
+    }
+
+    private void thenIsFalse(boolean expectedValue) {
+        assertFalse(expectedValue);
     }
 
     private void thenIsSameHashCode() {

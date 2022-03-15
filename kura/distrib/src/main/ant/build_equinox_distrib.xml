@@ -488,9 +488,6 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/${build.output.name}/kura.service"
 				prefix="${build.output.name}/${install.folder}" />
-			<zipfileset
-				file="src/main/resources/${build.name}/recover_default_config.init"
-				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/firewall.service"
 				prefix="${build.output.name}/${install.folder}" filemode="700" />
 			<zipfileset file="src/main/resources/${build.name}/firewall.init"

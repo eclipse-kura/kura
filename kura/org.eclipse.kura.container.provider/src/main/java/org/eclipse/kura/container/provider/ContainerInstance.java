@@ -15,6 +15,7 @@ package org.eclipse.kura.container.provider;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -23,6 +24,7 @@ import java.util.function.UnaryOperator;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.slf4j.Logger;
@@ -107,6 +109,11 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.state = newState;
     }
 
+    private Optional<String> getExistingContainerId(final String containerName) {
+        return containerOrchestrationService.listContainerDescriptors().stream()
+                .map(ContainerInstanceDescriptor::getContainerName).filter(containerName::equals).findAny();
+    }
+
     private interface State {
 
         public default State onConnect() {
@@ -141,20 +148,42 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         @Override
         public State onConfigurationUpdated(ContainerInstanceOptions options) {
-            if (options.isEnabled()) {
-                return new Starting(options);
-            } else {
-                return new Disabled(options);
-            }
+            return updateStateInternal(options);
         }
 
         @Override
         public State onConnect() {
-            if (this.options.isEnabled()) {
-                return new Starting(this.options);
-            } else {
-                return this;
+            return updateStateInternal(this.options);
+        }
+
+        private State updateStateInternal(ContainerInstanceOptions newOptions) {
+            if (!newOptions.isEnabled()) {
+                return new Disabled(newOptions);
             }
+
+            final Optional<String> existingContainerId;
+
+            try {
+                existingContainerId = getExistingContainerId(newOptions.getContainerDescriptor().getContainerName());
+            } catch (final Exception e) {
+                logger.warn("failed to get existing container state", e);
+                return new Disabled(newOptions);
+            }
+
+            if (existingContainerId.isPresent()) {
+                logger.info("found existing container with name {}",
+                        newOptions.getContainerDescriptor().getContainerName());
+                final Created created = new Created(newOptions, existingContainerId.get());
+
+                if (newOptions.isEnabled()) {
+                    return created;
+                } else {
+                    return created.onDisabled();
+                }
+            } else {
+                return new Starting(newOptions);
+            }
+
         }
 
     }
@@ -191,7 +220,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         @Override
         public State onStartupFailure() {
-            return new Failed(this.options);
+            return new Disabled(this.options);
         }
 
         @Override
@@ -216,8 +245,17 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                         Thread.sleep(retryInterval);
                     }
 
-                    final String containerId = ContainerInstance.this.containerOrchestrationService
-                            .startContainer(registeredContainerRefrence);
+                    final Optional<String> existingContainerId = getExistingContainerId(
+                            options.getContainerDescriptor().getContainerName());
+
+                    final String containerId;
+
+                    if (existingContainerId.isPresent()) {
+                        containerId = existingContainerId.get();
+                    } else {
+                        containerId = ContainerInstance.this.containerOrchestrationService
+                                .startContainer(registeredContainerRefrence);
+                    }
 
                     updateState(s -> s.onContanierReady(containerId));
                     return;
@@ -237,25 +275,6 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             updateState(State::onStartupFailure);
 
             logger.warn("Unable to start microservice...giving up");
-        }
-    }
-
-    private class Failed implements State {
-
-        final ContainerInstanceOptions options;
-
-        public Failed(ContainerInstanceOptions options) {
-            this.options = options;
-        }
-
-        @Override
-        public State onConfigurationUpdated(ContainerInstanceOptions newOptions) {
-            return new Starting(newOptions);
-        }
-
-        @Override
-        public State onConnect() {
-            return new Starting(this.options);
         }
     }
 

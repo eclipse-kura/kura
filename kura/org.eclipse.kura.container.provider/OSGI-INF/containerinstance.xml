@@ -16,6 +16,6 @@
       <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
    </service>
    <property name="service.pid" value="org.eclipse.kura.container.provider.ContainerInstance"/>
+   <reference bind="setContainerOrchestrationService" cardinality="1..1" interface="org.eclipse.kura.container.orchestration.ContainerOrchestrationService" name="ContainerOrchestrationService" policy="static"/>
    
-   <reference cardinality="1..1" interface="org.eclipse.kura.container.orchestration.ContainerOrchestrationService" name="ContainerOrchestrationService" policy="static" bind="setContainerOrchestrationService"/>
 </scr:component>

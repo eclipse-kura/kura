@@ -232,9 +232,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
-        return dockerService != null;
+        return checkIfContainerOrchestratorIsActive != null;
     }
 
     @Override
@@ -242,8 +242,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
-            ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
-            List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
+            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+            List<ContainerInstanceDescriptor> containers = checkIfContainerOrchestratorIsActive.listContainerDescriptors();
             if (containers != null) {
                 for (ContainerInstanceDescriptor container : containers) {
                     GwtGroupedNVPair pair = new GwtGroupedNVPair();
@@ -267,8 +267,8 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void startContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
-        List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        List<ContainerInstanceDescriptor> containers = containerOrchestrationService.listContainerDescriptors();
 
         logger.info("Starting container with name: {}", containerName);
 
@@ -276,7 +276,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             for (ContainerInstanceDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
-                        dockerService.startContainer(container.getContainerId());
+                        containerOrchestrationService.startContainer(container.getContainerId());
                     } catch (KuraException e) {
                         logger.error("Could not start container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
@@ -294,9 +294,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void stopContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
-        List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
+        List<ContainerInstanceDescriptor> containers = containerOrchestrationService.listContainerDescriptors();
 
         logger.info("Stopping container with name: {}", containerName);
 
@@ -304,7 +304,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
             for (ContainerInstanceDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
-                        dockerService.stopContainer(container.getContainerId());
+                        containerOrchestrationService.stopContainer(container.getContainerId());
                     } catch (KuraException e) {
                         logger.error("Could not stop container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);

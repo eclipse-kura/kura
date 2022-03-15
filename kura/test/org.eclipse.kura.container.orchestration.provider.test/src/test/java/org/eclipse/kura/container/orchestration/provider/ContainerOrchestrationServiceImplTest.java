@@ -30,8 +30,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
-import org.eclipse.kura.util.configuration.Property;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Answers;
 import org.mockito.Mock;
@@ -60,7 +58,6 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String IMAGES_DOWNLOAD_TIMEOUT = "dockerService.default.download.timeout";
     private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 120;
 
-
     private static final boolean DEFAULT_REPOSITORY_ENABLED = false;
     private static final String DEFAULT_REPOSITORY_URL = "";
     private static final String DEFAULT_REPOSITORY_USERNAME = "";
@@ -76,7 +73,7 @@ public class ContainerOrchestrationServiceImplTest {
     // for tests
     private String[] runningContainers;
     private ContainerInstanceDescriptor[] runningContainerDescriptor;
-    
+
     private ContainerConfiguration containerConfig1;
 
     private Map<String, Object> properties;
@@ -259,18 +256,6 @@ public class ContainerOrchestrationServiceImplTest {
 
         thenTestIfNewContainerDoesNotExists();
     }
-    
-    @Test(expected=KuraException.class)
-    public void testCreateContainerWithoutStart() throws KuraException, InterruptedException {
-        givenFullProperties(true);
-        givenDockerServiceImplSpy();
-        givenDockerClient();
-
-        whenDockerClientMockSomeContainers();
-        whenMockforContainerCreation();
-        
-        thenForceContainerCreation();
-    }
 
     /**
      * givens
@@ -279,11 +264,10 @@ public class ContainerOrchestrationServiceImplTest {
     private void givenDockerServiceImpl() {
         this.dockerService = new ContainerOrchestrationServiceImpl();
     }
-    
+
     private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
         this.dockerService = Mockito.spy(new ContainerOrchestrationServiceImpl());
-        Mockito.doReturn(true).when(this.dockerService).testConnection();
-    	Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class));
+        Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class));
     }
 
     private void givenDockerClient() {
@@ -293,10 +277,6 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void givenEmptyProperties() {
         this.properties = new HashMap<>();
-    }
-
-    private void whenPropertiesChangeAfterInit(boolean b) {
-        givenFullProperties(b);
     }
 
     private void givenFullProperties(boolean b) {
@@ -390,22 +370,11 @@ public class ContainerOrchestrationServiceImplTest {
         // Build Respective CD's
         ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID(mcont1.getId())
                 .setContainerName(mcont1.getNames()[0]).setContainerImage(mcont1.getImage()).build();
-        
+
         ContainerInstanceDescriptor mcontCD2 = ContainerInstanceDescriptor.builder().setContainerID(mcont2.getId())
                 .setContainerName(mcont2.getNames()[0]).setContainerImage(mcont2.getImage()).build();
-        
+
         this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1, mcontCD2 };
-
-        this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
-        when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
-        when(this.mockedListContainersCmd.withShowAll(true)).thenReturn(this.mockedListContainersCmd);
-        when(this.mockedListContainersCmd.exec()).thenReturn(containerListmock);
-    }
-
-    private void whenDockerClientMockListNoContainers() {
-        List<Container> containerListmock = new LinkedList<>();
-        // Build Container Mock
-        this.runningContainers = new String[0];
 
         this.mockedListContainersCmd = mock(ListContainersCmd.class, Mockito.RETURNS_DEEP_STUBS);
         when(this.localDockerClient.listContainersCmd()).thenReturn(this.mockedListContainersCmd);
@@ -416,15 +385,13 @@ public class ContainerOrchestrationServiceImplTest {
     private void whenMockforContainerCreation() {
 
         // Build Respective CD's
-    	ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
+        ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
-    	
-    	
-    	containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setContainerImage("nginx").setVolumes(Collections.singletonMap("test", "~/test/test"))
+
+        this.containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setContainerImage("nginx")
+                .setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
                 .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
-    	
-    	
 
         this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
 
@@ -446,7 +413,7 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void whenRunContainer() throws KuraException, InterruptedException {
         // startContainer
-        this.containerId = this.dockerService.startContainer(containerConfig1);
+        this.containerId = this.dockerService.startContainer(this.containerConfig1);
     }
 
     private void whenStopContainer() {
@@ -490,9 +457,4 @@ public class ContainerOrchestrationServiceImplTest {
     private void thenTestIfNewContainerDoesNotExists() {
         assertEquals(2, this.dockerService.listContainerDescriptors().size());
     }
-    
-    private void thenForceContainerCreation() throws KuraException {
-        this.dockerService.createContainer(containerConfig1);
-    }
-
 }

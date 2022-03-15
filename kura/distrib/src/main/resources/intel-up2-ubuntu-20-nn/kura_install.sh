@@ -43,10 +43,6 @@ ${INSTALL_DIR}/kura/.data/manage_kura_users.sh -i
 systemctl stop apparmor
 systemctl disable apparmor
 
-#set up recover default configuration script
-cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
-chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
-
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
@@ -76,9 +72,5 @@ chown -R kurad:kurad /opt/eclipse
 chmod -R go-rwx /opt/eclipse
 chmod a+rx /opt/eclipse    
 find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
-
-#set up recover default configuration script
-cp ${INSTALL_DIR}/kura/install/recover_default_config.init ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
-chmod +x ${INSTALL_DIR}/kura/bin/.recoverDefaultConfig.sh
 
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

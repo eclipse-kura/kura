@@ -45,6 +45,8 @@ public class ContainerConfiguration {
     private Map<String, String> containerVolumes;
     private Boolean containerPrivileged;
     private Boolean isFrameworkManaged = true;
+    private Map<String, String> containerLoggerParameters;
+    private String containerLoggingType;
 
     private ContainerConfiguration() {
     }
@@ -140,6 +142,24 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Returns a Map that identifies configured logger parameters.
+     *
+     * @return
+     */
+    public Map<String, String> getLoggerParameters() {
+        return this.containerLoggerParameters;
+    }
+
+    /**
+     * returns a string identifying which logger driver to use.
+     *
+     * @return
+     */
+    public String getContainerLoggingType() {
+        return this.containerLoggingType;
+    }
+
+    /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
      *
      * @return the builder.
@@ -151,7 +171,8 @@ public class ContainerConfiguration {
     @Override
     public int hashCode() {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerImage, this.containerImageTag,
-                this.containerName, this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
+                this.containerLoggerParameters, this.containerLoggingType, this.containerName,
+                this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
                 this.containerVolumes, this.isFrameworkManaged);
     }
 
@@ -168,6 +189,8 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerEnvVars, other.containerEnvVars)
                 && Objects.equals(this.containerImage, other.containerImage)
                 && Objects.equals(this.containerImageTag, other.containerImageTag)
+                && Objects.equals(this.containerLoggerParameters, other.containerLoggerParameters)
+                && Objects.equals(this.containerLoggingType, other.containerLoggingType)
                 && Objects.equals(this.containerName, other.containerName)
                 && Objects.equals(this.containerPortsExternal, other.containerPortsExternal)
                 && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
@@ -188,6 +211,8 @@ public class ContainerConfiguration {
         private Map<String, String> containerVolumes = new HashMap<>();
         private Boolean containerPrivilaged = false;
         private Boolean isFrameworkManaged = false;
+        private Map<String, String> containerLoggerParameters;
+        private String containerLoggingType;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -234,6 +259,16 @@ public class ContainerConfiguration {
             return this;
         }
 
+        public ContainerConfigurationBuilder setLoggerParameters(Map<String, String> paramMap) {
+            this.containerLoggerParameters = new HashMap<>(paramMap);
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setLoggingType(String containerLoggingType) {
+            this.containerLoggingType = containerLoggingType;
+            return this;
+        }
+
         public ContainerConfigurationBuilder setPrivilegedMode(Boolean containerPrivilaged) {
             this.containerPrivilaged = containerPrivilaged;
             return this;
@@ -252,6 +287,8 @@ public class ContainerConfiguration {
             result.containerVolumes = this.containerVolumes;
             result.containerPrivileged = this.containerPrivilaged;
             result.isFrameworkManaged = this.isFrameworkManaged;
+            result.containerLoggerParameters = this.containerLoggerParameters;
+            result.containerLoggingType = this.containerLoggingType;
 
             return result;
         }

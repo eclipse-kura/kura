@@ -30,8 +30,8 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
@@ -167,7 +167,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private Boolean isFrameworkManaged(Container container) {
         String containerName = getContainerName(container);
-        return this.frameworkManagedContainers.stream().allMatch(c -> c.name.equals(containerName));
+        return this.frameworkManagedContainers.stream().anyMatch(c -> c.name.equals(containerName));
     }
 
     private String getContainerName(Container container) {
@@ -280,24 +280,34 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         logger.info("Starting {} Microservice", container.getContainerName());
 
-        Optional<String> containerId = getContainerIdByName(container.getContainerName());
+        final Optional<ContainerInstanceDescriptor> existingInstance = listContainerDescriptors().stream()
+                .filter(c -> c.getContainerName().equals(container.getContainerName())).findAny();
 
-        if (!containerId.isPresent()) {
+        final String containerId;
+
+        if (existingInstance.isPresent() && existingInstance.get().getContainerState() == ContainerState.ACTIVE) {
+            logger.info("Found already existing running container");
+            containerId = existingInstance.get().getContainerId();
+        } else if (!existingInstance.isPresent()) {
+            logger.info("Creating new container instance");
             pullImage(container.getContainerImage(), container.getContainerImageTag(),
                     this.currentConfig.getImagesDownloadTimeout());
             containerId = createContainer(container);
+            startContainer(containerId);
+        } else {
+            logger.info("Found already exisiting not running container, starting it..");
+            containerId = existingInstance.get().getContainerId();
+            startContainer(containerId);
         }
-
-        startContainer(containerId.orElse(""));
 
         logger.info("Container Started Successfully");
 
         if (container.isFrameworkManaged()) {
             this.frameworkManagedContainers
-                    .add(new FrameworkManagedContainer(container.getContainerName(), containerId.orElse("")));
+                    .add(new FrameworkManagedContainer(container.getContainerName(), containerId));
         }
 
-        return containerId.orElse("");
+        return containerId;
     }
 
     @Override
@@ -367,7 +377,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     }
 
-    private Optional<String> createContainer(ContainerConfiguration containerDescription) throws KuraException {
+    private String createContainer(ContainerConfiguration containerDescription) throws KuraException {
         if (!testConnection()) {
             throw new IllegalStateException("failed to reach docker engine");
         }
@@ -403,7 +413,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 configuration = configuration.withPrivileged(containerDescription.getContainerPrivileged());
             }
 
-            return Optional.of(commandBuilder.withHostConfig(configuration).exec().getId());
+            return commandBuilder.withHostConfig(configuration).exec().getId();
 
         } catch (Exception e) {
             logger.error("failed to create container", e);

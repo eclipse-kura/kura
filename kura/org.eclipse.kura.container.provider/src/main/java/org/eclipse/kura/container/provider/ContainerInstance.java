@@ -109,9 +109,9 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         this.state = newState;
     }
 
-    private Optional<String> getExistingContainerId(final String containerName) {
+    private Optional<ContainerInstanceDescriptor> getExistingContainer(final String containerName) {
         return containerOrchestrationService.listContainerDescriptors().stream()
-                .map(ContainerInstanceDescriptor::getContainerName).filter(containerName::equals).findAny();
+                .filter(c -> c.getContainerName().equals(containerName)).findAny();
     }
 
     private interface State {
@@ -164,7 +164,8 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             final Optional<String> existingContainerId;
 
             try {
-                existingContainerId = getExistingContainerId(newOptions.getContainerDescriptor().getContainerName());
+                existingContainerId = getExistingContainer(newOptions.getContainerConfiguration().getContainerName())
+                        .map(ContainerInstanceDescriptor::getContainerName);
             } catch (final Exception e) {
                 logger.warn("failed to get existing container state", e);
                 return new Disabled(newOptions);
@@ -172,13 +173,12 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             if (existingContainerId.isPresent()) {
                 logger.info("found existing container with name {}",
-                        newOptions.getContainerDescriptor().getContainerName());
-                final Created created = new Created(newOptions, existingContainerId.get());
+                        newOptions.getContainerConfiguration().getContainerName());
 
                 if (newOptions.isEnabled()) {
-                    return created;
+                    return new Starting(newOptions);
                 } else {
-                    return created.onDisabled();
+                    return new Created(newOptions, existingContainerId.get()).onDisabled();
                 }
             } else {
                 return new Starting(newOptions);
@@ -234,7 +234,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int maxRetries = options.getMaxDownloadRetries();
             int retryInterval = options.getRetryInterval();
 
-            ContainerConfiguration registeredContainerRefrence = options.getContainerDescriptor();
+            final ContainerConfiguration containerCongiguration = options.getContainerConfiguration();
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
@@ -245,19 +245,10 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                         Thread.sleep(retryInterval);
                     }
 
-                    final Optional<String> existingContainerId = getExistingContainerId(
-                            options.getContainerDescriptor().getContainerName());
-
-                    final String containerId;
-
-                    if (existingContainerId.isPresent()) {
-                        containerId = existingContainerId.get();
-                    } else {
-                        containerId = ContainerInstance.this.containerOrchestrationService
-                                .startContainer(registeredContainerRefrence);
-                    }
-
+                    final String containerId = ContainerInstance.this.containerOrchestrationService
+                            .startContainer(containerCongiguration);
                     updateState(s -> s.onContanierReady(containerId));
+
                     return;
 
                 } catch (InterruptedException e) {
@@ -276,6 +267,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
             logger.warn("Unable to start microservice...giving up");
         }
+
     }
 
     private class Created implements State {

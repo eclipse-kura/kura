@@ -646,7 +646,7 @@ public class ContainerInstanceOptionsTest {
     }
 
     private void whenGetContainerDescriptor() {
-        this.containerDescriptor = this.cgdso.getContainerDescriptor();
+        this.containerDescriptor = this.cgdso.getContainerConfiguration();
     }
 
     private void thenEnabledStateIs(boolean b) {

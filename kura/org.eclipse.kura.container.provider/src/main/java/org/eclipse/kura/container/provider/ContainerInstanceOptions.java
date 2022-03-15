@@ -174,7 +174,7 @@ public class ContainerInstanceOptions {
         return this.retryInterval;
     }
 
-    public ContainerConfiguration getContainerDescriptor() {
+    public ContainerConfiguration getContainerConfiguration() {
         return ContainerConfiguration.builder().setContainerName(getContainerName())
                 .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
                 .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())

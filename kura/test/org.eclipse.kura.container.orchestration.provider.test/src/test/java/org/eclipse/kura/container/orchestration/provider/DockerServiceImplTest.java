@@ -343,7 +343,7 @@ public class DockerServiceImplTest {
     }
 
     /**
-     * when
+     * when 
      */
 
     private void whenActivateInstance() {

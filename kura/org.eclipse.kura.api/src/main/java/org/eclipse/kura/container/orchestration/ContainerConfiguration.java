@@ -20,13 +20,19 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a container. Used to track running containers.
+ * Object which represents a container configuration used to request the generation of a new container instance and
+ * running
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
  *
  */
+@ProviderType
 public class ContainerConfiguration {
 
     private String containerName;
@@ -40,13 +46,16 @@ public class ContainerConfiguration {
     private Boolean containerPrivileged;
     private Boolean isFrameworkManaged = true;
 
+    private ContainerConfiguration() {
+    }
+
     /**
      * The method will provide information if the container is or not managed by the framework
      *
      * @return <code>true</code> if the framework manages the container. <code>false</code> otherwise
      */
     public boolean isFrameworkManaged() {
-        return isFrameworkManaged;
+        return this.isFrameworkManaged;
     }
 
     /**
@@ -55,7 +64,7 @@ public class ContainerConfiguration {
      * @return
      */
     public String getContainerName() {
-        return containerName;
+        return this.containerName;
     }
 
     /**
@@ -64,7 +73,7 @@ public class ContainerConfiguration {
      * @return
      */
     public String getContainerImage() {
-        return containerImage;
+        return this.containerImage;
     }
 
     /**
@@ -73,7 +82,7 @@ public class ContainerConfiguration {
      * @return
      */
     public String getContainerImageTag() {
-        return containerImageTag;
+        return this.containerImageTag;
     }
 
     /**
@@ -82,7 +91,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsExternal() {
-        return containerPortsExternal;
+        return this.containerPortsExternal;
     }
 
     /**
@@ -91,7 +100,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-        return containerPortsInternal;
+        return this.containerPortsInternal;
     }
 
     /**
@@ -100,7 +109,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<String> getContainerEnvVars() {
-        return containerEnvVars;
+        return this.containerEnvVars;
     }
 
     /**
@@ -109,7 +118,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<String> getContainerDevices() {
-        return containerDevices;
+        return this.containerDevices;
     }
 
     /**
@@ -118,7 +127,7 @@ public class ContainerConfiguration {
      * @return
      */
     public Map<String, String> getContainerVolumes() {
-        return containerVolumes;
+        return this.containerVolumes;
     }
 
     /**
@@ -127,54 +136,44 @@ public class ContainerConfiguration {
      * @return
      */
     public boolean getContainerPrivileged() {
-        return containerPrivileged;
+        return this.containerPrivileged;
     }
 
     /**
-     * Static method that will extract the {@link ContainerConfiguration} matching the given name in the given list
-     *
-     * @param name
-     * @param serviceList
-     * @return
-     */
-    public static ContainerConfiguration findByName(String name, List<ContainerConfiguration> containerDescriptors) {
-        ContainerConfiguration sd = null;
-        for (ContainerConfiguration container : containerDescriptors) {
-            if (container.getContainerName().equals(name)) {
-                return container;
-            }
-        }
-        return sd;
-    }
-
-    public static int compare(ContainerConfiguration obj1, ContainerConfiguration obj2) {
-        return obj1.getContainerImage().compareTo(obj2.getContainerImage());
-    }
-
-    public static boolean equals(ContainerConfiguration obj1, ContainerConfiguration obj2) {
-        boolean resultBuilder;
-
-        resultBuilder = obj1.getContainerName().equals(obj2.getContainerName());
-        resultBuilder = resultBuilder && obj1.getContainerImage().equals(obj2.getContainerImage());
-        resultBuilder = resultBuilder && obj1.getContainerImageTag().equals(obj2.getContainerImageTag());
-        resultBuilder = resultBuilder && obj1.getContainerPortsExternal().equals(obj2.getContainerPortsExternal());
-        resultBuilder = resultBuilder && obj1.getContainerPortsInternal().equals(obj2.getContainerPortsInternal());
-        resultBuilder = resultBuilder && obj1.getContainerEnvVars().equals(obj2.getContainerEnvVars());
-        resultBuilder = resultBuilder && obj1.getContainerDevices().equals(obj2.getContainerDevices());
-        resultBuilder = resultBuilder && obj1.getContainerVolumes().equals(obj2.getContainerVolumes());
-        resultBuilder = resultBuilder && obj1.getContainerPrivileged() == obj2.getContainerPrivileged();
-        resultBuilder = resultBuilder && obj1.isFrameworkManaged() == obj2.isFrameworkManaged();
-
-        return resultBuilder;
-    }
-
-    /**
-     * Creates a builder for creating a new {@link ContainerDescriptor} instance.
+     * Creates a builder for creating a new {@link ContainerConfiguration} instance.
      *
      * @return the builder.
      */
     public static ContainerConfigurationBuilder builder() {
         return new ContainerConfigurationBuilder();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerImage, this.containerImageTag,
+                this.containerName, this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
+                this.containerVolumes, this.isFrameworkManaged);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ContainerConfiguration)) {
+            return false;
+        }
+        ContainerConfiguration other = (ContainerConfiguration) obj;
+        return Objects.equals(this.containerDevices, other.containerDevices)
+                && Objects.equals(this.containerEnvVars, other.containerEnvVars)
+                && Objects.equals(this.containerImage, other.containerImage)
+                && Objects.equals(this.containerImageTag, other.containerImageTag)
+                && Objects.equals(this.containerName, other.containerName)
+                && Objects.equals(this.containerPortsExternal, other.containerPortsExternal)
+                && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
+                && Objects.equals(this.containerPrivileged, other.containerPrivileged)
+                && Objects.equals(this.containerVolumes, other.containerVolumes)
+                && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged);
     }
 
     public static final class ContainerConfigurationBuilder {
@@ -188,7 +187,7 @@ public class ContainerConfiguration {
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
         private Boolean containerPrivilaged = false;
-        private Boolean isFrameworkManaged = true;
+        private Boolean isFrameworkManaged = false;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;

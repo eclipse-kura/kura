@@ -13,18 +13,20 @@
 
 package org.eclipse.kura.container.orchestration;
 
-import static java.util.Objects.requireNonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.osgi.annotation.versioning.ProviderType;
+
 /**
- * Object which represents a container. Used to track running containers.
+ * Object which represents a container. Used to track created containers.
  *
+ * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
  *
  */
+@ProviderType
 public class ContainerInstanceDescriptor {
 
     private String containerName;
@@ -45,7 +47,7 @@ public class ContainerInstanceDescriptor {
      * @return
      */
     public ContainerState getContainerState() {
-        return containerState;
+        return this.containerState;
     }
 
     /**
@@ -113,8 +115,8 @@ public class ContainerInstanceDescriptor {
 
     @Override
     public int hashCode() {
-        return Objects.hash(containerID, containerImage, containerImageTag, containerName, containerPortsExternal,
-                containerPortsInternal, containerState, isFrameworkManaged);
+        return Objects.hash(this.containerID, this.containerImage, this.containerImageTag, this.containerName,
+                this.containerPortsExternal, this.containerPortsInternal, this.containerState, this.isFrameworkManaged);
     }
 
     @Override
@@ -122,23 +124,21 @@ public class ContainerInstanceDescriptor {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         ContainerInstanceDescriptor other = (ContainerInstanceDescriptor) obj;
-        return Objects.equals(containerID, other.containerID) && Objects.equals(containerImage, other.containerImage)
-                && Objects.equals(containerImageTag, other.containerImageTag)
-                && Objects.equals(containerName, other.containerName)
-                && Objects.equals(containerPortsExternal, other.containerPortsExternal)
-                && Objects.equals(containerPortsInternal, other.containerPortsInternal)
-                && containerState == other.containerState && isFrameworkManaged == other.isFrameworkManaged;
+        return Objects.equals(this.containerID, other.containerID)
+                && Objects.equals(this.containerImage, other.containerImage)
+                && Objects.equals(this.containerImageTag, other.containerImageTag)
+                && Objects.equals(this.containerName, other.containerName)
+                && Objects.equals(this.containerPortsExternal, other.containerPortsExternal)
+                && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
+                && this.containerState == other.containerState && this.isFrameworkManaged == other.isFrameworkManaged;
     }
 
     /**
-     * Creates a builder for creating a new {@link ContainerDescriptor} instance.
+     * Creates a builder for creating a new {@link ContainerInstanceDescriptor} instance.
      *
      * @return the builder.
      */
@@ -151,7 +151,7 @@ public class ContainerInstanceDescriptor {
         private String containerName;
         private String containerImage;
         private String containerImageTag = "latest";
-        private String containerID = "";
+        private String containerId = "";
         private List<Integer> containerPortsExternal = new ArrayList<>();
         private List<Integer> containerPortsInternal = new ArrayList<>();
         private ContainerState containerState = ContainerState.STOPPING;
@@ -178,7 +178,7 @@ public class ContainerInstanceDescriptor {
         }
 
         public ContainerInstanceDescriptorBuilder setContainerID(String containerID) {
-            this.containerID = containerID;
+            this.containerId = containerID;
             return this;
         }
 
@@ -200,12 +200,10 @@ public class ContainerInstanceDescriptor {
         public ContainerInstanceDescriptor build() {
             ContainerInstanceDescriptor containerDescriptor = new ContainerInstanceDescriptor();
 
-            containerDescriptor.containerName = requireNonNull(this.containerName,
-                    "Request Container Name cannot be null");
-            containerDescriptor.containerImage = requireNonNull(this.containerImage,
-                    "Request Container Image cannot be null");
+            containerDescriptor.containerName = this.containerName;
+            containerDescriptor.containerImage = this.containerImage;
             containerDescriptor.containerImageTag = this.containerImageTag;
-            containerDescriptor.containerID = this.containerID;
+            containerDescriptor.containerID = this.containerId;
             containerDescriptor.containerPortsExternal = this.containerPortsExternal;
             containerDescriptor.containerPortsInternal = this.containerPortsInternal;
             containerDescriptor.containerState = this.containerState;

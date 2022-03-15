@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.util.configuration.Property;
@@ -197,22 +198,9 @@ public class ContainerInstanceOptions {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.containerDevice == null ? 0 : this.containerDevice.hashCode());
-        result = prime * result + (this.containerEnv == null ? 0 : this.containerEnv.hashCode());
-        result = prime * result + (this.containerName == null ? 0 : this.containerName.hashCode());
-        result = prime * result + (this.containerVolumeString == null ? 0 : this.containerVolumeString.hashCode());
-        result = prime * result + (this.containerVolumes == null ? 0 : this.containerVolumes.hashCode());
-        result = prime * result + (this.enabled ? 1231 : 1237);
-        result = prime * result + (this.externalPorts == null ? 0 : this.externalPorts.hashCode());
-        result = prime * result + (this.image == null ? 0 : this.image.hashCode());
-        result = prime * result + (this.imageTag == null ? 0 : this.imageTag.hashCode());
-        result = prime * result + (this.internalPorts == null ? 0 : this.internalPorts.hashCode());
-        result = prime * result + this.maxDownloadRetries;
-        result = prime * result + (this.privilegedMode ? 1231 : 1237);
-        result = prime * result + this.retryInterval;
-        return result;
+        return Objects.hash(this.containerDevice, this.containerEnv, this.containerName, this.containerVolumeString,
+                this.containerVolumes, this.enabled, this.externalPorts, this.image, this.imageTag, this.internalPorts,
+                this.maxDownloadRetries, this.privilegedMode, this.retryInterval);
     }
 
     @Override
@@ -220,86 +208,20 @@ public class ContainerInstanceOptions {
         if (this == obj) {
             return true;
         }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (!(obj instanceof ContainerInstanceOptions)) {
             return false;
         }
         ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
-        if (this.containerDevice == null) {
-            if (other.containerDevice != null) {
-                return false;
-            }
-        } else if (!this.containerDevice.equals(other.containerDevice)) {
-            return false;
-        }
-        if (this.containerEnv == null) {
-            if (other.containerEnv != null) {
-                return false;
-            }
-        } else if (!this.containerEnv.equals(other.containerEnv)) {
-            return false;
-        }
-        if (this.containerName == null) {
-            if (other.containerName != null) {
-                return false;
-            }
-        } else if (!this.containerName.equals(other.containerName)) {
-            return false;
-        }
-        if (this.containerVolumeString == null) {
-            if (other.containerVolumeString != null) {
-                return false;
-            }
-        } else if (!this.containerVolumeString.equals(other.containerVolumeString)) {
-            return false;
-        }
-        if (this.containerVolumes == null) {
-            if (other.containerVolumes != null) {
-                return false;
-            }
-        } else if (!this.containerVolumes.equals(other.containerVolumes)) {
-            return false;
-        }
-        if (this.enabled != other.enabled) {
-            return false;
-        }
-        if (this.externalPorts == null) {
-            if (other.externalPorts != null) {
-                return false;
-            }
-        } else if (!this.externalPorts.equals(other.externalPorts)) {
-            return false;
-        }
-        if (this.image == null) {
-            if (other.image != null) {
-                return false;
-            }
-        } else if (!this.image.equals(other.image)) {
-            return false;
-        }
-        if (this.imageTag == null) {
-            if (other.imageTag != null) {
-                return false;
-            }
-        } else if (!this.imageTag.equals(other.imageTag)) {
-            return false;
-        }
-        if (this.internalPorts == null) {
-            if (other.internalPorts != null) {
-                return false;
-            }
-        } else if (!this.internalPorts.equals(other.internalPorts)) {
-            return false;
-        }
-        if (this.maxDownloadRetries != other.maxDownloadRetries) {
-            return false;
-        }
-        if (this.privilegedMode != other.privilegedMode) {
-            return false;
-        }
-        if (this.retryInterval != other.retryInterval) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.containerDevice, other.containerDevice)
+                && Objects.equals(this.containerEnv, other.containerEnv)
+                && Objects.equals(this.containerName, other.containerName)
+                && Objects.equals(this.containerVolumeString, other.containerVolumeString)
+                && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
+                && Objects.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
+                && Objects.equals(this.imageTag, other.imageTag)
+                && Objects.equals(this.internalPorts, other.internalPorts)
+                && this.maxDownloadRetries == other.maxDownloadRetries && this.privilegedMode == other.privilegedMode
+                && this.retryInterval == other.retryInterval;
     }
 
 }

@@ -14,7 +14,7 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService" name="ContainerOrchestrationService"
+    <OCD id="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService" name="Container Orchestration Service"
         description="The ContainerOrchestrationService connects to locally running Docker/Podman/... instances, and allows for container management.">
         
 

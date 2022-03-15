@@ -42,6 +42,8 @@ public class ContainerInstanceOptionsTest {
     private static final boolean DEFAULT_CCONTAINER_PRIVILEGED = false;
     private static final int DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRIES = 5;
     private static final int DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = 30000;
+    private static final String DEFAULT_CONTAINER_LOGGER_PARAMETERS = "";
+    private static final String DEFAULT_CONTAINER_LOGGING_TYPE = "default";
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -55,6 +57,8 @@ public class ContainerInstanceOptionsTest {
     private static final String CONTAINER_PRIVILEGED = "container.privileged";
     private static final String CONTAINER_IMAGE_DOWNLOAD_RETRIES = "container.image.download.retries";
     private static final String CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = "container.image.download.interval";
+    private static final String CONTAINER_LOGGER_PARAMETERS = "container.loggerParameters";
+    private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
 
     private Map<String, Object> properties;
 
@@ -518,6 +522,8 @@ public class ContainerInstanceOptionsTest {
         this.properties.put(CONTAINER_VOLUME,
                 DEFAULT_CONTAINER_PATH_FILE_PATH + ":" + DEFAULT_CONTAINER_PATH_DESTINATION);
         this.properties.put(CONTAINER_DEVICE, DEFAULT_CONTAINER_DEVICE);
+        this.properties.put(CONTAINER_LOGGING_TYPE, DEFAULT_CONTAINER_LOGGING_TYPE);
+        this.properties.put(CONTAINER_LOGGER_PARAMETERS, DEFAULT_CONTAINER_LOGGER_PARAMETERS);
     }
 
     private void givenDifferentProperties() {
@@ -531,6 +537,8 @@ public class ContainerInstanceOptionsTest {
         this.newProperties.put(CONTAINER_ENV, "");
         this.newProperties.put(CONTAINER_VOLUME, "diffrent:diffrent");
         this.newProperties.put(CONTAINER_DEVICE, "");
+        this.properties.put(CONTAINER_LOGGING_TYPE, "JOURNALD");
+        this.properties.put(CONTAINER_LOGGER_PARAMETERS, "label=true");
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {

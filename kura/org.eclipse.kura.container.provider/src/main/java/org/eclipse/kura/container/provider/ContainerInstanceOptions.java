@@ -41,6 +41,9 @@ public class ContainerInstanceOptions {
             "container.image.download.retries", 5);
     private static final Property<Integer> CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = new Property<>(
             "container.image.download.interval", 30000);
+    private static final Property<String> CONTAINER_LOGGER_PARAMETERS = new Property<>("container.loggerParameters",
+            "");
+    private static final Property<String> CONTAINER_LOGGING_TYPE = new Property<>("container.loggingType", "default");
 
     private final boolean enabled;
     private final String image;
@@ -55,6 +58,8 @@ public class ContainerInstanceOptions {
     private final Map<String, String> containerVolumes;
     private final int maxDownloadRetries;
     private final int retryInterval;
+    private final Map<String, String> containerLoggingParameters;
+    private final String containerLoggerType;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -74,6 +79,8 @@ public class ContainerInstanceOptions {
         this.privilegedMode = CONTAINER_PRIVILEGED.get(properties);
         this.maxDownloadRetries = CONTAINER_IMAGE_DOWNLOAD_RETRIES.get(properties);
         this.retryInterval = CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL.get(properties);
+        this.containerLoggerType = CONTAINER_LOGGING_TYPE.get(properties);
+        this.containerLoggingParameters = parseLoggingParams(CONTAINER_LOGGER_PARAMETERS.get(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -85,6 +92,23 @@ public class ContainerInstanceOptions {
 
         for (String entry : volumeString.trim().split(",")) {
             String[] tempEntry = entry.split(":");
+            if (tempEntry.length == 2) {
+                map.put(tempEntry[0].trim(), tempEntry[1].trim());
+            }
+        }
+
+        return map;
+    }
+
+    private Map<String, String> parseLoggingParams(String loggingString) {
+        Map<String, String> map = new HashMap<>();
+
+        if (loggingString.isEmpty()) {
+            return map;
+        }
+
+        for (String entry : loggingString.trim().split(",")) {
+            String[] tempEntry = entry.split("=");
             if (tempEntry.length == 2) {
                 map.put(tempEntry[0].trim(), tempEntry[1].trim());
             }
@@ -174,13 +198,22 @@ public class ContainerInstanceOptions {
         return this.retryInterval;
     }
 
+    public String getLoggingType() {
+        return this.containerLoggerType;
+    }
+
+    public Map<String, String> getLoggerParameters() {
+        return this.containerLoggingParameters;
+    }
+
     public ContainerConfiguration getContainerConfiguration() {
         return ContainerConfiguration.builder().setContainerName(getContainerName())
                 .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
                 .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())
                 .setEnvVars(getContainerEnvList()).setVolumes(getContainerVolumeList())
                 .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
-                .setFrameworkManaged(true).build();
+                .setFrameworkManaged(true).setLoggingType(getLoggingType()).setLoggerParameters(getLoggerParameters())
+                .build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -198,8 +231,9 @@ public class ContainerInstanceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerDevice, this.containerEnv, this.containerName, this.containerVolumeString,
-                this.containerVolumes, this.enabled, this.externalPorts, this.image, this.imageTag, this.internalPorts,
+        return Objects.hash(this.containerDevice, this.containerEnv, this.containerLoggerType,
+                this.containerLoggingParameters, this.containerName, this.containerVolumeString, this.containerVolumes,
+                this.enabled, this.externalPorts, this.image, this.imageTag, this.internalPorts,
                 this.maxDownloadRetries, this.privilegedMode, this.retryInterval);
     }
 
@@ -214,6 +248,8 @@ public class ContainerInstanceOptions {
         ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
         return Objects.equals(this.containerDevice, other.containerDevice)
                 && Objects.equals(this.containerEnv, other.containerEnv)
+                && Objects.equals(this.containerLoggerType, other.containerLoggerType)
+                && Objects.equals(this.containerLoggingParameters, other.containerLoggingParameters)
                 && Objects.equals(this.containerName, other.containerName)
                 && Objects.equals(this.containerVolumeString, other.containerVolumeString)
                 && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled

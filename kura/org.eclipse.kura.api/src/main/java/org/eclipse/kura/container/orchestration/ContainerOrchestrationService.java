@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
+import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -26,7 +26,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * @noimplement This interface is not intended to be implemented by clients.
  */
 @ProviderType
-public interface DockerService {
+public interface ContainerOrchestrationService {
 
     /**
      * Lists all available containers by id only, like running 'Docker ps -a'
@@ -111,17 +111,17 @@ public interface DockerService {
     public void deleteContainer(String id) throws KuraException;
 
     /**
-     * Adds a new {@link DockerServiceListener}
+     * Adds a new {@link ContainerOrchestrationServiceListener}
      *
      * @param dockerListener
      * @param containerName
      */
-    public void registerListener(DockerServiceListener dockerListener);
+    public void registerListener(ContainerOrchestrationServiceListener dockerListener);
 
     /**
-     * Removes the {@link DockerServiceListener} specified as parameter
+     * Removes the {@link ContainerOrchestrationServiceListener} specified as parameter
      *
      * @param dockerListener
      */
-    public void unregisterListener(DockerServiceListener dockerListener);
+    public void unregisterListener(ContainerOrchestrationServiceListener dockerListener);
 }

@@ -37,7 +37,7 @@ import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.DockerService;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -91,7 +91,7 @@ public class InventoryHandlerV1Test {
     private ContainerConfiguration dockerContainer1Config;
     private ContainerConfiguration dockerContainer2Config;
 
-    private DockerService mockDockerService;
+    private ContainerOrchestrationService mockDockerService;
 
     private DockerContainer dockerContainerObject;
     private DockerContainers dockerContainersObject;
@@ -1079,7 +1079,7 @@ public class InventoryHandlerV1Test {
 
         InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
 
-        this.mockDockerService = mock(DockerService.class, Mockito.RETURNS_DEEP_STUBS);
+        this.mockDockerService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
 
         when(this.mockDockerService.listContainerDescriptors())
                 .thenReturn(Arrays.asList(this.dockerContainer1, this.dockerContainer2));
@@ -1106,7 +1106,7 @@ public class InventoryHandlerV1Test {
 
         InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
 
-        this.mockDockerService = mock(DockerService.class, Mockito.RETURNS_DEEP_STUBS);
+        this.mockDockerService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
 
         when(this.mockDockerService.listContainerDescriptors())
                 .thenReturn(Arrays.asList(this.dockerContainer1, this.dockerContainer2));

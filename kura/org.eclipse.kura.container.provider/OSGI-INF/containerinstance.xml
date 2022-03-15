@@ -17,5 +17,5 @@
    </service>
    <property name="service.pid" value="org.eclipse.kura.container.provider.ContainerInstance"/>
    
-   <reference cardinality="1..1" interface="org.eclipse.kura.container.orchestration.DockerService" name="DockerService" policy="static" bind="setDockerService" unbind="unsetDockerService"/>
+   <reference cardinality="1..1" interface="org.eclipse.kura.container.orchestration.ContainerOrchestrationService" name="ContainerOrchestrationService" policy="static" bind="setContainerOrchestrationService"/>
 </scr:component>

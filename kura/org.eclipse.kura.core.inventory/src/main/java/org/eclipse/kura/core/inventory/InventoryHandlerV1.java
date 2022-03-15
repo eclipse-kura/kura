@@ -32,7 +32,7 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.DockerService;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -89,7 +89,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     private SystemService systemService;
     private BundleContext bundleContext;
 
-    private DockerService dockerService;
+    private ContainerOrchestrationService dockerService;
 
     // ----------------------------------------------------------------
     //
@@ -97,11 +97,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
-    public void setDockerService(DockerService dockerService) {
+    public void setDockerService(ContainerOrchestrationService dockerService) {
         this.dockerService = dockerService;
     }
 
-    public void unsetDockerService(DockerService dockerService) {
+    public void unsetDockerService(ContainerOrchestrationService dockerService) {
         if (this.dockerService == dockerService) {
             this.dockerService = null;
         }

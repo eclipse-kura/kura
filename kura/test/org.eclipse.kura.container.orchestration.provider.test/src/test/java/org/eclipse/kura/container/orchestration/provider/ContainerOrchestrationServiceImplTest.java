@@ -29,7 +29,7 @@ import java.util.Map;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.provider.impl.DockerServiceImpl;
+import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.eclipse.kura.util.configuration.Property;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -45,7 +45,7 @@ import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
 import com.github.dockerjava.api.model.Image;
 
-public class DockerServiceImplTest {
+public class ContainerOrchestrationServiceImplTest {
 
     private static final String DOCKER_HOST_URL = "dockerService.dockerHost";
     private static final String IS_ENABLED = "dockerService.enabled";
@@ -66,7 +66,7 @@ public class DockerServiceImplTest {
     private static final String DEFAULT_REPOSITORY_USERNAME = "";
     private static final String DEFAULT_REPOSITORY_PASSWORD = "";
 
-    private DockerServiceImpl dockerService;
+    private ContainerOrchestrationServiceImpl dockerService;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DockerClient localDockerClient;
@@ -277,11 +277,11 @@ public class DockerServiceImplTest {
      */
 
     private void givenDockerServiceImpl() {
-        this.dockerService = new DockerServiceImpl();
+        this.dockerService = new ContainerOrchestrationServiceImpl();
     }
     
     private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
-        this.dockerService = Mockito.spy(new DockerServiceImpl());
+        this.dockerService = Mockito.spy(new ContainerOrchestrationServiceImpl());
         Mockito.doReturn(true).when(this.dockerService).testConnection();
     	Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class));
     }

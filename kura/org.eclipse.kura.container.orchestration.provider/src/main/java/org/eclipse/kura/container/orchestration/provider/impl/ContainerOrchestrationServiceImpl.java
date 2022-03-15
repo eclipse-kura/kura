@@ -31,8 +31,8 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerState;
-import org.eclipse.kura.container.orchestration.DockerService;
-import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,16 +59,16 @@ import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
 
-public class DockerServiceImpl implements ConfigurableComponent, DockerService {
+public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
     private static final String CONTAINER_DESCRIPTOR_CANNOT_BE_NULL = "ContainerDescriptor cannot be null!";
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
-    private static final Logger logger = LoggerFactory.getLogger(DockerServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
 
-    private DockerServiceOptions currentConfig;
+    private ContainerOrchestrationServiceOptions currentConfig;
 
-    private final Set<DockerServiceListener> dockerServiceListeners = new HashSet<>();
+    private final Set<ContainerOrchestrationServiceListener> dockerServiceListeners = new HashSet<>();
     private final Set<FrameworkManagedContainer> frameworkManagedContainers = new HashSet<>();
 
     private DockerClient dockerClient;
@@ -101,7 +101,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
 
     public void updated(Map<String, Object> properties) {
         logger.info("Bundle {} is updating with config!", APP_ID);
-        DockerServiceOptions newProps = new DockerServiceOptions(properties);
+        ContainerOrchestrationServiceOptions newProps = new ContainerOrchestrationServiceOptions(properties);
         if (!newProps.equals(this.currentConfig)) {
 
             this.currentConfig = newProps;
@@ -334,13 +334,13 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     }
 
     @Override
-    public void registerListener(DockerServiceListener dockerListener) {
+    public void registerListener(ContainerOrchestrationServiceListener dockerListener) {
         this.dockerServiceListeners.add(dockerListener);
 
     }
 
     @Override
-    public void unregisterListener(DockerServiceListener dockerListener) {
+    public void unregisterListener(ContainerOrchestrationServiceListener dockerListener) {
         this.dockerServiceListeners.remove(dockerListener);
 
     }
@@ -544,7 +544,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     private void cleanUpDocker() {
 
         if (testConnection()) {
-            this.dockerServiceListeners.forEach(DockerServiceListener::onDisabled);
+            this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisabled);
             disconnect();
         }
     }
@@ -568,7 +568,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
         final boolean connected = testConnection();
 
         if (connected) {
-            this.dockerServiceListeners.forEach(DockerServiceListener::onConnect);
+            this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onConnect);
         }
         return connected;
     }
@@ -576,7 +576,7 @@ public class DockerServiceImpl implements ConfigurableComponent, DockerService {
     private void disconnect() {
         if (testConnection()) {
             try {
-                this.dockerServiceListeners.forEach(DockerServiceListener::onDisconnect);
+                this.dockerServiceListeners.forEach(ContainerOrchestrationServiceListener::onDisconnect);
                 this.dockerClient.close();
             } catch (IOException e) {
                 logger.error("Error disconnecting", e);

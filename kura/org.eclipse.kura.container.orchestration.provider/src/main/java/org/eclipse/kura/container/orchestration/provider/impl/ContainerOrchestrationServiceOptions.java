@@ -19,18 +19,16 @@ import java.util.Objects;
 
 import org.eclipse.kura.util.configuration.Property;
 
-public class DockerServiceOptions {
+public class ContainerOrchestrationServiceOptions {
 
-    private static final Property<Boolean> IS_ENABLED = new Property<>("dockerService.enabled", false);
-    private static final Property<String> DOCKER_HOST_URL = new Property<>("dockerService.dockerHost",
+    private static final Property<Boolean> IS_ENABLED = new Property<>("enabled", false);
+    private static final Property<String> DOCKER_HOST_URL = new Property<>("container.engine.host",
             "unix:///var/run/docker.sock");
-    private static final Property<Boolean> REPOSITORY_ENABLED = new Property<>("dockerService.repository.enabled",
-            false);
-    private static final Property<String> REPOSITORY_URL = new Property<>("dockerService.repository.hostname", "");
-    private static final Property<String> REPOSITORY_USERNAME = new Property<>("dockerService.repository.username", "");
-    private static final Property<String> REPOSITORY_PASSWORD = new Property<>("dockerService.repository.password", "");
-    private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>(
-            "dockerService.default.download.timeout", 120);
+    private static final Property<Boolean> REPOSITORY_ENABLED = new Property<>("repository.enabled", false);
+    private static final Property<String> REPOSITORY_URL = new Property<>("repository.hostname", "");
+    private static final Property<String> REPOSITORY_USERNAME = new Property<>("repository.username", "");
+    private static final Property<String> REPOSITORY_PASSWORD = new Property<>("repository.password", "");
+    private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>("default.download.timeout", 120);
 
     private final boolean enabled;
     private final String hostUrl;
@@ -40,7 +38,7 @@ public class DockerServiceOptions {
     private final String repositoryPassword;
     private final int imagesDownloadTimeout;
 
-    public DockerServiceOptions(final Map<String, Object> properties) {
+    public ContainerOrchestrationServiceOptions(final Map<String, Object> properties) {
 
         if (isNull(properties)) {
             throw new IllegalArgumentException("Properties cannot be null!");
@@ -78,7 +76,7 @@ public class DockerServiceOptions {
     public String getRepositoryPassword() {
         return this.repositoryPassword;
     }
-    
+
     public int getImagesDownloadTimeout() {
         return this.imagesDownloadTimeout;
     }
@@ -97,7 +95,7 @@ public class DockerServiceOptions {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        DockerServiceOptions other = (DockerServiceOptions) obj;
+        ContainerOrchestrationServiceOptions other = (ContainerOrchestrationServiceOptions) obj;
         return isEnabled() == other.isEnabled() && Objects.equals(getHostUrl(), other.getHostUrl())
                 && isRepositoryEnabled() == other.isRepositoryEnabled()
                 && Objects.equals(getRepositoryUrl(), other.getRepositoryUrl())

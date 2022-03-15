@@ -20,23 +20,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.kura.container.orchestration.provider.impl.DockerServiceOptions;
+import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceOptions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ConfigurableDockerOptionsTest {
+public class ContainerOrchestrationServiceOptionsTest {
 
-    private static final String DOCKER_HOST_URL = "dockerService.dockerHost";
-    private static final String IS_ENABLED = "dockerService.enabled";
+    private static final String DOCKER_HOST_URL = "container.engine.host";
+    private static final String IS_ENABLED = "enabled";
 
     private static final String DEFAULT_DOCKER_HOST_URL = "unix:///var/run/docker.sock";
     private static final boolean DEFAULT_IS_ENABLED = false;
 
-    private static final String REPOSITORY_ENABLED = "dockerService.repository.enabled";
-    private static final String REPOSITORY_URL = "dockerService.repository.hostname";
-    private static final String REPOSITORY_USERNAME = "dockerService.repository.username";
-    private static final String REPOSITORY_PASSWORD = "dockerService.repository.password";
+    private static final String REPOSITORY_ENABLED = "repository.enabled";
+    private static final String REPOSITORY_URL = "repository.hostname";
+    private static final String REPOSITORY_USERNAME = "repository.username";
+    private static final String REPOSITORY_PASSWORD = "repository.password";
 
     private static final boolean DEFAULT_REPOSITORY_ENABLED = false;
     private static final String DEFAULT_REPOSITORY_URL = "";
@@ -53,8 +53,8 @@ public class ConfigurableDockerOptionsTest {
 
     private Map<String, Object> properties = new HashMap<>();
     private Map<String, Object> newProperties = new HashMap<>();
-    private DockerServiceOptions dso = new DockerServiceOptions(this.properties);
-    private DockerServiceOptions ddso = new DockerServiceOptions(this.properties);
+    private ContainerOrchestrationServiceOptions dso = new ContainerOrchestrationServiceOptions(this.properties);
+    private ContainerOrchestrationServiceOptions ddso = new ContainerOrchestrationServiceOptions(this.properties);
 
     @Before
     public void setUp() throws Exception {
@@ -177,11 +177,11 @@ public class ConfigurableDockerOptionsTest {
     }
 
     private void givenDockerServiceOptions() {
-        this.dso = new DockerServiceOptions(this.properties);
+        this.dso = new ContainerOrchestrationServiceOptions(this.properties);
     }
 
     private void givenDifferentDockerServiceOptions() {
-        this.ddso = new DockerServiceOptions(this.newProperties);
+        this.ddso = new ContainerOrchestrationServiceOptions(this.newProperties);
     }
 
     private void givenDockerServiceEnabled(boolean b) {

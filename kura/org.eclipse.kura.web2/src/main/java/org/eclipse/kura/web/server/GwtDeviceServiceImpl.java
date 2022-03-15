@@ -27,7 +27,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
-import org.eclipse.kura.container.orchestration.DockerService;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
@@ -232,7 +232,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+        ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
         return dockerService != null;
     }
@@ -242,7 +242,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
-            DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+            ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
             List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
             if (containers != null) {
                 for (ContainerInstanceDescriptor container : containers) {
@@ -267,7 +267,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void startContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+        ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
         List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
 
         logger.info("Starting container with name: {}", containerName);
@@ -294,7 +294,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void stopContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+        ContainerOrchestrationService dockerService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
         List<ContainerInstanceDescriptor> containers = dockerService.listContainerDescriptors();
 

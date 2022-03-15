@@ -23,31 +23,23 @@ import java.util.function.UnaryOperator;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
-import org.eclipse.kura.container.orchestration.DockerService;
-import org.eclipse.kura.container.orchestration.listener.DockerServiceListener;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ContainerInstance implements ConfigurableComponent, DockerServiceListener {
+public class ContainerInstance implements ConfigurableComponent, ContainerOrchestrationServiceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ContainerInstance.class);
-    private static final String APP_ID = "org.eclipse.kura.container.provider.ConfigurableGenericDockerService";
-    public static final String DEFAULT_INSTANCE_PID = APP_ID;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private DockerService dockerService;
+    private ContainerOrchestrationService containerOrchestrationService;
 
     private State state = new Disabled(new ContainerInstanceOptions(Collections.emptyMap()));
 
-    public void setDockerService(final DockerService dockerService) {
-        this.dockerService = dockerService;
-    }
-
-    public void unsetDockerService(final DockerService dockerService) {
-        if (this.dockerService == dockerService) {
-            this.dockerService = null;
-        }
+    public void setContainerOrchestrationService(final ContainerOrchestrationService containerOrchestrationService) {
+        this.containerOrchestrationService = containerOrchestrationService;
     }
 
     // ----------------------------------------------------------------
@@ -67,9 +59,9 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
         ContainerInstanceOptions newProps = new ContainerInstanceOptions(properties);
 
         if (newProps.isEnabled()) {
-            this.dockerService.registerListener(this);
+            this.containerOrchestrationService.registerListener(this);
         } else {
-            this.dockerService.unregisterListener(this);
+            this.containerOrchestrationService.unregisterListener(this);
         }
 
         updateState(s -> s.onConfigurationUpdated(newProps));
@@ -81,7 +73,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
         updateState(State::onDisabled);
 
         this.executor.shutdown();
-        this.dockerService.unregisterListener(this);
+        this.containerOrchestrationService.unregisterListener(this);
 
         logger.info("deactivate...done");
     }
@@ -141,7 +133,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
     private class Disabled implements State {
 
-        private ContainerInstanceOptions options;
+        private final ContainerInstanceOptions options;
 
         public Disabled(ContainerInstanceOptions options) {
             this.options = options;
@@ -174,7 +166,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
         public Starting(final ContainerInstanceOptions options) {
             this.options = options;
-            this.startupFuture = executor.submit(() -> startMicroservice(options));
+            this.startupFuture = ContainerInstance.this.executor.submit(() -> startMicroservice(options));
         }
 
         @Override
@@ -183,7 +175,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
                 return this;
             }
 
-            startupFuture.cancel(true);
+            this.startupFuture.cancel(true);
 
             if (newOptions.isEnabled()) {
                 return new Starting(newOptions);
@@ -194,17 +186,17 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
         @Override
         public State onContanierReady(final String containerId) {
-            return new Created(options, containerId);
+            return new Created(this.options, containerId);
         }
 
         @Override
         public State onStartupFailure() {
-            return new Failed(options);
+            return new Failed(this.options);
         }
 
         @Override
         public State onDisabled() {
-            startupFuture.cancel(true);
+            this.startupFuture.cancel(true);
             return new Disabled(this.options);
         }
 
@@ -224,7 +216,8 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
                         Thread.sleep(retryInterval);
                     }
 
-                    final String containerId = dockerService.startContainer(registeredContainerRefrence);
+                    final String containerId = ContainerInstance.this.containerOrchestrationService
+                            .startContainer(registeredContainerRefrence);
 
                     updateState(s -> s.onContanierReady(containerId));
                     return;
@@ -262,7 +255,7 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
         @Override
         public State onConnect() {
-            return new Starting(options);
+            return new Starting(this.options);
         }
     }
 
@@ -278,10 +271,10 @@ public class ContainerInstance implements ConfigurableComponent, DockerServiceLi
 
         private void deleteContainer() {
             try {
-                dockerService.stopContainer(this.containerId);
-                dockerService.deleteContainer(this.containerId);
+                ContainerInstance.this.containerOrchestrationService.stopContainer(this.containerId);
+                ContainerInstance.this.containerOrchestrationService.deleteContainer(this.containerId);
             } catch (Exception e) {
-                logger.error("Error stopping microservice {}", options.getContainerName(), e);
+                logger.error("Error stopping microservice {}", this.options.getContainerName(), e);
             }
         }
 

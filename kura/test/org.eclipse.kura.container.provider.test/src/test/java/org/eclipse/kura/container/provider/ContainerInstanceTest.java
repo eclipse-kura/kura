@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
-import org.eclipse.kura.container.orchestration.DockerService;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.junit.Test;
 
 public class ContainerInstanceTest {
@@ -44,7 +44,7 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_ENABLED = "container.enabled";
     private static final String CONTAINER_DEVICE = "container.Device";
 
-    private DockerService dockerService;
+    private ContainerOrchestrationService dockerService;
     private Map<String, Object> properties;
     private ContainerInstance configurableGenericDockerService;
     private CompletableFuture<Void> containerStarted = new CompletableFuture<>();
@@ -150,7 +150,7 @@ public class ContainerInstanceTest {
     }
 
     private void givenDockerService() {
-        this.dockerService = mock(DockerService.class);
+        this.dockerService = mock(ContainerOrchestrationService.class);
         this.configurableGenericDockerService.setDockerService(this.dockerService);
         try {
             when(this.dockerService.startContainer((ContainerConfiguration) any())).thenAnswer(i -> {

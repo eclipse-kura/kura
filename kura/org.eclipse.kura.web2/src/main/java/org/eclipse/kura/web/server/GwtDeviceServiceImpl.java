@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Jens Reimann <jreimann@redhat.com>
@@ -16,7 +16,6 @@ package org.eclipse.kura.web.server;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -27,8 +26,8 @@ import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
-import org.eclipse.kura.container.orchestration.provider.ContainerDescriptor;
-import org.eclipse.kura.container.orchestration.provider.DockerService;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
@@ -196,8 +195,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
         Properties kuraProps = systemService.getProperties();
         SortedSet kuraKeys = new TreeSet(kuraProps.keySet());
-        for (Iterator ki = kuraKeys.iterator(); ki.hasNext();) {
-            Object key = ki.next();
+        for (Object key : kuraKeys) {
             pairs.add(new GwtGroupedNVPair("propsKura", key.toString(), kuraProps.get(key).toString()));
         }
         return new ArrayList<>(pairs);
@@ -234,9 +232,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken xsrfToken) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+        ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
-        return dockerService != null;
+        return checkIfContainerOrchestratorIsActive != null;
     }
 
     @Override
@@ -244,23 +242,22 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
-            DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-            ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
-                    .toArray(ContainerDescriptor[]::new);
+            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+            List<ContainerInstanceDescriptor> containers = checkIfContainerOrchestratorIsActive.listContainerDescriptors();
             if (containers != null) {
-                for (ContainerDescriptor container : containers) {
+                for (ContainerInstanceDescriptor container : containers) {
                     GwtGroupedNVPair pair = new GwtGroupedNVPair();
                     pair.setId(container.getContainerName());
                     pair.setName(container.getContainerImage());
                     pair.setStatus(containerStateToString(container));
                     pair.setVersion(container.getContainerImageTag().split(":")[0]);
-                    pair.set("isFrameworkManaged", container.getIsEsfManaged());
+                    pair.set("isFrameworkManaged", container.isFrameworkManaged());
                     pairs.add(pair);
                 }
             }
-            
-        } catch(Exception e){
-            logger.error("Failed To List Containers: {}", e);
+
+        } catch (Exception e) {
+            logger.error("Failed To List Containers", e);
         }
 
         return new ArrayList<>(pairs);
@@ -270,17 +267,16 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void startContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
-        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
-                .toArray(ContainerDescriptor[]::new);
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+        List<ContainerInstanceDescriptor> containers = containerOrchestrationService.listContainerDescriptors();
 
         logger.info("Starting container with name: {}", containerName);
 
         if (containers != null) {
-            for (ContainerDescriptor container : containers) {
+            for (ContainerInstanceDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
-                        dockerService.startContainer(container);
+                        containerOrchestrationService.startContainer(container.getContainerId());
                     } catch (KuraException e) {
                         logger.error("Could not start container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
@@ -298,18 +294,17 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
     public void stopContainer(GwtXSRFToken xsrfToken, String containerName) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
-        DockerService dockerService = ServiceLocator.getInstance().getService(DockerService.class);
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
-        ContainerDescriptor[] containers = dockerService.listRegisteredContainers().stream()
-                .toArray(ContainerDescriptor[]::new);
+        List<ContainerInstanceDescriptor> containers = containerOrchestrationService.listContainerDescriptors();
 
         logger.info("Stopping container with name: {}", containerName);
 
         if (containers != null) {
-            for (ContainerDescriptor container : containers) {
+            for (ContainerInstanceDescriptor container : containers) {
                 if (container.getContainerName().equals(containerName)) {
                     try {
-                        dockerService.stopContainer(container);
+                        containerOrchestrationService.stopContainer(container.getContainerId());
                     } catch (KuraException e) {
                         logger.error("Could not stop container with name: {}", containerName);
                         throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
@@ -443,9 +438,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      * </ol>
      *
      * @param bundle
-     *                   the bundle which name to retrieve
+     *            the bundle which name to retrieve
      * @param locale
-     *                   the locale, in which the bundle name is requested
+     *            the locale, in which the bundle name is requested
      * @return the bundle name - see the description of the method for more
      *         details.
      */
@@ -468,9 +463,9 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
      * available.
      *
      * @param bundle
-     *                       the bundle which header to retrieve
+     *            the bundle which header to retrieve
      * @param headerName
-     *                       the name of the header to retrieve
+     *            the name of the header to retrieve
      * @return the header or empty string if it is not set
      */
     private static String getHeaderValue(Bundle bundle, String headerName) {
@@ -500,7 +495,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
     }
 
-    private String containerStateToString(final ContainerDescriptor container) {
+    private String containerStateToString(final ContainerInstanceDescriptor container) {
         switch (container.getContainerState()) {
         case STARTING:
             return "bndInstalled";

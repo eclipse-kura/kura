@@ -124,6 +124,8 @@ Build the target profiles:
 mvn -f kura/distrib/pom.xml clean install
 ```
 
+> *Note*: You can skip tests by adding `-Dmaven.test.skip=true` in the commands above.
+
 #### Build scripts
 
 Alternatively you can use the build scripts available in the root directory.

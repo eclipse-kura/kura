@@ -1,9 +1,9 @@
+Eclipse Kura™
+=============
+
 <p align="center">
 <img src="https://www.eclipse.org/kura/content/images/kura_logo_400.png" alt="Kura™ logo" width="500"/>
 </p>
-
-Eclipse Kura™
-=============
 
 <div align="center">
 

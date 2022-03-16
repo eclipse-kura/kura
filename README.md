@@ -92,9 +92,9 @@ For Maven
 
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
 
-### Build Kura™
+### Build Kura
 
-Change to the new directory and clone the Kura™ repo:
+Change to the new directory and clone the Kura repo:
 
 ```bash
 git clone -b develop https://github.com/eclipse/kura.git

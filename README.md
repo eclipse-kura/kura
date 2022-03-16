@@ -1,6 +1,10 @@
 Eclipse Kura™
 =============
 
+<p align="center">
+<img src="https://www.eclipse.org/kura/content/images/kura_logo_400.png" alt="Kura™ logo" width="500"/>
+</p>
+
 <div align="center">
 
 [![Jenkins](https://img.shields.io/jenkins/build/https/ci.eclipse.org/kura/job/multibranch/job/develop.svg)](https://ci.eclipse.org/kura/)
@@ -87,6 +91,56 @@ sudo apt install openjdk-8-jdk
 For Maven   
 
 You can follow the tutorial from the official [Maven](http://maven.apache.org/install.html) site. Remember that you need to install the 3.5.x version.
+
+### Build Kura
+
+Change to the new directory and clone the Kura repo:
+
+```bash
+git clone -b develop https://github.com/eclipse/kura.git
+```
+
+Move inside the newly created directory and build the target platform:
+
+```bash
+mvn -f target-platform/pom.xml clean install
+```
+
+Build the core components:
+
+```bash
+mvn -f kura/pom.xml clean install
+```
+
+Build the examples (optional):
+
+```bash
+mvn -f kura/examples/pom.xml clean install
+```
+
+Build the target profiles:
+
+```bash
+mvn -f kura/distrib/pom.xml clean install
+```
+
+> *Note*: You can skip tests by adding `-Dmaven.test.skip=true` in the commands above.
+
+#### Build scripts
+
+Alternatively you can use the build scripts available in the root directory.
+
+```bash
+./build-all.sh
+```
+
+or
+
+```bash
+./build-menu.sh
+```
+
+and select the profiles you want to build.
 
 ### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.

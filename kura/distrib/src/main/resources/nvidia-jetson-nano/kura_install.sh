@@ -68,6 +68,12 @@ systemctl enable firewall
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+#disable gpsd-related services
+systemctl stop gpsd.service
+systemctl disable gpsd.service
+systemctl stop gpsd.socket
+systemctl disable gpsd.socket
+
 #disable NTP service
 if command -v timedatectl > /dev/null ; then
     timedatectl set-ntp false

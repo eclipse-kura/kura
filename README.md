@@ -124,6 +124,22 @@ Build the target profiles:
 mvn -f kura/distrib/pom.xml clean install
 ```
 
+#### Build scripts
+
+Alternatively you can use the build scripts available in the root directory.
+
+```bash
+./build-all.sh
+```
+
+or
+
+```bash
+./build-menu.sh
+```
+
+and select the profiles you want to build.
+
 ### Eclipse IDE
 The simplest way to start developing on Eclipse Kura is to use an [Eclipse Installer](https://www.eclipse.org/downloads/) based setup. A detailed installation and setup guide is available on the [official documentation](http://eclipse.github.io/kura/dev/kura-setup.html). Here you'll find a brief explaination of the required steps.
 

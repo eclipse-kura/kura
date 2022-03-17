@@ -267,7 +267,8 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
         this.dockerService = Mockito.spy(new ContainerOrchestrationServiceImpl());
-        Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class));
+        Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class),
+                any());
     }
 
     private void givenDockerClient() {

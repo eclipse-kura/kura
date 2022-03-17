@@ -21,8 +21,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.util.configuration.Property;
 
 public class ContainerInstanceOptions {
@@ -44,6 +48,11 @@ public class ContainerInstanceOptions {
     private static final Property<String> CONTAINER_LOGGER_PARAMETERS = new Property<>("container.loggerParameters",
             "");
     private static final Property<String> CONTAINER_LOGGING_TYPE = new Property<>("container.loggingType", "default");
+    private static final Property<String> REGISTRY_URL = new Property<>("registry.hostname", "");
+    private static final Property<String> REGISTRY_USERNAME = new Property<>("registry.username", "");
+    private static final Property<String> REGISTRY_PASSWORD = new Property<>("registry.password", "");
+    private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>("container.image.download.timeout",
+            500);
 
     private final boolean enabled;
     private final String image;
@@ -60,6 +69,10 @@ public class ContainerInstanceOptions {
     private final int retryInterval;
     private final Map<String, String> containerLoggingParameters;
     private final String containerLoggerType;
+    private final Optional<String> registryURL;
+    private final Optional<String> registryUsername;
+    private final Optional<String> registryPassword;
+    private final int imagesDownloadTimeout;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -81,6 +94,10 @@ public class ContainerInstanceOptions {
         this.retryInterval = CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL.get(properties);
         this.containerLoggerType = CONTAINER_LOGGING_TYPE.get(properties);
         this.containerLoggingParameters = parseLoggingParams(CONTAINER_LOGGER_PARAMETERS.get(properties));
+        this.registryURL = REGISTRY_URL.getOptional(properties);
+        this.registryUsername = REGISTRY_USERNAME.getOptional(properties);
+        this.registryPassword = REGISTRY_PASSWORD.getOptional(properties);
+        this.imagesDownloadTimeout = IMAGES_DOWNLOAD_TIMEOUT.get(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -206,6 +223,19 @@ public class ContainerInstanceOptions {
         return this.containerLoggingParameters;
     }
 
+    public Optional<RegistryCredentials> getRegistryCredentials() {
+        if (this.registryUsername.isPresent() && this.registryPassword.isPresent()) {
+            return Optional.of(new PasswordRegistryCredentials(this.registryURL, this.registryUsername.get(),
+                    new Password(this.registryPassword.get())));
+        }
+
+        return Optional.empty();
+    }
+
+    public int getImagesDownloadTimeout() {
+        return this.imagesDownloadTimeout;
+    }
+
     public ContainerConfiguration getContainerConfiguration() {
         return ContainerConfiguration.builder().setContainerName(getContainerName())
                 .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
@@ -233,8 +263,9 @@ public class ContainerInstanceOptions {
     public int hashCode() {
         return Objects.hash(this.containerDevice, this.containerEnv, this.containerLoggerType,
                 this.containerLoggingParameters, this.containerName, this.containerVolumeString, this.containerVolumes,
-                this.enabled, this.externalPorts, this.image, this.imageTag, this.internalPorts,
-                this.maxDownloadRetries, this.privilegedMode, this.retryInterval);
+                this.enabled, this.externalPorts, this.image, this.imageTag, this.imagesDownloadTimeout,
+                this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
+                this.registryURL, this.registryUsername, this.retryInterval);
     }
 
     @Override
@@ -255,8 +286,12 @@ public class ContainerInstanceOptions {
                 && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
                 && Objects.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
                 && Objects.equals(this.imageTag, other.imageTag)
+                && this.imagesDownloadTimeout == other.imagesDownloadTimeout
                 && Objects.equals(this.internalPorts, other.internalPorts)
                 && this.maxDownloadRetries == other.maxDownloadRetries && this.privilegedMode == other.privilegedMode
+                && Objects.equals(this.registryPassword, other.registryPassword)
+                && Objects.equals(this.registryURL, other.registryURL)
+                && Objects.equals(this.registryUsername, other.registryUsername)
                 && this.retryInterval == other.retryInterval;
     }
 

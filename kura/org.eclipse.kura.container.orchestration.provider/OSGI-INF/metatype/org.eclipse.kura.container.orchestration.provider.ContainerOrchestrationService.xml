@@ -26,31 +26,6 @@
             description="Host URL: tcp://localhost:2376 or unix:///var/run/docker.sock" type="String"
             cardinality="0" required="true" default="unix:///var/run/docker.sock" />
         
-         <AD id="repository.enabled" name="Enable Credentials" type="Boolean" cardinality="0" required="true" default="false"
-            description="Enables the usage of authenticated docker-repositories.">
-        </AD>
-        
-        <AD id="repository.hostname" name="Repository URL (Leave blank for docker-hub)"
-            description="Url for docker repository. Leave blank for docker hub." type="String"
-            cardinality="0" required="false" default="" />
-            
-        <AD id="repository.username" name="Username"
-            description="Username for container repository." type="String"
-            cardinality="0" required="false" default="" />
-            
-        <AD id="repository.password" name="Password"
-            description="Password for container repository." type="Password"
-            cardinality="0" required="false" default="" />
-            
-        <AD id="default.download.timeout" 
-            name="Images Download Timeout"
-            description="Default images download timeout. Value specified in seconds" 
-            type="Integer"
-            cardinality="0" 
-            required="true" 
-            min="1"
-            default="120" />
-        
     </OCD>
 
     <Designate pid="org.eclipse.kura.container.orchestration.provider.ContainerOrchestrationService">

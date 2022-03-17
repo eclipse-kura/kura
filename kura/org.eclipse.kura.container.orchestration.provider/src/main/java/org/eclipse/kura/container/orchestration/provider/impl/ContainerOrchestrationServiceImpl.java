@@ -32,6 +32,8 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
@@ -74,7 +76,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private final Set<FrameworkManagedContainer> frameworkManagedContainers = new HashSet<>();
 
     private DockerClient dockerClient;
-    private AuthConfig dockerAuthConfig;
     private CryptoService cryptoService;
 
     public void setDockerClient(DockerClient dockerClient) {
@@ -293,7 +294,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         } else if (!existingInstance.isPresent()) {
             logger.info("Creating new container instance");
             pullImage(container.getContainerImage(), container.getContainerImageTag(),
-                    this.currentConfig.getImagesDownloadTimeout());
+                    container.getImageDownloadTimeoutSeconds(), container.getRepositoryCredentials());
             containerId = createContainer(container);
             startContainer(containerId);
         } else {
@@ -330,13 +331,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSecconds)
-            throws KuraException, InterruptedException {
+    public void pullImage(String imageName, String imageTag, int timeOutSecconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
         boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
 
         if (!imageAvailableLocally) {
             try {
-                imagePullHelper(imageName, imageTag, timeOutSecconds, this.currentConfig.isRepositoryEnabled());
+                imagePullHelper(imageName, imageTag, timeOutSecconds, registryCredentials);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -357,14 +358,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     }
 
-    private void imagePullHelper(String imageName, String imageTag, int timeOutSecconds, boolean withAuth)
-            throws InterruptedException {
+    private void imagePullHelper(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> repositoryCredentials) throws InterruptedException, KuraException {
 
-        logger.info("Attempting to pull image: {}. \n Authentication is set to: {}", imageName, withAuth);
+        logger.info("Attempting to pull image: {}.", imageName);
         PullImageCmd pullRequest = this.dockerClient.pullImageCmd(imageName).withTag(imageTag);
 
-        if (withAuth) {
-            pullRequest.withAuthConfig(this.dockerAuthConfig);
+        if (repositoryCredentials.isPresent()) {
+            doAuthenticate(repositoryCredentials.get(), pullRequest);
         }
 
         pullRequest.exec(new PullImageResultCallback() {
@@ -376,8 +377,26 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             }
 
-        }).awaitCompletion(timeOutSecconds, TimeUnit.SECONDS);
+        }).awaitCompletion(timeOutSeconds, TimeUnit.SECONDS);
 
+    }
+
+    private void doAuthenticate(RegistryCredentials repositoryCredentials, PullImageCmd pullRequest)
+            throws KuraException {
+        if (!(repositoryCredentials instanceof PasswordRegistryCredentials)) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        PasswordRegistryCredentials repositoryPasswordCredentials = (PasswordRegistryCredentials) repositoryCredentials;
+
+        AuthConfig authConfig = new AuthConfig().withUsername(repositoryPasswordCredentials.getUsername()).withPassword(
+                new String(this.cryptoService.decryptAes(repositoryPasswordCredentials.getPassword().getPassword())));
+        Optional<String> url = repositoryPasswordCredentials.getUrl();
+        if (url.isPresent()) {
+            logger.info("Attempting to sign into repo: {}", url.get());
+            authConfig = authConfig.withRegistryAddress(url.get());
+        }
+        pullRequest.withAuthConfig(authConfig);
     }
 
     private void createLoggerMessageForContainerPull(PullResponseItem item, String imageName, String imageTag) {
@@ -427,7 +446,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             configuration = containerDevicesHandler(containerDescription, configuration);
 
             configuration = containerPortManagementHandler(containerDescription, configuration);
-            
+
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
             if (containerDescription.getContainerPrivileged()) {
@@ -493,15 +512,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             lt = LoggingType.DEFAULT;
             break;
         }
-        
-        LogConfig lc = new LogConfig(lt,
-                containerDescription.getLoggerParameters());
+
+        LogConfig lc = new LogConfig(lt, containerDescription.getLoggerParameters());
 
         configuration.withLogConfig(lc);
 
         return configuration;
     }
-    
+
     private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
             HostConfig commandBuilder) {
 
@@ -648,10 +666,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
 
-        if (this.currentConfig.isRepositoryEnabled()) {
-            logIntoRemoteRepository();
-        }
-
         final boolean connected = testConnection();
 
         if (connected) {
@@ -682,29 +696,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return canConnect;
     }
 
-    private void logIntoRemoteRepository() {
-
-        // Decode password
-        String decodedPassword;
-        try {
-            decodedPassword = String
-                    .valueOf(this.cryptoService.decryptAes(this.currentConfig.getRepositoryPassword().toCharArray()));
-        } catch (Exception e) {
-            logger.error("Failed to decode password: {0}", e);
-            decodedPassword = this.currentConfig.getRepositoryPassword();
-        }
-
-        if (this.currentConfig.getRepositoryUrl().isEmpty()) {
-            logger.info("Attempting to sign into Docker-Hub");
-            this.dockerAuthConfig = new AuthConfig().withUsername(this.currentConfig.getRepositoryUsername())
-                    .withPassword(decodedPassword);
-        } else {
-            logger.info("Attempting to sign into repo: {}", this.currentConfig.getRepositoryUrl());
-            this.dockerAuthConfig = new AuthConfig().withUsername(this.currentConfig.getRepositoryUsername())
-                    .withPassword(decodedPassword).withRegistryAddress(this.currentConfig.getRepositoryUrl());
-        }
-    }
-
     private static class FrameworkManagedContainer {
 
         private final String name;
@@ -725,7 +716,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (this == obj) {
                 return true;
             }
-            if ((obj == null) || (getClass() != obj.getClass())) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
             FrameworkManagedContainer other = (FrameworkManagedContainer) obj;

@@ -43,17 +43,19 @@ public interface ContainerOrchestrationService {
     public List<ContainerInstanceDescriptor> listContainerDescriptors();
 
     /**
-     * Allows to pull the required image, using the specified tag. The image will be downloaded respecting the
-     * configured timeout in seconds.
+     * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded
+     * respecting the configured timeout in seconds.
      *
      * @param imageName
      * @param imageTag
      * @param timeOutSeconds
+     * @param registryCredentials
      * @throws KuraException
      *             if the pull operation fails
+     * @throws InterruptedException
      */
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds)
-            throws KuraException, InterruptedException;
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException;
 
     /**
      * Returns the id of the container corresponding to the specified name. If no container can be found an

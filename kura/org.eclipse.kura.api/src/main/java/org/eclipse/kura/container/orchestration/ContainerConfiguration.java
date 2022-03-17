@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -47,6 +48,8 @@ public class ContainerConfiguration {
     private Boolean isFrameworkManaged = true;
     private Map<String, String> containerLoggerParameters;
     private String containerLoggingType;
+    private Optional<RegistryCredentials> repositoryCredentials;
+    private int imageDownloadTimeoutSeconds;
 
     private ContainerConfiguration() {
     }
@@ -151,12 +154,28 @@ public class ContainerConfiguration {
     }
 
     /**
-     * returns a string identifying which logger driver to use.
+     * Returns a string identifying which logger driver to use.
      *
      * @return
      */
     public String getContainerLoggingType() {
         return this.containerLoggingType;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Optional<RegistryCredentials> getRepositoryCredentials() {
+        return this.repositoryCredentials;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getImageDownloadTimeoutSeconds() {
+        return this.imageDownloadTimeoutSeconds;
     }
 
     /**
@@ -173,7 +192,8 @@ public class ContainerConfiguration {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerImage, this.containerImageTag,
                 this.containerLoggerParameters, this.containerLoggingType, this.containerName,
                 this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
-                this.containerVolumes, this.isFrameworkManaged);
+                this.containerVolumes, this.repositoryCredentials, this.imageDownloadTimeoutSeconds,
+                this.isFrameworkManaged);
     }
 
     @Override
@@ -196,6 +216,8 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
+                && Objects.equals(this.repositoryCredentials, other.repositoryCredentials)
+                && this.imageDownloadTimeoutSeconds == other.imageDownloadTimeoutSeconds
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged);
     }
 
@@ -209,10 +231,12 @@ public class ContainerConfiguration {
         private List<String> containerEnvVars = new LinkedList<>();
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
-        private Boolean containerPrivilaged = false;
+        private Boolean containerPrivileged = false;
         private Boolean isFrameworkManaged = false;
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
+        private Optional<RegistryCredentials> repositoryCredentials;
+        private int imageDownloadTimeoutSeconds;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -269,8 +293,19 @@ public class ContainerConfiguration {
             return this;
         }
 
-        public ContainerConfigurationBuilder setPrivilegedMode(Boolean containerPrivilaged) {
-            this.containerPrivilaged = containerPrivilaged;
+        public ContainerConfigurationBuilder setPrivilegedMode(Boolean containerPrivileged) {
+            this.containerPrivileged = containerPrivileged;
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setRepositoryCredentials(
+                Optional<RegistryCredentials> repositoryCredentials) {
+            this.repositoryCredentials = repositoryCredentials;
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setImageDownloadTimeoutSeconds(int imageDownloadTimeoutSeconds) {
+            this.imageDownloadTimeoutSeconds = imageDownloadTimeoutSeconds;
             return this;
         }
 
@@ -285,10 +320,12 @@ public class ContainerConfiguration {
             result.containerEnvVars = this.containerEnvVars;
             result.containerDevices = this.containerDevices;
             result.containerVolumes = this.containerVolumes;
-            result.containerPrivileged = this.containerPrivilaged;
+            result.containerPrivileged = this.containerPrivileged;
             result.isFrameworkManaged = this.isFrameworkManaged;
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
+            result.repositoryCredentials = this.repositoryCredentials;
+            result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 
             return result;
         }

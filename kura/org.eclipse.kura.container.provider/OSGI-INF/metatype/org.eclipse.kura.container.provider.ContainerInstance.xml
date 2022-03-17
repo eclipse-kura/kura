@@ -45,12 +45,12 @@
             default="30000" />
 
         <AD id="container.ports.internal" name="Internal ports"
-            description="A comma seperated list of ports. Note, the number of internal ports must be equal to the number of external ports. Example: 80, 443." 
+            description="A comma separated list of ports. Note, the number of internal ports must be equal to the number of external ports. Example: 80, 443." 
             type="String" cardinality="1" required="true"
             default="80" />
 
         <AD id="container.ports.external" name="External ports"
-            description="A comma seperated list of ports. Note, the number of external ports must be equal to the number of internal ports. Example: 8080, 443." 
+            description="A comma separated list of ports. Note, the number of external ports must be equal to the number of internal ports. Example: 8080, 443." 
             type="String" cardinality="1" required="true"
             default="8080" />
 

@@ -48,7 +48,7 @@ public class ContainerConfiguration {
     private Boolean isFrameworkManaged = true;
     private Map<String, String> containerLoggerParameters;
     private String containerLoggingType;
-    private Optional<RegistryCredentials> repositoryCredentials;
+    private Optional<RegistryCredentials> registryCredentials;
     private int imageDownloadTimeoutSeconds;
 
     private ContainerConfiguration() {
@@ -163,14 +163,16 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Returns the Registry credentials
      *
      * @return
      */
     public Optional<RegistryCredentials> getRepositoryCredentials() {
-        return this.repositoryCredentials;
+        return this.registryCredentials;
     }
 
     /**
+     * Returns the image download timeout (in seconds)
      *
      * @return
      */
@@ -192,7 +194,7 @@ public class ContainerConfiguration {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerImage, this.containerImageTag,
                 this.containerLoggerParameters, this.containerLoggingType, this.containerName,
                 this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
-                this.containerVolumes, this.repositoryCredentials, this.imageDownloadTimeoutSeconds,
+                this.containerVolumes, this.registryCredentials, this.imageDownloadTimeoutSeconds,
                 this.isFrameworkManaged);
     }
 
@@ -216,7 +218,7 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
-                && Objects.equals(this.repositoryCredentials, other.repositoryCredentials)
+                && Objects.equals(this.registryCredentials, other.registryCredentials)
                 && this.imageDownloadTimeoutSeconds == other.imageDownloadTimeoutSeconds
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged);
     }
@@ -235,7 +237,7 @@ public class ContainerConfiguration {
         private Boolean isFrameworkManaged = false;
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
-        private Optional<RegistryCredentials> repositoryCredentials;
+        private Optional<RegistryCredentials> registryCredentials;
         private int imageDownloadTimeoutSeconds;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
@@ -298,9 +300,9 @@ public class ContainerConfiguration {
             return this;
         }
 
-        public ContainerConfigurationBuilder setRepositoryCredentials(
-                Optional<RegistryCredentials> repositoryCredentials) {
-            this.repositoryCredentials = repositoryCredentials;
+        public ContainerConfigurationBuilder setRegistryCredentials(
+                Optional<RegistryCredentials> registryCredentials) {
+            this.registryCredentials = registryCredentials;
             return this;
         }
 
@@ -324,7 +326,7 @@ public class ContainerConfiguration {
             result.isFrameworkManaged = this.isFrameworkManaged;
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
-            result.repositoryCredentials = this.repositoryCredentials;
+            result.registryCredentials = this.registryCredentials;
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 
             return result;

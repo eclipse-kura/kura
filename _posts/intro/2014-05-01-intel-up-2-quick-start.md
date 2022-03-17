@@ -17,11 +17,11 @@ Intel Up² and the Kura development environment.
 
 This quickstart has been tested using the following image:
 
-<pre>ubuntu-20.04.3-live-server-amd64.iso</pre>
+<pre>ubuntu-20.04.4-live-server-amd64.iso</pre>
 
 downloaded from
 
-<pre>https://releases.ubuntu.com/20.04/ubuntu-20.04.3-live-server-amd64.iso</pre>
+<pre>https://releases.ubuntu.com/20.04/ubuntu-20.04.4-live-server-amd64.iso</pre>
 
 and with the image burned on an USB stick with [balenaEtcher](https://www.balena.io/etcher/)
 

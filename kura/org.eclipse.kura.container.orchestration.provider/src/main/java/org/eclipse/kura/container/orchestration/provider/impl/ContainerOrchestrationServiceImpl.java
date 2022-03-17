@@ -65,7 +65,7 @@ import com.github.dockerjava.transport.DockerHttpClient;
 
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
-    private static final String CONTAINER_DESCRIPTOR_CANNOT_BE_NULL = "ContainerDescriptor cannot be null!";
+    private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
     private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
@@ -149,13 +149,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public List<ContainerInstanceDescriptor> listContainerDescriptors() {
-        List<ContainerInstanceDescriptor> result = new ArrayList<>();
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
+        List<ContainerInstanceDescriptor> result = new ArrayList<>();
         containers.forEach(container -> result.add(ContainerInstanceDescriptor.builder()
                 .setContainerName(getContainerName(container)).setContainerImage(getContainerTag(container))
                 .setContainerImageTag(getContainerVersion(container)).setContainerID(container.getId())
@@ -241,9 +241,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public Optional<String> getContainerIdByName(String name) {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
-        }
+        checkRequestEnv(name);
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
@@ -261,9 +259,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public void startContainer(String id) throws KuraException {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
-        }
+        checkRequestEnv(id);
         try {
             this.dockerClient.startContainerCmd(id).exec();
         } catch (Exception e) {
@@ -274,12 +270,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public String startContainer(ContainerConfiguration container) throws KuraException, InterruptedException {
-        if (isNull(container)) {
-            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
-        }
-        if (!testConnection()) {
-            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, "Unable to connect to the container service");
-        }
+        checkRequestEnv(container);
 
         logger.info("Starting {} Microservice", container.getContainerName());
 
@@ -314,30 +305,49 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     @Override
-    public void stopContainer(String id) {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+    public void stopContainer(String id) throws KuraException {
+        checkRequestEnv(id);
+
+        try {
+            this.dockerClient.stopContainerCmd(id).exec();
+        } catch (Exception e) {
+            logger.error("Could not stop container {}.", id);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
-        this.dockerClient.stopContainerCmd(id).exec();
     }
 
     @Override
-    public void deleteContainer(String id) {
+    public void deleteContainer(String id) throws KuraException {
+        checkRequestEnv(id);
+        try {
+            this.dockerClient.removeContainerCmd(id).exec();
+            this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
+        } catch (Exception e) {
+            logger.error("Could not remove container {}.", id);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+        }
+    }
+
+    private void checkRequestEnv(Object parameter) {
+        if (isNull(parameter)) {
+            throw new IllegalArgumentException(PARAMETER_CANNOT_BE_NULL);
+        }
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
-        this.dockerClient.removeContainerCmd(id).exec();
-        this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSecconds,
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
             Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
+        if (isNull(imageName) || isNull(imageTag) || timeOutSeconds < 0 || isNull(registryCredentials)) {
+            throw new IllegalArgumentException("Parameters cannot be null or negative");
+        }
         boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
 
         if (!imageAvailableLocally) {
             try {
-                imagePullHelper(imageName, imageTag, timeOutSecconds, registryCredentials);
+                imagePullHelper(imageName, imageTag, timeOutSeconds, registryCredentials);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {

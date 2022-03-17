@@ -238,7 +238,7 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private Optional<RegistryCredentials> registryCredentials;
-        private int imageDownloadTimeoutSeconds;
+        private int imageDownloadTimeoutSeconds = 500;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -326,7 +326,7 @@ public class ContainerConfiguration {
             result.isFrameworkManaged = this.isFrameworkManaged;
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
-            result.registryCredentials = this.registryCredentials;
+            result.registryCredentials = requireNonNull(this.registryCredentials, "Request Registry Credentials object cannot be null");
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 
             return result;

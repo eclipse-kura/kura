@@ -48,6 +48,7 @@ COMMIT
 -A input-kura -i eth0 -p tcp -m tcp --dport 443 -j ACCEPT
 -A input-kura -i eth0 -p tcp -m tcp --dport 4443 -j ACCEPT
 -A input-kura -i eth0 -p tcp -m tcp --dport 22 -j ACCEPT
+-A input-kura -i lo -p tcp -m tcp --dport 2947 -j ACCEPT
 -A input-kura -i lo -j ACCEPT
 -A input-kura -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A input-kura -p icmp -m icmp --icmp-type 8 -m state --state NEW,RELATED,ESTABLISHED -j ACCEPT

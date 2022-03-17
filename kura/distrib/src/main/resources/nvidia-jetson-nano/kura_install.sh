@@ -68,6 +68,9 @@ systemctl enable firewall
 #copy snapshot_0.xml
 cp ${INSTALL_DIR}/kura/user/snapshots/snapshot_0.xml ${INSTALL_DIR}/kura/.data/snapshot_0.xml
 
+#force gpsd.socket to use only ipv4
+sed -i "s/\(ListenStream=\[::1\]\)/# \1/g" /lib/systemd/system/gpsd.socket
+
 #disable NTP service
 if command -v timedatectl > /dev/null ; then
     timedatectl set-ntp false

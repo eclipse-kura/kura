@@ -226,6 +226,18 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         @Override
         public State onDisabled() {
             this.startupFuture.cancel(true);
+
+            try {
+                final Optional<ContainerInstanceDescriptor> existingInstance = getExistingContainer(
+                        this.options.getContainerName());
+
+                if (existingInstance.isPresent()) {
+                    return new Created(this.options, existingInstance.get().getContainerId()).onDisabled();
+                }
+            } catch (final Exception e) {
+                logger.warn("failed to check container state", e);
+            }
+
             return new Disabled(this.options);
         }
 

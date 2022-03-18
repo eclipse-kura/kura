@@ -417,7 +417,7 @@ public class ContainerOrchestrationServiceImplTest {
         this.containerId = this.dockerService.startContainer(this.containerConfig1);
     }
 
-    private void whenStopContainer() {
+    private void whenStopContainer() throws KuraException {
         // startContainer
         this.dockerService.stopContainer(this.containerId);
     }

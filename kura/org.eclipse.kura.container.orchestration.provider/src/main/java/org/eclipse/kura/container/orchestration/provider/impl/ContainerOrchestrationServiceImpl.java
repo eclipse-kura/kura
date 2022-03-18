@@ -669,10 +669,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             return false;
         }
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost(this.currentConfig.getHostUrl()).withDockerCertPath("/home/user/.docker").build();
+                .withDockerHost(this.currentConfig.getHostUrl()).build();
 
-        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
-                .sslConfig(config.getSSLConfig()).build();
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
 
         this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
 

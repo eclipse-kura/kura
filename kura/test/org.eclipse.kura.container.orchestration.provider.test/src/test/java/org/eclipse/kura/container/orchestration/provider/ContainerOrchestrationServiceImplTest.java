@@ -25,10 +25,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.junit.Test;
 import org.mockito.Answers;
@@ -50,10 +53,14 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String DEFAULT_DOCKER_HOST_URL = "unix:///var/run/docker.sock";
     private static final boolean DEFAULT_IS_ENABLED = false;
 
-    private static final String REPOSITORY_ENABLED = "dockerService.repository.enabled";
-    private static final String REPOSITORY_URL = "dockerService.repository.hostname";
-    private static final String REPOSITORY_USERNAME = "dockerService.repository.username";
-    private static final String REPOSITORY_PASSWORD = "dockerService.repository.password";
+    private static final String REPOSITORY_ENABLED = "repository.enabled";
+    private static final String REPOSITORY_URL = "repository.hostname";
+    private static final String REPOSITORY_USERNAME = "repository.username";
+    private static final String REPOSITORY_PASSWORD = "repository.password";
+    
+    private static final String REGISTRY_URL = "https://test";
+    private static final String REGISTRY_USERNAME = "test";
+    private static final String REGISTRY_PASSWORD = "test1";
 
     private static final String IMAGES_DOWNLOAD_TIMEOUT = "dockerService.default.download.timeout";
     private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 120;
@@ -392,7 +399,8 @@ public class ContainerOrchestrationServiceImplTest {
         this.containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setContainerImage("nginx")
                 .setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
-                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
+                .setEnvVars(Arrays.asList("test=test", "test2=test2")).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
 
         this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
 

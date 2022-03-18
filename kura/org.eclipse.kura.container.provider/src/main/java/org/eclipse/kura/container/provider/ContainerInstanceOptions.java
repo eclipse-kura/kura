@@ -264,7 +264,7 @@ public class ContainerInstanceOptions {
     public int hashCode() {
         return Objects.hash(this.containerDevice, this.containerEnv, this.containerLoggerType,
                 this.containerLoggingParameters, this.containerName, this.containerVolumeString, this.containerVolumes,
-                this.enabled, this.externalPorts, this.image, this.imageTag, this.imageDownloadTimeout,
+                this.enabled, this.externalPorts, this.image, this.imageDownloadTimeout, this.imageTag,
                 this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
                 this.registryURL, this.registryUsername, this.retryInterval);
     }
@@ -286,8 +286,8 @@ public class ContainerInstanceOptions {
                 && Objects.equals(this.containerVolumeString, other.containerVolumeString)
                 && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
                 && Objects.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
-                && Objects.equals(this.imageTag, other.imageTag)
                 && this.imageDownloadTimeout == other.imageDownloadTimeout
+                && Objects.equals(this.imageTag, other.imageTag)
                 && Objects.equals(this.internalPorts, other.internalPorts)
                 && this.maxDownloadRetries == other.maxDownloadRetries && this.privilegedMode == other.privilegedMode
                 && Objects.equals(this.registryPassword, other.registryPassword)

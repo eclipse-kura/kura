@@ -24,15 +24,21 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang.ArrayUtils;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.junit.Test;
 
 public class ContainerDescriptorTest {
 
     private static final String H2_DB_NAME = "Kura_H2DB";
     private static final String H2_DB_IMAGE = "joedoe/h2db";
+    private static final String REGISTRY_URL = "https://test";
+    private static final String REGISTRY_USERNAME = "test";
+    private static final String REGISTRY_PASSWORD = "test1";
     private static final List<Integer> H2_DB_PORTS_EXTERNAL = new ArrayList<>(Arrays.asList(1521, 81));
     private static final List<Integer> H2_DB_PORTS_INTERNAL = new ArrayList<>(Arrays.asList(1521, 81));
     private ContainerConfiguration firstContainerConfig;
@@ -114,14 +120,15 @@ public class ContainerDescriptorTest {
 
         this.firstContainerConfig = ContainerConfiguration.builder().setContainerImageTag(H2_DB_NAME)
                 .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setExternalPorts(H2_DB_PORTS_EXTERNAL)
-                .setInternalPorts(H2_DB_PORTS_INTERNAL).build();
+                .setInternalPorts(H2_DB_PORTS_INTERNAL).setRegistryCredentials(Optional.empty()).build();
     }
 
     private void givenContainerTwoDiffrent() {
 
         this.secondContainerConfig = ContainerConfiguration.builder().setContainerImageTag(H2_DB_NAME)
                 .setContainerName(H2_DB_NAME).setContainerImage(H2_DB_IMAGE).setContainerImageTag("diffrent")
-                .setExternalPorts(H2_DB_PORTS_EXTERNAL).setInternalPorts(H2_DB_PORTS_INTERNAL).build();
+                .setExternalPorts(H2_DB_PORTS_EXTERNAL).setInternalPorts(H2_DB_PORTS_INTERNAL).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
     }
 
     private void givenExtendedContainerParameters() {
@@ -141,26 +148,33 @@ public class ContainerDescriptorTest {
         this.testContainerList.add(this.firstContainerConfig);
         this.testContainerList.add(this.secondContainerConfig);
         this.testContainerList.add(ContainerConfiguration.builder().setContainerName("randomTestName")
-                .setContainerImage(H2_DB_IMAGE).build());
+                .setContainerImage(H2_DB_IMAGE).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build());
     }
 
     private void whenContainerTrioIsCreated() {
         // Using Set
         this.firstContainerConfig = ContainerConfiguration.builder().setContainerName("abc")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolumes(this.volumes)
-                .setEnvVars(this.envVar).setDeviceList(this.devices).build();
+                .setEnvVars(this.envVar).setDeviceList(this.devices).setRegistryCredentials(Optional.empty()).build();
 
         // Using Add by item
         this.secondContainerConfig = ContainerConfiguration.builder().setContainerName("def")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE)
                 .setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
-                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
+                .setEnvVars(Arrays.asList("test=test", "test2=test2"))
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.empty(), REGISTRY_USERNAME,
+                        new Password(REGISTRY_PASSWORD))))
+                .build();
 
         // Using add by list
         this.thirdContainerConfig = ContainerConfiguration.builder().setContainerName("ghi")
                 .setPrivilegedMode(this.privilegedMode).setContainerImage(H2_DB_IMAGE).setVolumes(this.volumes)
-                .setEnvVars(this.envVar).setDeviceList(this.devices).build();
+                .setEnvVars(this.envVar).setDeviceList(this.devices)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
     }
 
     // then

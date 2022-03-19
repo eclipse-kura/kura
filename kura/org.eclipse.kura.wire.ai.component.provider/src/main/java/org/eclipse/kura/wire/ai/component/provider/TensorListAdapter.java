@@ -18,12 +18,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireRecord;
@@ -41,7 +43,7 @@ public class TensorListAdapter {
     }
 
     /**
-     * 
+     *
      * @param descriptors
      *            the list of {@link TensorDescriptor} to use in this instance
      * @return the {@link TensorListAdapter} with the descriptors set
@@ -77,7 +79,7 @@ public class TensorListAdapter {
     }
 
     /**
-     * 
+     *
      * @param tensors
      *            the list of {@link Tensor} to convert to a list of {@link WireRecord}.
      *            <p>
@@ -96,18 +98,19 @@ public class TensorListAdapter {
             String name = tensor.getDescriptor().getName();
             Class<?> tensorType = tensor.getType();
 
-            if (tensor.getData(tensorType).isPresent()) {
+            Optional<?> tensorData = tensor.getData(tensorType);
+            if (tensorData.isPresent()) {
 
-                List<?> tensorData = tensor.getData(tensorType).get();
+                List<?> tensorDataList = (List<?>) tensorData.get();
                 Object data;
 
                 if (tensorType.isAssignableFrom(Byte.class)) {
-                    data = toByteArray(tensorData);
+                    data = toByteArray(tensorDataList);
                 } else {
-                    if (tensorData.size() != 1) {
+                    if (tensorDataList.size() != 1) {
                         throw new KuraIOException("The tensor " + name + " does not contain data of length 1.");
                     }
-                    data = tensorData.get(0);
+                    data = tensorDataList.get(0);
                 }
 
                 TypedValue<?> typedValue = TypedValues.newTypedValue(data);

@@ -140,7 +140,7 @@ public class ContainerConfiguration {
      *
      * @return
      */
-    public boolean getContainerPrivileged() {
+    public boolean isContainerPrivileged() {
         return this.containerPrivileged;
     }
 
@@ -167,7 +167,7 @@ public class ContainerConfiguration {
      *
      * @return
      */
-    public Optional<RegistryCredentials> getRepositoryCredentials() {
+    public Optional<RegistryCredentials> getRegistryCredentials() {
         return this.registryCredentials;
     }
 
@@ -227,7 +227,7 @@ public class ContainerConfiguration {
 
         private String containerName;
         private String containerImage;
-        private String containerImageTag = "latest";
+        private String containerImageTag;
         private List<Integer> containerPortsExternal = new ArrayList<>();
         private List<Integer> containerPortsInternal = new ArrayList<>();
         private List<String> containerEnvVars = new LinkedList<>();

@@ -285,7 +285,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         } else if (!existingInstance.isPresent()) {
             logger.info("Creating new container instance");
             pullImage(container.getContainerImage(), container.getContainerImageTag(),
-                    container.getImageDownloadTimeoutSeconds(), container.getRepositoryCredentials());
+                    container.getImageDownloadTimeoutSeconds(), container.getRegistryCredentials());
             containerId = createContainer(container);
             startContainer(containerId);
         } else {
@@ -459,8 +459,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
-            if (containerDescription.getContainerPrivileged()) {
-                configuration = configuration.withPrivileged(containerDescription.getContainerPrivileged());
+            if (containerDescription.isContainerPrivileged()) {
+                configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
 
             return commandBuilder.withHostConfig(configuration).exec().getId();

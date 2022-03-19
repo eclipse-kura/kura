@@ -63,6 +63,7 @@
                 	<gwt:CellTable bordered="true" condensed="true"
                    	 striped="true" hover="true" height="100%" width="100%"
                    	 ui:field="permissionTable" />
+                   	<b:PanelFooter ui:field="tablePanelFooter" />
                  </b:PanelBody>
             </b:Row>
         </b:Column>

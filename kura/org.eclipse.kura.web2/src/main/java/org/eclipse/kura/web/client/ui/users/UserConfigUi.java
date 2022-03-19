@@ -26,6 +26,7 @@ import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.InlineRadio;
+import org.gwtbootstrap3.client.ui.PanelFooter;
 import org.gwtbootstrap3.client.ui.constants.InputType;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
 
@@ -37,9 +38,12 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
+import com.google.gwt.user.cellview.client.SimplePager;
+import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.HasRows;
 import com.google.gwt.view.client.ListDataProvider;
 
 public class UserConfigUi extends Composite {
@@ -65,6 +69,8 @@ public class UserConfigUi extends Composite {
     Picker picker;
     @UiField
     CellTable<AssignedPermission> permissionTable;
+    @UiField
+    PanelFooter tablePanelFooter;
 
     private final Listener listener;
     private final GwtUserConfig userData;
@@ -72,6 +78,8 @@ public class UserConfigUi extends Composite {
     private final ListDataProvider<AssignedPermission> dataProvider = new ListDataProvider<>();
     private final boolean hasPassword;
     private final List<Validator<String>> passwordStrengthValidators;
+
+    private SimplePager pager;
 
     public UserConfigUi(final GwtUserConfig userData, final Set<String> definedPermissions, final Listener listener) {
         this.listener = listener;
@@ -84,6 +92,26 @@ public class UserConfigUi extends Composite {
     }
 
     private void initTable(final GwtUserData userData, final Set<String> definedPermissions) {
+
+        this.pager = new SimplePager(TextLocation.CENTER, false, 0, true) {
+
+            @Override
+            public void nextPage() {
+                setPage(getPage() + 1);
+            }
+
+            @Override
+            public void setPageStart(int index) {
+                final HasRows display = getDisplay();
+                if (display != null) {
+                    display.setVisibleRange(index, getPageSize());
+                }
+            }
+        };
+        this.pager.setPageSize(15);
+        this.pager.setDisplay(this.permissionTable);
+        this.tablePanelFooter.add(this.pager);
+
         final Column<AssignedPermission, String> assignedColumn = new Column<AssignedPermission, String>(
                 new BooleanInputCell()) {
 

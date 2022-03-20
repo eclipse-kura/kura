@@ -25,7 +25,6 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
-import org.eclipse.kura.type.DataType;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
 import org.eclipse.kura.wire.WireRecord;
@@ -64,7 +63,7 @@ public class TensorListAdapter {
      *         Each created {@link Tensor} will contain a data list of length 1 if the type is BOOLEAN, DOUBLE, FLOAT,
      *         INTEGER, LONG, STRING. In case of BYTE_ARRAY the list is equal to the length of the array.
      * @throws KuraException
-     *             if no descriptor matches the record name or the type is not a {@link DataType}
+     *             if no descriptor matches the record name or the type is not a {@link org.eclipse.kura.type.DataType}
      */
     public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraException {
         List<Tensor> output = new LinkedList<>();

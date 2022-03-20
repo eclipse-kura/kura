@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.junit.Test;
 
 public class ContainerInstanceOptionsTest {
@@ -44,6 +46,10 @@ public class ContainerInstanceOptionsTest {
     private static final int DEFAULT_CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = 30000;
     private static final String DEFAULT_CONTAINER_LOGGER_PARAMETERS = "";
     private static final String DEFAULT_CONTAINER_LOGGING_TYPE = "default";
+    private static final String DEFAULT_REGISTRY_URL = "";
+    private static final String DEFAULT_REGISTRY_USERNAME = "";
+    private static final String DEFAULT_REGISTRY_PASSWORD = "";
+    private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 500;
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -59,6 +65,10 @@ public class ContainerInstanceOptionsTest {
     private static final String CONTAINER_IMAGE_DOWNLOAD_RETRY_INTERVAL = "container.image.download.interval";
     private static final String CONTAINER_LOGGER_PARAMETERS = "container.loggerParameters";
     private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
+    private static final String REGISTRY_URL = "registry.hostname";
+    private static final String REGISTRY_USERNAME = "registry.username";
+    private static final String REGISTRY_PASSWORD = "registry.password";
+    private static final String IMAGES_DOWNLOAD_TIMEOUT = "container.image.download.timeout";
 
     private Map<String, Object> properties;
 
@@ -82,6 +92,11 @@ public class ContainerInstanceOptionsTest {
     private int imageDownloadRetries;
     private int imageDownloadRetryInterval;
     private boolean unlimitedRetries;
+
+    private Optional<String> registryURL;
+    private String registryUsername;
+    private String registryPassword;
+    private int imageDownloadTimeout;
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullProperties() {
@@ -308,6 +323,30 @@ public class ContainerInstanceOptionsTest {
     }
 
     @Test
+    public void testRegistryURLDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetRegistryURL();
+
+        thenRegistryURL(DEFAULT_REGISTRY_URL);
+
+    }
+
+    @Test
+    public void testRegistryURL() {
+
+        givenDefaultProperties();
+        givenRegistryURL("https://test");
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetRegistryURL();
+
+        thenRegistryURL("https://test");
+    }
+
+    @Test
     public void testImageDownloadUnlimitedRetriesDefault() {
 
         givenDefaultProperties();
@@ -353,6 +392,78 @@ public class ContainerInstanceOptionsTest {
         whenGetImageDownloadRetryInterval();
 
         thenImageDownloadRetryInterval(100);
+    }
+
+    @Test
+    public void testRegistryUsernameDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetRegistryUsername();
+
+        thenRegistryUsername(DEFAULT_REGISTRY_USERNAME);
+
+    }
+
+    @Test
+    public void testRegistryUsername() {
+
+        givenDefaultProperties();
+        givenRegistryUsername("test");
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetRegistryUsername();
+
+        thenRegistryUsername("test");
+    }
+
+    @Test
+    public void testRegistryPasswordDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetRegistryPassword();
+
+        thenRegistryPassword(DEFAULT_REGISTRY_PASSWORD);
+
+    }
+
+    @Test
+    public void testRegistryPassword() {
+
+        givenDefaultProperties();
+        givenRegistryPassword("test");
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetRegistryPassword();
+
+        thenRegistryPassword("test");
+    }
+
+    @Test
+    public void testImageDownloadTimeoutDefault() {
+
+        givenDefaultProperties();
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetImageDownloadTimeout();
+
+        thenImageDownloadTimeout(DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
+
+    }
+
+    @Test
+    public void testImageDownloadTimeout() {
+
+        givenDefaultProperties();
+        givenImageDownloadTimeout(100);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetImageDownloadTimeout();
+
+        thenImageDownloadTimeout(100);
     }
 
     @Test
@@ -524,6 +635,10 @@ public class ContainerInstanceOptionsTest {
         this.properties.put(CONTAINER_DEVICE, DEFAULT_CONTAINER_DEVICE);
         this.properties.put(CONTAINER_LOGGING_TYPE, DEFAULT_CONTAINER_LOGGING_TYPE);
         this.properties.put(CONTAINER_LOGGER_PARAMETERS, DEFAULT_CONTAINER_LOGGER_PARAMETERS);
+        this.properties.put(REGISTRY_URL, DEFAULT_REGISTRY_URL);
+        this.properties.put(REGISTRY_USERNAME, DEFAULT_REGISTRY_USERNAME);
+        this.properties.put(REGISTRY_PASSWORD, DEFAULT_REGISTRY_PASSWORD);
+        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
     }
 
     private void givenDifferentProperties() {
@@ -537,8 +652,13 @@ public class ContainerInstanceOptionsTest {
         this.newProperties.put(CONTAINER_ENV, "");
         this.newProperties.put(CONTAINER_VOLUME, "diffrent:diffrent");
         this.newProperties.put(CONTAINER_DEVICE, "");
-        this.properties.put(CONTAINER_LOGGING_TYPE, "JOURNALD");
-        this.properties.put(CONTAINER_LOGGER_PARAMETERS, "label=true");
+        this.newProperties.put(CONTAINER_LOGGING_TYPE, "JOURNALD");
+        this.newProperties.put(CONTAINER_LOGGER_PARAMETERS, "label=true");
+
+        this.newProperties.put(REGISTRY_URL, "https://something");
+        this.newProperties.put(REGISTRY_USERNAME, "test");
+        this.newProperties.put(REGISTRY_PASSWORD, "test");
+        this.newProperties.put(IMAGES_DOWNLOAD_TIMEOUT, 100);
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
@@ -583,6 +703,22 @@ public class ContainerInstanceOptionsTest {
 
     private void givenContainerDevice(String value) {
         this.properties.put(CONTAINER_DEVICE, value);
+    }
+
+    private void givenRegistryURL(String value) {
+        this.properties.put(REGISTRY_URL, value);
+    }
+
+    private void givenRegistryUsername(String username) {
+        this.properties.put(REGISTRY_USERNAME, username);
+    }
+
+    private void givenRegistryPassword(String password) {
+        this.properties.put(REGISTRY_PASSWORD, password);
+    }
+
+    private void givenImageDownloadTimeout(int value) {
+        this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, value);
     }
 
     private void givenPortsConfiguration(String portProperty, String Ports) {
@@ -645,6 +781,28 @@ public class ContainerInstanceOptionsTest {
         this.portsAvailable = this.cgdso.getContainerPortsInternal();
     }
 
+    private void whenGetRegistryURL() {
+        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials) this.cgdso
+                .getRegistryCredentials().get();
+        this.registryURL = registryCredentials.getUrl();
+    }
+
+    private void whenGetRegistryUsername() {
+        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials) this.cgdso
+                .getRegistryCredentials().get();
+        this.registryUsername = registryCredentials.getUsername();
+    }
+
+    private void whenGetRegistryPassword() {
+        PasswordRegistryCredentials registryCredentials = (PasswordRegistryCredentials) this.cgdso
+                .getRegistryCredentials().get();
+        this.registryPassword = new String(registryCredentials.getPassword().getPassword());
+    }
+
+    private void whenGetImageDownloadTimeout() {
+        this.imageDownloadTimeout = this.cgdso.getImageDownloadTimeout();
+    }
+
     private void whenGetEquals(ContainerInstanceOptions options) {
         this.equals = this.cgdso.equals(options);
     }
@@ -687,6 +845,22 @@ public class ContainerInstanceOptionsTest {
 
     private void thenImageDownloadRetries(int expectedValue) {
         assertEquals(expectedValue, this.imageDownloadRetries);
+    }
+
+    private void thenRegistryURL(String expectedValue) {
+        assertEquals(expectedValue, this.registryURL.get());
+    }
+
+    private void thenRegistryUsername(String expectedValue) {
+        assertEquals(expectedValue, this.registryUsername);
+    }
+
+    private void thenRegistryPassword(String expectedValue) {
+        assertEquals(expectedValue, this.registryPassword);
+    }
+
+    private void thenImageDownloadTimeout(int expectedValue) {
+        assertEquals(expectedValue, this.imageDownloadTimeout);
     }
 
     private void thenImageDownloadRetryInterval(int expectedValue) {

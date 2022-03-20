@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -45,10 +45,6 @@ public class ContainerOrchestrationServiceOptionsTest {
 
     private String host_url = "";
     private boolean is_enabled = false;
-    private final boolean repositoryEnabled = false;
-    private final String repositoryURL = "";
-    private final String repositoryUsername = "";
-    private final String repositoryPassword = "";
     private int hash;
 
     private Map<String, Object> properties = new HashMap<>();
@@ -205,8 +201,7 @@ public class ContainerOrchestrationServiceOptionsTest {
     }
 
     private void whenHashIsCalculated() {
-        this.hash = Objects.hash(this.is_enabled, this.host_url, this.repositoryEnabled, this.repositoryURL,
-                this.repositoryUsername, this.repositoryPassword);
+        this.hash = Objects.hash(this.is_enabled, this.host_url);
     }
 
     /**

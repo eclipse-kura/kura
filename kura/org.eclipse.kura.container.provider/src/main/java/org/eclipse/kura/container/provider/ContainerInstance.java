@@ -108,7 +108,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         this.state = newState;
     }
-
+    
     private Optional<ContainerInstanceDescriptor> getExistingContainer(final String containerName) {
         return containerOrchestrationService.listContainerDescriptors().stream()
                 .filter(c -> c.getContainerName().equals(containerName)).findAny();
@@ -124,7 +124,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             return this;
         }
 
-        public default State onContanierReady(final String containerId) {
+        public default State onContainerReady(final String containerId) {
             return this;
         }
 
@@ -214,7 +214,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         }
 
         @Override
-        public State onContanierReady(final String containerId) {
+        public State onContainerReady(final String containerId) {
             return new Created(this.options, containerId);
         }
 
@@ -226,6 +226,18 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         @Override
         public State onDisabled() {
             this.startupFuture.cancel(true);
+
+            try {
+                final Optional<ContainerInstanceDescriptor> existingInstance = getExistingContainer(
+                        this.options.getContainerName());
+
+                if (existingInstance.isPresent()) {
+                    return new Created(this.options, existingInstance.get().getContainerId()).onDisabled();
+                }
+            } catch (final Exception e) {
+                logger.warn("failed to check container state", e);
+            }
+
             return new Disabled(this.options);
         }
 
@@ -247,7 +259,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
                     final String containerId = ContainerInstance.this.containerOrchestrationService
                             .startContainer(containerCongiguration);
-                    updateState(s -> s.onContanierReady(containerId));
+                    updateState(s -> s.onContainerReady(containerId));
 
                     return;
 

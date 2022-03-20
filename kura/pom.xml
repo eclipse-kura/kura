@@ -163,6 +163,8 @@
         <osgi-dp-plugin-version>0.3.0</osgi-dp-plugin-version>
 
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
+
+        <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
     </properties>
 
     <distributionManagement>
@@ -310,7 +312,7 @@
         <repository>
             <id>kura_addons</id>
             <name>Eclipse Kura Addons Maven Repository</name>
-            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+            <url>${kura.addons.url}</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>

@@ -49,6 +49,7 @@ Deprecated APIs:
 Target Platform Updates
   * com.h2database.h2=2.1.210
   * com.google.protobuf=3.19.3
+  * log4j=2.17.1
   * com.eclipsesource.jaxrs.provider.multipart=2.2.0.201602281253
   * org.apache.commons.commons-net=3.8.0
   * org.apache.commons.commons-io=2.11.0

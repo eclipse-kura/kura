@@ -29,15 +29,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.request.RequestHandlerContext;
+import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -85,6 +88,10 @@ public class InventoryHandlerV1Test {
 
     private static String TEST_JSON = "testJson";
     private static String TEST_XML = "testXML";
+    
+    private static final String REGISTRY_URL = "https://test";
+    private static final String REGISTRY_USERNAME = "test";
+    private static final String REGISTRY_PASSWORD = "test1";
 
     private ContainerInstanceDescriptor dockerContainer1;
     private ContainerInstanceDescriptor dockerContainer2;
@@ -1036,9 +1043,11 @@ public class InventoryHandlerV1Test {
                 .setContainerImage("nginx").setContainerID("124344").build();
         
         this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
-                .setContainerImage("nginx").setContainerImageTag("latest").build();
+                .setContainerImage("nginx").setContainerImageTag("latest").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
         this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
-                .setContainerImage("nginx").build();
+                .setContainerImage("nginx").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
     }
 
     private void givenTheFollowingJson() {

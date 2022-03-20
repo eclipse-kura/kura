@@ -43,33 +43,39 @@ public interface ContainerOrchestrationService {
     public List<ContainerInstanceDescriptor> listContainerDescriptors();
 
     /**
-     * Allows to pull the required image, using the specified tag. The image will be downloaded respecting the
-     * configured timeout in seconds.
+     * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded
+     * respecting the configured timeout in seconds.
      *
      * @param imageName
+     *            the image name to be used. Must not be null.
      * @param imageTag
+     *            a string representing the image tag. Must not be null.
      * @param timeOutSeconds
+     *            a non negative integer representing the image download timeout in seconds
+     * @param registryCredentials
+     *            an optional that can contain the registry URL and credentials for authentication
      * @throws KuraException
      *             if the pull operation fails
+     * @throws InterruptedException
      */
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds)
-            throws KuraException, InterruptedException;
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException;
 
     /**
      * Returns the id of the container corresponding to the specified name. If no container can be found an
      * {@link Optional#empty(} result is returned.
      *
      * @param name
-     *            the string representing the container name
+     *            the string representing the container name. Must not be null
      * @return an {@link Optional} value that will contain the container ID, if the container exists. Otherwise and
      *         {@link Optional#empty()}
      */
     public Optional<String> getContainerIdByName(String name);
 
     /**
-     * Starts a container identified by the values provided in the {@link ContainerConfiguration} object. If the
-     * requested
-     * image does not exists, it will be downloaded. A String representing the container ID will be returned if the
+     * Starts a container identified by the values provided in a not null {@link ContainerConfiguration} object. If the
+     * requested image does not exists, it will be downloaded. A String representing the container ID will be returned
+     * if the
      * operation of container creation and start succeed.
      *
      * @param containerConfiguration
@@ -84,7 +90,7 @@ public interface ContainerOrchestrationService {
      * Starts a container identified by the specified ID
      *
      * @param id
-     *            the ID of an already existing container
+     *            the ID of an already existing container. Must not be null
      * @throws KuraException
      *             if the container starting fails
      */
@@ -94,7 +100,7 @@ public interface ContainerOrchestrationService {
      * Stops a container identified by the specified ID
      *
      * @param id
-     *            the ID of an already existing container
+     *            the ID of an already existing container. Must not be null
      * @throws KuraException
      *             if the container stopping fails
      */
@@ -104,7 +110,7 @@ public interface ContainerOrchestrationService {
      * Deletes a container identified by the specified ID
      *
      * @param id
-     *            the ID of an already existing container
+     *            the ID of an already existing container. Must not be null
      * @throws KuraException
      *             if the container removal fails
      */

@@ -32,6 +32,8 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
+import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
 import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
@@ -63,7 +65,7 @@ import com.github.dockerjava.transport.DockerHttpClient;
 
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
-    private static final String CONTAINER_DESCRIPTOR_CANNOT_BE_NULL = "ContainerDescriptor cannot be null!";
+    private static final String PARAMETER_CANNOT_BE_NULL = "The provided parameter cannot be null";
     private static final String UNABLE_TO_CONNECT_TO_DOCKER_CLI = "Unable to connect to docker cli";
     private static final Logger logger = LoggerFactory.getLogger(ContainerOrchestrationServiceImpl.class);
     private static final String APP_ID = "org.eclipse.kura.container.orchestration.provider.ConfigurableDocker";
@@ -74,7 +76,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private final Set<FrameworkManagedContainer> frameworkManagedContainers = new HashSet<>();
 
     private DockerClient dockerClient;
-    private AuthConfig dockerAuthConfig;
     private CryptoService cryptoService;
 
     public void setDockerClient(DockerClient dockerClient) {
@@ -148,13 +149,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public List<ContainerInstanceDescriptor> listContainerDescriptors() {
-        List<ContainerInstanceDescriptor> result = new ArrayList<>();
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
+        List<ContainerInstanceDescriptor> result = new ArrayList<>();
         containers.forEach(container -> result.add(ContainerInstanceDescriptor.builder()
                 .setContainerName(getContainerName(container)).setContainerImage(getContainerTag(container))
                 .setContainerImageTag(getContainerVersion(container)).setContainerID(container.getId())
@@ -240,9 +241,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public Optional<String> getContainerIdByName(String name) {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
-        }
+        checkRequestEnv(name);
 
         List<Container> containers = this.dockerClient.listContainersCmd().withShowAll(true).exec();
 
@@ -260,9 +259,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public void startContainer(String id) throws KuraException {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
-        }
+        checkRequestEnv(id);
         try {
             this.dockerClient.startContainerCmd(id).exec();
         } catch (Exception e) {
@@ -273,12 +270,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public String startContainer(ContainerConfiguration container) throws KuraException, InterruptedException {
-        if (isNull(container)) {
-            throw new IllegalArgumentException(CONTAINER_DESCRIPTOR_CANNOT_BE_NULL);
-        }
-        if (!testConnection()) {
-            throw new KuraException(KuraErrorCode.CONNECTION_FAILED, "Unable to connect to the container service");
-        }
+        checkRequestEnv(container);
 
         logger.info("Starting {} Microservice", container.getContainerName());
 
@@ -293,7 +285,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         } else if (!existingInstance.isPresent()) {
             logger.info("Creating new container instance");
             pullImage(container.getContainerImage(), container.getContainerImageTag(),
-                    this.currentConfig.getImagesDownloadTimeout());
+                    container.getImageDownloadTimeoutSeconds(), container.getRegistryCredentials());
             containerId = createContainer(container);
             startContainer(containerId);
         } else {
@@ -313,30 +305,49 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     @Override
-    public void stopContainer(String id) {
-        if (!testConnection()) {
-            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+    public void stopContainer(String id) throws KuraException {
+        checkRequestEnv(id);
+
+        try {
+            this.dockerClient.stopContainerCmd(id).exec();
+        } catch (Exception e) {
+            logger.error("Could not stop container {}.", id);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
-        this.dockerClient.stopContainerCmd(id).exec();
     }
 
     @Override
-    public void deleteContainer(String id) {
+    public void deleteContainer(String id) throws KuraException {
+        checkRequestEnv(id);
+        try {
+            this.dockerClient.removeContainerCmd(id).exec();
+            this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
+        } catch (Exception e) {
+            logger.error("Could not remove container {}.", id);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+        }
+    }
+
+    private void checkRequestEnv(Object parameter) {
+        if (isNull(parameter)) {
+            throw new IllegalArgumentException(PARAMETER_CANNOT_BE_NULL);
+        }
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
-        this.dockerClient.removeContainerCmd(id).exec();
-        this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
     }
 
     @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSecconds)
-            throws KuraException, InterruptedException {
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
+        if (isNull(imageName) || isNull(imageTag) || timeOutSeconds < 0 || isNull(registryCredentials)) {
+            throw new IllegalArgumentException("Parameters cannot be null or negative");
+        }
         boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
 
         if (!imageAvailableLocally) {
             try {
-                imagePullHelper(imageName, imageTag, timeOutSecconds, this.currentConfig.isRepositoryEnabled());
+                imagePullHelper(imageName, imageTag, timeOutSeconds, registryCredentials);
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -357,14 +368,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     }
 
-    private void imagePullHelper(String imageName, String imageTag, int timeOutSecconds, boolean withAuth)
-            throws InterruptedException {
+    private void imagePullHelper(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> repositoryCredentials) throws InterruptedException, KuraException {
 
-        logger.info("Attempting to pull image: {}. \n Authentication is set to: {}", imageName, withAuth);
+        logger.info("Attempting to pull image: {}.", imageName);
         PullImageCmd pullRequest = this.dockerClient.pullImageCmd(imageName).withTag(imageTag);
 
-        if (withAuth) {
-            pullRequest.withAuthConfig(this.dockerAuthConfig);
+        if (repositoryCredentials.isPresent()) {
+            doAuthenticate(repositoryCredentials.get(), pullRequest);
         }
 
         pullRequest.exec(new PullImageResultCallback() {
@@ -376,8 +387,26 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             }
 
-        }).awaitCompletion(timeOutSecconds, TimeUnit.SECONDS);
+        }).awaitCompletion(timeOutSeconds, TimeUnit.SECONDS);
 
+    }
+
+    private void doAuthenticate(RegistryCredentials repositoryCredentials, PullImageCmd pullRequest)
+            throws KuraException {
+        if (!(repositoryCredentials instanceof PasswordRegistryCredentials)) {
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        PasswordRegistryCredentials repositoryPasswordCredentials = (PasswordRegistryCredentials) repositoryCredentials;
+
+        AuthConfig authConfig = new AuthConfig().withUsername(repositoryPasswordCredentials.getUsername()).withPassword(
+                new String(this.cryptoService.decryptAes(repositoryPasswordCredentials.getPassword().getPassword())));
+        Optional<String> url = repositoryPasswordCredentials.getUrl();
+        if (url.isPresent()) {
+            logger.info("Attempting to sign into repo: {}", url.get());
+            authConfig = authConfig.withRegistryAddress(url.get());
+        }
+        pullRequest.withAuthConfig(authConfig);
     }
 
     private void createLoggerMessageForContainerPull(PullResponseItem item, String imageName, String imageTag) {
@@ -427,11 +456,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             configuration = containerDevicesHandler(containerDescription, configuration);
 
             configuration = containerPortManagementHandler(containerDescription, configuration);
-            
+
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
-            if (containerDescription.getContainerPrivileged()) {
-                configuration = configuration.withPrivileged(containerDescription.getContainerPrivileged());
+            if (containerDescription.isContainerPrivileged()) {
+                configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
 
             return commandBuilder.withHostConfig(configuration).exec().getId();
@@ -493,15 +522,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             lt = LoggingType.DEFAULT;
             break;
         }
-        
-        LogConfig lc = new LogConfig(lt,
-                containerDescription.getLoggerParameters());
+
+        LogConfig lc = new LogConfig(lt, containerDescription.getLoggerParameters());
 
         configuration.withLogConfig(lc);
 
         return configuration;
     }
-    
+
     private HostConfig containerPortManagementHandler(ContainerConfiguration containerDescription,
             HostConfig commandBuilder) {
 
@@ -641,16 +669,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             return false;
         }
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost(this.currentConfig.getHostUrl()).withDockerCertPath("/home/user/.docker").build();
+                .withDockerHost(this.currentConfig.getHostUrl()).build();
 
-        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost())
-                .sslConfig(config.getSSLConfig()).build();
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).build();
 
         this.dockerClient = DockerClientImpl.getInstance(config, httpClient);
-
-        if (this.currentConfig.isRepositoryEnabled()) {
-            logIntoRemoteRepository();
-        }
 
         final boolean connected = testConnection();
 
@@ -682,29 +705,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return canConnect;
     }
 
-    private void logIntoRemoteRepository() {
-
-        // Decode password
-        String decodedPassword;
-        try {
-            decodedPassword = String
-                    .valueOf(this.cryptoService.decryptAes(this.currentConfig.getRepositoryPassword().toCharArray()));
-        } catch (Exception e) {
-            logger.error("Failed to decode password: {0}", e);
-            decodedPassword = this.currentConfig.getRepositoryPassword();
-        }
-
-        if (this.currentConfig.getRepositoryUrl().isEmpty()) {
-            logger.info("Attempting to sign into Docker-Hub");
-            this.dockerAuthConfig = new AuthConfig().withUsername(this.currentConfig.getRepositoryUsername())
-                    .withPassword(decodedPassword);
-        } else {
-            logger.info("Attempting to sign into repo: {}", this.currentConfig.getRepositoryUrl());
-            this.dockerAuthConfig = new AuthConfig().withUsername(this.currentConfig.getRepositoryUsername())
-                    .withPassword(decodedPassword).withRegistryAddress(this.currentConfig.getRepositoryUrl());
-        }
-    }
-
     private static class FrameworkManagedContainer {
 
         private final String name;
@@ -725,7 +725,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             if (this == obj) {
                 return true;
             }
-            if ((obj == null) || (getClass() != obj.getClass())) {
+            if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
             FrameworkManagedContainer other = (FrameworkManagedContainer) obj;

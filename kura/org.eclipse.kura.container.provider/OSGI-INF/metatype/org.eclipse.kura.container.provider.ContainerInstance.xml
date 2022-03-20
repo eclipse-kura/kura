@@ -18,13 +18,33 @@
         <AD id="container.enabled" name="Enabled" type="Boolean" cardinality="1" required="true" default="false"
             description="Enables this container">
         </AD>
-
-        <AD id="container.image" name="Image name" description="The image the container will be created with. This utility will pull images from the configured registry."
+        
+        <AD id="container.image" 
+            name="Image name" 
+            description="The image the container will be created with. The value will need to be expressed in the form registryURL/imagename in case of a custom registry. 
+            Please fill the following registry credentials in case of pulling from a custom or authenticated Docker hub registry."
             type="String" cardinality="1" required="true" default="nginx" />
 
         <AD id="container.image.tag" name="Image tag"
             description="Describes which image version that should be pulled from the container registry." type="String"
             cardinality="1" required="true" default="latest" />
+        
+        <AD id="registry.hostname" name="Authentication Registry URL"
+            description="Url for docker registry. Required only for authenticated registries" 
+            type="String"
+            cardinality="0" required="false" default="" />
+            
+        <AD id="registry.username" name="Authentication Username"
+            description="Username for container registry. Required only for authenticated registries"
+            type="String"
+            cardinality="0" 
+            required="false" 
+            default="" />
+            
+        <AD id="registry.password" name="Password"
+            description="Password for container registry. Required only for authenticated registries" 
+            type="Password"
+            cardinality="0" required="false" default="" />
         
         <AD id="container.image.download.retries" 
             name="Image Download Retries" 
@@ -43,6 +63,15 @@
             min="0"
             required="true" 
             default="30000" />
+        
+        <AD id="container.image.download.timeout" 
+            name="Image Download Timeout"
+            description="Image download timeout. Value specified in seconds" 
+            type="Integer"
+            cardinality="0" 
+            required="true" 
+            min="1"
+            default="500" />
 
         <AD id="container.ports.internal" name="Internal ports"
             description="A comma separated list of ports. Note, the number of internal ports must be equal to the number of external ports. Example: 80, 443." 

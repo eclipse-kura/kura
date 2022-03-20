@@ -20,13 +20,16 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.junit.Test;
 
@@ -155,9 +158,20 @@ public class ContainerInstanceTest {
         this.dockerService = mock(ContainerOrchestrationService.class);
         this.configurableGenericDockerService.setContainerOrchestrationService(this.dockerService);
         try {
+            final AtomicReference<ContainerConfiguration> config = new AtomicReference<>();
+
             when(this.dockerService.startContainer((ContainerConfiguration) any())).thenAnswer(i -> {
+                config.set(i.getArgumentAt(0, ContainerConfiguration.class));
                 this.containerStarted.complete(null);
                 return "1234";
+            });
+            when(this.dockerService.listContainerDescriptors()).thenAnswer(i -> {
+                if (this.containerStarted.isDone()) {
+                    return Collections.singletonList(ContainerInstanceDescriptor.builder()
+                            .setContainerName(config.get().getContainerName()).setContainerID("1234").build());
+                } else {
+                    return Collections.emptyList();
+                }
             });
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

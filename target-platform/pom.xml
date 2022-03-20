@@ -45,7 +45,7 @@
         <repository>
             <id>kura_addons</id>
             <name>Kura Addons Maven Repository</name>
-            <url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</url>
+            <url>${kura.addons.url}</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>
@@ -83,6 +83,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <check.plugins.exist.remote>false</check.plugins.exist.remote>
+        <kura.addons.url>https://raw.github.com/eurotech/kura_addons/mvn-repo/</kura.addons.url>
     </properties>
     
     <profiles>

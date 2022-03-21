@@ -108,6 +108,9 @@
         <setEntry value="org.eclipse.kura.asset.cloudlet.provider@default:default"/>
         <setEntry value="org.eclipse.kura.asset.helper.provider@default:default"/>
         <setEntry value="org.eclipse.kura.asset.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.cloudconnection.raw.mqtt.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.container.orchestration.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.container.provider@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.core@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.simple.mqtt@default:default"/>
         <setEntry value="org.eclipse.kura.broker.artemis.xml@default:default"/>

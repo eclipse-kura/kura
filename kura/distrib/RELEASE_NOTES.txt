@@ -24,6 +24,7 @@ Features:
   * Asset update to support scale, offset and unit in numeric channels
   * Web Ui and user admin implementation update to support forced password change on first login
   * Wi-Fi 5Ghz refactoring and enhancements 
+  * Wi-Fi regulatory domain checks and rules
   * New platforms support with Intel Up 2 with Ubuntu 20, Raspberry Pi Ubuntu 20 and NVIDIA Jetson Nano
 
 Target Environments:
@@ -40,6 +41,9 @@ Breaking Changes:
     dependency. The new package introduces breaking changes (documented in https://github.com/eclipse/kura/pull/3728), 
     both in database persistence format and behaviour, that will make existing persisted databases not usable with the 
     latest version. Manual migration is required as the H2db project does not provide an automated upgrade solution. 
+  * In order to better comply with Wi-Fi regulations on frequency usage, you must now configure the regulatory domain 
+    and radio mode before accessing Wi-Fi hotspots that use regulated channels.
+
  
 Deprecated APIs:
   * org.eclipse.kura.position.PositionService (partial)

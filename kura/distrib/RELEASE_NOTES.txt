@@ -5,8 +5,8 @@ This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduc
 like gpsd support, EDGE AI, Linux Containers management from Kura, 
 device log management and reporting from the Local framework UI.
 
-It also introduces new gateway profiles with the important addition of Ubuntu 20.04 64 bits 
-for Intel Up 2 and Raspberry Pi.
+It also introduces two new gateway profiles for Intel Up 2 and Raspberry Pi based on Ubuntu 20.04 64 bits.
+The EDGE AI features can be natively leveraged on a new profile Ubuntu 18 based for the NVIDIA Jetson Nano.
 
 
 Features:

@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -41,7 +42,7 @@ public class TensorListAdapter {
     }
 
     /**
-     * 
+     *
      * @param descriptors
      *            the list of {@link TensorDescriptor} to use in this instance
      * @return the {@link TensorListAdapter} with the descriptors set
@@ -62,7 +63,7 @@ public class TensorListAdapter {
      *         Each created {@link Tensor} will contain a data list of length 1 if the type is BOOLEAN, DOUBLE, FLOAT,
      *         INTEGER, LONG, STRING. In case of BYTE_ARRAY the list is equal to the length of the array.
      * @throws KuraException
-     *             if no descriptor matches the record name or the type is not a {@link DataType}
+     *             if no descriptor matches the record name or the type is not a {@link org.eclipse.kura.type.DataType}
      */
     public List<Tensor> fromWireRecord(WireRecord wireRecord) throws KuraException {
         List<Tensor> output = new LinkedList<>();
@@ -77,7 +78,7 @@ public class TensorListAdapter {
     }
 
     /**
-     * 
+     *
      * @param tensors
      *            the list of {@link Tensor} to convert to a list of {@link WireRecord}.
      *            <p>
@@ -96,18 +97,19 @@ public class TensorListAdapter {
             String name = tensor.getDescriptor().getName();
             Class<?> tensorType = tensor.getType();
 
-            if (tensor.getData(tensorType).isPresent()) {
+            Optional<?> tensorData = tensor.getData(tensorType);
+            if (tensorData.isPresent()) {
 
-                List<?> tensorData = tensor.getData(tensorType).get();
+                List<?> tensorDataList = (List<?>) tensorData.get();
                 Object data;
 
                 if (tensorType.isAssignableFrom(Byte.class)) {
-                    data = toByteArray(tensorData);
+                    data = toByteArray(tensorDataList);
                 } else {
-                    if (tensorData.size() != 1) {
+                    if (tensorDataList.size() != 1) {
                         throw new KuraIOException("The tensor " + name + " does not contain data of length 1.");
                     }
-                    data = tensorData.get(0);
+                    data = tensorDataList.get(0);
                 }
 
                 TypedValue<?> typedValue = TypedValues.newTypedValue(data);

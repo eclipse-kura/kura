@@ -118,6 +118,12 @@ chmod 600 /etc/bind/rndc.key
 cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
 cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
 
+if [ ! -f /etc/cron.d/logrotate-kura ]; then
+    test -d /etc/cron.d || mkdir -p /etc/cron.d
+    touch /etc/cron.d/logrotate-kura
+    echo "*/5 * * * * root /usr/sbin/logrotate /etc/logrotate.conf" >> /etc/cron.d/logrotate-kura
+fi
+
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 

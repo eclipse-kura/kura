@@ -5,7 +5,7 @@ Priority: low
 Depends: dos2unix, unzip, 
  telnet, bluez-hcidump, 
  bluez, chrony, ntpdate, 
- openjdk-8-jre-headless
+ openjdk-8-jre-headless, cron
 Architecture: all
 Maintainer: support@eurotech.com
 Description: Kura is an inclusive software framework that puts a layer

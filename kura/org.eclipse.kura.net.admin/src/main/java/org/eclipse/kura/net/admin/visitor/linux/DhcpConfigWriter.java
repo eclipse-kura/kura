@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -111,6 +112,8 @@ public class DhcpConfigWriter implements NetworkConfigurationVisitor {
                         } else {
                             logger.info("Not rewriting DHCP config file for {} because it is the same", interfaceName);
                         }
+
+                        Files.deleteIfExists(tmpDhcpConfigFile.toPath());
                     } catch (IOException e) {
                         throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR,
                                 "error while building up new configuration files for dhcp servers", e);

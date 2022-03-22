@@ -522,9 +522,7 @@ fi]]>
 			<zipfileset file="src/main/resources/common/kura-tmpfiles.conf"
 				prefix="${build.output.name}/${install.folder}" />
 
-			<zipfileset file="src/main/resources/common/logrotate.conf"
-				prefix="${build.output.name}/${install.folder}" />
-			<zipfileset file="src/main/resources/common/kura.logrotate"
+			<zipfileset file="src/main/resources/${build.name}/kura.logrotate"
 				prefix="${build.output.name}/${install.folder}" />
 
 			<zipfileset file="src/main/resources/common/sysctl.kura.conf"

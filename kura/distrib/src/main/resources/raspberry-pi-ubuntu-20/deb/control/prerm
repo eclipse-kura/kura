@@ -70,6 +70,7 @@ function preRemove {
     fi
     
     #Roll-back logrotate setup
+    rm -f  /var/log/logrotate-kura.status
     rm -f  /etc/logrotate-kura.conf
     rm -f  /etc/cron.d/logrotate-kura
 

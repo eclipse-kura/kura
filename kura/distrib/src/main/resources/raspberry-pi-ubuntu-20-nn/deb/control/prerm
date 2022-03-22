@@ -67,6 +67,7 @@ function preRemove {
     rm -f  /etc/cron.d/logrotate-kura
 
     rm -f  /var/log/kura*.log
+    rm -f  /var/log/kura*.gz
     rm -rf /tmp/.kura
     rm -rf /tmp/kura
 

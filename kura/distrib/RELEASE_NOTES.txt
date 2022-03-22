@@ -114,6 +114,15 @@ Known Issues :
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * daa1d47e0a - Added container orchestration bundles to dev-env (#3919) (#3922) (github-actions[bot])
+  * dbd8a07f3c - Disabled systemd-hostnamed (#3917) (#3921) (github-actions[bot])
+  * 3d42a14f7e - Removed dhcp confinguration tmp file once consumed (#3918) (#3920) (github-actions[bot])
+  * 8491a9c34e - Changed TensorListAdapter.fromTensorList (#3911) (#3915) (github-actions[bot])
+  * a0c8975574 - Added support for container registry auth (#3908) (#3912) (github-actions[bot])
+  * 162ce8715d - Fixed identity permission table max size (#3909) (#3910) (github-actions[bot])
+  * 12d5a2c5f6 - Force ipv4 in gpsd.socket on Jetson Nano (#3901) (#3905) (github-actions[bot])
+  * ab17ef3143 - Fixed typo. (#3904) (#3906) (github-actions[bot])
+  * def153e72e - Added gcompat dependency (#3900) (#3903) (github-actions[bot])
   * a0c897557 - Added support for container registry auth (#3908) (#3912) (github-actions[bot])
   * 162ce8715 - Fixed identity permission table max size (#3909) (#3910) (github-actions[bot])
   * 12d5a2c5f - Force ipv4 in gpsd.socket on Jetson Nano (#3901) (#3905) (github-actions[bot])

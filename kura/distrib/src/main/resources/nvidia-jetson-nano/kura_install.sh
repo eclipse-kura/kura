@@ -111,8 +111,13 @@ chown bind:bind /etc/bind/rndc.key
 chmod 600 /etc/bind/rndc.key
 
 #set up logrotate - no need to restart as it is a cronjob
-cp ${INSTALL_DIR}/kura/install/logrotate.conf /etc/logrotate.conf
-cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate.d/kura
+cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf
+
+if [ ! -f /etc/cron.d/logrotate-kura ]; then
+    test -d /etc/cron.d || mkdir -p /etc/cron.d
+    touch /etc/cron.d/logrotate-kura
+    echo "*/5 * * * * root /usr/sbin/logrotate --state /var/log/logrotate-kura.status /etc/logrotate-kura.conf" >> /etc/cron.d/logrotate-kura
+fi
 
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf

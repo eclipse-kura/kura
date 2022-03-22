@@ -65,7 +65,7 @@ cp ${INSTALL_DIR}/kura/install/kura.logrotate /etc/logrotate-kura.conf
 if [ ! -f /etc/cron.d/logrotate-kura ]; then
     test -d /etc/cron.d || mkdir -p /etc/cron.d
     touch /etc/cron.d/logrotate-kura
-    echo "*/5 * * * * root /usr/sbin/logrotate /etc/logrotate-kura.conf" >> /etc/cron.d/logrotate-kura
+    echo "*/5 * * * * root /usr/sbin/logrotate --state /var/log/logrotate-kura.status /etc/logrotate-kura.conf" >> /etc/cron.d/logrotate-kura
 fi
 
 #set up systemd-tmpfiles

@@ -69,6 +69,7 @@ function preRemove {
         rm /lib/systemd/system/firewall.service
     fi
     
+    #Roll-back logrotate setup
     rm -f  /etc/cron.d/logrotate-kura
 
     rm -f  /var/log/kura*.log

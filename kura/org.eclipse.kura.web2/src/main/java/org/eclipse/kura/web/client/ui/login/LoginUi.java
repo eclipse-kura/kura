@@ -149,13 +149,16 @@ public class LoginUi extends Composite implements Context {
         super.onAttach();
 
         this.loginForm.addSubmitHandler(e -> {
-            e.cancel();
+            // TO VERIFY: can we move it at the end of the function?
+            // e.cancel();
             this.waitModal.show();
             this.authenticationHandler.authenticate(new Callback<String, String>() {
 
                 @Override
                 public void onSuccess(String result) {
-                    Window.Location.assign(result);
+                    // TO VERIFY: maybe just assign works as well
+                    // replace prevents to save it in history
+                    Window.Location.replace(result);
                 }
 
                 @Override

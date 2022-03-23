@@ -114,6 +114,8 @@ Known Issues :
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 3148a7f8a6 - Merge pull request #3923 from eclipse/backport-3916-to-release-5.1.0 (nicolatimeus)
+  * 63554abde0 - Fix Kura log rotation (#3916) (Mattia Dal Ben)
   * daa1d47e0a - Added container orchestration bundles to dev-env (#3919) (#3922) (github-actions[bot])
   * dbd8a07f3c - Disabled systemd-hostnamed (#3917) (#3921) (github-actions[bot])
   * 3d42a14f7e - Removed dhcp confinguration tmp file once consumed (#3918) (#3920) (github-actions[bot])

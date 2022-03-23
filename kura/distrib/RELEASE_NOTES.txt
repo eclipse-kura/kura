@@ -43,7 +43,8 @@ Breaking Changes:
     latest version. Manual migration is required as the H2db project does not provide an automated upgrade solution. 
   * In order to better comply with Wi-Fi regulations on frequency usage, you must now configure the regulatory domain 
     and radio mode before accessing Wi-Fi hotspots that use regulated channels.
-
+  * Configuring the PPP interface number for a cellular interface is no longer supported, the PPP interface number is now assigned automatically.
+  * The properties that describe the configuration of a cellular interface are now identified by the modem USB port and not by the PPP interface number.
  
 Deprecated APIs:
   * org.eclipse.kura.position.PositionService (partial)

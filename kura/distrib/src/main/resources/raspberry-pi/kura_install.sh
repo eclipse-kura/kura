@@ -1,15 +1,15 @@
 #!/bin/sh
 #
-#  Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+# Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
 #
-#  This program and the accompanying materials are made
-#  available under the terms of the Eclipse Public License 2.0
-#  which is available at https://www.eclipse.org/legal/epl-2.0/
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
 #
-#  SPDX-License-Identifier: EPL-2.0
+# SPDX-License-Identifier: EPL-2.0
 #
-#  Contributors:
-#   Eurotech
+# Contributors:
+#  Eurotech
 #
 
 INSTALL_DIR=/opt/eclipse
@@ -21,6 +21,7 @@ ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
 systemctl enable kura
+chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 # setup snapshot_0 recovery folder
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
@@ -76,6 +77,8 @@ sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
 # Prevent time sync services from starting
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
+systemctl stop systemd-timedated.service
+systemctl disable systemd-timedated.service
 # Prevent time sync with chrony from starting.
 systemctl stop chrony
 systemctl disable chrony

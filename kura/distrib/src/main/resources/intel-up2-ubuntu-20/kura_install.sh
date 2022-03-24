@@ -21,6 +21,7 @@ ln -sf ${INSTALL_DIR}/kura_* ${INSTALL_DIR}/kura
 sed "s|INSTALL_DIR|${INSTALL_DIR}|" ${INSTALL_DIR}/kura/install/kura.service > /lib/systemd/system/kura.service
 systemctl daemon-reload
 systemctl enable kura
+chmod +x ${INSTALL_DIR}/kura/bin/*.sh
 
 # setup snapshot_0 recovery folder
 if [ ! -d ${INSTALL_DIR}/kura/.data ]; then
@@ -81,6 +82,8 @@ systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
+systemctl stop systemd-timedated.service
+systemctl disable systemd-timedated.service
 # Prevent time sync with chrony from starting.
 systemctl stop chrony
 systemctl disable chrony
@@ -133,6 +136,10 @@ systemctl disable dhcpcd
 # disable isc-dhcp-server service - kura is the network manager
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
+
+#disable isc-dhcp-server6.service
+systemctl stop isc-dhcp-server6.service
+systemctl disable isc-dhcp-server6.service
 
 # disable NetworkManager.service - kura is the network manager
 systemctl stop NetworkManager.service

@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,10 @@ public class LinuxNetworkUtil {
 
     private static Map<String, LinuxIfconfig> ifconfigs = new HashMap<>();
     private static final String[] IGNORE_IFACES = { "can", "sit", "mon.wlan" };
+    private static List<String> searchFolders = new ArrayList<>();
+    static {
+        searchFolders.addAll(Arrays.asList("/sbin/", "/usr/sbin/", "/bin/"));
+    }
     private static final ArrayList<String> TOOLS = new ArrayList<>();
     private static final String PPP_IFACE_REGEX = "^ppp\\d+$";
     private static final String MODEM = "MODEM";
@@ -265,7 +270,6 @@ public class LinuxNetworkUtil {
 
     public static boolean toolExists(String tool) {
         boolean ret = false;
-        final String[] searchFolders = new String[] { "/sbin/", "/usr/sbin/", "/bin/" };
 
         if (TOOLS.contains(tool)) {
             ret = true;
@@ -280,6 +284,10 @@ public class LinuxNetworkUtil {
             }
         }
         return ret;
+    }
+
+    public static void addToolSearchFolder(String folder) {
+        searchFolders.add(folder);
     }
 
     /**

@@ -17,6 +17,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
@@ -30,6 +31,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -58,6 +62,7 @@ import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.route.RouteService;
 import org.eclipse.kura.linux.net.util.IScanTool;
 import org.eclipse.kura.linux.net.util.LinkTool;
+import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -968,7 +973,7 @@ public class WifiMonitorServiceImplTest {
 
         CommandExecutorService esMock = mock(CommandExecutorService.class);
 
-        CommandStatus linkStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandStatus linkStatusWlan3 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(outputStream);
         out.write(
@@ -976,13 +981,27 @@ public class WifiMonitorServiceImplTest {
                         .getBytes());
         outputStream.flush();
         outputStream.close();
-        linkStatus.setOutputStream(outputStream);
+        linkStatusWlan3.setOutputStream(outputStream);
         String[] cmd = { "ip", "-o", "link", "show", "dev", "wlan3" };
-        Command linkStatusCommand = new Command(cmd);
-        linkStatusCommand.setTimeout(60);
-        when(esMock.execute(linkStatusCommand)).thenReturn(linkStatus);
+        Command linkStatusCommandWlan3 = new Command(cmd);
+        linkStatusCommandWlan3.setTimeout(60);
+        when(esMock.execute(linkStatusCommandWlan3)).thenReturn(linkStatusWlan3);
 
-        CommandStatus addrStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandStatus linkStatusWlan4 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "4: wlan4: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000\\    link/ether e0:94:67:5b:0d:bf brd ff:ff:ff:ff:ff:ff"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        linkStatusWlan4.setOutputStream(outputStream);
+        cmd = new String[] { "ip", "-o", "link", "show", "dev", "wlan4" };
+        Command linkStatusCommandWlan4 = new Command(cmd);
+        linkStatusCommandWlan3.setTimeout(60);
+        when(esMock.execute(linkStatusCommandWlan4)).thenReturn(linkStatusWlan4);
+
+        CommandStatus addrStatusWlan3 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
         out.write(
@@ -990,22 +1009,36 @@ public class WifiMonitorServiceImplTest {
                         .getBytes());
         outputStream.flush();
         outputStream.close();
-        addrStatus.setOutputStream(outputStream);
+        addrStatusWlan3.setOutputStream(outputStream);
         cmd = new String[] { "ip", "-o", "-4", "addr", "show", "dev", "wlan3" };
-        Command addrStatusCommand = new Command(cmd);
-        addrStatusCommand.setTimeout(60);
-        when(esMock.execute(addrStatusCommand)).thenReturn(addrStatus);
+        Command addrStatusCommandWlan3 = new Command(cmd);
+        addrStatusCommandWlan3.setTimeout(60);
+        when(esMock.execute(addrStatusCommandWlan3)).thenReturn(addrStatusWlan3);
 
-        CommandStatus infoStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandStatus addrStatusWlan4 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "4: wlan4    inet 172.16.2.1/24 brd 172.16.2.255 scope global wlan4\\       valid_lft forever preferred_lft forever"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        addrStatusWlan4.setOutputStream(outputStream);
+        cmd = new String[] { "ip", "-o", "-4", "addr", "show", "dev", "wlan4" };
+        Command addrStatusCommandWlan4 = new Command(cmd);
+        addrStatusCommandWlan4.setTimeout(60);
+        when(esMock.execute(addrStatusCommandWlan4)).thenReturn(addrStatusWlan4);
+
+        CommandStatus infoStatusWlan3 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         cmd = new String[] { "iw", "dev", "wlan3", "info" };
-        Command infoCommand = new Command(cmd);
-        infoCommand.setTimeout(60);
-        when(esMock.execute(infoCommand)).thenReturn(infoStatus);
+        Command infoCommandWlan3 = new Command(cmd);
+        infoCommandWlan3.setTimeout(60);
+        when(esMock.execute(infoCommandWlan3)).thenReturn(infoStatusWlan3);
 
-        CommandStatus iwconfigStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        CommandStatus iwconfigStatusWlan3 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         cmd = new String[] { "iwconfig", "wlan3" };
-        Command iwconfigCommand = new Command(cmd);
-        iwconfigCommand.setTimeout(60);
+        Command iwconfigCommandWlan3 = new Command(cmd);
+        iwconfigCommandWlan3.setTimeout(60);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
         out.write(
@@ -1013,8 +1046,54 @@ public class WifiMonitorServiceImplTest {
                         .getBytes());
         outputStream.flush();
         outputStream.close();
-        iwconfigStatus.setOutputStream(outputStream);
-        when(esMock.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+        iwconfigStatusWlan3.setOutputStream(outputStream);
+        when(esMock.execute(iwconfigCommandWlan3)).thenReturn(iwconfigStatusWlan3);
+
+        CommandStatus infoStatusWlan4 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "Interface wlp4s0\n        ifindex 4\n        wdev 0x1\n        addr e0:94:67:5b:0d:bf\n        ssid wifi-intel-up2\n        type AP\n        wiphy 0\n        channel 8 (2447 MHz), width: 20 MHz, center1: 2447 MHz\n        txpower 22.00 dBm\n        multicast TXQ:\n                qsz-byt qsz-pkt flows   drops   marks   overlmt hashcol tx-bytes        tx-packets\n                0       0       133     0       0       0       0       22492           133\n"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        infoStatusWlan4.setOutputStream(outputStream);
+        cmd = new String[] { "iw", "dev", "wlan4", "info" };
+        Command infoCommandWlan4 = new Command(cmd);
+        infoCommandWlan4.setTimeout(60);
+        when(esMock.execute(infoCommandWlan4)).thenReturn(infoStatusWlan4);
+
+        Command infoCommandWlan4InShell = new Command(cmd);
+        infoCommandWlan4InShell.setTimeout(60);
+        infoCommandWlan4InShell.setExecuteInAShell(true);
+        when(esMock.execute(infoCommandWlan4InShell)).thenReturn(infoStatusWlan4);
+
+        CommandStatus iwconfigStatusWlan4 = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        cmd = new String[] { "iwconfig", "wlan4" };
+        Command iwconfigCommandWlan4 = new Command(cmd);
+        iwconfigCommandWlan4.setTimeout(60);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "wlan4    IEEE 802.11  Mode:Master  Tx-Power=22 dBm\\n          Retry short limit:7   RTS thr:off   Fragment thr:off\\n          Power Management:on\n"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        iwconfigStatusWlan4.setOutputStream(outputStream);
+        when(esMock.execute(iwconfigCommandWlan4)).thenReturn(iwconfigStatusWlan4);
+
+        // hostapd is running
+        when(esMock.isRunning(any(String[].class))).thenReturn(true);
+        boolean iwExists = LinuxNetworkUtil.toolExists("iw");
+        // iw exists
+        if (!iwExists) {
+            String tempDir = System.getProperty("java.io.tmpdir");
+            Path iwMockPath = Paths.get(tempDir, "iw");
+            if (!Files.exists(iwMockPath)) {
+                iwMockPath = Files.createFile(iwMockPath);
+            }
+            LinuxNetworkUtil.addToolSearchFolder(tempDir);
+        }
 
         CommandStatus ethtoolStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         cmd = new String[] { "ethtool", "-i", "wlan3" };
@@ -1032,16 +1111,25 @@ public class WifiMonitorServiceImplTest {
 
         svc.setExecutorService(esMock);
 
-        String interfaceName = "wlan3";
+        String interfaceNameInfra = "wlan3";
 
-        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceName)
+        WifiInterfaceConfigImpl wifiInterfaceConfig = new WifiBuilder(interfaceNameInfra)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true)
                 .addWifiConfig("testDdriver", WifiMode.INFRA) // don't add this - calls a native binary
                 .build();
 
+        String interfaceNameMaster = "wlan4";
+
+        WifiInterfaceConfigImpl wifiInterfaceConfigMaster = new WifiBuilder(interfaceNameMaster)
+                .addWifiInterfaceAddressConfig(WifiMode.MASTER)
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).addDhcpConfig(true)
+                .addWifiConfig("testDdriver", WifiMode.MASTER) // don't add this - calls a native binary
+                .build();
+
         NetworkConfiguration nc = new NetworkConfiguration();
         nc.addNetInterfaceConfig(wifiInterfaceConfig);
+        nc.addNetInterfaceConfig(wifiInterfaceConfigMaster);
         TestUtil.setFieldValue(svc, "newNetConfiguration", nc);
 
         NetworkService nsMock = mock(NetworkService.class);
@@ -1049,7 +1137,8 @@ public class WifiMonitorServiceImplTest {
 
         List<String> list = new ArrayList<>();
         list.add("eth4");
-        list.add(interfaceName);
+        list.add(interfaceNameInfra);
+        list.add(interfaceNameMaster);
         when(nsMock.getAllNetworkInterfaceNames()).thenReturn(list);
 
         NetworkAdminService naMock = mock(NetworkAdminService.class);
@@ -1061,8 +1150,10 @@ public class WifiMonitorServiceImplTest {
         TestUtil.invokePrivate(svc, "monitor");
 
         verify(nsMock, times(1)).getAllNetworkInterfaceNames();
-        verify(naMock, times(1)).disableInterface(interfaceName);
-        verify(eaMock, times(1)).postEvent(anyObject());
+        verify(naMock, times(1)).disableInterface(interfaceNameInfra);
+        verify(eaMock, times(2)).postEvent(anyObject());
+        verify(naMock, times(1)).manageDhcpServer(interfaceNameMaster, true);
+
     }
 
     @Test

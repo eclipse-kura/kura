@@ -32,6 +32,7 @@ import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
 import org.eclipse.kura.web.client.ui.device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.firewall.FirewallPanelUi;
+import org.eclipse.kura.web.client.ui.login.PasswordChangeModal;
 import org.eclipse.kura.web.client.ui.network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.security.SecurityPanelUi;
@@ -47,6 +48,8 @@ import org.eclipse.kura.web.client.util.request.Request;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
@@ -742,7 +745,59 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void changePassword() {
-        // TODO
+        changePassword(ok -> logout(), e -> {
+            final String message;
+
+            if ((e instanceof GwtKuraException)
+                    && ((GwtKuraException) e).getCode() == GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD) {
+                message = MSGS.loginPasswordChangeSame();
+            } else {
+                message = MSGS.loginInternalError();
+            }
+            changePassword();
+        });
+
+    }
+
+    private void getGwtConsoleUserOptions(final Consumer<GwtConsoleUserOptions> onSuccess,
+            final Consumer<Throwable> onFailure) {
+        gwtXSRFService.generateSecurityToken(asyncCallback(
+                token -> gwtSessionService.getUserOptions(token, asyncCallback(onSuccess, onFailure)), onFailure));
+    }
+
+    private void setNewPassword(final String newPassword, final Consumer<Void> onSuccess,
+            final Consumer<Throwable> onFailure) {
+        gwtXSRFService.generateSecurityToken(asyncCallback(
+                token -> gwtSessionService.updatePassword(newPassword, asyncCallback(onSuccess, onFailure)),
+                onFailure));
+
+    }
+
+    private void changePassword(final Consumer<Void> onSuccess, final Consumer<Throwable> onFailure) {
+        final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
+        getGwtConsoleUserOptions(
+                options -> passwordChangeModal.pickPassword(options, p -> setNewPassword(p, onSuccess, onFailure)),
+                onFailure);
+    }
+
+    private <T> AsyncCallback<T> asyncCallback(final Consumer<T> onSuccess, final Consumer<Throwable> onFailure) {
+
+        final Callback<Void, String> longRunningOpCallback = startLongRunningOperation();
+
+        return new AsyncCallback<T>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                longRunningOpCallback.onFailure(null);
+                onFailure.accept(caught);
+            }
+
+            @Override
+            public void onSuccess(T result) {
+                longRunningOpCallback.onSuccess(null);
+                onSuccess.accept(result);
+            }
+        };
     }
 
     private void initServicesTree() {

@@ -486,6 +486,26 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                     enableInterface(wifiInterfaceConfig);
                 }
             }
+
+            // manage dhcp server in case only dhcp configuration is changed and interface and its link are up
+            if (up && linkUp) {
+
+                boolean enableDhcpServer = false;
+
+                WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((AbstractNetInterface<?>) wifiInterfaceConfig)
+                        .getNetInterfaceAddressConfig();
+
+                if (getWifiInterfaceMode(wifiInterfaceConfig) == WifiMode.MASTER) {
+                    for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
+                        if (netConfig instanceof DhcpServerConfig4) {
+                            enableDhcpServer = ((DhcpServerConfig4) netConfig).isEnabled();
+                            break;
+                        }
+                    }
+                    this.netAdminService.manageDhcpServer(interfaceName, enableDhcpServer);
+                }
+            }
+
         }
     }
 

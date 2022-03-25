@@ -135,8 +135,8 @@
 								    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 									<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameSmall" />
 									<b:Container addStyleNames="dropdown-settings-content">
-										<b.html:Span text="Change password" ui:field="h_todecide1" />
-										<b.html:Span text="Logout" ui:field="h_todecide2" />
+										<g:Label text="Change password" ui:field="headerChangePassword" />
+										<g:Label text="Logout" ui:field="headerLogout" />
 									</b:Container>
 								</b:Container>
 								
@@ -246,8 +246,8 @@
 					<b.html:Span text="Logged in as" />
 					<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameLarge" />
 					<b:Container addStyleNames="dropdown-settings-content">
-						<b.html:Span text="Change password" ui:field="todecide1" />
-						<b.html:Span text="Logout" ui:field="todecide2" />
+						<g:Label text="Change password" ui:field="changePassword" />
+						<g:Label text="Logout" ui:field="logout" />
 					</b:Container>
 				</b:Container>
 				

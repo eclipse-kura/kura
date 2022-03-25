@@ -181,9 +181,13 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @UiField
     Panel sidenavOverlay;
     @UiField
-    Button logoutButton;
+    Label logout;
     @UiField
-    Button headerLogoutButton;
+    Label headerLogout;
+    @UiField
+    Label changePassword;
+    @UiField
+    Label headerChangePassword;
     @UiField
     NavPills sidenavPills;
     @UiField
@@ -306,7 +310,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             }
         });
 
-        initLogoutButtons();
+        initDropdownMenu();
         initServicesTree();
         initExtensions();
     }
@@ -721,16 +725,24 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     }
 
-    private void initLogoutButtons() {
+    private void initDropdownMenu() {
         final ClickHandler logoutHandler = e -> confirmIfUiDirty(() -> logout());
+        final ClickHandler changePasswordHandler = e -> confirmIfUiDirty(() -> changePassword());
 
-        this.logoutButton.addClickHandler(logoutHandler);
-        this.headerLogoutButton.addClickHandler(logoutHandler);
+        this.logout.addClickHandler(logoutHandler);
+        this.headerLogout.addClickHandler(logoutHandler);
+
+        this.changePassword.addClickHandler(changePasswordHandler);
+        this.headerChangePassword.addClickHandler(changePasswordHandler);
     }
 
     private void logout() {
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
                 c.callback(token -> this.gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
+    }
+
+    private void changePassword() {
+        // TODO
     }
 
     private void initServicesTree() {

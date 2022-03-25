@@ -18,48 +18,62 @@ For this bundle to function appropriately, the gateway must have docker installe
 
 ## Starting the Service
 
-To use this service select the **Docker-API** option located in the **Services** area. The docker-api service provides the following parameters: **Enabled**--activates the service when set to true, and **Docker Host URL**--provides a string that tells the service where to find the docker engine (best left to the default value). Optionally a user can provide a Repository/Registry URL and respective credentials so that containers will be pulled from an alternative source such as AWS-ECR.
+To use this service select the **ContainerOrchestrationService** option located in the **Services** area. The ContainerOrchestrationService provides the following parameters: 
+- **Enabled**--activates the service when set to true
+- **Docker Host URL**--provides a string that tells the service where to find the docker engine (best left to the default value).
 
 ![Container-API]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/enable_api.png)
 
 ## Creating your first container.
 
-To create a container, select the + icon (Create a new component) under **services**. A pop up dialog box will appear. In the field **Factory** select **org.eclipse.kura.container.provider.ConfigurableGenericDockerService** from the drop-down. Then, using the **Name** field, enter the name of the container you wish to create and Finally press submit to create the component.
+To create a container, select the + icon (Create a new component) under **services**. A popup dialogue box will appear. In the field **Factory** select **org.eclipse.kura.container.provider.ContainerInstance** from the drop-down. Then, using the **Name** field, enter the name of the container you wish to create and Finally press submit to create the component.
 
 ![Container-API]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/create_container.png)
 
-After pressing submit, a new component will be added under the **services** tab, with the name that was selected in the dialog. Select this component to finish configuring the container.
+After pressing submit, a new component will be added under the **services** tab, with the name that was selected in the dialogue. Select this component to finish configuring the container.
 
-## Configuring the container
+##Configuring the container
 
 To begin configuring the container, look under **Services** and select the item which has the name set in the previous step.
 
 Containers may be configured using the following fields:
 
-- **Enabled** - When true, api will create the described container. When false api will not create the container, or will destroy the container if already running.
+- **Enabled** - When true, API will create the described container. When false the API will not create the container or will destroy the container if already running.
   
-- **Image Name** - Describes the docker image that will be used to create the container. Remember to ensure that the selected image supports the architecture of the host machine, or else the container will not be able to start.
+- **Image Name** - Describes the image that will be used to create the container. Remember to ensure that the selected image supports the architecture of the host machine, or else the container will not be able to start.
   
 - **Image Tag** - Describes the version of the docker image that will be used to create the container.
+
+- **Authentication Registry URL** - URL for an alternative registry to pull images from. (If the field is left blank, credentials will be applied to Docker-Hub). Please see the [Authenticated Containers ](#authenticated-containers) document for more information about connecting to different popular repositories.
+
+- **Authentication Username** - Describes the username to access the Docker repository entered above.
+
+- **Password** - Describes the password to access the alternative Docker repository.
+
+- **Image Download Retries** - Describes the number of retries the framework will attempt to pull the image before giving up.
+
+- **Image Download Retry Interval** - Describes the amount of time the framework will wait before attempting to pull the image again.
+
+- **Image Download Timeout** - Describes the amount of time the framework will let the image download before timeout.
   
-- **Internal Ports** - This field accepts a comma separated list of ports that will be internally exposed on the spun up docker container.
+- **Internal Ports** - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up docker container.
   
-- **External Ports** - This field accepts a comma separated list of ports that will be externally exposed on the host machine.
+- **External Ports** - This field accepts a comma-separated list of ports that will be externally exposed on the host machine.
   
 - **Privileged Mode** - This flag if enabled will give the container root capabilities to all devices on the host system. Please be aware that setting this flag can be dangerous, and must only be used in exceptional situations.
   
-- **Environment Variables (optional)** - This field accepts a comma separated list of environment variables, which will be set inside the container when spun up.
+- **Environment Variables (optional)** - This field accepts a comma-separated list of environment variables, which will be set inside the container when spun up.
   
-- **Volume Mount (optional)** - This field accepts a comma separated list of system-to-container file mounts. This allows for the container to access files on the host machine.
+- **Volume Mount (optional)** - This field accepts a comma-separated list of system-to-container file mounts. This allows for the container to access files on the host machine.
   
-- **Peripheral Device (optional)** - This field accepts a comma separated list of device paths. This parameter allows for devices to be passed through from the host to the container.
+- **Peripheral Device (optional)** - This field accepts a comma-separated list of device paths. This parameter allows for devices to be passed through from the host to the container.
 
-- **Logger Type** - This field provides a dropdown selection of supported container logging drivers.
-  
-- **Logger Parameters (optional)** - This field accepts a comma separated list of logging parameters. More information can be found in the [Docker logger documentation](https://docs.docker.com/config/containers/logging/configure/#supported-logging-drivers).
-  
+- **Logger Type** - This field provides a drop-down selection of supported container logging drivers.
 
-After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. Docker will then pull the respective image locally, or through docker hub, spin up and start the container. If the gateway is reset (power cycled), and the container and Docker-service is set to **enabled**, Kura will automatically start the container again upon startup. 
+- **Logger Parameters (optional)** - This field accepts a comma-separated list of logging parameters. More information can be found in the Docker logger documentation.
+
+After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. Docker will then pull the respective image, spin up and start the container. If the gateway is reset (power cycled), and the container and Docker-service are set to **enabled**, ESF will automatically start the container again upon startup. 
+
 ![Supported-Container-Configuration]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/container_configuration.png)
 
 ## Stopping the container
@@ -77,85 +91,84 @@ The Container Orchestration service also provides the user with an intuitive con
 
 ***
 
+# Authenticated Containers
+The Container Orchestrator provider allows the user to pull images from private and password-protected registries. The following document will provide examples of how to connect to some popular registries.
+
+
+{% include alerts.html 
+message="
+These guides make the following two assumptions.
+
+1) That you have already configured the Container Orchestrator and have a container instance already created. Please see the [usage](#how-to-use-the-container-orchestration-provider) doc, to learn the basics of the orchestrator.
+
+2) That the image you are trying to pull supports the architecture of the gateway.
+" %}
+
+### Private Docker-Hub Registries
+
+#### Preparation:
+ - have a Docker Hub account (its credentials), and a private image ready to pull. 
+
+#### Procedure:
+
+1) Populate the image name field. The username containing the private image must be placed before the image name separated by a forward slash. This is demonstrated below:
+- **Image Name: ** ```<Docker-Hub username>/<image name>``` for exmaple```eurotech/esf```.
+
+2) Populate the credential fields: 
+- **Authentication Registry URL:** This field should be left blank.
+- **Authentication Username:** Your Docker Hub username.
+- **Password:** Your Docker Hub password.
+![Authenticated-Docker-Hub]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/authenticated-docker-hub.png)
+
+### Amazon Web Services - Elastic Container Registries (AWS-ECR)
+#### Preparation:
+- Have access to an Amazon ECR instance.
+- Have the [AWS-CLI](https://aws.amazon.com/cli/) tool installed and appropriately configured on your computer. 
+- Have access to your AWS ECR web console.
+
+#### Procedure:
+
+1) Sign in to your amazon web console, navigate to ECR and identify which container you will like to pull onto the gateway. Copy the URI of the container. This URI will reveal the information required for the following steps. Here is how to decode the URI ```<identifier>.dkr.ecr.<ecr-region>.amazonaws.com/<directory>/<image name>:<image tag>```.
+
+2) Generating an AWS-ECR access password. Open a terminal window on the machine with aws-cli installed and enter the following command ```aws ecr get-login-password --region <ecr-region>```. Your ECR region can be found by inspecting the container URI string copied in the previous step. This command will return a long string which will be used as the repo password in the gateway.
+
+3) Populating information on the gateway. 
+ - **Image Name: ** enter the full URI without the tag.```<identifier>.dkr.ecr.<ecr-region>.amazonaws.com/<directory>/<image name>```
+- **Image Tag:** enter only the image tag found at the end of the URI  ```<image tag>```
+- **Authentication Registry URL:** Paste only the part of the URI before the image name   ```<identifier>.dkr.ecr.<ecr-region>.amazonaws.com/<directory>/```
+- **Authentication Username:** will be ```AWS```
+- **Password:** will be the string created in step two.
+
+A fully configured container set to pull AWS will look like the following.
+![Authenticated-AWS-ECR]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/authenticated-aws-ecr.png)
+
+***
+
 # How to leverage the Container Orchestration Provider API?
 
-The Kura Container Orchestration Provider bundle exposes two main classes: 1) DockerService, 2) ContainerDescriptor.
+The Container Orchestration Provider exposes an API that can be leveraged by other framework plugins. The following is an overview of how these APIs work together.
 
 ![API-Overview]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/api-overview.png)
 
-## DockerService Interface
-This interface is used to directly communicate with the running docker instance. It exposes methods for listing, creating, and stopping containers, and utilizes an instantiated ContainerDescriptor object as a parameter.
+##ContainerOrchestrationService
+The ContainerOrchestrationService is used to directly communicate with the running container engine. It exposes methods for listing, creating, and stopping containers. This class utilizes an instantiated ContainerConfiguration object as a parameter for container creation.
 
-## ContainerDescriptor
-The ContainerDescriptor class, allows you to define a container to create. Using the embedded builder class, one can define many container related parameters such as name, image, ports and volume mounts.
+##ContainerConfiguration
+The ContainerConfiguration class, allows you to define a container to create. Using the embedded builder class, one can define many container-related parameters such as name, image, ports and volume mounts.
 
-# Inventory-V1 API
-Using the API exposed by Inventory-V1, one can start and stop docker containers via external applications such as Everywhere Cloud.
+##ContainerInstanceDescriptor
+The ContainerInstanceDescriptor class is used to describe a container that has already been created. This class contains runtime information such as the ID of the container.
 
-## List All Containers
+##ContainerState
+The ContainerState is a class that exposes an enum of container states tracked by the framework.
 
-This operation lists all the containers installed in the gateway.
+##PasswordRegistryCredentials
+The PasswordRegistryCredentials class stores password credentials when provisioning a container to pull from an alternative password-protected registry.
 
-* Request Topic:
-  * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
-* Request Payload:
-  * Nothing application-specific beyond the request ID and requester client ID
-* Response Payload:
-  * Installed containers serialized in JSON format
+##PasswordRegistryCredentials
+The PasswordRegistryCredentials class stores password credentials when provisioning a container to pull from an alternative password-protected registry.
 
-The following JSON message is an example of what this request outputs:
-    
-    {
-      "containers":
-      [
-        {
-          "name":"docker_container_1",
-          "version":"nginx:latest",
-          "type":"DOCKER"
-        }
-      ]
-    }
-
-The container JSON message is comprised of the following elements:
-    - Name: The name of the docker container.
-    - Version: describes both the container's respective image and tag separated by a colon.
-    - Type: denotes the type of inventory payload
-
-## Start Container
-
-This operation allows starting a container installed on the gateway.
-* Request Topic
-  * $EDC/account_name/client_id/INVENTORY-V1/EXEC/containers/_start
-* Request Payload
-  * A JSON object that identifies the target container must be specified in payload body. This payload will be described in the following section
-* Response Payload
-  * Nothing application specific
-
-## Stop Container
-
-* Request Topic
-  * $EDC/account_name/client_id/INVENTORY-V1/EXEC/containers/_stop
-* Request Payload
-  * A JSON object that identifies the target container must be specified in payload body. This payload will be described in the following section.
-* Response Payload
-  *Nothing application specific
-
-## JSON identifier/payload for start and stop requests
-
-The requests for starting and stopping a container require the application to include a JSON object in request payload for selecting the target container. Docker enforces unique container names on a gateway, and thus they can reliably be used as an identifier.
-
-Example 1:
-    
-    {
-    "name":"docker_container_1",
-    "version":"nginx:latest",
-    "type":"DOCKER"
-    }
-
-
-Example 2:
-    
-    {
-    "name":"docker_container_1",
-    }
-
+{% include alerts.html 
+message="
+The Container Orchestration Provider exports an MQTT-Namespace API. This API can be used to manage containers via MQTT requests from external applications such as Everywhere Cloud. Please visit the  [Remote Gateway Inventory via MQTT](../ref/mqtt-namespace.html) documentation for more information.
+" %}

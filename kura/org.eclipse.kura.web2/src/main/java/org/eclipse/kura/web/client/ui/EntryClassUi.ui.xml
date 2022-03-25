@@ -131,7 +131,6 @@
 									addStyleNames="glyphicon glyphicon-menu-hamburger sidebar-button"></b:Button>
 								<b:Panel addStyleNames="{style.image} headerLogo" />
 								
-								<!-- WORK IN PROGRESS -->
 								<b:Container addStyleNames="dropdown-settings header-dropdown-settings">
 								    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 									<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameSmall" />
@@ -140,6 +139,7 @@
 										<b.html:Span text="Logout" ui:field="h_todecide2" />
 									</b:Container>
 								</b:Container>
+								
 							</b:PanelHeader>
 						</b:Panel>
 					</b:Column>
@@ -240,7 +240,7 @@
 						</b:Column>
 					</b:Row>
 				</b:Column>
-				<!-- WORK IN PROGRESS -->
+				
 				<b:Container addStyleNames="dropdown-settings">
 				    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 					<b.html:Span text="Logged in as" />
@@ -250,6 +250,7 @@
 						<b.html:Span text="Logout" ui:field="todecide2" />
 					</b:Container>
 				</b:Container>
+				
 				<b:Row addStyleNames='main-content'>
 					<b:Panel>
 						<b:PanelBody>

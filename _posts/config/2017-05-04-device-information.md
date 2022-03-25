@@ -28,7 +28,7 @@ The **Threads** tab shows a list of the threads that are currently running in th
 ![]({{ site.baseurl }}/assets/images/config/DeviceThreads.png)
 
 ## System Packages
-The **System Packages** tab shows the list of all the Linux packages installed on the OS. The package is detailed with the name, version and type (DEB/RPM).
+The **System Packages** tab shows the list of all the Linux packages installed on the OS. The package is detailed with the name, version and type (DEB/RPM/APK).
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceSystemPackages.png)
 

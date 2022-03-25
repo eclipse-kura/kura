@@ -14,6 +14,11 @@ The **Profile** tab shows several information about the gateway, organized under
 ## Bundles
 This tab lists all the bundles installed on ESF, with details about the name, version, id, state and signature.
 The signature value will be **true** if the corresponding bundle is digitally signed, **false** otherwise.
+The buttons in the upper part of the tab allows the user to manage the listed bundles:
+
+ - **Start Bundle**: starts a bundle that is in **Resolved** or **Installed** state;
+ - **Stop Bundle**: stops a bundle that is in **Active** state;
+ - **Refresh**: reloads the bundles states list.
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceBundles.png)
 

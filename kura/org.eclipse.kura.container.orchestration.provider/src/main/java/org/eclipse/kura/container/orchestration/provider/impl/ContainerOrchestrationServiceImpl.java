@@ -32,6 +32,8 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.AuthConfig;
@@ -733,4 +736,36 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
     }
+
+    @Override
+    public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException {
+    	pullImage(imageConfig.getImageName(), imageConfig.getImageTag(), imageConfig.getimageDownloadTimeoutSeconds(), imageConfig.getRegistryCredentials());
+    }
+    
+	@Override
+	public List<ImageInstanceDescriptor> listImageInstanceDescriptor() {
+        if (!testConnection()) {
+            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+        }
+
+        List<Image> images = this.dockerClient.listImagesCmd().withShowAll(true).exec();
+
+        List<ImageInstanceDescriptor> result = new ArrayList<>();
+        images.forEach(image -> {
+        	InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
+        	result.add(ImageInstanceDescriptor.builder()
+                .setImageName(getImageName(image)).setImageTag(getImageTag(image)).setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch()).setimageSize(iir.getSize()).setImageLabels(image.getLabels()).build());
+        });
+
+        return result;
+	}
+	
+    private String getImageName(Image image) {
+        return image.getRepoTags()[0].split(":")[0];
+    }
+    
+    private String getImageTag(Image image) {
+        return image.getRepoTags()[0].split(":")[0];
+    }
+
 }

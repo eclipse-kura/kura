@@ -13,7 +13,13 @@
 package org.eclipse.kura.linux.net.util;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
@@ -70,6 +76,27 @@ public class LinuxNetworkUtilTest {
         thenNetworkInterfaceLinkIsDown();
     }
 
+    @Test
+    public void addToolsSearchFolder() {
+        givenLinuxNetworkUtil();
+        givenIwToolInFolder("tool", System.getProperty("java.io.tmpdir"));
+
+        whenNewToolsSearchFolderIs(System.getProperty("java.io.tmpdir"));
+
+        thenToolsIsFound("tool");
+    }
+
+    private void givenIwToolInFolder(String tool, String folder) {
+        Path toolPath = Paths.get(folder, tool);
+        try {
+            if (Files.notExists(toolPath)) {
+                Files.createFile(Paths.get(folder, tool));
+            }
+        } catch (IOException e) {
+            fail();
+        }
+    }
+
     private void givenLinuxNetworkUtil() {
         CommandStatus status = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
         this.commandExecutorServiceStub = new CommandExecutorServiceStub(status);
@@ -89,6 +116,10 @@ public class LinuxNetworkUtilTest {
     private void whenDedicatedInterfaceName(String dedicatedInterfaceName) {
         this.dedicatedInterfaceName = dedicatedInterfaceName;
 
+    }
+
+    private void whenNewToolsSearchFolderIs(String folder) {
+        LinuxNetworkUtil.addToolSearchFolder(folder);
     }
 
     private void givenLinkStatus(String linkStatus) {
@@ -134,6 +165,10 @@ public class LinuxNetworkUtilTest {
         } catch (KuraException e) {
             fail();
         }
+    }
+
+    private void thenToolsIsFound(String tool) {
+        assertTrue(LinuxNetworkUtil.toolExists(tool));
     }
 
 }

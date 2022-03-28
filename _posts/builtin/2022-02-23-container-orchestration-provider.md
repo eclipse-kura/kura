@@ -5,7 +5,7 @@ categories: [builtin]
 ---
 
 # What is the Container Orchestration Provider?
-The Container Orchestration Provider allows Kura to manage Docker. With this tool you can arbitrarily pull and deploy containerized software packages and run them on your gateway. This Provider allows the user to create, configure, start, and stop containers all from the browser. The bundle will also restart containers, if the gateway is restarted.
+The Container Orchestration Provider allows Kura to manage containers. With this tool you can arbitrarily pull and deploy containerized software packages and run them on your gateway. This Provider allows the user to create, configure, start, and stop containers all from the browser. The bundle will also restart containers, if the gateway is restarted.
 
 The Container Orchestration service is composed of two bundles, one that exposes APIs for container management and one that implements those APIs. This API is exposed so that you can leverage it to implement containerization in your own Kura plugins.
 
@@ -14,13 +14,13 @@ The Container Orchestration service is composed of two bundles, one that exposes
 # How to use the Container Orchestration Provider
 
 ## Before Starting
-For this bundle to function appropriately, the gateway must have docker installed and the docker daemon must be started and enabled.
+For this bundle to function appropriately, the gateway must a supported container engine installed and running. Currently the only officially supported engine is Docker.
 
 ## Starting the Service
 
 To use this service select the **ContainerOrchestrationService** option located in the **Services** area. The ContainerOrchestrationService provides the following parameters: 
 - **Enabled**--activates the service when set to true
-- **Docker Host URL**--provides a string that tells the service where to find the docker engine (best left to the default value).
+- **Container Engine Host URL**--provides a string that tells the service where to find the container engine (best left to the default value).
 
 ![Container-API]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/enable_api.png)
 
@@ -42,13 +42,13 @@ Containers may be configured using the following fields:
   
 - **Image Name** - Describes the image that will be used to create the container. Remember to ensure that the selected image supports the architecture of the host machine, or else the container will not be able to start.
   
-- **Image Tag** - Describes the version of the docker image that will be used to create the container.
+- **Image Tag** - Describes the version of the image that will be used to create the container.
 
 - **Authentication Registry URL** - URL for an alternative registry to pull images from. (If the field is left blank, credentials will be applied to Docker-Hub). Please see the [Authenticated Containers ](#authenticated-containers) document for more information about connecting to different popular repositories.
 
-- **Authentication Username** - Describes the username to access the Docker repository entered above.
+- **Authentication Username** - Describes the username to access the repository entered above.
 
-- **Password** - Describes the password to access the alternative Docker repository.
+- **Password** - Describes the password to access the alternative repository.
 
 - **Image Download Retries** - Describes the number of retries the framework will attempt to pull the image before giving up.
 
@@ -56,7 +56,7 @@ Containers may be configured using the following fields:
 
 - **Image Download Timeout** - Describes the amount of time the framework will let the image download before timeout.
   
-- **Internal Ports** - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up docker container.
+- **Internal Ports** - This field accepts a comma-separated list of ports that will be internally exposed on the spun-up container.
   
 - **External Ports** - This field accepts a comma-separated list of ports that will be externally exposed on the host machine.
   
@@ -70,9 +70,9 @@ Containers may be configured using the following fields:
 
 - **Logger Type** - This field provides a drop-down selection of supported container logging drivers.
 
-- **Logger Parameters (optional)** - This field accepts a comma-separated list of logging parameters. More information can be found in the Docker logger documentation.
+- **Logger Parameters (optional)** - This field accepts a comma-separated list of logging parameters.
 
-After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. Docker will then pull the respective image, spin up and start the container. If the gateway is reset (power cycled), and the container and Docker-service are set to **enabled**, ESF will automatically start the container again upon startup. 
+After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway is reset (power cycled), and the container and Container Orchestration Service are set to **enabled**, The framework will automatically start the container again upon startup. 
 
 ![Supported-Container-Configuration]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/container_configuration.png)
 
@@ -85,7 +85,7 @@ To stop the container without deleting the component, set the **Enabled** field 
 
 ## Container Management Dashboard
 
-The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with Kura and those created manually through the command line interface. To utilize this dashboard the **org.eclipse.container.orchestration.provider** (Docker-API) must be enabled, and the dashboard can be opened by navigating to **Device > Docker Containers**.
+The Container Orchestration service also provides the user with an intuitive container dashboard. This dashboard shows all containers running on a gateway, including containers created with Kura and those created manually through the command line interface. To utilize this dashboard the **org.eclipse.container.orchestration.provider** (Container Orchestration Service) must be enabled, and the dashboard can be opened by navigating to **Device > Docker Containers**.
 
 ![Stop-Container]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/container_inventory.png)
 
@@ -112,7 +112,7 @@ These guides make the following two assumptions.
 #### Procedure:
 
 1) Populate the image name field. The username containing the private image must be placed before the image name separated by a forward slash. This is demonstrated below:
-- **Image Name: ** ```<Docker-Hub username>/<image name>``` for exmaple```eurotech/esf```.
+- **Image Name: ** ```<Docker-Hub username>/<image name>``` for exmaple```eclipse/kura```.
 
 2) Populate the credential fields: 
 - **Authentication Registry URL:** This field should be left blank.

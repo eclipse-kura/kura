@@ -944,7 +944,7 @@ public class WifiMonitorServiceImplTest {
 
         int timeout = 100;
 
-        boolean result = (boolean) TestUtil.invokePrivate(svc, "isAccessPointReachable", interfaceName, timeout);
+        TestUtil.invokePrivate(svc, "isAccessPointReachable", interfaceName, timeout);
 
         // will likely be false, but let's not presume it - concrete implementation is called
         // we should be satisfied that no exception was thrown

@@ -58,6 +58,10 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
     private boolean isRequestRunning = false;
 
+    /**
+     * Container View Related
+     */
+    
     @UiField
     Button containersRefresh;
     @UiField
@@ -69,6 +73,18 @@ public class DockerContainersTabUi extends Composite implements Tab {
     CellTable<GwtGroupedNVPair> bundlesGrid = new CellTable<>();
     private final ListDataProvider<GwtGroupedNVPair> bundlesDataProvider = new ListDataProvider<>();
     private final SingleSelectionModel<GwtGroupedNVPair> selectionModel = new SingleSelectionModel<>();
+    
+    /**
+     * Images View Related
+     */
+    
+    @UiField
+    Button imagesDelete;
+
+    @UiField
+    CellTable<GwtGroupedNVPair> imagesGrid = new CellTable<>();
+    private final ListDataProvider<GwtGroupedNVPair> imagesDataProvider = new ListDataProvider<>();
+    private final SingleSelectionModel<GwtGroupedNVPair> imagesSelectionModel = new SingleSelectionModel<>();
 
     private final GwtDeviceServiceAsync deviceService = GWT.create(GwtDeviceService.class);
     private final GwtSecurityTokenServiceAsync securityTokenService = GWT.create(GwtSecurityTokenService.class);
@@ -76,6 +92,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
     public DockerContainersTabUi() {
         initWidget(uiBinder.createAndBindUi(this));
         loadContainersTable(this.bundlesGrid, this.bundlesDataProvider);
+        loadImagesTable(this.imagesGrid, this.imagesDataProvider);
 
         this.containersRefresh.setText(MSGS.refresh());
         this.containersStart.setText(MSGS.deviceTabContainerStart());
@@ -90,12 +107,23 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
         updateButtons();
 
+        this.imagesDelete.setText("Delete Image"); //TODO: Fix this text
+        
+        this.imagesSelectionModel.clear();
+        this.imagesGrid.setSelectionModel(this.imagesSelectionModel);
+        this.imagesSelectionModel.addSelectionChangeHandler(event -> updateImageButtons());
+        this.imagesDelete.addClickHandler(event -> deleteSelectedImage());
+
+        updateImageButtons();
+
         EventService.Handler onBundleUpdatedHandler = eventInfo -> {
             if (DockerContainersTabUi.this.isVisible() && DockerContainersTabUi.this.isAttached()) {
                 refresh();
+                updateImageButtons();
             }
         };
 
+        //TODO: See if this needs to be updated
         EventService.subscribe(ForwardedEventTopic.DOCKER_RUNNING, onBundleUpdatedHandler);
         EventService.subscribe(ForwardedEventTopic.DOCKER_STARTED, onBundleUpdatedHandler);
         EventService.subscribe(ForwardedEventTopic.DOCKER_STOPPED, onBundleUpdatedHandler);
@@ -119,6 +147,59 @@ public class DockerContainersTabUi extends Composite implements Tab {
         this.containersStart.setEnabled(!isActive);
         this.containersStop.setEnabled(isActive);
 
+    }
+    
+    //TODO: update this code
+    private void updateImageButtons() {
+        GwtGroupedNVPair selected = this.imagesSelectionModel.getSelectedObject();
+
+        this.imagesDelete.setEnabled(false);
+
+        String status;
+
+        if (selected == null || (status = selected.getStatus()) == null) {
+            return;
+        }
+
+        boolean isInstalled = "bndInstalled".equals(status);
+
+        this.imagesDelete.setEnabled(isInstalled);
+
+    }
+    
+    private void deleteSelectedImage() {
+        EntryClassUi.showWaitModal();
+
+        this.securityTokenService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                DockerContainersTabUi.this.deviceService.deleteImage(token,
+                        DockerContainersTabUi.this.imagesSelectionModel.getSelectedObject().getId(),
+                        new AsyncCallback<Void>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                EntryClassUi.hideWaitModal();
+                            }
+                        });
+
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(caught);
+            }
+        });
+        refresh();
     }
 
     private void startSelectedContainer() {
@@ -253,6 +334,77 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
         };
         col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        //TODO: update this heading
+        TextHeader arch = new TextHeader(MSGS.deviceTabContainerIsFrameworkManagedHeading());
+        arch.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col5, arch);
+
+        dataProvider.addDataDisplay(bundlesGrid2);
+    }
+    
+    private void loadImagesTable(CellTable<GwtGroupedNVPair> bundlesGrid2,
+            ListDataProvider<GwtGroupedNVPair> dataProvider) {
+
+        TextColumn<GwtGroupedNVPair> col1 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getId();
+            }
+        };
+        col1.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader id = new TextHeader(MSGS.deviceBndId());
+        id.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col1, id);
+
+        TextColumn<GwtGroupedNVPair> col2 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return validationMessages.getString(object.getStatus());
+            }
+        };
+        col2.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader state = new TextHeader(MSGS.deviceBndState());
+        state.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col2, state);
+
+        TextColumn<GwtGroupedNVPair> col3 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getName();
+            }
+        };
+        col3.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader name = new TextHeader(MSGS.deviceBndName());
+        name.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col3, name);
+
+        TextColumn<GwtGroupedNVPair> col4 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getVersion();
+            }
+        };
+        col4.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
+        TextHeader version = new TextHeader(MSGS.deviceBndVersion());
+        version.setHeaderStyleNames(ROW_HEADER_STYLE);
+        bundlesGrid2.addColumn(col4, version);
+
+        TextColumn<GwtGroupedNVPair> col5 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                if ((boolean) object.get("arch")) {
+                    return MSGS.trueLabel();
+                } else {
+                    return MSGS.falseLabel();
+                }
+            }
+        };
+        col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
         TextHeader isFrameworkManaged = new TextHeader(MSGS.deviceTabContainerIsFrameworkManagedHeading());
         isFrameworkManaged.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col5, isFrameworkManaged);
@@ -282,6 +434,10 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
             @Override
             public void onSuccess(GwtXSRFToken token) {
+            	
+            	/**
+            	 * List Containers
+            	 */
                 DockerContainersTabUi.this.gwtDeviceService.findContainers(token,
                         new AsyncCallback<List<GwtGroupedNVPair>>() {
 
@@ -295,8 +451,8 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
                             @Override
                             public void onSuccess(List<GwtGroupedNVPair> result) {
-                                EntryClassUi.hideWaitModal();
                                 DockerContainersTabUi.this.isRequestRunning = false;
+                                EntryClassUi.hideWaitModal();
                                 for (GwtGroupedNVPair resultPair : result) {
                                     DockerContainersTabUi.this.bundlesDataProvider.getList().add(resultPair);
                                 }
@@ -307,9 +463,59 @@ public class DockerContainersTabUi extends Composite implements Tab {
                                 updateButtons();
                             }
                         });
+                
             }
 
         });
+
+        EntryClassUi.showWaitModal();
+        
+        this.imagesDataProvider.getList().clear();
+        
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
+
+            @Override
+            public void onFailure(Throwable ex) {
+                DockerContainersTabUi.this.isRequestRunning = false;
+                EntryClassUi.hideWaitModal();
+                FailureHandler.handle(ex);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                
+                /**
+                 * List Images
+                 */
+                DockerContainersTabUi.this.gwtDeviceService.findImages(token,
+                        new AsyncCallback<List<GwtGroupedNVPair>>() {
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                DockerContainersTabUi.this.isRequestRunning = false;
+                                EntryClassUi.hideWaitModal();
+                                FailureHandler.handle(caught);
+                                DockerContainersTabUi.this.imagesDataProvider.flush();
+                            }
+
+                            @Override
+                            public void onSuccess(List<GwtGroupedNVPair> result) {
+                                DockerContainersTabUi.this.isRequestRunning = false;
+                                EntryClassUi.hideWaitModal();
+                                for (GwtGroupedNVPair resultPair : result) {
+                                    DockerContainersTabUi.this.imagesDataProvider.getList().add(resultPair);
+                                }
+                                int size = DockerContainersTabUi.this.imagesDataProvider.getList().size();
+                                DockerContainersTabUi.this.imagesGrid.setVisibleRange(0, size);
+                                DockerContainersTabUi.this.imagesDataProvider.flush();
+                                DockerContainersTabUi.this.imagesSelectionModel.clear();
+                                updateImageButtons();
+                            }
+                        });
+            }
+
+        });
+        
     }
 
     @Override

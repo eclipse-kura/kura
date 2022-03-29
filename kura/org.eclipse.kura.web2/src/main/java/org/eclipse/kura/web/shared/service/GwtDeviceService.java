@@ -41,6 +41,8 @@ public interface GwtDeviceService extends RemoteService {
     public void stopBundle(GwtXSRFToken xsrfToken, String bundleId) throws GwtKuraException;
 
     public List<GwtGroupedNVPair> findContainers(GwtXSRFToken xsrfToken) throws GwtKuraException;
+    
+    public List<GwtGroupedNVPair> findImages(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
     public List<GwtGroupedNVPair> findThreads(GwtXSRFToken xsrfToken) throws GwtKuraException;
 
@@ -60,5 +62,8 @@ public interface GwtDeviceService extends RemoteService {
 
     @Audit(componentName = "UI Device", description = "check if container orchestrator is active")
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken token) throws GwtKuraException;
+    
+    @Audit(componentName = "UI Device", description = "Delete Image")
+    public void deleteImage(GwtXSRFToken xsrfToken, String imageId) throws GwtKuraException;
 
 }

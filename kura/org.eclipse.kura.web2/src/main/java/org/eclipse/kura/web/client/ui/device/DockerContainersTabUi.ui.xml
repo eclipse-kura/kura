@@ -28,6 +28,7 @@
     }
     </ui:style>
 
+<b:Panel addStyleNames="bundles-well center-panel">
     <b:Panel addStyleNames="bundles-well center-panel">
         <b:ButtonGroup>
             <b:ButtonGroup size="SMALL">
@@ -42,4 +43,16 @@
             striped="true" hover="true" height="100%" width="100%"
             ui:field="bundlesGrid" />
     </b:Panel>
+     <b:Panel addStyleNames="bundles-well center-panel">
+        <b:ButtonGroup>
+            <b:ButtonGroup size="SMALL">
+                <b:Button ui:field="imagesDelete" addStyleNames="fa fa-stop"></b:Button>
+            </b:ButtonGroup>
+        </b:ButtonGroup>
+
+        <gwt:CellTable bordered="true" condensed="true"
+            striped="true" hover="true" height="100%" width="100%"
+            ui:field="imagesGrid" />
+    </b:Panel>
+</b:Panel>
 </ui:UiBinder> 

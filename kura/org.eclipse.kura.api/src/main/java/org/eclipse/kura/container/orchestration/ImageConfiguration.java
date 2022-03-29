@@ -15,18 +15,14 @@ package org.eclipse.kura.container.orchestration;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a image configuration used to request the generation of a new image instance
+ * Object which represents a image configuration used to request the generation
+ * of a new image instance
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
@@ -34,37 +30,37 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class ImageConfiguration {
-
+    
     private String imageName;
     private String imageTag;
     private Optional<RegistryCredentials> registryCredentials;
     private int imageDownloadTimeoutSeconds = 500;
-
+    
     private ImageConfiguration() {
     }
-    
+
     /***
      * 
      * @return
      */
     public String getImageName() {
-    	return this.imageName;
+        return this.imageName;
     }
-    
+
     /***
      * 
      * @return
      */
     public String getImageTag() {
-    	return this.imageTag;
+        return this.imageTag;
     }
-    
+
     /***
      * 
      * @return
      */
     public int getimageDownloadTimeoutSeconds() {
-    	return this.imageDownloadTimeoutSeconds;
+        return this.imageDownloadTimeoutSeconds;
     }
 
     /**
@@ -76,7 +72,6 @@ public class ImageConfiguration {
         return this.registryCredentials;
     }
 
-
     /**
      * Creates a builder for creating a new {@link ImageConfiguration} instance.
      *
@@ -85,7 +80,6 @@ public class ImageConfiguration {
     public static ContainerConfigurationBuilder builder() {
         return new ContainerConfigurationBuilder();
     }
-
 
     @Override
     public int hashCode() {
@@ -101,17 +95,15 @@ public class ImageConfiguration {
             return false;
         }
         ImageConfiguration other = (ImageConfiguration) obj;
-        return Objects.equals(this.imageName, other.imageName)
-                && Objects.equals(this.imageTag, other.imageTag)
+        return Objects.equals(this.imageName, other.imageName) && Objects.equals(this.imageTag, other.imageTag)
                 && Objects.equals(this.registryCredentials, other.registryCredentials);
     }
 
+    public static final class ContainerConfigurationBuilder {
 
-	public static final class ContainerConfigurationBuilder {
-
-	    private String imageName;
-	    private String imageTag;
-	    private Optional<RegistryCredentials> registryCredentials;
+        private String imageName;
+        private String imageTag;
+        private Optional<RegistryCredentials> registryCredentials;
         private int imageDownloadTimeoutSeconds = 500;
 
         public ContainerConfigurationBuilder setImageName(String imageName) {
@@ -123,7 +115,6 @@ public class ImageConfiguration {
             this.imageTag = imageTag;
             return this;
         }
-
 
         public ContainerConfigurationBuilder setRegistryCredentials(Optional<RegistryCredentials> registryCredentials) {
             this.registryCredentials = registryCredentials;

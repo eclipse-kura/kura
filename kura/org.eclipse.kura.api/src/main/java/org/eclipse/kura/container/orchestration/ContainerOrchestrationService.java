@@ -48,6 +48,14 @@ public interface ContainerOrchestrationService {
      * @return a list of {@link ContainerInstanceDescriptor}s representing the available containers
      */
     public List<ImageInstanceDescriptor> listImageInstanceDescriptor();
+    
+    /**
+     * Deletes Image from container engine. Takes ImageID String as parameter.
+     *
+     * @return void
+     * @throws KuraException 
+     */
+    public void deleteImage(String imageId) throws KuraException;
 
     /**
      * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded

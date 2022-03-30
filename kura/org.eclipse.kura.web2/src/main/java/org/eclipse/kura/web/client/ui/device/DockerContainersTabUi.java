@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.web.client.ui.device;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.web.client.messages.Messages;
@@ -22,6 +23,9 @@ import org.eclipse.kura.web.client.util.EventService;
 import org.eclipse.kura.web.client.util.FailureHandler;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
 import org.eclipse.kura.web.shared.model.GwtGroupedNVPair;
+import org.eclipse.kura.web.shared.model.GwtModemInterfaceConfig;
+import org.eclipse.kura.web.shared.model.GwtNetIfType;
+import org.eclipse.kura.web.shared.model.GwtNetInterfaceConfig;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtDeviceService;
 import org.eclipse.kura.web.shared.service.GwtDeviceServiceAsync;
@@ -37,6 +41,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -57,6 +62,23 @@ public class DockerContainersTabUi extends Composite implements Tab {
     private final GwtDeviceServiceAsync gwtDeviceService = GWT.create(GwtDeviceService.class);
 
     private boolean isRequestRunning = false;
+    
+    /**
+     * Switcher Related
+     */
+    
+    @UiField
+    Panel containerListPanel;
+    
+    @UiField
+    Panel imageListPanel;
+    
+    @UiField
+    CellTable<GwtGroupedNVPair> assetGrid = new CellTable<>();
+    
+    private final ListDataProvider<GwtGroupedNVPair> assetSwitcherProvider = new ListDataProvider<>();
+    final SingleSelectionModel<GwtGroupedNVPair> switcherSelectionModel = new SingleSelectionModel<>();
+    
 
     /**
      * Container View Related
@@ -80,6 +102,8 @@ public class DockerContainersTabUi extends Composite implements Tab {
     
     @UiField
     Button imagesDelete;
+    @UiField
+    Button imagesRefresh;
 
     @UiField
     CellTable<GwtGroupedNVPair> imagesGrid = new CellTable<>();
@@ -93,6 +117,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
         initWidget(uiBinder.createAndBindUi(this));
         loadContainersTable(this.bundlesGrid, this.bundlesDataProvider);
         loadImagesTable(this.imagesGrid, this.imagesDataProvider);
+        initTableSwitcher();
 
         this.containersRefresh.setText(MSGS.refresh());
         this.containersStart.setText(MSGS.deviceTabContainerStart());
@@ -104,15 +129,19 @@ public class DockerContainersTabUi extends Composite implements Tab {
         this.containersRefresh.addClickHandler(event -> refresh());
         this.containersStart.addClickHandler(event -> startSelectedContainer());
         this.containersStop.addClickHandler(event -> stopSelectedContainer());
+        
+        this.switcherSelectionModel.addSelectionChangeHandler(event -> updateSelectedPanels());
 
         updateButtons();
 
+        this.imagesRefresh.setText(MSGS.refresh());
         this.imagesDelete.setText("Delete Image"); //TODO: Fix this text
         
         this.imagesSelectionModel.clear();
         this.imagesGrid.setSelectionModel(this.imagesSelectionModel);
         this.imagesSelectionModel.addSelectionChangeHandler(event -> updateImageButtons());
         this.imagesDelete.addClickHandler(event -> deleteSelectedImage());
+        this.imagesRefresh.addClickHandler(event -> refresh());
 
         updateImageButtons();
 
@@ -147,6 +176,59 @@ public class DockerContainersTabUi extends Composite implements Tab {
         this.containersStart.setEnabled(!isActive);
         this.containersStop.setEnabled(isActive);
 
+    }
+    
+    private void updateSelectedPanels() {
+        GwtGroupedNVPair selected = this.switcherSelectionModel.getSelectedObject();
+        
+        if (selected == null || (selected.getName()) == null) {
+            return;
+        }
+        
+        switch(selected.getName()) {
+        case "images":
+        	imageListPanel.setVisible(true);
+        	containerListPanel.setVisible(false);
+        	break;
+        default:
+        	imageListPanel.setVisible(false);
+        	containerListPanel.setVisible(true);
+        	break;
+        }
+
+    }
+    
+    private void initTableSwitcher() {
+    	
+    	imageListPanel.setVisible(false);
+    	containerListPanel.setVisible(true);
+    	
+    	List<GwtGroupedNVPair> typeList = new ArrayList<>();
+    	GwtGroupedNVPair containers = new GwtGroupedNVPair();
+    	containers.setName("containers");
+    	GwtGroupedNVPair images = new GwtGroupedNVPair();
+    	images.setName("images");
+    	typeList.add(containers);
+    	typeList.add(images);
+    	
+    	this.assetSwitcherProvider.getList().addAll(typeList);
+    	
+        TextColumn<GwtGroupedNVPair> switcherCol1 = new TextColumn<GwtGroupedNVPair>() {
+
+            @Override
+            public String getValue(GwtGroupedNVPair object) {
+                return object.getName();
+            }
+        };
+        switcherCol1.setCellStyleNames("status-table-row");
+        switcherCol1.setSortable(true);
+        //TODO: create proper entry for this
+        this.assetGrid.addColumn(switcherCol1, "Asset Type");
+
+        this.assetSwitcherProvider.addDataDisplay(this.assetGrid);
+        this.assetGrid.setSelectionModel(this.switcherSelectionModel);
+
+        this.assetGrid.getColumnSortList().push(switcherCol1);
     }
     
     //TODO: update this code
@@ -397,15 +479,12 @@ public class DockerContainersTabUi extends Composite implements Tab {
 
             @Override
             public String getValue(GwtGroupedNVPair object) {
-                if ((boolean) object.get("arch")) {
-                    return MSGS.trueLabel();
-                } else {
-                    return MSGS.falseLabel();
-                }
+            	return object.get("arch"); 
             }
         };
         col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        TextHeader isFrameworkManaged = new TextHeader(MSGS.deviceTabContainerIsFrameworkManagedHeading());
+        //TODO: fix this string to make it pernament
+        TextHeader isFrameworkManaged = new TextHeader("Architecture");
         isFrameworkManaged.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col5, isFrameworkManaged);
 

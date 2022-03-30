@@ -766,11 +766,23 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return result;
     }
 
-    private String getImageName(Image image) {
+    private String getImageName(Image image) {        
+        if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
+            return "";
+        }
+        
         return image.getRepoTags()[0].split(":")[0];
     }
 
     private String getImageTag(Image image) {
+        if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
+            return "";
+        }
+        
+        if (image.getRepoTags()[0].split(":").length < 2) {
+            return "";
+        }
+        
         return image.getRepoTags()[0].split(":")[1];
     }
 

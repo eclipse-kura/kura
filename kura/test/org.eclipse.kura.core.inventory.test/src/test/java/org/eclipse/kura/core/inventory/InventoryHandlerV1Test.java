@@ -1095,7 +1095,7 @@ public class InventoryHandlerV1Test {
 
         KuraMessage theMessage = requestMessage(request, payload);
 
-        handler.setDockerService(this.mockDockerService);
+        handler.setContainerOrchestrationService(this.mockDockerService);
         handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
 
         // convert ContainerDescriptor to a DockerContainer
@@ -1122,7 +1122,7 @@ public class InventoryHandlerV1Test {
 
         KuraMessage theMessage = requestMessage(request, payload);
 
-        handler.setDockerService(this.mockDockerService);
+        handler.setContainerOrchestrationService(this.mockDockerService);
         handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
 
         // convert ContainerDescriptor to a DockerContainer

@@ -89,7 +89,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     private SystemService systemService;
     private BundleContext bundleContext;
 
-    private ContainerOrchestrationService dockerService;
+    private ContainerOrchestrationService containerOrchestrationService;
 
     // ----------------------------------------------------------------
     //
@@ -97,13 +97,13 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     //
     // ----------------------------------------------------------------
 
-    public void setDockerService(ContainerOrchestrationService dockerService) {
-        this.dockerService = dockerService;
+    public void setContainerOrchestrationService(ContainerOrchestrationService containerOrchestrationService) {
+        this.containerOrchestrationService = containerOrchestrationService;
     }
 
-    public void unsetDockerService(ContainerOrchestrationService dockerService) {
-        if (this.dockerService == dockerService) {
-            this.dockerService = null;
+    public void unsetContainerOrchestrationService(ContainerOrchestrationService containerOrchestrationService) {
+        if (this.containerOrchestrationService == containerOrchestrationService) {
+            this.containerOrchestrationService = null;
         }
     }
 
@@ -222,21 +222,21 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 return success();
             } else if (START_CONTAINER.equals(resources)) {
 
-                if (this.dockerService == null) {
+                if (this.containerOrchestrationService == null) {
                     return notFound();
                 }
 
-                this.dockerService
+                this.containerOrchestrationService
                         .startContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
 
                 return success();
             } else if (STOP_CONTAINER.equals(resources)) {
 
-                if (this.dockerService == null) {
+                if (this.containerOrchestrationService == null) {
                     return notFound();
                 }
 
-                this.dockerService
+                this.containerOrchestrationService
                         .stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
                 return success();
             }
@@ -370,10 +370,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 .add(new SystemResourceInfo(dp.getName(), dp.getVersion().toString(), SystemResourceType.DP)));
 
         // get Docker Containers
-        if (this.dockerService != null) {
+        if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating docker invenetory");
-                List<ContainerInstanceDescriptor> containers = this.dockerService.listContainerDescriptors();
+                List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService.listContainerDescriptors();
                 containers.stream().forEach(
                         container -> inventory.add(new SystemResourceInfo(container.getContainerName().replace("/", ""),
                                 container.getContainerImage() + ":" + container.getContainerImageTag().split(":")[0],
@@ -424,13 +424,13 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private KuraPayload doGetDockerContainers() {
 
-        if (this.dockerService == null) {
+        if (this.containerOrchestrationService == null) {
             return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
         }
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ContainerInstanceDescriptor> containers = this.dockerService.listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containers = this.containerOrchestrationService.listContainerDescriptors();
 
             List<DockerContainer> containersList = new ArrayList<>();
             containers.stream().forEach(p -> containersList.add(new DockerContainer(p)));
@@ -558,7 +558,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 DockerContainer.class);
 
         try {
-            List<ContainerInstanceDescriptor> containerList = this.dockerService.listContainerDescriptors();
+            List<ContainerInstanceDescriptor> containerList = this.containerOrchestrationService.listContainerDescriptors();
 
             for (ContainerInstanceDescriptor container : containerList) {
                 if (container.getContainerName().equals(dc.getContainerName())) {
@@ -592,7 +592,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
     private ContainerInstanceDescriptor findFirstMatchingContainer(final ContainerInstanceDescriptor ref)
             throws KuraException {
-        for (final ContainerInstanceDescriptor container : this.dockerService.listContainerDescriptors()) {
+        for (final ContainerInstanceDescriptor container : this.containerOrchestrationService.listContainerDescriptors()) {
             if (container.getContainerName().equals(ref.getContainerName())) {
                 return container;
             }

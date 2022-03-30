@@ -88,7 +88,7 @@ public class InventoryHandlerV1Test {
 
     private static String TEST_JSON = "testJson";
     private static String TEST_XML = "testXML";
-    
+
     private static final String REGISTRY_URL = "https://test";
     private static final String REGISTRY_USERNAME = "test";
     private static final String REGISTRY_PASSWORD = "test1";
@@ -98,7 +98,7 @@ public class InventoryHandlerV1Test {
     private ContainerConfiguration dockerContainer1Config;
     private ContainerConfiguration dockerContainer2Config;
 
-    private ContainerOrchestrationService mockDockerService;
+    private ContainerOrchestrationService mockContainerOrchestrationService;
 
     private DockerContainer dockerContainerObject;
     private DockerContainers dockerContainersObject;
@@ -1041,13 +1041,17 @@ public class InventoryHandlerV1Test {
                 .setContainerImage("nginx").setContainerImageTag("latest").setContainerID("1234").build();
         this.dockerContainer2 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer2")
                 .setContainerImage("nginx").setContainerID("124344").build();
-        
+
         this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
-                .setContainerImage("nginx").setContainerImageTag("latest").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
+                .setContainerImage("nginx").setContainerImageTag("latest")
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
         this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
-                .setContainerImage("nginx").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
+                .setContainerImage("nginx")
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
     }
 
     private void givenTheFollowingJson() {
@@ -1088,14 +1092,14 @@ public class InventoryHandlerV1Test {
 
         InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
 
-        this.mockDockerService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
+        this.mockContainerOrchestrationService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
 
-        when(this.mockDockerService.listContainerDescriptors())
+        when(this.mockContainerOrchestrationService.listContainerDescriptors())
                 .thenReturn(Arrays.asList(this.dockerContainer1, this.dockerContainer2));
 
         KuraMessage theMessage = requestMessage(request, payload);
 
-        handler.setDockerService(this.mockDockerService);
+        handler.setContainerOrchestrationService(this.mockContainerOrchestrationService);
         handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
 
         // convert ContainerDescriptor to a DockerContainer
@@ -1115,14 +1119,14 @@ public class InventoryHandlerV1Test {
 
         InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
 
-        this.mockDockerService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
+        this.mockContainerOrchestrationService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
 
-        when(this.mockDockerService.listContainerDescriptors())
+        when(this.mockContainerOrchestrationService.listContainerDescriptors())
                 .thenReturn(Arrays.asList(this.dockerContainer1, this.dockerContainer2));
 
         KuraMessage theMessage = requestMessage(request, payload);
 
-        handler.setDockerService(this.mockDockerService);
+        handler.setContainerOrchestrationService(this.mockContainerOrchestrationService);
         handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
 
         // convert ContainerDescriptor to a DockerContainer
@@ -1166,21 +1170,29 @@ public class InventoryHandlerV1Test {
     }
 
     private void thenCheckIfContainerWereListed() throws KuraException {
-        Mockito.verify(this.mockDockerService, times(1)).listContainerDescriptors();
+        Mockito.verify(this.mockContainerOrchestrationService, times(1)).listContainerDescriptors();
     }
 
     private void thenCheckIfContainerOneHasStarted() throws KuraException, InterruptedException {
-        Mockito.verify(this.mockDockerService, times(1)).startContainer(this.dockerContainer1.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer1.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(1))
+                .startContainer(this.dockerContainer1.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(0))
+                .stopContainer(this.dockerContainer1.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(0))
+                .startContainer(this.dockerContainer2.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(0))
+                .stopContainer(this.dockerContainer2.getContainerId());
     }
 
     private void thenCheckIfContainerOneHasStopped() throws KuraException, InterruptedException {
-        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer1.getContainerId());
-        Mockito.verify(this.mockDockerService, times(1)).stopContainer(this.dockerContainer1.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).startContainer(this.dockerContainer2.getContainerId());
-        Mockito.verify(this.mockDockerService, times(0)).stopContainer(this.dockerContainer2.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(0))
+                .startContainer(this.dockerContainer1.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(1))
+                .stopContainer(this.dockerContainer1.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(0))
+                .startContainer(this.dockerContainer2.getContainerId());
+        Mockito.verify(this.mockContainerOrchestrationService, times(0))
+                .stopContainer(this.dockerContainer2.getContainerId());
     }
 
     @SuppressWarnings("unchecked")

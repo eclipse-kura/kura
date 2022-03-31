@@ -22,10 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.core.linux.executor.LinuxExitStatus;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
+import org.eclipse.kura.executor.Command;
+import org.eclipse.kura.executor.CommandExecutorService;
+import org.eclipse.kura.executor.CommandStatus;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
@@ -68,7 +72,30 @@ public class GetWifiHotSpotListTest {
 
         this.nas = new NetworkAdminServiceImpl(wpaSupplicantConfigWriterFactory);
         NetworkConfigurationService ncs = mock(NetworkConfigurationService.class);
+        CommandExecutorService ces = mock(CommandExecutorService.class);
+
+        CommandStatus infoStatusInterface = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(1));
+        String[] cmd = new String[] { "iw", "dev", this.interfaceName, "info" };
+        String[] cmdAp = new String[] { "iw", "dev", this.interfaceName + "_ap", "info" };
+        Command infoCommand = new Command(cmd);
+        Command infoCommandAp = new Command(cmdAp);
+        infoCommand.setTimeout(60);
+        infoCommandAp.setTimeout(60);
+        when(ces.execute(infoCommand)).thenReturn(infoStatusInterface);
+        when(ces.execute(infoCommandAp)).thenReturn(infoStatusInterface);
+
+        CommandStatus iwconfigStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(1));
+        cmd = new String[] { "iwconfig", this.interfaceName };
+        cmdAp = new String[] { "iwconfig", this.interfaceName + "_ap" };
+
+        Command iwconfigCommand = new Command(cmd);
+        Command iwconfigCommandAp = new Command(cmdAp);
+        iwconfigCommand.setTimeout(60);
+        when(ces.execute(iwconfigCommand)).thenReturn(iwconfigStatus);
+        when(ces.execute(iwconfigCommandAp)).thenReturn(iwconfigStatus);
+
         this.nas.setNetworkConfigurationService(ncs);
+        this.nas.setExecutorService(ces);
 
         LinuxNetworkUtil linuxNetworkUtil = mock(LinuxNetworkUtil.class);
 

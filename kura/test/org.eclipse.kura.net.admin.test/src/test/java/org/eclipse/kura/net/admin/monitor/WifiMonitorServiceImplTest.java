@@ -954,6 +954,8 @@ public class WifiMonitorServiceImplTest {
     public void testMonitor() throws Throwable {
         // only makes part of the method traversal easier - can hardly avoid native calls... check nothing, in the end
 
+        Path iwPath = addTool("iw");
+
         WifiMonitorServiceImpl svc = new WifiMonitorServiceImpl() {
 
             @Override
@@ -1083,6 +1085,8 @@ public class WifiMonitorServiceImplTest {
         svc.setEventAdmin(eaMock);
 
         TestUtil.invokePrivate(svc, "monitor");
+
+        removeTool(iwPath);
 
         verify(nsMock, times(1)).getAllNetworkInterfaceNames();
         verify(naMock, times(1)).disableInterface(interfaceNameInfra);
@@ -1253,16 +1257,6 @@ public class WifiMonitorServiceImplTest {
 
         // hostapd is running
         when(esMock.isRunning(any(String[].class))).thenReturn(true);
-        boolean iwExists = LinuxNetworkUtil.toolExists("iw");
-        // iw exists
-        if (!iwExists) {
-            String tempDir = System.getProperty("java.io.tmpdir");
-            Path iwMockPath = Paths.get(tempDir, "iw");
-            if (!Files.exists(iwMockPath)) {
-                iwMockPath = Files.createFile(iwMockPath);
-            }
-            LinuxNetworkUtil.addToolSearchFolder(tempDir);
-        }
 
         WifiBuilder wifiBuilder = new WifiBuilder(interfaceName).addWifiInterfaceAddressConfig(mode)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).addWifiConfig("testDriver", mode);
@@ -1273,6 +1267,27 @@ public class WifiMonitorServiceImplTest {
         return wifiBuilder.build();
     }
 
+    private Path addTool(String tool) throws IOException {
+        boolean iwExists = LinuxNetworkUtil.toolExists(tool);
+        Path iwMockPath = null;
+        // iw exists
+        if (!iwExists) {
+            String tempDir = System.getProperty("java.io.tmpdir");
+            iwMockPath = Paths.get(tempDir, tool);
+            if (!Files.exists(iwMockPath)) {
+                iwMockPath = Files.createFile(iwMockPath);
+            }
+            LinuxNetworkUtil.addToolSearchFolder(tempDir);
+        }
+
+        return iwMockPath;
+    }
+
+    private void removeTool(Path toolPath) throws IOException {
+        if (toolPath != null) {
+            Files.deleteIfExists(toolPath);
+        }
+    }
 }
 
 class WifiBuilder {

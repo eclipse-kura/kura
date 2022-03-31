@@ -20,8 +20,8 @@
 		}
 
 		.switcher-grid{
-		margin-bottom: 10px;
-		margin-top: 10px;
+		margin-bottom: 50px;
+		margin-top: 50px;
 		}
 
 		.interfaces-panel {
@@ -29,14 +29,15 @@
 		}
 	</ui:style>
 
-	<b:Panel
-		addStyleNames="bundles-well center-panel switcher-grid">
+	<b:Panel addStyleNames="bundles-well center-panel">
 		<b:Column size="MD_2"
 			addStyleNames="{style.interfaces-panel}">
 			<b:Panel addStyleNames="bundles-well center-panel">
-				<gwt:CellTable bordered="true" condensed="true"
-					striped="true" hover="true" height="100%" width="100%"
-					ui:field="assetGrid" />
+				<b:ButtonGroup size="SMALL">
+					<gwt:CellTable bordered="true" condensed="true"
+						striped="true" hover="true" height="100%" width="100%"
+						ui:field="assetGrid" />
+				</b:ButtonGroup>
 			</b:Panel>
 		</b:Column>
 
@@ -63,7 +64,7 @@
 				<b:ButtonGroup>
 					<b:ButtonGroup size="SMALL">
 						<b:Button ui:field="imagesDelete"
-							addStyleNames="fa fa-stop"></b:Button>
+							addStyleNames="fa fa-trash"></b:Button>
 						<b:Button ui:field="imagesRefresh"
 							addStyleNames="fa fa-refresh"></b:Button>
 					</b:ButtonGroup>

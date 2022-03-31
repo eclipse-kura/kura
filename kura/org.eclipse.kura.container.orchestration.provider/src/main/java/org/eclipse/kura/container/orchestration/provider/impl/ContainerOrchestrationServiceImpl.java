@@ -748,21 +748,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
-       logger.error("test1");
         List<Image> images = this.dockerClient.listImagesCmd().withShowAll(true).exec();
-        logger.error("test2");
         List<ImageInstanceDescriptor> result = new ArrayList<>();
         images.forEach(image -> {
-            logger.error("test3");
             InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
-            logger.error("test4");
             result.add(ImageInstanceDescriptor.builder().setImageName(getImageName(image))
                     .setImageTag(getImageTag(image)).setImageId(image.getId()).setImageAuthor(iir.getAuthor())
                     .setImageArch(iir.getArch()).setimageSize(iir.getSize().longValue()).setImageLabels(image.getLabels()).build());
-            logger.error("test5");
-            logger.error(getImageName(image), getImageTag(image), image.getId(), iir.getAuthor(), iir.getArch(), iir.getSize(), image.getLabels());
         });
-        logger.error("test6");
         return result;
     }
 
@@ -785,14 +778,15 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         
         return image.getRepoTags()[0].split(":")[1];
     }
-
+    
+    @Override
     public void deleteImage(String imageId) throws KuraException {
         checkRequestEnv(imageId);
         try {
-            this.dockerClient.removeImageCmd(imageId).exec();            
+            this.dockerClient.removeImageCmd(imageId).exec();   
         } catch (Exception e) {
-            logger.error("Could not remove container {}.", imageId);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
+            logger.error("Could not remove image {}.", imageId);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Image could not be deleted. It is most likely in use by a container.");
         }
     }    
 

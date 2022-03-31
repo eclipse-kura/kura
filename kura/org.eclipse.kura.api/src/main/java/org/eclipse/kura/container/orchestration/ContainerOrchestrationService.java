@@ -43,14 +43,14 @@ public interface ContainerOrchestrationService {
     public List<ContainerInstanceDescriptor> listContainerDescriptors();
     
     /**
-     * Lists all available images returning the corresponding {@link ImageInstanceDescriptor}s
+     * Lists all available images, returning the corresponding {@link ImageInstanceDescriptor}s
      *
      * @return a list of {@link ContainerInstanceDescriptor}s representing the available containers
      */
     public List<ImageInstanceDescriptor> listImageInstanceDescriptor();
     
     /**
-     * Deletes Image from container engine. Takes ImageID String as parameter.
+     * Deletes Image from container engine. Takes ImageID String as parameter. Will throw an error if image is being used by a container.
      *
      * @return void
      * @throws KuraException 

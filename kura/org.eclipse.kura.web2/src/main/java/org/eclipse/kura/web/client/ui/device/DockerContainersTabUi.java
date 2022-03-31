@@ -135,7 +135,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
         updateButtons();
 
         this.imagesRefresh.setText(MSGS.refresh());
-        this.imagesDelete.setText("Delete Image"); //TODO: Fix this text
+        this.imagesDelete.setText(MSGS.deviceTabContainerImagesDelete());
         
         this.imagesSelectionModel.clear();
         this.imagesGrid.setSelectionModel(this.imagesSelectionModel);
@@ -152,7 +152,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
         };
 
-        //TODO: See if this needs to be updated
         EventService.subscribe(ForwardedEventTopic.DOCKER_RUNNING, onBundleUpdatedHandler);
         EventService.subscribe(ForwardedEventTopic.DOCKER_STARTED, onBundleUpdatedHandler);
         EventService.subscribe(ForwardedEventTopic.DOCKER_STOPPED, onBundleUpdatedHandler);
@@ -185,17 +184,13 @@ public class DockerContainersTabUi extends Composite implements Tab {
             return;
         }
         
-        switch(selected.getName()) {
-        case "images":
+        if (selected.getName().equals(MSGS.deviceTabContainerSwitcherGridImagesText())) {
         	imageListPanel.setVisible(true);
         	containerListPanel.setVisible(false);
-        	break;
-        default:
+        }else {
         	imageListPanel.setVisible(false);
         	containerListPanel.setVisible(true);
-        	break;
         }
-
     }
     
     private void initTableSwitcher() {
@@ -205,9 +200,9 @@ public class DockerContainersTabUi extends Composite implements Tab {
     	
     	List<GwtGroupedNVPair> typeList = new ArrayList<>();
     	GwtGroupedNVPair containers = new GwtGroupedNVPair();
-    	containers.setName("containers");
+    	containers.setName(MSGS.deviceTabContainerSwitcherGridContainerText());
     	GwtGroupedNVPair images = new GwtGroupedNVPair();
-    	images.setName("images");
+    	images.setName(MSGS.deviceTabContainerSwitcherGridImagesText());
     	typeList.add(containers);
     	typeList.add(images);
     	
@@ -220,10 +215,9 @@ public class DockerContainersTabUi extends Composite implements Tab {
                 return object.getName();
             }
         };
-        switcherCol1.setCellStyleNames("status-table-row");
+        switcherCol1.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
         switcherCol1.setSortable(true);
-        //TODO: create proper entry for this
-        this.assetGrid.addColumn(switcherCol1, "Asset Type");
+        this.assetGrid.addColumn(switcherCol1, MSGS.deviceTabContainerSwitcherGridHeading());
 
         this.assetSwitcherProvider.addDataDisplay(this.assetGrid);
         this.assetGrid.setSelectionModel(this.switcherSelectionModel);
@@ -231,7 +225,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
         this.assetGrid.getColumnSortList().push(switcherCol1);
     }
     
-    //TODO: update this code
     private void updateImageButtons() {
         GwtGroupedNVPair selected = this.imagesSelectionModel.getSelectedObject();
 
@@ -263,8 +256,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
                             @Override
                             public void onFailure(Throwable caught) {
                                 EntryClassUi.hideWaitModal();
-                                FailureHandler.handle(caught);
-
+                                FailureHandler.showErrorMessage(MSGS.deviceTabContainerImagesDeleteErrorMessage());
                             }
 
                             @Override
@@ -416,7 +408,6 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
         };
         col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        //TODO: update this heading
         TextHeader arch = new TextHeader(MSGS.deviceTabContainerIsFrameworkManagedHeading());
         arch.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col5, arch);
@@ -483,8 +474,7 @@ public class DockerContainersTabUi extends Composite implements Tab {
             }
         };
         col5.setCellStyleNames(STATUS_TABLE_ROW_STYLE);
-        //TODO: fix this string to make it pernament
-        TextHeader isFrameworkManaged = new TextHeader("Architecture");
+        TextHeader isFrameworkManaged = new TextHeader(MSGS.deviceTabContainerImagesArchitextureCollumHeading());
         isFrameworkManaged.setHeaderStyleNames(ROW_HEADER_STYLE);
         bundlesGrid2.addColumn(col5, isFrameworkManaged);
 

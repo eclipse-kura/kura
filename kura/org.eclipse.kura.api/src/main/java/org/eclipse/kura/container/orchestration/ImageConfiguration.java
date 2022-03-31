@@ -40,6 +40,7 @@ public class ImageConfiguration {
     }
 
     /***
+     * Returns a Image's name as a String.
      * 
      * @return
      */
@@ -48,6 +49,7 @@ public class ImageConfiguration {
     }
 
     /***
+     * Returns a Image's tag as a String.
      * 
      * @return
      */
@@ -56,6 +58,7 @@ public class ImageConfiguration {
     }
 
     /***
+     * Returns a Image's download timeout time as a int.
      * 
      * @return
      */

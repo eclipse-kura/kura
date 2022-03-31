@@ -257,6 +257,15 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 this.dockerService
                         .deleteImage(findFirstMatchingImage(extractContainerImageRef(reqMessage)).getImageId());
                 return success();
+            } else if (DELETE_IMAGE.equals(resources)) {
+
+                if (this.dockerService == null) {
+                    return notFound();
+                }
+
+                this.dockerService
+                        .deleteImage(findFirstMatchingImage(extractContainerImageRef(reqMessage)).getImageId());
+                return success();
             }
         } catch (final KuraException e) {
             throw e;

@@ -171,6 +171,7 @@ public class DnsMonitorServiceImplTest {
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "enabled"));
 
+        @SuppressWarnings("unchecked")
         Set<NetworkPair<IP4Address>> aa = (Set<NetworkPair<IP4Address>>) TestUtil.getFieldValue(svc, "allowedNetworks");
         assertNotNull(aa);
         assertEquals(1, aa.size());

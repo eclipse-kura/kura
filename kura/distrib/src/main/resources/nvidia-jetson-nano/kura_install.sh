@@ -85,8 +85,6 @@ fi
 sed -i "s/\(, \?ntp-servers\)/; #\1/g" /etc/dhcp/dhclient.conf
 
 #prevent time sync services from starting
-systemctl stop systemd-timedated
-systemctl disable systemd-timedated
 systemctl stop systemd-timesyncd
 systemctl disable systemd-timesyncd
 # Prevent time sync with chrony from starting.

@@ -20,7 +20,7 @@
 
     <groupId>org.eclipse.kura</groupId>
     <artifactId>org.eclipse.kura.demo.bnd.heater</artifactId>
-    <version>1.0.201-SNAPSHOT</version>
+    <version>1.0.201</version>
     <packaging>bundle</packaging>
 
     <repositories>

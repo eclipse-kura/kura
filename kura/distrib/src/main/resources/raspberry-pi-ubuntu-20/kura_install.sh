@@ -130,6 +130,10 @@ systemctl disable dhcpcd
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
 
+#disable isc-dhcp-server6.service
+systemctl stop isc-dhcp-server6.service
+systemctl disable isc-dhcp-server6.service
+
 # disable NetworkManager.service - kura is the network manager
 systemctl stop NetworkManager.service
 systemctl disable NetworkManager.service

@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -275,7 +276,7 @@ public class LinuxNetworkUtil {
             ret = true;
         } else {
             for (String folder : searchFolders) {
-                File fTool = new File(folder + tool);
+                File fTool = Paths.get(folder, tool).toFile();
                 if (fTool.exists()) {
                     TOOLS.add(tool);
                     ret = true;

@@ -1025,6 +1025,7 @@ public class WifiMonitorServiceImplTest {
         cmd = new String[] { "ethtool", "-i", "wlan3" };
         Command ethtoolCommand = new Command(cmd);
         ethtoolCommand.setTimeout(60);
+        ethtoolCommand.setExecuteInAShell(true);
         outputStream = new ByteArrayOutputStream();
         out = new DataOutputStream(outputStream);
         out.write(
@@ -1042,7 +1043,7 @@ public class WifiMonitorServiceImplTest {
         WifiInterfaceConfigImpl wifiInterfaceConfigInfra = new WifiBuilder(interfaceNameInfra)
                 .addWifiInterfaceAddressConfig(WifiMode.INFRA)
                 .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true)
-                .addWifiConfig("testDdriver", WifiMode.INFRA) // don't add this - calls a native binary
+                .addWifiConfig("testDriver", WifiMode.INFRA) // don't add this - calls a native binary
                 .build();
 
         String interfaceNameMaster = "wlan4";
@@ -1235,6 +1236,21 @@ public class WifiMonitorServiceImplTest {
         iwconfigStatusWlan.setOutputStream(outputStream);
         when(esMock.execute(iwconfigCommandWlan)).thenReturn(iwconfigStatusWlan);
 
+        CommandStatus ethtoolStatus = new CommandStatus(new Command(new String[] {}), new LinuxExitStatus(0));
+        cmd = new String[] { "ethtool", "-i", interfaceName };
+        Command ethtoolCommand = new Command(cmd);
+        ethtoolCommand.setTimeout(60);
+        ethtoolCommand.setExecuteInAShell(true);
+        outputStream = new ByteArrayOutputStream();
+        out = new DataOutputStream(outputStream);
+        out.write(
+                "driver: e1000\n        version: 7.3.21-k8-NAPI\n        firmware-version: \n        expansion-rom-version: \n        bus-info: 0000:00:03.0\n        supports-statistics: yes\n        supports-test: yes\n        supports-eeprom-access: yes\n        supports-register-dump: yes\n        supports-priv-flags: no"
+                        .getBytes());
+        outputStream.flush();
+        outputStream.close();
+        ethtoolStatus.setOutputStream(outputStream);
+        when(esMock.execute(ethtoolCommand)).thenReturn(ethtoolStatus);
+
         // hostapd is running
         when(esMock.isRunning(any(String[].class))).thenReturn(true);
         boolean iwExists = LinuxNetworkUtil.toolExists("iw");
@@ -1249,7 +1265,7 @@ public class WifiMonitorServiceImplTest {
         }
 
         WifiBuilder wifiBuilder = new WifiBuilder(interfaceName).addWifiInterfaceAddressConfig(mode)
-                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).addWifiConfig("testDdriver", mode);
+                .addNetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true).addWifiConfig("testDriver", mode);
 
         if (hasDhcpServer) {
             wifiBuilder.addDhcpConfig(true);

@@ -21,13 +21,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a container configuration used to request the generation of a new container instance and
- * running
+ * Object which represents a container configuration used to request the
+ * generation of a new container instance and running
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
@@ -52,9 +51,11 @@ public class ContainerConfiguration {
     }
 
     /**
-     * The method will provide information if the container is or not managed by the framework
+     * The method will provide information if the container is or not managed by the
+     * framework
      *
-     * @return <code>true</code> if the framework manages the container. <code>false</code> otherwise
+     * @return <code>true</code> if the framework manages the container.
+     *         <code>false</code> otherwise
      */
     public boolean isFrameworkManaged() {
         return this.isFrameworkManaged;
@@ -88,7 +89,8 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the list of environment properties that will be passed to the container
+     * Returns the list of environment properties that will be passed to the
+     * container
      *
      * @return
      */
@@ -115,7 +117,8 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns a boolean representing if the container runs or will run in privileged mode.
+     * Returns a boolean representing if the container runs or will run in
+     * privileged mode.
      *
      * @return
      */
@@ -140,10 +143,9 @@ public class ContainerConfiguration {
     public String getContainerLoggingType() {
         return this.containerLoggingType;
     }
-    
+
     /**
-     * @since 2.4
-     * Returns the {@link ImageConfiguration} object
+     * @since 2.4 Returns the {@link ImageConfiguration} object
      *
      * @return
      */
@@ -162,10 +164,9 @@ public class ContainerConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerDevices, this.containerEnvVars,
-                this.containerLoggerParameters, this.containerLoggingType, this.containerName,
-                this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
-                this.containerVolumes, this.isFrameworkManaged, this.imageConfig);
+        return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
+                this.containerLoggingType, this.containerName, this.containerPortsExternal, this.containerPortsInternal,
+                this.containerPrivileged, this.containerVolumes, this.isFrameworkManaged, this.imageConfig);
     }
 
     @Override
@@ -253,10 +254,10 @@ public class ContainerConfiguration {
             this.containerPrivileged = containerPrivileged;
             return this;
         }
-        
+
         public ContainerConfigurationBuilder setImageConfiguration(ImageConfiguration imageConfig) {
-        	this.imageConfig = imageConfig;
-        	return this;
+            this.imageConfig = imageConfig;
+            return this;
         }
 
         public ContainerConfiguration build() {

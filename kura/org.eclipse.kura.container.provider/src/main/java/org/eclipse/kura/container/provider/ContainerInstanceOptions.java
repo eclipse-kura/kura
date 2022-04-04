@@ -236,17 +236,20 @@ public class ContainerInstanceOptions {
     public int getImageDownloadTimeout() {
         return this.imageDownloadTimeout;
     }
-    
+
     private ImageConfiguration buildImageConfig() {
-    	return new ImageConfiguration.ContainerConfigurationBuilder().setImageName(image).setImageTag(imageTag).setImageDownloadTimeoutSeconds(imageDownloadTimeout).setRegistryCredentials(getRegistryCredentials()).build();
+        return new ImageConfiguration.ContainerConfigurationBuilder().setImageName(image).setImageTag(imageTag)
+                .setImageDownloadTimeoutSeconds(imageDownloadTimeout).setRegistryCredentials(getRegistryCredentials())
+                .build();
     }
 
     public ContainerConfiguration getContainerConfiguration() {
-        return ContainerConfiguration.builder().setContainerName(getContainerName()).setImageConfiguration(buildImageConfig())
-                .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())
-                .setEnvVars(getContainerEnvList()).setVolumes(getContainerVolumeList())
-                .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
-                .setFrameworkManaged(true).setLoggingType(getLoggingType()).setLoggerParameters(getLoggerParameters()).build();
+        return ContainerConfiguration.builder().setContainerName(getContainerName())
+                .setImageConfiguration(buildImageConfig()).setExternalPorts(getContainerPortsExternal())
+                .setInternalPorts(getContainerPortsInternal()).setEnvVars(getContainerEnvList())
+                .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
+                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
+                .setLoggerParameters(getLoggerParameters()).build();
     }
 
     private List<Integer> parsePortString(String ports) {

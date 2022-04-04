@@ -58,7 +58,7 @@ public class ContainerOrchestrationServiceImplTest {
     private static final String REPOSITORY_URL = "repository.hostname";
     private static final String REPOSITORY_USERNAME = "repository.username";
     private static final String REPOSITORY_PASSWORD = "repository.password";
-    
+
     private static final String REGISTRY_URL = "https://test";
     private static final String REGISTRY_USERNAME = "test";
     private static final String REGISTRY_PASSWORD = "test1";
@@ -396,12 +396,15 @@ public class ContainerOrchestrationServiceImplTest {
         // Build Respective CD's
         ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
-        
-        this.imageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(0).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
 
-        this.containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setImageConfiguration(imageConfig)
-                .setVolumes(Collections.singletonMap("test", "~/test/test"))
+        this.imageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("nginx")
+                .setImageTag("latest").setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+
+        this.containerConfig1 = ContainerConfiguration.builder().setContainerName("frank")
+                .setImageConfiguration(imageConfig).setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
                 .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
 

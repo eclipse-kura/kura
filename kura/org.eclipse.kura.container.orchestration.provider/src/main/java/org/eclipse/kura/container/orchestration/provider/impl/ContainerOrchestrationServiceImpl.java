@@ -418,7 +418,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException("failed to create container, null containerImage passed");
         }
 
-        String containerImageFullString = String.format("%s:%s", containerDescription.getImageConfiguration().getImageName(),
+        String containerImageFullString = String.format("%s:%s",
+                containerDescription.getImageConfiguration().getImageName(),
                 containerDescription.getImageConfiguration().getImageTag());
 
         CreateContainerCmd commandBuilder = null;
@@ -719,15 +720,17 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException {
-        if (isNull(imageConfig.getImageName()) || isNull(imageConfig.getImageTag()) || imageConfig.getimageDownloadTimeoutSeconds() < 0 || isNull(imageConfig.getRegistryCredentials())) {
+        if (isNull(imageConfig.getImageName()) || isNull(imageConfig.getImageTag())
+                || imageConfig.getimageDownloadTimeoutSeconds() < 0 || isNull(imageConfig.getRegistryCredentials())) {
             throw new IllegalArgumentException("Parameters cannot be null or negative");
         }
-        
+
         boolean imageAvailableLocally = doesImageExist(imageConfig.getImageName(), imageConfig.getImageTag());
 
         if (!imageAvailableLocally) {
             try {
-                imagePullHelper(imageConfig.getImageName(), imageConfig.getImageTag(), imageConfig.getimageDownloadTimeoutSeconds(), imageConfig.getRegistryCredentials());
+                imagePullHelper(imageConfig.getImageName(), imageConfig.getImageTag(),
+                        imageConfig.getimageDownloadTimeoutSeconds(), imageConfig.getRegistryCredentials());
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
@@ -745,18 +748,19 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         List<ImageInstanceDescriptor> result = new ArrayList<>();
         images.forEach(image -> {
             InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
-            result.add(ImageInstanceDescriptor.builder().setImageName(getImageName(image))
-                    .setImageTag(getImageTag(image)).setImageId(image.getId()).setImageAuthor(iir.getAuthor())
-                    .setImageArch(iir.getArch()).setimageSize(iir.getSize().longValue()).setImageLabels(image.getLabels()).build());
+            result.add(
+                    ImageInstanceDescriptor.builder().setImageName(getImageName(image)).setImageTag(getImageTag(image))
+                            .setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
+                            .setimageSize(iir.getSize().longValue()).setImageLabels(image.getLabels()).build());
         });
         return result;
     }
 
-    private String getImageName(Image image) {        
+    private String getImageName(Image image) {
         if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
             return "";
         }
-        
+
         return image.getRepoTags()[0].split(":")[0];
     }
 
@@ -764,23 +768,24 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
             return "";
         }
-        
+
         if (image.getRepoTags()[0].split(":").length < 2) {
             return "";
         }
-        
+
         return image.getRepoTags()[0].split(":")[1];
     }
-    
+
     @Override
     public void deleteImage(String imageId) throws KuraException {
         checkRequestEnv(imageId);
         try {
-            this.dockerClient.removeImageCmd(imageId).exec();   
+            this.dockerClient.removeImageCmd(imageId).exec();
         } catch (Exception e) {
             logger.error("Could not remove image {}.", imageId);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Image could not be deleted. It is most likely in use by a container.");
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
+                    "Image could not be deleted. It is most likely in use by a container.");
         }
-    }    
+    }
 
 }

@@ -113,20 +113,25 @@ public class ContainerConfigurationTest {
     }
 
     private void givenContainerNoCredentials() {
-    	this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE).setImageTag(CONTAINER_IMAGE_TAG).setImageDownloadTimeoutSeconds(0).build();
+        this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE)
+                .setImageTag(CONTAINER_IMAGE_TAG).setImageDownloadTimeoutSeconds(0).build();
 
         this.firstContainerConfig = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
                 .setImageConfiguration(firstImageConfig).build();
     }
 
     private void givenContainerBuilder() {
-    	this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE).setImageTag(CONTAINER_IMAGE_TAG).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).setImageDownloadTimeoutSeconds(0).build();
+        this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE)
+                .setImageTag(CONTAINER_IMAGE_TAG)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .setImageDownloadTimeoutSeconds(0).build();
 
-        this.containerConfigurationBuilder = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME).setImageConfiguration(firstImageConfig)
-                .setExternalPorts(CONTAINER_PORTS_EXTERNAL).setInternalPorts(CONTAINER_PORTS_INTERNAL)
-                .setEnvVars(CONTAINER_ENV_VARS).setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES)
-                .setPrivilegedMode(false).setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
+        this.containerConfigurationBuilder = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
+                .setImageConfiguration(firstImageConfig).setExternalPorts(CONTAINER_PORTS_EXTERNAL)
+                .setInternalPorts(CONTAINER_PORTS_INTERNAL).setEnvVars(CONTAINER_ENV_VARS)
+                .setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES).setPrivilegedMode(false)
+                .setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
                 .setLoggingType(CONTAINER_LOGGER_TYPE);
     }
 
@@ -138,8 +143,11 @@ public class ContainerConfigurationTest {
     private void givenContainerTwoDiffrent() {
 
         givenContainerBuilder();
-    	this.seccondImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("different").setImageTag("different").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of("different"),
-                REGISTRY_USERNAME, new Password("different")))).setImageDownloadTimeoutSeconds(0).build();
+        this.seccondImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("different")
+                .setImageTag("different")
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of("different"),
+                        REGISTRY_USERNAME, new Password("different"))))
+                .setImageDownloadTimeoutSeconds(0).build();
         this.secondContainerConfig = this.containerConfigurationBuilder.setImageConfiguration(seccondImageConfig)
                 .build();
     }

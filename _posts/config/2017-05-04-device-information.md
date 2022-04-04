@@ -14,6 +14,11 @@ The **Profile** tab shows several information about the gateway, organized under
 ## Bundles
 This tab lists all the bundles installed on ESF, with details about the name, version, id, state and signature.
 The signature value will be **true** if the corresponding bundle is digitally signed, **false** otherwise.
+The buttons in the upper part of the tab allows the user to manage the listed bundles:
+
+ - **Start Bundle**: starts a bundle that is in **Resolved** or **Installed** state;
+ - **Stop Bundle**: stops a bundle that is in **Active** state;
+ - **Refresh**: reloads the bundles states list.
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceBundles.png)
 
@@ -23,7 +28,7 @@ The **Threads** tab shows a list of the threads that are currently running in th
 ![]({{ site.baseurl }}/assets/images/config/DeviceThreads.png)
 
 ## System Packages
-The **System Packages** tab shows the list of all the Linux packages installed on the OS. The package is detailed with the name, version and type (DEB/RPM).
+The **System Packages** tab shows the list of all the Linux packages installed on the OS. The package is detailed with the name, version and type (DEB/RPM/APK).
 
 ![]({{ site.baseurl }}/assets/images/config/DeviceSystemPackages.png)
 

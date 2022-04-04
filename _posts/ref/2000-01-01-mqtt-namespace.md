@@ -1015,10 +1015,11 @@ An application is installed in the gateway to allow for the remote query of the 
 
 The **app_id** for the remote inventory service of an MQTT application is “**INVENTORY-V1**”.  The service allows to retrieve all the different resources available/installed on the gateway. The service supports the following resources:
 
-- DEB : represents a Linux Debian package
-- RPM : represents a Linux RPM package
 - BUNDLES : represents a OSGi Bundle
 - DP : represents a OSGi Deployment Package
+- DEB : represents a Linux Debian package
+- RPM : represents a Linux RPM package
+- APK : represents a Linux Alpine APK package
 
 The resources are represented in JSON format. The following message is an example of a service deployment:
 
@@ -1047,9 +1048,9 @@ The inventory JSON message is comprised of the following package elements:
 
 * Type
 
-#### INVENTORY-V1
+The “INVENTORY-V1” application supports the resource operations as described in the following sections.
 
-The “INVENTORY-V1” application supports only the *read* resource operations as described in the following sections.
+#### Inventory Bundles
 
 ##### Read All Bundles
 
@@ -1073,13 +1074,15 @@ The following JSON message is an example of a bundle:
             "name":"org.eclipse.osgi",
             "version":"3.16.0.v20200828-0759",
             "id":0,
-            "state":"ACTIVE"
+            "state":"ACTIVE",
+            "signed":false
         },
         {
             "name":"org.eclipse.equinox.cm",
             "version":"1.4.400.v20200422-1833",
             "id":1,
-            "state":"ACTIVE"
+            "state":"ACTIVE",
+            "signed":true
         }
     ]
 }
@@ -1094,6 +1097,58 @@ The bundle JSON message is comprised of the following bundle elements:
 * ID
 
 * State
+
+* Signed
+
+##### Start Bundle
+
+This operation allows to start a bundles installed in the OSGi framework.
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/EXEC/bundles/_start**
+
+* Request Payload:
+  * A JSON object that identifies the target bundle must be specified in payload body.
+    
+* Response Payload:
+  * Nothing application specific
+
+##### Stop Bundle
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/EXEC/bundles/_stop**
+
+* Request Payload:
+  * A JSON object that identifies the target bundle must be specified in payload body.
+
+* Response Payload:
+  * Nothing application specific
+
+##### JSON identifier for start and stop requests
+
+The requests for starting and stopping a bundle require the application to include a JSON object in request payload for selecting the target bundle, the defined properties are the following:
+
+* **name**: The symbolic name of the bundle to be started/stopped. This parameter must be of string type and it is mandatory.
+* **version**: The version of the bundle to be stopped. This parameter must be of string type and it is optional.
+
+If multiple bundles match the selection criteria, only one of them will be stopped/started, which one is not defined.
+
+Examples:
+
+```json
+{
+    "name":"org.eclipse.kura.example.beacon"
+}
+```
+
+```json
+{
+    "name":"org.eclipse.kura.example.beacon",
+    "version":"1.0.500"
+}
+```
+
+#### Inventory Deployment Packages
 
 ##### Read All Deployment Packages
 
@@ -1133,7 +1188,11 @@ The deployment package JSON message is comprised of the following package elemen
 
 * Version
 
+* Signature: true if all the bundles in the deployment package are signed
+
 * Bundles that are managed by the deployment package along with their symbolic name and version
+
+#### Inventory System Packages (DEB/RPM/APK)
 
 ##### Read All System Packages
 
@@ -1204,6 +1263,8 @@ The bundle JSON message is comprised of the following bundle elements:
 * Version
 
 * Type
+
+#### Inventory Summary
 
 ##### Read All Resources
 

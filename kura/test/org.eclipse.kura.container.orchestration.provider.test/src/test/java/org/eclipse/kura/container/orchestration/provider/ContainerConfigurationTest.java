@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration.ContainerConfigurationBuilder;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.junit.Test;
 
@@ -47,6 +48,8 @@ public class ContainerConfigurationTest {
     private ContainerConfiguration firstContainerConfig;
     private ContainerConfiguration secondContainerConfig;
     private ContainerConfigurationBuilder containerConfigurationBuilder;
+    private ImageConfiguration firstImageConfig;
+    private ImageConfiguration seccondImageConfig;
     private boolean comparisonResult;
     private int hashResult;
 
@@ -110,22 +113,21 @@ public class ContainerConfigurationTest {
     }
 
     private void givenContainerNoCredentials() {
+    	this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE).setImageTag(CONTAINER_IMAGE_TAG).setImageDownloadTimeoutSeconds(0).build();
 
         this.firstContainerConfig = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
-                .setContainerImage(CONTAINER_IMAGE).build();
+                .setImageConfiguration(firstImageConfig).build();
     }
 
     private void givenContainerBuilder() {
+    	this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE).setImageTag(CONTAINER_IMAGE_TAG).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).setImageDownloadTimeoutSeconds(0).build();
 
-        this.containerConfigurationBuilder = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
-                .setContainerImage(CONTAINER_IMAGE).setContainerImageTag(CONTAINER_IMAGE_TAG)
+        this.containerConfigurationBuilder = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME).setImageConfiguration(firstImageConfig)
                 .setExternalPorts(CONTAINER_PORTS_EXTERNAL).setInternalPorts(CONTAINER_PORTS_INTERNAL)
                 .setEnvVars(CONTAINER_ENV_VARS).setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES)
                 .setPrivilegedMode(false).setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
-                .setLoggingType(CONTAINER_LOGGER_TYPE)
-                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
-                .setImageDownloadTimeoutSeconds(0);
+                .setLoggingType(CONTAINER_LOGGER_TYPE);
     }
 
     private void givenContainerOne() {
@@ -136,8 +138,9 @@ public class ContainerConfigurationTest {
     private void givenContainerTwoDiffrent() {
 
         givenContainerBuilder();
-        this.secondContainerConfig = this.containerConfigurationBuilder.setRegistryCredentials(Optional
-                .of(new PasswordRegistryCredentials(Optional.of("different"), "different", new Password("different"))))
+    	this.seccondImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("different").setImageTag("different").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of("different"),
+                REGISTRY_USERNAME, new Password("different")))).setImageDownloadTimeoutSeconds(0).build();
+        this.secondContainerConfig = this.containerConfigurationBuilder.setImageConfiguration(seccondImageConfig)
                 .build();
     }
 
@@ -156,8 +159,8 @@ public class ContainerConfigurationTest {
     // then
     private void thenContainerPropertiesMatchExpected() {
         assertEquals(CONTAINER_NAME, this.firstContainerConfig.getContainerName());
-        assertEquals(CONTAINER_IMAGE, this.firstContainerConfig.getContainerImage());
-        assertEquals(CONTAINER_IMAGE_TAG, this.firstContainerConfig.getContainerImageTag());
+        assertEquals(CONTAINER_IMAGE, this.firstContainerConfig.getImageConfiguration().getImageName());
+        assertEquals(CONTAINER_IMAGE_TAG, this.firstContainerConfig.getImageConfiguration().getImageTag());
 
         assertEquals(CONTAINER_PORTS_EXTERNAL, this.firstContainerConfig.getContainerPortsExternal());
         assertEquals(CONTAINER_PORTS_INTERNAL, this.firstContainerConfig.getContainerPortsInternal());
@@ -168,14 +171,14 @@ public class ContainerConfigurationTest {
         assertEquals(CONTAINER_DEVICE_LIST, this.firstContainerConfig.getContainerDevices());
 
         PasswordRegistryCredentials prc = (PasswordRegistryCredentials) this.firstContainerConfig
-                .getRegistryCredentials().get();
+                .getImageConfiguration().getRegistryCredentials().get();
         assertEquals(REGISTRY_URL, prc.getUrl().get());
         assertEquals(REGISTRY_USERNAME, prc.getUsername());
         assertEquals(REGISTRY_PASSWORD, new String(prc.getPassword().getPassword()));
 
         assertFalse(this.firstContainerConfig.isContainerPrivileged());
         assertFalse(this.firstContainerConfig.isFrameworkManaged());
-        assertEquals(0, this.firstContainerConfig.getImageDownloadTimeoutSeconds());
+        assertEquals(0, this.firstContainerConfig.getImageConfiguration().getimageDownloadTimeoutSeconds());
     }
 
     private void thenFirstContainerDoesntEqualSeccond() {

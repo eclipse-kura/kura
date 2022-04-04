@@ -43,6 +43,7 @@ public interface ContainerOrchestrationService {
     public List<ContainerInstanceDescriptor> listContainerDescriptors();
     
     /**
+     * @since 2.4
      * Lists all available images, returning the corresponding {@link ImageInstanceDescriptor}s
      *
      * @return a list of {@link ContainerInstanceDescriptor}s representing the available containers
@@ -50,44 +51,21 @@ public interface ContainerOrchestrationService {
     public List<ImageInstanceDescriptor> listImageInstanceDescriptor();
     
     /**
+     * @since 2.4
      * Deletes Image from container engine. Takes ImageID String as parameter. Will throw an error if image is being used by a container.
      *
      * @return void
      * @throws KuraException 
      */
     public void deleteImage(String imageId) throws KuraException;
-
-    /**
-     * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded
-     * respecting the configured timeout in seconds.
-     *
-     * @param imageName
-     *            the image name to be used. Must not be null.
-     * @param imageTag
-     *            a string representing the image tag. Must not be null.
-     * @param timeOutSeconds
-     *            a non negative integer representing the image download timeout in seconds
-     * @param registryCredentials
-     *            an optional that can contain the registry URL and credentials for authentication
-     * @throws KuraException
-     *             if the pull operation fails
-     * @throws InterruptedException
-     */
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
-            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException;
     
     /**
+     * @since 2.4
      * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded
      * respecting the configured timeout in seconds.
      *
-     * @param imageName
-     *            the image name to be used. Must not be null.
-     * @param imageTag
-     *            a string representing the image tag. Must not be null.
-     * @param timeOutSeconds
-     *            a non negative integer representing the image download timeout in seconds
-     * @param registryCredentials
-     *            an optional that can contain the registry URL and credentials for authentication
+     * @param imageConfig
+     *            a ImageConfiguration object which contains info such as image name, tag, pull timeout in secconds and registry credentials.
      * @throws KuraException
      *             if the pull operation fails
      * @throws InterruptedException

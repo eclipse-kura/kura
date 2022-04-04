@@ -31,6 +31,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.provider.impl.ContainerOrchestrationServiceImpl;
 import org.junit.Test;
@@ -82,6 +83,7 @@ public class ContainerOrchestrationServiceImplTest {
     private ContainerInstanceDescriptor[] runningContainerDescriptor;
 
     private ContainerConfiguration containerConfig1;
+    private ImageConfiguration imageConfig;
 
     private Map<String, Object> properties;
     private String containerId;
@@ -274,8 +276,7 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void givenDockerServiceImplSpy() throws KuraException, InterruptedException {
         this.dockerService = Mockito.spy(new ContainerOrchestrationServiceImpl());
-        Mockito.doNothing().when(this.dockerService).pullImage(any(String.class), any(String.class), any(int.class),
-                any());
+        Mockito.doNothing().when(this.dockerService).pullImage(any(ImageConfiguration.class));
     }
 
     private void givenDockerClient() {
@@ -395,12 +396,14 @@ public class ContainerOrchestrationServiceImplTest {
         // Build Respective CD's
         ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
+        
+        this.imageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(0).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
 
-        this.containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setContainerImage("nginx")
+        this.containerConfig1 = ContainerConfiguration.builder().setContainerName("frank").setImageConfiguration(imageConfig)
                 .setVolumes(Collections.singletonMap("test", "~/test/test"))
                 .setDeviceList(Arrays.asList("/dev/gpio1", "/dev/gpio2"))
-                .setEnvVars(Arrays.asList("test=test", "test2=test2")).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
+                .setEnvVars(Arrays.asList("test=test", "test2=test2")).build();
 
         this.runningContainerDescriptor = new ContainerInstanceDescriptor[] { mcontCD1 };
 

@@ -287,8 +287,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             containerId = existingInstance.get().getContainerId();
         } else if (!existingInstance.isPresent()) {
             logger.info("Creating new container instance");
-            pullImage(container.getContainerImage(), container.getContainerImageTag(),
-                    container.getImageDownloadTimeoutSeconds(), container.getRegistryCredentials());
+            pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
             startContainer(containerId);
         } else {
@@ -337,25 +336,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
-        }
-    }
-
-    @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
-            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
-        if (isNull(imageName) || isNull(imageTag) || timeOutSeconds < 0 || isNull(registryCredentials)) {
-            throw new IllegalArgumentException("Parameters cannot be null or negative");
-        }
-        boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
-
-        if (!imageAvailableLocally) {
-            try {
-                imagePullHelper(imageName, imageTag, timeOutSeconds, registryCredentials);
-            } catch (InterruptedException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
-            }
         }
     }
 
@@ -433,13 +413,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException("failed to reach docker engine");
         }
 
-        if (containerDescription == null || containerDescription.getContainerImage() == null
-                || containerDescription.getContainerImageTag() == null) {
+        if (containerDescription == null || containerDescription.getImageConfiguration().getImageName() == null
+                || containerDescription.getImageConfiguration().getImageTag() == null) {
             throw new IllegalStateException("failed to create container, null containerImage passed");
         }
 
-        String containerImageFullString = String.format("%s:%s", containerDescription.getContainerImage(),
-                containerDescription.getContainerImageTag());
+        String containerImageFullString = String.format("%s:%s", containerDescription.getImageConfiguration().getImageName(),
+                containerDescription.getImageConfiguration().getImageTag());
 
         CreateContainerCmd commandBuilder = null;
         try {
@@ -739,8 +719,21 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     @Override
     public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException {
-        pullImage(imageConfig.getImageName(), imageConfig.getImageTag(), imageConfig.getimageDownloadTimeoutSeconds(),
-                imageConfig.getRegistryCredentials());
+        if (isNull(imageConfig.getImageName()) || isNull(imageConfig.getImageTag()) || imageConfig.getimageDownloadTimeoutSeconds() < 0 || isNull(imageConfig.getRegistryCredentials())) {
+            throw new IllegalArgumentException("Parameters cannot be null or negative");
+        }
+        
+        boolean imageAvailableLocally = doesImageExist(imageConfig.getImageName(), imageConfig.getImageTag());
+
+        if (!imageAvailableLocally) {
+            try {
+                imagePullHelper(imageConfig.getImageName(), imageConfig.getImageTag(), imageConfig.getimageDownloadTimeoutSeconds(), imageConfig.getRegistryCredentials());
+            } catch (InterruptedException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
+            }
+        }
     }
 
     @Override

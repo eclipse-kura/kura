@@ -25,7 +25,7 @@ import org.osgi.annotation.versioning.ProviderType;
  * that exist in the container engine.
  *
  * @noimplement This interface is not intended to be implemented by clients.
- * @since 2.3
+ * @since 2.4
  *
  */
 @ProviderType

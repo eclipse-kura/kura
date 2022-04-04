@@ -38,17 +38,17 @@ To begin configuring the container, look under **Services** and select the item 
 
 Containers may be configured using the following fields:
 
-- **Enabled** - When true, API will create the described container. When false the API will not create the container or will destroy the container if already running.
+- **Enabled** - When true, the service will create the defined container. When false the API will not create the container or will destroy the container if already running.
   
 - **Image Name** - Describes the image that will be used to create the container. Remember to ensure that the selected image supports the architecture of the host machine, or else the container will not be able to start.
   
 - **Image Tag** - Describes the version of the image that will be used to create the container.
 
-- **Authentication Registry URL** - URL for an alternative registry to pull images from. (If the field is left blank, credentials will be applied to Docker-Hub). Please see the [Authenticated Containers ](#authenticated-containers) document for more information about connecting to different popular repositories.
+- **Authentication Registry URL** - URL for an alternative registry to pull images from. (If the field is left blank, credentials will be applied to Docker-Hub). Please see the [Authenticated Registries ](#authenticated-registries) section for more information about connecting to different popular registries.
 
-- **Authentication Username** - Describes the username to access the repository entered above.
+- **Authentication Username** - Describes the username to access the registry entered above.
 
-- **Password** - Describes the password to access the alternative repository.
+- **Password** - Describes the password to access the alternative registry.
 
 - **Image Download Retries** - Describes the number of retries the framework will attempt to pull the image before giving up.
 
@@ -72,7 +72,7 @@ Containers may be configured using the following fields:
 
 - **Logger Parameters (optional)** - This field accepts a comma-separated list of logging parameters.
 
-After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway is reset (power cycled), and the container and Container Orchestration Service are set to **enabled**, The framework will automatically start the container again upon startup. 
+After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework are power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
 ![Supported-Container-Configuration]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/container_configuration.png)
 
@@ -80,7 +80,7 @@ After specifying container parameters, ensure to set **Enabled** to **true** and
 
 {% include alerts.html message="Stopping a container will delete it in irreversible way. Please be sure to use only stateless container and/or save their data in external volumes." %}
 
-To stop the container without deleting the component, set the **Enabled** field to **false**, and then press **Apply**. This will delete the running container, but leave this component available for running the container again in the future. If you want to completely remove the container and component, press the **Delete** button to the top right of the screen, and press **Yes** on the confirmation dialog.
+To stop the container without deleting the component, set the **Enabled** field to **false**, and then press **Apply**. This will delete the running container, but leave this component available for running the container again in the future. If you want to completely remove the container and component, press the **Delete** button to the top right of the screen, and press **Yes** on the confirmation dialogue.
 ![Stop-Container]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/stop_container.png)
 
 ## Container Management Dashboard
@@ -91,7 +91,7 @@ The Container Orchestration service also provides the user with an intuitive con
 
 ***
 
-# Authenticated Containers
+# Authenticated Registries
 The Container Orchestrator provider allows the user to pull images from private and password-protected registries. The following document will provide examples of how to connect to some popular registries.
 
 

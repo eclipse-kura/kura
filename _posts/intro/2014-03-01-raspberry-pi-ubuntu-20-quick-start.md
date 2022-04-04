@@ -55,24 +55,15 @@ following steps:
 
     All the required dependencies will be downloaded and installed.
 
-6. It could happen that 'wlan' interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:
+6. Set the right Wi-Fi regulatory domain based on your current world region editing the `/etc/default/crda` and adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region.
 
-    <pre>rfkill list</pre>
-
-    and unblock it with:
-
-    <pre>sudo rfkill unblock wlan</pre>
-
-
-7. Set the right Wi-Fi regulatory domain based on your current world region editing the `/etc/default/crda` and adding the [ISO 3166-1 alpha-2](https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2) code of your region.
-
-8. Reboot the Raspberry Pi with:
+7. Reboot the Raspberry Pi with:
 
     <pre>sudo reboot</pre>
 
     Kura starts on the target platform after reboot.
 
-9. Kura setups a local web ui that is available using a browser via:
+8. Kura setups a local web ui that is available using a browser via:
 
      <pre>https://&lt;device-ip&gt;</pre>
 

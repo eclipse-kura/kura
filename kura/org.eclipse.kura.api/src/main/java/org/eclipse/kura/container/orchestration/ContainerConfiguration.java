@@ -155,7 +155,7 @@ public class ContainerConfiguration {
     }
     
     /**
-     * @deprecated
+     * @deprecated Since 2.4 use {@link #getImageConfiguration()}. Image related information has been moved to the {@link ImageConfiguration} class.
      * Returns the base image for the associated container
      *
      * @return
@@ -165,7 +165,7 @@ public class ContainerConfiguration {
     }
 
     /**
-     * @deprecated
+     * @deprecated Since 2.4 use {@link #getImageConfiguration()}. Image related information has been moved to it's own class.
      * Returns the image tag for the associated container
      *
      * @return
@@ -175,7 +175,7 @@ public class ContainerConfiguration {
     }
 
     /**
-     * @deprecated
+     * @deprecated Since 2.4 use {@link #getImageConfiguration()}. Image related information has been moved to it's own class.
      * Returns the Registry credentials
      *
      * @return
@@ -185,7 +185,7 @@ public class ContainerConfiguration {
     }
 
     /**
-     * @deprecated
+     * @deprecated Since 2.4 use {@link #getImageConfiguration()}. Image related information has been moved to it's own class.
      * Returns the image download timeout (in seconds)
      *
      * @return

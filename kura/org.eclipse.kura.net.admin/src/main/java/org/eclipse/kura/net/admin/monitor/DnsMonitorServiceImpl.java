@@ -312,8 +312,8 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         LinuxDns linuxDns = this.dnsUtil;
         Set<IPAddress> currentServers = linuxDns.getDnServers();
 
-        if (newServers == null || newServers.isEmpty()) {
-            logger.debug("Not Setting DNS servers to empty");
+        if (newServers == null) {
+            logger.debug("Invalid DNS servers.");
             return;
         }
 

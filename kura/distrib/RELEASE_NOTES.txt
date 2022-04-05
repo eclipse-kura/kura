@@ -77,6 +77,8 @@ Known Issues :
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 53c47f859a - First version for Kura 5.1.1 release notes (#3952) (Matteo Maiero)
+  * 6dbef99a95 - Fixed incorrect permission name (#3950) (#3951) (github-actions[bot])
   * be2a792efc - Added all known permissions to snapshot_0 (#3948) (#3949) (github-actions[bot])
   * c3eaf1abef - Upticked versions for 5.1.1 release (#3946) (nicolatimeus)
   * f73e7ee2b6 - Disabled systemd-timedated.service and isc-dhcp-server6.service (#3927) (#3945) (github-actions[bot])

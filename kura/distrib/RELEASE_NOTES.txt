@@ -1,31 +1,15 @@
-Eclipse Kura - 5.1.0   - March 2022
+Eclipse Kura - 5.1.1   - April 2022
 -------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces new framework features 
-like gpsd support, EDGE AI, Linux Containers management from Kura, 
-device log management and reporting from the Local framework UI.
-
-It also introduces two new gateway profiles for Intel Up 2 and Raspberry Pi based on Ubuntu 20.04 64 bits.
-The EDGE AI features can be natively leveraged on a new profile Ubuntu 18 based for the NVIDIA Jetson Nano.
+This service release of Eclipse Kura fixes the Container Management support for Inventory-V1 request handler. 
+Minor additional fixes in installers to stop unneeded services in the target devices.
 
 
-Features:
-  * Position service gpsd support
-  * Docker container with Ubi8
-  * Docker Container Management API, with containers as Kura configurable components and INVENTORY-V1 integration
-  * EDGE AI APIs and NVIDIA Triton reference implementation and corresponding wire component.
-  * Log Management APIs and implementation with Web UI integration
-  * Network configuration snapshot-only based
-  * H2DB database update to 2.1.210 and required data service adaptations
-  * CONF-V2 and WIRE-V1 new REST APIs and Request Handlers
-  * Configurable PPP logging policy in kura.properties file
-  * Added the jax-rs provider multipart dependency
-  * Support for snapshot in JSON format
-  * Asset update to support scale, offset and unit in numeric channels
-  * Web Ui and user admin implementation update to support forced password change on first login
-  * Wi-Fi 5Ghz refactoring and enhancements 
-  * Wi-Fi regulatory domain checks and rules
-  * New platforms support with Intel Up 2 with Ubuntu 20, Raspberry Pi Ubuntu 20 and NVIDIA Jetson Nano
+Bug Fixes:
+  * Corrected wrong container service reference in Inventory code
+  * Removed features folder in Kura examples to prevent duplication
+  * Removed unnecessary disabling of services upon installation
+  * Network related permission cleanup 
 
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
@@ -45,28 +29,6 @@ Breaking Changes:
     and radio mode before accessing Wi-Fi hotspots that use regulated channels.
   * Configuring the PPP interface number for a cellular interface is no longer supported, the PPP interface number is now assigned automatically.
   * The properties that describe the configuration of a cellular interface are now identified by the modem USB port and not by the PPP interface number.
- 
-Deprecated APIs:
-  * org.eclipse.kura.position.PositionService (partial)
-  * org.eclipse.kura.net.NetworkService (partial)
-  * org.eclipse.kura.net.wifi.WifiConfig (partial)
-
-Target Platform Updates
-  * com.h2database.h2=2.1.210
-  * com.google.protobuf=3.19.3
-  * log4j=2.17.1
-  * com.eclipsesource.jaxrs.provider.multipart=2.2.0.201602281253
-  * org.apache.commons.commons-net=3.8.0
-  * org.apache.commons.commons-io=2.11.0
-  * com.eurotech.gpsd4java=1.0.0
-  * org.eclipse.jetty.continuation=9.4.44.v20210927
-  * org.eclipse.jetty.http=9.4.44.v20210927
-  * org.eclipse.jetty.io=9.4.44.v20210927
-  * org.eclipse.jetty.security=9.4.44.v20210927
-  * org.eclipse.jetty.server=9.4.44.v20210927
-  * org.eclipse.jetty.servlet=9.4.44.v20210927
-  * org.eclipse.jetty.util=9.4.44.v20210927
-  * org.eclipse.jetty.util.ajax=9.4.44.v20210927
 
 Known Issues :
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
@@ -115,160 +77,11 @@ Known Issues :
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
-  * 3148a7f8a6 - Merge pull request #3923 from eclipse/backport-3916-to-release-5.1.0 (nicolatimeus)
-  * 63554abde0 - Fix Kura log rotation (#3916) (Mattia Dal Ben)
-  * daa1d47e0a - Added container orchestration bundles to dev-env (#3919) (#3922) (github-actions[bot])
-  * dbd8a07f3c - Disabled systemd-hostnamed (#3917) (#3921) (github-actions[bot])
-  * 3d42a14f7e - Removed dhcp confinguration tmp file once consumed (#3918) (#3920) (github-actions[bot])
-  * 8491a9c34e - Changed TensorListAdapter.fromTensorList (#3911) (#3915) (github-actions[bot])
-  * a0c8975574 - Added support for container registry auth (#3908) (#3912) (github-actions[bot])
-  * 162ce8715d - Fixed identity permission table max size (#3909) (#3910) (github-actions[bot])
-  * 12d5a2c5f6 - Force ipv4 in gpsd.socket on Jetson Nano (#3901) (#3905) (github-actions[bot])
-  * ab17ef3143 - Fixed typo. (#3904) (#3906) (github-actions[bot])
-  * def153e72e - Added gcompat dependency (#3900) (#3903) (github-actions[bot])
-  * a0c897557 - Added support for container registry auth (#3908) (#3912) (github-actions[bot])
-  * 162ce8715 - Fixed identity permission table max size (#3909) (#3910) (github-actions[bot])
-  * 12d5a2c5f - Force ipv4 in gpsd.socket on Jetson Nano (#3901) (#3905) (github-actions[bot])
-  * ab17ef314 - Fixed typo. (#3904) (#3906) (github-actions[bot])
-  * def153e72 - Added gcompat dependency (#3900) (#3903) (github-actions[bot])
-  * 4eb1e0145 - Merge pull request #3897 from nicolatimeus/backport-3896-to-release-5.1.0 (nicolatimeus)
-  * c3ba2cdda - Merge pull request #3898 from nicolatimeus/backport-3895-to-release-5.1.0 (nicolatimeus)
-  * 274a2b655 - initial commit of all logger driver code (Gregory Ivo)
-  * bcd5706d3 - Improved image pull logging (Maiero)
-  * 270fbd575 - Fixed netWifiChannelMissingError message (#3892) (#3894) (github-actions[bot])
-  * b096644d5 - Add container start retry (#3869) (#3893) (github-actions[bot])
-  * 946b526d9 - Remove the recover config script (#3843) (#3891) (github-actions[bot])
-  * 4f948cb97 - H2DB store wire component checks on user input (#3855) (#3890) (github-actions[bot])
-  * ee3ef3f8b - Unlock radio mode and channel selection in WiFi station mode (#3859) (#3889) (github-actions[bot])
-  * 8a65b6bfd - Removed leftover rock960 references (#3877) (#3878) (Matteo Maiero)
-  * 702fb8ff8 - Removed /etc/network/interfaces.tmp after it has been consumed (#3872) (#3887) (github-actions[bot])
-  * 3e9641758 - Improved disable of NTP server request for DHCP client (#3880) (#3888) (Mattia Dal Ben)
-  * 4e11281bc - [Backport release-5.1.0] Added workaround for GPSD not reporting fix lost (#3875) (nicolatimeus)
-  * 2ae4116fa - Merge pull request #3885 from nicolatimeus/backport-3884-to-release-5.1.0 (nicolatimeus)
-  * 4a60ebf57 - Merge pull request #3883 from eclipse/backport-3876-to-release-5.1.0 (nicolatimeus)
-  * 58d95e229 - Merge pull request #3881 from eclipse/backport-3874-to-release-5.1.0 (nicolatimeus)
-  * bd6b97329 - Changed Kura files permissions (Merlino)
-  * 2b67e4aef - Fix error dhcp-lease-list (#3876) (Marcello Rinaldo Martina)
-  * 298e4d107 - Added missing since annotation to dhcp lease (#3874) (Matteo Maiero)
-  * 66ad8f427 - Preventing systemd-tmpfiles cleanup (#3867) (#3873) (github-actions[bot])
-  * 37e1b21e4 - Merge pull request #3871 from eclipse/backport-3862-to-release-5.1.0 (nicolatimeus)
-  * 0f8b82f5f - Fixed forgotten comma in Jetson Nano control file (#3862) (Mattia Dal Ben)
-  * 7a0ae23ca - DHCP server lease database fix on Jetson Nano (#3857) (#3864) (github-actions[bot])
-  * 3e6d92032 - Merge pull request #3863 from eclipse/backport-3847-to-release-5.1.0 (nicolatimeus)
-  * bda78a5b9 - Kura installers alignment for Ubuntu profiles (#3850) (#3860) (github-actions[bot])
-  * 1b3148425 - Fixed Invalid returned GPS Position and event firing missing. (#3847) (Salvatore Coppola)
-  * 34d7ce85f - [Backport release-5.1.0] Minor changes to fix spelling in docker logs (#3848) (github-actions[bot])
-  * 813f275f5 - Updated ssl keystore adding certificate for Eclipse marketplace (#3854) (#3856) (github-actions[bot])
-  * 08f1b69bb - Fixed port forward behaviour with single source port (#3841) (#3851) (github-actions[bot])
-  * 093eca1c3 - Update release notes for Kura 5.1.0 (#3853) (Mattia Dal Ben)
-  * 433102b9e - Modified firewall rules specifying ports for port 22 (#3844) (#3849) (github-actions[bot])
-  * 879d918dc - Prepare 5.1.0 release branch (#3842) (nicolatimeus)
-  * 380463bc2 - Fixed core test imports (#3838) (Matteo Maiero)
-  * 838ba7e81 - Minor adjustment to build.properties (#3833) (nicolatimeus)
-  * fb4b330d4 - First implementation of Triton inference engine (#3810) (Pierantonio Merlino)
-  * 61f363101 - web2 code contribution for container orchestration  (#3821) (G_Ivo)
-  * 849c56a6f - inventory code contribution for container orchestration (#3822) (G_Ivo)
-  * 666211b96 - Kura container management (Container Provider - Factory) [depends on PR 1] #2 (#3795) (G_Ivo)
-  * a0da2eb8c - Disabled time synch services after Kura installation (#3831) (Mattia Dal Ben)
-  * 7f241a92f - Unify emulator launch (#3825) (Matteo Maiero)
-  * eef4cb4e0 - Disable net management services on Jetson Nano during Kura installation (#3828) (Mattia Dal Ben)
-  * 2b3feb15c - Modem related fixes (#3811) (nicolatimeus)
-  * 8ef422834 - Added AI Wire Component to featuresas DP, added as default to nvidia-jetson-nano build (#3819) (Marcello Rinaldo Martina)
-  * 7f99b30a5 - AI Wire Component unit test (#3814) (Mattia Dal Ben)
-  * 4d4c50c31 - Allow suppressing the start of the bluetooth daemon (#3623) (Jens Reimann)
-  * 7eaf44a94 - Applied quick fix to jdk.dio to fix Sensehat driver issue (#3813) (nicolatimeus)
-  * ed4a766ae - Should support disabling/removal of value notifications callbacks. (#3804) (Martin Zachrison)
-  * c70d51475 - AI Wire Component (#3812) (Marcello Rinaldo Martina)
-  * 52151165a - Attempt to remove jakarta.annotation-api (#3809) (nicolatimeus)
-  * 844cca681 - fix #3444  #3308  #3733 (#3775) (heyoulin)
-  * 8f4923ff6 - Simplified edge ai APIs (#3807) (Pierantonio Merlino)
-  * fb0953f42 - Updated Web Console metatype description for the entry point (#3806) (Matteo Maiero)
-  * 0ac1a4ff4 - Fix intermittent wifi scan failures. (#3799) (Salvatore Coppola)
-  * 7e8975a4f - Added support for larger numeric node ids in OPCUA driver (#3803) (nicolatimeus)
-  * dc8ca5b2d - Kura Container management (API - container.orchestrator) #1 (#3794) (G_Ivo)
-  * 722c442b5 - Edge AI server APIs (#3786) (Pierantonio Merlino)
-  * 673667ae7 - Channel selection is editable also in station mode (#3800) (Matteo Maiero)
-  * 70a7abd4e - Updated commons-net/io dependency (#3779) (Matteo Maiero)
-  * 91355d316 - Permissions table now is sorted and sortable. (#3792) (Salvatore Coppola)
-  * 51d2285cd - Divided payload column into small and large (#3773) (Marcello Rinaldo Martina)
-  * 356a6e80c - Reviewed ubuntu nn snapshot. (#3798) (Matteo Maiero)
-  * c76e3627b - Fixed failure in displaying Asset channel configuration with a CHAR property (#3797) (Matteo Maiero)
-  * 7042cd77e - Merge pull request #3785 from salvatore-coppola/fix-deadlock-first-start (nicolatimeus)
-  * e22c05a73 - Removed audit. (#3791) (Matteo Maiero)
-  * 1d970a683 - configurationService#updateConfiguration is removed from synchronized block. (Salvatore Coppola)
-  * ef42d35d4 - Removed non-existent profile speedup. (#3787) (Salvatore Coppola)
-  * a6acc1d22 - Changed default Position in case of no data. (#3783) (Salvatore Coppola)
-  * 72bc81b2e - Dhcp Lease List Added (#3756) (ftoure67)
-  * d98e2d769 - Added @since annotation. (#3782) (Salvatore Coppola)
-  * 5c2091d74 - Docker images clean up (#3778) (Salvatore Coppola)
-  * c58d244d7 - Added Support for Gpsd (#3740) (Salvatore Coppola)
-  * e529a2828 - Feature wire metadata (#3771) (nicolatimeus)
-  * aad95f92c - Fix networking defaults (#3764) (Matteo Maiero)
-  * 6485eb24e - Added validation to DHCP/NAT tab (#3769) (Pierantonio Merlino)
-  * a994519bd - Fix special characters in Wi-Fi SSID (#3768) (Salvatore Coppola)
-  * a600da729 - Allowed to submit password change modal with enter key (#3777) (nicolatimeus)
-  * cac67ed0c - Fixed request handler cardinality (#3770) (Matteo Maiero)
-  * 35e354e8e - Added support for password change on login  (#3760) (nicolatimeus)
-  * 8278c797b - First implementation of WIRE-V1 (#3747) (nicolatimeus)
-  * 607004e23 - Network configuration clean up (#3749) (Pierantonio Merlino)
-  * 4df89ae80 - Update h2db to 2.1.210 (#3728) (Marcello Rinaldo Martina)
-  * 2b9c4a804 - Merge pull request #3745 from marcellorinaldo/add-cog-during-log-download (nicolatimeus)
-  * bd9a1a050 - Updated protobuf Java to 3.19.3 (#3753) (Matteo Maiero)
-  * 3cc2d0b73 - Updated Jetty web server to 9.4.44 (#3750) (Matteo Maiero)
-  * 0936b5260 - Upgraded log4j2 to version 2.17.1 (#3746) (Salvatore Coppola)
-  * 05758b8d9 - Added a nonce to the download cookie to differentiate different users requests (Marcello Martina)
-  * 3d70ce239 - Added waiting modal when downloading logs using cookies (Marcello Martina)
-  * 67c28bca1 - Improved Network classes cleanliness (#3741) (Pierantonio Merlino)
-  * 7f9764d5c - Adding property to disable ppp logging (#3744) (Matteo Maiero)
-  * 10c68a126 - Minor README docs improvements (#3742) (Mattia Dal Ben)
-  * 5e85f8c48 - Reviewed refresh logic in firewall tabs. (#3739) (Matteo Maiero)
-  * fc0208dec - Added the jax-rs provider multipart dependency (#3736) (Matteo Maiero)
-  * fb9797c50 - Fix GATT characteristic name when parsing to match enum (#3734) (Andrej Krota)
-  * b8637f2c7 - First attempt to remove dependency on kuranet and net config files (#3676) (Pierantonio Merlino)
-  * 151cf18ed - Fix deb dependencies during multiple profile building (#3711) (Salvatore Coppola)
-  * 8a8396ae1 - Add log UI new window button (#3715) (Marcello Rinaldo Martina)
-  * 085a8fd58 - Merge pull request #3722 from eclipse/update-log4j-2.17.0 (nicolatimeus)
-  * f1fd2ad78 - Updated log4j to 2.17.0 (Maiero)
-  * f933fade8 - Updated log4j2 to 2.16.0 (#3713) (Matteo Maiero)
-  * b5e072bdd - Disable dhcpcd and isc-dhcp-server (#3706) (Salvatore Coppola)
-  * 2ffabeb45 - Allow different dns service name in systemd. (#3707) (Salvatore Coppola)
-  * 0c3e48f17 - Merge pull request #3708 from eclipse/update_log4j (nicolatimeus)
-  * 3688cf6ec - Updating log4j version to 2.15.0. (Maiero)
-  * 6f074db92 - Add multiuser support for UI log view (#3703) (Marcello Rinaldo Martina)
-  * 20095c265 - Added UI support for JSON snapshot format (#3704) (nicolatimeus)
-  * 1d739457a - Upgrade raspbian profile to bulleyes 2 (#3705) (Salvatore Coppola)
-  * f2c5de52b - Added value unit support (#3699) (Matteo Maiero)
-  * b6806d2cb - Attempt to time correctly isSync asserts (#3702) (Marcello Rinaldo Martina)
-  * 0fb21bf5f - Updated snapshot0 profiles to have default filesystem log providers (#3701) (Marcello Rinaldo Martina)
-  * c763ab537 - Add scale and offset to the Asset channels (#3694) (Matteo Maiero)
-  * 140398f04 - Added org.eclipse.kura.log.filesystem.provider bundle (#3686) (Marcello Rinaldo Martina)
-  * 16f1f8bee - First implementation of CONF-V2 request handler and Rest APIs (#3698) (nicolatimeus)
-  * 7f0e199ae - Jaxb-impl is started on boot. (#3692) (Matteo Maiero)
-  * 908ecad65 - Fixed missing since tag in WiFiInterface class (#3693) (Matteo Maiero)
-  * a1e71a08d - Updated readme and contributing files (#3688) (Salvatore Coppola)
-  * f18c0c94a - Now a task monitor is created if there is a disabled interface. (#3690) (Salvatore Coppola)
-  * 63e1b716e - Wifi 5ghz enhancement (#3661) (Salvatore Coppola)
-  * bdaef35a5 - First implementation of the UI log view feature (#3680) (Marcello Rinaldo Martina)
-  * b2a0430e2 - Added signature status in inventory results (#3681) (Matteo Maiero)
-  * d127f9980 - Added LogProvider interface and renamed LogReaderListener (#3682) (Marcello Rinaldo Martina)
-  * fb0a1c037 - Added code to manage signature status (#3675) (Matteo Maiero)
-  * 3e2c52bb5 - Added explicit reference to openjdk8 (#3677) (Matteo Maiero)
-  * 8ad9f20f3 - Fixed typo in kura_install.sh script (#3678) (Salvatore Coppola)
-  * 0d76e656a - Added explicit reference to openjdk8 in Kura Intel Up 2 Profile (#3679) (Salvatore Coppola)
-  * 69af673af - Raspberry 3 & 4 ubuntu20 profile fixes (#3667) (Salvatore Coppola)
-  * b15dec991 - Updated packages section description. (#3670) (Matteo Maiero)
-  * 48c825ddc - Intel up 2 - Ubuntu 20 - Removed netplan stopping (#3673) (Salvatore Coppola)
-  * dd735c6a8 - Disabled standard Ubuntu service that could interfere with the network management. (#3671) (Salvatore Coppola)
-  * 2493caf90 - Added error message on H2DbFilter unsupported type usage (#3672) (nicolatimeus)
-  * 372a4fc64 - Added new log APIs (#3665) (Marcello Rinaldo Martina)
-  * 0d86bdac2 - Support for Ubuntu 20 on Raspberry Pi 3 & 4 (#3666) (Salvatore Coppola)
-  * fa3a4e687 - Fixed wrong version (#3659) (Matteo Maiero)
-  * ca623dcfc - Prepared versions for 5.1.0-SNAPSHOT (#3631) (Matteo Maiero)
-  * 9a33b9ffa - Fix wpa encoded password save (#3637) (Salvatore Coppola)
-  * 829adab4e - Replaced Intel Up2 Ubuntu 18 profile with Intel Up2 Ubuntu 20 (#3600) (Salvatore Coppola)
-  * 677c18c10 - Fixed logging bundles. (#3636) (Salvatore Coppola)
-  * dea048f44 - Add Nvidia Jetson Nano profiles (#3592) (Pierantonio Merlino)
-  * a067e074c - Encode WPA password in wpa_supplicant.conf files. (#3609) (Salvatore Coppola)
-  * 1ccc1e4eb - Set default privileged command service in some profiles (#3603) (Pierantonio Merlino)
-  * 765be981a - [#3587]: Add missing files to installation (#3588) (Jens Reimann)
-  * 7e7c13199 - Applied formatting to WifiAccessPointImplTest (#3597) (Matteo Maiero)
+  * be2a792efc - Added all known permissions to snapshot_0 (#3948) (#3949) (github-actions[bot])
+  * c3eaf1abef - Upticked versions for 5.1.1 release (#3946) (nicolatimeus)
+  * f73e7ee2b6 - Disabled systemd-timedated.service and isc-dhcp-server6.service (#3927) (#3945) (github-actions[bot])
+  * 3f6ff9c11a - Removed unnecessary disable of `systemd-timedated` upon installation (#3943) (#3944) (github-actions[bot])
+  * 78afcdd727 - Removed the features in the examples folder (#3939) (#3942) (nicolatimeus)
+  * 54ae56908d - Fixed wrong container service ref from Inventory (#3933) (#3941) (github-actions[bot])
+  * 26e5e9213e - Updated build.properties files for 5.1.1 (#3940) (nicolatimeus)
+  * d3ee3a12ff - Upticked versions to 5.1.1-SNAPSHOT  (#3932) (nicolatimeus)

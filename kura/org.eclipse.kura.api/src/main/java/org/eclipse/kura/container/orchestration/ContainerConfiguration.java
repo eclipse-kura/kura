@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -151,6 +152,46 @@ public class ContainerConfiguration {
      */
     public ImageConfiguration getImageConfiguration() {
         return this.imageConfig;
+    }
+    
+    /**
+     * @deprecated
+     * Returns the base image for the associated container
+     *
+     * @return
+     */
+    public String getContainerImage() {
+        return this.imageConfig.getImageName();
+    }
+
+    /**
+     * @deprecated
+     * Returns the image tag for the associated container
+     *
+     * @return
+     */
+    public String getContainerImageTag() {
+        return this.imageConfig.getImageTag();
+    }
+
+    /**
+     * @deprecated
+     * Returns the Registry credentials
+     *
+     * @return
+     */
+    public Optional<RegistryCredentials> getRegistryCredentials() {
+        return this.imageConfig.getRegistryCredentials();
+    }
+
+    /**
+     * @deprecated
+     * Returns the image download timeout (in seconds)
+     *
+     * @return
+     */
+    public int getImageDownloadTimeoutSeconds() {
+        return this.imageConfig.getimageDownloadTimeoutSeconds();
     }
 
     /**

@@ -32,6 +32,8 @@ Breaking Changes:
 
 Known Issues :
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
+  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is 
+    built and run immediately after installation.
   * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
     The issue impact is limited, if the dataservice reconnect option is enabled.  
   * The implementation of the CryptoService performs encryption using a

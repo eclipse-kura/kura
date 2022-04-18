@@ -27,7 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Object which represents a container configuration used to request the
- * generation of a new container instance and running 
+ * generation of a new container instance and running
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
@@ -153,9 +153,11 @@ public class ContainerConfiguration {
     public ImageConfiguration getImageConfiguration() {
         return this.imageConfig;
     }
-    
+
     /**
-     * Returns the base image for the associated container. Detailed image information can be found in the {@link ImageConfig} class, provided by the {@link #getImageConfiguration()} method.
+     * Returns the base image for the associated container. Detailed image
+     * information can be found in the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
      *
      * @return
      */
@@ -164,7 +166,9 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the image tag for the associated container. Detailed image information can be found in the {@link ImageConfig} class, provided by the {@link #getImageConfiguration()} method.
+     * Returns the image tag for the associated container. Detailed image
+     * information can be found in the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
      *
      * @return
      */
@@ -173,7 +177,9 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the Registry credentials. Detailed image information can be found in the {@link ImageConfig} class, provided by the {@link #getImageConfiguration()} method.
+     * Returns the Registry credentials. Detailed image information can be found in
+     * the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
      *
      * @return
      */
@@ -182,7 +188,9 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the image download timeout (in seconds). Detailed image information can be found in the {@link ImageConfig} class, provided by the {@link #getImageConfiguration()} method.
+     * Returns the image download timeout (in seconds). Detailed image information
+     * can be found in the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
      *
      * @return
      */

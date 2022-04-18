@@ -250,11 +250,11 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 return success();
             } else if (DELETE_IMAGE.equals(resources)) {
 
-                if (this.dockerService == null) {
+                if (this.containerOrchestrationService == null) {
                     return notFound();
                 }
 
-                this.dockerService
+                this.containerOrchestrationService
                         .deleteImage(findFirstMatchingImage(extractContainerImageRef(reqMessage)).getImageId());
                 return success();
             }
@@ -403,10 +403,10 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         }
         
         // get Container Images
-        if (this.dockerService != null) {
+        if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating container images invenetory");
-                List<ImageInstanceDescriptor> images = this.dockerService.listImageInstanceDescriptor();
+                List<ImageInstanceDescriptor> images = this.containerOrchestrationService.listImageInstanceDescriptor();
                 images.stream().forEach(
                         image -> inventory.add(new SystemResourceInfo(image.getImageName(),
                                 image.getImageTag(),
@@ -482,13 +482,13 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     
     private KuraPayload doGetContainerImages() {
 
-        if (this.dockerService == null) {
+        if (this.containerOrchestrationService == null) {
             return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
         }
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ImageInstanceDescriptor> containers = this.dockerService.listImageInstanceDescriptor();
+            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService.listImageInstanceDescriptor();
 
             List<ContainerImage> imageList = new ArrayList<>();
             containers.stream().forEach(p -> imageList.add(new ContainerImage(p)));
@@ -646,7 +646,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         		ContainerImage.class);
 
         try {
-            List<ImageInstanceDescriptor> imageList = this.dockerService.listImageInstanceDescriptor();
+            List<ImageInstanceDescriptor> imageList = this.containerOrchestrationService.listImageInstanceDescriptor();
 
             for (ImageInstanceDescriptor image : imageList) {
                 if (image.getImageName().equals(dc.getImageName()) && image.getImageTag().equals(dc.getImageTag())) {
@@ -691,7 +691,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     
     private ImageInstanceDescriptor findFirstMatchingImage(final ImageInstanceDescriptor ref)
             throws KuraException {
-        for (final ImageInstanceDescriptor image : this.dockerService.listImageInstanceDescriptor()) {
+        for (final ImageInstanceDescriptor image : this.containerOrchestrationService.listImageInstanceDescriptor()) {
             if (image.getImageName().equals(ref.getImageName()) && image.getImageTag().equals(ref.getImageTag())) {
                 return image;
             }

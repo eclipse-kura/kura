@@ -34,7 +34,7 @@ public class JsonJavaContainerImagesMapper {
     // ]
     // }
 
-    private static final String SYSTEM_IMAGES = "containers";
+    private static final String SYSTEM_IMAGES = "images";
     private static final String SYSTEM_IMAGES_IMAGE_NAME = "name";
     private static final String SYSTEM_IMAGES_IMAGE_VERSION = "version";
     private static final String SYSTEM_IMAGES_IMAGE_TYPE = "type";

@@ -31,6 +31,7 @@ public class ContainerImage extends SystemResourceInfo {
     public ContainerImage(String name, String version) {
         super(name, version, SystemResourceType.CONTAINER_IMAGE);
         this.imageName = name;
+        this.imageTag = version;
     }
 
     public ContainerImage(ImageInstanceDescriptor image) {

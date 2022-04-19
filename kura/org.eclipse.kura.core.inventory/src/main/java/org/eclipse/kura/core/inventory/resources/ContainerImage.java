@@ -29,7 +29,7 @@ public class ContainerImage extends SystemResourceInfo {
     private Boolean isFrameworkManaged;
 
     public ContainerImage(String name, String version) {
-        super(name, version, SystemResourceType.DOCKER);
+        super(name, version, SystemResourceType.CONTAINER_IMAGE);
         this.imageName = name;
     }
 

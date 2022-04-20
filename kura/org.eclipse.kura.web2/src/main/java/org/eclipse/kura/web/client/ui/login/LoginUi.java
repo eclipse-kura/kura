@@ -401,8 +401,8 @@ public class LoginUi extends Composite implements Context {
 
         private void changePassword(final Consumer<Void> onSuccess, final Consumer<Throwable> onFailure) {
 
-            getGwtConsoleUserOptions(options -> this.passwordChangeModal.pickPassword(options,
-                    p -> setNewPassword(p, onSuccess, onFailure)), onFailure);
+            getGwtConsoleUserOptions(options -> this.passwordChangeModal.pickPassword(true, options,
+                    (oldPass, newPass) -> setNewPassword(newPass, onSuccess, onFailure)), onFailure);
         }
 
         private <T> AsyncCallback<T> asyncCallback(final Consumer<T> onSuccess, final Consumer<Throwable> onFailure) {

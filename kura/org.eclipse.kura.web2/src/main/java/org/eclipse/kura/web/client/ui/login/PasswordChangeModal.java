@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.gwtbootstrap3.client.ui.Button;
+import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
@@ -45,6 +46,10 @@ public class PasswordChangeModal extends Composite {
     @UiField
     Modal passwordChangeModal;
     @UiField
+    FormGroup oldPasswordGroup;
+    @UiField
+    Input oldPassword;
+    @UiField
     Input newPassword;
     @UiField
     Input confirmNewPassword;
@@ -53,15 +58,37 @@ public class PasswordChangeModal extends Composite {
     @UiField
     FormPanel passwordChangeForm;
 
+    private boolean isAdmin;
+
     private Optional<Callback> callback = Optional.empty();
 
     public PasswordChangeModal() {
         initWidget(uiBinder.createAndBindUi(this));
 
+        this.oldPassword.addChangeHandler(e -> validate());
         this.newPassword.addChangeHandler(e -> validate());
         this.confirmNewPassword.addChangeHandler(e -> validate());
+        this.oldPassword.addKeyUpHandler(e -> validate());
         this.newPassword.addKeyUpHandler(e -> validate());
         this.confirmNewPassword.addKeyUpHandler(e -> validate());
+
+        this.oldPassword.addValidator(new Validator<String>() {
+
+            @Override
+            public int getPriority() {
+                return 0;
+            }
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String value) {
+                if (value == null || value.length() <= 0) {
+                    return Collections
+                            .singletonList(new BasicEditorError(editor, value, "enter the current user password"));
+                }
+                return Collections.emptyList();
+            }
+
+        });
 
         this.confirmNewPassword.addValidator(new Validator<String>() {
 
@@ -88,15 +115,23 @@ public class PasswordChangeModal extends Composite {
     }
 
     private void trySubmit() {
+        Optional<String> oldPassword = Optional.ofNullable(this.oldPassword.getValue());
+        
+        if (!this.isAdmin && !oldPassword.isPresent()) {
+            return;
+        }
+        
         if (!newPassword.validate() || !confirmNewPassword.validate()) {
             return;
         }
 
         passwordChangeModal.hide();
-        callback.ifPresent(c -> c.onPasswordChanged(newPassword.getValue()));
+        callback.ifPresent(
+                c -> c.onPasswordChanged(oldPassword, newPassword.getValue()));
     }
 
     private void validate() {
+        oldPassword.validate();
         newPassword.validate();
         confirmNewPassword.validate();
     }
@@ -124,7 +159,10 @@ public class PasswordChangeModal extends Composite {
         });
     }
 
-    public void pickPassword(final GwtConsoleUserOptions options, final Callback callback) {
+    public void pickPassword(boolean isAdmin, final GwtConsoleUserOptions options, final Callback callback) {
+        this.isAdmin = isAdmin;
+        this.oldPasswordGroup.setVisible(!this.isAdmin);
+        this.oldPassword.setValue("");
         this.newPassword.setValue("");
         this.confirmNewPassword.setValue("");
         setUserOptions(options);
@@ -135,6 +173,6 @@ public class PasswordChangeModal extends Composite {
 
     public interface Callback {
 
-        public void onPasswordChanged(final String newPassword);
+        public void onPasswordChanged(final Optional<String> oldPassword, final String newPassword);
     }
 }

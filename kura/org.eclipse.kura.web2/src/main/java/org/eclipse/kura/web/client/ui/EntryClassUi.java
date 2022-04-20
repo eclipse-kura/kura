@@ -765,18 +765,24 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 token -> gwtSessionService.getUserOptions(token, asyncCallback(onSuccess, onFailure)), onFailure));
     }
 
-    private void setNewPassword(final String newPassword, final Consumer<Void> onSuccess,
+    private void setNewPassword(Optional<String> oldPassword, final String newPassword, final Consumer<Void> onSuccess,
             final Consumer<Throwable> onFailure) {
-        gwtXSRFService.generateSecurityToken(asyncCallback(
+        if (oldPassword.isPresent()) {
+            // TODO: implement the old password verification on server side
+        } else {
+            gwtXSRFService.generateSecurityToken(asyncCallback(
                 token -> gwtSessionService.updatePassword(newPassword, asyncCallback(onSuccess, onFailure)),
                 onFailure));
+        }
 
     }
 
     private void changePassword(final Consumer<Void> onSuccess, final Consumer<Throwable> onFailure) {
         final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
         getGwtConsoleUserOptions(
-                options -> passwordChangeModal.pickPassword(options, p -> setNewPassword(p, onSuccess, onFailure)),
+                options -> passwordChangeModal.pickPassword(this.userData.checkPermission(KuraPermission.ADMIN),
+                        options,
+                        (oldPass, newPass) -> setNewPassword(oldPass, newPass, onSuccess, onFailure)),
                 onFailure);
     }
 

@@ -394,7 +394,7 @@ public class LoginUi extends Composite implements Context {
         private void setNewPassword(final String newPassword, final Consumer<Void> onSuccess,
                 final Consumer<Throwable> onFailure) {
             gwtXsrfService.generateSecurityToken(asyncCallback(
-                    token -> gwtSessionService.updatePassword(newPassword, asyncCallback(onSuccess, onFailure)),
+                    token -> gwtSessionService.updatePassword(token, newPassword, asyncCallback(onSuccess, onFailure)),
                     onFailure));
 
         }

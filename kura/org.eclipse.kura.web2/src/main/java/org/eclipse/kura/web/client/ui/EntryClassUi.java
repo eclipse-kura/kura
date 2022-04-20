@@ -771,7 +771,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             // TODO: implement the old password verification on server side
         } else {
             gwtXSRFService.generateSecurityToken(asyncCallback(
-                token -> gwtSessionService.updatePassword(newPassword, asyncCallback(onSuccess, onFailure)),
+                    token -> gwtSessionService.updatePassword(token, newPassword, asyncCallback(onSuccess, onFailure)),
                 onFailure));
         }
 

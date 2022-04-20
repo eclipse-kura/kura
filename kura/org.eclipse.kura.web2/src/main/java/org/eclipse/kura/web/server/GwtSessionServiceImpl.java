@@ -100,7 +100,8 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public void updatePassword(String newPassword) throws GwtKuraException {
+    public void updatePassword(GwtXSRFToken xsrfToken, String newPassword) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);

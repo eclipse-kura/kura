@@ -80,8 +80,8 @@ public class ImageConfiguration {
      *
      * @return the builder.
      */
-    public static ContainerConfigurationBuilder builder() {
-        return new ContainerConfigurationBuilder();
+    public static ImageConfigurationBuilder builder() {
+        return new ImageConfigurationBuilder();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ImageConfiguration {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ContainerConfiguration)) {
+        if (!(obj instanceof ImageConfiguration)) {
             return false;
         }
         ImageConfiguration other = (ImageConfiguration) obj;
@@ -102,29 +102,29 @@ public class ImageConfiguration {
                 && Objects.equals(this.registryCredentials, other.registryCredentials);
     }
 
-    public static final class ContainerConfigurationBuilder {
+    public static final class ImageConfigurationBuilder {
 
         private String imageName;
         private String imageTag;
         private Optional<RegistryCredentials> registryCredentials;
         private int imageDownloadTimeoutSeconds = 500;
 
-        public ContainerConfigurationBuilder setImageName(String imageName) {
+        public ImageConfigurationBuilder setImageName(String imageName) {
             this.imageName = imageName;
             return this;
         }
 
-        public ContainerConfigurationBuilder setImageTag(String imageTag) {
+        public ImageConfigurationBuilder setImageTag(String imageTag) {
             this.imageTag = imageTag;
             return this;
         }
 
-        public ContainerConfigurationBuilder setRegistryCredentials(Optional<RegistryCredentials> registryCredentials) {
+        public ImageConfigurationBuilder setRegistryCredentials(Optional<RegistryCredentials> registryCredentials) {
             this.registryCredentials = registryCredentials;
             return this;
         }
 
-        public ContainerConfigurationBuilder setImageDownloadTimeoutSeconds(int imageDownloadTimeoutSeconds) {
+        public ImageConfigurationBuilder setImageDownloadTimeoutSeconds(int imageDownloadTimeoutSeconds) {
             this.imageDownloadTimeoutSeconds = imageDownloadTimeoutSeconds;
             return this;
         }
@@ -132,8 +132,8 @@ public class ImageConfiguration {
         public ImageConfiguration build() {
             ImageConfiguration result = new ImageConfiguration();
 
-            result.imageName = requireNonNull(this.imageName, "Request Container Name cannot be null");
-            result.imageTag = requireNonNull(this.imageTag, "Request Container Image cannot be null");
+            result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
+            result.imageTag = requireNonNull(this.imageTag, "Request Image Image cannot be null");
             result.registryCredentials = requireNonNull(this.registryCredentials,
                     "Request Registry Credentials object cannot be null");
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;

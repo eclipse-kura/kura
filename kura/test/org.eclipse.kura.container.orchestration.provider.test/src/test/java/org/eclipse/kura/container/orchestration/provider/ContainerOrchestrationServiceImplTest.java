@@ -397,7 +397,7 @@ public class ContainerOrchestrationServiceImplTest {
         ContainerInstanceDescriptor mcontCD1 = ContainerInstanceDescriptor.builder().setContainerID("1d3dewf34r5")
                 .setContainerName("frank").setContainerImage("nginx").build();
 
-        this.imageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("nginx")
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
                 .setImageTag("latest").setImageDownloadTimeoutSeconds(0)
                 .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
                         REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))

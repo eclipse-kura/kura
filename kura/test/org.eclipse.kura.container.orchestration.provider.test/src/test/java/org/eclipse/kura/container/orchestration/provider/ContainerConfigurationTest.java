@@ -113,7 +113,7 @@ public class ContainerConfigurationTest {
     }
 
     private void givenContainerNoCredentials() {
-        this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE)
+        this.firstImageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(CONTAINER_IMAGE)
                 .setImageTag(CONTAINER_IMAGE_TAG).setImageDownloadTimeoutSeconds(0).build();
 
         this.firstContainerConfig = ContainerConfiguration.builder().setContainerName(CONTAINER_NAME)
@@ -121,7 +121,7 @@ public class ContainerConfigurationTest {
     }
 
     private void givenContainerBuilder() {
-        this.firstImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName(CONTAINER_IMAGE)
+        this.firstImageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName(CONTAINER_IMAGE)
                 .setImageTag(CONTAINER_IMAGE_TAG)
                 .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
                         REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
@@ -143,7 +143,7 @@ public class ContainerConfigurationTest {
     private void givenContainerTwoDiffrent() {
 
         givenContainerBuilder();
-        this.seccondImageConfig = new ImageConfiguration.ContainerConfigurationBuilder().setImageName("different")
+        this.seccondImageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName("different")
                 .setImageTag("different")
                 .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of("different"),
                         REGISTRY_USERNAME, new Password("different"))))

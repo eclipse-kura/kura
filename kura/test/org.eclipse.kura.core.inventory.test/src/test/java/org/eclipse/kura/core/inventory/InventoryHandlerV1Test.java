@@ -40,6 +40,7 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
@@ -97,6 +98,9 @@ public class InventoryHandlerV1Test {
     private ContainerInstanceDescriptor dockerContainer2;
     private ContainerConfiguration dockerContainer1Config;
     private ContainerConfiguration dockerContainer2Config;
+    
+    private ImageConfiguration containerImage1;
+    private ImageConfiguration containerImage2;
 
     private ContainerOrchestrationService mockDockerService;
 
@@ -1042,12 +1046,13 @@ public class InventoryHandlerV1Test {
         this.dockerContainer2 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer2")
                 .setContainerImage("nginx").setContainerID("124344").build();
         
-        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
-                .setContainerImage("nginx").setContainerImageTag("latest").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
-        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
-                .setContainerImage("nginx").setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
+        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(200).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
+        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(200).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
+        
+        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1").setImageConfiguration(containerImage1).build();
+        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2").setImageConfiguration(containerImage2).build();
     }
 
     private void givenTheFollowingJson() {

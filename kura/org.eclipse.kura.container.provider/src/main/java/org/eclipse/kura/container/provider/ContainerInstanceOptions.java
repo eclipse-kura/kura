@@ -238,7 +238,7 @@ public class ContainerInstanceOptions {
     }
 
     private ImageConfiguration buildImageConfig() {
-        return new ImageConfiguration.ContainerConfigurationBuilder().setImageName(image).setImageTag(imageTag)
+        return new ImageConfiguration.ImageConfigurationBuilder().setImageName(image).setImageTag(imageTag)
                 .setImageDownloadTimeoutSeconds(imageDownloadTimeout).setRegistryCredentials(getRegistryCredentials())
                 .build();
     }

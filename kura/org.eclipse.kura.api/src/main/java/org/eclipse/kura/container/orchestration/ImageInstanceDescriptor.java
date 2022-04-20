@@ -177,8 +177,8 @@ public class ImageInstanceDescriptor {
         public ImageInstanceDescriptor build() {
             ImageInstanceDescriptor result = new ImageInstanceDescriptor();
 
-            result.imageName = requireNonNull(this.imageName, "Request Container Name cannot be null");
-            result.imageTag = requireNonNull(this.imageTag, "Request Container Image cannot be null");
+            result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
+            result.imageTag = requireNonNull(this.imageTag, "Request Image Image cannot be null");
             result.imageId = this.imageId;
             result.imageAuthor = this.imageAuthor;
             result.imageArch = this.imageArch;

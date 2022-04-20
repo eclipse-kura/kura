@@ -56,29 +56,29 @@ Before installing Kura, you need to have the following programs installed in you
 * Maven 3.5.x
 
 #### Installing Prerequisites in Mac OS 
-Using [Brew](https://brew.sh/) you can easily install both Java and Maven from the command line.
 
-Use the following commands in a terminal
+To install Java 8, download the JDK tar archive from the [Adoptium Project Repository](https://adoptium.net/releases.html?variant=openjdk8&jvmVariant=hotspot).
 
-For Java  
+Once downloaded, copy the tar archive in `/Library/Java/JavaVirtualMachines/` and cd into it. Unpack the archive with the following command:
 ```bash
-brew tap adoptopenjdk/openjdk 
+sudo tar -xzf <archive-name>.tar.gz
 ```
-```bash
-brew install --cask adoptopenjdk8   
-```
-Make sure to set this version in your path, this can be done by:
-```bash
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
-```
-Run `java -version` to make sure it is installed correctly.  
+The tar archive can be deleted afterwards.
 
-For Maven
+Depending on which terminal you are using, edit the profiles (.zshrc, .profile, .bash_profile) to contain:
+```bash
+# Adoptium JDK 8
+export JAVA_8_HOME=/Library/Java/JavaVirtualMachines/<archive-name>/Contents/Home
+alias java8='export JAVA_HOME=$JAVA_8_HOME'
+java8 
+```
+Reload the terminal and run `java -version` to make sure it is installed correctly.
+
+Using [Brew](https://brew.sh/) you can easily install Maven from the command line:
 ```bash
 brew install maven@3.5
 ```
-Run `mvn -version` to ensure that Maven has been added to the PATH.
-If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
+Run `mvn -version` to ensure that Maven has been added to the PATH. If Maven cannot be found, try running `brew link maven@3.5 --force` or manually add it to your path with:
 ```bash
 export PATH="/usr/local/opt/maven@3.5/bin:$PATH"
 ```

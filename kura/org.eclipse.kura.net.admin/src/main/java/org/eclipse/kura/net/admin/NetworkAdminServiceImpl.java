@@ -186,7 +186,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     public void setUserAdmin(final UserAdmin userAdmin) {
-        userAdmin.createRole("kura.network.admin", Role.GROUP);
+        userAdmin.createRole("kura.permission.kura.network.admin", Role.GROUP);
     }
 
     // ----------------------------------------------------------------

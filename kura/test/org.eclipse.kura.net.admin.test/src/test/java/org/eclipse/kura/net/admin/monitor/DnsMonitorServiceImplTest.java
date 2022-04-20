@@ -171,6 +171,7 @@ public class DnsMonitorServiceImplTest {
 
         assertTrue((boolean) TestUtil.getFieldValue(svc, "enabled"));
 
+        @SuppressWarnings("unchecked")
         Set<NetworkPair<IP4Address>> aa = (Set<NetworkPair<IP4Address>>) TestUtil.getFieldValue(svc, "allowedNetworks");
         assertNotNull(aa);
         assertEquals(1, aa.size());
@@ -271,13 +272,11 @@ public class DnsMonitorServiceImplTest {
         LinuxDns dns = mock(LinuxDns.class);
         TestUtil.setFieldValue(svc, "dnsUtil", dns);
 
-        doThrow(new RuntimeException("test")).when(dns).setDnServers(anyObject());
-
         Set<IPAddress> servers = new HashSet<>();
 
         TestUtil.invokePrivate(svc, "setDnsServers", servers);
 
-        // no exception expected - set DNS servers should not be called
+        verify(dns, times(1)).setDnServers(servers);
     }
 
     @Test

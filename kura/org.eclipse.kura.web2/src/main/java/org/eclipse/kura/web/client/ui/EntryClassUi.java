@@ -745,16 +745,34 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     }
 
     private void changePassword() {
-        changePassword(ok -> logout(), e -> {
-            final String message;
 
-            if ((e instanceof GwtKuraException)
-                    && ((GwtKuraException) e).getCode() == GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD) {
-                message = MSGS.loginPasswordChangeSame();
+        changePassword(ok -> logout(), e -> {
+            if (e instanceof GwtKuraException) {
+                GwtKuraErrorCode errorCode = ((GwtKuraException) e).getCode();
+                final String message;
+                
+                switch (errorCode) {
+                case PASSWORD_CHANGE_SAME_PASSWORD: {
+                    message = MSGS.loginPasswordChangeSame();
+                }
+                    break;
+                case INVALID_USERNAME_PASSWORD: {
+                    message = MSGS.loginWrongCredentials();
+                }
+                    break;
+                case UNAUTHENTICATED: {
+                    message = MSGS.sessionExpiredError();
+                }
+                    break;
+                default: {
+                    message = MSGS.loginInternalError();
+                }
+                }
+
+                this.alertDialog.show(message, AlertDialog.Severity.ERROR, (ConfirmListener) null);
             } else {
-                message = MSGS.loginInternalError();
+                FailureHandler.handle(e);
             }
-            changePassword();
         });
 
     }
@@ -767,8 +785,12 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private void setNewPassword(Optional<String> oldPassword, final String newPassword, final Consumer<Void> onSuccess,
             final Consumer<Throwable> onFailure) {
+
         if (oldPassword.isPresent()) {
-            // TODO: implement the old password verification on server side
+            gwtXSRFService.generateSecurityToken(asyncCallback(
+                    token -> gwtSessionService.updatePassword(token, oldPassword.get(), newPassword,
+                            asyncCallback(onSuccess, onFailure)),
+                    onFailure));
         } else {
             gwtXSRFService.generateSecurityToken(asyncCallback(
                     token -> gwtSessionService.updatePassword(token, newPassword, asyncCallback(onSuccess, onFailure)),
@@ -779,6 +801,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     private void changePassword(final Consumer<Void> onSuccess, final Consumer<Throwable> onFailure) {
         final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
+
         getGwtConsoleUserOptions(
                 options -> passwordChangeModal.pickPassword(this.userData.checkPermission(KuraPermission.ADMIN),
                         options,

@@ -100,12 +100,34 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     @Override
-    public void updatePassword(GwtXSRFToken xsrfToken, String newPassword) throws GwtKuraException {
+    public void updatePassword(GwtXSRFToken xsrfToken, String oldPassword, String newPassword) throws GwtKuraException {
         checkXSRFToken(xsrfToken);
 
         final HttpServletRequest request = getThreadLocalRequest();
         final HttpSession session = request.getSession(false);
 
+        String username = getSessionUsername(session);
+
+        try {
+            this.userManager.authenticateWithPassword(username, oldPassword);
+        } catch (KuraException e) {
+            logger.warn("Wrong password");
+            throw new GwtKuraException(GwtKuraErrorCode.INVALID_USERNAME_PASSWORD);
+        }
+        
+        try {
+            if (!this.userManager.setUserPassword(username, newPassword)) {
+                throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD);
+            }
+        } catch (final KuraException e) {
+            logger.warn("Failed to update user password", e);
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+        }
+
+        setAuthenticated(session, username);
+    }
+
+    private String getSessionUsername(HttpSession session) throws GwtKuraException {
         if (session == null) {
             throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
         }
@@ -116,16 +138,11 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
             throw new GwtKuraException(GwtKuraErrorCode.UNAUTHENTICATED);
         }
 
-        try {
-            if (!this.userManager.setUserPassword((String) username, newPassword)) {
-                throw new GwtKuraException(GwtKuraErrorCode.PASSWORD_CHANGE_SAME_PASSWORD);
-            }
-        } catch (final KuraException e) {
-            logger.warn("failed to update user password", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
-        }
+        return (String) username;
+    }
 
-        Console.instance().setAuthenticated(session, (String) username,
+    private void setAuthenticated(HttpSession session, String username) throws GwtKuraException {
+        Console.instance().setAuthenticated(session, username,
                 AuditContext.current().orElseThrow(() -> new GwtKuraException("Audit context is not available")));
         session.removeAttribute(Attributes.LOCKED.getValue());
     }

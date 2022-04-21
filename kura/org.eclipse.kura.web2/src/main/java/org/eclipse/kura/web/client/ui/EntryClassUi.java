@@ -744,89 +744,67 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 c.callback(token -> this.gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
     }
 
-    private void changePassword() {
+    private void setNewPassword(final String oldPassword, final String newPassword) {
+    
+        RequestQueue.submit(c -> {
+            gwtXSRFService.generateSecurityToken(c.callback(token -> {
+                gwtSessionService.updatePassword(token, oldPassword, newPassword, c.callback(new AsyncCallback<Void>() {
 
-        changePassword(ok -> logout(), e -> {
-            if (e instanceof GwtKuraException) {
-                GwtKuraErrorCode errorCode = ((GwtKuraException) e).getCode();
-                final String message;
+                    @Override
+                    public void onFailure(Throwable e) {
+   
+                        if (e instanceof GwtKuraException) {
+                            GwtKuraErrorCode errorCode = ((GwtKuraException) e).getCode();
+                            final String message;
+                            
+                            switch (errorCode) {
+                            case PASSWORD_CHANGE_SAME_PASSWORD: {
+                                message = MSGS.loginPasswordChangeSame();
+                            }
+                                break;
+                            case INVALID_USERNAME_PASSWORD: {
+                                message = MSGS.loginWrongCredentials();
+                            }
+                                break;
+                            case UNAUTHENTICATED: {
+                                message = MSGS.sessionExpiredError();
+                            }
+                                break;
+                            default: {
+                                message = MSGS.loginInternalError();
+                            }
+                            }
+
+                            EntryClassUi.this.alertDialog.show(message, AlertDialog.Severity.ERROR,
+                                    (ConfirmListener) null);
+                        } else {
+                            FailureHandler.handle(e);
+                        }
+                    }
                 
-                switch (errorCode) {
-                case PASSWORD_CHANGE_SAME_PASSWORD: {
-                    message = MSGS.loginPasswordChangeSame();
-                }
-                    break;
-                case INVALID_USERNAME_PASSWORD: {
-                    message = MSGS.loginWrongCredentials();
-                }
-                    break;
-                case UNAUTHENTICATED: {
-                    message = MSGS.sessionExpiredError();
-                }
-                    break;
-                default: {
-                    message = MSGS.loginInternalError();
-                }
-                }
-
-                this.alertDialog.show(message, AlertDialog.Severity.ERROR, (ConfirmListener) null);
-            } else {
-                FailureHandler.handle(e);
-            }
+                    @Override
+                    public void onSuccess(Void result) {
+                        logout();
+                    }
+                }));
+            }));
         });
 
     }
 
-    private void getGwtConsoleUserOptions(final Consumer<GwtConsoleUserOptions> onSuccess,
-            final Consumer<Throwable> onFailure) {
-        gwtXSRFService.generateSecurityToken(asyncCallback(
-                token -> gwtSessionService.getUserOptions(token, asyncCallback(onSuccess, onFailure)), onFailure));
-    }
-
-    private void setNewPassword(Optional<String> oldPassword, final String newPassword, final Consumer<Void> onSuccess,
-            final Consumer<Throwable> onFailure) {
-
-        if (oldPassword.isPresent()) {
-            gwtXSRFService.generateSecurityToken(asyncCallback(
-                    token -> gwtSessionService.updatePassword(token, oldPassword.get(), newPassword,
-                            asyncCallback(onSuccess, onFailure)),
-                    onFailure));
-        } else {
-            gwtXSRFService.generateSecurityToken(asyncCallback(
-                    token -> gwtSessionService.updatePassword(token, newPassword, asyncCallback(onSuccess, onFailure)),
-                onFailure));
-        }
-
-    }
-
-    private void changePassword(final Consumer<Void> onSuccess, final Consumer<Throwable> onFailure) {
+    private void changePassword() {
         final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
 
-        getGwtConsoleUserOptions(
-                options -> passwordChangeModal.pickPassword(this.userData.checkPermission(KuraPermission.ADMIN),
-                        options,
-                        (oldPass, newPass) -> setNewPassword(oldPass, newPass, onSuccess, onFailure)),
-                onFailure);
-    }
-
-    private <T> AsyncCallback<T> asyncCallback(final Consumer<T> onSuccess, final Consumer<Throwable> onFailure) {
-
-        final Callback<Void, String> longRunningOpCallback = startLongRunningOperation();
-
-        return new AsyncCallback<T>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                longRunningOpCallback.onFailure(null);
-                onFailure.accept(caught);
-            }
-
-            @Override
-            public void onSuccess(T result) {
-                longRunningOpCallback.onSuccess(null);
-                onSuccess.accept(result);
-            }
-        };
+        RequestQueue.submit(c -> {
+            gwtXSRFService.generateSecurityToken(c.callback(token -> {
+                gwtSessionService.getUserOptions(token, c.callback(options -> {
+                    passwordChangeModal.pickPassword(options,
+                            (oldPass, newPass) -> {
+                                setNewPassword(oldPass, newPass);
+                            });
+                }));
+            }));
+        });
     }
 
     private void initServicesTree() {

@@ -21,7 +21,6 @@ import java.util.Optional;
 import org.eclipse.kura.web.client.ui.validator.GwtValidators;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.FormGroup;
 import org.gwtbootstrap3.client.ui.Input;
 import org.gwtbootstrap3.client.ui.Modal;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
@@ -46,8 +45,6 @@ public class PasswordChangeModal extends Composite {
     @UiField
     Modal passwordChangeModal;
     @UiField
-    FormGroup oldPasswordGroup;
-    @UiField
     Input oldPassword;
     @UiField
     Input newPassword;
@@ -57,8 +54,6 @@ public class PasswordChangeModal extends Composite {
     Button okButton;
     @UiField
     FormPanel passwordChangeForm;
-
-    private boolean isAdmin;
 
     private Optional<Callback> callback = Optional.empty();
 
@@ -115,19 +110,13 @@ public class PasswordChangeModal extends Composite {
     }
 
     private void trySubmit() {
-        Optional<String> oldPassword = Optional.ofNullable(this.oldPassword.getValue());
-        
-        if (!this.isAdmin && !oldPassword.isPresent()) {
-            return;
-        }
-        
-        if (!newPassword.validate() || !confirmNewPassword.validate()) {
+        if (!oldPassword.validate() || !newPassword.validate() || !confirmNewPassword.validate()) {
             return;
         }
 
         passwordChangeModal.hide();
         callback.ifPresent(
-                c -> c.onPasswordChanged(oldPassword, newPassword.getValue()));
+                c -> c.onPasswordChanged(oldPassword.getValue(), newPassword.getValue()));
     }
 
     private void validate() {
@@ -159,9 +148,7 @@ public class PasswordChangeModal extends Composite {
         });
     }
 
-    public void pickPassword(boolean isAdmin, final GwtConsoleUserOptions options, final Callback callback) {
-        this.isAdmin = isAdmin;
-        this.oldPasswordGroup.setVisible(!this.isAdmin);
+    public void pickPassword(final GwtConsoleUserOptions options, final Callback callback) {
         this.oldPassword.setValue("");
         this.newPassword.setValue("");
         this.confirmNewPassword.setValue("");
@@ -173,6 +160,6 @@ public class PasswordChangeModal extends Composite {
 
     public interface Callback {
 
-        public void onPasswordChanged(final Optional<String> oldPassword, final String newPassword);
+        public void onPasswordChanged(final String oldPassword, final String newPassword);
     }
 }

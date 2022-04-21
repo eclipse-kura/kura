@@ -31,5 +31,6 @@ public interface GwtSessionService extends RemoteService {
 
     public GwtUserConfig getUserConfig(GwtXSRFToken token) throws GwtKuraException;
 
-    public void updatePassword(GwtXSRFToken token, final String newPassword) throws GwtKuraException;
+    public void updatePassword(GwtXSRFToken token, final String oldPassword, final String newPassword)
+            throws GwtKuraException;
 }

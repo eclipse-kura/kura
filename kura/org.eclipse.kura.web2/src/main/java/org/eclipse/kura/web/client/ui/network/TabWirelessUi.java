@@ -1305,31 +1305,31 @@ public class TabWirelessUi extends Composite implements NetworkTab {
                     this.channelList.setSelectedIndex(channelToSelect);
                     this.activeConfig.setChannels(Collections.singletonList(wifiHotspotEntry.getChannel()));
                     logger.info("SSID Selected channel: " + wifiHotspotEntry.getChannel());
-                }
 
-                TabWirelessUi.this.ssid.setValue(GwtSafeHtmlUtils.htmlUnescape(wifiHotspotEntry.getSSID()));
-                String sec = wifiHotspotEntry.getSecurity();
-                for (int i1 = 0; i1 < TabWirelessUi.this.security.getItemCount(); i1++) {
-                    if (sec.equals(TabWirelessUi.this.security.getItemText(i1))) {
-                        TabWirelessUi.this.security.setSelectedIndex(i1);
-                        DomEvent.fireNativeEvent(Document.get().createChangeEvent(), TabWirelessUi.this.security);
-                        break;
+                    TabWirelessUi.this.ssid.setValue(GwtSafeHtmlUtils.htmlUnescape(wifiHotspotEntry.getSSID()));
+                    String sec = wifiHotspotEntry.getSecurity();
+                    for (int i1 = 0; i1 < TabWirelessUi.this.security.getItemCount(); i1++) {
+                        if (sec.equals(TabWirelessUi.this.security.getItemText(i1))) {
+                            TabWirelessUi.this.security.setSelectedIndex(i1);
+                            DomEvent.fireNativeEvent(Document.get().createChangeEvent(), TabWirelessUi.this.security);
+                            break;
+                        }
                     }
-                }
 
-                String pairwiseCiphers = wifiHotspotEntry.getPairwiseCiphersEnum().name();
-                for (int i2 = 0; i2 < TabWirelessUi.this.pairwise.getItemCount(); i2++) {
-                    if (MessageUtils.get(pairwiseCiphers).equals(TabWirelessUi.this.pairwise.getItemText(i2))) {
-                        TabWirelessUi.this.pairwise.setSelectedIndex(i2);
-                        break;
+                    String pairwiseCiphers = wifiHotspotEntry.getPairwiseCiphersEnum().name();
+                    for (int i2 = 0; i2 < TabWirelessUi.this.pairwise.getItemCount(); i2++) {
+                        if (MessageUtils.get(pairwiseCiphers).equals(TabWirelessUi.this.pairwise.getItemText(i2))) {
+                            TabWirelessUi.this.pairwise.setSelectedIndex(i2);
+                            break;
+                        }
                     }
-                }
 
-                String groupCiphers = wifiHotspotEntry.getGroupCiphersEnum().name();
-                for (int i3 = 0; i3 < TabWirelessUi.this.group.getItemCount(); i3++) {
-                    if (MessageUtils.get(groupCiphers).equals(TabWirelessUi.this.group.getItemText(i3))) {
-                        TabWirelessUi.this.group.setSelectedIndex(i3);
-                        break;
+                    String groupCiphers = wifiHotspotEntry.getGroupCiphersEnum().name();
+                    for (int i3 = 0; i3 < TabWirelessUi.this.group.getItemCount(); i3++) {
+                        if (MessageUtils.get(groupCiphers).equals(TabWirelessUi.this.group.getItemText(i3))) {
+                            TabWirelessUi.this.group.setSelectedIndex(i3);
+                            break;
+                        }
                     }
                 }
 

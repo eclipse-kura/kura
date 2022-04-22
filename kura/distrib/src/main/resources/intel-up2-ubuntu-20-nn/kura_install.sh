@@ -78,4 +78,18 @@ chmod -R go-rwx /opt/eclipse
 chmod a+rx /opt/eclipse    
 find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
 
+#enable kurad user to HALT functionality
+for group in gpio leds spi i2c; do
+    if ! getent group $group >/dev/null; then
+        addgroup --system $group
+    fi
+done
+
+usermod -a -G gpio kurad
+usermod -a -G leds kurad
+usermod -a -G spi kurad
+usermod -a -G i2c kurad
+# kurad is already added in dialout in manage_kura_users.sh
+#usermod -a -G dialout kurad
+
 keytool -genkey -alias localhost -keyalg RSA -keysize 2048 -keystore /opt/eclipse/kura/user/security/httpskeystore.ks -deststoretype pkcs12 -dname "CN=Kura, OU=Kura, O=Eclipse Foundation, L=Ottawa, S=Ontario, C=CA" -ext ku=digitalSignature,nonRepudiation,keyEncipherment,dataEncipherment,keyAgreement,keyCertSign -ext eku=serverAuth,clientAuth,codeSigning,timeStamping -validity 1000 -storepass changeit -keypass changeit

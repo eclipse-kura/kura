@@ -127,10 +127,6 @@ fi
 #set up systemd-tmpfiles
 cp ${INSTALL_DIR}/kura/install/kura-tmpfiles.conf /etc/tmpfiles.d/kura.conf
 
-# disable dhcpcd service - kura is the network manager
-systemctl stop dhcpcd
-systemctl disable dhcpcd
-
 # disable isc-dhcp-server service - kura is the network manager
 systemctl stop isc-dhcp-server
 systemctl disable isc-dhcp-server
@@ -156,8 +152,6 @@ systemctl mask systemd-networkd-wait-online
 #disable DNS-related services - kura is the network manager
 systemctl stop systemd-resolved.service
 systemctl disable systemd-resolved.service
-systemctl stop resolvconf.service
-systemctl disable resolvconf.service
 
 #disable ModemManager
 systemctl stop ModemManager
@@ -184,6 +178,14 @@ chown -R kurad:kurad /opt/eclipse
 chmod -R go-rwx /opt/eclipse
 chmod a+rx /opt/eclipse    
 find /opt/eclipse/kura -type d -exec chmod u+x "{}" \;
+
+#enable kurad user to HALT functionality
+usermod -a -G gpio kurad
+usermod -a -G leds kurad
+usermod -a -G spi kurad
+usermod -a -G i2c kurad
+# kurad is already added in dialout in manage_kura_users.sh
+#usermod -a -G dialout kurad 
 
 # execute patch_sysctl.sh from installer install folder
 chmod 700 ${INSTALL_DIR}/kura/install/patch_sysctl.sh

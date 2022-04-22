@@ -508,7 +508,7 @@ Sidenav START
   	padding-top: 0.4cm;
   	right: 0;
 	text-align: right;
-	width: 200px !important;
+	width: 250px !important;
 	margin-right: 0px !important;
 }
 
@@ -516,7 +516,7 @@ Sidenav START
 	position: absolute;
 	right: 15px;
 	text-align: right;
-	width: 150px !important; /* leave 50px less than the width of dropdown-settings */
+	width: 200px !important; /* leave 50px less than the width of dropdown-settings */
 	display: none;
 	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 	z-index: 100;

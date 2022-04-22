@@ -134,7 +134,8 @@
 								<b:Container addStyleNames="dropdown-settings header-dropdown-settings">
 								    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 									<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameSmall" />
-									<b:Container addStyleNames="dropdown-settings-content">
+									<b:Button ui:icon="GEAR" />
+									<b:Container ui:field="dropdownContainer" addStyleNames="dropdown-settings-content">
 										<g:Label text="Change password" ui:field="headerChangePassword" />
 										<g:Label text="Logout" ui:field="headerLogout" />
 									</b:Container>
@@ -245,6 +246,7 @@
 				    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 					<b.html:Span text="Logged in as" />
 					<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameLarge" />
+					<b:Button ui:icon="GEAR" />
 					<b:Container addStyleNames="dropdown-settings-content">
 						<g:Label text="Change password" ui:field="changePassword" />
 						<g:Label text="Logout" ui:field="logout" />

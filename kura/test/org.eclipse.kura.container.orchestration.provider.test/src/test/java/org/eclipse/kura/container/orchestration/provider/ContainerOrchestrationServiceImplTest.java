@@ -265,6 +265,31 @@ public class ContainerOrchestrationServiceImplTest {
 
         thenTestIfNewContainerDoesNotExists();
     }
+    
+    @Test
+    public void testDeleteImage() throws KuraException, InterruptedException {
+        givenFullProperties(true);
+        givenDockerServiceImplSpy();
+        givenDockerClient();
+        
+        whenImageIsDeletedById("y456y5146hrth");
+        
+        thenCheckIfImageWasDeleted();
+    }
+    
+    @Test
+    public void testListImage() throws KuraException, InterruptedException {
+        givenFullProperties(true);
+        givenDockerServiceImplSpy();
+        givenDockerClient();
+        
+        whenMockForImageListing();
+        
+        whenImagesAreListed();
+        
+        thenCheckIfImagesWereListed();
+        
+    }
 
     /**
      * givens
@@ -425,6 +450,26 @@ public class ContainerOrchestrationServiceImplTest {
         when(this.localDockerClient.listImagesCmd().exec()).thenReturn(images);
 
     }
+    
+    private void whenMockForImageListing() {
+        this.imageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
+                .setImageTag("latest").setImageDownloadTimeoutSeconds(0)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+        
+        List<Image> images = new LinkedList<>();
+        Image mockImage = mock(Image.class);
+
+        when(mockImage.getRepoTags()).thenReturn(new String[] { "nginx", "latest", "nginx:latest" });
+
+        images.add(mockImage);
+
+        when(this.localDockerClient.listImagesCmd()).thenReturn(mock(ListImagesCmd.class));
+        when(this.localDockerClient.listImagesCmd().withShowAll(true)).thenReturn(mock(ListImagesCmd.class));
+        when(this.localDockerClient.listImagesCmd().withShowAll(true).exec()).thenReturn(images);
+
+    }
 
     private void whenRunContainer() throws KuraException, InterruptedException {
         // startContainer
@@ -435,7 +480,19 @@ public class ContainerOrchestrationServiceImplTest {
         // startContainer
         this.dockerService.stopContainer(this.containerId);
     }
+    
+    private void whenImageIsDeletedById(String imageId) throws KuraException {
+    	this.dockerService.deleteImage(imageId);
+    }
+    
+    private void whenImagesAreListed() throws KuraException {
+    	this.dockerService.listImageInstanceDescriptor();
+    }
 
+    /**
+     * then
+     */
+    
     private void thenNotStoppedMicroservice() throws KuraException {
         verify(this.localDockerClient, times(0)).removeContainerCmd(any(String.class));
     }
@@ -471,5 +528,13 @@ public class ContainerOrchestrationServiceImplTest {
 
     private void thenTestIfNewContainerDoesNotExists() {
         assertEquals(2, this.dockerService.listContainerDescriptors().size());
+    }
+    
+    private void thenCheckIfImageWasDeleted() throws KuraException {
+        verify(this.localDockerClient, times(1)).removeImageCmd(any(String.class));
+    }
+    
+    private void thenCheckIfImagesWereListed() throws KuraException {
+    	verify(this.localDockerClient, times(1)).inspectImageCmd(any(String.class));
     }
 }

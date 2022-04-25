@@ -740,6 +740,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     @Override
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
+        pullImage(new ImageConfiguration.ImageConfigurationBuilder().setImageName(imageName).setImageTag(imageTag)
+                .setImageDownloadTimeoutSeconds(timeOutSeconds).setRegistryCredentials(registryCredentials).build());
+    }
+
+    @Override
     public List<ImageInstanceDescriptor> listImageInstanceDescriptor() {
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);

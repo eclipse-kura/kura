@@ -71,6 +71,25 @@ public interface ContainerOrchestrationService {
      * @throws InterruptedException
      */
     public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException;
+    
+    /**
+     * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded
+     * respecting the configured timeout in seconds.
+     *
+     * @param imageName
+     *            the image name to be used. Must not be null.
+     * @param imageTag
+     *            a string representing the image tag. Must not be null.
+     * @param timeOutSeconds
+     *            a non negative integer representing the image download timeout in seconds
+     * @param registryCredentials
+     *            an optional that can contain the registry URL and credentials for authentication
+     * @throws KuraException
+     *             if the pull operation fails
+     * @throws InterruptedException
+     */
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException;
 
     /**
      * Returns the id of the container corresponding to the specified name. If no container can be found an

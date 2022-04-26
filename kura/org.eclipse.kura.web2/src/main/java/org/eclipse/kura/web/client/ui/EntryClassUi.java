@@ -72,6 +72,7 @@ import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
+import org.gwtbootstrap3.client.ui.Container;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -205,6 +206,14 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     Row mainContainer;
     @UiField
     DropdownNotification dropdownNotification;
+    @UiField
+    Button dropdownButton;
+    @UiField
+    Button dropdownHeaderButton;
+    @UiField
+    Container dropdownContainer;
+    @UiField
+    Container dropdownContainerHeader;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -218,6 +227,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService",
             "service.pid=*WireGraphService", "objectClass=org.eclipse.kura.wire.WireComponent",
             "objectClass=org.eclipse.kura.driver.Driver", "kura.ui.service.hide=true")));
+    private static final String DROPDOWN_MENU_HIDDEN_STYLE_NAME = "hide-dropdown";
 
     private static PopupPanel waitModal;
 
@@ -734,6 +744,24 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
         this.logout.addClickHandler(logoutHandler);
         this.headerLogout.addClickHandler(logoutHandler);
+
+        this.dropdownContainer.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+        this.dropdownContainerHeader.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+
+        this.dropdownButton.addClickHandler(e -> {
+            if (EntryClassUi.this.dropdownContainer.getStyleName().contains(DROPDOWN_MENU_HIDDEN_STYLE_NAME)) {
+                EntryClassUi.this.dropdownContainer.removeStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            } else {
+                EntryClassUi.this.dropdownContainer.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            }
+        });
+        this.dropdownHeaderButton.addClickHandler(e -> {
+            if (EntryClassUi.this.dropdownContainerHeader.getStyleName().contains(DROPDOWN_MENU_HIDDEN_STYLE_NAME)) {
+                EntryClassUi.this.dropdownContainerHeader.removeStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            } else {
+                EntryClassUi.this.dropdownContainerHeader.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            }
+        });
 
         this.changePassword.addClickHandler(changePasswordHandler);
         this.headerChangePassword.addClickHandler(changePasswordHandler);

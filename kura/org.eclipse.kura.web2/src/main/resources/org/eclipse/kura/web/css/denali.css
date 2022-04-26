@@ -517,11 +517,18 @@ Sidenav START
 	right: 15px;
 	text-align: right;
 	width: 200px !important; /* leave 50px less than the width of dropdown-settings */
-	display: none;
-	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	box-shadow: 0px 10px 7px 5px rgba(0,0,0,0.2);
 	z-index: 100;
 	padding-left: 0px !important;
 	padding-right: 0px !important;
+}
+
+.hide-dropdown {
+	display: none !important;
+}
+
+.dropdown-settings-content:not(.hide-dropdown) {
+	display: block !important;
 }
 
 .dropdown-settings-content * {
@@ -534,10 +541,6 @@ Sidenav START
 
 .dropdown-settings-content *:hover {
 	background-color: #f1f1f1
-}
-
-.dropdown-settings:hover .dropdown-settings-content {
-	display: block;
 }
 
 .nav li a {

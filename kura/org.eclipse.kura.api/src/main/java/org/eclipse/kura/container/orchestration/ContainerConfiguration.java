@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -248,11 +249,7 @@ public class ContainerConfiguration {
         private Boolean isFrameworkManaged = false;
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
-        private ImageConfiguration imageConfig;
-        private String containerImage;
-        private String containerImageTag;
-        private Optional<RegistryCredentials> registryCredentials;
-        private int imageDownloadTimeoutSeconds;
+        private ImageConfigurationBuilder imageConfigBuilder;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -305,22 +302,22 @@ public class ContainerConfiguration {
         }
 
         public ContainerConfigurationBuilder setContainerImage(String serviceImage) {
-            this.containerImage = serviceImage;
+            this.imageConfigBuilder.setImageName(serviceImage);
             return this;
         }
 
         public ContainerConfigurationBuilder setContainerImageTag(String serviceImageTag) {
-            this.containerImageTag = serviceImageTag;
+            this.imageConfigBuilder.setImageTag(serviceImageTag);
             return this;
         }
 
         public ContainerConfigurationBuilder setRegistryCredentials(Optional<RegistryCredentials> registryCredentials) {
-            this.registryCredentials = registryCredentials;
+            this.imageConfigBuilder.setRegistryCredentials(registryCredentials);
             return this;
         }
 
         public ContainerConfigurationBuilder setImageDownloadTimeoutSeconds(int imageDownloadTimeoutSeconds) {
-            this.imageDownloadTimeoutSeconds = imageDownloadTimeoutSeconds;
+            this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageDownloadTimeoutSeconds);
             return this;
         }
 
@@ -329,7 +326,10 @@ public class ContainerConfiguration {
          *
          */
         public ContainerConfigurationBuilder setImageConfiguration(ImageConfiguration imageConfig) {
-            this.imageConfig = imageConfig;
+            this.imageConfigBuilder.setImageName(imageConfig.getImageName());
+            this.imageConfigBuilder.setImageTag(imageConfig.getImageTag());
+            this.imageConfigBuilder.setRegistryCredentials(imageConfig.getRegistryCredentials());
+            this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageConfig.getimageDownloadTimeoutSeconds());
             return this;
         }
 
@@ -346,19 +346,7 @@ public class ContainerConfiguration {
             result.isFrameworkManaged = this.isFrameworkManaged;
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
-
-            if (imageConfig != null) {
-                result.imageConfig = requireNonNull(this.imageConfig,
-                        "Request Registry Credentials object cannot be null");
-            } else {
-                result.imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
-                        .setImageName(requireNonNull(this.containerImage, "Request Container Image cannot be null"))
-                        .setImageTag(this.containerImageTag)
-                        .setImageDownloadTimeoutSeconds(this.imageDownloadTimeoutSeconds)
-                        .setRegistryCredentials(requireNonNull(this.registryCredentials,
-                                "Request Registry Credentials object cannot be null"))
-                        .build();
-            }
+            result.imageConfig = this.imageConfigBuilder.build();
 
             return result;
         }

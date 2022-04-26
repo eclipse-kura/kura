@@ -249,6 +249,10 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private ImageConfiguration imageConfig;
+        private String containerImage;
+        private String containerImageTag;
+        private Optional<RegistryCredentials> registryCredentials;
+        private int imageDownloadTimeoutSeconds;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -300,6 +304,30 @@ public class ContainerConfiguration {
             return this;
         }
 
+        public ContainerConfigurationBuilder setContainerImage(String serviceImage) {
+            this.containerImage = serviceImage;
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setContainerImageTag(String serviceImageTag) {
+            this.containerImageTag = serviceImageTag;
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setRegistryCredentials(Optional<RegistryCredentials> registryCredentials) {
+            this.registryCredentials = registryCredentials;
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setImageDownloadTimeoutSeconds(int imageDownloadTimeoutSeconds) {
+            this.imageDownloadTimeoutSeconds = imageDownloadTimeoutSeconds;
+            return this;
+        }
+
+        /**
+         * @since 2.4 builds image based on {@link ImageConfiguration}
+         *
+         */
         public ContainerConfigurationBuilder setImageConfiguration(ImageConfiguration imageConfig) {
             this.imageConfig = imageConfig;
             return this;
@@ -318,7 +346,19 @@ public class ContainerConfiguration {
             result.isFrameworkManaged = this.isFrameworkManaged;
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
-            result.imageConfig = requireNonNull(this.imageConfig, "Request Registry Credentials object cannot be null");
+
+            if (imageConfig != null) {
+                result.imageConfig = requireNonNull(this.imageConfig,
+                        "Request Registry Credentials object cannot be null");
+            } else {
+                result.imageConfig = new ImageConfiguration.ImageConfigurationBuilder()
+                        .setImageName(requireNonNull(this.containerImage, "Request Container Image cannot be null"))
+                        .setImageTag(this.containerImageTag)
+                        .setImageDownloadTimeoutSeconds(this.imageDownloadTimeoutSeconds)
+                        .setRegistryCredentials(requireNonNull(this.registryCredentials,
+                                "Request Registry Credentials object cannot be null"))
+                        .build();
+            }
 
             return result;
         }

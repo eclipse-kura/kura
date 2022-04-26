@@ -70,7 +70,7 @@ public class ConfigurationServiceTest {
     private static final String TEST_COMPONENT_FPID = "org.eclipse.kura.core.configuration.test.TestFactoryComponent";
     private static final String TEST_COMPONENT_PROPERTY_TEST = "field.test";
 
-    private static CountDownLatch dependencyLatch = new CountDownLatch(2);
+    private static CountDownLatch dependencyLatch = new CountDownLatch(3);
 
     static ConfigurationService configurationService;
     static OCDService ocdService;

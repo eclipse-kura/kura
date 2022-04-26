@@ -27,7 +27,7 @@ import org.osgi.annotation.versioning.ProviderType;
 
 /**
  * Object which represents a container configuration used to request the
- * generation of a new container instance and running
+ * generation of a new container instance.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3

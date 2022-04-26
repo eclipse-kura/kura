@@ -1834,7 +1834,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         // WifiMode wifiMode = getWifiConfigWirelessMode(gwtWifiConfig.getWirelessMode());
         // wifiConfig.setMode(wifiMode);
         String mode = gwtWifiConfig.getWirelessMode();
-        String wifiMode;
+        String wifiMode = WifiMode.UNKNOWN.name();
         StringBuilder wifiModeBasePropName = new StringBuilder(wifiBasePropName);
         if (mode != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
             wifiMode = WifiMode.MASTER.name();
@@ -1843,8 +1843,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             wifiMode = WifiMode.INFRA.name();
             wifiModeBasePropName.append("infra.");
         } else if (mode != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name())) {
+            // ????
             wifiMode = WifiMode.ADHOC.name();
         } else {
+            // ????
             wifiMode = WifiMode.UNKNOWN.name();
         }
         properties.put(wifiBasePropName.append("mode").toString(), wifiMode);
@@ -1899,8 +1901,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         if (wifiBgscan.getModule().equals(WifiBgscanModule.NONE)) {
             properties.put(wifiModeBasePropName.toString() + "bgscan", null);
         } else {
-            String wifiBgscanString = wifiBgscan.getModule().name().toLowerCase() + ":" + wifiBgscan.getRssiThreshold()
-                    + ":" + wifiBgscan.getShortInterval() + ":" + wifiBgscan.getLongInterval();
+            String wifiBgscanString = wifiBgscan.getModule().name().toLowerCase() + ":" + wifiBgscan.getShortInterval()
+                    + ":" + wifiBgscan.getRssiThreshold() + ":" + wifiBgscan.getLongInterval();
             properties.put(wifiModeBasePropName.toString() + "bgscan", wifiBgscanString);
         }
         // wifiConfig.setBgscan(wifiBgscan);
@@ -1928,20 +1930,21 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     } else {
                         oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
                     }
-                    try {
-                        if (oldGwtWifiConfig != null) {
-                            CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);
-                            char[] passphrase = cs.encryptAes(
-                                    GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()).toCharArray());
-                            properties.put(wifiModeBasePropName.toString() + "passphrase", new Password(passphrase));
-                            // wifiConfig.setPasskey(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()));
-                        }
-                    } catch (KuraException e) {
-                        throw new GwtKuraException(GwtKuraErrorCode.WARNING, e); // change error code. Add a new one?
+                    // try {
+                    if (oldGwtWifiConfig != null) {
+                        // CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);
+                        // char[] passphrase = cs.encryptAes(
+                        // GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()).toCharArray());
+                        properties.put(wifiModeBasePropName.toString() + "passphrase",
+                                new Password(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword())));
+                        // wifiConfig.setPasskey(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()));
                     }
+                    // } catch (KuraException e) {
+                    // throw new GwtKuraException(GwtKuraErrorCode.WARNING, e); // change error code. Add a new one?
+                    // }
                 }
             }
-        } else if (passKey != null && mode.equalsIgnoreCase(WifiMode.MASTER.name())) {
+        } else if (passKey != null && wifiMode.equalsIgnoreCase(WifiMode.MASTER.name())) {
             validateUserPassword(passKey);
             try {
                 CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);

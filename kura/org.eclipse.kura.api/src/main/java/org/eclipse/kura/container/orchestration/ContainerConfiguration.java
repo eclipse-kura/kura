@@ -249,7 +249,7 @@ public class ContainerConfiguration {
         private Boolean isFrameworkManaged = false;
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
-        private ImageConfigurationBuilder imageConfigBuilder;
+        private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;

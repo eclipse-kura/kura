@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.keystore.test;
+package org.eclipse.kura.core.keystore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -49,10 +49,10 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl;
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.osgi.service.component.ComponentContext;
@@ -656,16 +656,9 @@ public class FilesystemKeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] password = "some password".toCharArray();
-        ks.load(null, password);
-        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl() {
+        createEmptyKeystore(STORE_PATH, STORE_PASS);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
 
-            @Override
-            public KeyStore getKeyStore() throws KuraException {
-                return ks;
-            }
-        };
         keystoreService.setCryptoService(cryptoService);
         keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.activate(componentContext, properties);
@@ -780,7 +773,7 @@ public class FilesystemKeystoreServiceImplTest {
 
     @Test
     public void testCreateCSRWithAlias()
-            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+            throws KuraException, NoSuchAlgorithmException, CertificateException, KeyStoreException, IOException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -791,16 +784,8 @@ public class FilesystemKeystoreServiceImplTest {
 
         ComponentContext componentContext = mock(ComponentContext.class);
 
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        char[] password = "some password".toCharArray();
-        ks.load(null, password);
-        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl() {
-
-            @Override
-            public KeyStore getKeyStore() throws KuraException {
-                return ks;
-            }
-        };
+        createEmptyKeystore(STORE_PATH, STORE_PASS);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
         keystoreService.setEventAdmin(mock(EventAdmin.class));
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
@@ -922,6 +907,120 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.updated(newProps);
 
         assertNotNull(keystoreService.getKeyStore());
+    }
+
+    @Test
+    public void testActivateWithPasswordInCrypto()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, "a wrong password");
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        KeyStore keystore = keystoreService.getKeyStore();
+
+        assertNotNull(keystore);
+        assertEquals(Collections.list(this.store.aliases()), Collections.list(keystore.aliases()));
+
+        assertKeystoreIsLoadable(STORE_PATH, STORE_PASS);
+    }
+
+    @Test
+    public void testActivateWithPasswordInCryptoAndSpuriousUpdate()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, "a wrong password");
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        KeyStore keystore = keystoreService.getKeyStore();
+
+        assertNotNull(keystore);
+        assertEquals(Collections.list(this.store.aliases()), Collections.list(keystore.aliases()));
+
+        assertKeystoreIsLoadable(STORE_PATH, STORE_PASS);
+
+        keystoreService.updated(properties);
+
+        assertKeystoreIsLoadable(STORE_PATH, STORE_PASS);
+    }
+
+    @Test
+    public void testActivateWithPasswordInCryptoAndChangePassword()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, "a wrong password");
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.encryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.decryptAes((char[]) Matchers.any())).thenAnswer(i -> i.getArgumentAt(0, char[].class));
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        KeyStore keystore = keystoreService.getKeyStore();
+
+        assertNotNull(keystore);
+        assertEquals(Collections.list(this.store.aliases()), Collections.list(keystore.aliases()));
+
+        assertKeystoreIsLoadable(STORE_PATH, STORE_PASS);
+
+        properties.put(KEY_KEYSTORE_PASSWORD, "foo");
+        keystoreService.updated(properties);
+
+        assertKeystoreIsLoadable(STORE_PATH, "foo");
+        Mockito.verify(cryptoService).setKeyStorePassword(Mockito.eq(STORE_PATH),
+                AdditionalMatchers.aryEq("foo".toCharArray()));
+    }
+
+    private void assertKeystoreIsLoadable(final String path, final String password)
+            throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
+        final KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        try (final FileInputStream in = new FileInputStream(path)) {
+            ks.load(in, password.toCharArray());
+        }
+    }
+
+    private KeyStore createEmptyKeystore(final String path, final String password)
+            throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+        char[] passwordChars = password.toCharArray();
+        ks.load(null, passwordChars);
+
+        try (final FileOutputStream out = new FileOutputStream(path)) {
+            ks.store(out, passwordChars);
+        }
+
+        return ks;
     }
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -156,7 +156,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())
                 && this.keystoreServiceOptions.needsRandomPassword()) {
-            changeDefaultKeystorePassword();
+            setRandomPassword();
         }
 
         this.crlManagerOptions = new CRLManagerOptions(properties);
@@ -175,9 +175,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
             if (!this.keystoreServiceOptions.getKeystorePath().equals(newOptions.getKeystorePath())) {
                 updateKeystorePath(newOptions);
-            } else if (!Arrays.equals(this.keystoreServiceOptions.getKeystorePassword(this.cryptoService),
-                    newOptions.getKeystorePassword(this.cryptoService))) {
-                updateKeystorePassword(this.keystoreServiceOptions, newOptions);
+            } else {
+                checkAndUpdateKeystorePassword(newOptions);
             }
 
             this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
@@ -193,6 +192,21 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
 
         logger.info("Bundle {} has updated!", properties.get(KURA_SERVICE_PID));
+    }
+
+    private void checkAndUpdateKeystorePassword(final KeystoreServiceOptions options) {
+        try {
+            final LoadedKeystore ks = loadKeystore(this.keystoreServiceOptions);
+
+            final char[] configPassword = options.getKeystorePassword(cryptoService);
+
+            if (!Arrays.equals(ks.password, configPassword)) {
+                setKeystorePassword(ks, configPassword);
+            }
+
+        } catch (final Exception e) {
+            logger.warn("failed to load or update keystore password", e);
+        }
     }
 
     public void deactivate() {
@@ -222,23 +236,21 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
             return;
         }
 
-        if (!isKeyStoreAccessible(newOptions.getKeystorePath(), newOptions.getKeystorePassword(this.cryptoService))) {
+        try {
+            loadKeystore(newOptions);
+        } catch (final Exception e) {
             logger.warn("Keystore {} not accessible!", newOptions.getKeystorePath());
         }
     }
 
-    private void changeDefaultKeystorePassword() {
-
-        char[] oldPassword = this.keystoreServiceOptions.getKeystorePassword(this.cryptoService);
-
-        if (isDefaultFromCrypto()) {
-            oldPassword = this.cryptoService.getKeyStorePassword(this.keystoreServiceOptions.getKeystorePath());
-        }
-
-        char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
+    private void setRandomPassword() {
 
         try {
-            changeKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(), oldPassword, newPassword);
+            final LoadedKeystore keystore = loadKeystore(this.keystoreServiceOptions);
+
+            char[] newPassword = new BigInteger(160, new SecureRandom()).toString(32).toCharArray();
+
+            setKeystorePassword(keystore, newPassword);
 
             Map<String, Object> props = new HashMap<>(this.keystoreServiceOptions.getProperties());
             props.put(KEY_KEYSTORE_PASSWORD, new String(this.cryptoService.encryptAes(newPassword)));
@@ -250,20 +262,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
     }
 
-    private synchronized void changeKeyStorePassword(String location, char[] oldPassword, char[] newPassword)
-            throws IOException, NoSuchAlgorithmException, CertificateException, KeyStoreException,
-            UnrecoverableEntryException {
-
-        KeyStore keystore = loadKeystore(location, oldPassword);
-
-        updateKeyEntriesPasswords(keystore, oldPassword, newPassword);
-        saveKeystore(location, newPassword, keystore);
-    }
-
-    private void saveKeystore(String keyStoreFileName, char[] keyStorePassword, KeyStore ks)
+    private synchronized void saveKeystore(LoadedKeystore ks, char[] keyStorePassword)
             throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        try (FileOutputStream tsOutStream = new FileOutputStream(keyStoreFileName);) {
-            ks.store(tsOutStream, keyStorePassword);
+        try (FileOutputStream tsOutStream = new FileOutputStream(ks.path)) {
+            ks.keystore.store(tsOutStream, keyStorePassword);
         }
     }
 
@@ -293,89 +295,37 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }, 1000, 1000, TimeUnit.MILLISECONDS);
     }
 
-    private boolean isDefaultFromCrypto() {
-        char[] cryptoPassword = this.cryptoService.getKeyStorePassword(this.keystoreServiceOptions.getKeystorePath());
-
-        if (cryptoPassword == null) {
-            return false;
-        }
-        return isKeyStoreAccessible(this.keystoreServiceOptions.getKeystorePath(), cryptoPassword);
-    }
-
-    private boolean isKeyStoreAccessible(String location, char[] password) {
+    private synchronized void setKeystorePassword(LoadedKeystore ks, char[] password) {
         try {
-            loadKeystore(location, password);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
+            updateKeyEntriesPasswords(ks, password);
+            saveKeystore(ks, password);
 
-    private KeyStore loadKeystore(String keyStore, char[] keyStorePassword)
-            throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-
-        try (InputStream tsReadStream = new FileInputStream(keyStore);) {
-            ks.load(tsReadStream, keyStorePassword);
-        }
-
-        return ks;
-    }
-
-    private void updateKeystorePassword(KeystoreServiceOptions oldOptions, KeystoreServiceOptions newOptions) {
-        try {
-            changeKeyStorePassword(oldOptions.getKeystorePassword(this.cryptoService),
-                    newOptions.getKeystorePassword(this.cryptoService));
-
-            this.cryptoService.setKeyStorePassword(this.keystoreServiceOptions.getKeystorePath(),
-                    newOptions.getKeystorePassword(this.cryptoService));
+            this.cryptoService.setKeyStorePassword(ks.path, password);
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | UnrecoverableEntryException
                 | IOException e) {
             logger.warn("Failed to change keystore password");
         } catch (KuraException e) {
             logger.warn("Failed to persist keystore password");
-        } catch (GeneralSecurityException e) {
-            logger.warn("Failed to load keystore");
         }
     }
 
-    private void changeKeyStorePassword(char[] oldPassword, char[] newPassword)
-            throws IOException, GeneralSecurityException, KuraException {
-
-        KeyStore keystore = getKeyStore();
-
-        updateKeyEntriesPasswords(keystore, oldPassword, newPassword);
-        saveKeystore(keystore, newPassword);
-    }
-
-    private static void updateKeyEntriesPasswords(KeyStore keystore, char[] oldPassword, char[] newPassword)
+    private static void updateKeyEntriesPasswords(LoadedKeystore ks, char[] newPassword)
             throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableEntryException {
-        Enumeration<String> aliases = keystore.aliases();
+        Enumeration<String> aliases = ks.keystore.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
-            if (keystore.isKeyEntry(alias)) {
-                PasswordProtection oldPP = new PasswordProtection(oldPassword);
-                Entry entry = keystore.getEntry(alias, oldPP);
+            if (ks.keystore.isKeyEntry(alias)) {
+                PasswordProtection oldPP = new PasswordProtection(ks.password);
+                Entry entry = ks.keystore.getEntry(alias, oldPP);
                 PasswordProtection newPP = new PasswordProtection(newPassword);
-                keystore.setEntry(alias, entry, newPP);
+                ks.keystore.setEntry(alias, entry, newPP);
             }
         }
     }
 
     @Override
     public synchronized KeyStore getKeyStore() throws KuraException {
-        KeyStore ks = null;
-        try (InputStream tsReadStream = new FileInputStream(this.keystoreServiceOptions.getKeystorePath());) {
-            ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            char[] keystorePassword = this.keystoreServiceOptions.getKeystorePassword(this.cryptoService);
-
-            ks.load(tsReadStream, keystorePassword);
-        } catch (GeneralSecurityException | IOException e) {
-            logger.warn("Failed to get the KeyStore {}", this.keystoreServiceOptions.getKeystorePath());
-            throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get the KeyStore");
-        }
-
-        return ks;
+        return loadKeystore(this.keystoreServiceOptions).keystore;
     }
 
     @Override
@@ -383,14 +333,14 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         if (isNull(alias)) {
             throw new IllegalArgumentException("Key Pair alias cannot be null!");
         }
-        KeyStore ks = getKeyStore();
+        LoadedKeystore ks = loadKeystore(this.keystoreServiceOptions);
 
         try {
-            if (ks.entryInstanceOf(alias, PrivateKeyEntry.class) || ks.entryInstanceOf(alias, SecretKeyEntry.class)) {
-                return ks.getEntry(alias,
-                        new PasswordProtection(this.keystoreServiceOptions.getKeystorePassword(this.cryptoService)));
+            if (ks.keystore.entryInstanceOf(alias, PrivateKeyEntry.class)
+                    || ks.keystore.entryInstanceOf(alias, SecretKeyEntry.class)) {
+                return ks.keystore.getEntry(alias, new PasswordProtection(ks.password));
             } else {
-                return ks.getEntry(alias, null);
+                return ks.keystore.getEntry(alias, null);
             }
         } catch (GeneralSecurityException e) {
             throw new KuraException(KuraErrorCode.BAD_REQUEST, e, "Failed to get the entry " + alias);
@@ -466,10 +416,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         if (isNull(algorithm)) {
             throw new IllegalArgumentException("Algorithm cannot be null!");
         }
-        KeyStore ks = getKeyStore();
+        LoadedKeystore ks = loadKeystore(this.keystoreServiceOptions);
         try {
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(algorithm);
-            kmf.init(ks, this.keystoreServiceOptions.getKeystorePassword(this.cryptoService));
+            kmf.init(ks.keystore, ks.password);
 
             return Arrays.asList(kmf.getKeyManagers());
         } catch (GeneralSecurityException e) {
@@ -489,9 +439,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
             return;
         }
 
-        KeyStore ks = getKeyStore();
+        LoadedKeystore ks = loadKeystore(this.keystoreServiceOptions);
         try {
-            ks.deleteEntry(alias);
+            ks.keystore.deleteEntry(alias);
             saveKeystore(ks);
             boolean crlStoreChanged = false;
             crlStoreChanged = tryRemoveFromCrlManagement(currentEntry.get());
@@ -503,15 +453,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
     }
 
-    private void saveKeystore(KeyStore ks)
-            throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
-        saveKeystore(ks, this.keystoreServiceOptions.getKeystorePassword(this.cryptoService));
-    }
-
-    private void saveKeystore(KeyStore ks, char[] password)
+    private void saveKeystore(LoadedKeystore ks)
             throws IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
         try (FileOutputStream tsOutStream = new FileOutputStream(this.keystoreServiceOptions.getKeystorePath());) {
-            ks.store(tsOutStream, password);
+            ks.keystore.store(tsOutStream, ks.password);
         }
     }
 
@@ -520,18 +465,17 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         if (isNull(alias) || alias.trim().isEmpty() || isNull(entry)) {
             throw new IllegalArgumentException("Input cannot be null or empty!");
         }
-        KeyStore ks = getKeyStore();
+        LoadedKeystore ks = loadKeystore(keystoreServiceOptions);
 
         final ProtectionParameter protectionParameter;
 
         if (entry instanceof TrustedCertificateEntry) {
             protectionParameter = null;
         } else {
-            protectionParameter = new PasswordProtection(
-                    this.keystoreServiceOptions.getKeystorePassword(this.cryptoService));
+            protectionParameter = new PasswordProtection(ks.password);
         }
         try {
-            ks.setEntry(alias, entry, protectionParameter);
+            ks.keystore.setEntry(alias, entry, protectionParameter);
             saveKeystore(ks);
             if (!tryAddToCrlManagement(entry)) {
                 postChangedEvent();
@@ -698,7 +642,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         final Optional<X509Certificate> certificate = extractCertificate(entry);
         final Optional<CRLManager> currentCrlManager = this.crlManager;
 
-        if (certificate.isPresent() && this.crlManager.isPresent()) {
+        if (certificate.isPresent() && currentCrlManager.isPresent()) {
             return currentCrlManager.get().removeTrustedCertificate(certificate.get());
         } else {
             return false;
@@ -752,4 +696,84 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     private void postChangedEvent() {
         this.eventAdmin.postEvent(new KeystoreChangedEvent(this.ownPid));
     }
+
+    private synchronized LoadedKeystore loadKeystore(final KeystoreServiceOptions options) throws KuraException {
+        final List<char[]> passwords = new ArrayList<>(2);
+
+        passwords.add(options.getKeystorePassword(cryptoService));
+
+        char[] passwordInCrypto = null;
+
+        try {
+            passwordInCrypto = this.cryptoService.getKeyStorePassword(options.getKeystorePath());
+            if (passwordInCrypto != null) {
+                passwords.add(passwordInCrypto);
+            }
+        } catch (final Exception e) {
+            logger.debug("failed to retrieve password", e);
+        }
+
+        final LoadedKeystore result = new KeystoreLoader(options.getKeystorePath(), passwords).loadKeystore();
+
+        if (!Arrays.equals(passwordInCrypto, result.password)) {
+            this.cryptoService.setKeyStorePassword(result.path, result.password);
+        }
+
+        return result;
+    }
+
+    private static class KeystoreLoader {
+
+        private final String path;
+        private final List<char[]> passwords;
+
+        KeystoreLoader(final String path, final List<char[]> passwords) {
+            this.path = path;
+            this.passwords = passwords;
+        }
+
+        private KeyStore loadKeystore(final String path, final char[] password)
+                throws NoSuchAlgorithmException, CertificateException, IOException, KeyStoreException {
+            KeyStore ks = null;
+            try (InputStream tsReadStream = new FileInputStream(path)) {
+                ks = KeyStore.getInstance(KeyStore.getDefaultType());
+                char[] keystorePassword = password;
+
+                ks.load(tsReadStream, keystorePassword);
+            }
+
+            return ks;
+        }
+
+        LoadedKeystore loadKeystore() throws KuraException {
+
+            for (final char[] password : this.passwords) {
+                try {
+                    final KeyStore keyStore = loadKeystore(path, password);
+
+                    return new LoadedKeystore(keyStore, password, this.path);
+                } catch (final Exception e) {
+                    logger.debug("failed to load keystore", e);
+                }
+            }
+
+            throw new KuraException(KuraErrorCode.BAD_REQUEST, "Failed to get the KeyStore");
+
+        }
+    }
+
+    private static class LoadedKeystore {
+
+        private final KeyStore keystore;
+        private final char[] password;
+        private final String path;
+
+        public LoadedKeystore(final KeyStore keystore, final char[] password, final String path) {
+            this.keystore = keystore;
+            this.password = password;
+            this.path = path;
+        }
+
+    }
+
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ import static java.util.Objects.isNull;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.crypto.CryptoService;
@@ -98,14 +99,7 @@ public class KeystoreServiceOptions {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.keystorePassword == null ? 0 : this.keystorePassword.hashCode());
-        result = prime * result + (this.keystorePath == null ? 0 : this.keystorePath.hashCode());
-        result = prime * result + (this.pid == null ? 0 : this.pid.hashCode());
-        result = prime * result + (this.properties == null ? 0 : this.properties.hashCode());
-        result = prime * result + (this.randomPassword ? 1231 : 1237);
-        return result;
+        return Objects.hash(Arrays.hashCode(keystorePassword.getPassword()), keystorePath, pid, randomPassword);
     }
 
     @Override
@@ -120,38 +114,9 @@ public class KeystoreServiceOptions {
             return false;
         }
         KeystoreServiceOptions other = (KeystoreServiceOptions) obj;
-        if (this.keystorePassword == null) {
-            if (other.keystorePassword != null) {
-                return false;
-            }
-        } else if (!Arrays.equals(this.keystorePassword.getPassword(), other.keystorePassword.getPassword())) {
-            return false;
-        }
-        if (this.keystorePath == null) {
-            if (other.keystorePath != null) {
-                return false;
-            }
-        } else if (!this.keystorePath.equals(other.keystorePath)) {
-            return false;
-        }
-        if (this.pid == null) {
-            if (other.pid != null) {
-                return false;
-            }
-        } else if (!this.pid.equals(other.pid)) {
-            return false;
-        }
-        if (this.properties == null) {
-            if (other.properties != null) {
-                return false;
-            }
-        } else if (!this.properties.equals(other.properties)) {
-            return false;
-        }
-        boolean result = true;
-        if (this.randomPassword != other.randomPassword) {
-            result = false;
-        }
-        return result;
+        return Arrays.equals(keystorePassword.getPassword(), other.keystorePassword.getPassword())
+                && Objects.equals(keystorePath, other.keystorePath) && Objects.equals(pid, other.pid)
+                && randomPassword == other.randomPassword;
     }
+
 }

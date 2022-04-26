@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.core.keystore.test;
+package org.eclipse.kura.core.keystore;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

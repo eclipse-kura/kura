@@ -486,7 +486,7 @@ public class ContainerOrchestrationServiceImplTest {
     }
     
     private void whenImagesAreListed() throws KuraException {
-    	this.dockerService.listImageInstanceDescriptor();
+    	this.dockerService.listImageInstanceDescriptors();
     }
 
     /**

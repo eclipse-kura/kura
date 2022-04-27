@@ -147,9 +147,10 @@ public class ContainerConfiguration {
     }
 
     /**
-     * @since 2.4 Returns the {@link ImageConfiguration} object
+     * Returns the {@link ImageConfiguration} object
      *
      * @return
+     * @since 2.4
      */
     public ImageConfiguration getImageConfiguration() {
         return this.imageConfig;
@@ -322,8 +323,9 @@ public class ContainerConfiguration {
         }
 
         /**
-         * @since 2.4 builds image based on {@link ImageConfiguration}
-         *
+         * builds image based on {@link ImageConfiguration}
+         * 
+         * @since 2.4
          */
         public ContainerConfigurationBuilder setImageConfiguration(ImageConfiguration imageConfig) {
             this.imageConfigBuilder.setImageName(imageConfig.getImageName());

@@ -413,8 +413,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException("failed to reach docker engine");
         }
 
-        if (containerDescription == null || containerDescription.getImageConfiguration().getImageName() == null
-                || containerDescription.getImageConfiguration().getImageTag() == null) {
+        if (containerDescription == null) {
             throw new IllegalStateException("failed to create container, null containerImage passed");
         }
 
@@ -747,7 +746,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     @Override
-    public List<ImageInstanceDescriptor> listImageInstanceDescriptor() {
+    public List<ImageInstanceDescriptor> listImageInstanceDescriptors() {
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
         }
@@ -791,7 +790,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         } catch (Exception e) {
             logger.error("Could not remove image {}.", imageId);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                    "Image could not be deleted. It is most likely in use by a container.");
+                    "Delete Container Image","500 (server error). Image is most likely in use by a container.");
         }
     }
 

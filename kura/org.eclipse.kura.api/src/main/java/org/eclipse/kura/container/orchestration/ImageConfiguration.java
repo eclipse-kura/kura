@@ -105,7 +105,7 @@ public class ImageConfiguration {
     public static final class ImageConfigurationBuilder {
 
         private String imageName;
-        private String imageTag;
+        private String imageTag = "latest";
         private Optional<RegistryCredentials> registryCredentials;
         private int imageDownloadTimeoutSeconds = 500;
 
@@ -134,8 +134,7 @@ public class ImageConfiguration {
 
             result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
             result.imageTag = this.imageTag;
-            result.registryCredentials = requireNonNull(this.registryCredentials,
-                    "Request Registry Credentials object cannot be null");
+            result.registryCredentials = this.registryCredentials;
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 
             return result;

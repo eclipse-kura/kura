@@ -21,7 +21,7 @@ import java.util.Objects;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a image. Used to track created images, and images
+ * Object which represents an image. Used to track created images, and images
  * that exist in the container engine.
  *
  * @noimplement This interface is not intended to be implemented by clients.
@@ -42,7 +42,7 @@ public class ImageInstanceDescriptor {
     private ImageInstanceDescriptor() {
     }
 
-    /***
+    /**
      * Returns a Image's name as a String.
      * @return
      */
@@ -50,7 +50,7 @@ public class ImageInstanceDescriptor {
         return this.imageName;
     }
 
-    /***
+    /**
      * Returns a Image's tag as a String.
      * @return
      */
@@ -94,7 +94,7 @@ public class ImageInstanceDescriptor {
      * Returns all of a Image's tags as a Map<String,String>.
      * @return
      */
-    public Map<String, String> getImageTags() {
+    public Map<String, String> getImageLabels() {
         return imageLabels;
     }
 
@@ -177,9 +177,9 @@ public class ImageInstanceDescriptor {
         public ImageInstanceDescriptor build() {
             ImageInstanceDescriptor result = new ImageInstanceDescriptor();
 
-            result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
-            result.imageTag = requireNonNull(this.imageTag, "Request Image Image cannot be null");
-            result.imageId = this.imageId;
+            result.imageName = this.imageName;
+            result.imageTag = this.imageTag;
+            result.imageId = requireNonNull(this.imageId,"Image ID cannot be null");
             result.imageAuthor = this.imageAuthor;
             result.imageArch = this.imageArch;
             result.imageSize = this.imageSize;

@@ -43,32 +43,37 @@ public interface ContainerOrchestrationService {
     public List<ContainerInstanceDescriptor> listContainerDescriptors();
     
     /**
-     * @since 2.4
      * Lists all available images, returning the corresponding {@link ImageInstanceDescriptor}s
      *
      * @return a list of {@link ContainerInstanceDescriptor}s representing the available containers
+     * @since 2.4
      */
-    public List<ImageInstanceDescriptor> listImageInstanceDescriptor();
+    public List<ImageInstanceDescriptor> listImageInstanceDescriptors();
     
     /**
-     * @since 2.4
-     * Deletes Image from container engine. Takes ImageID String as parameter. Will throw an error if image is being used by a container.
+     * Deletes Image from container engine. Takes ImageID String as parameter. 
+     * Will throw an error if image is being used by a container.
      *
-     * @return void
-     * @throws KuraException 
+     * @param imageId
+     * string parameter that identifies the image to be deleted
+     * @throws KuraException
+     * if the image is used by a container or if the image deletion process fails
+     * @since 2.4
      */
     public void deleteImage(String imageId) throws KuraException;
     
     /**
-     * @since 2.4
      * Allows to pull the required image, using the specified tag and credentials. The image will be downloaded
      * respecting the configured timeout in seconds.
      *
      * @param imageConfig
-     *            a ImageConfiguration object which contains info such as image name, tag, pull timeout in secconds and registry credentials.
+     * a ImageConfiguration object which contains info such as image name, tag, pull timeout in seconds and
+     * registry credentials.
+     * 
      * @throws KuraException
-     *             if the pull operation fails
+     * if the pull operation fails
      * @throws InterruptedException
+     * @since 2.4
      */
     public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException;
     

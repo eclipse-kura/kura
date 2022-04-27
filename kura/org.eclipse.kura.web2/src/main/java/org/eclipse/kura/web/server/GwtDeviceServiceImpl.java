@@ -244,7 +244,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
         try {
             ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
-            List<ImageInstanceDescriptor> images = checkIfContainerOrchestratorIsActive.listImageInstanceDescriptor();
+            List<ImageInstanceDescriptor> images = checkIfContainerOrchestratorIsActive.listImageInstanceDescriptors();
             if (images != null) {
                 for (ImageInstanceDescriptor image : images) {
                     GwtGroupedNVPair pair = new GwtGroupedNVPair();
@@ -271,7 +271,7 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
 
         ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
-        List<ImageInstanceDescriptor> images = containerOrchestrationService.listImageInstanceDescriptor();
+        List<ImageInstanceDescriptor> images = containerOrchestrationService.listImageInstanceDescriptors();
 
         logger.info("Deleting image with id: {}", imageId);
 

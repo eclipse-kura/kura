@@ -917,10 +917,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                     if (config.getSubnetMask() != null && !config.getSubnetMask().isEmpty()) {
                         logger.debug("setting subnet mask: {}", config.getSubnetMask());
-                        StringBuilder netmaskPropName = new StringBuilder(basePropName.toString())
-                                .append("ip4.netmask");
-                        properties.put(netmaskPropName.toString(),
+                        StringBuilder prefixPropName = new StringBuilder(basePropName.toString()).append("ip4.prefix");
+                        short prefix = NetworkUtil.getNetmaskShortForm(
                                 ((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask())).getHostAddress());
+                        properties.put(prefixPropName.toString(), prefix);
                         // netConfig4.setSubnetMask((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask()));
                     }
                     if (config.getGateway() != null && !config.getGateway().isEmpty()) {
@@ -1462,7 +1462,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     // private List<NetConfig> getDhcpConfig(GwtNetInterfaceConfig config) throws KuraException {
     private void getDhcpConfig(GwtNetInterfaceConfig config, Map<String, Object> properties, String basePropName)
-            throws KuraException {
+            throws KuraException, UnknownHostException {
         // Setup the DHCP and NAT if necessary
 
         // net.interface.eno1.config.dhcpClient4.enabled<Boolean> = false
@@ -1475,110 +1475,162 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         // net.interface.eno1.config.dhcpServer4.rangeStart<String> = 172.16.0.100
 
         String routerMode = config.getRouterMode();
+        StringBuilder dhcpServer4PropName = new StringBuilder(basePropName).append("dhcpServer4.");
         if (routerMode.equals(GwtNetRouterMode.netRouterOff.name())) {
             logger.debug("DCHP and NAT are disabled");
-            return;
-        } else if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())
-                || routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())
-                || routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
-            try {
-                // List<NetConfig> netConfigs = new ArrayList<>();
+            properties.put(dhcpServer4PropName.toString() + "enabled", false);
+            properties.put(basePropName.toString() + "nat.enabled", false);
+        } else if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())) {
+            fillDhcpServerProperties(config, properties, basePropName);
+            properties.put(basePropName.toString() + "nat.enabled", false);
+        } else if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())) {
+            fillDhcpServerProperties(config, properties, basePropName);
+            /*
+             * IPAddress m_sourceNetwork; //192.168.1.0
+             * IPAddress m_netmask; //255.255.255.0
+             * String m_sourceInterface; //eth0
+             * String m_destinationInterface; //ppp0 or something similar
+             * boolean m_masquerade; //yes
+             */
 
-                if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())
-                        || routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())) {
-                    StringBuilder defaultLeaseTimePropName = new StringBuilder(basePropName)
-                            .append("dhcpServer4.defaultLeaseTime");
-                    properties.put(defaultLeaseTimePropName.toString(), config.getRouterDhcpDefaultLease());
-                    // int defaultLeaseTime = config.getRouterDhcpDefaultLease();
-                    StringBuilder maximumLeaseTimePropName = new StringBuilder(basePropName)
-                            .append("dhcpServer4.maxLeaseTime");
-                    properties.put(maximumLeaseTimePropName.toString(), config.getRouterDhcpMaxLease());
-                    // int maximumLeaseTime = config.getRouterDhcpMaxLease();
-                    // StringBuilder routerAddressPropName = new
-                    // StringBuilder(basePropName.toString()).append("dhcpServer4.maxLeaseTime"); ??????
-                    // properties.put(routerAddressPropName.toString(), ((IP4Address)
-                    // IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
-                    // IP4Address routerAddress = (IP4Address) IPAddress.parseHostAddress(config.getIpAddress());
-                    StringBuilder rangeStartPropName = new StringBuilder(basePropName).append("dhcpServer4.rangeStart");
-                    properties.put(rangeStartPropName.toString(),
-                            ((IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpBeginAddress()))
-                                    .getHostAddress());
-                    // IP4Address rangeStart = (IP4Address)
-                    // IPAddress.parseHostAddress(config.getRouterDhcpBeginAddress());
-                    StringBuilder rangeEndPropName = new StringBuilder(basePropName).append("dhcpServer4.rangeEnd");
-                    properties.put(rangeEndPropName.toString(),
-                            ((IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpEndAddress()))
-                                    .getHostAddress());
-                    // IP4Address rangeEnd = (IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpEndAddress());
-                    StringBuilder passDnsPropName = new StringBuilder(basePropName).append("dhcpServer4.passDns");
-                    properties.put(passDnsPropName.toString(), config.getRouterDnsPass());
-                    // boolean passDns = config.getRouterDnsPass();
+            // String sourceInterface = config.getName();
+            // String destinationInterface = "unknown"; // dynamic and defined at runtime
+            // boolean masquerade = true;
+            //
+            // FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
+            // masquerade); // ????????
+            // netConfigs.add(natConfig);
+            properties.put(basePropName.toString() + "nat.enabled", true);
+        } else if (routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
+            properties.put(dhcpServer4PropName.toString() + "enabled", false);
+            properties.put(basePropName.toString() + "nat.enabled", true);
+            /*
+             * IPAddress m_sourceNetwork; //192.168.1.0
+             * IPAddress m_netmask; //255.255.255.0
+             * String m_sourceInterface; //eth0
+             * String m_destinationInterface; //ppp0 or something similar
+             * boolean m_masquerade; //yes
+             */
 
-                    StringBuilder prefixPropName = new StringBuilder(basePropName).append("dhcpServer4.prefix");
-                    IP4Address subnetMask = (IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpSubnetMask());
-                    // IP4Address subnet = (IP4Address) IPAddress.parseHostAddress(
-                    // NetworkUtil.calculateNetwork(config.getIpAddress(), config.getSubnetMask()));
-                    short prefix = NetworkUtil.getNetmaskShortForm(subnetMask.getHostAddress());
-                    properties.put(prefixPropName.toString(), prefix);
-
-                    // Use our IP as the DNS server and we'll use named to proxy DNS queries
-                    StringBuilder dnsServerPropName = new StringBuilder(basePropName.toString())
-                            .append("ip4.dnsServers");
-                    List<IP4Address> dnsServers = new ArrayList<>();
-                    dnsServers.add((IP4Address) IPAddress.parseHostAddress(config.getIpAddress()));
-                    StringBuilder dnsServersBuilder = new StringBuilder();
-                    dnsServers.forEach(dns -> dnsServersBuilder.append(dns.getHostAddress()).append(","));
-                    properties.put(dnsServerPropName.toString(),
-                            dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
-
-                    // logger.debug("DhcpServerConfigIP4 - start: {}, end: {}, prefix: {}, subnet: {}, subnetMask: {}",
-                    // new Object[] { rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix,
-                    // subnet.getHostAddress(), subnetMask.getHostAddress() });
-                    // try {
-                    // DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(config.getName(), true, defaultLeaseTime,
-                    // maximumLeaseTime, passDns);
-                    // DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
-                    // routerAddress, rangeStart, rangeEnd, dnsServers);
-                    // netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
-                    // } catch (KuraException e) {
-                    // logger.error(
-                    // "Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see
-                    // below) are in the {} subnet.",
-                    // subnet.getHostAddress());
-                    // logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(),
-                    // rangeEnd.getHostAddress());
-                    // logger.error("Exception: ", e);
-                    // }
-                }
-
-                if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())
-                        || routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
-
-                    /*
-                     * IPAddress m_sourceNetwork; //192.168.1.0
-                     * IPAddress m_netmask; //255.255.255.0
-                     * String m_sourceInterface; //eth0
-                     * String m_destinationInterface; //ppp0 or something similar
-                     * boolean m_masquerade; //yes
-                     */
-
-                    String sourceInterface = config.getName();
-                    String destinationInterface = "unknown";                        // dynamic and defined at runtime
-                    boolean masquerade = true;
-
-                    FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
-                            masquerade); // ????????
-                    // netConfigs.add(natConfig);
-                }
-
-                // return netConfigs;
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
-            }
+            // String sourceInterface = config.getName();
+            // String destinationInterface = "unknown"; // dynamic and defined at runtime
+            // boolean masquerade = true;
+            //
+            // FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
+            // masquerade); // ????????
+            // netConfigs.add(natConfig);
         } else {
             logger.error("Unsupported routerMode: {}", routerMode);
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Unsupported routerMode: " + routerMode);
         }
+
+        // if (routerMode.equals(GwtNetRouterMode.netRouterOff.name())) {
+        // logger.debug("DCHP and NAT are disabled");
+        // properties.put(DhcpServer4EnabledPropName.toString(), false);
+        // return;
+        // } else if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())
+        // || routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())
+        // || routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
+        // try {
+        // // List<NetConfig> netConfigs = new ArrayList<>();
+        //
+        // if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())
+        // || routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())) {
+        // fillDhcpServerProperties();
+        // }
+        //
+        // if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())
+        // || routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
+        //
+        // /*
+        // * IPAddress m_sourceNetwork; //192.168.1.0
+        // * IPAddress m_netmask; //255.255.255.0
+        // * String m_sourceInterface; //eth0
+        // * String m_destinationInterface; //ppp0 or something similar
+        // * boolean m_masquerade; //yes
+        // */
+        //
+        // String sourceInterface = config.getName();
+        // String destinationInterface = "unknown"; // dynamic and defined at runtime
+        // boolean masquerade = true;
+        //
+        // FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
+        // masquerade); // ????????
+        // // netConfigs.add(natConfig);
+        // }
+        //
+        // // return netConfigs;
+        // } catch (Exception e) {
+        // throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
+        // }
+        // } else {
+        // logger.error("Unsupported routerMode: {}", routerMode);
+        // throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Unsupported routerMode: " + routerMode);
+        // }
+    }
+
+    private void fillDhcpServerProperties(GwtNetInterfaceConfig config, Map<String, Object> properties,
+            String basePropName) throws UnknownHostException {
+        StringBuilder dhcpServer4PropName = new StringBuilder(basePropName).append("dhcpServer4.");
+        properties.put(dhcpServer4PropName.toString() + "enabled", true);
+        StringBuilder defaultLeaseTimePropName = new StringBuilder(dhcpServer4PropName).append("defaultLeaseTime");
+        properties.put(defaultLeaseTimePropName.toString(), config.getRouterDhcpDefaultLease());
+        // int defaultLeaseTime = config.getRouterDhcpDefaultLease();
+        StringBuilder maximumLeaseTimePropName = new StringBuilder(dhcpServer4PropName).append("maxLeaseTime");
+        properties.put(maximumLeaseTimePropName.toString(), config.getRouterDhcpMaxLease());
+        // int maximumLeaseTime = config.getRouterDhcpMaxLease();
+        // StringBuilder routerAddressPropName = new
+        // StringBuilder(basePropName.toString()).append("dhcpServer4.maxLeaseTime"); ??????
+        // properties.put(routerAddressPropName.toString(), ((IP4Address)
+        // IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
+        // IP4Address routerAddress = (IP4Address) IPAddress.parseHostAddress(config.getIpAddress());
+        StringBuilder rangeStartPropName = new StringBuilder(dhcpServer4PropName).append("rangeStart");
+        properties.put(rangeStartPropName.toString(),
+                ((IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpBeginAddress())).getHostAddress());
+        // IP4Address rangeStart = (IP4Address)
+        // IPAddress.parseHostAddress(config.getRouterDhcpBeginAddress());
+        StringBuilder rangeEndPropName = new StringBuilder(dhcpServer4PropName).append("rangeEnd");
+        properties.put(rangeEndPropName.toString(),
+                ((IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpEndAddress())).getHostAddress());
+        // IP4Address rangeEnd = (IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpEndAddress());
+        StringBuilder passDnsPropName = new StringBuilder(dhcpServer4PropName).append("passDns");
+        properties.put(passDnsPropName.toString(), config.getRouterDnsPass());
+        // boolean passDns = config.getRouterDnsPass();
+
+        StringBuilder prefixPropName = new StringBuilder(dhcpServer4PropName).append("prefix");
+        IP4Address subnetMask = (IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpSubnetMask());
+        // IP4Address subnet = (IP4Address) IPAddress.parseHostAddress(
+        // NetworkUtil.calculateNetwork(config.getIpAddress(), config.getSubnetMask()));
+        short prefix = NetworkUtil.getNetmaskShortForm(subnetMask.getHostAddress());
+        properties.put(prefixPropName.toString(), prefix);
+
+        // Use our IP as the DNS server and we'll use named to proxy DNS queries
+        StringBuilder dnsServerPropName = new StringBuilder(basePropName.toString()).append("ip4.dnsServers");
+        List<IP4Address> dnsServers = new ArrayList<>();
+        dnsServers.add((IP4Address) IPAddress.parseHostAddress(config.getIpAddress()));
+        StringBuilder dnsServersBuilder = new StringBuilder();
+        dnsServers.forEach(dns -> dnsServersBuilder.append(dns.getHostAddress()).append(","));
+        properties.put(dnsServerPropName.toString(),
+                dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
+
+        // logger.debug("DhcpServerConfigIP4 - start: {}, end: {}, prefix: {}, subnet: {}, subnetMask: {}",
+        // new Object[] { rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix,
+        // subnet.getHostAddress(), subnetMask.getHostAddress() });
+        // try {
+        // DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(config.getName(), true, defaultLeaseTime,
+        // maximumLeaseTime, passDns);
+        // DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
+        // routerAddress, rangeStart, rangeEnd, dnsServers);
+        // netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
+        // } catch (KuraException e) {
+        // logger.error(
+        // "Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see
+        // below) are in the {} subnet.",
+        // subnet.getHostAddress());
+        // logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(),
+        // rangeEnd.getHostAddress());
+        // logger.error("Exception: ", e);
+        // }
     }
 
     @Override

@@ -119,8 +119,8 @@ import org.slf4j.LoggerFactory;
 public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements GwtNetworkService {
 
     private static final long serialVersionUID = -4188750359099902616L;
-
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    private static final String ENABLED = "enabled";
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
@@ -748,429 +748,38 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throws GwtKuraException {
 
         checkXSRFToken(xsrfToken);
-        ConfigurationService cs = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
         Map<String, Object> properties = new HashMap<>();
-        // cs.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService", properties, true);
-
-        // component.id<Long> = 91
-        // component.name<String> = org.eclipse.kura.net.admin.NetworkConfigurationService
-        // kura.service.pid<String> = org.eclipse.kura.net.admin.NetworkConfigurationService
-        // net.interface.1-4.config.activeFilter<String> = inbound
-        // net.interface.1-4.config.authType<String> = NONE
-        // net.interface.1-4.config.dhcpClient4.enabled<Boolean> = false
-        // net.interface.1-4.config.dhcpClient6.enabled<Boolean> = false
-        // net.interface.1-4.config.diversityEnabled<Boolean> = false
-        // net.interface.1-4.config.enabled<Boolean> = false
-        // net.interface.1-4.config.gpsEnabled<Boolean> = false
-        // net.interface.1-4.config.idle<Integer> = 95
-        // net.interface.1-4.config.ip4.address<String> =
-        // net.interface.1-4.config.ip4.dnsServers<String> =
-        // net.interface.1-4.config.ip4.gateway<String> =
-        // net.interface.1-4.config.ip4.prefix<Short> = -1
-        // net.interface.1-4.config.ip4.status<String> = netIPv4StatusDisabled
-        // net.interface.1-4.config.ip6.dnsServers<String> =
-        // net.interface.1-4.config.ip6.status<String> = netIPv6StatusDisabled
-        // net.interface.1-4.config.ipAddress<String> =
-        // net.interface.1-4.config.lcpEchoFailure<Integer> = 0
-        // net.interface.1-4.config.lcpEchoInterval<Integer> = 0
-        // net.interface.1-4.config.maxFail<Integer> = 5
-        // net.interface.1-4.config.password<String> =
-        // net.interface.1-4.config.pdpType<String> = IP
-        // net.interface.1-4.config.persist<Boolean> = true
-        // net.interface.1-4.config.resetTimeout<Integer> = 5
-        // net.interface.1-4.type<String> = MODEM
-        // net.interface.eno1.config.dhcpClient4.enabled<Boolean> = false
-        // net.interface.eno1.config.dhcpClient6.enabled<Boolean> = false
-        // net.interface.eno1.config.dhcpServer4.defaultLeaseTime<Integer> = 7200
-        // net.interface.eno1.config.dhcpServer4.enabled<Boolean> = true
-        // net.interface.eno1.config.dhcpServer4.maxLeaseTime<Integer> = 7200
-        // net.interface.eno1.config.dhcpServer4.passDns<Boolean> = false
-        // net.interface.eno1.config.dhcpServer4.prefix<Short> = 24
-        // net.interface.eno1.config.dhcpServer4.rangeEnd<String> = 172.16.0.110
-        // net.interface.eno1.config.dhcpServer4.rangeStart<String> = 172.16.0.100
-        // net.interface.eno1.config.ip4.address<String> = 172.16.0.1
-        // net.interface.eno1.config.ip4.dnsServers<String> =
-        // net.interface.eno1.config.ip4.gateway<String> =
-        // net.interface.eno1.config.ip4.prefix<Short> = 24
-        // net.interface.eno1.config.ip4.status<String> = netIPv4StatusEnabledLAN
-        // net.interface.eno1.config.ip6.dnsServers<String> =
-        // net.interface.eno1.config.ip6.status<String> = netIPv6StatusDisabled
-        // net.interface.eno1.type<String> = ETHERNET
-        // net.interface.enp5s0.config.dhcpClient4.enabled<Boolean> = true
-        // net.interface.enp5s0.config.dhcpClient6.enabled<Boolean> = false
-        // net.interface.enp5s0.config.ip4.dnsServers<String> =
-        // net.interface.enp5s0.config.ip4.status<String> = netIPv4StatusEnabledWAN
-        // net.interface.enp5s0.config.ip6.dnsServers<String> =
-        // net.interface.enp5s0.config.ip6.status<String> = netIPv6StatusDisabled
-        // net.interface.enp5s0.type<String> = ETHERNET
-        // net.interface.lo.config.dhcpClient4.enabled<Boolean> = false
-        // net.interface.lo.config.dhcpClient6.enabled<Boolean> = false
-        // net.interface.lo.config.ip4.address<String> = 127.0.0.1
-        // net.interface.lo.config.ip4.dnsServers<String> =
-        // net.interface.lo.config.ip4.gateway<String> =
-        // net.interface.lo.config.ip4.prefix<Short> = 8
-        // net.interface.lo.config.ip4.status<String> = netIPv4StatusEnabledLAN
-        // net.interface.lo.config.ip6.dnsServers<String> =
-        // net.interface.lo.config.ip6.status<String> = netIPv6StatusDisabled
-        // net.interface.lo.type<String> = LOOPBACK
-        // net.interface.wlp1s0.config.dhcpClient4.enabled<Boolean> = false
-        // net.interface.wlp1s0.config.dhcpClient6.enabled<Boolean> = false
-        // net.interface.wlp1s0.config.ip4.address<String> =
-        // net.interface.wlp1s0.config.ip4.dnsServers<String> =
-        // net.interface.wlp1s0.config.ip4.gateway<String> =
-        // net.interface.wlp1s0.config.ip4.prefix<Short> = 24
-        // net.interface.wlp1s0.config.ip4.status<String> = netIPv4StatusDisabled
-        // net.interface.wlp1s0.config.ip6.dnsServers<String> =
-        // net.interface.wlp1s0.config.ip6.status<String> = netIPv6StatusDisabled
-        // net.interface.wlp1s0.config.wifi.infra.bgscan<String> =
-        // net.interface.wlp1s0.config.wifi.infra.channel<String> = 1
-        // net.interface.wlp1s0.config.wifi.infra.driver<String> = nl80211
-        // net.interface.wlp1s0.config.wifi.infra.groupCiphers<String> = CCMP_TKIP
-        // net.interface.wlp1s0.config.wifi.infra.ignoreSSID<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.infra.mode<String> = INFRA
-        // net.interface.wlp1s0.config.wifi.infra.pairwiseCiphers<String> = CCMP_TKIP
-        // net.interface.wlp1s0.config.wifi.infra.passphrase<String> =
-        // net.interface.wlp1s0.config.wifi.infra.pingAccessPoint<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.infra.radioMode<String> = RADIO_MODE_80211b
-        // net.interface.wlp1s0.config.wifi.infra.securityType<String> = SECURITY_NONE
-        // net.interface.wlp1s0.config.wifi.infra.ssid<String> =
-        // net.interface.wlp1s0.config.wifi.master.bgscan<String> =
-        // net.interface.wlp1s0.config.wifi.master.channel<String> = 1
-        // net.interface.wlp1s0.config.wifi.master.driver<String> = nl80211
-        // net.interface.wlp1s0.config.wifi.master.groupCiphers<String> = CCMP_TKIP
-        // net.interface.wlp1s0.config.wifi.master.ignoreSSID<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.master.mode<String> = MASTER
-        // net.interface.wlp1s0.config.wifi.master.pairwiseCiphers<String> = CCMP
-        // net.interface.wlp1s0.config.wifi.master.passphrase<String> =
-        // qAHZ6ajx/QrkiLqh-F9x5ZNdnvw08Kl3TgU3um1FedDKuyKdB
-        // net.interface.wlp1s0.config.wifi.master.pingAccessPoint<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.master.radioMode<String> = RADIO_MODE_80211g
-        // net.interface.wlp1s0.config.wifi.master.securityType<String> = SECURITY_WPA2
-        // net.interface.wlp1s0.config.wifi.master.ssid<String> = kura_gateway_0
-        // net.interface.wlp1s0.config.wifi.mode<String> = MASTER
-        // net.interface.wlp1s0.type<String> = WIFI
-        // net.interfaces<String> = enp5s0,lo,eno1,wlp1s0,1-4
-        // service.pid<String> = org.eclipse.kura.net.admin.NetworkConfigurationService
-
-        // NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         StringBuilder basePropName = new StringBuilder("net.interface.");
         basePropName.append(config.getName()).append(".config.");
 
         String status = config.getStatus();
-
-        // logger.debug("config.getStatus(): {}", GwtSafeHtmlUtils.htmlEscape(config.getStatus()));
-
-        boolean autoConnect = true;
-        if (GwtNetIfStatus.netIPv4StatusDisabled.name().equals(status)) {
-            autoConnect = false;
+        if (logger.isDebugEnabled()) {
+            logger.debug("config.getStatus(): {}", GwtSafeHtmlUtils.htmlEscape(status));
         }
         try {
-            // Interface status
-            NetInterfaceStatus netInterfaceStatus;
-            if (status.equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusUnmanaged;
-            } else if (status.equals(GwtNetIfStatus.netIPv4StatusL2Only.name())) {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
-            } else if (status.equals(GwtNetIfStatus.netIPv4StatusEnabledLAN.name())) {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledLAN;
-            } else if (status.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledWAN;
-            } else {
-                netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
-            }
-            StringBuilder statusPropName = new StringBuilder(basePropName.toString()).append("ip4.status");
-            properties.put(statusPropName.toString(), netInterfaceStatus.name());
+            NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(status);
+            properties.put(basePropName.toString() + "ip4.status", netInterfaceStatus.name());
 
-            // cs.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService", properties, true);
-
-            // Set up configs
-            // List<NetConfig> netConfigs = new ArrayList<>();
-
-            // Initialize NetConfigIP4 object
-            // NetConfigIP4 netConfig4 = new NetConfigIP4(netInterfaceStatus, autoConnect);
-
-            // build the appropriate NetConfig objects for ethernet type
             if (config.getHwTypeEnum() == GwtNetIfType.ETHERNET || config.getHwTypeEnum() == GwtNetIfType.WIFI
                     || config.getHwTypeEnum() == GwtNetIfType.MODEM) {
-
-                logger.debug("config.getConfigMode(): {}", config.getConfigMode());
-                String regexp = "[\\s,;\\n\\t]+";
-                StringBuilder dhcpClientPropName = new StringBuilder(basePropName.toString())
-                        .append("dhcpClient4.enabled");
-                if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
-                    logger.debug("mode is DHCP");
-                    properties.put(dhcpClientPropName.toString(), true);
-                    // netConfig4.setDhcp(true);
-                } else {
-                    logger.debug("mode is STATIC");
-                    properties.put(dhcpClientPropName.toString(), false);
-                    // netConfig4.setDhcp(false);
-
-                    if (config.getIpAddress() != null && !config.getIpAddress().isEmpty()) {
-                        logger.debug("setting address: {}", config.getIpAddress());
-                        StringBuilder addressPropName = new StringBuilder(basePropName.toString())
-                                .append("ip4.address");
-                        properties.put(addressPropName.toString(),
-                                ((IP4Address) IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
-                        // netConfig4.setAddress((IP4Address) IPAddress.parseHostAddress(config.getIpAddress()));
-                    }
-
-                    if (config.getSubnetMask() != null && !config.getSubnetMask().isEmpty()) {
-                        logger.debug("setting subnet mask: {}", config.getSubnetMask());
-                        StringBuilder prefixPropName = new StringBuilder(basePropName.toString()).append("ip4.prefix");
-                        short prefix = NetworkUtil.getNetmaskShortForm(
-                                ((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask())).getHostAddress());
-                        properties.put(prefixPropName.toString(), prefix);
-                        // netConfig4.setSubnetMask((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask()));
-                    }
-                    if (config.getGateway() != null && !config.getGateway().isEmpty()) {
-                        logger.debug("setting gateway: {}", config.getGateway());
-                        StringBuilder gatewayPropName = new StringBuilder(basePropName.toString())
-                                .append("ip4.gateway");
-                        properties.put(gatewayPropName.toString(),
-                                ((IP4Address) IPAddress.parseHostAddress(config.getGateway())).getHostAddress());
-                        // netConfig4.setGateway((IP4Address) IPAddress.parseHostAddress(config.getGateway()));
-                    }
-                }
-
-                String[] dnsServersString = config.getDnsServers().split(regexp);
-                if (dnsServersString != null && dnsServersString.length > 0) {
-                    IP4Address dnsServer;
-                    List<IP4Address> dnsServers = new ArrayList<>();
-                    for (String dnsEntry : dnsServersString) {
-                        if (!dnsEntry.trim().isEmpty()) {
-                            logger.debug("setting DNS: {}", dnsEntry);
-                            dnsServer = (IP4Address) IPAddress.parseHostAddress(dnsEntry);
-                            dnsServers.add(dnsServer);
-                        }
-                    }
-                    StringBuilder dnsServerPropName = new StringBuilder(basePropName.toString())
-                            .append("ip4.dnsServers");
-                    if (!dnsServers.isEmpty()) {
-                        StringBuilder dnsServersBuilder = new StringBuilder();
-                        dnsServers.forEach(dns -> dnsServersBuilder.append(dns.getHostAddress()).append(","));
-                        properties.put(dnsServerPropName.toString(),
-                                dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
-                    } else {
-                        properties.put(dnsServerPropName.toString(), "");
-                    }
-                    // netConfig4.setDnsServers(dnsServers);
-                }
-
-                // netConfigs.add(netConfig4);
-
-                // TODO - add IPv6 support later...
-
-                // Set up DHCP and NAT
-                if (GwtNetIfConfigMode.netIPv4ConfigModeManual.name().equals(config.getConfigMode())) {
-                    getDhcpConfig(config, properties, basePropName.toString());
-                    // List<NetConfig> dhcpConfigs = getDhcpConfig(config); // <--
-                    // if (dhcpConfigs != null) {
-                    // logger.debug("Adding dhcp and/or nat configs to interface update config");
-                    // netConfigs.addAll(dhcpConfigs);
-                    // }
-
-                }
-
-                if (config.getHwTypeEnum() == GwtNetIfType.ETHERNET) {
-                    // nas.updateEthernetInterfaceConfig(GwtSafeHtmlUtils.htmlEscape(config.getName()), autoConnect,
-                    // config.getHwMTU(), netConfigs);
-                }
+                fillIp4AndDhcpProperties(config, properties, basePropName.toString());
             }
 
-            if (config.getHwTypeEnum() == GwtNetIfType.WIFI) {
-
-                if (config instanceof GwtWifiNetInterfaceConfig) {
-                    GwtWifiConfig gwtWifiConfig = ((GwtWifiNetInterfaceConfig) config).getActiveWifiConfig();
-
-                    if (gwtWifiConfig != null) {
-                        // WifiConfig wifiConfig = getWifiConfig(gwtWifiConfig);
-                        fillWifiProperties(gwtWifiConfig, properties, basePropName.toString(), config.getName());
-
-                        // String passKey = new String(wifiConfig.getPasskey().getPassword());
-                        // if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
-                        //
-                        // List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
-                        // for (GwtNetInterfaceConfig netConfig : result) {
-                        // if (netConfig instanceof GwtWifiNetInterfaceConfig
-                        // && config.getName().equals(((GwtWifiNetInterfaceConfig) netConfig).getName())) {
-                        // GwtWifiNetInterfaceConfig oldWifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
-                        // GwtWifiConfig oldGwtWifiConfig;
-                        // if (gwtWifiConfig.getWirelessMode()
-                        // .equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-                        // oldGwtWifiConfig = oldWifiConfig.getAccessPointWifiConfig();
-                        // } else {
-                        // oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
-                        // }
-                        //
-                        // if (oldGwtWifiConfig != null) {
-                        // wifiConfig.setPasskey(
-                        // GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()));
-                        // }
-                        // }
-                        // }
-                        // } else if (passKey != null && wifiConfig.getMode() == WifiMode.MASTER) {
-                        // validateUserPassword(passKey);
-                        // }
-
-                        // netConfigs.add(wifiConfig);
-                        // nas.updateWifiInterfaceConfig(GwtSafeHtmlUtils.htmlEscape(config.getName()), autoConnect,
-                        // null,
-                        // netConfigs);
-                    }
+            if (config.getHwTypeEnum() == GwtNetIfType.WIFI && config instanceof GwtWifiNetInterfaceConfig) {
+                GwtWifiConfig gwtWifiConfig = ((GwtWifiNetInterfaceConfig) config).getActiveWifiConfig();
+                if (gwtWifiConfig != null) {
+                    fillWifiProperties(gwtWifiConfig, properties, basePropName.toString(), config.getName());
                 }
-            } else if (config.getHwTypeEnum() == GwtNetIfType.MODEM) {
-                // net.interface.1-4.config.activeFilter<String> = inbound
-                // net.interface.1-4.config.authType<String> = NONE
-                // net.interface.1-4.config.dhcpClient4.enabled<Boolean> = false
-                // net.interface.1-4.config.dhcpClient6.enabled<Boolean> = false
-                // net.interface.1-4.config.diversityEnabled<Boolean> = false
-                // net.interface.1-4.config.enabled<Boolean> = false
-                // net.interface.1-4.config.gpsEnabled<Boolean> = false
-                // net.interface.1-4.config.idle<Integer> = 95
-                // net.interface.1-4.config.ip4.address<String> =
-                // net.interface.1-4.config.ip4.dnsServers<String> =
-                // net.interface.1-4.config.ip4.gateway<String> =
-                // net.interface.1-4.config.ip4.prefix<Short> = -1
-                // net.interface.1-4.config.ip4.status<String> = netIPv4StatusDisabled
-                // net.interface.1-4.config.ip6.dnsServers<String> =
-                // net.interface.1-4.config.ip6.status<String> = netIPv6StatusDisabled
-                // net.interface.1-4.config.ipAddress<String> =
-                // net.interface.1-4.config.lcpEchoFailure<Integer> = 0
-                // net.interface.1-4.config.lcpEchoInterval<Integer> = 0
-                // net.interface.1-4.config.maxFail<Integer> = 5
-                // net.interface.1-4.config.password<String> =
-                // net.interface.1-4.config.pdpType<String> = IP
-                // net.interface.1-4.config.persist<Boolean> = true
-                // net.interface.1-4.config.resetTimeout<Integer> = 5
-                // net.interface.1-4.type<String> = MODEM
-
-                if (config instanceof GwtModemInterfaceConfig) {
-                    GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) config;
-
-                    // ModemConfig modemConfig = new ModemConfig();
-
-                    String serialNum = gwtModemConfig.getHwSerial();
-                    String modemId = gwtModemConfig.getModemId();
-                    int pppNum = gwtModemConfig.getPppNum();
-
-                    // modem enabled/disabled
-                    // if (netInterfaceStatus.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN)) {
-                    // modemConfig.setEnabled(true);
-                    // } else {
-                    // modemConfig.setEnabled(false);
-                    // }
-                    Boolean enabled = netInterfaceStatus.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
-                    properties.put(basePropName.append("enabled").toString(), enabled);
-
-                    // modemConfig.setApn(gwtModemConfig.getApn());
-                    properties.put(basePropName.append("apn").toString(), gwtModemConfig.getApn());
-                    // modemConfig.setPppNumber(gwtModemConfig.getPppNum());
-                    // modemConfig.setDataCompression(gwtModemConfig.getDataCompression()); ????
-                    properties.put(basePropName.append("dialString").toString(), gwtModemConfig.getDialString());
-                    // modemConfig.setDialString(gwtModemConfig.getDialString());
-
-                    // modemConfig.setHeaderCompression(gwtModemConfig.getHeaderCompression()); ????
-
-                    String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtModemConfig.getPassword());
-                    if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
-                        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
-                        for (GwtNetInterfaceConfig netConfig : result) {
-                            if (netConfig instanceof GwtModemInterfaceConfig) {
-                                GwtModemInterfaceConfig oldModemConfig = (GwtModemInterfaceConfig) netConfig;
-                                if (gwtModemConfig.getName().equals(oldModemConfig.getName())) {
-                                    CryptoService cryptpService = ServiceLocator.getInstance()
-                                            .getService(CryptoService.class);
-                                    char[] passphrase = cryptpService.encryptAes(
-                                            GwtSafeHtmlUtils.htmlUnescape(oldModemConfig.getPassword()).toCharArray());
-                                    properties.put(basePropName.append("password").toString(),
-                                            new Password(passphrase));
-                                    // modemConfig.setPassword(oldModemConfig.getPassword());
-                                }
-                            }
-                        }
-                    } else if (passKey != null) {
-                        CryptoService cryptpService = ServiceLocator.getInstance().getService(CryptoService.class);
-                        char[] passphrase = cryptpService.encryptAes(passKey.toCharArray());
-                        properties.put(basePropName.append("password").toString(), new Password(passphrase));
-                        // modemConfig.setPassword(passKey);
-                    }
-
-                    // modemConfig.setUsername(gwtModemConfig.getUsername());
-                    properties.put(basePropName.append("username").toString(), gwtModemConfig.getUsername());
-                    // modemConfig.setResetTimeout(gwtModemConfig.getResetTimeout());
-                    properties.put(basePropName.append("resetTimeout").toString(), gwtModemConfig.getResetTimeout());
-                    // modemConfig.setPersist(gwtModemConfig.isPersist());
-                    properties.put(basePropName.append("persist").toString(), gwtModemConfig.isPersist());
-                    // modemConfig.setMaxFail(gwtModemConfig.getMaxFail());
-                    properties.put(basePropName.append("maxFail").toString(), gwtModemConfig.getMaxFail());
-                    // modemConfig.setIdle(gwtModemConfig.getIdle());
-                    properties.put(basePropName.append("idle").toString(), gwtModemConfig.getIdle());
-                    // modemConfig.setActiveFilter(gwtModemConfig.getActiveFilter());
-                    properties.put(basePropName.append("activeFilter").toString(), gwtModemConfig.getActiveFilter());
-                    // modemConfig.setLcpEchoInterval(gwtModemConfig.getLcpEchoInterval());
-                    properties.put(basePropName.append("lcpEchoInterval").toString(),
-                            gwtModemConfig.getLcpEchoInterval());
-                    // modemConfig.setLcpEchoFailure(gwtModemConfig.getLcpEchoFailure());
-                    properties.put(basePropName.append("lcpEchoFailure").toString(),
-                            gwtModemConfig.getLcpEchoFailure());
-                    // modemConfig.setGpsEnabled(gwtModemConfig.isGpsEnabled());
-                    properties.put(basePropName.append("gpsEnabled").toString(), gwtModemConfig.isGpsEnabled());
-                    // modemConfig.setDiversityEnabled(gwtModemConfig.isDiversityEnabled());
-                    properties.put(basePropName.append("diversityEnabled").toString(),
-                            gwtModemConfig.isDiversityEnabled());
-
-                    GwtModemAuthType authType = gwtModemConfig.getAuthType();
-                    if (authType != null) {
-                        if (authType.equals(GwtModemAuthType.netModemAuthNONE)) {
-                            properties.put(basePropName.append("authType").toString(),
-                                    ModemConfig.AuthType.NONE.name());
-                            // modemConfig.setAuthType(ModemConfig.AuthType.NONE);
-                        } else if (authType.equals(GwtModemAuthType.netModemAuthAUTO)) {
-                            properties.put(basePropName.append("authType").toString(),
-                                    ModemConfig.AuthType.AUTO.name());
-                            // modemConfig.setAuthType(ModemConfig.AuthType.AUTO);
-                        } else if (authType.equals(GwtModemAuthType.netModemAuthCHAP)) {
-                            properties.put(basePropName.append("authType").toString(),
-                                    ModemConfig.AuthType.CHAP.name());
-                            // modemConfig.setAuthType(ModemConfig.AuthType.CHAP);
-                        } else if (authType.equals(GwtModemAuthType.netModemAuthPAP)) {
-                            properties.put(basePropName.append("authType").toString(), ModemConfig.AuthType.PAP.name());
-                            // modemConfig.setAuthType(ModemConfig.AuthType.PAP);
-                        }
-                    }
-
-                    GwtModemPdpType pdpType = gwtModemConfig.getPdpType();
-                    if (pdpType != null) {
-                        if (pdpType.equals(GwtModemPdpType.netModemPdpIP)) {
-                            properties.put(basePropName.append("pdpType").toString(), ModemConfig.PdpType.IP.name());
-                            // modemConfig.setPdpType(ModemConfig.PdpType.IP);
-                        } else if (pdpType.equals(GwtModemPdpType.netModemPdpIPv6)) {
-                            properties.put(basePropName.append("pdpType").toString(), ModemConfig.PdpType.IPv6.name());
-                            // modemConfig.setPdpType(ModemConfig.PdpType.IPv6);
-                        } else if (pdpType.equals(GwtModemPdpType.netModemPdpPPP)) {
-                            properties.put(basePropName.append("pdpType").toString(), ModemConfig.PdpType.PPP.name());
-                            // modemConfig.setPdpType(ModemConfig.PdpType.PPP);
-                        } else {
-                            properties.put(basePropName.append("pdpType").toString(),
-                                    ModemConfig.PdpType.UNKNOWN.name());
-                            // modemConfig.setPdpType(ModemConfig.PdpType.UNKNOWN);
-                        }
-                    }
-
-                    // netConfigs.add(modemConfig);
-
-                    // nas.updateModemInterfaceConfig(config.getName(), serialNum, modemId, pppNum, autoConnect, -1,
-                    // netConfigs);
-                }
-            } else {
-                // TODO - more types
+            } else if (config.getHwTypeEnum() == GwtNetIfType.MODEM && config instanceof GwtModemInterfaceConfig) {
+                GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) config;
+                fillModemProperties(gwtModemConfig, properties, basePropName.toString(), netInterfaceStatus);
             }
 
-            cs.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService", properties, true);
+            configurationService.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService",
+                    properties, true);
 
         } catch (Exception e) {
-            logger.warn("Failed", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1313,7 +922,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
             }
         } catch (Throwable t) {
-            logger.error("Failed", t);
             KuraExceptionHandler.handle(t);
         }
 
@@ -1415,7 +1023,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             return new ArrayList<>(gwtPortForwardEntries);
 
         } catch (KuraException e) {
-            logger.warn("Failed", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1449,7 +1056,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             return new ArrayList<>(gwtNatEntries);
 
         } catch (KuraException e) {
-            logger.warn("Failed", e);
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1460,177 +1066,203 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     //
     // -------------------------------------------------------------------------------------
 
-    // private List<NetConfig> getDhcpConfig(GwtNetInterfaceConfig config) throws KuraException {
-    private void getDhcpConfig(GwtNetInterfaceConfig config, Map<String, Object> properties, String basePropName)
-            throws KuraException, UnknownHostException {
-        // Setup the DHCP and NAT if necessary
+    private NetInterfaceStatus getNetInterfaceStatus(String status) {
+        NetInterfaceStatus netInterfaceStatus = NetInterfaceStatus.netIPv4StatusDisabled;
+        if (status.equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
+            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusUnmanaged;
+        } else if (status.equals(GwtNetIfStatus.netIPv4StatusL2Only.name())) {
+            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusL2Only;
+        } else if (status.equals(GwtNetIfStatus.netIPv4StatusEnabledLAN.name())) {
+            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledLAN;
+        } else if (status.equals(GwtNetIfStatus.netIPv4StatusEnabledWAN.name())) {
+            netInterfaceStatus = NetInterfaceStatus.netIPv4StatusEnabledWAN;
+        }
+        return netInterfaceStatus;
+    }
 
-        // net.interface.eno1.config.dhcpClient4.enabled<Boolean> = false
-        // net.interface.eno1.config.dhcpServer4.defaultLeaseTime<Integer> = 7200
-        // net.interface.eno1.config.dhcpServer4.enabled<Boolean> = true
-        // net.interface.eno1.config.dhcpServer4.maxLeaseTime<Integer> = 7200
-        // net.interface.eno1.config.dhcpServer4.passDns<Boolean> = false
-        // net.interface.eno1.config.dhcpServer4.prefix<Short> = 24
-        // net.interface.eno1.config.dhcpServer4.rangeEnd<String> = 172.16.0.110
-        // net.interface.eno1.config.dhcpServer4.rangeStart<String> = 172.16.0.100
+    private void fillIp4AndDhcpProperties(GwtNetInterfaceConfig config, Map<String, Object> properties,
+            String basePropName) throws UnknownHostException, KuraException {
+        logger.debug("config.getConfigMode(): {}", config.getConfigMode());
+        String dhcpClient4PropName = basePropName + "dhcpClient4.enabled";
+        if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
+            logger.debug("mode is DHCP");
+            properties.put(dhcpClient4PropName, true);
+        } else {
+            logger.debug("mode is STATIC");
+            properties.put(dhcpClient4PropName, false);
 
+            if (config.getIpAddress() != null && !config.getIpAddress().isEmpty()) {
+                logger.debug("setting address: {}", config.getIpAddress());
+                String addressPropName = basePropName + "ip4.address";
+                properties.put(addressPropName,
+                        ((IP4Address) IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
+            }
+
+            if (config.getSubnetMask() != null && !config.getSubnetMask().isEmpty()) {
+                logger.debug("setting subnet mask: {}", config.getSubnetMask());
+                String prefixPropName = basePropName + "ip4.prefix";
+                short prefix = NetworkUtil.getNetmaskShortForm(
+                        ((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask())).getHostAddress());
+                properties.put(prefixPropName, prefix);
+            }
+            if (config.getGateway() != null && !config.getGateway().isEmpty()) {
+                logger.debug("setting gateway: {}", config.getGateway());
+                String gatewayPropName = basePropName + "ip4.gateway";
+                properties.put(gatewayPropName,
+                        ((IP4Address) IPAddress.parseHostAddress(config.getGateway())).getHostAddress());
+            }
+        }
+
+        fillDnsServers(config, properties, basePropName);
+
+        if (GwtNetIfConfigMode.netIPv4ConfigModeManual.name().equals(config.getConfigMode())) {
+            fillDhcpAndNatProperties(config, properties, basePropName);
+        }
+    }
+
+    private void fillDnsServers(GwtNetInterfaceConfig config, Map<String, Object> properties, String basePropName) {
+        String regexp = "[\\s,;\\n\\t]+";
+        String dnsServerPropName = basePropName + "ip4.dnsServers";
+        String[] dnsServersString = config.getDnsServers().split(regexp);
+        if (dnsServersString != null && dnsServersString.length > 0) {
+            StringBuilder dnsServersBuilder = new StringBuilder();
+            try {
+                for (String dns : Arrays.asList(dnsServersString)) {
+                    dnsServersBuilder.append(((IP4Address) IPAddress.parseHostAddress(dns)).getHostAddress())
+                            .append(",");
+                }
+                properties.put(dnsServerPropName,
+                        dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
+            } catch (UnknownHostException e) {
+                logger.warn("Failed to parse dns server address", e);
+                properties.put(dnsServerPropName, "");
+            }
+        } else {
+            properties.put(dnsServerPropName, "");
+        }
+    }
+
+    private void fillModemProperties(GwtModemInterfaceConfig gwtModemConfig, Map<String, Object> properties,
+            String basePropName, NetInterfaceStatus netInterfaceStatus) throws KuraException, GwtKuraException {
+
+        Boolean enabled = netInterfaceStatus.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
+        properties.put(basePropName + ENABLED, enabled);
+
+        properties.put(basePropName + "apn", gwtModemConfig.getApn());
+        properties.put(basePropName + "dialString", gwtModemConfig.getDialString());
+
+        fillModemPassword(gwtModemConfig, properties, basePropName);
+
+        properties.put(basePropName + "username", gwtModemConfig.getUsername());
+        properties.put(basePropName + "resetTimeout", gwtModemConfig.getResetTimeout());
+        properties.put(basePropName + "persist", gwtModemConfig.isPersist());
+        properties.put(basePropName + "maxFail", gwtModemConfig.getMaxFail());
+        properties.put(basePropName + "idle", gwtModemConfig.getIdle());
+        properties.put(basePropName + "activeFilter", gwtModemConfig.getActiveFilter());
+        properties.put(basePropName + "lcpEchoInterval", gwtModemConfig.getLcpEchoInterval());
+        properties.put(basePropName + "lcpEchoFailure", gwtModemConfig.getLcpEchoFailure());
+        properties.put(basePropName + "gpsEnabled", gwtModemConfig.isGpsEnabled());
+        properties.put(basePropName + "diversityEnabled", gwtModemConfig.isDiversityEnabled());
+
+        GwtModemAuthType authType = gwtModemConfig.getAuthType();
+        if (authType != null) {
+            String authTypePropName = basePropName + "authType";
+            if (authType.equals(GwtModemAuthType.netModemAuthNONE)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.NONE.name());
+            } else if (authType.equals(GwtModemAuthType.netModemAuthAUTO)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.AUTO.name());
+            } else if (authType.equals(GwtModemAuthType.netModemAuthCHAP)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.CHAP.name());
+            } else if (authType.equals(GwtModemAuthType.netModemAuthPAP)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.PAP.name());
+            }
+        }
+
+        GwtModemPdpType pdpType = gwtModemConfig.getPdpType();
+        if (pdpType != null) {
+            String pdpTypePropName = basePropName + "pdpType";
+            if (pdpType.equals(GwtModemPdpType.netModemPdpIP)) {
+                properties.put(pdpTypePropName, ModemConfig.PdpType.IP.name());
+            } else if (pdpType.equals(GwtModemPdpType.netModemPdpIPv6)) {
+                properties.put(pdpTypePropName, ModemConfig.PdpType.IPv6.name());
+            } else if (pdpType.equals(GwtModemPdpType.netModemPdpPPP)) {
+                properties.put(pdpTypePropName, ModemConfig.PdpType.PPP.name());
+            } else {
+                properties.put(pdpTypePropName, ModemConfig.PdpType.UNKNOWN.name());
+            }
+        }
+    }
+
+    private void fillModemPassword(GwtModemInterfaceConfig gwtModemConfig, Map<String, Object> properties,
+            String basePropName) throws GwtKuraException, KuraException {
+        String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtModemConfig.getPassword());
+        if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
+            List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+            for (GwtNetInterfaceConfig netConfig : result) {
+                if (netConfig instanceof GwtModemInterfaceConfig) {
+                    GwtModemInterfaceConfig oldModemConfig = (GwtModemInterfaceConfig) netConfig;
+                    if (gwtModemConfig.getName().equals(oldModemConfig.getName())) {
+                        properties.put(basePropName + "password",
+                                new Password(GwtSafeHtmlUtils.htmlUnescape(oldModemConfig.getPassword())));
+                    }
+                }
+            }
+        } else if (passKey != null) {
+            CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+            char[] passphrase = cryptoService.encryptAes(passKey.toCharArray());
+            properties.put(basePropName + "password", new Password(passphrase));
+        }
+    }
+
+    private void fillDhcpAndNatProperties(GwtNetInterfaceConfig config, Map<String, Object> properties,
+            String basePropName) throws KuraException, UnknownHostException {
         String routerMode = config.getRouterMode();
+        String natEnabledPropName = basePropName + "nat.enabled";
         StringBuilder dhcpServer4PropName = new StringBuilder(basePropName).append("dhcpServer4.");
         if (routerMode.equals(GwtNetRouterMode.netRouterOff.name())) {
             logger.debug("DCHP and NAT are disabled");
-            properties.put(dhcpServer4PropName.toString() + "enabled", false);
-            properties.put(basePropName.toString() + "nat.enabled", false);
+            properties.put(dhcpServer4PropName.toString() + ENABLED, false);
+            properties.put(natEnabledPropName, false);
         } else if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())) {
+            logger.debug("DCHP is enabled");
             fillDhcpServerProperties(config, properties, basePropName);
-            properties.put(basePropName.toString() + "nat.enabled", false);
+            properties.put(natEnabledPropName, false);
         } else if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())) {
+            logger.debug("DCHP and NAT is enabled");
             fillDhcpServerProperties(config, properties, basePropName);
-            /*
-             * IPAddress m_sourceNetwork; //192.168.1.0
-             * IPAddress m_netmask; //255.255.255.0
-             * String m_sourceInterface; //eth0
-             * String m_destinationInterface; //ppp0 or something similar
-             * boolean m_masquerade; //yes
-             */
-
-            // String sourceInterface = config.getName();
-            // String destinationInterface = "unknown"; // dynamic and defined at runtime
-            // boolean masquerade = true;
-            //
-            // FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
-            // masquerade); // ????????
-            // netConfigs.add(natConfig);
-            properties.put(basePropName.toString() + "nat.enabled", true);
+            properties.put(natEnabledPropName, true);
         } else if (routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
-            properties.put(dhcpServer4PropName.toString() + "enabled", false);
-            properties.put(basePropName.toString() + "nat.enabled", true);
-            /*
-             * IPAddress m_sourceNetwork; //192.168.1.0
-             * IPAddress m_netmask; //255.255.255.0
-             * String m_sourceInterface; //eth0
-             * String m_destinationInterface; //ppp0 or something similar
-             * boolean m_masquerade; //yes
-             */
-
-            // String sourceInterface = config.getName();
-            // String destinationInterface = "unknown"; // dynamic and defined at runtime
-            // boolean masquerade = true;
-            //
-            // FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
-            // masquerade); // ????????
-            // netConfigs.add(natConfig);
+            logger.debug("NAT is enabled");
+            properties.put(dhcpServer4PropName.toString() + ENABLED, false);
+            properties.put(natEnabledPropName, true);
         } else {
             logger.error("Unsupported routerMode: {}", routerMode);
             throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Unsupported routerMode: " + routerMode);
         }
-
-        // if (routerMode.equals(GwtNetRouterMode.netRouterOff.name())) {
-        // logger.debug("DCHP and NAT are disabled");
-        // properties.put(DhcpServer4EnabledPropName.toString(), false);
-        // return;
-        // } else if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())
-        // || routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())
-        // || routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
-        // try {
-        // // List<NetConfig> netConfigs = new ArrayList<>();
-        //
-        // if (routerMode.equals(GwtNetRouterMode.netRouterDchp.name())
-        // || routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())) {
-        // fillDhcpServerProperties();
-        // }
-        //
-        // if (routerMode.equals(GwtNetRouterMode.netRouterDchpNat.name())
-        // || routerMode.equals(GwtNetRouterMode.netRouterNat.name())) {
-        //
-        // /*
-        // * IPAddress m_sourceNetwork; //192.168.1.0
-        // * IPAddress m_netmask; //255.255.255.0
-        // * String m_sourceInterface; //eth0
-        // * String m_destinationInterface; //ppp0 or something similar
-        // * boolean m_masquerade; //yes
-        // */
-        //
-        // String sourceInterface = config.getName();
-        // String destinationInterface = "unknown"; // dynamic and defined at runtime
-        // boolean masquerade = true;
-        //
-        // FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig(sourceInterface, destinationInterface,
-        // masquerade); // ????????
-        // // netConfigs.add(natConfig);
-        // }
-        //
-        // // return netConfigs;
-        // } catch (Exception e) {
-        // throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, e);
-        // }
-        // } else {
-        // logger.error("Unsupported routerMode: {}", routerMode);
-        // throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "Unsupported routerMode: " + routerMode);
-        // }
     }
 
     private void fillDhcpServerProperties(GwtNetInterfaceConfig config, Map<String, Object> properties,
             String basePropName) throws UnknownHostException {
         StringBuilder dhcpServer4PropName = new StringBuilder(basePropName).append("dhcpServer4.");
-        properties.put(dhcpServer4PropName.toString() + "enabled", true);
-        StringBuilder defaultLeaseTimePropName = new StringBuilder(dhcpServer4PropName).append("defaultLeaseTime");
-        properties.put(defaultLeaseTimePropName.toString(), config.getRouterDhcpDefaultLease());
-        // int defaultLeaseTime = config.getRouterDhcpDefaultLease();
-        StringBuilder maximumLeaseTimePropName = new StringBuilder(dhcpServer4PropName).append("maxLeaseTime");
-        properties.put(maximumLeaseTimePropName.toString(), config.getRouterDhcpMaxLease());
-        // int maximumLeaseTime = config.getRouterDhcpMaxLease();
-        // StringBuilder routerAddressPropName = new
-        // StringBuilder(basePropName.toString()).append("dhcpServer4.maxLeaseTime"); ??????
-        // properties.put(routerAddressPropName.toString(), ((IP4Address)
-        // IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
-        // IP4Address routerAddress = (IP4Address) IPAddress.parseHostAddress(config.getIpAddress());
-        StringBuilder rangeStartPropName = new StringBuilder(dhcpServer4PropName).append("rangeStart");
-        properties.put(rangeStartPropName.toString(),
+        properties.put(dhcpServer4PropName.toString() + ENABLED, true);
+        properties.put(dhcpServer4PropName.toString() + "defaultLeaseTime", config.getRouterDhcpDefaultLease());
+        properties.put(dhcpServer4PropName.toString() + "maxLeaseTime", config.getRouterDhcpMaxLease());
+        properties.put(dhcpServer4PropName.toString() + "rangeStart",
                 ((IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpBeginAddress())).getHostAddress());
-        // IP4Address rangeStart = (IP4Address)
-        // IPAddress.parseHostAddress(config.getRouterDhcpBeginAddress());
-        StringBuilder rangeEndPropName = new StringBuilder(dhcpServer4PropName).append("rangeEnd");
-        properties.put(rangeEndPropName.toString(),
+        properties.put(dhcpServer4PropName.toString() + "rangeEnd",
                 ((IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpEndAddress())).getHostAddress());
-        // IP4Address rangeEnd = (IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpEndAddress());
-        StringBuilder passDnsPropName = new StringBuilder(dhcpServer4PropName).append("passDns");
-        properties.put(passDnsPropName.toString(), config.getRouterDnsPass());
-        // boolean passDns = config.getRouterDnsPass();
+        properties.put(dhcpServer4PropName.toString() + "passDns", config.getRouterDnsPass());
 
-        StringBuilder prefixPropName = new StringBuilder(dhcpServer4PropName).append("prefix");
         IP4Address subnetMask = (IP4Address) IPAddress.parseHostAddress(config.getRouterDhcpSubnetMask());
-        // IP4Address subnet = (IP4Address) IPAddress.parseHostAddress(
-        // NetworkUtil.calculateNetwork(config.getIpAddress(), config.getSubnetMask()));
         short prefix = NetworkUtil.getNetmaskShortForm(subnetMask.getHostAddress());
-        properties.put(prefixPropName.toString(), prefix);
+        properties.put(dhcpServer4PropName.toString() + "prefix", prefix);
 
-        // Use our IP as the DNS server and we'll use named to proxy DNS queries
-        StringBuilder dnsServerPropName = new StringBuilder(basePropName.toString()).append("ip4.dnsServers");
         List<IP4Address> dnsServers = new ArrayList<>();
         dnsServers.add((IP4Address) IPAddress.parseHostAddress(config.getIpAddress()));
         StringBuilder dnsServersBuilder = new StringBuilder();
         dnsServers.forEach(dns -> dnsServersBuilder.append(dns.getHostAddress()).append(","));
-        properties.put(dnsServerPropName.toString(),
+        properties.put(dhcpServer4PropName.toString() + "ip4.dnsServers",
                 dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
-
-        // logger.debug("DhcpServerConfigIP4 - start: {}, end: {}, prefix: {}, subnet: {}, subnetMask: {}",
-        // new Object[] { rangeStart.getHostAddress(), rangeEnd.getHostAddress(), prefix,
-        // subnet.getHostAddress(), subnetMask.getHostAddress() });
-        // try {
-        // DhcpServerCfg dhcpServerCfg = new DhcpServerCfg(config.getName(), true, defaultLeaseTime,
-        // maximumLeaseTime, passDns);
-        // DhcpServerCfgIP4 dhcpServerCfgIP4 = new DhcpServerCfgIP4(subnet, subnetMask, prefix,
-        // routerAddress, rangeStart, rangeEnd, dnsServers);
-        // netConfigs.add(new DhcpServerConfigIP4(dhcpServerCfg, dhcpServerCfgIP4));
-        // } catch (KuraException e) {
-        // logger.error(
-        // "Failed to create new DhcpServerConfigIP4 object. Please verify that DHCP pool IP addresses (see
-        // below) are in the {} subnet.",
-        // subnet.getHostAddress());
-        // logger.error("DHCP Pool: range from {} to {}", rangeStart.getHostAddress(),
-        // rangeEnd.getHostAddress());
-        // logger.error("Exception: ", e);
-        // }
     }
 
     @Override

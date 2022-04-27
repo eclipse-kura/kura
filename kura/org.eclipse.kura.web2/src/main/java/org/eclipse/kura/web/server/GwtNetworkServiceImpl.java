@@ -46,8 +46,6 @@ import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.dhcp.DhcpLease;
-import org.eclipse.kura.net.dhcp.DhcpServerCfg;
-import org.eclipse.kura.net.dhcp.DhcpServerCfgIP4;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
@@ -750,8 +748,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         checkXSRFToken(xsrfToken);
         ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
         Map<String, Object> properties = new HashMap<>();
-        StringBuilder basePropName = new StringBuilder("net.interface.");
-        basePropName.append(config.getName()).append(".config.");
+        StringBuilder basePropName = new StringBuilder("net.interface.").append(config.getName()).append(".config.");
 
         String status = config.getStatus();
         if (logger.isDebugEnabled()) {
@@ -779,7 +776,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             configurationService.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService",
                     properties, true);
 
-        } catch (Exception e) {
+        } catch (UnknownHostException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
     }
@@ -1120,23 +1117,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    private void fillDnsServers(GwtNetInterfaceConfig config, Map<String, Object> properties, String basePropName) {
+    private void fillDnsServers(GwtNetInterfaceConfig config, Map<String, Object> properties, String basePropName)
+            throws UnknownHostException {
         String regexp = "[\\s,;\\n\\t]+";
         String dnsServerPropName = basePropName + "ip4.dnsServers";
         String[] dnsServersString = config.getDnsServers().split(regexp);
         if (dnsServersString != null && dnsServersString.length > 0) {
             StringBuilder dnsServersBuilder = new StringBuilder();
-            try {
-                for (String dns : Arrays.asList(dnsServersString)) {
-                    dnsServersBuilder.append(((IP4Address) IPAddress.parseHostAddress(dns)).getHostAddress())
-                            .append(",");
-                }
-                properties.put(dnsServerPropName,
-                        dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
-            } catch (UnknownHostException e) {
-                logger.warn("Failed to parse dns server address", e);
-                properties.put(dnsServerPropName, "");
+            for (String dns : Arrays.asList(dnsServersString)) {
+                dnsServersBuilder.append(((IP4Address) IPAddress.parseHostAddress(dns)).getHostAddress()).append(",");
             }
+            properties.put(dnsServerPropName,
+                    dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
         } else {
             properties.put(dnsServerPropName, "");
         }
@@ -1472,53 +1464,12 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return wifiConfig;
     }
 
-    // private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) throws GwtKuraException {
     private void fillWifiProperties(GwtWifiConfig gwtWifiConfig, Map<String, Object> properties, String basePropName,
-            String interfaceName) throws GwtKuraException {
-        // net.interface.wlp1s0.config.dhcpClient4.enabled<Boolean> = false
-        // net.interface.wlp1s0.config.dhcpClient6.enabled<Boolean> = false
-        // net.interface.wlp1s0.config.ip4.address<String> =
-        // net.interface.wlp1s0.config.ip4.dnsServers<String> =
-        // net.interface.wlp1s0.config.ip4.gateway<String> =
-        // net.interface.wlp1s0.config.ip4.prefix<Short> = 24
-        // net.interface.wlp1s0.config.ip4.status<String> = netIPv4StatusDisabled
-        // net.interface.wlp1s0.config.ip6.dnsServers<String> =
-        // net.interface.wlp1s0.config.ip6.status<String> = netIPv6StatusDisabled
-        // net.interface.wlp1s0.config.wifi.infra.bgscan<String> =
-        // net.interface.wlp1s0.config.wifi.infra.channel<String> = 1
-        // net.interface.wlp1s0.config.wifi.infra.driver<String> = nl80211
-        // net.interface.wlp1s0.config.wifi.infra.groupCiphers<String> = CCMP_TKIP
-        // net.interface.wlp1s0.config.wifi.infra.ignoreSSID<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.infra.mode<String> = INFRA
-        // net.interface.wlp1s0.config.wifi.infra.pairwiseCiphers<String> = CCMP_TKIP
-        // net.interface.wlp1s0.config.wifi.infra.passphrase<String> =
-        // net.interface.wlp1s0.config.wifi.infra.pingAccessPoint<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.infra.radioMode<String> = RADIO_MODE_80211b
-        // net.interface.wlp1s0.config.wifi.infra.securityType<String> = SECURITY_NONE
-        // net.interface.wlp1s0.config.wifi.infra.ssid<String> =
-        // net.interface.wlp1s0.config.wifi.master.bgscan<String> =
-        // net.interface.wlp1s0.config.wifi.master.channel<String> = 1
-        // net.interface.wlp1s0.config.wifi.master.driver<String> = nl80211
-        // net.interface.wlp1s0.config.wifi.master.groupCiphers<String> = CCMP_TKIP
-        // net.interface.wlp1s0.config.wifi.master.ignoreSSID<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.master.mode<String> = MASTER
-        // net.interface.wlp1s0.config.wifi.master.pairwiseCiphers<String> = CCMP
-        // net.interface.wlp1s0.config.wifi.master.passphrase<String> =
-        // qAHZ6ajx/QrkiLqh-F9x5ZNdnvw08Kl3TgU3um1FedDKuyKdB
-        // net.interface.wlp1s0.config.wifi.master.pingAccessPoint<Boolean> = false
-        // net.interface.wlp1s0.config.wifi.master.radioMode<String> = RADIO_MODE_80211g
-        // net.interface.wlp1s0.config.wifi.master.securityType<String> = SECURITY_WPA2
-        // net.interface.wlp1s0.config.wifi.master.ssid<String> = kura_gateway_0
-        // net.interface.wlp1s0.config.wifi.mode<String> = MASTER
-        // net.interface.wlp1s0.type<String> = WIFI
-
-        // WifiConfig wifiConfig = new WifiConfig();
+            String interfaceName) throws KuraException, GwtKuraException {
         StringBuilder wifiBasePropName = new StringBuilder(basePropName).append("wifi.");
 
-        // WifiMode wifiMode = getWifiConfigWirelessMode(gwtWifiConfig.getWirelessMode());
-        // wifiConfig.setMode(wifiMode);
         String mode = gwtWifiConfig.getWirelessMode();
-        String wifiMode = WifiMode.UNKNOWN.name();
+        String wifiMode;
         StringBuilder wifiModeBasePropName = new StringBuilder(wifiBasePropName);
         if (mode != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
             wifiMode = WifiMode.MASTER.name();
@@ -1527,58 +1478,33 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             wifiMode = WifiMode.INFRA.name();
             wifiModeBasePropName.append("infra.");
         } else if (mode != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAdHoc.name())) {
-            // ????
-            wifiMode = WifiMode.ADHOC.name();
+            properties.put(wifiBasePropName.toString() + "mode", WifiMode.ADHOC.name());
+            return;
         } else {
-            // ????
-            wifiMode = WifiMode.UNKNOWN.name();
+            properties.put(wifiBasePropName.toString() + "mode", WifiMode.UNKNOWN.name());
+            return;
         }
-        properties.put(wifiBasePropName.append("mode").toString(), wifiMode);
+        properties.put(wifiBasePropName.toString() + "mode", wifiMode);
 
-        // wifiConfig.setSSID(GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getWirelessSsid()));
         properties.put(wifiModeBasePropName.toString() + "ssid",
                 GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getWirelessSsid()));
-
-        // wifiConfig.setDriver(gwtWifiConfig.getDriver());
         properties.put(wifiModeBasePropName.toString() + "driver", gwtWifiConfig.getDriver());
-
-        // WifiRadioMode wifiRadioMode = getWifiConfigRadioMode(gwtWifiConfig.getRadioModeEnum());
-        // wifiConfig.setRadioMode(wifiRadioMode);
         properties.put(wifiModeBasePropName.toString() + "radioMode",
                 getWifiConfigRadioMode(gwtWifiConfig.getRadioModeEnum()).name());
 
-        // ????
-        // String hardwareMode = gwtWifiConfig.getRadioModeEnum().getRadioMode();
-        // wifiConfig.setHardwareMode(hardwareMode);
-
-        int[] wifiConfigChannels = getWifiConfigChannels(gwtWifiConfig.getChannels());
-        String wifiConfigChannelsPropName = wifiModeBasePropName.toString() + "channel";
-        if (wifiConfigChannels.length > 0) {
-            StringBuilder wifiConfigChannelsStringBuilder = new StringBuilder();
-            for (int i = 0; i < wifiConfigChannels.length; i++) {
-                wifiConfigChannelsStringBuilder.append(String.valueOf(wifiConfigChannels[i]));
-                if (i != wifiConfigChannels.length - 1) {
-                    wifiConfigChannelsStringBuilder.append(" ");
-                }
-            }
-            properties.put(wifiConfigChannelsPropName, wifiConfigChannelsStringBuilder.toString());
-            // wifiConfig.setChannels(wifiConfigChannels);
-        }
+        fillWifiChannelsProperties(gwtWifiConfig, properties, wifiModeBasePropName.toString());
 
         WifiSecurity wifiSecurity = getWifiConfigSecurity(gwtWifiConfig.getSecurity());
         properties.put(wifiModeBasePropName.toString() + "securityType", wifiSecurity.name());
-        // wifiConfig.setSecurity(wifiSecurity);
 
         WifiCiphers wifiPairwiseCiphers = getWifiConfigCiphers(gwtWifiConfig.getPairwiseCiphers());
         if (wifiPairwiseCiphers != null) {
             properties.put(wifiModeBasePropName.toString() + "pairwiseCiphers", wifiPairwiseCiphers.name());
-            // wifiConfig.setPairwiseCiphers(wifiPairwiseCiphers);
         }
 
         WifiCiphers wifiGroupCiphers = getWifiConfigCiphers(gwtWifiConfig.getGroupCiphers());
         if (wifiGroupCiphers != null) {
             properties.put(wifiModeBasePropName.toString() + "groupCiphers", wifiGroupCiphers.name());
-            // wifiConfig.setGroupCiphers(wifiGroupCiphers);
         }
 
         WifiBgscan wifiBgscan = getWifiConfigBgscan(gwtWifiConfig, gwtWifiConfig.getBgscanModule());
@@ -1589,76 +1515,69 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     + ":" + wifiBgscan.getRssiThreshold() + ":" + wifiBgscan.getLongInterval();
             properties.put(wifiModeBasePropName.toString() + "bgscan", wifiBgscanString);
         }
-        // wifiConfig.setBgscan(wifiBgscan);
 
-        // wifiConfig.setPasskey(GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword()));
-        // CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);
-        // try {
-        // char[] passphrase = cs.encryptAes(GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword()).toCharArray());
-        // properties.put(wifiModeBasePropName.append("passphrase").toString(), new Password(passphrase));
-        // } catch (KuraException e) {
-        // throw new GwtKuraException(GwtKuraErrorCode.WARNING, e); // change error code. Add a new one?
-        // }
+        fillWifiPassphrase(gwtWifiConfig, properties, wifiModeBasePropName.toString(), interfaceName, mode);
 
-        String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword());
-        if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
+        properties.put(wifiModeBasePropName.toString() + "pingAccessPoint", gwtWifiConfig.pingAccessPoint());
+        properties.put(wifiModeBasePropName.toString() + "ignoreSSID", gwtWifiConfig.ignoreSSID());
+    }
 
-            List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
-            for (GwtNetInterfaceConfig netConfig : result) {
-                if (netConfig instanceof GwtWifiNetInterfaceConfig
-                        && interfaceName.equals(((GwtWifiNetInterfaceConfig) netConfig).getName())) {
-                    GwtWifiNetInterfaceConfig oldWifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
-                    GwtWifiConfig oldGwtWifiConfig;
-                    if (mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
-                        oldGwtWifiConfig = oldWifiConfig.getAccessPointWifiConfig();
-                    } else {
-                        oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
-                    }
-                    // try {
-                    if (oldGwtWifiConfig != null) {
-                        // CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);
-                        // char[] passphrase = cs.encryptAes(
-                        // GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()).toCharArray());
-                        properties.put(wifiModeBasePropName.toString() + "passphrase",
-                                new Password(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword())));
-                        // wifiConfig.setPasskey(GwtSafeHtmlUtils.htmlUnescape(oldGwtWifiConfig.getPassword()));
-                    }
-                    // } catch (KuraException e) {
-                    // throw new GwtKuraException(GwtKuraErrorCode.WARNING, e); // change error code. Add a new one?
-                    // }
+    private void fillWifiChannelsProperties(GwtWifiConfig gwtWifiConfig, Map<String, Object> properties,
+            String wifiModeBasePropName) {
+        int[] wifiConfigChannels = getWifiConfigChannels(gwtWifiConfig.getChannels());
+        if (wifiConfigChannels.length > 0) {
+            StringBuilder wifiConfigChannelsStringBuilder = new StringBuilder();
+            for (int i = 0; i < wifiConfigChannels.length; i++) {
+                wifiConfigChannelsStringBuilder.append(String.valueOf(wifiConfigChannels[i]));
+                if (i != wifiConfigChannels.length - 1) {
+                    wifiConfigChannelsStringBuilder.append(" ");
                 }
             }
-        } else if (passKey != null && wifiMode.equalsIgnoreCase(WifiMode.MASTER.name())) {
+            properties.put(wifiModeBasePropName.toString() + "channel", wifiConfigChannelsStringBuilder.toString());
+        }
+    }
+
+    private void fillWifiPassphrase(GwtWifiConfig gwtWifiConfig, Map<String, Object> properties,
+            String wifiModeBasePropName, String interfaceName, String mode) throws GwtKuraException, KuraException {
+        String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtWifiConfig.getPassword());
+        String wifiPassphrasePropName = wifiModeBasePropName + "passphrase";
+        if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
+            Optional<GwtWifiConfig> oldGwtWifiConfig = getOldGwtWifiConfig(interfaceName, mode);
+            oldGwtWifiConfig.ifPresent(config -> properties.put(wifiPassphrasePropName,
+                    new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
+        } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
             validateUserPassword(passKey);
-            try {
-                CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);
-                char[] passphrase = cs.encryptAes(passKey.toCharArray());
-                properties.put(wifiModeBasePropName.toString() + "passphrase", new Password(passphrase));
-            } catch (KuraException e) {
-                throw new GwtKuraException(GwtKuraErrorCode.WARNING, e); // change error code. Add a new one?
-            }
-        } else {
-            try {
-                CryptoService cs = ServiceLocator.getInstance().getService(CryptoService.class);
-                char[] passphrase = cs.encryptAes(passKey.toCharArray());
-                properties.put(wifiModeBasePropName.toString() + "passphrase", new Password(passphrase));
-            } catch (KuraException e) {
-                throw new GwtKuraException(GwtKuraErrorCode.WARNING, e); // change error code. Add a new one?
+            properties.put(wifiPassphrasePropName, new Password(encryptWifiPassphrase(passKey)));
+        } else if (passKey != null) {
+            properties.put(wifiPassphrasePropName, new Password(encryptWifiPassphrase(passKey)));
+        }
+    }
+
+    private char[] encryptWifiPassphrase(String wifiPassphrase) throws GwtKuraException, KuraException {
+        CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
+        return cryptoService.encryptAes(wifiPassphrase.toCharArray());
+    }
+
+    private Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode) throws GwtKuraException {
+        Optional<GwtWifiConfig> config = Optional.empty();
+        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+        for (GwtNetInterfaceConfig netConfig : result) {
+            if (netConfig instanceof GwtWifiNetInterfaceConfig
+                    && interfaceName.equals(((GwtWifiNetInterfaceConfig) netConfig).getName())) {
+                GwtWifiNetInterfaceConfig oldWifiConfig = (GwtWifiNetInterfaceConfig) netConfig;
+                GwtWifiConfig oldGwtWifiConfig;
+                if (mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
+                    oldGwtWifiConfig = oldWifiConfig.getAccessPointWifiConfig();
+                } else {
+                    oldGwtWifiConfig = oldWifiConfig.getStationWifiConfig();
+                }
+                if (oldGwtWifiConfig != null) {
+                    config = Optional.of(oldGwtWifiConfig);
+                    break;
+                }
             }
         }
-
-        // wifiConfig.setPingAccessPoint(gwtWifiConfig.pingAccessPoint());
-        properties.put(wifiModeBasePropName.toString() + "pingAccessPoint", gwtWifiConfig.pingAccessPoint());
-
-        // wifiConfig.setIgnoreSSID(gwtWifiConfig.ignoreSSID());
-        properties.put(wifiModeBasePropName.toString() + "ignoreSSID", gwtWifiConfig.ignoreSSID());
-
-        // ????
-        // wifiConfig.setBroadcast(!gwtWifiConfig.ignoreSSID());
-
-        // wifiConfig.setWifiCountryCode(gwtWifiConfig.getCountryCode());
-
-        // return wifiConfig;
+        return config;
     }
 
     private WifiBgscan getWifiConfigBgscan(GwtWifiConfig gwtWifiConfig, String bgscanModule) {

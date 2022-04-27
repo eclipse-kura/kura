@@ -789,8 +789,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             this.dockerClient.removeImageCmd(imageId).exec();
         } catch (Exception e) {
             logger.error("Could not remove image {}.", imageId);
-            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR,
-                    "Delete Container Image","500 (server error). Image is most likely in use by a container.");
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
+                    "500 (server error). Image is most likely in use by a container.");
         }
     }
 

@@ -63,7 +63,7 @@ public interface GwtDeviceService extends RemoteService {
     @Audit(componentName = "UI Device", description = "check if container orchestrator is active")
     public boolean checkIfContainerOrchestratorIsActive(GwtXSRFToken token) throws GwtKuraException;
     
-    @Audit(componentName = "UI Device", description = "Delete Image")
+    @Audit(componentName = "UI Device", description = "Delete Container Image")
     public void deleteImage(GwtXSRFToken xsrfToken, String imageId) throws GwtKuraException;
 
 }

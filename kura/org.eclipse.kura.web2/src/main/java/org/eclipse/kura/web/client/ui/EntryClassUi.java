@@ -56,6 +56,7 @@ import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -762,9 +763,39 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                 EntryClassUi.this.dropdownContainerHeader.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
             }
         });
+        
+        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
 
-        this.changePassword.addClickHandler(changePasswordHandler);
-        this.headerChangePassword.addClickHandler(changePasswordHandler);
+            @Override
+            public void onFailure(Throwable caught) {
+                EntryClassUi.this.changePassword.setVisible(false);
+                EntryClassUi.this.headerChangePassword.setVisible(false);
+            }
+
+            @Override
+            public void onSuccess(GwtXSRFToken token) {
+                EntryClassUi.this.gwtSessionService.getUserConfig(token, new AsyncCallback<GwtUserConfig>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.this.changePassword.setVisible(false);
+                        EntryClassUi.this.headerChangePassword.setVisible(false);
+                    }
+
+                    @Override
+                    public void onSuccess(GwtUserConfig result) {
+                        if (result.isPasswordAuthEnabled()) {
+                            EntryClassUi.this.changePassword.addClickHandler(changePasswordHandler);
+                            EntryClassUi.this.headerChangePassword.addClickHandler(changePasswordHandler);
+                        } else {
+                            EntryClassUi.this.changePassword.setVisible(false);
+                            EntryClassUi.this.headerChangePassword.setVisible(false);
+                        }
+                    }
+                });
+
+            }
+        });
     }
 
     private void logout() {
@@ -823,16 +854,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     private void changePassword() {
         final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
 
-        RequestQueue.submit(c -> {
-            gwtXSRFService.generateSecurityToken(c.callback(token -> {
-                gwtSessionService.getUserOptions(token, c.callback(options -> {
-                    passwordChangeModal.pickPassword(options,
-                            (oldPass, newPass) -> {
-                                setNewPassword(oldPass, newPass);
-                            });
-                }));
-            }));
-        });
+        passwordChangeModal.pickPassword(userOptions, this::setNewPassword);
     }
 
     private void initServicesTree() {

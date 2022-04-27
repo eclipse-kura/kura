@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.util.Optional;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -107,6 +109,12 @@ public class GwtSessionServiceImpl extends OsgiRemoteServiceServlet implements G
         final HttpSession session = request.getSession(false);
 
         String username = getSessionUsername(session);
+
+        Optional<GwtUserConfig> userConfig = this.userManager.getUserConfig(username);
+
+        if (!userConfig.isPresent() || !userConfig.get().isPasswordAuthEnabled()) {
+            throw new GwtKuraException(GwtKuraErrorCode.OPERATION_NOT_SUPPORTED);
+        }
 
         try {
             this.userManager.authenticateWithPassword(username, oldPassword);

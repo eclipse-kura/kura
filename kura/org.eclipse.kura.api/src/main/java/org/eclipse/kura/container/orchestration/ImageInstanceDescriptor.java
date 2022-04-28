@@ -145,7 +145,7 @@ public class ImageInstanceDescriptor {
         private String imageAuthor;
         private String imageArch;
         private long imageSize;
-        private Map<String, String> imageLabels;
+        private Map<String, String> imageLabels = new HashMap<>();
 
         public ImageInstanceDescriptorBuilder setImageName(String imageName) {
             this.imageName = nullToEmpty(imageName);
@@ -191,7 +191,7 @@ public class ImageInstanceDescriptor {
             result.imageAuthor = this.imageAuthor;
             result.imageArch = this.imageArch;
             result.imageSize = this.imageSize;
-            result.imageLabels = this.imageLabels;
+            result.imageLabels = requireNonNull(this.imageLabels, "ImageLabels must not be null");
 
             return result;
         }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Configurable container management component
 Bundle-SymbolicName: org.eclipse.kura.container.orchestration.provider
-Bundle-Version: 1.0.1
+Bundle-Version: 1.0.2.qualifier
 Bundle-Vendor: Eclipse Kura
 Automatic-Module-Name: org.eclipse.kura.container.orchestration.provider
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

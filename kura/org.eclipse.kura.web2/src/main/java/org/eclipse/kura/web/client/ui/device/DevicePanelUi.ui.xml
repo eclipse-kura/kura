@@ -33,7 +33,7 @@
                         ui:field="profile" active="true"/>
                     <b:TabListItem dataTarget="#bundlesPanel" text="Bundles"
                         ui:field="bundles" />
-                    <b:TabListItem dataTarget="#dockerContainersPanel" text="Docker Containers"
+                    <b:TabListItem dataTarget="#dockerContainersPanel" text="Containers"
                         ui:field="containers" />
                     <b:TabListItem dataTarget="#threadsPanel" text="Threads"
                         ui:field="threads" />

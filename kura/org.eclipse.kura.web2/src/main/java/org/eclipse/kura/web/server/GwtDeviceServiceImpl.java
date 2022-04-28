@@ -28,6 +28,7 @@ import org.eclipse.kura.KuraProcessExecutionErrorException;
 import org.eclipse.kura.command.PasswordCommandService;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.system.SystemAdminService;
 import org.eclipse.kura.system.SystemResourceInfo;
 import org.eclipse.kura.system.SystemService;
@@ -235,6 +236,62 @@ public class GwtDeviceServiceImpl extends OsgiRemoteServiceServlet implements Gw
         ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
 
         return checkIfContainerOrchestratorIsActive != null;
+    }
+    
+    @Override
+    public List<GwtGroupedNVPair> findImages(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        List<GwtGroupedNVPair> pairs = new ArrayList<>();
+        try {
+            ContainerOrchestrationService checkIfContainerOrchestratorIsActive = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+            List<ImageInstanceDescriptor> images = checkIfContainerOrchestratorIsActive.listImageInstanceDescriptors();
+            if (images != null) {
+                for (ImageInstanceDescriptor image : images) {
+                    GwtGroupedNVPair pair = new GwtGroupedNVPair();
+                    pair.setId(image.getImageId());
+                    pair.setName(image.getImageName());
+                    pair.setStatus("bndInstalled");
+                    pair.setVersion(image.getImageTag());
+                    pair.set("arch", image.getImageArch());
+                    
+                    pairs.add(pair);
+                }
+            }
+
+        } catch (Exception e) {
+            logger.error("Failed To List Containers", e);
+        }
+
+        return new ArrayList<>(pairs);
+    }
+    
+    @Override
+    public void deleteImage(GwtXSRFToken xsrfToken, String imageId) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        ContainerOrchestrationService containerOrchestrationService = ServiceLocator.getInstance().getService(ContainerOrchestrationService.class);
+
+        List<ImageInstanceDescriptor> images = containerOrchestrationService.listImageInstanceDescriptors();
+
+        logger.info("Deleting image with id: {}", imageId);
+
+        if (images != null) {
+            for (ImageInstanceDescriptor image : images) {
+                if (image.getImageId().equals(imageId)) {
+                    try {
+                        containerOrchestrationService.deleteImage(imageId);
+                    } catch (KuraException e) {
+                        logger.error("Could not stop container with name: {}", imageId);
+                        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+                    }
+                    return;
+                }
+            }
+        }
+        // image was not found, throw error
+        logger.error("Could not find image with name: {}", imageId);
+        throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR);
+
     }
 
     @Override

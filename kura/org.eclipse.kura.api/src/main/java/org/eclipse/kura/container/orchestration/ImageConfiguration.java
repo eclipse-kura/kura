@@ -30,12 +30,12 @@ import org.osgi.annotation.versioning.ProviderType;
  */
 @ProviderType
 public class ImageConfiguration {
-    
+
     private String imageName;
     private String imageTag;
     private Optional<RegistryCredentials> registryCredentials;
     private int imageDownloadTimeoutSeconds = 500;
-    
+
     private ImageConfiguration() {
     }
 
@@ -134,7 +134,7 @@ public class ImageConfiguration {
 
             result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
             result.imageTag = this.imageTag;
-            result.registryCredentials =  result.registryCredentials = requireNonNull(this.registryCredentials,
+            result.registryCredentials = requireNonNull(this.registryCredentials,
                     "Request Registry Credentials object cannot be null.");
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 

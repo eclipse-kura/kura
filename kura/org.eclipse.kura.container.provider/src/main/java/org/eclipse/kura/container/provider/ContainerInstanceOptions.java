@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.util.configuration.Property;
@@ -236,15 +237,19 @@ public class ContainerInstanceOptions {
         return this.imageDownloadTimeout;
     }
 
+    private ImageConfiguration buildImageConfig() {
+        return new ImageConfiguration.ImageConfigurationBuilder().setImageName(image).setImageTag(imageTag)
+                .setImageDownloadTimeoutSeconds(imageDownloadTimeout).setRegistryCredentials(getRegistryCredentials())
+                .build();
+    }
+
     public ContainerConfiguration getContainerConfiguration() {
         return ContainerConfiguration.builder().setContainerName(getContainerName())
-                .setContainerImage(getContainerImage()).setContainerImageTag(getContainerImageTag())
-                .setExternalPorts(getContainerPortsExternal()).setInternalPorts(getContainerPortsInternal())
-                .setEnvVars(getContainerEnvList()).setVolumes(getContainerVolumeList())
-                .setPrivilegedMode(this.privilegedMode).setDeviceList(getContainerDeviceList())
-                .setFrameworkManaged(true).setLoggingType(getLoggingType()).setLoggerParameters(getLoggerParameters())
-                .setRegistryCredentials(getRegistryCredentials())
-                .setImageDownloadTimeoutSeconds(getImageDownloadTimeout()).build();
+                .setImageConfiguration(buildImageConfig()).setExternalPorts(getContainerPortsExternal())
+                .setInternalPorts(getContainerPortsInternal()).setEnvVars(getContainerEnvList())
+                .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
+                .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
+                .setLoggerParameters(getLoggerParameters()).build();
     }
 
     private List<Integer> parsePortString(String ports) {

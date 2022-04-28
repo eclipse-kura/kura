@@ -43,7 +43,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns a Image's name as a String.
+     * Returns an Image's name as a String.
      * 
      * @return
      */
@@ -52,7 +52,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns a Image's tag as a String.
+     * Returns an Image's tag as a String.
      * 
      * @return
      */
@@ -61,7 +61,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns a Image's id as a String.
+     * Returns an Image's id as a String.
      * 
      * @return
      */
@@ -70,7 +70,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns a Image's author as a String.
+     * Returns an Image's author as a String.
      * 
      * @return
      */
@@ -79,7 +79,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns a Image's architecture as a String.
+     * Returns an Image's architecture as a String.
      * 
      * @return
      */
@@ -88,7 +88,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns a Image's size as a long.
+     * Returns an Image's size as a long.
      * 
      * @return
      */
@@ -97,7 +97,7 @@ public class ImageInstanceDescriptor {
     }
 
     /**
-     * Returns all of a Image's tags as a Map<String,String>.
+     * Returns all of an Image's tags as a Map<String,String>.
      * 
      * @return
      */

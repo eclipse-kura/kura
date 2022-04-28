@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
@@ -21,7 +21,7 @@ import java.util.Optional;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a image configuration used to request the generation
+ * Object which represents an Image configuration used to request the generation
  * of a new image instance
  *
  * @noimplement This interface is not intended to be implemented by clients.
@@ -39,8 +39,8 @@ public class ImageConfiguration {
     private ImageConfiguration() {
     }
 
-    /***
-     * Returns a Image's name as a String.
+    /**
+     * Returns an Image's name as a String.
      * 
      * @return
      */
@@ -48,8 +48,8 @@ public class ImageConfiguration {
         return this.imageName;
     }
 
-    /***
-     * Returns a Image's tag as a String.
+    /**
+     * Returns an Image's tag as a String.
      * 
      * @return
      */
@@ -57,8 +57,8 @@ public class ImageConfiguration {
         return this.imageTag;
     }
 
-    /***
-     * Returns a Image's download timeout time as a int.
+    /**
+     * Returns an Image's download timeout time as a int.
      * 
      * @return
      */

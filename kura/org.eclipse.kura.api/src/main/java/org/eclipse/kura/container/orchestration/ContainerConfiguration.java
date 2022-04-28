@@ -323,7 +323,7 @@ public class ContainerConfiguration {
         }
 
         /**
-         * builds image based on {@link ImageConfiguration}
+         * Set the {@link ImageConfiguration}
          * 
          * @since 2.4
          */

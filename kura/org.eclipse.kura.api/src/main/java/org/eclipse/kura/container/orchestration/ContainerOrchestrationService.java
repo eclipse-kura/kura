@@ -70,7 +70,7 @@ public interface ContainerOrchestrationService {
      * Allows to pull the required image, using the specified tag and credentials.
      * The image will be downloaded respecting the configured timeout in seconds.
      *
-     * @param imageConfig a ImageConfiguration object which contains info such as
+     * @param imageConfig an ImageConfiguration object which contains info such as
      *                    image name, tag, pull timeout in seconds and registry
      *                    credentials.
      * 

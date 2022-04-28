@@ -20,7 +20,7 @@ import java.util.Objects;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a container. Used to track created containers.
+ * Object which represents a instantiated container. Used to track created containers.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3

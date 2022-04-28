@@ -32,6 +32,8 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
+import org.eclipse.kura.container.orchestration.ImageConfiguration;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.command.InspectImageResponse;
 import com.github.dockerjava.api.command.PullImageCmd;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.AuthConfig;
@@ -284,8 +287,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             containerId = existingInstance.get().getContainerId();
         } else if (!existingInstance.isPresent()) {
             logger.info("Creating new container instance");
-            pullImage(container.getContainerImage(), container.getContainerImageTag(),
-                    container.getImageDownloadTimeoutSeconds(), container.getRegistryCredentials());
+            pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
             startContainer(containerId);
         } else {
@@ -334,25 +336,6 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
         if (!testConnection()) {
             throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
-        }
-    }
-
-    @Override
-    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
-            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
-        if (isNull(imageName) || isNull(imageTag) || timeOutSeconds < 0 || isNull(registryCredentials)) {
-            throw new IllegalArgumentException("Parameters cannot be null or negative");
-        }
-        boolean imageAvailableLocally = doesImageExist(imageName, imageTag);
-
-        if (!imageAvailableLocally) {
-            try {
-                imagePullHelper(imageName, imageTag, timeOutSeconds, registryCredentials);
-            } catch (InterruptedException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
-            }
         }
     }
 
@@ -430,13 +413,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             throw new IllegalStateException("failed to reach docker engine");
         }
 
-        if (containerDescription == null || containerDescription.getContainerImage() == null
-                || containerDescription.getContainerImageTag() == null) {
+        if (containerDescription == null) {
             throw new IllegalStateException("failed to create container, null containerImage passed");
         }
 
-        String containerImageFullString = String.format("%s:%s", containerDescription.getContainerImage(),
-                containerDescription.getContainerImageTag());
+        String containerImageFullString = String.format("%s:%s",
+                containerDescription.getImageConfiguration().getImageName(),
+                containerDescription.getImageConfiguration().getImageTag());
 
         CreateContainerCmd commandBuilder = null;
         try {
@@ -733,4 +716,82 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
     }
+
+    @Override
+    public void pullImage(ImageConfiguration imageConfig) throws KuraException, InterruptedException {
+        if (isNull(imageConfig.getImageName()) || isNull(imageConfig.getImageTag())
+                || imageConfig.getimageDownloadTimeoutSeconds() < 0 || isNull(imageConfig.getRegistryCredentials())) {
+            throw new IllegalArgumentException("Parameters cannot be null or negative");
+        }
+
+        boolean imageAvailableLocally = doesImageExist(imageConfig.getImageName(), imageConfig.getImageTag());
+
+        if (!imageAvailableLocally) {
+            try {
+                imagePullHelper(imageConfig.getImageName(), imageConfig.getImageTag(),
+                        imageConfig.getimageDownloadTimeoutSeconds(), imageConfig.getRegistryCredentials());
+            } catch (InterruptedException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
+            }
+        }
+    }
+
+    @Override
+    public void pullImage(String imageName, String imageTag, int timeOutSeconds,
+            Optional<RegistryCredentials> registryCredentials) throws KuraException, InterruptedException {
+        pullImage(new ImageConfiguration.ImageConfigurationBuilder().setImageName(imageName).setImageTag(imageTag)
+                .setImageDownloadTimeoutSeconds(timeOutSeconds).setRegistryCredentials(registryCredentials).build());
+    }
+
+    @Override
+    public List<ImageInstanceDescriptor> listImageInstanceDescriptors() {
+        if (!testConnection()) {
+            throw new IllegalStateException(UNABLE_TO_CONNECT_TO_DOCKER_CLI);
+        }
+        List<Image> images = this.dockerClient.listImagesCmd().withShowAll(true).exec();
+        List<ImageInstanceDescriptor> result = new ArrayList<>();
+        images.forEach(image -> {
+            InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
+            result.add(
+                    ImageInstanceDescriptor.builder().setImageName(getImageName(image)).setImageTag(getImageTag(image))
+                            .setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
+                            .setimageSize(iir.getSize().longValue()).setImageLabels(image.getLabels()).build());
+        });
+        return result;
+    }
+
+    private String getImageName(Image image) {
+        if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
+            return "";
+        }
+
+        return image.getRepoTags()[0].split(":")[0];
+    }
+
+    private String getImageTag(Image image) {
+        if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
+            return "";
+        }
+
+        if (image.getRepoTags()[0].split(":").length < 2) {
+            return "";
+        }
+
+        return image.getRepoTags()[0].split(":")[1];
+    }
+
+    @Override
+    public void deleteImage(String imageId) throws KuraException {
+        checkRequestEnv(imageId);
+        try {
+            this.dockerClient.removeImageCmd(imageId).exec();
+        } catch (Exception e) {
+            logger.error("Could not remove image {}.", imageId);
+            throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
+                    "500 (server error). Image is most likely in use by a container.");
+        }
+    }
+
 }

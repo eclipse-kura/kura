@@ -15,6 +15,7 @@ package org.eclipse.kura.container.orchestration;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -37,7 +38,7 @@ public class ImageInstanceDescriptor {
     private String imageAuthor = "";
     private String imageArch = "";
     private long imageSize = 0;
-    private Map<String, String> imageLabels;
+    private Map<String, String> imageLabels = new HashMap<>();
 
     private ImageInstanceDescriptor() {
     }

@@ -106,7 +106,10 @@ public class PasswordChangeModal extends Composite {
             e.cancel();
             trySubmit();
         });
-        this.okButton.addClickHandler(e -> trySubmit());
+        this.okButton.addClickHandler(e -> {
+            e.preventDefault();
+            trySubmit();
+        });
     }
 
     private void trySubmit() {
@@ -115,8 +118,7 @@ public class PasswordChangeModal extends Composite {
         }
 
         passwordChangeModal.hide();
-        callback.ifPresent(
-                c -> c.onPasswordChanged(oldPassword.getValue(), newPassword.getValue()));
+        callback.ifPresent(c -> c.onPasswordChanged(oldPassword.getValue(), newPassword.getValue()));
     }
 
     private void validate() {

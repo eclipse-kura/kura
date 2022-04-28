@@ -764,17 +764,8 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             }
         });
         
-        this.gwtXSRFService.generateSecurityToken(new AsyncCallback<GwtXSRFToken>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                EntryClassUi.this.changePassword.setVisible(false);
-                EntryClassUi.this.headerChangePassword.setVisible(false);
-            }
-
-            @Override
-            public void onSuccess(GwtXSRFToken token) {
-                EntryClassUi.this.gwtSessionService.getUserConfig(token, new AsyncCallback<GwtUserConfig>() {
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(
+                c.callback(token -> gwtSessionService.getUserConfig(token, new AsyncCallback<GwtUserConfig>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -783,8 +774,8 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                     }
 
                     @Override
-                    public void onSuccess(GwtUserConfig result) {
-                        if (result.isPasswordAuthEnabled()) {
+                    public void onSuccess(GwtUserConfig config) {
+                        if (config.isPasswordAuthEnabled()) {
                             EntryClassUi.this.changePassword.addClickHandler(changePasswordHandler);
                             EntryClassUi.this.headerChangePassword.addClickHandler(changePasswordHandler);
                         } else {
@@ -792,10 +783,8 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
                             EntryClassUi.this.headerChangePassword.setVisible(false);
                         }
                     }
-                });
-
-            }
-        });
+                })))
+        );
     }
 
     private void logout() {

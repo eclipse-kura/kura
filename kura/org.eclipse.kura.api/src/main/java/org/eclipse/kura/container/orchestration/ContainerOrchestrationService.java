@@ -30,7 +30,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public interface ContainerOrchestrationService {
 
     /**
-     * Lists all available containers by id only, like running 'Docker ps -a'
+     * Lists all available containers by id only, like running the cli command 'docker ps -a'
      *
      * @return a list of string objects representing the container IDs
      */

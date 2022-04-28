@@ -134,7 +134,8 @@ public class ImageConfiguration {
 
             result.imageName = requireNonNull(this.imageName, "Request Image Name cannot be null");
             result.imageTag = this.imageTag;
-            result.registryCredentials = this.registryCredentials;
+            result.registryCredentials =  result.registryCredentials = requireNonNull(this.registryCredentials,
+                    "Request Registry Credentials object cannot be null.");
             result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
 
             return result;

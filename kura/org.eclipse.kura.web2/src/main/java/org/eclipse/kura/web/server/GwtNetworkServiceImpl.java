@@ -115,7 +115,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
     private static final String FIREWALL_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.FirewallConfigurationService";
     private static final String ENABLED = "enabled";
-    private static final String UNKNOWN_IP = "0.0.0.0/0";
+    private static final String UNKNOWN_NETWORK = "0.0.0.0/0";
+    private static final String UNKNOWN_IP = "0.0.0.0";
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
@@ -1064,10 +1065,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             for (GwtFirewallOpenPortEntry entry : entries) {
                 openPorts.append(entry.getPortRange()).append(",");
                 openPorts.append(entry.getProtocol()).append(",");
-                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_IP)) {
-                    openPorts.append(UNKNOWN_IP);
+                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_NETWORK)) {
+                    openPorts.append(UNKNOWN_NETWORK);
                 } else {
-                    appendNetworkAddress(entry.getPermittedNetwork(), openPorts);
+                    appendNetwork(entry.getPermittedNetwork(), openPorts);
                 }
                 openPorts.append(",");
                 if (entry.getPermittedInterfaceName() != null) {
@@ -1109,8 +1110,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             for (GwtFirewallPortForwardEntry entry : entries) {
                 portForwarding.append(entry.getInboundInterface()).append(",");
                 portForwarding.append(entry.getOutboundInterface()).append(",");
-                appendNetworkAddress(entry.getAddress(), portForwarding);
-                portForwarding.append(",");
+                portForwarding.append(((IP4Address) IPAddress.parseHostAddress(entry.getAddress())).getHostAddress())
+                        .append(",");
                 portForwarding.append(entry.getProtocol()).append(",");
                 portForwarding.append(entry.getOutPort()).append(",");
                 portForwarding.append(entry.getInPort()).append(",");
@@ -1120,10 +1121,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     portForwarding.append("false");
                 }
                 portForwarding.append(",");
-                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_IP)) {
-                    portForwarding.append(UNKNOWN_IP);
+                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_NETWORK)) {
+                    portForwarding.append(UNKNOWN_NETWORK);
                 } else {
-                    appendNetworkAddress(entry.getPermittedNetwork(), portForwarding);
+                    appendNetwork(entry.getPermittedNetwork(), portForwarding);
                 }
                 portForwarding.append(",");
                 if (entry.getPermittedMAC() != null) {
@@ -1158,16 +1159,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 nat.append(entry.getInInterface()).append(",");
                 nat.append(entry.getOutInterface()).append(",");
                 nat.append(entry.getProtocol()).append(",");
-                if (entry.getSourceNetwork() == null || entry.getSourceNetwork().equals(UNKNOWN_IP)) {
-                    nat.append(UNKNOWN_IP);
+                if (entry.getSourceNetwork() == null || entry.getSourceNetwork().equals(UNKNOWN_NETWORK)) {
+                    nat.append(UNKNOWN_NETWORK);
                 } else {
-                    appendNetworkAddress(entry.getSourceNetwork(), nat);
+                    appendNetwork(entry.getSourceNetwork(), nat);
                 }
-                if (entry.getDestinationNetwork() == null || entry.getDestinationNetwork().equals(UNKNOWN_IP)) {
-                    nat.append(UNKNOWN_IP);
+                nat.append(",");
+                if (entry.getDestinationNetwork() == null || entry.getDestinationNetwork().equals(UNKNOWN_NETWORK)) {
+                    nat.append(UNKNOWN_NETWORK);
                 } else {
-                    appendNetworkAddress(entry.getDestinationNetwork(), nat);
+                    appendNetwork(entry.getDestinationNetwork(), nat);
                 }
+                nat.append(",");
                 if (entry.getMasquerade().equals("yes")) {
                     nat.append("true");
                 } else {
@@ -1810,7 +1813,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    private void appendNetworkAddress(String address, StringBuilder stringBuilder) throws UnknownHostException {
+    private void appendNetwork(String address, StringBuilder stringBuilder) throws UnknownHostException {
         String[] networkAddress = address.split("/");
         if (networkAddress.length >= 2) {
             stringBuilder.append(((IP4Address) IPAddress.parseHostAddress(networkAddress[0])).getHostAddress())

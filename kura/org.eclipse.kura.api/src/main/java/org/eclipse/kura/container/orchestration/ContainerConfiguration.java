@@ -23,11 +23,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * Object which represents a container configuration used to request the generation of a new container instance and
- * running
+ * Object which represents a container configuration used to request the
+ * generation of a new container instance.
  *
  * @noimplement This interface is not intended to be implemented by clients.
  * @since 2.3
@@ -37,8 +38,6 @@ import org.osgi.annotation.versioning.ProviderType;
 public class ContainerConfiguration {
 
     private String containerName;
-    private String containerImage;
-    private String containerImageTag;
     private List<Integer> containerPortsExternal;
     private List<Integer> containerPortsInternal;
     private List<String> containerEnvVars;
@@ -48,16 +47,17 @@ public class ContainerConfiguration {
     private Boolean isFrameworkManaged = true;
     private Map<String, String> containerLoggerParameters;
     private String containerLoggingType;
-    private Optional<RegistryCredentials> registryCredentials;
-    private int imageDownloadTimeoutSeconds;
+    private ImageConfiguration imageConfig;
 
     private ContainerConfiguration() {
     }
 
     /**
-     * The method will provide information if the container is or not managed by the framework
+     * The method will provide information if the container is or not managed by the
+     * framework
      *
-     * @return <code>true</code> if the framework manages the container. <code>false</code> otherwise
+     * @return <code>true</code> if the framework manages the container.
+     *         <code>false</code> otherwise
      */
     public boolean isFrameworkManaged() {
         return this.isFrameworkManaged;
@@ -70,24 +70,6 @@ public class ContainerConfiguration {
      */
     public String getContainerName() {
         return this.containerName;
-    }
-
-    /**
-     * Returns the base image for the associated container
-     *
-     * @return
-     */
-    public String getContainerImage() {
-        return this.containerImage;
-    }
-
-    /**
-     * Returns the image tag for the associated container
-     *
-     * @return
-     */
-    public String getContainerImageTag() {
-        return this.containerImageTag;
     }
 
     /**
@@ -109,7 +91,8 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the list of environment properties that will be passed to the container
+     * Returns the list of environment properties that will be passed to the
+     * container
      *
      * @return
      */
@@ -136,7 +119,8 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns a boolean representing if the container runs or will run in privileged mode.
+     * Returns a boolean representing if the container runs or will run in
+     * privileged mode.
      *
      * @return
      */
@@ -163,21 +147,57 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns the Registry credentials
+     * Returns the {@link ImageConfiguration} object
+     *
+     * @return
+     * @since 2.4
+     */
+    public ImageConfiguration getImageConfiguration() {
+        return this.imageConfig;
+    }
+
+    /**
+     * Returns the base image for the associated container. Detailed image
+     * information can be found in the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
+     *
+     * @return
+     */
+    public String getContainerImage() {
+        return this.imageConfig.getImageName();
+    }
+
+    /**
+     * Returns the image tag for the associated container. Detailed image
+     * information can be found in the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
+     *
+     * @return
+     */
+    public String getContainerImageTag() {
+        return this.imageConfig.getImageTag();
+    }
+
+    /**
+     * Returns the Registry credentials. Detailed image information can be found in
+     * the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
      *
      * @return
      */
     public Optional<RegistryCredentials> getRegistryCredentials() {
-        return this.registryCredentials;
+        return this.imageConfig.getRegistryCredentials();
     }
 
     /**
-     * Returns the image download timeout (in seconds)
+     * Returns the image download timeout (in seconds). Detailed image information
+     * can be found in the {@link ImageConfig} class, provided by the
+     * {@link #getImageConfiguration()} method.
      *
      * @return
      */
     public int getImageDownloadTimeoutSeconds() {
-        return this.imageDownloadTimeoutSeconds;
+        return this.imageConfig.getimageDownloadTimeoutSeconds();
     }
 
     /**
@@ -191,11 +211,9 @@ public class ContainerConfiguration {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerImage, this.containerImageTag,
-                this.containerLoggerParameters, this.containerLoggingType, this.containerName,
-                this.containerPortsExternal, this.containerPortsInternal, this.containerPrivileged,
-                this.containerVolumes, this.imageDownloadTimeoutSeconds, this.isFrameworkManaged,
-                this.registryCredentials);
+        return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
+                this.containerLoggingType, this.containerName, this.containerPortsExternal, this.containerPortsInternal,
+                this.containerPrivileged, this.containerVolumes, this.isFrameworkManaged, this.imageConfig);
     }
 
     @Override
@@ -209,8 +227,6 @@ public class ContainerConfiguration {
         ContainerConfiguration other = (ContainerConfiguration) obj;
         return Objects.equals(this.containerDevices, other.containerDevices)
                 && Objects.equals(this.containerEnvVars, other.containerEnvVars)
-                && Objects.equals(this.containerImage, other.containerImage)
-                && Objects.equals(this.containerImageTag, other.containerImageTag)
                 && Objects.equals(this.containerLoggerParameters, other.containerLoggerParameters)
                 && Objects.equals(this.containerLoggingType, other.containerLoggingType)
                 && Objects.equals(this.containerName, other.containerName)
@@ -218,16 +234,13 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
-                && this.imageDownloadTimeoutSeconds == other.imageDownloadTimeoutSeconds
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
-                && Objects.equals(this.registryCredentials, other.registryCredentials);
+                && Objects.equals(this.imageConfig, other.imageConfig);
     }
 
     public static final class ContainerConfigurationBuilder {
 
         private String containerName;
-        private String containerImage;
-        private String containerImageTag;
         private List<Integer> containerPortsExternal = new ArrayList<>();
         private List<Integer> containerPortsInternal = new ArrayList<>();
         private List<String> containerEnvVars = new LinkedList<>();
@@ -237,8 +250,7 @@ public class ContainerConfiguration {
         private Boolean isFrameworkManaged = false;
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
-        private Optional<RegistryCredentials> registryCredentials;
-        private int imageDownloadTimeoutSeconds = 500;
+        private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -247,16 +259,6 @@ public class ContainerConfiguration {
 
         public ContainerConfigurationBuilder setFrameworkManaged(Boolean isFrameworkManaged) {
             this.isFrameworkManaged = isFrameworkManaged;
-            return this;
-        }
-
-        public ContainerConfigurationBuilder setContainerImage(String serviceImage) {
-            this.containerImage = serviceImage;
-            return this;
-        }
-
-        public ContainerConfigurationBuilder setContainerImageTag(String serviceImageTag) {
-            this.containerImageTag = serviceImageTag;
             return this;
         }
 
@@ -300,13 +302,36 @@ public class ContainerConfiguration {
             return this;
         }
 
+        public ContainerConfigurationBuilder setContainerImage(String serviceImage) {
+            this.imageConfigBuilder.setImageName(serviceImage);
+            return this;
+        }
+
+        public ContainerConfigurationBuilder setContainerImageTag(String serviceImageTag) {
+            this.imageConfigBuilder.setImageTag(serviceImageTag);
+            return this;
+        }
+
         public ContainerConfigurationBuilder setRegistryCredentials(Optional<RegistryCredentials> registryCredentials) {
-            this.registryCredentials = registryCredentials;
+            this.imageConfigBuilder.setRegistryCredentials(registryCredentials);
             return this;
         }
 
         public ContainerConfigurationBuilder setImageDownloadTimeoutSeconds(int imageDownloadTimeoutSeconds) {
-            this.imageDownloadTimeoutSeconds = imageDownloadTimeoutSeconds;
+            this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageDownloadTimeoutSeconds);
+            return this;
+        }
+
+        /**
+         * Set the {@link ImageConfiguration}
+         * 
+         * @since 2.4
+         */
+        public ContainerConfigurationBuilder setImageConfiguration(ImageConfiguration imageConfig) {
+            this.imageConfigBuilder.setImageName(imageConfig.getImageName());
+            this.imageConfigBuilder.setImageTag(imageConfig.getImageTag());
+            this.imageConfigBuilder.setRegistryCredentials(imageConfig.getRegistryCredentials());
+            this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageConfig.getimageDownloadTimeoutSeconds());
             return this;
         }
 
@@ -314,8 +339,6 @@ public class ContainerConfiguration {
             ContainerConfiguration result = new ContainerConfiguration();
 
             result.containerName = requireNonNull(this.containerName, "Request Container Name cannot be null");
-            result.containerImage = requireNonNull(this.containerImage, "Request Container Image cannot be null");
-            result.containerImageTag = this.containerImageTag;
             result.containerPortsExternal = this.containerPortsExternal;
             result.containerPortsInternal = this.containerPortsInternal;
             result.containerEnvVars = this.containerEnvVars;
@@ -325,9 +348,7 @@ public class ContainerConfiguration {
             result.isFrameworkManaged = this.isFrameworkManaged;
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
-            result.registryCredentials = requireNonNull(this.registryCredentials,
-                    "Request Registry Credentials object cannot be null");
-            result.imageDownloadTimeoutSeconds = this.imageDownloadTimeoutSeconds;
+            result.imageConfig = this.imageConfigBuilder.build();
 
             return result;
         }

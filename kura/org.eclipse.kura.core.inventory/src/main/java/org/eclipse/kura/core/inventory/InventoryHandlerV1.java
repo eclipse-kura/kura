@@ -91,6 +91,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
     private static final String BAD_REQUEST_TOPIC_MESSAGE = "Bad request topic: {}";
     private static final String ERROR_GETTING_RESOURCE = "Error getting resource {}";
+    private static final String MISSING_MESSAGE_BODY = "missing message body";
 
     private DeploymentAdmin deploymentAdmin;
     private SystemService systemService;
@@ -595,7 +596,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         final byte[] body = payload.getBody();
 
         if (body == null) {
-            logger.warn("missing message body");
+            logger.warn(MISSING_MESSAGE_BODY);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -608,7 +609,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         final byte[] body = payload.getBody();
 
         if (body == null) {
-            logger.warn("missing message body");
+            logger.warn(MISSING_MESSAGE_BODY);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -638,7 +639,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         final byte[] body = payload.getBody();
 
         if (body == null) {
-            logger.warn("missing message body");
+            logger.warn(MISSING_MESSAGE_BODY);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 

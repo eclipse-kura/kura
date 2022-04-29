@@ -116,7 +116,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final String FIREWALL_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.FirewallConfigurationService";
     private static final String ENABLED = "enabled";
     private static final String UNKNOWN_NETWORK = "0.0.0.0/0";
-    private static final String UNKNOWN_IP = "0.0.0.0";
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {

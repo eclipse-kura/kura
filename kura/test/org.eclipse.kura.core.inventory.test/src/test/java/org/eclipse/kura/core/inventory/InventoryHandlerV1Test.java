@@ -45,6 +45,7 @@ import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
 import org.eclipse.kura.core.inventory.resources.ContainerImage;
+import org.eclipse.kura.core.inventory.resources.ContainerImages;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -115,6 +116,9 @@ public class InventoryHandlerV1Test {
 
     private DockerContainer dockerContainerObject;
     private DockerContainers dockerContainersObject;
+
+    private ContainerImage containerImageObject;
+    private ContainerImages containerImagesObject;
 
     @Test(expected = KuraException.class)
     public void testDoGetNoResources() throws KuraException, NoSuchFieldException {
@@ -973,9 +977,7 @@ public class InventoryHandlerV1Test {
         return message;
     }
 
-    // -----------------------------------------//
-    // Start of Container Related Tests //
-    // -----------------------------------------//
+    // region Container Related Tests
 
     @Test
     public void testContainerMarshalingJSON() throws BundleException, KuraException {
@@ -989,9 +991,9 @@ public class InventoryHandlerV1Test {
 
     @Test
     public void testContainerUnMarshalingJSON() throws BundleException, KuraException {
-        givenTheFollowingJson();
+        givenTheFollowingContainerJson();
 
-        whenAJsonIsPassedToMarshaler();
+        whenAContainerJsonIsPassedToMarshaler();
 
         thenCheckIfJsonMatchesContainer();
     }
@@ -1034,6 +1036,39 @@ public class InventoryHandlerV1Test {
 
     }
 
+    // endregion
+
+    // region Image Related Tests
+
+    @Test
+    public void testContainerImageMarshalingJSON() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingImagesSetupToMarshal();
+
+        whenImagesArePassedToMarshaler();
+
+        thenCheckIfImageMatchesJSON();
+    }
+
+    @Test
+    public void testContainerImageUnMarshalingJSON() throws BundleException, KuraException {
+        givenTheFollowingImageJson();
+
+        whenAImageJsonIsPassedToMarshaler();
+
+        thenCheckIfJsonMatchesImage();
+    }
+
+    @Test
+    public void testContainerImageMarshalingXML() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingImagesSetupToMarshal();
+
+        whenImagesArePassedToMarshalerXML();
+
+        thenCheckIfImageMatchesXML();
+    }
+
     @Test
     public void testListImageDoGet() throws BundleException, KuraException {
         givenTwoDockerContainers();
@@ -1052,9 +1087,7 @@ public class InventoryHandlerV1Test {
         thenCheckIfImageHasDelete();
     }
 
-    // ---------------------------------------//
-    // End of Container Related Tests //
-    // ---------------------------------------//
+    // endregion
 
     /**
      * given
@@ -1065,6 +1098,13 @@ public class InventoryHandlerV1Test {
         this.dockerContainerObject = new DockerContainer(this.dockerContainer1);
 
         this.dockerContainersObject = new DockerContainers(Arrays.asList(this.dockerContainerObject));
+    }
+
+    private void giventheFollowingImagesSetupToMarshal() {
+
+        this.containerImageObject = new ContainerImage(this.containerInstanceImage1);
+
+        this.containerImagesObject = new ContainerImages(Arrays.asList(this.containerImageObject));
     }
 
     private void givenTwoDockerContainers() {
@@ -1096,20 +1136,13 @@ public class InventoryHandlerV1Test {
                 .setImageConfiguration(containerImage2).build();
     }
 
-    private void givenTheFollowingJson() {
-
-        // {
-        // "containers": [
-        // {
-        // "name" : "rfkill",
-        // "version": "nginx:latest",
-        // type": "DOCKER",
-        // }
-        // ]
-        // }
-        // TEST_JSON = "{\"containers\":
-        // [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
+    private void givenTheFollowingContainerJson() {
         TEST_JSON = "{\"name\":\"test\",\"version\":\"nginx:latest\"}";
+    }
+
+    private void givenTheFollowingImageJson() {
+
+        TEST_JSON = "{\"name\":\"nginx\",\"version\":\"latest\"}";
     }
 
     /**
@@ -1120,14 +1153,29 @@ public class InventoryHandlerV1Test {
         TEST_JSON = marsh.marshal(this.dockerContainersObject);
     }
 
+    private void whenImagesArePassedToMarshaler() throws BundleException, KuraException {
+        JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
+        TEST_JSON = marsh.marshal(this.containerImagesObject);
+    }
+
     private void whenContainersArePassedToMarshalerXML() throws BundleException, KuraException {
         XmlMarshallUnmarshallImpl marsh = new XmlMarshallUnmarshallImpl();
         TEST_XML = marsh.marshal(this.dockerContainersObject);
     }
 
-    private void whenAJsonIsPassedToMarshaler() throws BundleException, KuraException {
+    private void whenImagesArePassedToMarshalerXML() throws BundleException, KuraException {
+        XmlMarshallUnmarshallImpl marsh = new XmlMarshallUnmarshallImpl();
+        TEST_XML = marsh.marshal(this.containerImagesObject);
+    }
+
+    private void whenAContainerJsonIsPassedToMarshaler() throws BundleException, KuraException {
         JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
         this.dockerContainerObject = marsh.unmarshal(TEST_JSON, DockerContainer.class);
+    }
+
+    private void whenAImageJsonIsPassedToMarshaler() throws BundleException, KuraException {
+        JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
+        this.containerImageObject = marsh.unmarshal(TEST_JSON, ContainerImage.class);
     }
 
     private void whenTheFollowingJsonKuraPayloadDoExec(List<String> request, String payload)
@@ -1219,6 +1267,11 @@ public class InventoryHandlerV1Test {
                 TEST_JSON);
     }
 
+    private void thenCheckIfImageMatchesJSON() {
+        assertEquals("{\"images\":[{\"name\":\"nginx\",\"version\":\"latest\",\"type\":\"CONTAINER_IMAGE\"}]}",
+                TEST_JSON);
+    }
+
     private void thenCheckIfContainerMatchesXML() {
         /**
          * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
@@ -1229,8 +1282,23 @@ public class InventoryHandlerV1Test {
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 
+    private void thenCheckIfImageMatchesXML() {
+        /**
+         * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
+         * <name>dockerContainer1</name> <version>nginx:latest</version> </container>
+         * </containers> ]>
+         */
+        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><images><image><name>nginx</name><version>latest</version></image></images>";
+        assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
+    }
+
     private void thenCheckIfJsonMatchesContainer() {
         assertEquals("test", this.dockerContainerObject.getContainerName());
+
+    }
+
+    private void thenCheckIfJsonMatchesImage() {
+        assertEquals("nginx", this.containerImageObject.getName());
 
     }
 

@@ -406,7 +406,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         if (this.containerOrchestrationService != null) {
             try {
                 logger.info("Creating container images invenetory");
-                List<ImageInstanceDescriptor> images = this.containerOrchestrationService.listImageInstanceDescriptor();
+                List<ImageInstanceDescriptor> images = this.containerOrchestrationService.listImageInstanceDescriptors();
                 images.stream().forEach(
                         image -> inventory.add(new SystemResourceInfo(image.getImageName(),
                                 image.getImageTag(),
@@ -488,7 +488,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
         try {
-            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService.listImageInstanceDescriptor();
+            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService.listImageInstanceDescriptors();
 
             List<ContainerImage> imageList = new ArrayList<>();
             containers.stream().forEach(p -> imageList.add(new ContainerImage(p)));
@@ -646,7 +646,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         		ContainerImage.class);
 
         try {
-            List<ImageInstanceDescriptor> imageList = this.containerOrchestrationService.listImageInstanceDescriptor();
+            List<ImageInstanceDescriptor> imageList = this.containerOrchestrationService.listImageInstanceDescriptors();
 
             for (ImageInstanceDescriptor image : imageList) {
                 if (image.getImageName().equals(dc.getImageName()) && image.getImageTag().equals(dc.getImageTag())) {
@@ -691,7 +691,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     
     private ImageInstanceDescriptor findFirstMatchingImage(final ImageInstanceDescriptor ref)
             throws KuraException {
-        for (final ImageInstanceDescriptor image : this.containerOrchestrationService.listImageInstanceDescriptor()) {
+        for (final ImageInstanceDescriptor image : this.containerOrchestrationService.listImageInstanceDescriptors()) {
             if (image.getImageName().equals(ref.getImageName()) && image.getImageTag().equals(ref.getImageTag())) {
                 return image;
             }

@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.net.firewall;
 
+import java.util.Objects;
+
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkPair;
@@ -176,17 +178,8 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (this.permittedInterfaceName == null ? 0 : this.permittedInterfaceName.hashCode());
-        result = prime * result + (this.permittedMac == null ? 0 : this.permittedMac.hashCode());
-        result = prime * result + (this.permittedNetwork == null ? 0 : this.permittedNetwork.hashCode());
-        result = prime * result + this.port;
-        result = prime * result + (this.protocol == null ? 0 : this.protocol.hashCode());
-        result = prime * result + (this.sourcePortRange == null ? 0 : this.sourcePortRange.hashCode());
-        result = prime * result
-                + (this.unpermittedInterfaceName == null ? 0 : this.unpermittedInterfaceName.hashCode());
-        return result;
+        return Objects.hash(permittedInterfaceName, permittedMac, permittedNetwork, port, portRange, protocol,
+                sourcePortRange, unpermittedInterfaceName);
     }
 
     @Override
@@ -200,49 +193,13 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         if (getClass() != obj.getClass()) {
             return false;
         }
-        FirewallOpenPortConfigIP<?> other = (FirewallOpenPortConfigIP<?>) obj;
-        if (this.permittedInterfaceName == null) {
-            if (other.permittedInterfaceName != null) {
-                return false;
-            }
-        } else if (!this.permittedInterfaceName.equals(other.permittedInterfaceName)) {
-            return false;
-        }
-        if (this.permittedMac == null) {
-            if (other.permittedMac != null) {
-                return false;
-            }
-        } else if (!this.permittedMac.equals(other.permittedMac)) {
-            return false;
-        }
-        if (this.permittedNetwork == null) {
-            if (other.permittedNetwork != null) {
-                return false;
-            }
-        } else if (!this.permittedNetwork.equals(other.permittedNetwork)) {
-            return false;
-        }
-        if (this.port != other.port) {
-            return false;
-        }
-        if (this.protocol != other.protocol) {
-            return false;
-        }
-        if (this.sourcePortRange == null) {
-            if (other.sourcePortRange != null) {
-                return false;
-            }
-        } else if (!this.sourcePortRange.equals(other.sourcePortRange)) {
-            return false;
-        }
-        if (this.unpermittedInterfaceName == null) {
-            if (other.unpermittedInterfaceName != null) {
-                return false;
-            }
-        } else if (!this.unpermittedInterfaceName.equals(other.unpermittedInterfaceName)) {
-            return false;
-        }
-        return true;
+        FirewallOpenPortConfigIP other = (FirewallOpenPortConfigIP) obj;
+        return Objects.equals(permittedInterfaceName, other.permittedInterfaceName)
+                && Objects.equals(permittedMac, other.permittedMac)
+                && Objects.equals(permittedNetwork, other.permittedNetwork) && port == other.port
+                && Objects.equals(portRange, other.portRange) && protocol == other.protocol
+                && Objects.equals(sourcePortRange, other.sourcePortRange)
+                && Objects.equals(unpermittedInterfaceName, other.unpermittedInterfaceName);
     }
 
     @Override
@@ -265,6 +222,8 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         StringBuilder builder = new StringBuilder();
         builder.append("FirewallOpenPortConfigIP [port=");
         builder.append(this.port);
+        builder.append(", portRange=");
+        builder.append(this.portRange);
         builder.append(", protocol=");
         builder.append(this.protocol);
         builder.append(", permittedNetwork=");

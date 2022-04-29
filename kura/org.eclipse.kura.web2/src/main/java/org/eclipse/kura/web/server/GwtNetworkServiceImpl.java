@@ -42,18 +42,13 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceState;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
-import org.eclipse.kura.net.NetProtocol;
 import org.eclipse.kura.net.NetworkAdminService;
-import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.dhcp.DhcpLease;
 import org.eclipse.kura.net.dhcp.DhcpServerConfigIP4;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
-import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP;
 import org.eclipse.kura.net.firewall.FirewallOpenPortConfigIP4;
-import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP;
 import org.eclipse.kura.net.firewall.FirewallPortForwardConfigIP4;
-import org.eclipse.kura.net.firewall.RuleType;
 import org.eclipse.kura.net.modem.CellularModem;
 import org.eclipse.kura.net.modem.ModemConfig;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
@@ -118,7 +113,9 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     private static final long serialVersionUID = -4188750359099902616L;
     private static final Logger logger = LoggerFactory.getLogger(GwtNetworkServiceImpl.class);
+    private static final String FIREWALL_CONFIGURATION_SERVICE_PID = "org.eclipse.kura.net.admin.FirewallConfigurationService";
     private static final String ENABLED = "enabled";
+    private static final String UNKNOWN_IP = "0.0.0.0/0";
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
@@ -224,7 +221,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                         for (NetConfig netConfig : netConfigs) {
                             if (netConfig instanceof NetConfigIP4) {
                                 logger.debug("Setting up NetConfigIP4 with status {}",
-                                        ((NetConfigIP4) netConfig).getStatus().toString());
+                                        ((NetConfigIP4) netConfig).getStatus());
 
                                 // we are enabled - for LAN or WAN?
                                 if (((NetConfigIP4) netConfig)
@@ -276,7 +273,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                     }
 
                                     // DHCP supplied DNS servers
-                                    StringBuffer sb = new StringBuffer();
+                                    StringBuilder sb = new StringBuilder();
                                     List<? extends IPAddress> dnsServers = addressConfig.getDnsServers();
                                     if (dnsServers != null && !dnsServers.isEmpty()) {
                                         String sep = "";
@@ -319,7 +316,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 }
 
                                 // Custom DNS servers
-                                StringBuffer sb = new StringBuffer();
+                                StringBuilder sb = new StringBuilder();
                                 List<IP4Address> dnsServers = ((NetConfigIP4) netConfig).getDnsServers();
                                 if (dnsServers != null && !dnsServers.isEmpty()) {
                                     for (IP4Address dnsServer : dnsServers) {
@@ -435,7 +432,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 if (channels != null) {
                                     ArrayList<Integer> alChannels = new ArrayList<>();
                                     for (int channel : channels) {
-                                        alChannels.add(new Integer(channel));
+                                        alChannels.add(channel);
                                     }
                                     gwtWifiConfig.setChannels(alChannels);
                                 }
@@ -478,22 +475,20 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 } else if (activeWirelessMode == WifiMode.INFRA) {
                                     ((GwtWifiNetInterfaceConfig) gwtNetConfig)
                                             .setWirelessMode(GwtWifiWirelessMode.netWifiWirelessModeStation.name());
-                                    if (wifiClientMonitorService != null) {
-                                        if (wifiConfig.getMode().equals(WifiMode.INFRA)) {
-                                            if (gwtNetConfig.getStatus()
-                                                    .equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
-                                                    || gwtNetConfig.getStatus()
-                                                            .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
-                                                gwtNetConfig.setHwRssi("N/A");
-                                            } else {
-                                                try {
-                                                    int rssi = wifiClientMonitorService.getSignalLevel(
-                                                            netIfConfig.getName(), wifiConfig.getSSID());
-                                                    logger.debug("Setting Received Signal Strength to {}", rssi);
-                                                    gwtNetConfig.setHwRssi(Integer.toString(rssi));
-                                                } catch (KuraException e) {
-                                                    logger.warn("Failed", e);
-                                                }
+                                    if (wifiClientMonitorService != null
+                                            && wifiConfig.getMode().equals(WifiMode.INFRA)) {
+                                        if (gwtNetConfig.getStatus().equals(GwtNetIfStatus.netIPv4StatusDisabled.name())
+                                                || gwtNetConfig.getStatus()
+                                                        .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
+                                            gwtNetConfig.setHwRssi("N/A");
+                                        } else {
+                                            try {
+                                                int rssi = wifiClientMonitorService
+                                                        .getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
+                                                logger.debug("Setting Received Signal Strength to {}", rssi);
+                                                gwtNetConfig.setHwRssi(Integer.toString(rssi));
+                                            } catch (KuraException e) {
+                                                logger.warn("Failed", e);
                                             }
                                         }
                                     }
@@ -661,8 +656,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                 logger.debug("Setting up DhcpServerConfigIP4: {} to {}",
                                         ((DhcpServerConfigIP4) netConfig).getRangeStart().getHostAddress(),
                                         ((DhcpServerConfigIP4) netConfig).getRangeEnd().getHostAddress());
-                                logger.debug("Setting up DhcpServerConfigIP4: {}",
-                                        ((DhcpServerConfigIP4) netConfig).toString());
+                                logger.debug("Setting up DhcpServerConfigIP4: {}", netConfig);
 
                                 isDhcpServerEnabled = ((DhcpServerConfigIP4) netConfig).isEnabled();
 
@@ -1057,6 +1051,246 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
+    @Override
+    public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
+            throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        Map<String, Object> properties = new HashMap<>();
+        String openPortsPropName = "firewall.open.ports";
+        StringBuilder openPorts = new StringBuilder();
+
+        try {
+            for (GwtFirewallOpenPortEntry entry : entries) {
+                openPorts.append(entry.getPortRange()).append(",");
+                openPorts.append(entry.getProtocol()).append(",");
+                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_IP)) {
+                    openPorts.append(UNKNOWN_IP);
+                } else {
+                    appendNetworkAddress(entry.getPermittedNetwork(), openPorts);
+                }
+                openPorts.append(",");
+                if (entry.getPermittedInterfaceName() != null) {
+                    openPorts.append(entry.getPermittedInterfaceName());
+                }
+                openPorts.append(",");
+                if (entry.getUnpermittedInterfaceName() != null) {
+                    openPorts.append(entry.getUnpermittedInterfaceName());
+                }
+                openPorts.append(",");
+                if (entry.getPermittedMAC() != null) {
+                    openPorts.append(entry.getPermittedMAC());
+                }
+                openPorts.append(",");
+                if (entry.getSourcePortRange() != null) {
+                    openPorts.append(entry.getSourcePortRange());
+                }
+                openPorts.append(",").append("#").append(";");
+            }
+
+            properties.put(openPortsPropName, openPorts.toString());
+            configurationService.updateConfiguration(FIREWALL_CONFIGURATION_SERVICE_PID, properties, true);
+        } catch (KuraException | UnknownHostException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
+            throws GwtKuraException {
+
+        checkXSRFToken(xsrfToken);
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        Map<String, Object> properties = new HashMap<>();
+        String portForwardingPropName = "firewall.port.forwarding";
+        StringBuilder portForwarding = new StringBuilder();
+
+        try {
+            for (GwtFirewallPortForwardEntry entry : entries) {
+                portForwarding.append(entry.getInboundInterface()).append(",");
+                portForwarding.append(entry.getOutboundInterface()).append(",");
+                appendNetworkAddress(entry.getAddress(), portForwarding);
+                portForwarding.append(",");
+                portForwarding.append(entry.getProtocol()).append(",");
+                portForwarding.append(entry.getOutPort()).append(",");
+                portForwarding.append(entry.getInPort()).append(",");
+                if (entry.getMasquerade().equals("yes")) {
+                    portForwarding.append("true");
+                } else {
+                    portForwarding.append("false");
+                }
+                portForwarding.append(",");
+                if (entry.getPermittedNetwork() == null || entry.getPermittedNetwork().equals(UNKNOWN_IP)) {
+                    portForwarding.append(UNKNOWN_IP);
+                } else {
+                    appendNetworkAddress(entry.getPermittedNetwork(), portForwarding);
+                }
+                portForwarding.append(",");
+                if (entry.getPermittedMAC() != null) {
+                    portForwarding.append(entry.getPermittedMAC()).append(",");
+                }
+                portForwarding.append(",");
+                if (entry.getSourcePortRange() != null) {
+                    portForwarding.append(entry.getSourcePortRange());
+                }
+                portForwarding.append(",").append("#").append(";");
+            }
+
+            properties.put(portForwardingPropName, portForwarding.toString());
+            configurationService.updateConfiguration(FIREWALL_CONFIGURATION_SERVICE_PID, properties, true);
+        } catch (KuraException | UnknownHostException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public void updateDeviceFirewallNATs(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
+            throws GwtKuraException {
+
+        checkXSRFToken(xsrfToken);
+        ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
+        Map<String, Object> properties = new HashMap<>();
+        String natPropName = "firewall.nat";
+        StringBuilder nat = new StringBuilder();
+
+        try {
+            for (GwtFirewallNatEntry entry : entries) {
+                nat.append(entry.getInInterface()).append(",");
+                nat.append(entry.getOutInterface()).append(",");
+                nat.append(entry.getProtocol()).append(",");
+                if (entry.getSourceNetwork() == null || entry.getSourceNetwork().equals(UNKNOWN_IP)) {
+                    nat.append(UNKNOWN_IP);
+                } else {
+                    appendNetworkAddress(entry.getSourceNetwork(), nat);
+                }
+                if (entry.getDestinationNetwork() == null || entry.getDestinationNetwork().equals(UNKNOWN_IP)) {
+                    nat.append(UNKNOWN_IP);
+                } else {
+                    appendNetworkAddress(entry.getDestinationNetwork(), nat);
+                }
+                if (entry.getMasquerade().equals("yes")) {
+                    nat.append("true");
+                } else {
+                    nat.append("false");
+                }
+                nat.append(",").append("#").append(";");
+            }
+
+            properties.put(natPropName, nat.toString());
+            configurationService.updateConfiguration(FIREWALL_CONFIGURATION_SERVICE_PID, properties, true);
+        } catch (KuraException | UnknownHostException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            nas.renewDhcpLease(GwtSafeHtmlUtils.htmlEscape(interfaceName));
+        } catch (KuraException e) {
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName,
+            GwtWifiRadioMode radioMode) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        logger.debug("Find Frequency Network Service impl");
+        List<GwtWifiChannelFrequency> channels = new ArrayList<>();
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            List<WifiChannel> channelFrequencies = nas.getWifiFrequencies(interfaceName);
+            boolean hasSystemDFS = nas.isWifiDFS(interfaceName);
+
+            for (WifiChannel channelFreq : channelFrequencies) {
+                if (logger.isDebugEnabled())
+                    logger.debug(channelFreq.toString());
+
+                boolean channelIsfive5Ghz = channelFreq.getFrequency() > 2501;
+
+                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
+
+                    if (Boolean.TRUE.equals(channelFreq.isRadarDetection()) && !hasSystemDFS) {
+                        continue;
+                    }
+
+                    GwtWifiChannelFrequency channelFrequency = new GwtWifiChannelFrequency();
+
+                    channelFrequency.setChannel(channelFreq.getChannel());
+                    channelFrequency.setFrequency(channelFreq.getFrequency());
+                    channelFrequency.setNoIrradiation(channelFreq.isNoInitiatingRadiation());
+                    channelFrequency.setRadarDetection(channelFreq.isRadarDetection());
+                    channelFrequency.setDisabled(channelFreq.isDisabled());
+
+                    channels.add(channelFrequency);
+
+                    logger.debug("Found {} - {} Mhz", channelFrequency.getChannel(), channelFrequency.getFrequency());
+                }
+
+            }
+            return channels;
+        } catch (KuraException e) {
+            logger.error("Find Frequency exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        logger.info("Get Wifi Country Code impl");
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            return nas.getWifiCountryCode();
+        } catch (KuraException e) {
+            logger.error("Get Wifi Country Code exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            return nas.isWifiIEEE80211AC(ifaceName);
+        } catch (KuraException e) {
+            logger.error("Ieee80211ac support exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
+    @Override
+    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
+        checkXSRFToken(xsrfToken);
+
+        List<String> dhcpLease = new ArrayList<>();
+
+        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
+        try {
+            List<DhcpLease> leases = nas.getDhcpLeases();
+
+            for (DhcpLease dl : leases) {
+                GwtDhcpLease dhcp = new GwtDhcpLease();
+                dhcp.setMacAddress(dl.getMacAddress());
+                dhcp.setIpAddress(dl.getIpAddress());
+                dhcp.setHostname(dl.getHostname());
+                dhcpLease.add(dhcp.toString());
+            }
+            return dhcpLease;
+        } catch (KuraException e) {
+            logger.error("Find Dhcp Lease List Exception");
+            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+        }
+    }
+
     // -------------------------------------------------------------------------------------
     //
     // Private Methods
@@ -1257,162 +1491,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
     }
 
-    @Override
-    public void updateDeviceFirewallOpenPorts(GwtXSRFToken xsrfToken, List<GwtFirewallOpenPortEntry> entries)
-            throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallOpenPortConfigIPs = new ArrayList<>();
-        logger.debug("updating open ports");
-
-        try {
-            for (GwtFirewallOpenPortEntry entry : entries) {
-                String network = null;
-                String prefix = null;
-
-                if (entry.getPermittedNetwork() != null) {
-                    String[] parts = entry.getPermittedNetwork().split("/");
-                    network = parts[0];
-                    prefix = parts[1];
-                }
-
-                FirewallOpenPortConfigIP<IP4Address> firewallOpenPortConfigIP = new FirewallOpenPortConfigIP4();
-
-                if (entry.getPortRange().indexOf(':') != -1) {
-                    String[] parts = entry.getPortRange().split(":");
-                    if (Integer.valueOf(parts[0].trim()) < Integer.valueOf(parts[1].trim())) {
-                        firewallOpenPortConfigIP.setPortRange(entry.getPortRange());
-                    } else {
-                        throw new KuraException(KuraErrorCode.BAD_REQUEST);
-                    }
-                } else {
-                    firewallOpenPortConfigIP.setPort(Integer.parseInt(entry.getPortRange()));
-                }
-                firewallOpenPortConfigIP
-                        .setProtocol(NetProtocol.valueOf(GwtSafeHtmlUtils.htmlEscape(entry.getProtocol())));
-                if (network != null && prefix != null) {
-                    firewallOpenPortConfigIP.setPermittedNetwork(new NetworkPair<>(
-                            (IP4Address) IPAddress.parseHostAddress(network), Short.parseShort(prefix)));
-                }
-                firewallOpenPortConfigIP
-                        .setPermittedInterfaceName(GwtSafeHtmlUtils.htmlEscape(entry.getPermittedInterfaceName()));
-                firewallOpenPortConfigIP
-                        .setUnpermittedInterfaceName(GwtSafeHtmlUtils.htmlEscape(entry.getUnpermittedInterfaceName()));
-                firewallOpenPortConfigIP.setPermittedMac(GwtSafeHtmlUtils.htmlEscape(entry.getPermittedMAC()));
-                firewallOpenPortConfigIP.setSourcePortRange(GwtSafeHtmlUtils.htmlEscape(entry.getSourcePortRange()));
-
-                logger.debug("adding open port entry for {}", entry.getPortRange());
-                firewallOpenPortConfigIPs.add(firewallOpenPortConfigIP);
-            }
-
-            nas.setFirewallOpenPortConfiguration(firewallOpenPortConfigIPs);
-        } catch (KuraException | NumberFormatException | UnknownHostException e) {
-            logger.warn("Exception while updating firewall open ports", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    public void updateDeviceFirewallPortForwards(GwtXSRFToken xsrfToken, List<GwtFirewallPortForwardEntry> entries)
-            throws GwtKuraException {
-
-        logger.debug("updateDeviceFirewallPortForwards() :: updating port forward entries");
-        checkXSRFToken(xsrfToken);
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallPortForwardConfigIPs = new ArrayList<>();
-
-        try {
-            for (GwtFirewallPortForwardEntry entry : entries) {
-                String network = null;
-                String prefix = null;
-
-                if (entry.getPermittedNetwork() != null) {
-                    String[] parts = entry.getPermittedNetwork().split("/");
-                    network = parts[0];
-                    prefix = parts[1];
-                }
-
-                FirewallPortForwardConfigIP<IP4Address> firewallPortForwardConfigIP = new FirewallPortForwardConfigIP4();
-                firewallPortForwardConfigIP
-                        .setInboundInterface(GwtSafeHtmlUtils.htmlEscape(entry.getInboundInterface()));
-                firewallPortForwardConfigIP
-                        .setOutboundInterface(GwtSafeHtmlUtils.htmlEscape(entry.getOutboundInterface()));
-                firewallPortForwardConfigIP.setAddress(
-                        (IP4Address) IPAddress.parseHostAddress(GwtSafeHtmlUtils.htmlEscape(entry.getAddress())));
-                firewallPortForwardConfigIP
-                        .setProtocol(NetProtocol.valueOf(GwtSafeHtmlUtils.htmlEscape(entry.getProtocol())));
-                firewallPortForwardConfigIP.setInPort(entry.getInPort());
-                firewallPortForwardConfigIP.setOutPort(entry.getOutPort());
-                boolean masquerade = entry.getMasquerade().equals("yes") ? true : false;
-                firewallPortForwardConfigIP.setMasquerade(masquerade);
-                if (network != null && prefix != null) {
-                    firewallPortForwardConfigIP.setPermittedNetwork(new NetworkPair<>(
-                            (IP4Address) IPAddress.parseHostAddress(network), Short.parseShort(prefix)));
-                }
-                firewallPortForwardConfigIP.setPermittedMac(GwtSafeHtmlUtils.htmlEscape(entry.getPermittedMAC()));
-                firewallPortForwardConfigIP.setSourcePortRange(GwtSafeHtmlUtils.htmlEscape(entry.getSourcePortRange()));
-
-                logger.debug("adding port forward entry for inbound iface {} - port {}",
-                        GwtSafeHtmlUtils.htmlEscape(entry.getInboundInterface()), entry.getInPort());
-                firewallPortForwardConfigIPs.add(firewallPortForwardConfigIP);
-            }
-
-            nas.setFirewallPortForwardingConfiguration(firewallPortForwardConfigIPs);
-        } catch (KuraException | NumberFormatException | UnknownHostException e) {
-            logger.warn("Exception while updating firewall port forwards", e);
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    public void updateDeviceFirewallNATs(GwtXSRFToken xsrfToken, List<GwtFirewallNatEntry> entries)
-            throws GwtKuraException {
-
-        logger.debug("updateDeviceFirewallNATs() :: updating NAT entries");
-        checkXSRFToken(xsrfToken);
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        List<FirewallNatConfig> firewallNatConfigs = new ArrayList<>();
-
-        for (GwtFirewallNatEntry entry : entries) {
-
-            String srcNetwork = GwtSafeHtmlUtils.htmlEscape(entry.getSourceNetwork());
-            String dstNetwork = GwtSafeHtmlUtils.htmlEscape(entry.getDestinationNetwork());
-            if (srcNetwork == null || "".equals(srcNetwork)) {
-                srcNetwork = "0.0.0.0/0";
-            }
-            if (dstNetwork == null || "".equals(dstNetwork)) {
-                dstNetwork = "0.0.0.0/0";
-            }
-
-            boolean masquerade = entry.getMasquerade().equals("yes");
-
-            FirewallNatConfig firewallNatConfig = new FirewallNatConfig(
-                    GwtSafeHtmlUtils.htmlEscape(entry.getInInterface()),
-                    GwtSafeHtmlUtils.htmlEscape(entry.getOutInterface()),
-                    GwtSafeHtmlUtils.htmlEscape(entry.getProtocol()), srcNetwork, dstNetwork, masquerade,
-                    RuleType.IP_FORWARDING);
-
-            firewallNatConfigs.add(firewallNatConfig);
-        }
-
-        try {
-            nas.setFirewallNatConfiguration(firewallNatConfigs);
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    public void renewDhcpLease(GwtXSRFToken xsrfToken, String interfaceName) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        try {
-            nas.renewDhcpLease(GwtSafeHtmlUtils.htmlEscape(interfaceName));
-        } catch (KuraException e) {
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
     private WifiConfig getWifiConfig(GwtWifiConfig gwtWifiConfig) throws GwtKuraException {
 
         WifiConfig wifiConfig = new WifiConfig();
@@ -1533,7 +1611,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     wifiConfigChannelsStringBuilder.append(" ");
                 }
             }
-            properties.put(wifiModeBasePropName.toString() + "channel", wifiConfigChannelsStringBuilder.toString());
+            properties.put(wifiModeBasePropName + "channel", wifiConfigChannelsStringBuilder.toString());
         }
     }
 
@@ -1716,79 +1794,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return false;
     }
 
-    @Override
-    public List<GwtWifiChannelFrequency> findFrequencies(GwtXSRFToken xsrfToken, String interfaceName,
-            GwtWifiRadioMode radioMode) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        logger.debug("Find Frequency Network Service impl");
-        List<GwtWifiChannelFrequency> channels = new ArrayList<>();
-
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        try {
-            List<WifiChannel> channelFrequencies = nas.getWifiFrequencies(interfaceName);
-            boolean hasSystemDFS = nas.isWifiDFS(interfaceName);
-
-            for (WifiChannel channelFreq : channelFrequencies) {
-                if (logger.isDebugEnabled())
-                    logger.debug(channelFreq.toString());
-
-                boolean channelIsfive5Ghz = channelFreq.getFrequency() > 2501;
-
-                if (radioMode.isFiveGhz() && channelIsfive5Ghz || radioMode.isTwoDotFourGhz() && !channelIsfive5Ghz) {
-
-                    if (Boolean.TRUE.equals(channelFreq.isRadarDetection()) && !hasSystemDFS) {
-                        continue;
-                    }
-
-                    GwtWifiChannelFrequency channelFrequency = new GwtWifiChannelFrequency();
-
-                    channelFrequency.setChannel(channelFreq.getChannel());
-                    channelFrequency.setFrequency(channelFreq.getFrequency());
-                    channelFrequency.setNoIrradiation(channelFreq.isNoInitiatingRadiation());
-                    channelFrequency.setRadarDetection(channelFreq.isRadarDetection());
-                    channelFrequency.setDisabled(channelFreq.isDisabled());
-
-                    channels.add(channelFrequency);
-
-                    logger.debug("Found {} - {} Mhz", channelFrequency.getChannel(), channelFrequency.getFrequency());
-                }
-
-            }
-            return channels;
-        } catch (KuraException e) {
-            logger.error("Find Frequency exception");
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    public String getWifiCountryCode(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        logger.info("Get Wifi Country Code impl");
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        try {
-            return nas.getWifiCountryCode();
-        } catch (KuraException e) {
-            logger.error("Get Wifi Country Code exception");
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
-    @Override
-    public boolean isIEEE80211ACSupported(GwtXSRFToken xsrfToken, String ifaceName) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        try {
-            return nas.isWifiIEEE80211AC(ifaceName);
-        } catch (KuraException e) {
-            logger.error("Ieee80211ac support exception");
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
-        }
-    }
-
     private void validateUserPassword(final String password) throws GwtKuraException {
         final List<Validator<String>> validators = PasswordStrengthValidators
                 .fromConfig(Console.getConsoleOptions().getUserOptions());
@@ -1805,27 +1810,12 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
-    @Override
-    public List<String> getDhcpLeases(GwtXSRFToken xsrfToken) throws GwtKuraException {
-        checkXSRFToken(xsrfToken);
-
-        List<String> dhcpLease = new ArrayList<>();
-
-        NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
-        try {
-            List<DhcpLease> leases = nas.getDhcpLeases();
-
-            for (DhcpLease dl : leases) {
-                GwtDhcpLease dhcp = new GwtDhcpLease();
-                dhcp.setMacAddress(dl.getMacAddress());
-                dhcp.setIpAddress(dl.getIpAddress());
-                dhcp.setHostname(dl.getHostname());
-                dhcpLease.add(dhcp.toString());
-            }
-            return dhcpLease;
-        } catch (KuraException e) {
-            logger.error("Find Dhcp Lease List Exception");
-            throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
+    private void appendNetworkAddress(String address, StringBuilder stringBuilder) throws UnknownHostException {
+        String[] networkAddress = address.split("/");
+        if (networkAddress.length >= 2) {
+            stringBuilder.append(((IP4Address) IPAddress.parseHostAddress(networkAddress[0])).getHostAddress())
+                    .append("/").append(networkAddress[1]);
         }
     }
+
 }

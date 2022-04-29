@@ -41,7 +41,10 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
+import org.eclipse.kura.core.inventory.resources.ContainerImage;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -80,12 +83,16 @@ public class InventoryHandlerV1Test {
     public static final String RESOURCE_BUNDLES = "bundles";
     public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
     public static final String RESOURCE_DOCKER_CONTAINERS = "containers";
+    public static final String RESOURCE_CONTAINER_IMAGES = "images";
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
+    private static final String DELETE = "_delete";
 
     private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
     private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+
+    private static final List<String> DELETE_IMAGE = Arrays.asList(RESOURCE_CONTAINER_IMAGES, DELETE);
 
     private static String TEST_JSON = "testJson";
     private static String TEST_XML = "testXML";
@@ -98,9 +105,11 @@ public class InventoryHandlerV1Test {
     private ContainerInstanceDescriptor dockerContainer2;
     private ContainerConfiguration dockerContainer1Config;
     private ContainerConfiguration dockerContainer2Config;
-    
+
     private ImageConfiguration containerImage1;
+    private ImageInstanceDescriptor containerInstanceImage1;
     private ImageConfiguration containerImage2;
+    private ImageInstanceDescriptor containerInstanceImage2;
 
     private ContainerOrchestrationService mockContainerOrchestrationService;
 
@@ -1025,6 +1034,24 @@ public class InventoryHandlerV1Test {
 
     }
 
+    @Test
+    public void testListImageDoGet() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonKuraPayloadDoGet(Arrays.asList(RESOURCE_CONTAINER_IMAGES), "");
+
+        thenCheckIfImagesHaveBeenListed();
+    }
+
+    @Test
+    public void testDeleteImage() throws BundleException, KuraException, InterruptedException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonContainerImageKuraPayloadDoExec(DELETE_IMAGE,
+                "{\"name\":\"nginx\",\"version\":\"latest\"}");
+        thenCheckIfImageHasDelete();
+    }
+
     // ---------------------------------------//
     // End of Container Related Tests //
     // ---------------------------------------//
@@ -1045,14 +1072,28 @@ public class InventoryHandlerV1Test {
                 .setContainerImage("nginx").setContainerImageTag("latest").setContainerID("1234").build();
         this.dockerContainer2 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer2")
                 .setContainerImage("nginx").setContainerID("124344").build();
-      
-        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(200).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
-        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(200).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
-        
-        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1").setImageConfiguration(containerImage1).build();
-        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2").setImageConfiguration(containerImage2).build();
+
+        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
+                .setImageTag("latest").setImageDownloadTimeoutSeconds(200)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+        this.containerInstanceImage1 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
+                .setImageName(containerImage1.getImageName()).setImageTag(containerImage1.getImageTag())
+                .setImageId("SHA256:3h278f34yhufy3h").build();
+        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
+                .setImageTag("alpine").setImageDownloadTimeoutSeconds(200)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+        this.containerInstanceImage2 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
+                .setImageName(containerImage2.getImageName()).setImageTag(containerImage2.getImageTag())
+                .setImageId("SHA256:dfiyegfyuwehf978ew4hu").build();
+
+        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
+                .setImageConfiguration(containerImage1).build();
+        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
+                .setImageConfiguration(containerImage2).build();
     }
 
     private void givenTheFollowingJson() {
@@ -1066,7 +1107,8 @@ public class InventoryHandlerV1Test {
         // }
         // ]
         // }
-        // TEST_JSON = "{\"containers\": [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
+        // TEST_JSON = "{\"containers\":
+        // [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
         TEST_JSON = "{\"name\":\"test\",\"version\":\"nginx:latest\"}";
     }
 
@@ -1115,6 +1157,33 @@ public class InventoryHandlerV1Test {
                 ((KuraResponsePayload) response.getPayload()).getResponseCode());
     }
 
+    private void whenTheFollowingJsonContainerImageKuraPayloadDoExec(List<String> request, String payload)
+            throws BundleException, KuraException {
+
+        InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
+
+        this.mockContainerOrchestrationService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
+
+        when(this.mockContainerOrchestrationService.listImageInstanceDescriptors())
+                .thenReturn(Arrays.asList(this.containerInstanceImage1, this.containerInstanceImage2));
+
+        KuraMessage theMessage = requestMessage(request, payload);
+
+        handler.setContainerOrchestrationService(this.mockContainerOrchestrationService);
+        handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
+
+        // convert ContainerDescriptor to a DockerContainer
+        ContainerImage testImageInstance = new ContainerImage(this.containerInstanceImage1);
+
+        doReturn(testImageInstance).when(handler).unmarshal(payload, ContainerImage.class);
+
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
+                theMessage);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
+                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+    }
+
     private void whenTheFollowingJsonKuraPayloadDoGet(List<String> request, String payload)
             throws BundleException, KuraException {
 
@@ -1152,14 +1221,9 @@ public class InventoryHandlerV1Test {
 
     private void thenCheckIfContainerMatchesXML() {
         /**
-         * <[<?xml version="1.0" encoding="UTF-8"?>
-         * <containers>
-         * <container>
-         * <name>dockerContainer1</name>
-         * <version>nginx:latest</version>
-         * </container>
-         * </containers>
-         * ]>
+         * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
+         * <name>dockerContainer1</name> <version>nginx:latest</version> </container>
+         * </containers> ]>
          */
         String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version></container></containers>";
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
@@ -1172,6 +1236,10 @@ public class InventoryHandlerV1Test {
 
     private void thenCheckIfContainerWereListed() throws KuraException {
         Mockito.verify(this.mockContainerOrchestrationService, times(1)).listContainerDescriptors();
+    }
+
+    private void thenCheckIfImagesHaveBeenListed() throws KuraException {
+        Mockito.verify(this.mockContainerOrchestrationService, times(1)).listImageInstanceDescriptors();
     }
 
     private void thenCheckIfContainerOneHasStarted() throws KuraException, InterruptedException {
@@ -1194,6 +1262,11 @@ public class InventoryHandlerV1Test {
                 .startContainer(this.dockerContainer2.getContainerId());
         Mockito.verify(this.mockContainerOrchestrationService, times(0))
                 .stopContainer(this.dockerContainer2.getContainerId());
+    }
+
+    private void thenCheckIfImageHasDelete() throws KuraException, InterruptedException {
+        Mockito.verify(this.mockContainerOrchestrationService, times(1))
+                .deleteImage(this.containerInstanceImage1.getImageId());
     }
 
     @SuppressWarnings("unchecked")

@@ -43,7 +43,6 @@ import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
-import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
 import org.eclipse.kura.core.inventory.resources.ContainerImage;
 import org.eclipse.kura.core.inventory.resources.ContainerImages;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
@@ -725,6 +724,28 @@ public class InventoryHandlerV1Test {
 
     @Test
     public void doGetInventory() throws KuraException, NoSuchFieldException {
+        givenTwoDockerContainers();
+
+        this.mockContainerOrchestrationService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
+
+        when(this.mockContainerOrchestrationService.listContainerDescriptors())
+                .thenReturn(Arrays.asList(this.dockerContainer1, this.dockerContainer2));
+
+        when(this.mockContainerOrchestrationService.listImageInstanceDescriptors())
+                .thenReturn(Arrays.asList(this.containerInstanceImage1, this.containerInstanceImage2));
+
+        // convert ContainerDescriptor to a DockerContainer
+        DockerContainer testContainer = new DockerContainer(this.dockerContainer1);
+
+        // convert ContainerDescriptor to a DockerContainer
+        ContainerImage testImageInstance = new ContainerImage(this.containerInstanceImage1);
+
+        // doReturn(testImageInstance).when(handler).unmarshal(Mockito.any(String.class),
+        // ContainerImage.class);
+
+        // doReturn(testContainer).when(handler).unmarshal(Mockito.any(String.class),
+        // DockerContainer.class);
+
         Bundle[] bundles = new Bundle[1];
         Bundle bundle = mock(Bundle.class);
         bundles[0] = bundle;
@@ -739,25 +760,38 @@ public class InventoryHandlerV1Test {
         bundleInfos[0] = bundleInfo;
 
         InventoryHandlerV1 inventory = new InventoryHandlerV1() {
-
             @Override
             protected String marshal(Object object) {
                 SystemResourcesInfo resources = (SystemResourcesInfo) object;
                 List<SystemResourceInfo> resourceList = resources.getSystemResources();
-                assertEquals(3, resourceList.size());
+                assertEquals(7, resourceList.size());
                 assertEquals("bundle1", resourceList.get(0).getName());
                 assertEquals("2.0.0", resourceList.get(0).getVersion());
                 assertEquals("BUNDLE", resourceList.get(0).getTypeString());
-                assertEquals("dp1", resourceList.get(1).getName());
-                assertEquals("3.0.0", resourceList.get(1).getVersion());
-                assertEquals("DP", resourceList.get(1).getTypeString());
-                assertEquals("package1", resourceList.get(2).getName());
-                assertEquals("1.0.0", resourceList.get(2).getVersion());
-                assertEquals("DEB", resourceList.get(2).getTypeString());
+                assertEquals("dockerContainer1", resourceList.get(1).getName());
+                assertEquals("nginx:latest", resourceList.get(1).getVersion());
+                assertEquals("DOCKER", resourceList.get(1).getTypeString());
+                assertEquals("dockerContainer2", resourceList.get(2).getName());
+                assertEquals("nginx:latest", resourceList.get(2).getVersion());
+                assertEquals("DOCKER", resourceList.get(2).getTypeString());
+                assertEquals("dp1", resourceList.get(3).getName());
+                assertEquals("3.0.0", resourceList.get(3).getVersion());
+                assertEquals("DP", resourceList.get(3).getTypeString());
+                assertEquals("nginx", resourceList.get(4).getName());
+                assertEquals("latest", resourceList.get(4).getVersion());
+                assertEquals("CONTAINER_IMAGE", resourceList.get(4).getTypeString());
+                assertEquals("nginx", resourceList.get(5).getName());
+                assertEquals("alpine", resourceList.get(5).getVersion());
+                assertEquals("CONTAINER_IMAGE", resourceList.get(5).getTypeString());
+                assertEquals("package1", resourceList.get(6).getName());
+                assertEquals("1.0.0", resourceList.get(6).getVersion());
+                assertEquals("DEB", resourceList.get(6).getTypeString());
 
                 return TEST_JSON;
             }
         };
+
+        inventory.setContainerOrchestrationService(this.mockContainerOrchestrationService);
 
         List<String> resourcesList = new ArrayList<>();
         resourcesList.add("inventory");

@@ -26,8 +26,6 @@ public class ContainerImage extends SystemResourceInfo {
     private String imageArch = "";
     private long imageSize = 0;
 
-    private Boolean isFrameworkManaged;
-
     public ContainerImage(String name, String version) {
         super(name, version, SystemResourceType.CONTAINER_IMAGE);
         this.imageName = name;
@@ -91,14 +89,6 @@ public class ContainerImage extends SystemResourceInfo {
 
     public void setImageSize(long imageSize) {
         this.imageSize = imageSize;
-    }
-
-    public Boolean getIsFrameworkManaged() {
-        return isFrameworkManaged;
-    }
-
-    public void setIsFrameworkManaged(Boolean isFrameworkManaged) {
-        this.isFrameworkManaged = isFrameworkManaged;
     }
 
 }

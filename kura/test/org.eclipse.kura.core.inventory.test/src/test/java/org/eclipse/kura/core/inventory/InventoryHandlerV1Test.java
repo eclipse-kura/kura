@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1120,6 +1121,11 @@ public class InventoryHandlerV1Test {
                 "{\"name\":\"nginx\",\"version\":\"latest\"}");
         thenCheckIfImageHasDelete();
     }
+    
+    @Test
+    public void testContainerImageDataStuct() throws BundleException, KuraException, InterruptedException {
+    	thenCompareOutputOfContainerImage();
+    }
 
     // endregion
 
@@ -1403,6 +1409,35 @@ public class InventoryHandlerV1Test {
         when(result.getVersion()).thenReturn(new Version(version));
 
         return result;
+    }
+    
+    private void thenCompareOutputOfContainerImage() {
+    	containerImageObject = new ContainerImage("test", "latest");
+    	
+        String imageName = "test";
+        String imageTag = "latest";
+        String imageId = "3e3rf32e2wsd2f";
+        String imageAuthor = "Greg";
+        String imageArch = "ARM64";
+        long imageSize = 9883829;
+        
+        containerImageObject.setImageName(imageName);
+        containerImageObject.setImageTag(imageTag);
+        containerImageObject.setImageId(imageId);
+        containerImageObject.setImageAuthor(imageAuthor);
+        containerImageObject.setImageArch(imageArch);
+        containerImageObject.setImageSize(imageSize);
+        
+        containerImagesObject = new ContainerImages(new LinkedList<ContainerImage>());
+        containerImagesObject.setContainerImages(Arrays.asList(containerImageObject));
+        
+        assertEquals(containerImageObject.getImageName(), imageName);
+        assertEquals(containerImageObject.getImageTag(), imageTag);
+        assertEquals(containerImageObject.getImageId(), imageId);
+        assertEquals(containerImageObject.getImageAuthor(), imageAuthor);
+        assertEquals(containerImageObject.getImageArch(), imageArch);
+        assertEquals(containerImageObject.getImageSize(), imageSize);
+        assertEquals(containerImagesObject.getContainerImages().get(0).getName(), imageName);
     }
 
 }

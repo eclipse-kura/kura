@@ -31,5 +31,7 @@ public interface GwtSessionService extends RemoteService {
 
     public GwtUserConfig getUserConfig(GwtXSRFToken token) throws GwtKuraException;
 
-    public void updatePassword(final String newPassword) throws GwtKuraException;
+    @Audit(componentName = "UI Session", description = "Password update")
+    public void updatePassword(GwtXSRFToken token, final String oldPassword, final String newPassword)
+            throws GwtKuraException;
 }

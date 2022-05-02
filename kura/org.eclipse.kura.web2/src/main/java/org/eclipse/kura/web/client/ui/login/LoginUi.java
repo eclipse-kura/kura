@@ -391,10 +391,11 @@ public class LoginUi extends Composite implements Context {
                     token -> gwtSessionService.getUserOptions(token, asyncCallback(onSuccess, onFailure)), onFailure));
         }
 
-        private void setNewPassword(final String newPassword, final Consumer<Void> onSuccess,
+        private void setNewPassword(final String oldPassword, final String newPassword, final Consumer<Void> onSuccess,
                 final Consumer<Throwable> onFailure) {
             gwtXsrfService.generateSecurityToken(asyncCallback(
-                    token -> gwtSessionService.updatePassword(newPassword, asyncCallback(onSuccess, onFailure)),
+                    token -> gwtSessionService.updatePassword(token, oldPassword, newPassword,
+                            asyncCallback(onSuccess, onFailure)),
                     onFailure));
 
         }
@@ -402,7 +403,7 @@ public class LoginUi extends Composite implements Context {
         private void changePassword(final Consumer<Void> onSuccess, final Consumer<Throwable> onFailure) {
 
             getGwtConsoleUserOptions(options -> this.passwordChangeModal.pickPassword(options,
-                    p -> setNewPassword(p, onSuccess, onFailure)), onFailure);
+                    (oldPass, newPass) -> setNewPassword(oldPass, newPass, onSuccess, onFailure)), onFailure);
         }
 
         private <T> AsyncCallback<T> asyncCallback(final Consumer<T> onSuccess, final Consumer<Throwable> onFailure) {

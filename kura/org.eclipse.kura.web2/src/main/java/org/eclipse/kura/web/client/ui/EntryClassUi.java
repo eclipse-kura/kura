@@ -32,6 +32,7 @@ import org.eclipse.kura.web.client.ui.cloudconnection.CloudConnectionsUi;
 import org.eclipse.kura.web.client.ui.device.DevicePanelUi;
 import org.eclipse.kura.web.client.ui.drivers.assets.DriversAndAssetsUi;
 import org.eclipse.kura.web.client.ui.firewall.FirewallPanelUi;
+import org.eclipse.kura.web.client.ui.login.PasswordChangeModal;
 import org.eclipse.kura.web.client.ui.network.NetworkPanelUi;
 import org.eclipse.kura.web.client.ui.packages.PackagesPanelUi;
 import org.eclipse.kura.web.client.ui.security.SecurityPanelUi;
@@ -47,12 +48,15 @@ import org.eclipse.kura.web.client.util.request.Request;
 import org.eclipse.kura.web.client.util.request.RequestContext;
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.ForwardedEventTopic;
+import org.eclipse.kura.web.shared.GwtKuraErrorCode;
+import org.eclipse.kura.web.shared.GwtKuraException;
 import org.eclipse.kura.web.shared.KuraPermission;
 import org.eclipse.kura.web.shared.model.GwtConfigComponent;
 import org.eclipse.kura.web.shared.model.GwtConsoleUserOptions;
 import org.eclipse.kura.web.shared.model.GwtEventInfo;
 import org.eclipse.kura.web.shared.model.GwtSecurityCapabilities;
 import org.eclipse.kura.web.shared.model.GwtSession;
+import org.eclipse.kura.web.shared.model.GwtUserConfig;
 import org.eclipse.kura.web.shared.model.GwtUserData;
 import org.eclipse.kura.web.shared.model.GwtXSRFToken;
 import org.eclipse.kura.web.shared.service.GwtComponentService;
@@ -69,6 +73,7 @@ import org.eclipse.kura.web2.ext.WidgetFactory;
 import org.gwtbootstrap3.client.ui.AnchorListItem;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.Column;
+import org.gwtbootstrap3.client.ui.Container;
 import org.gwtbootstrap3.client.ui.FormLabel;
 import org.gwtbootstrap3.client.ui.Icon;
 import org.gwtbootstrap3.client.ui.ListBox;
@@ -181,9 +186,13 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     @UiField
     Panel sidenavOverlay;
     @UiField
-    Button logoutButton;
+    Label logout;
     @UiField
-    Button headerLogoutButton;
+    Label headerLogout;
+    @UiField
+    Label changePassword;
+    @UiField
+    Label headerChangePassword;
     @UiField
     NavPills sidenavPills;
     @UiField
@@ -198,6 +207,14 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
     Row mainContainer;
     @UiField
     DropdownNotification dropdownNotification;
+    @UiField
+    Button dropdownButton;
+    @UiField
+    Button dropdownHeaderButton;
+    @UiField
+    Container dropdownContainer;
+    @UiField
+    Container dropdownContainerHeader;
 
     private static final Messages MSGS = GWT.create(Messages.class);
     private static final EntryClassUIUiBinder uiBinder = GWT.create(EntryClassUIUiBinder.class);
@@ -211,6 +228,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             "service.pid=*SslManagerService", "service.pid=*FirewallConfigurationService",
             "service.pid=*WireGraphService", "objectClass=org.eclipse.kura.wire.WireComponent",
             "objectClass=org.eclipse.kura.driver.Driver", "kura.ui.service.hide=true")));
+    private static final String DROPDOWN_MENU_HIDDEN_STYLE_NAME = "hide-dropdown";
 
     private static PopupPanel waitModal;
 
@@ -306,7 +324,7 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
             }
         });
 
-        initLogoutButtons();
+        initDropdownMenu();
         initServicesTree();
         initExtensions();
     }
@@ -721,16 +739,111 @@ public class EntryClassUi extends Composite implements Context, ServicesUi.Liste
 
     }
 
-    private void initLogoutButtons() {
+    private void initDropdownMenu() {
         final ClickHandler logoutHandler = e -> confirmIfUiDirty(() -> logout());
+        final ClickHandler changePasswordHandler = e -> confirmIfUiDirty(() -> changePassword());
 
-        this.logoutButton.addClickHandler(logoutHandler);
-        this.headerLogoutButton.addClickHandler(logoutHandler);
+        this.logout.addClickHandler(logoutHandler);
+        this.headerLogout.addClickHandler(logoutHandler);
+
+        this.dropdownContainer.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+        this.dropdownContainerHeader.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+
+        this.dropdownButton.addClickHandler(e -> {
+            if (EntryClassUi.this.dropdownContainer.getStyleName().contains(DROPDOWN_MENU_HIDDEN_STYLE_NAME)) {
+                EntryClassUi.this.dropdownContainer.removeStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            } else {
+                EntryClassUi.this.dropdownContainer.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            }
+        });
+        this.dropdownHeaderButton.addClickHandler(e -> {
+            if (EntryClassUi.this.dropdownContainerHeader.getStyleName().contains(DROPDOWN_MENU_HIDDEN_STYLE_NAME)) {
+                EntryClassUi.this.dropdownContainerHeader.removeStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            } else {
+                EntryClassUi.this.dropdownContainerHeader.addStyleName(DROPDOWN_MENU_HIDDEN_STYLE_NAME);
+            }
+        });
+        
+        RequestQueue.submit(c -> gwtXSRFService.generateSecurityToken(
+                c.callback(token -> gwtSessionService.getUserConfig(token, new AsyncCallback<GwtUserConfig>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        EntryClassUi.this.changePassword.setVisible(false);
+                        EntryClassUi.this.headerChangePassword.setVisible(false);
+                    }
+
+                    @Override
+                    public void onSuccess(GwtUserConfig config) {
+                        if (config.isPasswordAuthEnabled()) {
+                            EntryClassUi.this.changePassword.addClickHandler(changePasswordHandler);
+                            EntryClassUi.this.headerChangePassword.addClickHandler(changePasswordHandler);
+                        } else {
+                            EntryClassUi.this.changePassword.setVisible(false);
+                            EntryClassUi.this.headerChangePassword.setVisible(false);
+                        }
+                    }
+                })))
+        );
     }
 
     private void logout() {
         RequestQueue.submit(c -> this.gwtXSRFService.generateSecurityToken(
                 c.callback(token -> this.gwtSessionService.logout(token, c.callback(ok -> Window.Location.reload())))));
+    }
+
+    private void setNewPassword(final String oldPassword, final String newPassword) {
+    
+        RequestQueue.submit(c -> {
+            gwtXSRFService.generateSecurityToken(c.callback(token -> {
+                gwtSessionService.updatePassword(token, oldPassword, newPassword, c.callback(new AsyncCallback<Void>() {
+
+                    @Override
+                    public void onFailure(Throwable e) {
+   
+                        if (e instanceof GwtKuraException) {
+                            GwtKuraErrorCode errorCode = ((GwtKuraException) e).getCode();
+                            final String message;
+                            
+                            switch (errorCode) {
+                            case PASSWORD_CHANGE_SAME_PASSWORD: {
+                                message = MSGS.loginPasswordChangeSame();
+                            }
+                                break;
+                            case INVALID_USERNAME_PASSWORD: {
+                                message = MSGS.loginWrongCredentials();
+                            }
+                                break;
+                            case UNAUTHENTICATED: {
+                                message = MSGS.sessionExpiredError();
+                            }
+                                break;
+                            default: {
+                                message = MSGS.loginInternalError();
+                            }
+                            }
+
+                            EntryClassUi.this.alertDialog.show(message, AlertDialog.Severity.ERROR,
+                                    (ConfirmListener) null);
+                        } else {
+                            FailureHandler.handle(e);
+                        }
+                    }
+                
+                    @Override
+                    public void onSuccess(Void result) {
+                        logout();
+                    }
+                }));
+            }));
+        });
+
+    }
+
+    private void changePassword() {
+        final PasswordChangeModal passwordChangeModal = new PasswordChangeModal();
+
+        passwordChangeModal.pickPassword(userOptions, this::setNewPassword);
     }
 
     private void initServicesTree() {

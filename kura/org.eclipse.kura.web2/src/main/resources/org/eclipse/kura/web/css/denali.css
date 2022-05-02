@@ -485,7 +485,7 @@ Sidenav START
 		transform: translateX(-6cm);
 	}
 	
-	.logout-ui:not(.header-logout-ui) {
+	.dropdown-settings:not(.header-dropdown-settings) {
 		display: none;
 	}
 	
@@ -502,6 +502,45 @@ Sidenav START
 	width: 100vw;
 	height: 100vh;
 	overflow: hidden;
+}
+
+.dropdown-settings {
+  	padding-top: 0.4cm;
+  	right: 0;
+	text-align: right;
+	width: fit-content !important;
+	margin-right: 0px !important;
+}
+
+.dropdown-settings-content {
+	position: absolute;
+	right: 15px;
+	text-align: right;
+	width: 200px !important; /* leave 50px less than the width of dropdown-settings */
+	box-shadow: 0px 10px 7px 5px rgba(0,0,0,0.2);
+	z-index: 100;
+	padding-left: 0px !important;
+	padding-right: 0px !important;
+}
+
+.hide-dropdown {
+	display: none !important;
+}
+
+.dropdown-settings-content:not(.hide-dropdown) {
+	display: block !important;
+}
+
+.dropdown-settings-content * {
+	background-color: white;
+	color: black;
+	padding: 10px;
+	text-decoration: none;
+	display: block;
+}
+
+.dropdown-settings-content *:hover {
+	background-color: #f1f1f1
 }
 
 .nav li a {
@@ -526,18 +565,7 @@ Sidenav START
 	background-color: white;
 }
 
-.logout-ui {
-	padding-top: 0.2cm;
-	text-align: right;
-	padding-left: 15px !important;
-    padding-right: 15px !important;
-}
-		
-.logout-button {
-	display: inline;
-}
-
-.header-bar .logout-ui {
+.header-bar .dropdown-settings {
 	position: absolute;
 	right: 0;
 	top: 0.2cm;

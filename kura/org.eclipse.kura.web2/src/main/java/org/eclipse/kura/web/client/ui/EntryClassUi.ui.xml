@@ -130,12 +130,17 @@
 								<b:Button ui:field="sidenavButton"
 									addStyleNames="glyphicon glyphicon-menu-hamburger sidebar-button"></b:Button>
 								<b:Panel addStyleNames="{style.image} headerLogo" />
-								<b:Container fluid="true" addStyleNames="logout-ui header-logout-ui">
+								
+								<b:Container addStyleNames="dropdown-settings header-dropdown-settings">
 								    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 									<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameSmall" />
-									<b:Button text="Logout" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
-										ui:field="headerLogoutButton" />
+									<b:Button ui:field="dropdownHeaderButton" ui:icon="GEAR" />
+									<b:Container ui:field="dropdownContainerHeader" addStyleNames="dropdown-settings-content">
+										<g:Label text="Change password" ui:field="headerChangePassword" />
+										<g:Label text="Logout" ui:field="headerLogout" />
+									</b:Container>
 								</b:Container>
+								
 							</b:PanelHeader>
 						</b:Panel>
 					</b:Column>
@@ -236,13 +241,18 @@
 						</b:Column>
 					</b:Row>
 				</b:Column>
-				<b:Container fluid="true" addStyleNames="logout-ui">
+				
+				<b:Container addStyleNames="dropdown-settings">
 				    <b:Icon addStyleNames="{style.user-icon}" type="USER" size="LARGE" />
 					<b.html:Span text="Logged in as" />
 					<b.html:Span addStyleNames="{style.user-name}" ui:field="userNameLarge" />
-					<b:Button text="Logout" icon="SIGN_OUT" size="SMALL" addStyleNames="logout-button"
-										ui:field="logoutButton" />
+					<b:Button ui:field="dropdownButton" ui:icon="GEAR" />
+					<b:Container ui:field="dropdownContainer" addStyleNames="dropdown-settings-content">
+						<g:Label text="Change password" ui:field="changePassword" />
+						<g:Label text="Logout" ui:field="logout" />
+					</b:Container>
 				</b:Container>
+				
 				<b:Row addStyleNames='main-content'>
 					<b:Panel>
 						<b:PanelBody>

@@ -66,7 +66,10 @@ public interface NetworkAdminService {
      * @param mtu
      *            - required MTU for the interface, -1 to keep the automatic default
      * @throws KuraException
+     * 
+     * @deprecated Since 2.4
      */
+    @Deprecated
     public void updateEthernetInterfaceConfig(String interfaceName, boolean autoConnect, int mtu,
             List<NetConfig> netConfigs) throws KuraException;
 
@@ -78,7 +81,10 @@ public interface NetworkAdminService {
      * @param autoConnect
      *            - specifies the auto-connect value for the interface
      * @throws KuraException
+     * 
+     * @deprecated Since 2.4
      */
+    @Deprecated
     public void updateWifiInterfaceConfig(String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint,
             List<NetConfig> netConfigs) throws KuraException;
 
@@ -100,7 +106,10 @@ public interface NetworkAdminService {
      * @param netConfigs
      *            - list of NetConfigs for this interface
      * @throws KuraException
+     * 
+     * @deprecated Since 2.4
      */
+    @Deprecated
     public void updateModemInterfaceConfig(String interfaceName, String serialNum, String modemId, int pppNumber,
             boolean autoConnect, int mtu, List<NetConfig> netConfigs) throws KuraException;
 
@@ -165,7 +174,10 @@ public interface NetworkAdminService {
      * @param firewallConfiguration
      *            A list of FirewallOpenPortConfigIP Objects representing the configuration to set
      * @throws KuraException
+     * 
+     * @deprecated Since 2.4
      */
+    @Deprecated
     public void setFirewallOpenPortConfiguration(
             List<FirewallOpenPortConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException;
 
@@ -175,10 +187,23 @@ public interface NetworkAdminService {
      * @param firewallConfiguration
      *            A list of FirewallPortForwardConfigIP Objects representing the configuration to set
      * @throws KuraException
+     * 
+     * @deprecated Since 2.4
      */
+    @Deprecated
     public void setFirewallPortForwardingConfiguration(
             List<FirewallPortForwardConfigIP<? extends IPAddress>> firewallConfiguration) throws KuraException;
 
+    /**
+     * Sets the 'ip forwarding' portion of the firewall configuration
+     *
+     * @param natConfigs
+     *            A list of FirewallNatConfig Objects representing the configuration to set
+     * @throws KuraException
+     * 
+     * @deprecated Since 2.4
+     */
+    @Deprecated
     public void setFirewallNatConfiguration(List<FirewallNatConfig> natConfigs) throws KuraException;
 
     /**
@@ -259,6 +284,7 @@ public interface NetworkAdminService {
 
     /**
      * Obtains the DHCP Lease values
+     * 
      * @return list of ipAddresses, macAddresses, hostnames;
      * @throws KuraException
      * @since 2.3

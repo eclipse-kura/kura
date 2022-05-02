@@ -1357,14 +1357,21 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             throws UnknownHostException {
         String regexp = "[\\s,;\\n\\t]+";
         String dnsServerPropName = basePropName + "ip4.dnsServers";
-        String[] dnsServersString = config.getDnsServers().split(regexp);
-        if (dnsServersString != null && dnsServersString.length > 0) {
+        List<String> dnsServers = Arrays.asList(config.getDnsServers().split(regexp));
+        if (dnsServers != null && !dnsServers.isEmpty()) {
             StringBuilder dnsServersBuilder = new StringBuilder();
-            for (String dns : Arrays.asList(dnsServersString)) {
-                dnsServersBuilder.append(((IP4Address) IPAddress.parseHostAddress(dns)).getHostAddress()).append(",");
+            for (String dns : dnsServers) {
+                if (!dns.trim().isEmpty()) {
+                    dnsServersBuilder.append(((IP4Address) IPAddress.parseHostAddress(dns)).getHostAddress())
+                            .append(",");
+                }
             }
-            properties.put(dnsServerPropName,
-                    dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
+            if (dnsServersBuilder.length() > 0) {
+                properties.put(dnsServerPropName,
+                        dnsServersBuilder.toString().substring(0, dnsServersBuilder.toString().length() - 1));
+            } else {
+                properties.put(dnsServerPropName, "");
+            }
         } else {
             properties.put(dnsServerPropName, "");
         }

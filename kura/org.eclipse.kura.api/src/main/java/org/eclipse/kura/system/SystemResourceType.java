@@ -25,6 +25,9 @@ public enum SystemResourceType {
     RPM,
     DEB,
     DOCKER,
+    /**
+     * @since 2.4
+     */
     CONTAINER_IMAGE,
     APK,
     UNKNOWN;

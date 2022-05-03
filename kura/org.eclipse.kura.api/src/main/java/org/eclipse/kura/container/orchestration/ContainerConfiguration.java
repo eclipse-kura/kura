@@ -48,6 +48,7 @@ public class ContainerConfiguration {
     private Map<String, String> containerLoggerParameters;
     private String containerLoggingType;
     private ImageConfiguration imageConfig;
+    private List<String> entryPoint;
 
     private ContainerConfiguration() {
     }
@@ -201,6 +202,17 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Returns a List<String> of container entry points. If this field is left empty
+     * the default container entrypoint will be used.
+     *
+     * @return
+     * @since 2.6
+     */
+    public List<String> getEntryPoint() {
+        return this.entryPoint;
+    }
+
+    /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
      *
      * @return the builder.
@@ -213,7 +225,8 @@ public class ContainerConfiguration {
     public int hashCode() {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
                 this.containerLoggingType, this.containerName, this.containerPortsExternal, this.containerPortsInternal,
-                this.containerPrivileged, this.containerVolumes, this.isFrameworkManaged, this.imageConfig);
+                this.containerPrivileged, this.containerVolumes, this.isFrameworkManaged, this.imageConfig,
+                this.entryPoint);
     }
 
     @Override
@@ -235,7 +248,8 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
-                && Objects.equals(this.imageConfig, other.imageConfig);
+                && Objects.equals(this.imageConfig, other.imageConfig)
+                && Objects.equals(this.entryPoint, other.entryPoint);
     }
 
     public static final class ContainerConfigurationBuilder {
@@ -251,6 +265,7 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
+        private List<String> EntryPoint = new LinkedList<>();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -322,6 +337,11 @@ public class ContainerConfiguration {
             return this;
         }
 
+        public ContainerConfigurationBuilder setEntryPoint(List<String> entryPoint) {
+            this.EntryPoint = entryPoint;
+            return this;
+        }
+
         /**
          * Set the {@link ImageConfiguration}
          * 
@@ -349,6 +369,7 @@ public class ContainerConfiguration {
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
             result.imageConfig = this.imageConfigBuilder.build();
+            result.entryPoint = requireNonNull(this.EntryPoint, "Container EntryPoint list must not be null");
 
             return result;
         }

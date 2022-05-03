@@ -1020,6 +1020,7 @@ The **app_id** for the remote inventory service of an MQTT application is “**I
 - DEB : represents a Linux Debian package
 - RPM : represents a Linux RPM package
 - APK : represents a Linux Alpine APK package
+- DOCKER: represents a container
 
 The resources are represented in JSON format. The following message is an example of a service deployment:
 
@@ -1263,6 +1264,86 @@ The bundle JSON message is comprised of the following bundle elements:
 * Version
 
 * Type
+
+#### Inventory Containers
+##### List All Containers
+
+Using the API exposed by Inventory-V1, the user can manage containers via external applications such as Everywhere Cloud. This operation lists all the containers installed in the gateway.
+
+* Request Topic:
+  * **$EDC/account_name/client_id/INVENTORY-V1/GET/containers**
+
+* Request Payload:
+  * Nothing application-specific beyond the request ID and requester client ID
+
+* Response Payload:
+  * Installed containers serialized in JSON format
+
+The following JSON message is an example of what this request outputs:
+
+```json
+{
+  "containers":
+  [
+    {
+      "name":"container_1",
+      "version":"nginx:latest",
+      "type":"DOCKER"
+    }
+  ]
+}
+```
+
+The container JSON message is comprised of the following elements:
+
+* Name: The name of the docker container.
+
+* Version: describes both the container's respective image and tag separated by a colon.
+
+* Type: denotes the type of inventory payload
+
+##### Start a Container
+
+This operation allows starting a container installed on the gateway.
+* Request Topic
+  * $EDC/account_name/client_id/INVENTORY-V1/EXEC/containers/_start
+
+* Request Payload
+  * A JSON object that identifies the target container must be specified in the payload body. This payload will be described in the following section
+
+* Response Payload
+  * Nothing application-specific
+
+##### Stop a Container
+
+* Request Topic
+  * $EDC/account_name/client_id/INVENTORY-V1/EXEC/containers/_stop
+
+* Request Payload
+  * A JSON object that identifies the target container must be specified in the payload body. This payload will be described in the following section.
+
+* Response Payload
+  * Nothing application-specific
+
+##### JSON identifier/payload for container start and stop requests
+
+The requests for starting and stopping a container require the application to include a JSON object in the request payload for selecting the target container. Docker enforces unique container names on a gateway, and thus they can reliably be used as an identifier.
+
+Examples:
+
+```json
+{
+    "name":"container_1",
+    "version":"nginx:latest",
+    "type":"DOCKER"
+}
+```
+
+```json
+{
+    "name":"container_1",
+}
+```
 
 #### Inventory Summary
 

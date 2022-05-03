@@ -54,6 +54,7 @@ public class ContainerInstanceOptions {
     private static final Property<String> REGISTRY_PASSWORD = new Property<>("registry.password", "");
     private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>("container.image.download.timeout",
             500);
+    private static final Property<String> CONTAINER_ENTRY_POINT = new Property<>("container.entrypoint", "");
 
     private final boolean enabled;
     private final String image;
@@ -74,6 +75,7 @@ public class ContainerInstanceOptions {
     private final Optional<String> registryUsername;
     private final Optional<String> registryPassword;
     private final int imageDownloadTimeout;
+    private final List<String> containerEntryPoint;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -99,6 +101,7 @@ public class ContainerInstanceOptions {
         this.registryUsername = REGISTRY_USERNAME.getOptional(properties);
         this.registryPassword = REGISTRY_PASSWORD.getOptional(properties);
         this.imageDownloadTimeout = IMAGES_DOWNLOAD_TIMEOUT.get(properties);
+        this.containerEntryPoint = parseStringListSplitByComma(CONTAINER_ENTRY_POINT.get(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -149,20 +152,21 @@ public class ContainerInstanceOptions {
         return envList;
     }
 
-    private List<String> parseDeviceStrings(String containerDevice) {
+    private List<String> parseStringListSplitByComma(String stringToSplit) {
 
-        List<String> deviceList = new LinkedList<>();
+        List<String> stringList = new LinkedList<>();
 
-        if (containerDevice.isEmpty()) {
-            return deviceList;
+        if (stringToSplit.isEmpty()) {
+            return stringList;
         }
 
-        for (String entry : containerDevice.trim().split(",")) {
-            deviceList.add(entry.trim());
+        for (String entry : stringToSplit.trim().split(",")) {
+            stringList.add(entry.trim());
         }
 
-        return deviceList;
+        return stringList;
     }
+    
 
     public boolean isEnabled() {
         return this.enabled;
@@ -197,7 +201,7 @@ public class ContainerInstanceOptions {
     }
 
     public List<String> getContainerDeviceList() {
-        return parseDeviceStrings(this.containerDevice);
+        return parseStringListSplitByComma(this.containerDevice);
     }
 
     public boolean getPrivilegedMode() {
@@ -236,6 +240,10 @@ public class ContainerInstanceOptions {
     public int getImageDownloadTimeout() {
         return this.imageDownloadTimeout;
     }
+    
+    public List<String> getEntryPoint(){
+    	return this.containerEntryPoint;
+    }
 
     private ImageConfiguration buildImageConfig() {
         return new ImageConfiguration.ImageConfigurationBuilder().setImageName(image).setImageTag(imageTag)
@@ -249,7 +257,7 @@ public class ContainerInstanceOptions {
                 .setInternalPorts(getContainerPortsInternal()).setEnvVars(getContainerEnvList())
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
-                .setLoggerParameters(getLoggerParameters()).build();
+                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint()).build();
     }
 
     private List<Integer> parsePortString(String ports) {

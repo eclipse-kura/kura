@@ -32,7 +32,6 @@ import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.util.NetworkUtil;
 import org.eclipse.kura.core.util.NetUtil;
-import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.net.IP4Address;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
@@ -1389,7 +1388,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     }
 
     private void fillModemProperties(GwtModemInterfaceConfig gwtModemConfig, Map<String, Object> properties,
-            String basePropName, NetInterfaceStatus netInterfaceStatus) throws KuraException, GwtKuraException {
+            String basePropName, NetInterfaceStatus netInterfaceStatus) throws GwtKuraException {
 
         Boolean enabled = netInterfaceStatus.equals(NetInterfaceStatus.netIPv4StatusEnabledWAN);
         properties.put(basePropName + ENABLED, enabled);
@@ -1410,20 +1409,12 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         properties.put(basePropName + "gpsEnabled", gwtModemConfig.isGpsEnabled());
         properties.put(basePropName + "diversityEnabled", gwtModemConfig.isDiversityEnabled());
 
-        GwtModemAuthType authType = gwtModemConfig.getAuthType();
-        if (authType != null) {
-            String authTypePropName = basePropName + "authType";
-            if (authType.equals(GwtModemAuthType.netModemAuthNONE)) {
-                properties.put(authTypePropName, ModemConfig.AuthType.NONE.name());
-            } else if (authType.equals(GwtModemAuthType.netModemAuthAUTO)) {
-                properties.put(authTypePropName, ModemConfig.AuthType.AUTO.name());
-            } else if (authType.equals(GwtModemAuthType.netModemAuthCHAP)) {
-                properties.put(authTypePropName, ModemConfig.AuthType.CHAP.name());
-            } else if (authType.equals(GwtModemAuthType.netModemAuthPAP)) {
-                properties.put(authTypePropName, ModemConfig.AuthType.PAP.name());
-            }
-        }
+        fillModemAuthType(gwtModemConfig, properties, basePropName);
+        fillModemPdpType(gwtModemConfig, properties, basePropName);
+    }
 
+    private void fillModemPdpType(GwtModemInterfaceConfig gwtModemConfig, Map<String, Object> properties,
+            String basePropName) {
         GwtModemPdpType pdpType = gwtModemConfig.getPdpType();
         if (pdpType != null) {
             String pdpTypePropName = basePropName + "pdpType";
@@ -1439,8 +1430,25 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
     }
 
+    private void fillModemAuthType(GwtModemInterfaceConfig gwtModemConfig, Map<String, Object> properties,
+            String basePropName) {
+        GwtModemAuthType authType = gwtModemConfig.getAuthType();
+        if (authType != null) {
+            String authTypePropName = basePropName + "authType";
+            if (authType.equals(GwtModemAuthType.netModemAuthNONE)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.NONE.name());
+            } else if (authType.equals(GwtModemAuthType.netModemAuthAUTO)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.AUTO.name());
+            } else if (authType.equals(GwtModemAuthType.netModemAuthCHAP)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.CHAP.name());
+            } else if (authType.equals(GwtModemAuthType.netModemAuthPAP)) {
+                properties.put(authTypePropName, ModemConfig.AuthType.PAP.name());
+            }
+        }
+    }
+
     private void fillModemPassword(GwtModemInterfaceConfig gwtModemConfig, Map<String, Object> properties,
-            String basePropName) throws GwtKuraException, KuraException {
+            String basePropName) throws GwtKuraException {
         String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtModemConfig.getPassword());
         if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
             List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
@@ -1454,9 +1462,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
             }
         } else if (passKey != null) {
-            CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-            char[] passphrase = cryptoService.encryptAes(passKey.toCharArray());
-            properties.put(basePropName + "password", new Password(passphrase));
+            properties.put(basePropName + "password", new Password(passKey));
         }
     }
 
@@ -1645,15 +1651,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                     new Password(GwtSafeHtmlUtils.htmlUnescape(config.getPassword()))));
         } else if (passKey != null && mode.equals(GwtWifiWirelessMode.netWifiWirelessModeAccessPoint.name())) {
             validateUserPassword(passKey);
-            properties.put(wifiPassphrasePropName, new Password(encryptWifiPassphrase(passKey)));
+            properties.put(wifiPassphrasePropName, new Password(passKey));
         } else if (passKey != null) {
-            properties.put(wifiPassphrasePropName, new Password(encryptWifiPassphrase(passKey)));
+            properties.put(wifiPassphrasePropName, new Password(passKey));
         }
-    }
-
-    private char[] encryptWifiPassphrase(String wifiPassphrase) throws GwtKuraException, KuraException {
-        CryptoService cryptoService = ServiceLocator.getInstance().getService(CryptoService.class);
-        return cryptoService.encryptAes(wifiPassphrase.toCharArray());
     }
 
     private Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode) throws GwtKuraException {

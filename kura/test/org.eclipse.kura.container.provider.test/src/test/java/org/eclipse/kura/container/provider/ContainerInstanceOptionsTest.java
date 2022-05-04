@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.util.configuration.Property;
 import org.junit.Test;
 
 public class ContainerInstanceOptionsTest {
@@ -50,6 +51,7 @@ public class ContainerInstanceOptionsTest {
     private static final String DEFAULT_REGISTRY_USERNAME = "";
     private static final String DEFAULT_REGISTRY_PASSWORD = "";
     private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 500;
+    private static final String DEFAULT_CONTAINER_ENTRY_POINT = "";
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -69,6 +71,7 @@ public class ContainerInstanceOptionsTest {
     private static final String REGISTRY_USERNAME = "registry.username";
     private static final String REGISTRY_PASSWORD = "registry.password";
     private static final String IMAGES_DOWNLOAD_TIMEOUT = "container.image.download.timeout";
+    private static final String CONTAINER_ENTRY_POINT = "container.entrypoint";
 
     private Map<String, Object> properties;
 
@@ -639,6 +642,7 @@ public class ContainerInstanceOptionsTest {
         this.properties.put(REGISTRY_USERNAME, DEFAULT_REGISTRY_USERNAME);
         this.properties.put(REGISTRY_PASSWORD, DEFAULT_REGISTRY_PASSWORD);
         this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
+        this.properties.put(CONTAINER_ENTRY_POINT, DEFAULT_CONTAINER_ENTRY_POINT);
     }
 
     private void givenDifferentProperties() {
@@ -659,6 +663,7 @@ public class ContainerInstanceOptionsTest {
         this.newProperties.put(REGISTRY_USERNAME, "test");
         this.newProperties.put(REGISTRY_PASSWORD, "test");
         this.newProperties.put(IMAGES_DOWNLOAD_TIMEOUT, 100);
+        this.newProperties.put(CONTAINER_ENTRY_POINT, "./test.py,-v,-m,--human-readable");
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {

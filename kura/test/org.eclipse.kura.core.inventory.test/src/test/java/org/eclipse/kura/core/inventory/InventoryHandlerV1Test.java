@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +42,10 @@ import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.core.inventory.resources.ContainerImage;
+import org.eclipse.kura.core.inventory.resources.ContainerImages;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -80,12 +84,16 @@ public class InventoryHandlerV1Test {
     public static final String RESOURCE_BUNDLES = "bundles";
     public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
     public static final String RESOURCE_DOCKER_CONTAINERS = "containers";
+    public static final String RESOURCE_CONTAINER_IMAGES = "images";
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
+    private static final String DELETE = "_delete";
 
     private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
     private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+
+    private static final List<String> DELETE_IMAGE = Arrays.asList(RESOURCE_CONTAINER_IMAGES, DELETE);
 
     private static String TEST_JSON = "testJson";
     private static String TEST_XML = "testXML";
@@ -98,14 +106,19 @@ public class InventoryHandlerV1Test {
     private ContainerInstanceDescriptor dockerContainer2;
     private ContainerConfiguration dockerContainer1Config;
     private ContainerConfiguration dockerContainer2Config;
-    
+
     private ImageConfiguration containerImage1;
+    private ImageInstanceDescriptor containerInstanceImage1;
     private ImageConfiguration containerImage2;
+    private ImageInstanceDescriptor containerInstanceImage2;
 
     private ContainerOrchestrationService mockContainerOrchestrationService;
 
     private DockerContainer dockerContainerObject;
     private DockerContainers dockerContainersObject;
+
+    private ContainerImage containerImageObject;
+    private ContainerImages containerImagesObject;
 
     @Test(expected = KuraException.class)
     public void testDoGetNoResources() throws KuraException, NoSuchFieldException {
@@ -712,6 +725,28 @@ public class InventoryHandlerV1Test {
 
     @Test
     public void doGetInventory() throws KuraException, NoSuchFieldException {
+        givenTwoDockerContainers();
+
+        this.mockContainerOrchestrationService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
+
+        when(this.mockContainerOrchestrationService.listContainerDescriptors())
+                .thenReturn(Arrays.asList(this.dockerContainer1, this.dockerContainer2));
+
+        when(this.mockContainerOrchestrationService.listImageInstanceDescriptors())
+                .thenReturn(Arrays.asList(this.containerInstanceImage1, this.containerInstanceImage2));
+
+        // convert ContainerDescriptor to a DockerContainer
+        DockerContainer testContainer = new DockerContainer(this.dockerContainer1);
+
+        // convert ContainerDescriptor to a DockerContainer
+        ContainerImage testImageInstance = new ContainerImage(this.containerInstanceImage1);
+
+        // doReturn(testImageInstance).when(handler).unmarshal(Mockito.any(String.class),
+        // ContainerImage.class);
+
+        // doReturn(testContainer).when(handler).unmarshal(Mockito.any(String.class),
+        // DockerContainer.class);
+
         Bundle[] bundles = new Bundle[1];
         Bundle bundle = mock(Bundle.class);
         bundles[0] = bundle;
@@ -726,25 +761,38 @@ public class InventoryHandlerV1Test {
         bundleInfos[0] = bundleInfo;
 
         InventoryHandlerV1 inventory = new InventoryHandlerV1() {
-
             @Override
             protected String marshal(Object object) {
                 SystemResourcesInfo resources = (SystemResourcesInfo) object;
                 List<SystemResourceInfo> resourceList = resources.getSystemResources();
-                assertEquals(3, resourceList.size());
+                assertEquals(7, resourceList.size());
                 assertEquals("bundle1", resourceList.get(0).getName());
                 assertEquals("2.0.0", resourceList.get(0).getVersion());
                 assertEquals("BUNDLE", resourceList.get(0).getTypeString());
-                assertEquals("dp1", resourceList.get(1).getName());
-                assertEquals("3.0.0", resourceList.get(1).getVersion());
-                assertEquals("DP", resourceList.get(1).getTypeString());
-                assertEquals("package1", resourceList.get(2).getName());
-                assertEquals("1.0.0", resourceList.get(2).getVersion());
-                assertEquals("DEB", resourceList.get(2).getTypeString());
+                assertEquals("dockerContainer1", resourceList.get(1).getName());
+                assertEquals("nginx:latest", resourceList.get(1).getVersion());
+                assertEquals("DOCKER", resourceList.get(1).getTypeString());
+                assertEquals("dockerContainer2", resourceList.get(2).getName());
+                assertEquals("nginx:latest", resourceList.get(2).getVersion());
+                assertEquals("DOCKER", resourceList.get(2).getTypeString());
+                assertEquals("dp1", resourceList.get(3).getName());
+                assertEquals("3.0.0", resourceList.get(3).getVersion());
+                assertEquals("DP", resourceList.get(3).getTypeString());
+                assertEquals("nginx", resourceList.get(4).getName());
+                assertEquals("latest", resourceList.get(4).getVersion());
+                assertEquals("CONTAINER_IMAGE", resourceList.get(4).getTypeString());
+                assertEquals("nginx", resourceList.get(5).getName());
+                assertEquals("alpine", resourceList.get(5).getVersion());
+                assertEquals("CONTAINER_IMAGE", resourceList.get(5).getTypeString());
+                assertEquals("package1", resourceList.get(6).getName());
+                assertEquals("1.0.0", resourceList.get(6).getVersion());
+                assertEquals("DEB", resourceList.get(6).getTypeString());
 
                 return TEST_JSON;
             }
         };
+
+        inventory.setContainerOrchestrationService(this.mockContainerOrchestrationService);
 
         List<String> resourcesList = new ArrayList<>();
         resourcesList.add("inventory");
@@ -964,9 +1012,7 @@ public class InventoryHandlerV1Test {
         return message;
     }
 
-    // -----------------------------------------//
-    // Start of Container Related Tests //
-    // -----------------------------------------//
+    // region Container Related Tests
 
     @Test
     public void testContainerMarshalingJSON() throws BundleException, KuraException {
@@ -980,9 +1026,9 @@ public class InventoryHandlerV1Test {
 
     @Test
     public void testContainerUnMarshalingJSON() throws BundleException, KuraException {
-        givenTheFollowingJson();
+        givenTheFollowingContainerJson();
 
-        whenAJsonIsPassedToMarshaler();
+        whenAContainerJsonIsPassedToMarshaler();
 
         thenCheckIfJsonMatchesContainer();
     }
@@ -1025,9 +1071,63 @@ public class InventoryHandlerV1Test {
 
     }
 
-    // ---------------------------------------//
-    // End of Container Related Tests //
-    // ---------------------------------------//
+    // endregion
+
+    // region Image Related Tests
+
+    @Test
+    public void testContainerImageMarshalingJSON() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingImagesSetupToMarshal();
+
+        whenImagesArePassedToMarshaler();
+
+        thenCheckIfImageMatchesJSON();
+    }
+
+    @Test
+    public void testContainerImageUnMarshalingJSON() throws BundleException, KuraException {
+        givenTheFollowingImageJson();
+
+        whenAImageJsonIsPassedToMarshaler();
+
+        thenCheckIfJsonMatchesImage();
+    }
+
+    @Test
+    public void testContainerImageMarshalingXML() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+        giventheFollowingImagesSetupToMarshal();
+
+        whenImagesArePassedToMarshalerXML();
+
+        thenCheckIfImageMatchesXML();
+    }
+
+    @Test
+    public void testListImageDoGet() throws BundleException, KuraException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonKuraPayloadDoGet(Arrays.asList(RESOURCE_CONTAINER_IMAGES), "");
+
+        thenCheckIfImagesHaveBeenListed();
+    }
+
+    @Test
+    public void testDeleteImage() throws BundleException, KuraException, InterruptedException {
+        givenTwoDockerContainers();
+
+        whenTheFollowingJsonContainerImageKuraPayloadDoExec(DELETE_IMAGE,
+                "{\"name\":\"nginx\",\"version\":\"latest\"}");
+        thenCheckIfImageHasDelete();
+    }
+    
+    @Test
+    public void testContainerImageDataStuct() throws BundleException, KuraException, InterruptedException {
+    	thenCompareOutputOfContainerImage();
+    }
+
+    // endregion
 
     /**
      * given
@@ -1040,34 +1140,49 @@ public class InventoryHandlerV1Test {
         this.dockerContainersObject = new DockerContainers(Arrays.asList(this.dockerContainerObject));
     }
 
+    private void giventheFollowingImagesSetupToMarshal() {
+
+        this.containerImageObject = new ContainerImage(this.containerInstanceImage1);
+
+        this.containerImagesObject = new ContainerImages(Arrays.asList(this.containerImageObject));
+    }
+
     private void givenTwoDockerContainers() {
         this.dockerContainer1 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer1")
                 .setContainerImage("nginx").setContainerImageTag("latest").setContainerID("1234").build();
         this.dockerContainer2 = ContainerInstanceDescriptor.builder().setContainerName("dockerContainer2")
                 .setContainerImage("nginx").setContainerID("124344").build();
-      
-        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(200).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
-        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx").setImageTag("latest").setImageDownloadTimeoutSeconds(200).setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
-                REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD)))).build();
-        
-        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1").setImageConfiguration(containerImage1).build();
-        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2").setImageConfiguration(containerImage2).build();
+
+        this.containerImage1 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
+                .setImageTag("latest").setImageDownloadTimeoutSeconds(200)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+        this.containerInstanceImage1 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
+                .setImageName(containerImage1.getImageName()).setImageTag(containerImage1.getImageTag())
+                .setImageId("SHA256:3h278f34yhufy3h").build();
+        this.containerImage2 = new ImageConfiguration.ImageConfigurationBuilder().setImageName("nginx")
+                .setImageTag("alpine").setImageDownloadTimeoutSeconds(200)
+                .setRegistryCredentials(Optional.of(new PasswordRegistryCredentials(Optional.of(REGISTRY_URL),
+                        REGISTRY_USERNAME, new Password(REGISTRY_PASSWORD))))
+                .build();
+        this.containerInstanceImage2 = new ImageInstanceDescriptor.ImageInstanceDescriptorBuilder()
+                .setImageName(containerImage2.getImageName()).setImageTag(containerImage2.getImageTag())
+                .setImageId("SHA256:dfiyegfyuwehf978ew4hu").build();
+
+        this.dockerContainer1Config = ContainerConfiguration.builder().setContainerName("dockerContainer1")
+                .setImageConfiguration(containerImage1).build();
+        this.dockerContainer2Config = ContainerConfiguration.builder().setContainerName("dockerContainer2")
+                .setImageConfiguration(containerImage2).build();
     }
 
-    private void givenTheFollowingJson() {
-
-        // {
-        // "containers": [
-        // {
-        // "name" : "rfkill",
-        // "version": "nginx:latest",
-        // type": "DOCKER",
-        // }
-        // ]
-        // }
-        // TEST_JSON = "{\"containers\": [{\"name\":\"test\",\"version\":\"nginx:latest\"}, \"type\": \"DOCKER\", ]}";
+    private void givenTheFollowingContainerJson() {
         TEST_JSON = "{\"name\":\"test\",\"version\":\"nginx:latest\"}";
+    }
+
+    private void givenTheFollowingImageJson() {
+
+        TEST_JSON = "{\"name\":\"nginx\",\"version\":\"latest\"}";
     }
 
     /**
@@ -1078,14 +1193,29 @@ public class InventoryHandlerV1Test {
         TEST_JSON = marsh.marshal(this.dockerContainersObject);
     }
 
+    private void whenImagesArePassedToMarshaler() throws BundleException, KuraException {
+        JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
+        TEST_JSON = marsh.marshal(this.containerImagesObject);
+    }
+
     private void whenContainersArePassedToMarshalerXML() throws BundleException, KuraException {
         XmlMarshallUnmarshallImpl marsh = new XmlMarshallUnmarshallImpl();
         TEST_XML = marsh.marshal(this.dockerContainersObject);
     }
 
-    private void whenAJsonIsPassedToMarshaler() throws BundleException, KuraException {
+    private void whenImagesArePassedToMarshalerXML() throws BundleException, KuraException {
+        XmlMarshallUnmarshallImpl marsh = new XmlMarshallUnmarshallImpl();
+        TEST_XML = marsh.marshal(this.containerImagesObject);
+    }
+
+    private void whenAContainerJsonIsPassedToMarshaler() throws BundleException, KuraException {
         JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
         this.dockerContainerObject = marsh.unmarshal(TEST_JSON, DockerContainer.class);
+    }
+
+    private void whenAImageJsonIsPassedToMarshaler() throws BundleException, KuraException {
+        JsonMarshallUnmarshallImpl marsh = new JsonMarshallUnmarshallImpl();
+        this.containerImageObject = marsh.unmarshal(TEST_JSON, ContainerImage.class);
     }
 
     private void whenTheFollowingJsonKuraPayloadDoExec(List<String> request, String payload)
@@ -1107,6 +1237,33 @@ public class InventoryHandlerV1Test {
         DockerContainer testContainer = new DockerContainer(this.dockerContainer1);
 
         doReturn(testContainer).when(handler).unmarshal(payload, DockerContainer.class);
+
+        final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
+                theMessage);
+
+        assertEquals(KuraResponsePayload.RESPONSE_CODE_OK,
+                ((KuraResponsePayload) response.getPayload()).getResponseCode());
+    }
+
+    private void whenTheFollowingJsonContainerImageKuraPayloadDoExec(List<String> request, String payload)
+            throws BundleException, KuraException {
+
+        InventoryHandlerV1 handler = Mockito.spy(new InventoryHandlerV1());
+
+        this.mockContainerOrchestrationService = mock(ContainerOrchestrationService.class, Mockito.RETURNS_DEEP_STUBS);
+
+        when(this.mockContainerOrchestrationService.listImageInstanceDescriptors())
+                .thenReturn(Arrays.asList(this.containerInstanceImage1, this.containerInstanceImage2));
+
+        KuraMessage theMessage = requestMessage(request, payload);
+
+        handler.setContainerOrchestrationService(this.mockContainerOrchestrationService);
+        handler.activate(mock(ComponentContext.class, Mockito.RETURNS_MOCKS));
+
+        // convert ContainerDescriptor to a DockerContainer
+        ContainerImage testImageInstance = new ContainerImage(this.containerInstanceImage1);
+
+        doReturn(testImageInstance).when(handler).unmarshal(payload, ContainerImage.class);
 
         final KuraMessage response = handler.doExec(mock(RequestHandlerContext.class, Mockito.RETURNS_DEEP_STUBS),
                 theMessage);
@@ -1150,18 +1307,28 @@ public class InventoryHandlerV1Test {
                 TEST_JSON);
     }
 
+    private void thenCheckIfImageMatchesJSON() {
+        assertEquals("{\"images\":[{\"name\":\"nginx\",\"version\":\"latest\",\"type\":\"CONTAINER_IMAGE\"}]}",
+                TEST_JSON);
+    }
+
     private void thenCheckIfContainerMatchesXML() {
         /**
-         * <[<?xml version="1.0" encoding="UTF-8"?>
-         * <containers>
-         * <container>
-         * <name>dockerContainer1</name>
-         * <version>nginx:latest</version>
-         * </container>
-         * </containers>
-         * ]>
+         * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
+         * <name>dockerContainer1</name> <version>nginx:latest</version> </container>
+         * </containers> ]>
          */
         String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><containers><container><name>dockerContainer1</name><version>nginx:latest</version></container></containers>";
+        assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
+    }
+
+    private void thenCheckIfImageMatchesXML() {
+        /**
+         * <[<?xml version="1.0" encoding="UTF-8"?> <containers> <container>
+         * <name>dockerContainer1</name> <version>nginx:latest</version> </container>
+         * </containers> ]>
+         */
+        String containerXMLExpected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><images><image><name>nginx</name><version>latest</version></image></images>";
         assertEquals(containerXMLExpected.replaceAll("\\s+", ""), TEST_XML.replaceAll("\\s+", ""));
     }
 
@@ -1170,8 +1337,17 @@ public class InventoryHandlerV1Test {
 
     }
 
+    private void thenCheckIfJsonMatchesImage() {
+        assertEquals("nginx", this.containerImageObject.getName());
+
+    }
+
     private void thenCheckIfContainerWereListed() throws KuraException {
         Mockito.verify(this.mockContainerOrchestrationService, times(1)).listContainerDescriptors();
+    }
+
+    private void thenCheckIfImagesHaveBeenListed() throws KuraException {
+        Mockito.verify(this.mockContainerOrchestrationService, times(1)).listImageInstanceDescriptors();
     }
 
     private void thenCheckIfContainerOneHasStarted() throws KuraException, InterruptedException {
@@ -1194,6 +1370,11 @@ public class InventoryHandlerV1Test {
                 .startContainer(this.dockerContainer2.getContainerId());
         Mockito.verify(this.mockContainerOrchestrationService, times(0))
                 .stopContainer(this.dockerContainer2.getContainerId());
+    }
+
+    private void thenCheckIfImageHasDelete() throws KuraException, InterruptedException {
+        Mockito.verify(this.mockContainerOrchestrationService, times(1))
+                .deleteImage(this.containerInstanceImage1.getImageId());
     }
 
     @SuppressWarnings("unchecked")
@@ -1228,6 +1409,35 @@ public class InventoryHandlerV1Test {
         when(result.getVersion()).thenReturn(new Version(version));
 
         return result;
+    }
+    
+    private void thenCompareOutputOfContainerImage() {
+    	containerImageObject = new ContainerImage("test", "latest");
+    	
+        String imageName = "test";
+        String imageTag = "latest";
+        String imageId = "3e3rf32e2wsd2f";
+        String imageAuthor = "Greg";
+        String imageArch = "ARM64";
+        long imageSize = 9883829;
+        
+        containerImageObject.setImageName(imageName);
+        containerImageObject.setImageTag(imageTag);
+        containerImageObject.setImageId(imageId);
+        containerImageObject.setImageAuthor(imageAuthor);
+        containerImageObject.setImageArch(imageArch);
+        containerImageObject.setImageSize(imageSize);
+        
+        containerImagesObject = new ContainerImages(new LinkedList<ContainerImage>());
+        containerImagesObject.setContainerImages(Arrays.asList(containerImageObject));
+        
+        assertEquals(containerImageObject.getImageName(), imageName);
+        assertEquals(containerImageObject.getImageTag(), imageTag);
+        assertEquals(containerImageObject.getImageId(), imageId);
+        assertEquals(containerImageObject.getImageAuthor(), imageAuthor);
+        assertEquals(containerImageObject.getImageArch(), imageArch);
+        assertEquals(containerImageObject.getImageSize(), imageSize);
+        assertEquals(containerImagesObject.getContainerImages().get(0).getName(), imageName);
     }
 
 }

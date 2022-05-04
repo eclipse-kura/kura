@@ -33,6 +33,9 @@ import org.eclipse.kura.cloudconnection.request.RequestHandlerRegistry;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.container.orchestration.ContainerInstanceDescriptor;
 import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.core.inventory.resources.ContainerImage;
+import org.eclipse.kura.core.inventory.resources.ContainerImages;
 import org.eclipse.kura.core.inventory.resources.DockerContainer;
 import org.eclipse.kura.core.inventory.resources.DockerContainers;
 import org.eclipse.kura.core.inventory.resources.SystemBundle;
@@ -70,20 +73,25 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
     public static final String RESOURCE_BUNDLES = "bundles";
     public static final String RESOURCE_SYSTEM_PACKAGES = "systemPackages";
     public static final String RESOURCE_DOCKER_CONTAINERS = "containers";
+    public static final String RESOURCE_CONTAINER_IMAGES = "images";
     public static final String INVENTORY = "inventory";
     private static final String START = "_start";
     private static final String STOP = "_stop";
+    private static final String DELETE = "_delete";
 
     private static final List<String> START_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, START);
     private static final List<String> STOP_BUNDLE = Arrays.asList(RESOURCE_BUNDLES, STOP);
 
     private static final List<String> START_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, START);
     private static final List<String> STOP_CONTAINER = Arrays.asList(RESOURCE_DOCKER_CONTAINERS, STOP);
+    
+    private static final List<String> DELETE_IMAGE = Arrays.asList(RESOURCE_CONTAINER_IMAGES, DELETE);
 
     private static final String CANNOT_FIND_RESOURCE_MESSAGE = "Cannot find resource with name: {}";
     private static final String NONE_RESOURCE_FOUND_MESSAGE = "Expected one resource but found none";
     private static final String BAD_REQUEST_TOPIC_MESSAGE = "Bad request topic: {}";
     private static final String ERROR_GETTING_RESOURCE = "Error getting resource {}";
+    private static final String MISSING_MESSAGE_BODY = "missing message body";
 
     private DeploymentAdmin deploymentAdmin;
     private SystemService systemService;
@@ -181,6 +189,8 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             resPayload = doGetSystemPackages();
         } else if (resources.get(0).equals(RESOURCE_DOCKER_CONTAINERS)) {
             resPayload = doGetDockerContainers();
+        } else if (resources.get(0).equals(RESOURCE_CONTAINER_IMAGES)) {
+            resPayload = doGetContainerImages();
         } else {
             logger.error(BAD_REQUEST_TOPIC_MESSAGE, resources);
             logger.error(CANNOT_FIND_RESOURCE_MESSAGE, resources.get(0));
@@ -238,6 +248,15 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
                 this.containerOrchestrationService
                         .stopContainer(findFirstMatchingContainer(extractContainerRef(reqMessage)).getContainerId());
+                return success();
+            } else if (DELETE_IMAGE.equals(resources)) {
+
+                if (this.containerOrchestrationService == null) {
+                    return notFound();
+                }
+
+                this.containerOrchestrationService
+                        .deleteImage(findFirstMatchingImage(extractContainerImageRef(reqMessage)).getImageId());
                 return success();
             }
         } catch (final KuraException e) {
@@ -383,6 +402,21 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
             }
 
         }
+        
+        // get Container Images
+        if (this.containerOrchestrationService != null) {
+            try {
+                logger.info("Creating container images invenetory");
+                List<ImageInstanceDescriptor> images = this.containerOrchestrationService.listImageInstanceDescriptors();
+                images.stream().forEach(
+                        image -> inventory.add(new SystemResourceInfo(image.getImageName(),
+                                image.getImageTag(),
+                                SystemResourceType.CONTAINER_IMAGE)));
+            } catch (Exception e) {
+                logger.error("Could not connect to container-engine");
+            }
+
+        }
 
         inventory.sort(Comparator.comparing(SystemResourceInfo::getName));
         SystemResourcesInfo systemResourcesInfo = new SystemResourcesInfo(inventory);
@@ -437,6 +471,31 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
             DockerContainers dockerContainers = new DockerContainers(containersList);
             String s = marshal(dockerContainers);
+            respPayload.setTimestamp(new Date());
+            respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            logger.error(ERROR_GETTING_RESOURCE, RESOURCE_SYSTEM_PACKAGES, e);
+            respPayload.setResponseCode(KuraResponsePayload.RESPONSE_CODE_ERROR);
+        }
+
+        return respPayload;
+    }
+    
+    private KuraPayload doGetContainerImages() {
+
+        if (this.containerOrchestrationService == null) {
+            return new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_NOTFOUND);
+        }
+
+        KuraResponsePayload respPayload = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);
+        try {
+            List<ImageInstanceDescriptor> containers = this.containerOrchestrationService.listImageInstanceDescriptors();
+
+            List<ContainerImage> imageList = new ArrayList<>();
+            containers.stream().forEach(p -> imageList.add(new ContainerImage(p)));
+
+            ContainerImages containerImages = new ContainerImages(imageList);
+            String s = marshal(containerImages);
             respPayload.setTimestamp(new Date());
             respPayload.setBody(s.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
@@ -537,7 +596,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         final byte[] body = payload.getBody();
 
         if (body == null) {
-            logger.warn("missing message body");
+            logger.warn(MISSING_MESSAGE_BODY);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -550,7 +609,7 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
         final byte[] body = payload.getBody();
 
         if (body == null) {
-            logger.warn("missing message body");
+            logger.warn(MISSING_MESSAGE_BODY);
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         }
 
@@ -566,6 +625,36 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
                 }
             }
             logger.warn("Failed to find container");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        } catch (Exception e) {
+            logger.warn("failed to access docker service");
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+    }
+    
+    private ImageInstanceDescriptor extractContainerImageRef(final KuraMessage message) throws KuraException {
+        final KuraPayload payload = message.getPayload();
+
+        final byte[] body = payload.getBody();
+
+        if (body == null) {
+            logger.warn(MISSING_MESSAGE_BODY);
+            throw new KuraException(KuraErrorCode.BAD_REQUEST);
+        }
+
+        ContainerImage dc = unmarshal(new String(message.getPayload().getBody(), StandardCharsets.UTF_8),
+        		ContainerImage.class);
+
+        try {
+            List<ImageInstanceDescriptor> imageList = this.containerOrchestrationService.listImageInstanceDescriptors();
+
+            for (ImageInstanceDescriptor image : imageList) {
+                if (image.getImageName().equals(dc.getImageName()) && image.getImageTag().equals(dc.getImageTag())) {
+                    return image;
+                }
+            }
+            logger.warn("Failed to find image");
             throw new KuraException(KuraErrorCode.BAD_REQUEST);
         } catch (Exception e) {
             logger.warn("failed to access docker service");
@@ -600,6 +689,18 @@ public class InventoryHandlerV1 implements ConfigurableComponent, RequestHandler
 
         throw new KuraException(KuraErrorCode.NOT_FOUND);
     }
+    
+    private ImageInstanceDescriptor findFirstMatchingImage(final ImageInstanceDescriptor ref)
+            throws KuraException {
+        for (final ImageInstanceDescriptor image : this.containerOrchestrationService.listImageInstanceDescriptors()) {
+            if (image.getImageName().equals(ref.getImageName()) && image.getImageTag().equals(ref.getImageTag())) {
+                return image;
+            }
+        }
+
+        throw new KuraException(KuraErrorCode.NOT_FOUND);
+    }
+
 
     private static KuraMessage success() {
         final KuraPayload response = new KuraResponsePayload(KuraResponsePayload.RESPONSE_CODE_OK);

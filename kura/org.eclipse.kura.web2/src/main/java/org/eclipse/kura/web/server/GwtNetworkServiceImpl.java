@@ -1334,6 +1334,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 logger.debug("setting address: {}", config.getIpAddress());
                 properties.put(addressPropName,
                         ((IP4Address) IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
+            } else {
+                properties.put(addressPropName, "");
             }
 
             if (config.getSubnetMask() != null && !config.getSubnetMask().isEmpty()) {
@@ -1341,7 +1343,10 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 short prefix = NetworkUtil.getNetmaskShortForm(
                         ((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask())).getHostAddress());
                 properties.put(prefixPropName, prefix);
+            } else {
+                properties.put(prefixPropName, "");
             }
+
             if (config.getGateway() != null && !config.getGateway().isEmpty()) {
                 logger.debug("setting gateway: {}", config.getGateway());
                 properties.put(gatewayPropName,

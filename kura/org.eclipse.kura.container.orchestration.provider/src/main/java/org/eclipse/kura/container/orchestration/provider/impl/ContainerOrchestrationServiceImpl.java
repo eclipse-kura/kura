@@ -432,6 +432,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             HostConfig configuration = new HostConfig();
 
             commandBuilder = containerEnviromentVariablesHandler(containerDescription, commandBuilder);
+            
+            commandBuilder = containerEntrypointHandler(containerDescription, commandBuilder);            
 
             // Host Configuration Related
             configuration = containerVolumeMangamentHandler(containerDescription, configuration);
@@ -563,6 +565,17 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         return commandBuilder;
 
     }
+    
+    private CreateContainerCmd containerEntrypointHandler(ContainerConfiguration containerDescription,
+            CreateContainerCmd commandBuilder) {
+        
+        if (containerDescription.getEntryPoint().isEmpty() || containerDescription.getEntryPoint() == null) {
+            return commandBuilder;
+        }
+
+        return commandBuilder.withEntrypoint(containerDescription.getEntryPoint());
+        
+    }
 
     private HostConfig containerVolumeMangamentHandler(ContainerConfiguration containerDescription,
             HostConfig hostConfiguration) {
@@ -615,6 +628,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         return hostConfiguration;
 
+    }
     }
 
     private boolean doesImageExist(String imageName, String imageTag) {

@@ -1317,32 +1317,37 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             String basePropName) throws UnknownHostException, KuraException {
         logger.debug("config.getConfigMode(): {}", config.getConfigMode());
         String dhcpClient4PropName = basePropName + "dhcpClient4.enabled";
+        String addressPropName = basePropName + "ip4.address";
+        String prefixPropName = basePropName + "ip4.prefix";
+        String gatewayPropName = basePropName + "ip4.gateway";
         if (GwtNetIfConfigMode.netIPv4ConfigModeDHCP.name().equals(config.getConfigMode())) {
             logger.debug("mode is DHCP");
             properties.put(dhcpClient4PropName, true);
+            properties.put(addressPropName, "");
+            properties.put(prefixPropName, "");
+            properties.put(gatewayPropName, "");
         } else {
             logger.debug("mode is STATIC");
             properties.put(dhcpClient4PropName, false);
 
             if (config.getIpAddress() != null && !config.getIpAddress().isEmpty()) {
                 logger.debug("setting address: {}", config.getIpAddress());
-                String addressPropName = basePropName + "ip4.address";
                 properties.put(addressPropName,
                         ((IP4Address) IPAddress.parseHostAddress(config.getIpAddress())).getHostAddress());
             }
 
             if (config.getSubnetMask() != null && !config.getSubnetMask().isEmpty()) {
                 logger.debug("setting subnet mask: {}", config.getSubnetMask());
-                String prefixPropName = basePropName + "ip4.prefix";
                 short prefix = NetworkUtil.getNetmaskShortForm(
                         ((IP4Address) IPAddress.parseHostAddress(config.getSubnetMask())).getHostAddress());
                 properties.put(prefixPropName, prefix);
             }
             if (config.getGateway() != null && !config.getGateway().isEmpty()) {
                 logger.debug("setting gateway: {}", config.getGateway());
-                String gatewayPropName = basePropName + "ip4.gateway";
                 properties.put(gatewayPropName,
                         ((IP4Address) IPAddress.parseHostAddress(config.getGateway())).getHostAddress());
+            } else {
+                properties.put(gatewayPropName, "");
             }
         }
 
@@ -1358,7 +1363,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         String regexp = "[\\s,;\\n\\t]+";
         String dnsServerPropName = basePropName + "ip4.dnsServers";
         List<String> dnsServers = Arrays.asList(config.getDnsServers().split(regexp));
-        if (dnsServers != null && !dnsServers.isEmpty()) {
+        if (getNetInterfaceStatus(config.getStatus()) == NetInterfaceStatus.netIPv4StatusEnabledWAN
+                && dnsServers != null && !dnsServers.isEmpty()) {
             StringBuilder dnsServersBuilder = new StringBuilder();
             for (String dns : dnsServers) {
                 if (!dns.trim().isEmpty()) {

@@ -67,7 +67,7 @@ public interface NetworkAdminService {
      *            - required MTU for the interface, -1 to keep the automatic default
      * @throws KuraException
      * 
-     * @deprecated Since 2.4
+     * @deprecated Since 2.4. Use the {@link ConfigurationService} to update the configuration of an Ethernet interface.
      */
     @Deprecated
     public void updateEthernetInterfaceConfig(String interfaceName, boolean autoConnect, int mtu,
@@ -82,7 +82,7 @@ public interface NetworkAdminService {
      *            - specifies the auto-connect value for the interface
      * @throws KuraException
      * 
-     * @deprecated Since 2.4
+     * @deprecated Since 2.4. Use the {@link ConfigurationService} to update the configuration of a Wifi interface.
      */
     @Deprecated
     public void updateWifiInterfaceConfig(String interfaceName, boolean autoConnect, WifiAccessPoint accessPoint,
@@ -107,7 +107,7 @@ public interface NetworkAdminService {
      *            - list of NetConfigs for this interface
      * @throws KuraException
      * 
-     * @deprecated Since 2.4
+     * @deprecated Since 2.4. Use the {@link ConfigurationService} to update the configuration of a Modem interface.
      */
     @Deprecated
     public void updateModemInterfaceConfig(String interfaceName, String serialNum, String modemId, int pppNumber,

@@ -108,7 +108,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
 
         this.state = newState;
     }
-    
+
     private Optional<ContainerInstanceDescriptor> getExistingContainer(final String containerName) {
         return containerOrchestrationService.listContainerDescriptors().stream()
                 .filter(c -> c.getContainerName().equals(containerName)).findAny();

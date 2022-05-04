@@ -166,7 +166,6 @@ public class ContainerInstanceOptions {
 
         return stringList;
     }
-    
 
     public boolean isEnabled() {
         return this.enabled;
@@ -240,9 +239,9 @@ public class ContainerInstanceOptions {
     public int getImageDownloadTimeout() {
         return this.imageDownloadTimeout;
     }
-    
-    public List<String> getEntryPoint(){
-    	return this.containerEntryPoint;
+
+    public List<String> getEntryPoint() {
+        return this.containerEntryPoint;
     }
 
     private ImageConfiguration buildImageConfig() {

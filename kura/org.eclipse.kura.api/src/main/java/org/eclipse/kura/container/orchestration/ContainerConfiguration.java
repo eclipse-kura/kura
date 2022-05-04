@@ -265,7 +265,7 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
-        private List<String> EntryPoint = new LinkedList<>();
+        private List<String> entryPoint = new LinkedList<>();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -338,7 +338,7 @@ public class ContainerConfiguration {
         }
 
         public ContainerConfigurationBuilder setEntryPoint(List<String> entryPoint) {
-            this.EntryPoint = entryPoint;
+            this.entryPoint = entryPoint;
             return this;
         }
 
@@ -369,7 +369,7 @@ public class ContainerConfiguration {
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
             result.imageConfig = this.imageConfigBuilder.build();
-            result.entryPoint = requireNonNull(this.EntryPoint, "Container EntryPoint list must not be null");
+            result.entryPoint = requireNonNull(this.entryPoint, "Container EntryPoint list must not be null");
 
             return result;
         }

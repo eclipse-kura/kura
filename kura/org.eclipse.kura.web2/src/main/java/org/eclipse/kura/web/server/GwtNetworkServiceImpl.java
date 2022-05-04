@@ -1157,13 +1157,13 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 nat.append(entry.getInInterface()).append(",");
                 nat.append(entry.getOutInterface()).append(",");
                 nat.append(entry.getProtocol()).append(",");
-                if (entry.getSourceNetwork() == null || entry.getSourceNetwork().equals(UNKNOWN_NETWORK)) {
+                if (UNKNOWN_NETWORK.equals(entry.getSourceNetwork())) {
                     nat.append(UNKNOWN_NETWORK);
                 } else {
                     appendNetwork(entry.getSourceNetwork(), nat);
                 }
                 nat.append(",");
-                if (entry.getDestinationNetwork() == null || entry.getDestinationNetwork().equals(UNKNOWN_NETWORK)) {
+                if (UNKNOWN_NETWORK.equals(entry.getDestinationNetwork())) {
                     nat.append(UNKNOWN_NETWORK);
                 } else {
                     appendNetwork(entry.getDestinationNetwork(), nat);

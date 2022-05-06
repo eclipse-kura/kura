@@ -146,9 +146,6 @@ public class TritonServerLocalManager {
         commandString.add("--grpc-port=" + this.options.getGrpcPort());
         commandString.add("--metrics-port=" + this.options.getMetricsPort());
         commandString.add("--model-control-mode=explicit");
-        if (!this.options.getModels().isEmpty()) {
-            this.options.getModels().forEach(model -> commandString.add("--load-model=" + model));
-        }
         commandString.add("2>&1");
         commandString.add("|");
         commandString.add("systemd-cat");

@@ -281,19 +281,26 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         final Optional<ContainerInstanceDescriptor> existingInstance = listContainerDescriptors().stream()
                 .filter(c -> c.getContainerName().equals(container.getContainerName())).findAny();
 
-        final String containerId;
+        String containerId;
 
-        if (existingInstance.isPresent() && existingInstance.get().getContainerState() == ContainerState.ACTIVE) {
-            logger.info("Found already existing running container");
-            containerId = existingInstance.get().getContainerId();
-        } else if (!existingInstance.isPresent()) {
+        if (existingInstance.isPresent()) {
+
+            if (existingInstance.get().getContainerState() == ContainerState.ACTIVE) {
+                logger.info("Found already existing running container");
+                containerId = existingInstance.get().getContainerId();
+            } else {
+                logger.info("Found already exisiting not running container, recreating it..");
+                containerId = existingInstance.get().getContainerId();
+                deleteContainer(containerId);
+                pullImage(container.getImageConfiguration());
+                containerId = createContainer(container);
+                startContainer(containerId);
+
+            }
+        } else {
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
-            startContainer(containerId);
-        } else {
-            logger.info("Found already exisiting not running container, starting it..");
-            containerId = existingInstance.get().getContainerId();
             startContainer(containerId);
         }
 
@@ -768,15 +775,16 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         List<ImageInstanceDescriptor> result = new ArrayList<>();
         images.forEach(image -> {
             InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
-            
-            ImageInstanceDescriptorBuilder imageBuilder = ImageInstanceDescriptor.builder().setImageName(getImageName(image)).setImageTag(getImageTag(image))
-                    .setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
+
+            ImageInstanceDescriptorBuilder imageBuilder = ImageInstanceDescriptor.builder()
+                    .setImageName(getImageName(image)).setImageTag(getImageTag(image)).setImageId(image.getId())
+                    .setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
                     .setimageSize(iir.getSize().longValue());
-            
+
             if (image.getLabels() != null) {
                 imageBuilder.setImageLabels(image.getLabels());
             }
-            
+
             result.add(imageBuilder.build());
         });
         return result;

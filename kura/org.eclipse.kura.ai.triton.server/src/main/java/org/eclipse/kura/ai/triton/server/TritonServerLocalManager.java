@@ -60,15 +60,12 @@ public class TritonServerLocalManager {
     }
 
     private void startLocalServerMonitor() {
-        if (this.options.isLocalEnabled()) {
-            this.serverCommand = createServerCommand();
-            this.scheduledFuture = this.scheduledExecutorService.scheduleAtFixedRate(() -> {
-                Thread.currentThread().setName(getClass().getSimpleName());
-                if (!isLocalServerRunning()) {
-                    startLocalServer();
-                }
-            }, 0, MONITOR_PERIOD, TimeUnit.SECONDS);
-        }
+        this.scheduledFuture = this.scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Thread.currentThread().setName(getClass().getSimpleName());
+            if (!isLocalServerRunning()) {
+                startLocalServer();
+            }
+        }, 0, MONITOR_PERIOD, TimeUnit.SECONDS);
     }
 
     private void startLocalServer() {

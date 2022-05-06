@@ -34,6 +34,7 @@ import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
@@ -767,10 +768,16 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         List<ImageInstanceDescriptor> result = new ArrayList<>();
         images.forEach(image -> {
             InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
-            result.add(
-                    ImageInstanceDescriptor.builder().setImageName(getImageName(image)).setImageTag(getImageTag(image))
-                            .setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
-                            .setimageSize(iir.getSize().longValue()).setImageLabels(image.getLabels()).build());
+            
+            ImageInstanceDescriptorBuilder imageBuilder = ImageInstanceDescriptor.builder().setImageName(getImageName(image)).setImageTag(getImageTag(image))
+                    .setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
+                    .setimageSize(iir.getSize().longValue());
+            
+            if (image.getLabels() != null) {
+                imageBuilder.setImageLabels(image.getLabels());
+            }
+            
+            result.add(imageBuilder.build());
         });
         return result;
     }

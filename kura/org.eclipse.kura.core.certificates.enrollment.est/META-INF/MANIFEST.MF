@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: org.eclipse.kura.core.certificates.enrollment.est
+Bundle-SymbolicName: org.eclipse.kura.core.certificates.enrollment.est;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Eclipse Kura
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.eclipse.kura.certificate.enrollment;version="[1.0,2.0]",
+ org.eclipse.kura.configuration;version="[1.2,2.0)",
+ org.slf4j;version="1.7.32"
+Service-Component: OSGI-INF/*.xml
+Bundle-ActivationPolicy: lazy

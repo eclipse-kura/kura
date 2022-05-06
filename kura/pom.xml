@@ -42,6 +42,7 @@
 
         <module>org.eclipse.kura.core</module>
         <module>org.eclipse.kura.core.certificates</module>
+        <module>org.eclipse.kura.core.certificates.enrollment.est</module>
         <module>org.eclipse.kura.core.keystore</module>
         <module>org.eclipse.kura.core.cloud</module>
         <module>org.eclipse.kura.core.cloud.factory</module>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+	 Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.core.certificates.enrollment.est.ESTEnrollmentService" 
+         name="ESTEnrollmentService" 
+         description="The ESTEnrollmentService allows the automated certificate enrollment with a trusted Certificate Authority (CA).">
+
+        <AD id="enabled"
+            name="Enabled"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enables the ESTEnrollmentSErvice"/>
+    
+        <AD id="server.url"
+            name="EST server endpoint"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="https://est-server-endpoint"
+            description="Specifies the EST server endpoint." />
+
+        <AD id="server.ca-root.certificate"
+            name="CA root certificate"
+            type="String"
+            cardinality="0"
+            required="false"
+            description="CA root certificate in PEM format.|TextArea" />
+
+        <AD id="client.tls.enabled"
+            name="TLS Client authentication"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enables the TLS Client Authentication." />
+
+        <AD id="client.http.basic-authentication"
+            name="HTTP basic authentication"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enables the HTTP basic authentication. Requires username and password." />
+
+        <AD id="client.http.basic-authentication.digest"
+            name="HTTP basic authentication digest"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="User the HTTP basic authentication digest. Requires username and password." />
+
+        <AD id="client.http.basic-authentication.username"
+            name="HTTP basic authentication username"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="Username for HTTP basic authentication." />
+
+        <AD id="client.http.basic-authentication.password"
+            name="HTTP basic authentication username"
+            type="Password"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="Password for HTTP basic authentication." />
+
+        <AD id="client.pof"
+            name="Proof-of-Possession"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enable Proof-of-Possession." />
+            
+        <AD id="client.renew"
+            name="Client Certificate renew"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Enable automatic client certificate renew." />
+            
+        <AD id="server.rollover"
+            name="CA certificate rollover"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="true"
+            description="Enable automatic CA certificate rollover." />
+
+        <AD id="SslManagerService.target"
+            name="SslManagerService Target Filter"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="(kura.service.pid=org.eclipse.kura.ssl.SslManagerService)"
+            description="Specifies, as an OSGi target filter, the pid of the SslManagerService used to create TLS connection." />
+
+        <AD id="client.subject.dn"
+            name="Subject Distinguished Name (DN)"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="" 
+            description="Distinguished Name (DN) to be used as Subject in the CSR." />
+            
+        <AD id="client.keypair.algorithm"
+            name="KeyPair generator algorithm"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=""
+            description="KeyPair generator algorithm to use." />
+
+        <AD id="client.csr.algorithm"
+            name="CSR signer algorithm"
+            type="String"
+            cardinality="0" 
+            required="true"
+            default="" 
+            description="Signer algorithm to use." />
+    </OCD>
+    <Designate pid="org.eclipse.kura.core.certificates.enrollment.est.ESTEnrollmentService">
+        <Object ocdref="org.eclipse.kura.core.certificates.enrollment.est.ESTEnrollmentService"/>
+    </Designate>
+</MetaData>

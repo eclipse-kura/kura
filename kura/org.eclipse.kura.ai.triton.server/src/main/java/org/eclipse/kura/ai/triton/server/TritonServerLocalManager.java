@@ -60,6 +60,7 @@ public class TritonServerLocalManager {
     }
 
     private void startLocalServerMonitor() {
+        this.serverCommand = createServerCommand();
         this.scheduledFuture = this.scheduledExecutorService.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName(getClass().getSimpleName());
             if (!isLocalServerRunning()) {

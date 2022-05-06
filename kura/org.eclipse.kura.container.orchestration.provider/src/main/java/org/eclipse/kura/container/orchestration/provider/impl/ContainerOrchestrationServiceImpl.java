@@ -182,14 +182,20 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private String getContainerVersion(Container container) {
         String version = "";
-        if (container.getImage().split(":").length > 1) {
-            version = container.getImage().split(":")[1];
+        String[] image = container.getImage().split(":");
+        if (image.length > 1 && !image[0].startsWith("sha256")) {
+            version = image[1];
         }
         return version;
     }
 
     private String getContainerTag(Container container) {
-        return container.getImage().split(":")[0];
+        String[] image = container.getImage().split(":");
+        if (image[0].startsWith("sha256")) {
+            return "none";
+        } else {
+            return image[0];
+        }
     }
 
     private List<Integer> parseExternalPortsFromDockerPs(ContainerPort[] ports) {

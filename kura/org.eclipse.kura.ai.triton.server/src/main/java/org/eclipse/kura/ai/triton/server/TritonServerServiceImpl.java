@@ -88,8 +88,10 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         this.options = new TritonServerServiceOptions(properties);
         if (isConfigurationValid()) {
             setGrpcResources();
-            this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
-            this.tritonServerLocalManager.start();
+            if (this.options.isLocalEnabled()) {
+                this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
+                this.tritonServerLocalManager.start();
+            }
             loadModels();
         } else {
             logger.warn("The provided configuration is not valid");
@@ -104,8 +106,12 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         this.options = new TritonServerServiceOptions(properties);
         if (isConfigurationValid()) {
             setGrpcResources();
-            this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
-            this.tritonServerLocalManager.start();
+            if (this.options.isLocalEnabled()) {
+                this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
+                this.tritonServerLocalManager.start();
+            } else {
+                this.tritonServerLocalManager = null;
+            }
             loadModels();
         } else {
             logger.warn("The provided configuration is not valid");
@@ -114,7 +120,9 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     protected void deactivate() {
         logger.info("Deactivate TritonServerService...");
-        this.tritonServerLocalManager.stop();
+        if (nonNull(this.tritonServerLocalManager)) {
+            this.tritonServerLocalManager.stop();
+        }
         this.grpcChannel.shutdownNow();
     }
 

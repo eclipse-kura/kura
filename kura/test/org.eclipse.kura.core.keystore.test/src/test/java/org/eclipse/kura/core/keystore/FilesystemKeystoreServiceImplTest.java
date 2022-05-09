@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -99,6 +101,10 @@ public class FilesystemKeystoreServiceImplTest {
         try (OutputStream os = new FileOutputStream(STORE_PATH)) {
             this.store.store(os, STORE_PASS.toCharArray());
         }
+
+        // clean test keystores
+        Files.deleteIfExists(Paths.get(NEW_STORE_PATH));
+        Files.deleteIfExists(Paths.get(UPDATED_NEW_STORE_PATH));
     }
 
     @Test

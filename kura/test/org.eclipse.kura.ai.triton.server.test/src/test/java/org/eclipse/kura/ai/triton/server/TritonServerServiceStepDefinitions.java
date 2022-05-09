@@ -153,11 +153,7 @@ public abstract class TritonServerServiceStepDefinitions {
     }
 
     protected void whenAskingIfEngineIsReady() {
-        try {
-            this.isEngineReady = this.tritonServerService.isEngineReady();
-        } catch (KuraException e) {
-            this.exceptionCaught = true;
-        }
+        this.isEngineReady = this.tritonServerService.isEngineReady();
     }
 
     protected void whenTritonServerIsActivated(Map<String, Object> properties) {

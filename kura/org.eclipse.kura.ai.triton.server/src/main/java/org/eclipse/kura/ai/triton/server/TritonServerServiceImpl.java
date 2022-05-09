@@ -148,27 +148,26 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     protected void loadModels() {
-        if (!this.options.isLocalEnabled()) {
-            int index = 0;
-            try {
-                while (!isEngineReady()) {
-                    if (index++ >= 6) {
-                        logger.warn("Cannot load models since server is not ready.");
-                        return;
-                    }
-                    TritonServerLocalManager.sleepFor(10);
-                }
-            } catch (KuraException e) {
-                logger.debug("Cannot read engine status", e);
-            }
-            this.options.getModels().forEach(modelName -> {
-                try {
-                    loadModel(modelName, Optional.empty());
-                } catch (KuraException e) {
-                    logger.error("Cannot load model " + modelName, e);
-                }
-            });
+        if (this.options.isLocalEnabled() || this.options.getModels().isEmpty()) {
+            return;
         }
+
+        int counter = 0;
+        while (!isEngineReady()) {
+            if (counter++ >= 6) {
+                logger.warn("Cannot load models since server is not ready.");
+                return;
+            }
+            TritonServerLocalManager.sleepFor(250);
+        }
+
+        this.options.getModels().forEach(modelName -> {
+            try {
+                loadModel(modelName, Optional.empty());
+            } catch (KuraException e) {
+                logger.error("Cannot load model " + modelName, e);
+            }
+        });
     }
 
     @Override
@@ -256,7 +255,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     @Override
-    public boolean isEngineReady() throws KuraException {
+    public boolean isEngineReady() {
         boolean isAlive = false;
 
         ServerLiveRequest serverLiveRequest = ServerLiveRequest.getDefaultInstance();
@@ -264,7 +263,8 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             ServerLiveResponse serverLiveResponse = this.grpcStub.serverLive(serverLiveRequest);
             isAlive = serverLiveResponse.getLive();
         } catch (StatusRuntimeException e) {
-            throw new KuraIOException(e, "Cannot get the status of the server");
+            logger.debug("Cannot get the status of the server: ", e);
+            return false;
         }
         return isAlive;
     }

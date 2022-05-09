@@ -193,7 +193,7 @@ public abstract class FirewallOpenPortConfigIP<T extends IPAddress> implements F
         if (getClass() != obj.getClass()) {
             return false;
         }
-        FirewallOpenPortConfigIP other = (FirewallOpenPortConfigIP) obj;
+        FirewallOpenPortConfigIP<?> other = (FirewallOpenPortConfigIP<?>) obj;
         return Objects.equals(permittedInterfaceName, other.permittedInterfaceName)
                 && Objects.equals(permittedMac, other.permittedMac)
                 && Objects.equals(permittedNetwork, other.permittedNetwork) && port == other.port

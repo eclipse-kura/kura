@@ -148,35 +148,27 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     protected void loadModels() {
-        if (this.options.isLocalEnabled() || this.options.getModels().isEmpty()) {
-            return;
-        }
-
-        boolean engineIsReady = false;
-        int counter = 0;
-        do {
+        if (!this.options.isLocalEnabled()) {
+            int index = 0;
             try {
-                engineIsReady = isEngineReady();
+                while (!isEngineReady()) {
+                    if (index++ >= 6) {
+                        logger.warn("Cannot load models since server is not ready.");
+                        return;
+                    }
+                    TritonServerLocalManager.sleepFor(10);
+                }
             } catch (KuraException e) {
                 logger.debug("Cannot read engine status", e);
             }
-
-            if (!engineIsReady) {
-                if (counter++ > 5) {
-                    logger.warn("Cannot load models since server is not ready.");
-                    return;
+            this.options.getModels().forEach(modelName -> {
+                try {
+                    loadModel(modelName, Optional.empty());
+                } catch (KuraException e) {
+                    logger.error("Cannot load model " + modelName, e);
                 }
-                TritonServerLocalManager.sleepFor(250);
-            }
-        } while (!engineIsReady);
-
-        this.options.getModels().forEach(modelName -> {
-            try {
-                loadModel(modelName, Optional.empty());
-            } catch (KuraException e) {
-                logger.error("Cannot load model " + modelName, e);
-            }
-        });
+            });
+        }
     }
 
     @Override

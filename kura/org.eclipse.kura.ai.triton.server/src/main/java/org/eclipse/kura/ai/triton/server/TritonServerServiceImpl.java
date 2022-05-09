@@ -149,9 +149,9 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     protected void loadModels() {
         if (!this.options.isLocalEnabled()) {
-            int index = 0;
+            int counter = 0;
             while (!isEngineReady()) {
-                if (index++ >= 6) {
+                if (counter++ >= 6) {
                     logger.warn("Cannot load models since server is not ready.");
                     return;
                 }

@@ -157,7 +157,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         keystoreService.updated(properties);
 
-        assertTrue(new File(NEW_STORE_PATH).exists());
+        assertTrue(new File(NEW_STORE_PATH).isFile());
     }
 
     @Test(expected = IllegalArgumentException.class)

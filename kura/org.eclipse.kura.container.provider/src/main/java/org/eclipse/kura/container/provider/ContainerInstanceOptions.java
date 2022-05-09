@@ -161,7 +161,9 @@ public class ContainerInstanceOptions {
         }
 
         for (String entry : stringToSplit.trim().split(",")) {
-            stringList.add(entry.trim());
+            if (entry.trim().length() > 0) {
+                stringList.add(entry.trim());                
+            }
         }
 
         return stringList;

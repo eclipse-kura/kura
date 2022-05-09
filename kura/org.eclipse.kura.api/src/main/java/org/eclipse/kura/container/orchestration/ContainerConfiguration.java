@@ -202,8 +202,7 @@ public class ContainerConfiguration {
     }
 
     /**
-     * Returns a List<String> of container entry points. If this field is left empty
-     * the default container entrypoint will be used.
+     * Returns a List<String> of container entry points. An empty list can be returned if no entrypoints are specified.
      *
      * @return
      * @since 2.6

@@ -615,6 +615,14 @@ public class ContainerInstanceOptionsTest {
 
         thenIsNotNullContainerDescriptor();
     }
+    
+    @Test
+    public void testExtraCommaInEntryPointFeild() {
+        givenDifferentProperties();
+        givenDiffrentConfigurableGenericDockerServiceOptions();
+        
+        thenCheckIfExtraCommasAreIgnored();
+    }
 
     private void givenNullProperties() {
         this.properties = null;
@@ -663,11 +671,15 @@ public class ContainerInstanceOptionsTest {
         this.newProperties.put(REGISTRY_USERNAME, "test");
         this.newProperties.put(REGISTRY_PASSWORD, "test");
         this.newProperties.put(IMAGES_DOWNLOAD_TIMEOUT, 100);
-        this.newProperties.put(CONTAINER_ENTRY_POINT, "./test.py,-v,-m,--human-readable");
+        this.newProperties.put(CONTAINER_ENTRY_POINT, "./test.py,-v,-m,--human-readable,,,");
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
         this.cgdso = new ContainerInstanceOptions(this.properties);
+    }
+    
+    private void givenDiffrentConfigurableGenericDockerServiceOptions() {
+        this.cgdso = new ContainerInstanceOptions(this.newProperties);
     }
 
     private void givenEnabled(boolean b) {
@@ -919,5 +931,9 @@ public class ContainerInstanceOptionsTest {
 
     private void thenIsNotNullContainerDescriptor() {
         assertNotNull(this.containerDescriptor);
+    }
+    
+    private void thenCheckIfExtraCommasAreIgnored() {
+        assertEquals(Arrays.asList("./test.py","-v","-m","--human-readable"), this.cgdso.getEntryPoint());
     }
 }

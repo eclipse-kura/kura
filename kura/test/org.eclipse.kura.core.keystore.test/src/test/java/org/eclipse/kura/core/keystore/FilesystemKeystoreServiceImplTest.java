@@ -129,6 +129,7 @@ public class FilesystemKeystoreServiceImplTest {
 
     @Test
     public void testCheckKeystoreFileCreation() throws KuraException, KeyStoreException {
+        assertFalse(new File(NEW_STORE_PATH).isFile());
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, NEW_STORE_PATH);
 
@@ -140,12 +141,13 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        assertTrue(new File(NEW_STORE_PATH).exists());
+        assertTrue(new File(NEW_STORE_PATH).isFile());
 
     }
 
     @Test
     public void testCheckKeystoreFileCreationWithUpdate() throws KuraException, KeyStoreException {
+        assertFalse(new File(NEW_STORE_PATH).isFile());
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, NEW_STORE_PATH);
 
@@ -161,7 +163,7 @@ public class FilesystemKeystoreServiceImplTest {
 
         keystoreService.updated(properties);
 
-        assertTrue(new File(NEW_STORE_PATH).exists());
+        assertTrue(new File(NEW_STORE_PATH).isFile());
     }
 
     @Test(expected = IllegalArgumentException.class)

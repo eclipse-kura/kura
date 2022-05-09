@@ -135,7 +135,7 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        assertTrue(new File(NEW_STORE_PATH).exists());
+        assertTrue(new File(NEW_STORE_PATH).isFile());
 
     }
 

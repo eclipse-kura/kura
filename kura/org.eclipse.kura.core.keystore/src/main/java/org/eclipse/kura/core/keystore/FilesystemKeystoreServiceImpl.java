@@ -154,8 +154,15 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         this.keystoreServiceOptions = new KeystoreServiceOptions(properties, this.cryptoService);
         this.selfUpdaterExecutor = Executors.newSingleThreadScheduledExecutor();
 
-        if (keystoreExists(this.keystoreServiceOptions.getKeystorePath())
-                && this.keystoreServiceOptions.needsRandomPassword()) {
+        if (!keystoreExists(this.keystoreServiceOptions.getKeystorePath())) {
+            try {
+                createKeystore(this.keystoreServiceOptions.getKeystorePath());
+            } catch (IOException e) {
+                logger.error("Keystore file creation failed", e);
+            }
+        }
+
+        if (this.keystoreServiceOptions.needsRandomPassword()) {
             setRandomPassword();
         }
 
@@ -223,17 +230,26 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     }
 
     private boolean keystoreExists(String keystorePath) {
-        boolean result = false;
-        File fKeyStore = new File(keystorePath);
-        if (fKeyStore.exists()) {
-            result = true;
+        return keystorePath != null && new File(keystorePath).exists();
+    }
+
+    private void createKeystore(String keystorePath) throws IOException {
+        if (keystorePath == null) {
+            return;
         }
-        return result;
+        File fKeyStore = new File(keystorePath);
+        if (!fKeyStore.createNewFile()) {
+            logger.error("Keystore file already exists at location {}", keystorePath);
+        }
     }
 
     private void updateKeystorePath(KeystoreServiceOptions newOptions) {
         if (!keystoreExists(newOptions.getKeystorePath())) {
-            return;
+            try {
+                createKeystore(newOptions.getKeystorePath());
+            } catch (IOException e) {
+                logger.error("Keystore file creation failed", e);
+            }
         }
 
         try {

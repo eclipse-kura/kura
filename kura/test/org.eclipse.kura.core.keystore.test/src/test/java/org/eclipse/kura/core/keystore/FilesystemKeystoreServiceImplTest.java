@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,6 +69,7 @@ public class FilesystemKeystoreServiceImplTest {
 
     private static final String STORE_PATH = "target/key.store";
     private static final String NEW_STORE_PATH = "target/newKey.store";
+    private static final String UPDATED_NEW_STORE_PATH = "target/updatedNewKey.store";
     private static final String STORE_PASS = "pass";
 
     private KeyStore store;
@@ -117,6 +119,43 @@ public class FilesystemKeystoreServiceImplTest {
 
         assertNotNull(keystore);
         assertEquals(Collections.list(this.store.aliases()), Collections.list(keystore.aliases()));
+    }
+
+    @Test
+    public void testCheckKeystoreFileCreation() throws KuraException, KeyStoreException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, NEW_STORE_PATH);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        assertTrue(new File(NEW_STORE_PATH).exists());
+
+    }
+
+    @Test
+    public void testCheckKeystoreFileCreationWithUpdate() throws KuraException, KeyStoreException {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, NEW_STORE_PATH);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.activate(componentContext, properties);
+
+        properties.put(KEY_KEYSTORE_PATH, UPDATED_NEW_STORE_PATH);
+
+        keystoreService.updated(properties);
+
+        assertTrue(new File(NEW_STORE_PATH).exists());
     }
 
     @Test(expected = IllegalArgumentException.class)

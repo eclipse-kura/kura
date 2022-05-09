@@ -14,6 +14,10 @@ package org.eclipse.kura.core.keystore;
 
 import static java.util.Objects.isNull;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -51,11 +55,22 @@ public class KeystoreServiceOptions {
 
         this.pid = (String) properties.get(KEY_SERVICE_PID);
 
-        this.keystorePath = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
+        String keyStorePath = (String) properties.getOrDefault(KEY_KEYSTORE_PATH, DEFAULT_KEYSTORE_PATH);
+        try {
+            this.keystorePath = validateAndNormalize(keyStorePath);
+        } catch (Exception e) {
+            logger.error("Keystore path {} not valid", keyStorePath);
+            throw new IllegalArgumentException("Invalid keystore path");
+        }
 
         this.keystorePassword = extractPassword(properties, cryptoService);
 
         this.randomPassword = (boolean) properties.getOrDefault(KEY_RANDOMIZE_PASSWORD, DEFAULT_RANDOMIZE_PASSWORD);
+    }
+
+    private String validateAndNormalize(String keystorePath) throws URISyntaxException, InvalidPathException {
+        Paths.get(keystorePath); // throw InvalidPathException if invalid
+        return new URI(keystorePath).normalize().toString();
     }
 
     private static Password extractPassword(final Map<String, Object> properties, final CryptoService cryptoService) {

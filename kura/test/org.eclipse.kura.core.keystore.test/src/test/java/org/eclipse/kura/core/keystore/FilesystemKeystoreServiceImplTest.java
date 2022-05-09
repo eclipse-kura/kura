@@ -141,6 +141,7 @@ public class FilesystemKeystoreServiceImplTest {
 
     @Test
     public void testCheckKeystoreFileCreationWithUpdate() throws KuraException, KeyStoreException {
+        assertFalse(new File(NEW_STORE_PATH).isFile());
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, NEW_STORE_PATH);
 

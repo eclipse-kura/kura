@@ -230,7 +230,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     }
 
     private boolean keystoreExists(String keystorePath) {
-        return keystorePath != null && new File(keystorePath).exists();
+        return keystorePath != null && new File(keystorePath).isFile();
     }
 
     private void createKeystore(String keystorePath) throws IOException {

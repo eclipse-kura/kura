@@ -28,7 +28,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void createDecryptionFolderShouldWork() {
         givenTargetFolder("target_folder");
-        givenDoesNotExist(this.targetFolder);
+        givenNoFileExistsAtPath(this.targetFolder);
 
         whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
 
@@ -71,7 +71,7 @@ public class TritonServerEncryptionUtilsTest {
         assertTrue(Files.exists(targetFolderPath));
     }
 
-    private void givenDoesNotExist(String folderPath) {
+    private void givenNoFileExistsAtPath(String folderPath) {
         Path targetFolderPath = Paths.get(folderPath);
         assertFalse(Files.exists(targetFolderPath));
     }

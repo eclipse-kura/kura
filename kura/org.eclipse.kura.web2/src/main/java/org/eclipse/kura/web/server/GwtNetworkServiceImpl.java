@@ -741,7 +741,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         checkXSRFToken(xsrfToken);
         ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
         Map<String, Object> properties = new HashMap<>();
-        StringBuilder basePropName = new StringBuilder("net.interface.").append(config.getName()).append(".config.");
+        String basePropName = new StringBuilder("net.interface.").append(config.getName()).append(".config.")
+                .toString();
 
         String status = config.getStatus();
         if (logger.isDebugEnabled()) {
@@ -749,21 +750,21 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         }
         try {
             NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(status);
-            properties.put(basePropName.toString() + "ip4.status", netInterfaceStatus.name());
+            properties.put(basePropName + "ip4.status", netInterfaceStatus.name());
 
             if (config.getHwTypeEnum() == GwtNetIfType.ETHERNET || config.getHwTypeEnum() == GwtNetIfType.WIFI
                     || config.getHwTypeEnum() == GwtNetIfType.MODEM) {
-                fillIp4AndDhcpProperties(config, properties, basePropName.toString());
+                fillIp4AndDhcpProperties(config, properties, basePropName);
             }
 
             if (config.getHwTypeEnum() == GwtNetIfType.WIFI && config instanceof GwtWifiNetInterfaceConfig) {
                 GwtWifiConfig gwtWifiConfig = ((GwtWifiNetInterfaceConfig) config).getActiveWifiConfig();
                 if (gwtWifiConfig != null) {
-                    fillWifiProperties(gwtWifiConfig, properties, basePropName.toString(), config.getName());
+                    fillWifiProperties(gwtWifiConfig, properties, basePropName, config.getName());
                 }
             } else if (config.getHwTypeEnum() == GwtNetIfType.MODEM && config instanceof GwtModemInterfaceConfig) {
                 GwtModemInterfaceConfig gwtModemConfig = (GwtModemInterfaceConfig) config;
-                fillModemProperties(gwtModemConfig, properties, basePropName.toString(), netInterfaceStatus);
+                fillModemProperties(gwtModemConfig, properties, basePropName, netInterfaceStatus);
             }
 
             configurationService.updateConfiguration("org.eclipse.kura.net.admin.NetworkConfigurationService",

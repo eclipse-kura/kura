@@ -22,7 +22,7 @@ import org.junit.Test;
 
 public class TritonServerEncryptionUtilsTest {
 
-    private static final String WORKDIR = "./decr_folder";
+    private static final String WORKDIR = System.getProperty("java.io.tmpdir") + "/decr_folder";
     private boolean exceptionOccurred = false;
     private String targetFolder;
 
@@ -71,7 +71,7 @@ public class TritonServerEncryptionUtilsTest {
 
         assertTrue(Files.exists(encryptedFilePath));
 
-        String decryptedFile = "target/test-classes/file";
+        String decryptedFile = WORKDIR + "/file";
         Path decryptedFilePath = Paths.get(decryptedFile);
 
         assertFalse(Files.exists(decryptedFilePath));
@@ -103,7 +103,7 @@ public class TritonServerEncryptionUtilsTest {
 
         assertTrue(Files.exists(encryptedFilePath));
 
-        String decryptedFile = "target/test-classes/file";
+        String decryptedFile = WORKDIR + "/file";
         Path decryptedFilePath = Paths.get(decryptedFile);
 
         assertFalse(Files.exists(decryptedFilePath));
@@ -126,7 +126,7 @@ public class TritonServerEncryptionUtilsTest {
 
         assertTrue(Files.exists(encryptedFilePath));
 
-        String decryptedFile = "target/test-classes/file";
+        String decryptedFile = WORKDIR + "/file";
         Path decryptedFilePath = Paths.get(decryptedFile);
 
         try {

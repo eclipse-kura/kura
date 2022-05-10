@@ -13,9 +13,13 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Set;
 
+import org.junit.After;
 import org.junit.Test;
 
 public class TritonServerEncryptionUtilsTest {
+
+    private boolean exceptionOccurred = false;
+    private String targetFolder;
 
     /*
      * Scenarios
@@ -23,76 +27,29 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void createDecryptionFolderShouldWork() {
-        final String TARGET_FOLDER = "target_folder";
-        Path targetFolderPath = Paths.get(TARGET_FOLDER);
-
         // Given: Target folder should not exists
-        assertFalse(Files.exists(targetFolderPath));
+        givenTargetFolder("target_folder");
+        givenDoesNotExist(this.targetFolder);
 
         // When: Run the createDecryptionFolder method
-        try {
-            TritonServerEncryptionUtils.createDecryptionFolder(TARGET_FOLDER);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            assertTrue(false);
-        }
+        whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
 
         // Then: Folder should exists
-        assertTrue(Files.isDirectory(targetFolderPath));
-
-        // Then: Folder should have the expected permissions
-        try {
-            Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(targetFolderPath,
-                    LinkOption.NOFOLLOW_LINKS);
-            Set<PosixFilePermission> expectedPermissions = PosixFilePermissions.fromString("rwx------");
-
-            assertEquals(expectedPermissions, permissions);
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-
-        // Cleanup
-        try {
-            Files.delete(targetFolderPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
+        thenTargetFolderExists(this.targetFolder);
+        thenTargetFolderHasPermissions(this.targetFolder, "rwx------");
+        thenNoExceptionOccurred();
     }
 
     @Test
     public void createDecryptionFolderShouldThrowOnNameClashes() {
-        final String TARGET_FOLDER = "another_folder";
-        Path targetFolderPath = Paths.get(TARGET_FOLDER);
-
         // Given: A file exists at target path
-        try {
-            Files.createFile(targetFolderPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-        assertTrue(Files.exists(targetFolderPath));
+        givenTargetFolder("another_folder");
+        givenClashingFilename(this.targetFolder);
 
         // When: Run the createDecryptionFolder method
-        try {
-            TritonServerEncryptionUtils.createDecryptionFolder(TARGET_FOLDER);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
+        whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
         // Then: An exception was thrown
-        // TODO
-
-        // Cleanup
-        try {
-            Files.delete(targetFolderPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            assertTrue(false);
-        }
-
+        thenAnExceptionOccurred();
     }
 
     /*
@@ -102,15 +59,78 @@ public class TritonServerEncryptionUtilsTest {
     /*
      * Given
      */
-    // TODO
+    private void givenTargetFolder(String folderPath) {
+        this.targetFolder = folderPath;
+    }
+
+    private void givenClashingFilename(String folderPath) {
+        Path targetFolderPath = Paths.get(folderPath);
+        assertFalse(Files.exists(targetFolderPath));
+
+        try {
+            Files.createFile(targetFolderPath);
+        } catch (IOException e) {
+            this.exceptionOccurred = true;
+        }
+
+        assertTrue(Files.exists(targetFolderPath));
+    }
+
+    private void givenDoesNotExist(String folderPath) {
+        Path targetFolderPath = Paths.get(folderPath);
+        assertFalse(Files.exists(targetFolderPath));
+    }
 
     /*
      * When
      */
-    // TODO
+    private void whenCreateDecryptionFolderIsCalledWith(String folderPath) {
+        try {
+            TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
+        } catch (IOException e) {
+            this.exceptionOccurred = true;
+        }
+    }
 
     /*
      * Then
      */
-    // TODO
+    private void thenTargetFolderExists(String folderPath) {
+        Path targetFolderPath = Paths.get(folderPath);
+        assertTrue(Files.isDirectory(targetFolderPath));
+    }
+
+    private void thenTargetFolderHasPermissions(String folderPath, String permissions) {
+        Path targetFolderPath = Paths.get(folderPath);
+        try {
+            Set<PosixFilePermission> readPermissions = Files.getPosixFilePermissions(targetFolderPath,
+                    LinkOption.NOFOLLOW_LINKS);
+            Set<PosixFilePermission> expectedPermissions = PosixFilePermissions.fromString(permissions);
+
+            assertEquals(expectedPermissions, readPermissions);
+        } catch (IOException e) {
+            this.exceptionOccurred = true;
+        }
+    }
+
+    private void thenNoExceptionOccurred() {
+        assertFalse(this.exceptionOccurred);
+    }
+
+    private void thenAnExceptionOccurred() {
+        assertTrue(this.exceptionOccurred);
+    }
+
+    /*
+     * Cleanup
+     */
+    @After
+    public void cleanup() {
+        Path targetFolderPath = Paths.get(this.targetFolder);
+        try {
+            Files.delete(targetFolderPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -36,7 +36,7 @@ public class TritonServerEncryptionUtils {
         Files.setPosixFilePermissions(targetFolderPath, permissions);
     }
 
-    protected static void decryptModel(String password, String inputFilePath, String outputFolder) {
+    protected static void decryptModel(String password, String inputFilePath, String outputFolder) throws IOException {
         // TODO
     }
 

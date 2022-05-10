@@ -67,6 +67,45 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldWork() {
         // Given: encrypted file at path
+        String encryptedFile = "target/test-classes/another_file.gpg";
+        Path encryptedFilePath = Paths.get(encryptedFile);
+
+        assertTrue(Files.exists(encryptedFilePath));
+
+        // Given: decrypted file at path
+        String decryptedFile = WORKDIR + "/file";
+        Path decryptedFilePath = Paths.get(decryptedFile);
+
+        assertFalse(Files.exists(decryptedFilePath));
+
+        // When: decryptModel is called with params
+        try {
+            TritonServerEncryptionUtils.decryptModel("password", encryptedFile, decryptedFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        // Then: no exception occurred
+        assertFalse(this.exceptionOccurred);
+
+        // Then: the decrypted file exists
+        assertTrue(Files.exists(decryptedFilePath));
+
+        // Then: the decrypted file content matches expectations
+        try {
+            List<String> content = Files.readAllLines(decryptedFilePath);
+
+            assertEquals(content.size(), 1);
+            assertEquals(content.get(0), "cudumar");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void decryptModelShouldWorkWithASCIIArmoredFormat() {
+        // Given: encrypted file at path
         String encryptedFile = "target/test-classes/empty_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 

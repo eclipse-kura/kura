@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -11,13 +12,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.Comparator;
 import java.util.Set;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public class TritonServerEncryptionUtilsTest {
 
+    private static final String WORKDIR = "./decr_folder";
     private boolean exceptionOccurred = false;
     private String targetFolder;
 
@@ -27,7 +31,19 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void createDecryptionFolderShouldWork() {
-        givenTargetFolder("target_folder");
+        givenTargetFolder(WORKDIR + "/target_folder");
+        givenNoFileExistsAtPath(this.targetFolder);
+
+        whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
+
+        thenTargetFolderExists(this.targetFolder);
+        thenTargetFolderHasPermissions(this.targetFolder, "rwx------");
+        thenNoExceptionOccurred();
+    }
+
+    @Test
+    public void createDecryptionFolderShouldWorkWithNestedPath() {
+        givenTargetFolder(WORKDIR + "/new/nested/folder");
         givenNoFileExistsAtPath(this.targetFolder);
 
         whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
@@ -39,7 +55,7 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void createDecryptionFolderShouldThrowOnNameClashes() {
-        givenTargetFolder("another_folder");
+        givenTargetFolder(WORKDIR + "/another_folder");
         givenAFileExistsAtPath(this.targetFolder);
 
         whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
@@ -119,11 +135,21 @@ public class TritonServerEncryptionUtilsTest {
     /*
      * Cleanup
      */
+    @Before
+    public void setup() {
+        Path workdirPath = Paths.get(WORKDIR);
+        try {
+            Files.createDirectories(workdirPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @After
     public void cleanup() {
-        Path targetFolderPath = Paths.get(this.targetFolder);
+        Path workdirPath = Paths.get(WORKDIR);
         try {
-            Files.delete(targetFolderPath);
+            Files.walk(workdirPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
         } catch (IOException e) {
             e.printStackTrace();
         }

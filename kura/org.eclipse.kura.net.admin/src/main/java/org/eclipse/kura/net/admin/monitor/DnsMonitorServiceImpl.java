@@ -117,6 +117,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         stopThread.set(false);
         monitorTask = this.executor.submit(() -> {
             while (!stopThread.get()) {
+                logger.info("DnsMonitor thread start");
                 Thread.currentThread().setName("DnsMonitorServiceImpl");
                 Set<IPAddress> dnsServers = DnsMonitorServiceImpl.this.dnsUtil.getDnServers();
 
@@ -139,23 +140,33 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                     // there was a change - deal with it
                     logger.info("Detected DNS resolv.conf change - restarting DNS proxy");
                     DnsMonitorServiceImpl.this.forwarders = fwds;
+                    logger.info("1");
 
                     DnsServerConfig currentDnsServerConfig = this.dnsServer.getConfig();
+                    logger.info("2");
                     DnsServerConfigIP4 newDnsServerConfig = new DnsServerConfigIP4(
                             DnsMonitorServiceImpl.this.forwarders, DnsMonitorServiceImpl.this.allowedNetworks);
+                    logger.info("3");
 
-                    if (currentDnsServerConfig.equals(newDnsServerConfig)) {
+                    logger.info("Is currentDnsServerConfig null? " + new Boolean(currentDnsServerConfig == null));
+                    logger.info("Is newDnsServerConfig null? " + new Boolean(newDnsServerConfig == null));
+                    if (currentDnsServerConfig != null && !currentDnsServerConfig.equals(newDnsServerConfig)) {
+                        logger.info("4");
                         logger.debug("DNS server config has changed - updating from {} to {}", currentDnsServerConfig,
                                 newDnsServerConfig);
+                        logger.info("5");
 
                         reconfigureDNSProxy(newDnsServerConfig);
+                        logger.info("6");
                     }
 
                 }
+                logger.info("DnsMonitor thread stop");
                 try {
                     monitorWait();
                 } catch (InterruptedException e) {
                     logger.debug("DNS monitor interrupted", e);
+                    Thread.currentThread().interrupt();
                 }
             }
         });
@@ -217,6 +228,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     @Override
     public void handleEvent(Event event) {
+        logger.info("Dns handle event");
         logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
 
@@ -433,7 +445,9 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private void monitorWait() throws InterruptedException {
         if (stopThread != null) {
             synchronized (stopThread) {
+                logger.info("DnsMonitor wait start " + System.currentTimeMillis());
                 stopThread.wait(THREAD_INTERVAL);
+                logger.info("DnsMonitor wait stop " + System.currentTimeMillis());
             }
         }
     }

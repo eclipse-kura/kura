@@ -148,7 +148,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     protected void loadModels() {
-        if (this.options.isLocalEnabled() || this.options.getModels().isEmpty()) {
+        if (this.options.getModels().isEmpty()) {
             return;
         }
 

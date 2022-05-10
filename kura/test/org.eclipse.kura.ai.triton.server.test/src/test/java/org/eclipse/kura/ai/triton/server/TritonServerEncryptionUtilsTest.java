@@ -12,10 +12,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -231,9 +231,9 @@ public class TritonServerEncryptionUtilsTest {
 
     @After
     public void teardown() {
-        Path workdirPath = Paths.get(WORKDIR);
         try {
-            Files.walk(workdirPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+            FileUtils.cleanDirectory(new File(WORKDIR));
+            Files.delete(Paths.get(WORKDIR));
         } catch (IOException e) {
             e.printStackTrace();
         }

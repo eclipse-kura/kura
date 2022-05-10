@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -48,6 +49,7 @@ public class ContainerConfiguration {
     private Map<String, String> containerLoggerParameters;
     private String containerLoggingType;
     private ImageConfiguration imageConfig;
+    private ContainerNetworkConfiguration networkConfiguration;
 
     private ContainerConfiguration() {
     }
@@ -199,6 +201,16 @@ public class ContainerConfiguration {
     public int getImageDownloadTimeoutSeconds() {
         return this.imageConfig.getimageDownloadTimeoutSeconds();
     }
+    
+    /**
+     * return the container's network configuration as a {@link ContainerNetworkConfiguration}. 
+     * 
+     * @return
+     * @since 2.7
+     */
+    public ContainerNetworkConfiguration getContainerNetworkConfiguration() {
+        return this.networkConfiguration;
+    }
 
     /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
@@ -251,6 +263,7 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
+        private ContainerNetworkConfigurationBuilder networkConfigurationBuilder = new ContainerNetworkConfigurationBuilder();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -321,6 +334,16 @@ public class ContainerConfiguration {
             this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageDownloadTimeoutSeconds);
             return this;
         }
+        
+        /**
+         * Set the {@link NetworkConfiguration}
+         * 
+         * @since 2.7
+         */
+        public ContainerConfigurationBuilder setContainerNetowrkConfiguration(ContainerNetworkConfiguration networkConfiguration) {
+            this.networkConfigurationBuilder.setNetworkMode(networkConfiguration.getNetworkMode());
+            return this;
+        }
 
         /**
          * Set the {@link ImageConfiguration}
@@ -349,6 +372,7 @@ public class ContainerConfiguration {
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
             result.imageConfig = this.imageConfigBuilder.build();
+            result.networkConfiguration = this.networkConfigurationBuilder.build();
 
             return result;
         }

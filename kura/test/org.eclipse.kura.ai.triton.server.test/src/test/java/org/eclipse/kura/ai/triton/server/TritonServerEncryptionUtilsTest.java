@@ -146,7 +146,7 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @After
-    public void cleanup() {
+    public void teardown() {
         Path workdirPath = Paths.get(WORKDIR);
         try {
             Files.walk(workdirPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);

@@ -86,9 +86,6 @@ public class TritonServerEncryptionUtilsTest {
             this.exceptionOccurred = true;
         }
 
-        // Then: no exception occurred
-        assertFalse(this.exceptionOccurred);
-
         // Then: the decrypted file exists
         assertTrue(Files.exists(decryptedFilePath));
 
@@ -100,7 +97,11 @@ public class TritonServerEncryptionUtilsTest {
             assertEquals(content.get(0), "cudumar");
         } catch (IOException e) {
             e.printStackTrace();
+            this.exceptionOccurred = true;
         }
+
+        // Then: no exception occurred
+        assertFalse(this.exceptionOccurred);
     }
 
     @Test
@@ -125,9 +126,6 @@ public class TritonServerEncryptionUtilsTest {
             this.exceptionOccurred = true;
         }
 
-        // Then: no exception occurred
-        assertFalse(this.exceptionOccurred);
-
         // Then: the decrypted file exists
         assertTrue(Files.exists(decryptedFilePath));
 
@@ -139,7 +137,11 @@ public class TritonServerEncryptionUtilsTest {
             assertEquals(content.get(0), "42");
         } catch (IOException e) {
             e.printStackTrace();
+            this.exceptionOccurred = true;
         }
+
+        // Then: no exception occurred
+        assertFalse(this.exceptionOccurred);
     }
 
     @Test
@@ -164,11 +166,12 @@ public class TritonServerEncryptionUtilsTest {
             this.exceptionOccurred = true;
         }
 
+        // Then: decrypted file doesn't exists
+        assertFalse(Files.exists(decryptedFilePath));
+
         // Then: an exception occurred
         assertTrue(this.exceptionOccurred);
 
-        // Then: decrypted file doesn't exists
-        assertFalse(Files.exists(decryptedFilePath));
     }
 
     @Test

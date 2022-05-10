@@ -27,14 +27,11 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void createDecryptionFolderShouldWork() {
-        // Given: Target folder should not exists
         givenTargetFolder("target_folder");
         givenDoesNotExist(this.targetFolder);
 
-        // When: Run the createDecryptionFolder method
         whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
 
-        // Then: Folder should exists
         thenTargetFolderExists(this.targetFolder);
         thenTargetFolderHasPermissions(this.targetFolder, "rwx------");
         thenNoExceptionOccurred();
@@ -42,13 +39,11 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void createDecryptionFolderShouldThrowOnNameClashes() {
-        // Given: A file exists at target path
         givenTargetFolder("another_folder");
-        givenClashingFilename(this.targetFolder);
+        givenAFileExistsAtPath(this.targetFolder);
 
-        // When: Run the createDecryptionFolder method
         whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
-        // Then: An exception was thrown
+
         thenAnExceptionOccurred();
     }
 
@@ -63,7 +58,7 @@ public class TritonServerEncryptionUtilsTest {
         this.targetFolder = folderPath;
     }
 
-    private void givenClashingFilename(String folderPath) {
+    private void givenAFileExistsAtPath(String folderPath) {
         Path targetFolderPath = Paths.get(folderPath);
         assertFalse(Files.exists(targetFolderPath));
 

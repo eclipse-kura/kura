@@ -34,6 +34,7 @@ import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.container.orchestration.ContainerState;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor.ImageInstanceDescriptorBuilder;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.container.orchestration.listener.ContainerOrchestrationServiceListener;
@@ -286,19 +287,26 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         final Optional<ContainerInstanceDescriptor> existingInstance = listContainerDescriptors().stream()
                 .filter(c -> c.getContainerName().equals(container.getContainerName())).findAny();
 
-        final String containerId;
+        String containerId;
 
-        if (existingInstance.isPresent() && existingInstance.get().getContainerState() == ContainerState.ACTIVE) {
-            logger.info("Found already existing running container");
-            containerId = existingInstance.get().getContainerId();
-        } else if (!existingInstance.isPresent()) {
+        if (existingInstance.isPresent()) {
+
+            if (existingInstance.get().getContainerState() == ContainerState.ACTIVE) {
+                logger.info("Found already existing running container");
+                containerId = existingInstance.get().getContainerId();
+            } else {
+                logger.info("Found already exisiting not running container, recreating it..");
+                containerId = existingInstance.get().getContainerId();
+                deleteContainer(containerId);
+                pullImage(container.getImageConfiguration());
+                containerId = createContainer(container);
+                startContainer(containerId);
+
+            }
+        } else {
             logger.info("Creating new container instance");
             pullImage(container.getImageConfiguration());
             containerId = createContainer(container);
-            startContainer(containerId);
-        } else {
-            logger.info("Found already exisiting not running container, starting it..");
-            containerId = existingInstance.get().getContainerId();
             startContainer(containerId);
         }
 
@@ -439,6 +447,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             commandBuilder = containerEnviromentVariablesHandler(containerDescription, commandBuilder);
 
+            commandBuilder = containerEntrypointHandler(containerDescription, commandBuilder);
+
             // Host Configuration Related
             configuration = containerVolumeMangamentHandler(containerDescription, configuration);
 
@@ -567,6 +577,17 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         }
 
         return commandBuilder;
+
+    }
+
+    private CreateContainerCmd containerEntrypointHandler(ContainerConfiguration containerDescription,
+            CreateContainerCmd commandBuilder) {
+
+        if (containerDescription.getEntryPoint().isEmpty() || containerDescription.getEntryPoint() == null) {
+            return commandBuilder;
+        }
+
+        return commandBuilder.withEntrypoint(containerDescription.getEntryPoint());
 
     }
 
@@ -760,10 +781,17 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         List<ImageInstanceDescriptor> result = new ArrayList<>();
         images.forEach(image -> {
             InspectImageResponse iir = this.dockerClient.inspectImageCmd(image.getId()).exec();
-            result.add(
-                    ImageInstanceDescriptor.builder().setImageName(getImageName(image)).setImageTag(getImageTag(image))
-                            .setImageId(image.getId()).setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
-                            .setimageSize(iir.getSize().longValue()).setImageLabels(image.getLabels()).build());
+
+            ImageInstanceDescriptorBuilder imageBuilder = ImageInstanceDescriptor.builder()
+                    .setImageName(getImageName(image)).setImageTag(getImageTag(image)).setImageId(image.getId())
+                    .setImageAuthor(iir.getAuthor()).setImageArch(iir.getArch())
+                    .setimageSize(iir.getSize().longValue());
+
+            if (image.getLabels() != null) {
+                imageBuilder.setImageLabels(image.getLabels());
+            }
+
+            result.add(imageBuilder.build());
         });
         return result;
     }

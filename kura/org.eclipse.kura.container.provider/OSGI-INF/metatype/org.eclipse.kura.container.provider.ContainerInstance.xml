@@ -92,6 +92,11 @@
             type="String" cardinality="1"
             required="false" default="" />
             
+        <AD id="container.entrypoint" name="Entrypoint Override"
+            description="Comma separated list which is used to override the command used to start a container. Example: ./test.sh,-v,-d,--human-readable"
+            type="String" cardinality="1"
+            required="false" default="" />
+            
         <AD id="container.volume" name="Volume Mount"
             description="The path on the container at which you would like to mount a file or folder. Example: /path/on/host1:/path/on/container1, /path/on/host2:/path/on/container2." 
             type="String" cardinality="1"

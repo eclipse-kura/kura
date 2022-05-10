@@ -66,26 +66,33 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void decryptModelShouldWork() {
+        // Given: encrypted file at path
         String encryptedFile = "target/test-classes/empty_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));
 
+        // Given: decrypted file at path
         String decryptedFile = WORKDIR + "/file";
         Path decryptedFilePath = Paths.get(decryptedFile);
 
         assertFalse(Files.exists(decryptedFilePath));
 
+        // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("eurotech", encryptedFile, decryptedFile);
         } catch (IOException e1) {
             e1.printStackTrace();
             this.exceptionOccurred = true;
         }
+
+        // Then: no exception occurred
         assertFalse(this.exceptionOccurred);
 
+        // Then: the decrypted file exists
         assertTrue(Files.exists(decryptedFilePath));
 
+        // Then: the decrypted file content matches expectations
         try {
             List<String> content = Files.readAllLines(decryptedFilePath);
 
@@ -98,37 +105,46 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void decryptModelShouldThrowWithWrongPassword() {
+        // Given: encrypted file at path
         String encryptedFile = "target/test-classes/empty_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));
 
+        // Given: decrypted file at path
         String decryptedFile = WORKDIR + "/file";
         Path decryptedFilePath = Paths.get(decryptedFile);
 
         assertFalse(Files.exists(decryptedFilePath));
 
+        // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("wrongpassword", encryptedFile, decryptedFile);
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
         }
+
+        // Then: an exception occurred
         assertTrue(this.exceptionOccurred);
 
+        // Then: decrypted file doesn't exists
         assertFalse(Files.exists(decryptedFilePath));
     }
 
     @Test
     public void decryptModelShouldThrowIfDestinationFileAlreadyExists() {
+        // Given: encrypted file at path
         String encryptedFile = "target/test-classes/empty_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));
 
+        // Given: decrypted file at path
         String decryptedFile = WORKDIR + "/file";
         Path decryptedFilePath = Paths.get(decryptedFile);
 
+        // Given: a file at decryptedFilePath already exists
         try {
             Files.createFile(decryptedFilePath);
         } catch (IOException e) {
@@ -138,12 +154,15 @@ public class TritonServerEncryptionUtilsTest {
 
         assertTrue(Files.exists(decryptedFilePath));
 
+        // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("eurotech", encryptedFile, decryptedFile);
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
         }
+
+        // Then: an exception occurred
         assertTrue(this.exceptionOccurred);
     }
 

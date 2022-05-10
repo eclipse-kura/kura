@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
@@ -54,6 +55,7 @@ public class ContainerInstanceOptions {
     private static final Property<String> REGISTRY_PASSWORD = new Property<>("registry.password", "");
     private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>("container.image.download.timeout",
             500);
+    private static final Property<String> CONTAINER_NETWORKING_MODE = new Property<>("container.networkMode", "bridge");
 
     private final boolean enabled;
     private final String image;
@@ -74,6 +76,7 @@ public class ContainerInstanceOptions {
     private final Optional<String> registryUsername;
     private final Optional<String> registryPassword;
     private final int imageDownloadTimeout;
+    private final String containerNetworkingMode;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -99,6 +102,7 @@ public class ContainerInstanceOptions {
         this.registryUsername = REGISTRY_USERNAME.getOptional(properties);
         this.registryPassword = REGISTRY_PASSWORD.getOptional(properties);
         this.imageDownloadTimeout = IMAGES_DOWNLOAD_TIMEOUT.get(properties);
+        this.containerNetworkingMode = CONTAINER_NETWORKING_MODE.get(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -223,6 +227,10 @@ public class ContainerInstanceOptions {
     public Map<String, String> getLoggerParameters() {
         return this.containerLoggingParameters;
     }
+    
+    public String getContainerNetworkingMode() {
+        return this.containerNetworkingMode;
+    }
 
     public Optional<RegistryCredentials> getRegistryCredentials() {
         if (this.registryUsername.isPresent() && this.registryPassword.isPresent()) {
@@ -235,6 +243,10 @@ public class ContainerInstanceOptions {
 
     public int getImageDownloadTimeout() {
         return this.imageDownloadTimeout;
+    }
+    
+    private ContainerNetworkConfiguration buildContainerNetworkConfig() {
+        return new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder().setNetworkMode(getContainerNetworkingMode()).build();
     }
 
     private ImageConfiguration buildImageConfig() {
@@ -249,7 +261,7 @@ public class ContainerInstanceOptions {
                 .setInternalPorts(getContainerPortsInternal()).setEnvVars(getContainerEnvList())
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
-                .setLoggerParameters(getLoggerParameters()).build();
+                .setLoggerParameters(getLoggerParameters()).setContainerNetowrkConfiguration(buildContainerNetworkConfig()).build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -271,7 +283,7 @@ public class ContainerInstanceOptions {
                 this.containerLoggingParameters, this.containerName, this.containerVolumeString, this.containerVolumes,
                 this.enabled, this.externalPorts, this.image, this.imageDownloadTimeout, this.imageTag,
                 this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
-                this.registryURL, this.registryUsername, this.retryInterval);
+                this.registryURL, this.registryUsername, this.retryInterval, this.containerNetworkingMode);
     }
 
     @Override
@@ -298,7 +310,8 @@ public class ContainerInstanceOptions {
                 && Objects.equals(this.registryPassword, other.registryPassword)
                 && Objects.equals(this.registryURL, other.registryURL)
                 && Objects.equals(this.registryUsername, other.registryUsername)
-                && this.retryInterval == other.retryInterval;
+                && this.retryInterval == other.retryInterval
+                && Objects.equals(this.containerNetworkingMode, other.containerNetworkingMode);
     }
 
 }

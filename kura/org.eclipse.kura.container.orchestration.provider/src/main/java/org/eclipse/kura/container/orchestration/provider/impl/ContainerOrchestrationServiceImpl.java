@@ -448,6 +448,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
+            configuration = containerNetworkConfigurationHandler(containerDescription, configuration);
+
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
@@ -515,6 +517,31 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         LogConfig lc = new LogConfig(lt, containerDescription.getLoggerParameters());
 
         configuration.withLogConfig(lc);
+
+        return configuration;
+    }
+
+    private HostConfig containerNetworkConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        String networkMode;
+
+        switch (containerDescription.getContainerNetworkConfiguration().getNetworkMode().toLowerCase().trim()) {
+        case "none":
+            networkMode = "none";
+            break;
+        case "container":
+            networkMode = "container";
+            break;
+        case "host":
+            networkMode = "host";
+            break;
+        default:
+            networkMode = "bridge";
+            break;
+        }
+
+        configuration.withNetworkMode(networkMode);
 
         return configuration;
     }

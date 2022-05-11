@@ -103,31 +103,28 @@ public class TritonServerEncryptionUtils {
             throws IOException, PGPException {
         inStream = PGPUtil.getDecoderStream(inStream);
 
-        JcaPGPObjectFactory pgpF = new JcaPGPObjectFactory(inStream);
-        PGPEncryptedDataList enc;
-        Object currentObj = pgpF.nextObject();
+        JcaPGPObjectFactory pgpFactory = new JcaPGPObjectFactory(inStream);
+        Object currentObj = pgpFactory.nextObject();
 
+        PGPEncryptedDataList enc;
         if (currentObj instanceof PGPEncryptedDataList) {
             enc = (PGPEncryptedDataList) currentObj;
         } else {
-            enc = (PGPEncryptedDataList) pgpF.nextObject();
+            enc = (PGPEncryptedDataList) pgpFactory.nextObject();
         }
 
         PGPPBEEncryptedData pbe = (PGPPBEEncryptedData) enc.get(0);
-
         InputStream clear = pbe.getDataStream(new JcePBEDataDecryptorFactoryBuilder(
                 new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC")
                         .build(passPhrase));
 
-        JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(clear);
+        pgpFactory = new JcaPGPObjectFactory(clear);
+        currentObj = pgpFactory.nextObject();
 
-        currentObj = pgpFact.nextObject();
         if (currentObj instanceof PGPCompressedData) {
             PGPCompressedData cData = (PGPCompressedData) currentObj;
-
-            pgpFact = new JcaPGPObjectFactory(cData.getDataStream());
-
-            currentObj = pgpFact.nextObject();
+            pgpFactory = new JcaPGPObjectFactory(cData.getDataStream());
+            currentObj = pgpFactory.nextObject();
         }
 
         PGPLiteralData ld = (PGPLiteralData) currentObj;

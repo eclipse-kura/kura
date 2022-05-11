@@ -106,8 +106,8 @@ public class TritonServerEncryptionUtilsTest {
         try {
             List<String> content = Files.readAllLines(decryptedFilePath);
 
-            assertEquals(content.size(), 1);
-            assertEquals(content.get(0), "cudumar");
+            assertEquals(1, content.size());
+            assertEquals("cudumar", content.get(0));
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
@@ -146,8 +146,8 @@ public class TritonServerEncryptionUtilsTest {
         try {
             List<String> content = Files.readAllLines(decryptedFilePath);
 
-            assertEquals(content.size(), 1);
-            assertEquals(content.get(0), "42");
+            assertEquals(1, content.size());
+            assertEquals("42", content.get(0));
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;

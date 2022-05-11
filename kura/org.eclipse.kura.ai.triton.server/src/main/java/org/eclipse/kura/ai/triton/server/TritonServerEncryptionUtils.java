@@ -73,11 +73,11 @@ public class TritonServerEncryptionUtils {
         }
 
         if (!Files.isRegularFile(Paths.get(inputFilePath))) {
-            throw new IOException("Input file " + inputFilePath.toString() + " does not exists/is not a file");
+            throw new IOException("Input file " + inputFilePath + " does not exists/is not a file");
         }
 
         if (Files.exists(Paths.get(outputFilePath))) {
-            throw new IOException("Output file " + outputFilePath.toString() + " already exists");
+            throw new IOException("Output file " + outputFilePath + " already exists");
         }
 
         InputStream in = new BufferedInputStream(new FileInputStream(inputFilePath));

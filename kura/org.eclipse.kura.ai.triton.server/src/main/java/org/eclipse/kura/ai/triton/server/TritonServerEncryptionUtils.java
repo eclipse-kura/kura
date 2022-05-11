@@ -72,13 +72,18 @@ public class TritonServerEncryptionUtils {
             Security.addProvider(new BouncyCastleProvider());
         }
 
+        if (!Files.isRegularFile(Paths.get(inputFilePath))) {
+            throw new IOException("Input file " + inputFilePath.toString() + " does not exists/is not a file");
+        }
+
+        if (Files.exists(Paths.get(outputFilePath))) {
+            throw new IOException("Output file " + outputFilePath.toString() + " already exists");
+        }
+
         InputStream in = new BufferedInputStream(new FileInputStream(inputFilePath));
         OutputStream out = new FileOutputStream(outputFilePath);
         try {
             decryptFile(in, out, password.toCharArray());
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         } catch (PGPException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

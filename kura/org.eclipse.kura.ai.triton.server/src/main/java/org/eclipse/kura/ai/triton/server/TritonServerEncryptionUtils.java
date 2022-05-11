@@ -68,7 +68,9 @@ public class TritonServerEncryptionUtils {
 
     protected static void decryptModel(String password, String inputFilePath, String outputFilePath)
             throws IOException {
-        Security.addProvider(new BouncyCastleProvider());
+        if (Security.getProvider("BC") == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
 
         InputStream in = new BufferedInputStream(new FileInputStream(inputFilePath));
         OutputStream out = new FileOutputStream(outputFilePath);

@@ -43,6 +43,7 @@
 
   <!-- Locales: English language, independent of country -->
   <extend-property name="locale" values="en"/>
+  <extend-property name="locale" values="jp"/>
   <set-property-fallback name="locale" value="en"/>
 
   <!-- Specify the app entry point class.                         -->

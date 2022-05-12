@@ -49,33 +49,33 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void createDecryptionFolderShouldWork() {
         givenTargetFolder(WORKDIR + "/target_folder");
-        givenNoFileExistsAtPath(this.targetFolder);
+        givenNoFileExistsAtPath(targetFolder);
 
-        whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
+        whenCreateDecryptionFolderIsCalledWith(targetFolder);
 
-        thenTargetFolderExists(this.targetFolder);
-        thenTargetFolderHasPermissions(this.targetFolder, "rwx------");
+        thenTargetFolderExists(targetFolder);
+        thenTargetFolderHasPermissions(targetFolder, "rwx------");
         thenNoExceptionOccurred();
     }
 
     @Test
     public void createDecryptionFolderShouldWorkWithNestedPath() {
         givenTargetFolder(WORKDIR + "/new/nested/folder");
-        givenNoFileExistsAtPath(this.targetFolder);
+        givenNoFileExistsAtPath(targetFolder);
 
-        whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
+        whenCreateDecryptionFolderIsCalledWith(targetFolder);
 
-        thenTargetFolderExists(this.targetFolder);
-        thenTargetFolderHasPermissions(this.targetFolder, "rwx------");
+        thenTargetFolderExists(targetFolder);
+        thenTargetFolderHasPermissions(targetFolder, "rwx------");
         thenNoExceptionOccurred();
     }
 
     @Test
     public void createDecryptionFolderShouldThrowOnNameClashes() {
         givenTargetFolder(WORKDIR + "/another_folder");
-        givenAFileExistsAtPath(this.targetFolder);
+        givenAFileExistsAtPath(targetFolder);
 
-        whenCreateDecryptionFolderIsCalledWith(this.targetFolder);
+        whenCreateDecryptionFolderIsCalledWith(targetFolder);
 
         thenAnExceptionOccurred();
     }
@@ -83,14 +83,14 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldWork() {
         givenEncryptedFileAtPath("target/test-classes/plain_file.gpg");
-        givenAnEncryptedFileExistsAtPath(this.encryptedFile);
+        givenAnEncryptedFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
-        givenNoFileExistsAtPath(this.decryptedFile);
+        givenNoFileExistsAtPath(decryptedFile);
 
-        whenDecryptModelIsCalledWith("password", this.encryptedFile, this.decryptedFile);
+        whenDecryptModelIsCalledWith("password", encryptedFile, decryptedFile);
 
-        thenFileExistsAtPath(this.decryptedFile);
-        thenDecryptedFileContentMatches(this.decryptedFile, "cudumar");
+        thenFileExistsAtPath(decryptedFile);
+        thenDecryptedFileContentMatches(decryptedFile, "cudumar");
         thenNoExceptionOccurred();
     }
 
@@ -98,51 +98,51 @@ public class TritonServerEncryptionUtilsTest {
     public void decryptModelShouldWorkWithZippedFiles() {
         // Given: encrypted file at path
         givenEncryptedFileAtPath("target/test-classes/plain.txt.zip.gpg");
-        givenAnEncryptedFileExistsAtPath(this.encryptedFile);
+        givenAnEncryptedFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
-        givenNoFileExistsAtPath(this.decryptedFile);
+        givenNoFileExistsAtPath(decryptedFile);
 
-        whenDecryptModelIsCalledWith("secret", this.encryptedFile, this.decryptedFile);
+        whenDecryptModelIsCalledWith("secret", encryptedFile, decryptedFile);
 
-        thenFileExistsAtPath(this.decryptedFile);
+        thenFileExistsAtPath(decryptedFile);
         thenNoExceptionOccurred();
     }
 
     @Test
     public void decryptModelShouldWorkWithASCIIArmoredFormat() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
-        givenAnEncryptedFileExistsAtPath(this.encryptedFile);
+        givenAnEncryptedFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
-        givenNoFileExistsAtPath(this.decryptedFile);
+        givenNoFileExistsAtPath(decryptedFile);
 
-        whenDecryptModelIsCalledWith("eurotech", this.encryptedFile, this.decryptedFile);
+        whenDecryptModelIsCalledWith("eurotech", encryptedFile, decryptedFile);
 
-        thenFileExistsAtPath(this.decryptedFile);
-        thenDecryptedFileContentMatches(this.decryptedFile, "42");
+        thenFileExistsAtPath(decryptedFile);
+        thenDecryptedFileContentMatches(decryptedFile, "42");
         thenNoExceptionOccurred();
     }
 
     @Test
     public void decryptModelShouldThrowWithWrongPassword() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
-        givenAnEncryptedFileExistsAtPath(this.encryptedFile);
+        givenAnEncryptedFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
-        givenNoFileExistsAtPath(this.decryptedFile);
+        givenNoFileExistsAtPath(decryptedFile);
 
-        whenDecryptModelIsCalledWith("wrongpassword", this.encryptedFile, this.decryptedFile);
+        whenDecryptModelIsCalledWith("wrongpassword", encryptedFile, decryptedFile);
 
         thenAnExceptionOccurred();
-        thenFileDoesNotExistsAtPath(this.decryptedFile);
+        thenFileDoesNotExistsAtPath(decryptedFile);
     }
 
     @Test
     public void decryptModelShouldThrowIfDestinationFileAlreadyExists() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
-        givenAnEncryptedFileExistsAtPath(this.encryptedFile);
+        givenAnEncryptedFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
-        givenAFileExistsAtPath(this.decryptedFile);
+        givenAFileExistsAtPath(decryptedFile);
 
-        whenDecryptModelIsCalledWith("eurotech", this.encryptedFile, this.decryptedFile);
+        whenDecryptModelIsCalledWith("eurotech", encryptedFile, decryptedFile);
 
         thenAnExceptionOccurred();
     }

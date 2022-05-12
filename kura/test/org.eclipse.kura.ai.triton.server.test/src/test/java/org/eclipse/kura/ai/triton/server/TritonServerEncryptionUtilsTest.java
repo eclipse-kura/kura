@@ -151,55 +151,27 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void deleteModelShouldWork() {
-        // Given a non empty folder exists at path
-        String modelRootPath = WORKDIR + "/model_dir";
-        try {
-            Files.createDirectories(Paths.get(modelRootPath));
-            Files.createFile(Paths.get(modelRootPath + "/test_file1"));
-            Files.createFile(Paths.get(modelRootPath + "/test_file2"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        givenTargetFolder(WORKDIR + "/model_dir");
+        givenAFolderAreadyExistsAtPath(targetFolder);
+        givenAFileAreadyExistsAtPath(targetFolder + "/test_file1");
+        givenAFileAreadyExistsAtPath(targetFolder + "/test_file2");
 
-        assertTrue(Files.isDirectory(Paths.get(modelRootPath)));
-        assertTrue(Files.isRegularFile(Paths.get(modelRootPath + "/test_file1")));
-        assertTrue(Files.isRegularFile(Paths.get(modelRootPath + "/test_file2")));
+        whenDeleteModelIsCalledWith(targetFolder);
 
-        // When deleteModel is called with params
-        try {
-            TritonServerEncryptionUtils.deleteModel(modelRootPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
-
-        // Then the folder shouldn't exists anymore
-        assertFalse(Files.exists(Paths.get(modelRootPath)));
-        // Then the parent folder should still exists
-        assertTrue(Files.exists(Paths.get(WORKDIR)));
-        // Then no exception occurred
-        assertFalse(exceptionOccurred);
+        thenFileDoesNotExistsAtPath(targetFolder);
+        thenTargetFolderExists(WORKDIR);
+        thenNoExceptionOccurred();
     }
 
     @Test
     public void deleteModelShouldThrowWithNonExistingFolder() {
-        // Given a non existing path
-        String modelRootPath = WORKDIR + "/non_existent";
-        assertFalse(Files.exists(Paths.get(modelRootPath)));
+        givenTargetFolder(WORKDIR + "/model_dir");
+        givenNoFileExistsAtPath(targetFolder);
 
-        // When deleteModel is called with params
-        try {
-            TritonServerEncryptionUtils.deleteModel(modelRootPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        whenDeleteModelIsCalledWith(targetFolder);
 
-        // Then an exception should be thrown
-        assertTrue(exceptionOccurred);
-        // Then enclosing folder still exists
-        assertTrue(Files.exists(Paths.get(WORKDIR)));
+        thenAnExceptionOccurred();
+        thenTargetFolderExists(WORKDIR);
     }
 
     /*
@@ -231,6 +203,19 @@ public class TritonServerEncryptionUtilsTest {
         assertFalse(Files.exists(Paths.get(folderPath)));
     }
 
+    private void givenAFolderAreadyExistsAtPath(String folderPath) {
+        Path targetFolderPath = Paths.get(folderPath);
+        assertFalse(Files.exists(targetFolderPath));
+
+        try {
+            Files.createDirectory(targetFolderPath);
+        } catch (IOException e) {
+            this.exceptionOccurred = true;
+        }
+
+        assertTrue(Files.isDirectory(targetFolderPath));
+    }
+
     private void givenAFileAreadyExistsAtPath(String folderPath) {
         Path targetFolderPath = Paths.get(folderPath);
         assertFalse(Files.exists(targetFolderPath));
@@ -241,7 +226,7 @@ public class TritonServerEncryptionUtilsTest {
             this.exceptionOccurred = true;
         }
 
-        assertTrue(Files.exists(targetFolderPath));
+        assertTrue(Files.isRegularFile(targetFolderPath));
     }
 
     /*
@@ -259,6 +244,15 @@ public class TritonServerEncryptionUtilsTest {
         try {
             TritonServerEncryptionUtils.decryptModel(password, encryptedFilePath, decryptedFilePath);
         } catch (IOException | KuraIOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+    }
+
+    private void whenDeleteModelIsCalledWith(String folderPath) {
+        try {
+            TritonServerEncryptionUtils.deleteModel(folderPath);
+        } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
         }

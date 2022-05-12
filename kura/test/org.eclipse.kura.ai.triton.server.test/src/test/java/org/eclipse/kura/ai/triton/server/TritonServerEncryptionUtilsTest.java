@@ -176,7 +176,8 @@ public class TritonServerEncryptionUtilsTest {
 
         // Then the folder shouldn't exists anymore
         assertFalse(Files.exists(Paths.get(modelRootPath)));
-
+        // Then the parent folder should still exists
+        assertTrue(Files.exists(Paths.get(WORKDIR)));
         // Then no exception occurred
         assertFalse(exceptionOccurred);
     }
@@ -185,7 +186,6 @@ public class TritonServerEncryptionUtilsTest {
     public void deleteModelShouldThrowWithNonExistingFolder() {
         // Given a non existing path
         String modelRootPath = WORKDIR + "/non_existent";
-
         assertFalse(Files.exists(Paths.get(modelRootPath)));
 
         // When deleteModel is called with params
@@ -198,7 +198,6 @@ public class TritonServerEncryptionUtilsTest {
 
         // Then an exception should be thrown
         assertTrue(exceptionOccurred);
-
         // Then enclosing folder still exists
         assertTrue(Files.exists(Paths.get(WORKDIR)));
     }

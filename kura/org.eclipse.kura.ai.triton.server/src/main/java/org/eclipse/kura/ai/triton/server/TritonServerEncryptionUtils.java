@@ -121,16 +121,16 @@ public class TritonServerEncryptionUtils {
         currentObj = pgpFactory.nextObject();
 
         if (currentObj instanceof PGPCompressedData) {
-            PGPCompressedData cData = (PGPCompressedData) currentObj;
-            pgpFactory = new JcaPGPObjectFactory(cData.getDataStream());
+            PGPCompressedData compressedData = (PGPCompressedData) currentObj;
+            pgpFactory = new JcaPGPObjectFactory(compressedData.getDataStream());
             currentObj = pgpFactory.nextObject();
         }
 
-        PGPLiteralData ld = (PGPLiteralData) currentObj;
-        InputStream unc = ld.getInputStream();
+        PGPLiteralData literalData = (PGPLiteralData) currentObj;
+        InputStream decryptedStream = literalData.getInputStream();
 
         OutputStream outStream = new FileOutputStream(outputFilePath);
-        Streams.pipeAll(unc, outStream);
+        Streams.pipeAll(decryptedStream, outStream);
         outStream.close();
         inStream.close();
 

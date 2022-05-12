@@ -182,12 +182,25 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
-    public void deleteModelShouldWorkWithNonExistingFolder() {
+    public void deleteModelShouldThrowWithNonExistingFolder() {
         // Given a non existing path
+        String modelRootPath = WORKDIR + "/non_existent";
+
+        assertFalse(Files.exists(Paths.get(modelRootPath)));
 
         // When deleteModel is called with params
+        try {
+            TritonServerEncryptionUtils.deleteModel(modelRootPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
 
         // Then an exception should be thrown
+        assertTrue(exceptionOccurred);
+
+        // Then enclosing folder still exists
+        assertTrue(Files.exists(Paths.get(WORKDIR)));
     }
 
     /*

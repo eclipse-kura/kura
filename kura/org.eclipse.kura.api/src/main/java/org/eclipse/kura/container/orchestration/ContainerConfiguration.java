@@ -201,9 +201,10 @@ public class ContainerConfiguration {
     public int getImageDownloadTimeoutSeconds() {
         return this.imageConfig.getimageDownloadTimeoutSeconds();
     }
-    
+
     /**
-     * return the container's network configuration as a {@link ContainerNetworkConfiguration}. 
+     * return the container's network configuration as a
+     * {@link ContainerNetworkConfiguration}.
      * 
      * @return
      * @since 2.7
@@ -334,13 +335,14 @@ public class ContainerConfiguration {
             this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageDownloadTimeoutSeconds);
             return this;
         }
-        
+
         /**
          * Set the {@link NetworkConfiguration}
          * 
          * @since 2.7
          */
-        public ContainerConfigurationBuilder setContainerNetowrkConfiguration(ContainerNetworkConfiguration networkConfiguration) {
+        public ContainerConfigurationBuilder setContainerNetowrkConfiguration(
+                ContainerNetworkConfiguration networkConfiguration) {
             this.networkConfigurationBuilder.setNetworkMode(networkConfiguration.getNetworkMode());
             return this;
         }

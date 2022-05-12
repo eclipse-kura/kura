@@ -227,7 +227,7 @@ public class ContainerInstanceOptions {
     public Map<String, String> getLoggerParameters() {
         return this.containerLoggingParameters;
     }
-    
+
     public String getContainerNetworkingMode() {
         return this.containerNetworkingMode;
     }
@@ -244,9 +244,10 @@ public class ContainerInstanceOptions {
     public int getImageDownloadTimeout() {
         return this.imageDownloadTimeout;
     }
-    
+
     private ContainerNetworkConfiguration buildContainerNetworkConfig() {
-        return new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder().setNetworkMode(getContainerNetworkingMode()).build();
+        return new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
+                .setNetworkMode(getContainerNetworkingMode()).build();
     }
 
     private ImageConfiguration buildImageConfig() {
@@ -261,7 +262,8 @@ public class ContainerInstanceOptions {
                 .setInternalPorts(getContainerPortsInternal()).setEnvVars(getContainerEnvList())
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
-                .setLoggerParameters(getLoggerParameters()).setContainerNetowrkConfiguration(buildContainerNetworkConfig()).build();
+                .setLoggerParameters(getLoggerParameters())
+                .setContainerNetowrkConfiguration(buildContainerNetworkConfig()).build();
     }
 
     private List<Integer> parsePortString(String ports) {

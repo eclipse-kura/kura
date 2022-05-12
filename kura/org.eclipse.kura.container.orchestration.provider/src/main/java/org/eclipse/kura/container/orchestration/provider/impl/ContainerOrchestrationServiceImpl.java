@@ -524,24 +524,13 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private HostConfig containerNetworkConfigurationHandler(ContainerConfiguration containerDescription,
             HostConfig configuration) {
 
-        String networkMode;
-
-        switch (containerDescription.getContainerNetworkConfiguration().getNetworkMode().toLowerCase().trim()) {
-        case "none":
-            networkMode = "none";
-            break;
-        case "container":
-            networkMode = "container";
-            break;
-        case "host":
-            networkMode = "host";
-            break;
-        default:
-            networkMode = "bridge";
-            break;
+        if (containerDescription.getContainerNetworkConfiguration().getNetworkMode() == null
+                || containerDescription.getContainerNetworkConfiguration().getNetworkMode().trim().isEmpty()) {
+            return configuration;
         }
 
-        configuration.withNetworkMode(networkMode);
+        configuration.withNetworkMode(
+                containerDescription.getContainerNetworkConfiguration().getNetworkMode().toLowerCase().trim());
 
         return configuration;
     }

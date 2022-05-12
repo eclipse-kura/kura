@@ -104,13 +104,9 @@
             
         <AD id="container.networkMode" 
             name="Networking Mode"
-            description="Used to specify what networking mode the container will use." type="String" cardinality="0"
-            required="true" 
-            default="bridge">
-            <Option label="bridge" value="bridge" />
-            <Option label="none" value="none" />
-            <Option label="container" value="container" />
-            <Option label="host" value="host" />
+            description="Used to specify what networking mode the container will use. Possible Drivers: bridge, none, container:{container id}, host" type="String" cardinality="0"
+            required="false" 
+            default="">
          </AD>
          
         <AD id="container.loggingType" 

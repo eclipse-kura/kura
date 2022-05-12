@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -13,14 +13,15 @@
 	 Eurotech
 
 -->
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" immediate="true" name="org.eclipse.kura.internal.rest.provider.RestService">
-   <implementation class="org.eclipse.kura.internal.rest.provider.RestService"/>
-   <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.provider.RestService"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" configuration-policy="require" immediate="true" modified="update" name="org.eclipse.kura.internal.rest.provider.RestService">
+   <implementation class="org.eclipse.kura.internal.rest.provider.RestService" />
+   <property name="service.pid" type="String" value="org.eclipse.kura.internal.rest.provider.RestService" />
    <service>
-      <provide interface="com.eclipsesource.jaxrs.provider.security.AuthorizationHandler"/>
-      <provide interface="com.eclipsesource.jaxrs.provider.security.AuthenticationHandler"/>
-      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+      <provide interface="com.eclipsesource.jaxrs.provider.security.AuthorizationHandler" />
+      <provide interface="com.eclipsesource.jaxrs.provider.security.AuthenticationHandler" />
+      <provide interface="org.eclipse.kura.configuration.ConfigurableComponent" />
    </service>
-   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
-   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static"/>
+   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static" />
+   <reference bind="setUserAdmin" cardinality="1..1" interface="org.osgi.service.useradmin.UserAdmin" name="UserAdmin" policy="static" />
+   <reference bind="bindAuthenticationProvider" cardinality="0..n" interface="org.eclipse.kura.rest.auth.AuthenticationProvider" name="AuthenticationProvider" policy="dynamic" unbind="unbindAuthenticationProvider" />
 </scr:component>

@@ -36,6 +36,8 @@ public class RestTransport implements Transport {
 
     private boolean initialized = false;
 
+    private Optional<String> basicCredentials = Optional.of("admin:admin");
+
     public RestTransport(final String servicePath) {
         this.baseURL = "http://localhost:8080/services/" + servicePath;
     }
@@ -96,8 +98,10 @@ public class RestTransport implements Transport {
 
         try {
             connection = (HttpURLConnection) new URL(this.baseURL + relativeUri).openConnection();
-            final String encoded = ENCODER.encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8));
-            connection.setRequestProperty("Authorization", "Basic " + encoded);
+            basicCredentials.ifPresent(c -> {
+                final String encoded = ENCODER.encodeToString(c.getBytes(StandardCharsets.UTF_8));
+                connection.setRequestProperty("Authorization", "Basic " + encoded);
+            });
             connection.setRequestProperty("Accept", "application/json");
             connection.setRequestMethod(method.getRestMethod());
 
@@ -119,6 +123,10 @@ public class RestTransport implements Transport {
         } catch (final Exception e) {
             throw new IllegalStateException("request failed", e);
         }
+    }
+
+    public void setBasicCredentials(final Optional<String> basicCredentials) {
+        this.basicCredentials = basicCredentials;
     }
 
 }

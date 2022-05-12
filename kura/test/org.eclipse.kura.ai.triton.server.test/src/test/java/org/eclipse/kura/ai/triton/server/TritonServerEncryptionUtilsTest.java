@@ -27,6 +27,7 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraIOException;
@@ -146,7 +147,107 @@ public class TritonServerEncryptionUtilsTest {
         thenAnExceptionOccurred();
     }
 
-    // TODO: unzipModel methods go here
+    @Test
+    public void unzipModelShouldWork() {
+        // Given a zip file at path
+        String zippedFile = "target/test-classes/tf_autoencoder_fp32.zip";
+        assertTrue(Files.isRegularFile(Paths.get(zippedFile)));
+        // Given a target file path
+        String targetFolder = WORKDIR;
+        assertTrue(Files.isDirectory(Paths.get(targetFolder)));
+        // Given target folder is empty
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        // When unzipModel method is run
+        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+
+        // Then the expected root model dir should exists
+        assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32")));
+        // Then the expected file should exist
+        assertTrue(Files.isRegularFile(Paths.get(targetFolder + "/tf_autoencoder_fp32/config.pbtxt")));
+        // Then the expected file should contain
+        try {
+            List<String> content = Files.readAllLines(Paths.get(targetFolder + "/tf_autoencoder_fp32/config.pbtxt"));
+
+            assertEquals(1, content.size());
+            assertEquals("test", content.get(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+        // Then the expected dir should exists
+        assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32/1")));
+        // Then the expected dir should exists
+        assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel")));
+        // Then the expected file should exists
+        assertTrue(Files
+                .isRegularFile(Paths.get(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb")));
+        // Then the expected file should contain
+        try {
+            List<String> content = Files
+                    .readAllLines(Paths.get(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb"));
+
+            assertEquals(1, content.size());
+            assertEquals("model", content.get(0));
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+        // Then no exception occurred
+        assertFalse(exceptionOccurred);
+    }
+
+    @Test
+    public void unzipModelShouldThrowIfFileDoesNotExist() {
+        // Given a non existent zip file at path
+        String zippedFile = WORKDIR + "/non_existent_file.zip";
+        assertFalse(Files.exists(Paths.get(zippedFile)));
+        // Given a target file path
+        String targetFolder = WORKDIR;
+        assertTrue(Files.isDirectory(Paths.get(targetFolder)));
+        // Given target folder is empty
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+
+        // Then target folder is empty
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+        // Then an exception occurred
+        assertTrue(exceptionOccurred);
+    }
+
+    @Test
+    public void unzipModelShouldThrowIfDestinationFolderDoesNotExist() {
+        // Given a non existent zip file at path
+        String zippedFile = "target/test-classes/tf_autoencoder_fp32.zip";
+        assertTrue(Files.isRegularFile(Paths.get(zippedFile)));
+        // Given a target file path
+        String targetFolder = WORKDIR + "/an_imaginary_folder";
+        // Given the target folder doesnt exist
+        assertFalse(Files.exists(Paths.get(targetFolder)));
+
+        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+
+        // Then the target folder doesnt exists
+        assertFalse(Files.exists(Paths.get(targetFolder)));
+        // Then an exception occurred
+        assertTrue(exceptionOccurred);
+    }
 
     @Test
     public void deleteModelShouldWork() {

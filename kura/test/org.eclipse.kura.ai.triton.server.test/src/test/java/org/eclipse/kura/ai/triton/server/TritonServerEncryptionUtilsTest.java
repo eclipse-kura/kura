@@ -186,8 +186,7 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     private void givenNoFileExistsAtPath(String folderPath) {
-        Path targetFolderPath = Paths.get(folderPath);
-        assertFalse(Files.exists(targetFolderPath));
+        assertFalse(Files.exists(Paths.get(folderPath)));
     }
 
     /*
@@ -214,24 +213,20 @@ public class TritonServerEncryptionUtilsTest {
      * Then
      */
     private void thenFileExistsAtPath(String filePath) {
-        Path targetFilePath = Paths.get(filePath);
-        assertTrue(Files.isRegularFile(targetFilePath));
+        assertTrue(Files.isRegularFile(Paths.get(filePath)));
     }
 
     private void thenFileDoesNotExistsAtPath(String filePath) {
-        Path targetFilePath = Paths.get(filePath);
-        assertFalse(Files.exists(targetFilePath));
+        assertFalse(Files.exists(Paths.get(filePath)));
     }
 
     private void thenTargetFolderExists(String folderPath) {
-        Path targetFolderPath = Paths.get(folderPath);
-        assertTrue(Files.isDirectory(targetFolderPath));
+        assertTrue(Files.isDirectory(Paths.get(folderPath)));
     }
 
     private void thenTargetFolderHasPermissions(String folderPath, String permissions) {
-        Path targetFolderPath = Paths.get(folderPath);
         try {
-            Set<PosixFilePermission> readPermissions = Files.getPosixFilePermissions(targetFolderPath,
+            Set<PosixFilePermission> readPermissions = Files.getPosixFilePermissions(Paths.get(folderPath),
                     LinkOption.NOFOLLOW_LINKS);
             Set<PosixFilePermission> expectedPermissions = PosixFilePermissions.fromString(permissions);
 
@@ -242,9 +237,8 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     private void thenDecryptedFileContentMatches(String filePath, String expectedContent) {
-        Path targetFilePath = Paths.get(filePath);
         try {
-            List<String> content = Files.readAllLines(targetFilePath);
+            List<String> content = Files.readAllLines(Paths.get(filePath));
 
             assertEquals(1, content.size());
             assertEquals(expectedContent, content.get(0));
@@ -267,9 +261,8 @@ public class TritonServerEncryptionUtilsTest {
      */
     @Before
     public void setup() {
-        Path workdirPath = Paths.get(WORKDIR);
         try {
-            Files.createDirectories(workdirPath);
+            Files.createDirectories(Paths.get(WORKDIR));
         } catch (IOException e) {
             e.printStackTrace();
         }

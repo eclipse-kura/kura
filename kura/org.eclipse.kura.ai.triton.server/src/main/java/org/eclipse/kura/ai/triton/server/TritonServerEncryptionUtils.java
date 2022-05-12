@@ -99,7 +99,6 @@ public class TritonServerEncryptionUtils {
     private static void decryptFile(String password, String inputFilePath, String outputFilePath)
             throws IOException, PGPException {
         InputStream inStream = new BufferedInputStream(new FileInputStream(inputFilePath));
-        OutputStream outStream = new FileOutputStream(outputFilePath);
 
         inStream = PGPUtil.getDecoderStream(inStream);
 
@@ -130,6 +129,7 @@ public class TritonServerEncryptionUtils {
         PGPLiteralData ld = (PGPLiteralData) currentObj;
         InputStream unc = ld.getInputStream();
 
+        OutputStream outStream = new FileOutputStream(outputFilePath);
         Streams.pipeAll(unc, outStream);
         outStream.close();
         inStream.close();

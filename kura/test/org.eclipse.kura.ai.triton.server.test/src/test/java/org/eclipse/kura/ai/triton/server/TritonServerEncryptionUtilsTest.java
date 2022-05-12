@@ -53,7 +53,7 @@ public class TritonServerEncryptionUtilsTest {
 
         whenCreateDecryptionFolderIsCalledWith(targetFolder);
 
-        thenTargetFolderExists(targetFolder);
+        thenAFolderExistsAtPath(targetFolder);
         thenTargetFolderHasPermissions(targetFolder, "rwx------");
         thenNoExceptionOccurred();
     }
@@ -65,7 +65,7 @@ public class TritonServerEncryptionUtilsTest {
 
         whenCreateDecryptionFolderIsCalledWith(targetFolder);
 
-        thenTargetFolderExists(targetFolder);
+        thenAFolderExistsAtPath(targetFolder);
         thenTargetFolderHasPermissions(targetFolder, "rwx------");
         thenNoExceptionOccurred();
     }
@@ -159,7 +159,7 @@ public class TritonServerEncryptionUtilsTest {
         whenDeleteModelIsCalledWith(targetFolder);
 
         thenFileDoesNotExistsAtPath(targetFolder);
-        thenTargetFolderExists(WORKDIR);
+        thenAFolderExistsAtPath(WORKDIR);
         thenNoExceptionOccurred();
     }
 
@@ -171,7 +171,7 @@ public class TritonServerEncryptionUtilsTest {
         whenDeleteModelIsCalledWith(targetFolder);
 
         thenAnExceptionOccurred();
-        thenTargetFolderExists(WORKDIR);
+        thenAFolderExistsAtPath(WORKDIR);
     }
 
     /*
@@ -269,7 +269,7 @@ public class TritonServerEncryptionUtilsTest {
         assertFalse(Files.exists(Paths.get(filePath)));
     }
 
-    private void thenTargetFolderExists(String folderPath) {
+    private void thenAFolderExistsAtPath(String folderPath) {
         assertTrue(Files.isDirectory(Paths.get(folderPath)));
     }
 

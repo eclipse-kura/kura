@@ -147,6 +147,49 @@ public class TritonServerEncryptionUtilsTest {
         thenAnExceptionOccurred();
     }
 
+    // TODO: unzipModel methods go here
+
+    @Test
+    public void deleteModelShouldWork() {
+        // Given a non empty folder exists at path
+        String modelRootPath = WORKDIR + "/model_dir";
+        try {
+            Files.createDirectories(Paths.get(modelRootPath));
+            Files.createFile(Paths.get(modelRootPath + "/test_file1"));
+            Files.createFile(Paths.get(modelRootPath + "/test_file2"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        assertTrue(Files.isDirectory(Paths.get(modelRootPath)));
+        assertTrue(Files.isRegularFile(Paths.get(modelRootPath + "/test_file1")));
+        assertTrue(Files.isRegularFile(Paths.get(modelRootPath + "/test_file2")));
+
+        // When deleteModel is called with params
+        try {
+            TritonServerEncryptionUtils.deleteModel(modelRootPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        // Then the folder shouldn't exists anymore
+        assertFalse(Files.exists(Paths.get(modelRootPath)));
+
+        // Then no exception occurred
+        assertFalse(exceptionOccurred);
+    }
+
+    @Test
+    public void deleteModelShouldWorkWithNonExistingFolder() {
+        // Given a non existing path
+
+        // When deleteModel is called with params
+
+        // Then an exception should be thrown
+    }
+
     /*
      * Steps
      */

@@ -80,15 +80,12 @@ public class TritonServerEncryptionUtils {
             throw new IOException("Output file " + outputFilePath + " already exists");
         }
 
-        InputStream in = new BufferedInputStream(new FileInputStream(inputFilePath));
-        OutputStream out = new FileOutputStream(outputFilePath);
         try {
-            decryptFile(in, out, password.toCharArray());
+            decryptFile(password, inputFilePath, outputFilePath);
         } catch (PGPException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        in.close();
     }
 
     protected static void unzipModel(String inputFilePath, String outputFolder) {
@@ -99,8 +96,11 @@ public class TritonServerEncryptionUtils {
         // TODO
     }
 
-    private static void decryptFile(InputStream inStream, OutputStream outStream, char[] passPhrase)
+    private static void decryptFile(String password, String inputFilePath, String outputFilePath)
             throws IOException, PGPException {
+        InputStream inStream = new BufferedInputStream(new FileInputStream(inputFilePath));
+        OutputStream outStream = new FileOutputStream(outputFilePath);
+
         inStream = PGPUtil.getDecoderStream(inStream);
 
         JcaPGPObjectFactory pgpFactory = new JcaPGPObjectFactory(inStream);
@@ -116,7 +116,7 @@ public class TritonServerEncryptionUtils {
         PGPPBEEncryptedData pbe = (PGPPBEEncryptedData) enc.get(0);
         InputStream clear = pbe.getDataStream(new JcePBEDataDecryptorFactoryBuilder(
                 new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC")
-                        .build(passPhrase));
+                        .build(password.toCharArray()));
 
         pgpFactory = new JcaPGPObjectFactory(clear);
         currentObj = pgpFactory.nextObject();
@@ -132,6 +132,7 @@ public class TritonServerEncryptionUtils {
 
         Streams.pipeAll(unc, outStream);
         outStream.close();
+        inStream.close();
 
         if (pbe.isIntegrityProtected()) {
             if (!pbe.verify()) {

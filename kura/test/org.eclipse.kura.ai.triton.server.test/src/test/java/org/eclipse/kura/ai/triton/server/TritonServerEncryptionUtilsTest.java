@@ -81,7 +81,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldWork() {
         // Given: encrypted file at path
-        String encryptedFile = "target/test-classes/another_file.gpg";
+        String encryptedFile = "target/test-classes/plain_file.gpg";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));
@@ -121,7 +121,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldWorkWithASCIIArmoredFormat() {
         // Given: encrypted file at path
-        String encryptedFile = "target/test-classes/empty_file.asc";
+        String encryptedFile = "target/test-classes/armored_plain_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));
@@ -161,7 +161,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldThrowWithWrongPassword() {
         // Given: encrypted file at path
-        String encryptedFile = "target/test-classes/empty_file.asc";
+        String encryptedFile = "target/test-classes/armored_plain_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));
@@ -191,7 +191,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldThrowIfDestinationFileAlreadyExists() {
         // Given: encrypted file at path
-        String encryptedFile = "target/test-classes/empty_file.asc";
+        String encryptedFile = "target/test-classes/armored_plain_file.asc";
         Path encryptedFilePath = Paths.get(encryptedFile);
 
         assertTrue(Files.exists(encryptedFilePath));

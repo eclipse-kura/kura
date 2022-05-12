@@ -52,6 +52,7 @@ public class ContainerInstanceOptionsTest {
     private static final String DEFAULT_REGISTRY_PASSWORD = "";
     private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 500;
     private static final String DEFAULT_CONTAINER_NETWORKING_MODE = ""; 
+    private static final String DEFAULT_CONTAINER_ENTRY_POINT = "";
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -72,7 +73,7 @@ public class ContainerInstanceOptionsTest {
     private static final String REGISTRY_PASSWORD = "registry.password";
     private static final String IMAGES_DOWNLOAD_TIMEOUT = "container.image.download.timeout";
     private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";
-    
+    private static final String CONTAINER_ENTRY_POINT = "container.entrypoint";
 
     private Map<String, Object> properties;
 
@@ -616,6 +617,14 @@ public class ContainerInstanceOptionsTest {
 
         thenIsNotNullContainerDescriptor();
     }
+    
+    @Test
+    public void testExtraCommaInEntryPointFeild() {
+        givenDifferentProperties();
+        givenDiffrentConfigurableGenericDockerServiceOptions();
+        
+        thenCheckIfExtraCommasAreIgnored();
+    }
 
     private void givenNullProperties() {
         this.properties = null;
@@ -644,6 +653,7 @@ public class ContainerInstanceOptionsTest {
         this.properties.put(REGISTRY_PASSWORD, DEFAULT_REGISTRY_PASSWORD);
         this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
         this.properties.put(CONTAINER_NETWORKING_MODE, DEFAULT_CONTAINER_NETWORKING_MODE);
+        this.properties.put(CONTAINER_ENTRY_POINT, DEFAULT_CONTAINER_ENTRY_POINT);
     }
 
     private void givenDifferentProperties() {
@@ -665,10 +675,15 @@ public class ContainerInstanceOptionsTest {
         this.newProperties.put(REGISTRY_PASSWORD, "test");
         this.newProperties.put(IMAGES_DOWNLOAD_TIMEOUT, 100);
         this.newProperties.put(CONTAINER_NETWORKING_MODE, "none");
+        this.newProperties.put(CONTAINER_ENTRY_POINT, "./test.py,-v,-m,--human-readable,,,");
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
         this.cgdso = new ContainerInstanceOptions(this.properties);
+    }
+    
+    private void givenDiffrentConfigurableGenericDockerServiceOptions() {
+        this.cgdso = new ContainerInstanceOptions(this.newProperties);
     }
 
     private void givenEnabled(boolean b) {
@@ -920,5 +935,9 @@ public class ContainerInstanceOptionsTest {
 
     private void thenIsNotNullContainerDescriptor() {
         assertNotNull(this.containerDescriptor);
+    }
+    
+    private void thenCheckIfExtraCommasAreIgnored() {
+        assertEquals(Arrays.asList("./test.py","-v","-m","--human-readable"), this.cgdso.getEntryPoint());
     }
 }

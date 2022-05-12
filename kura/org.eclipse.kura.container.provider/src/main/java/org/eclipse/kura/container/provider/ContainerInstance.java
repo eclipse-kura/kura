@@ -295,9 +295,14 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
         private void deleteContainer() {
             try {
                 ContainerInstance.this.containerOrchestrationService.stopContainer(this.containerId);
-                ContainerInstance.this.containerOrchestrationService.deleteContainer(this.containerId);
             } catch (Exception e) {
                 logger.error("Error stopping microservice {}", this.options.getContainerName(), e);
+            }
+            
+            try {
+                ContainerInstance.this.containerOrchestrationService.deleteContainer(this.containerId);
+            } catch (Exception e) {
+                logger.error("Error deleting microservice {}", this.options.getContainerName(), e);
             }
         }
 

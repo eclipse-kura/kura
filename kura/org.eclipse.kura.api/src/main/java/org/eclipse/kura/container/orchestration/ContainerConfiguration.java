@@ -50,6 +50,7 @@ public class ContainerConfiguration {
     private String containerLoggingType;
     private ImageConfiguration imageConfig;
     private ContainerNetworkConfiguration networkConfiguration;
+    private List<String> entryPoint;
 
     private ContainerConfiguration() {
     }
@@ -212,6 +213,16 @@ public class ContainerConfiguration {
     public ContainerNetworkConfiguration getContainerNetworkConfiguration() {
         return this.networkConfiguration;
     }
+     
+    /**
+     * Returns a List<String> of container entry points. An empty list can be returned if no entrypoints are specified.
+     *
+     * @return
+     * @since 2.6
+     */
+    public List<String> getEntryPoint() {
+        return this.entryPoint;
+    }
 
     /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
@@ -226,7 +237,8 @@ public class ContainerConfiguration {
     public int hashCode() {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
                 this.containerLoggingType, this.containerName, this.containerPortsExternal, this.containerPortsInternal,
-                this.containerPrivileged, this.containerVolumes, this.isFrameworkManaged, this.imageConfig);
+                this.containerPrivileged, this.containerVolumes, this.isFrameworkManaged, this.imageConfig,
+                this.entryPoint);
     }
 
     @Override
@@ -248,7 +260,8 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
-                && Objects.equals(this.imageConfig, other.imageConfig);
+                && Objects.equals(this.imageConfig, other.imageConfig)
+                && Objects.equals(this.entryPoint, other.entryPoint);
     }
 
     public static final class ContainerConfigurationBuilder {
@@ -265,6 +278,7 @@ public class ContainerConfiguration {
         private String containerLoggingType;
         private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
         private ContainerNetworkConfigurationBuilder networkConfigurationBuilder = new ContainerNetworkConfigurationBuilder();
+        private List<String> entryPoint = new LinkedList<>();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -336,6 +350,11 @@ public class ContainerConfiguration {
             return this;
         }
 
+        public ContainerConfigurationBuilder setEntryPoint(List<String> entryPoint) {
+            this.entryPoint = entryPoint;
+            return this;
+        }
+
         /**
          * Set the {@link NetworkConfiguration}
          * 
@@ -375,6 +394,7 @@ public class ContainerConfiguration {
             result.containerLoggingType = this.containerLoggingType;
             result.imageConfig = this.imageConfigBuilder.build();
             result.networkConfiguration = this.networkConfigurationBuilder.build();
+            result.entryPoint = requireNonNull(this.entryPoint, "Container EntryPoint list must not be null");
 
             return result;
         }

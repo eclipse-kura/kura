@@ -14,6 +14,7 @@
 package org.eclipse.kura.ai.triton.server;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,6 +29,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
@@ -92,8 +94,13 @@ public class TritonServerEncryptionUtils {
         // TODO
     }
 
-    protected static void deleteModel(String modelName) {
-        // TODO
+    protected static void deleteModel(String modelRootPath) throws IOException {
+        if (!Files.exists(Paths.get(modelRootPath))) {
+            throw new IOException("Model root folder " + modelRootPath + " does not exists");
+        }
+
+        FileUtils.cleanDirectory(new File(modelRootPath));
+        Files.delete(Paths.get(modelRootPath));
     }
 
     private static void decryptFile(String password, String inputFilePath, String outputFilePath)

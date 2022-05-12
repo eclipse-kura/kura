@@ -75,12 +75,12 @@
 
         <AD id="container.ports.internal" name="Internal ports"
             description="A comma separated list of ports. Note, the number of internal ports must be equal to the number of external ports. Example: 80, 443." 
-            type="String" cardinality="1" required="true"
+            type="String" cardinality="1" required="false"
             default="80" />
 
         <AD id="container.ports.external" name="External ports"
             description="A comma separated list of ports. Note, the number of external ports must be equal to the number of internal ports. Example: 8080, 443." 
-            type="String" cardinality="1" required="true"
+            type="String" cardinality="1" required="false"
             default="8080" />
 
         <AD id="container.privileged" name="Privileged Mode" type="Boolean" cardinality="1" required="true" default="false"

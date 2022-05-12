@@ -48,6 +48,7 @@ public class ContainerInstanceTest {
     private static final String CONTAINER_DEVICE = "container.Device";
     private static final String CONTAINER_LOGGER_PARAMETERS = "container.loggerParameters";
     private static final String CONTAINER_LOGGING_TYPE = "container.loggingType";
+    private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";   
 
     private ContainerOrchestrationService dockerService;
     private Map<String, Object> properties;
@@ -199,6 +200,7 @@ public class ContainerInstanceTest {
         this.properties.put(CONTAINER_DEVICE, "");
         this.properties.put(CONTAINER_LOGGER_PARAMETERS, "");
         this.properties.put(CONTAINER_LOGGING_TYPE, "default");
+        this.properties.put(CONTAINER_NETWORKING_MODE, "");
     }
 
     private void givenConfigurableGenericDockerService() {

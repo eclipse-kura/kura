@@ -55,7 +55,7 @@ public class ContainerInstanceOptions {
     private static final Property<String> REGISTRY_PASSWORD = new Property<>("registry.password", "");
     private static final Property<Integer> IMAGES_DOWNLOAD_TIMEOUT = new Property<>("container.image.download.timeout",
             500);
-    private static final Property<String> CONTAINER_NETWORKING_MODE = new Property<>("container.networkMode", "bridge");
+    private static final Property<String> CONTAINER_NETWORKING_MODE = new Property<>("container.networkMode", "");
 
     private final boolean enabled;
     private final String image;

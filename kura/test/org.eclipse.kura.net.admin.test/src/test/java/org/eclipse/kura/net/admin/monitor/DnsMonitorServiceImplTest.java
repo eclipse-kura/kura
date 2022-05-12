@@ -52,6 +52,7 @@ import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetworkPair;
 import org.eclipse.kura.net.admin.NetworkConfigurationService;
+import org.eclipse.kura.net.admin.NetworkConfigurationServiceImpl;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
 import org.eclipse.kura.net.admin.event.NetworkStatusChangeEvent;
 import org.eclipse.kura.net.dhcp.DhcpServerConfig;
@@ -103,6 +104,9 @@ public class DnsMonitorServiceImplTest {
 
         LinuxDns ldMock = mock(LinuxDns.class);
         TestUtil.setFieldValue(svc, "dnsUtil", ldMock);
+
+        NetworkConfigurationServiceImpl ncs = mock(NetworkConfigurationServiceImpl.class);
+        svc.setNetworkConfigurationService(ncs);
 
         Map<String, Object> props = new HashMap<>();
         props.put("net.interfaces", 1); // cause exception and make sure networkConfiguration remains null

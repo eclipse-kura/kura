@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-   Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+   Copyright (c) 2022 Eurotech and/or its affiliates and others
 
    This program and the accompanying materials are made
    available under the terms of the Eclipse Public License 2.0
@@ -22,4 +22,17 @@
 
     <property name="service.pid" value="org.eclipse.kura.certificate.enrollment.ESTEnrollmentService"/>
 
+    <reference name="KeystoreService"
+        interface="org.eclipse.kura.security.keystore.KeystoreService"
+        policy="dynamic"
+        cardinality="0..1"
+        bind="setKeystoreService"
+        unbind="unsetKeystoreService" />
+
+    <reference name="CryptoService" 
+        interface="org.eclipse.kura.crypto.CryptoService" 
+        policy="static" 
+        cardinality="1..1" 
+        bind="setCryptoService" 
+        unbind="unsetCryptoService" />
 </scr:component>

@@ -503,6 +503,11 @@
                                     <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bctls-jdk15on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                </artifactItem>
+                                <artifactItem>
                                     <groupId>com.eurotech</groupId>
                                     <artifactId>gpsd4java</artifactId>
                                     <version>${com.eurotech.gpsd4java.version}</version>
@@ -612,6 +617,7 @@
                                 <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
                                 <move file="target/source/plugins/bcpkix-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcprov-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk15on_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bctls-jdk15on.jar" tofile="target/source/plugins/org.bouncycastle.bctls-jdk15on_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
                             </tasks>
                         </configuration>

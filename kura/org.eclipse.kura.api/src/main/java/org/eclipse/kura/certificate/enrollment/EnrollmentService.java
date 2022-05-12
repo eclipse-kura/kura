@@ -20,9 +20,11 @@ public interface EnrollmentService {
 
     public void renew();
 
-    public Certificate getCARoot();
+    public Certificate getCACertificate();
 
-    public void forceCARootRollover();
+    public Certificate getClientCertificate();
+
+    public void forceCACertificateRollover();
 
     public boolean isEnrolled();
 

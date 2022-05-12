@@ -249,7 +249,7 @@ public enum KuraErrorCode {
      */
     UNSUPPORTED_MODEM,
     /**
-     * Certificate invalid
+     * Modem unsupported.
      * 
      * @since 2.4
      */

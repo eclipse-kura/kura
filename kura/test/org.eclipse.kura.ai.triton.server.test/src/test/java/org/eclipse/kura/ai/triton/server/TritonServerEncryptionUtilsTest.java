@@ -96,7 +96,6 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void decryptModelShouldWorkWithZippedFiles() {
-        // Given: encrypted file at path
         givenEncryptedFileAtPath("target/test-classes/plain.txt.zip.gpg");
         givenAFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");

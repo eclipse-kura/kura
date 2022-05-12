@@ -77,30 +77,12 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         this.netConfigService = netConfigService;
     }
 
-    public void unsetNetworkConfigurationService(NetworkConfigurationService netConfigService) {
-        if (netConfigService.equals(this.netConfigService)) {
-            this.netConfigService = null;
-        }
-    }
-
     public void setDnsServerService(DnsServerService dnsServer) {
         this.dnsServer = dnsServer;
     }
 
-    public void unsetDnsServerService(DnsServerService dnsServer) {
-        if (dnsServer.equals(this.dnsServer)) {
-            this.dnsServer = null;
-        }
-    }
-
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
-    }
-
-    public void unsetExecutorService(CommandExecutorService executorService) {
-        if (executorService.equals(this.executorService)) {
-            this.executorService = null;
-        }
     }
 
     protected void activate() {

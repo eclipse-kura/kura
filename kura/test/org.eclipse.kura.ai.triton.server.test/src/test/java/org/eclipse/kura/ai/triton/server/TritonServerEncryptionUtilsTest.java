@@ -83,7 +83,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldWork() {
         givenEncryptedFileAtPath("target/test-classes/plain_file.gpg");
-        givenAnEncryptedFileExistsAtPath(encryptedFile);
+        givenAFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
         givenNoFileExistsAtPath(decryptedFile);
 
@@ -98,7 +98,7 @@ public class TritonServerEncryptionUtilsTest {
     public void decryptModelShouldWorkWithZippedFiles() {
         // Given: encrypted file at path
         givenEncryptedFileAtPath("target/test-classes/plain.txt.zip.gpg");
-        givenAnEncryptedFileExistsAtPath(encryptedFile);
+        givenAFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
         givenNoFileExistsAtPath(decryptedFile);
 
@@ -111,7 +111,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldWorkWithASCIIArmoredFormat() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
-        givenAnEncryptedFileExistsAtPath(encryptedFile);
+        givenAFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
         givenNoFileExistsAtPath(decryptedFile);
 
@@ -125,7 +125,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldThrowWithWrongPassword() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
-        givenAnEncryptedFileExistsAtPath(encryptedFile);
+        givenAFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
         givenNoFileExistsAtPath(decryptedFile);
 
@@ -138,7 +138,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void decryptModelShouldThrowIfDestinationFileAlreadyExists() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
-        givenAnEncryptedFileExistsAtPath(encryptedFile);
+        givenAFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
         givenAFileAreadyExistsAtPath(decryptedFile);
 
@@ -166,10 +166,14 @@ public class TritonServerEncryptionUtilsTest {
         this.decryptedFile = filePath;
     }
 
-    private void givenAnEncryptedFileExistsAtPath(String filePath) {
+    private void givenAFileExistsAtPath(String filePath) {
         Path targetFilePath = Paths.get(filePath);
         assertTrue(Files.exists(targetFilePath));
         assertTrue(Files.isRegularFile(targetFilePath));
+    }
+
+    private void givenNoFileExistsAtPath(String folderPath) {
+        assertFalse(Files.exists(Paths.get(folderPath)));
     }
 
     private void givenAFileAreadyExistsAtPath(String folderPath) {
@@ -183,10 +187,6 @@ public class TritonServerEncryptionUtilsTest {
         }
 
         assertTrue(Files.exists(targetFolderPath));
-    }
-
-    private void givenNoFileExistsAtPath(String folderPath) {
-        assertFalse(Files.exists(Paths.get(folderPath)));
     }
 
     /*

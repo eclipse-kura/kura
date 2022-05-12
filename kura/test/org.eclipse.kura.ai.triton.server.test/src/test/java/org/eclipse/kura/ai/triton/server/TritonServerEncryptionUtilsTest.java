@@ -73,7 +73,7 @@ public class TritonServerEncryptionUtilsTest {
     @Test
     public void createDecryptionFolderShouldThrowOnNameClashes() {
         givenTargetFolder(WORKDIR + "/another_folder");
-        givenAFileExistsAtPath(targetFolder);
+        givenAFileAreadyExistsAtPath(targetFolder);
 
         whenCreateDecryptionFolderIsCalledWith(targetFolder);
 
@@ -140,7 +140,7 @@ public class TritonServerEncryptionUtilsTest {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
         givenAnEncryptedFileExistsAtPath(encryptedFile);
         givenDecryptedFileAtPath(WORKDIR + "/file");
-        givenAFileExistsAtPath(decryptedFile);
+        givenAFileAreadyExistsAtPath(decryptedFile);
 
         whenDecryptModelIsCalledWith("eurotech", encryptedFile, decryptedFile);
 
@@ -172,7 +172,7 @@ public class TritonServerEncryptionUtilsTest {
         assertTrue(Files.isRegularFile(targetFilePath));
     }
 
-    private void givenAFileExistsAtPath(String folderPath) {
+    private void givenAFileAreadyExistsAtPath(String folderPath) {
         Path targetFolderPath = Paths.get(folderPath);
         assertFalse(Files.exists(targetFolderPath));
 

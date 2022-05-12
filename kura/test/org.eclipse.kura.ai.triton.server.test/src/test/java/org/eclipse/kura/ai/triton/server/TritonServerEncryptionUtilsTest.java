@@ -119,6 +119,35 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
+    public void decryptModelShouldWorkWithZippedFiles() {
+        // Given: encrypted file at path
+        String encryptedFile = "target/test-classes/plain.txt.zip.gpg";
+        Path encryptedFilePath = Paths.get(encryptedFile);
+
+        assertTrue(Files.exists(encryptedFilePath));
+
+        // Given: decrypted file at path
+        String decryptedFile = WORKDIR + "/file";
+        Path decryptedFilePath = Paths.get(decryptedFile);
+
+        assertFalse(Files.exists(decryptedFilePath));
+
+        // When: decryptModel is called with params
+        try {
+            TritonServerEncryptionUtils.decryptModel("secret", encryptedFile, decryptedFile);
+        } catch (IOException | KuraIOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        // Then: the decrypted file exists
+        assertTrue(Files.exists(decryptedFilePath));
+
+        // Then: no exception occurred
+        assertFalse(this.exceptionOccurred);
+    }
+
+    @Test
     public void decryptModelShouldWorkWithASCIIArmoredFormat() {
         // Given: encrypted file at path
         String encryptedFile = "target/test-classes/armored_plain_file.asc";

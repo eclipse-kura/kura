@@ -39,6 +39,7 @@ import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBuilder;
 import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
+import org.eclipse.kura.KuraIOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ public class TritonServerEncryptionUtils {
     }
 
     protected static void decryptModel(String password, String inputFilePath, String outputFilePath)
-            throws IOException {
+            throws IOException, KuraIOException {
         if (Security.getProvider("BC") == null) {
             Security.addProvider(new BouncyCastleProvider());
         }
@@ -83,8 +84,7 @@ public class TritonServerEncryptionUtils {
         try {
             decryptFile(password, inputFilePath, outputFilePath);
         } catch (PGPException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new KuraIOException(e, "File decryption failed.");
         }
     }
 

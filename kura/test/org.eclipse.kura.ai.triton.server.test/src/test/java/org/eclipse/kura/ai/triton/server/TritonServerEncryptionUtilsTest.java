@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.kura.KuraIOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +95,7 @@ public class TritonServerEncryptionUtilsTest {
         // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("password", encryptedFile, decryptedFile);
-        } catch (IOException e) {
+        } catch (IOException | KuraIOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
         }
@@ -134,8 +135,8 @@ public class TritonServerEncryptionUtilsTest {
         // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("eurotech", encryptedFile, decryptedFile);
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (IOException | KuraIOException e) {
+            e.printStackTrace();
             this.exceptionOccurred = true;
         }
 
@@ -174,7 +175,7 @@ public class TritonServerEncryptionUtilsTest {
         // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("wrongpassword", encryptedFile, decryptedFile);
-        } catch (IOException e) {
+        } catch (IOException | KuraIOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
         }
@@ -212,7 +213,7 @@ public class TritonServerEncryptionUtilsTest {
         // When: decryptModel is called with params
         try {
             TritonServerEncryptionUtils.decryptModel("eurotech", encryptedFile, decryptedFile);
-        } catch (IOException e) {
+        } catch (IOException | KuraIOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;
         }

@@ -76,7 +76,7 @@ public class TritonServerEncryptionUtils {
         }
 
         if (!Files.isRegularFile(Paths.get(inputFilePath))) {
-            throw new IOException("Input file " + inputFilePath + " does not exists/is not a file");
+            throw new IOException("Input file " + inputFilePath + " does not exist/is not a file");
         }
 
         if (Files.exists(Paths.get(outputFilePath))) {
@@ -90,8 +90,17 @@ public class TritonServerEncryptionUtils {
         }
     }
 
-    protected static void unzipModel(String inputFilePath, String outputFolder) {
+    protected static void unzipModel(String inputFilePath, String outputFolder) throws IOException {
+        if (!Files.isRegularFile(Paths.get(inputFilePath))) {
+            throw new IOException("Input file " + inputFilePath + " does not exist/is not a file");
+        }
+
+        if (!Files.isDirectory(Paths.get(outputFolder))) {
+            throw new IOException("Output folder " + outputFolder + " does not exist/is not a folder");
+        }
+
         // TODO
+        // UnZip.unZipFile(inputFilePath, outputFolder);
     }
 
     protected static void deleteModel(String modelRootPath) throws IOException {

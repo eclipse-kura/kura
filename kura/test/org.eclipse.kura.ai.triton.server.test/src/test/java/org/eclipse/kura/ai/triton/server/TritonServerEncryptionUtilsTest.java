@@ -177,7 +177,13 @@ public class TritonServerEncryptionUtilsTest {
         }
 
         // When unzipModel method is run
-        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        try {
+            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            this.exceptionOccurred = true;
+
+        }
 
         // Then the expected root model dir should exists
         assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32")));
@@ -231,7 +237,12 @@ public class TritonServerEncryptionUtilsTest {
             this.exceptionOccurred = true;
         }
 
-        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        try {
+            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            this.exceptionOccurred = true;
+        }
 
         // Then target folder is empty
         try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
@@ -260,7 +271,12 @@ public class TritonServerEncryptionUtilsTest {
             this.exceptionOccurred = true;
         }
 
-        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        try {
+            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            this.exceptionOccurred = true;
+        }
 
         // Then target folder is empty
         try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
@@ -283,7 +299,12 @@ public class TritonServerEncryptionUtilsTest {
         // Given the target folder doesnt exist
         assertFalse(Files.exists(Paths.get(targetFolder)));
 
-        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        try {
+            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
 
         // Then the target folder doesnt exists
         assertFalse(Files.exists(Paths.get(targetFolder)));

@@ -61,6 +61,7 @@ public class TritonServerEncryptionUtilsTest {
 
         whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
 
+        thenNoExceptionOccurred();
         thenPathShouldMatch(expectedEncryptedModelPath, foundEncryptedModelPath);
     }
 
@@ -77,6 +78,7 @@ public class TritonServerEncryptionUtilsTest {
 
         whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
 
+        thenNoExceptionOccurred();
         thenPathShouldMatch(expectedEncryptedModelPath, foundEncryptedModelPath);
     }
 

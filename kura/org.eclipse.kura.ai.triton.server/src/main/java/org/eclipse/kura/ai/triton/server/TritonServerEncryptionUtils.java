@@ -119,6 +119,11 @@ public class TritonServerEncryptionUtils {
             enc = (PGPEncryptedDataList) pgpFactory.nextObject();
         }
 
+        if (enc == null) {
+            inStream.close();
+            throw new IOException("PGP PBE File format read failed");
+        }
+
         PGPPBEEncryptedData pbe = (PGPPBEEncryptedData) enc.get(0);
         InputStream clear = pbe.getDataStream(new JcePBEDataDecryptorFactoryBuilder(
                 new JcaPGPDigestCalculatorProviderBuilder().setProvider("BC").build()).setProvider("BC")

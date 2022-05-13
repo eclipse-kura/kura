@@ -437,7 +437,7 @@ public class TritonServerEncryptionUtilsTest {
 
     private void whenCleanModelRepositoryIsCalledWith(String folderPath) {
         try {
-            TritonServerEncryptionUtils.deleteModel(folderPath);
+            TritonServerEncryptionUtils.cleanRepository(folderPath);
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;

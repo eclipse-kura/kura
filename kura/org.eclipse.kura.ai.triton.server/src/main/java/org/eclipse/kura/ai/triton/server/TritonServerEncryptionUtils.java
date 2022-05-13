@@ -51,7 +51,6 @@ public class TritonServerEncryptionUtils {
     private static final Logger logger = LoggerFactory.getLogger(TritonServerEncryptionUtils.class);
 
     private TritonServerEncryptionUtils() {
-        // TODO
     }
 
     protected static void createDecryptionFolder(String folderPath) throws IOException {

@@ -15,6 +15,7 @@ package org.eclipse.kura.ai.triton.server;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openpgp.PGPCompressedData;
 import org.bouncycastle.openpgp.PGPEncryptedDataList;
@@ -53,9 +55,16 @@ public class TritonServerEncryptionUtils {
     private TritonServerEncryptionUtils() {
     }
 
-    protected static String getEncryptedModelPath(String modelName, String folderPath) {
-        // TODO
-        return "";
+    protected static String getEncryptedModelPath(String modelName, String folderPath) throws KuraIOException {
+        File dir = new File(folderPath);
+        FileFilter fileFilter = new WildcardFileFilter(modelName + ".*");
+        File[] files = dir.listFiles(fileFilter);
+
+        if (files.length != 1) {
+            throw new KuraIOException("No good match found in folder path");
+        }
+
+        return files[0].toString();
     }
 
     protected static void createDecryptionFolder(String folderPath) throws IOException {

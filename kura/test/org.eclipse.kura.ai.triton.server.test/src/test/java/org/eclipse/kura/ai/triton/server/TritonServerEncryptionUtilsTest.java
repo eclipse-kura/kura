@@ -287,25 +287,26 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
-    public void deleteModelShouldWork() {
+    public void cleanModelRepositoryShouldWork() {
         givenTargetFolder(WORKDIR + "/model_dir");
         givenAFolderAreadyExistsAtPath(targetFolder);
         givenAFileAreadyExistsAtPath(targetFolder + "/test_file1");
         givenAFileAreadyExistsAtPath(targetFolder + "/test_file2");
+        givenAFolderAreadyExistsAtPath(targetFolder + "/test_folder");
 
-        whenDeleteModelIsCalledWith(targetFolder);
+        whenCleanModelRepositoryIsCalledWith(targetFolder);
 
-        thenFileDoesNotExistsAtPath(targetFolder);
-        thenAFolderExistsAtPath(WORKDIR);
+        thenAFolderExistsAtPath(targetFolder);
+        thenFolderIsEmpty(targetFolder);
         thenNoExceptionOccurred();
     }
 
     @Test
     public void deleteModelShouldThrowWithNonExistingFolder() {
-        givenTargetFolder(WORKDIR + "/model_dir");
+        givenTargetFolder(WORKDIR + "/imaginary_dir");
         givenNoFileExistsAtPath(targetFolder);
 
-        whenDeleteModelIsCalledWith(targetFolder);
+        whenCleanModelRepositoryIsCalledWith(targetFolder);
 
         thenAnExceptionOccurred();
         thenAFolderExistsAtPath(WORKDIR);
@@ -434,7 +435,7 @@ public class TritonServerEncryptionUtilsTest {
         }
     }
 
-    private void whenDeleteModelIsCalledWith(String folderPath) {
+    private void whenCleanModelRepositoryIsCalledWith(String folderPath) {
         try {
             TritonServerEncryptionUtils.deleteModel(folderPath);
         } catch (IOException e) {

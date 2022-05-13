@@ -208,7 +208,7 @@ public class ContainerConfiguration {
      * {@link ContainerNetworkConfiguration}.
      * 
      * @return
-     * @since 2.7
+     * @since 2.4
      */
     public ContainerNetworkConfiguration getContainerNetworkConfiguration() {
         return this.networkConfiguration;
@@ -218,7 +218,7 @@ public class ContainerConfiguration {
      * Returns a List<String> of container entry points. An empty list can be returned if no entrypoints are specified.
      *
      * @return
-     * @since 2.6
+     * @since 2.4
      */
     public List<String> getEntryPoint() {
         return this.entryPoint;
@@ -358,7 +358,7 @@ public class ContainerConfiguration {
         /**
          * Set the {@link NetworkConfiguration}
          * 
-         * @since 2.7
+         * @since 2.4
          */
         public ContainerConfigurationBuilder setContainerNetowrkConfiguration(
                 ContainerNetworkConfiguration networkConfiguration) {

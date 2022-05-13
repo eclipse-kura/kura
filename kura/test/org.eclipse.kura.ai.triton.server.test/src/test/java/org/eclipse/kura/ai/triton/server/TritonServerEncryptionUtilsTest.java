@@ -136,6 +136,19 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
+    public void decryptModelShouldThrowWithWrongFileFormat() {
+        givenEncryptedFileAtPath("target/test-classes/tf_autoencoder_fp32.zip");
+        givenAFileExistsAtPath(encryptedFile);
+        givenDecryptedFileAtPath(WORKDIR + "/file");
+        givenNoFileExistsAtPath(decryptedFile);
+
+        whenDecryptModelIsCalledWith("anything", encryptedFile, decryptedFile);
+
+        thenAnExceptionOccurred();
+        thenFileDoesNotExistsAtPath(decryptedFile);
+    }
+
+    @Test
     public void decryptModelShouldThrowIfDestinationFileAlreadyExists() {
         givenEncryptedFileAtPath("target/test-classes/armored_plain_file.asc");
         givenAFileExistsAtPath(encryptedFile);

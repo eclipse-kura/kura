@@ -245,7 +245,7 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
-    public void unzipModelShouldThrowIfFileNotExpectedFormat() {
+    public void unzipModelShouldThrowWithWrongFileFormat() {
         // Given a file not in the .zip format
         String zippedFile = "target/test-classes/armored_plain_file.asc";
         assertTrue(Files.isRegularFile(Paths.get(zippedFile)));

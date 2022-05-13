@@ -53,6 +53,11 @@ public class TritonServerEncryptionUtils {
     private TritonServerEncryptionUtils() {
     }
 
+    protected static String getEncryptedModelPath(String modelName, String folderPath) {
+        // TODO
+        return "";
+    }
+
     protected static void createDecryptionFolder(String folderPath) throws IOException {
         Path targetFolderPath = Paths.get(folderPath);
 

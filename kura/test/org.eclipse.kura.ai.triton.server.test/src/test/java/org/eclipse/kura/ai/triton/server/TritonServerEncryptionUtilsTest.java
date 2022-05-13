@@ -42,6 +42,7 @@ public class TritonServerEncryptionUtilsTest {
     private String targetFolder;
     private String encryptedFile;
     private String decryptedFile;
+    private String compressedFile;
 
     /*
      * Scenarios
@@ -91,7 +92,7 @@ public class TritonServerEncryptionUtilsTest {
         whenDecryptModelIsCalledWith("password", encryptedFile, decryptedFile);
 
         thenFileExistsAtPath(decryptedFile);
-        thenDecryptedFileContentMatches(decryptedFile, "cudumar");
+        thenFileContentMatches(decryptedFile, "cudumar");
         thenNoExceptionOccurred();
     }
 
@@ -118,7 +119,7 @@ public class TritonServerEncryptionUtilsTest {
         whenDecryptModelIsCalledWith("eurotech", encryptedFile, decryptedFile);
 
         thenFileExistsAtPath(decryptedFile);
-        thenDecryptedFileContentMatches(decryptedFile, "42");
+        thenFileContentMatches(decryptedFile, "42");
         thenNoExceptionOccurred();
     }
 
@@ -162,154 +163,64 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void unzipModelShouldWork() {
-        // Given a zip file at path
-        String zippedFile = "target/test-classes/tf_autoencoder_fp32.zip";
-        assertTrue(Files.isRegularFile(Paths.get(zippedFile)));
-        // Given a target file path
-        String targetFolder = WORKDIR;
-        assertTrue(Files.isDirectory(Paths.get(targetFolder)));
-        // Given target folder is empty
-        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
-            assertFalse(entries.findFirst().isPresent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        givenCompressedFileAtPath("target/test-classes/tf_autoencoder_fp32.zip");
+        givenAFileExistsAtPath(compressedFile);
+        givenTargetFolder(WORKDIR);
+        givenAFolderExistsAtPath(targetFolder);
+        givenFolderAtPathIsEmpty(targetFolder);
 
-        // When unzipModel method is run
-        try {
-            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            this.exceptionOccurred = true;
+        whenUnzipModelIsCalledWith(compressedFile, targetFolder);
 
-        }
-
-        // Then the expected root model dir should exists
-        assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32")));
-        // Then the expected file should exist
-        assertTrue(Files.isRegularFile(Paths.get(targetFolder + "/tf_autoencoder_fp32/config.pbtxt")));
-        // Then the expected file should contain
-        try {
-            List<String> content = Files.readAllLines(Paths.get(targetFolder + "/tf_autoencoder_fp32/config.pbtxt"));
-
-            assertEquals(1, content.size());
-            assertEquals("test", content.get(0));
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
-        // Then the expected dir should exists
-        assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32/1")));
-        // Then the expected dir should exists
-        assertTrue(Files.isDirectory(Paths.get(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel")));
-        // Then the expected file should exists
-        assertTrue(Files
-                .isRegularFile(Paths.get(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb")));
-        // Then the expected file should contain
-        try {
-            List<String> content = Files
-                    .readAllLines(Paths.get(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb"));
-
-            assertEquals(1, content.size());
-            assertEquals("model", content.get(0));
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
-        // Then no exception occurred
-        assertFalse(exceptionOccurred);
+        thenAFolderExistsAtPath(targetFolder + "/tf_autoencoder_fp32");
+        thenFileExistsAtPath(targetFolder + "/tf_autoencoder_fp32/config.pbtxt");
+        thenFileContentMatches(targetFolder + "/tf_autoencoder_fp32/config.pbtxt", "test");
+        thenAFolderExistsAtPath(targetFolder + "/tf_autoencoder_fp32/1");
+        thenAFolderExistsAtPath(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel");
+        thenFileExistsAtPath(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb");
+        thenFileContentMatches(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb",
+                "model");
+        thenNoExceptionOccurred();
     }
 
     @Test
     public void unzipModelShouldThrowIfFileDoesNotExist() {
-        // Given a non existent zip file at path
-        String zippedFile = WORKDIR + "/non_existent_file.zip";
-        assertFalse(Files.exists(Paths.get(zippedFile)));
-        // Given a target file path
-        String targetFolder = WORKDIR;
-        assertTrue(Files.isDirectory(Paths.get(targetFolder)));
-        // Given target folder is empty
-        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
-            assertFalse(entries.findFirst().isPresent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        givenCompressedFileAtPath(WORKDIR + "/non_existent_file.zip");
+        givenNoFileExistsAtPath(compressedFile);
+        givenTargetFolder(WORKDIR);
+        givenAFolderExistsAtPath(targetFolder);
+        givenFolderAtPathIsEmpty(targetFolder);
 
-        try {
-            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        whenUnzipModelIsCalledWith(compressedFile, targetFolder);
 
-        // Then target folder is empty
-        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
-            assertFalse(entries.findFirst().isPresent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
-        // Then an exception occurred
-        assertTrue(exceptionOccurred);
+        thenAnExceptionOccurred();
+        thenFolderIsEmpty(targetFolder);
     }
 
     @Test
     public void unzipModelShouldThrowWithWrongFileFormat() {
-        // Given a file not in the .zip format
-        String zippedFile = "target/test-classes/armored_plain_file.asc";
-        assertTrue(Files.isRegularFile(Paths.get(zippedFile)));
-        // Given a target file path
-        String targetFolder = WORKDIR;
-        assertTrue(Files.isDirectory(Paths.get(targetFolder)));
-        // Given target folder is empty
-        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
-            assertFalse(entries.findFirst().isPresent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        givenCompressedFileAtPath("target/test-classes/armored_plain_file.asc");
+        givenAFileExistsAtPath(compressedFile);
+        givenTargetFolder(WORKDIR);
+        givenAFolderExistsAtPath(targetFolder);
+        givenFolderAtPathIsEmpty(targetFolder);
 
-        try {
-            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        whenUnzipModelIsCalledWith(compressedFile, targetFolder);
 
-        // Then target folder is empty
-        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
-            assertFalse(entries.findFirst().isPresent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
-        // Then an exception occurred
-        assertTrue(exceptionOccurred);
+        thenAnExceptionOccurred();
+        thenFolderIsEmpty(targetFolder);
     }
 
     @Test
     public void unzipModelShouldThrowIfDestinationFolderDoesNotExist() {
-        // Given a non existent zip file at path
-        String zippedFile = "target/test-classes/tf_autoencoder_fp32.zip";
-        assertTrue(Files.isRegularFile(Paths.get(zippedFile)));
-        // Given a target file path
-        String targetFolder = WORKDIR + "/an_imaginary_folder";
-        // Given the target folder doesnt exist
-        assertFalse(Files.exists(Paths.get(targetFolder)));
+        givenCompressedFileAtPath("target/test-classes/armored_plain_file.asc");
+        givenAFileExistsAtPath(compressedFile);
+        givenTargetFolder(WORKDIR + "/an_imaginary_folder");
+        givenNoFileExistsAtPath(targetFolder);
 
-        try {
-            TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        whenUnzipModelIsCalledWith(compressedFile, targetFolder);
 
-        // Then the target folder doesnt exists
-        assertFalse(Files.exists(Paths.get(targetFolder)));
-        // Then an exception occurred
-        assertTrue(exceptionOccurred);
+        thenAnExceptionOccurred();
+        thenFileDoesNotExistsAtPath(targetFolder);
     }
 
     @Test
@@ -356,10 +267,29 @@ public class TritonServerEncryptionUtilsTest {
         this.decryptedFile = filePath;
     }
 
+    private void givenCompressedFileAtPath(String filePath) {
+        this.compressedFile = filePath;
+    }
+
     private void givenAFileExistsAtPath(String filePath) {
         Path targetFilePath = Paths.get(filePath);
         assertTrue(Files.exists(targetFilePath));
         assertTrue(Files.isRegularFile(targetFilePath));
+    }
+
+    private void givenAFolderExistsAtPath(String folderPath) {
+        Path targetPath = Paths.get(folderPath);
+        assertTrue(Files.exists(targetPath));
+        assertTrue(Files.isDirectory(targetPath));
+    }
+
+    private void givenFolderAtPathIsEmpty(String folderPath) {
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
     }
 
     private void givenNoFileExistsAtPath(String folderPath) {
@@ -412,6 +342,15 @@ public class TritonServerEncryptionUtilsTest {
         }
     }
 
+    private void whenUnzipModelIsCalledWith(String compressedFilePath, String folderPath) {
+        try {
+            TritonServerEncryptionUtils.unzipModel(compressedFilePath, folderPath);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+    }
+
     private void whenDeleteModelIsCalledWith(String folderPath) {
         try {
             TritonServerEncryptionUtils.deleteModel(folderPath);
@@ -448,7 +387,16 @@ public class TritonServerEncryptionUtilsTest {
         }
     }
 
-    private void thenDecryptedFileContentMatches(String filePath, String expectedContent) {
+    private void thenFolderIsEmpty(String folderPath) {
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+    }
+
+    private void thenFileContentMatches(String filePath, String expectedContent) {
         try {
             List<String> content = Files.readAllLines(Paths.get(filePath));
 

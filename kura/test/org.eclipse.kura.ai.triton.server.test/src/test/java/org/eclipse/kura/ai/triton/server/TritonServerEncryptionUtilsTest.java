@@ -399,13 +399,19 @@ public class TritonServerEncryptionUtilsTest {
      * When
      */
     private void whenGetEncryptedModelPathIsCalledWith(String modelName, String folderPath) {
-        TritonServerEncryptionUtils.getEncryptedModelPath(modelName, folderPath);
+        try {
+            this.foundEncryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName, folderPath);
+        } catch (KuraIOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
     }
 
     private void whenCreateDecryptionFolderIsCalledWith(String folderPath) {
         try {
             TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
         } catch (IOException e) {
+            e.printStackTrace();
             this.exceptionOccurred = true;
         }
     }

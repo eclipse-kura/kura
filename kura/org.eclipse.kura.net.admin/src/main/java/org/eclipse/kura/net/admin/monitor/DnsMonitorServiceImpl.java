@@ -215,18 +215,21 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
 
-        if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
-            try {
-                this.networkConfiguration = this.netConfigService.getNetworkConfiguration();
-            } catch (KuraException e) {
-                logger.error("Could not get network configuration", e);
+        Thread thread = new Thread(() -> {
+            if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
+                try {
+                    this.networkConfiguration = this.netConfigService.getNetworkConfiguration();
+                } catch (KuraException e) {
+                    logger.error("Could not get network configuration", e);
+                }
+                updateDnsResolverConfig();
+                updateDnsProxyConfig();
+            } else if (topic.equals(NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC)) {
+                updateDnsResolverConfig();
+                updateDnsProxyConfig();
             }
-            updateDnsResolverConfig();
-            updateDnsProxyConfig();
-        } else if (topic.equals(NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC)) {
-            updateDnsResolverConfig();
-            updateDnsProxyConfig();
-        }
+        });
+        thread.start();
     }
 
     private void updateDnsResolverConfig() {

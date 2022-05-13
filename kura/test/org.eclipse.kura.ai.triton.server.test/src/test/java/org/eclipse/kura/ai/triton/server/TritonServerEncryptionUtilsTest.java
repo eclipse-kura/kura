@@ -232,6 +232,35 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
+    public void unzipModelShouldThrowIfFileNotExpectedFormat() {
+        // Given a file not in the .zip format
+        String zippedFile = "target/test-classes/armored_plain_file.asc";
+        assertTrue(Files.isRegularFile(Paths.get(zippedFile)));
+        // Given a target file path
+        String targetFolder = WORKDIR;
+        assertTrue(Files.isDirectory(Paths.get(targetFolder)));
+        // Given target folder is empty
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+
+        TritonServerEncryptionUtils.unzipModel(zippedFile, targetFolder);
+
+        // Then target folder is empty
+        try (Stream<Path> entries = Files.list(Paths.get(targetFolder))) {
+            assertFalse(entries.findFirst().isPresent());
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.exceptionOccurred = true;
+        }
+        // Then an exception occurred
+        assertTrue(exceptionOccurred);
+    }
+
+    @Test
     public void unzipModelShouldThrowIfDestinationFolderDoesNotExist() {
         // Given a non existent zip file at path
         String zippedFile = "target/test-classes/tf_autoencoder_fp32.zip";

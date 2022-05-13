@@ -21,14 +21,14 @@ import javax.ws.rs.container.ContainerRequestContext;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
- * A service interface that allows to register custom authentication providers for the RestService.
+ * A service interface that allows to register custom authentication providers for the {@code RestService}.
  * Registered {@link AuthenticationProvider} instances will be considered along with the currently enabled
  * built in authentication methods (e.g password and certificate authentication).<br>
  * 
  * The registered authentication providers will be called in order, the first provider whose
  * {@link AuthenticationProvider#authenticate(HttpServletRequest, ContainerRequestContext)} returns a non-empty optional
  * will determine a successful authentication.
- * If all providers return an empty optional will result in the call failing with 401 status.<br>
+ * If all providers return an empty optional the call failing with 401 status.<br>
  * 
  * The order in which the providers are called can be configured with the {@link javax.annotation.Priority} annotation.
  * Lower {@link javax.annotation.Priority#value()} values mean higher priority.

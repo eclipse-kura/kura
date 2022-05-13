@@ -16,11 +16,10 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
@@ -56,12 +55,15 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private static final Logger logger = LoggerFactory.getLogger(DnsMonitorServiceImpl.class);
 
     private static final long THREAD_INTERVAL = 60000;
-    private static final long THREAD_TERMINATION_TOUT = 1; // in seconds
+    private static final long THREAD_TERMINATION_TOUT = 60; // in seconds
     private Future<?> monitorTask;
-    private ExecutorService executor;
+    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor((r) -> {
+        final Thread t = Executors.defaultThreadFactory().newThread(r);
+        t.setName("DnsMonitorServiceImpl");
+        return t;
+    });
 
     private boolean enabled;
-    private final AtomicBoolean stopThread = new AtomicBoolean();
     private NetworkConfigurationService netConfigService;
     private NetworkConfiguration networkConfiguration;
     private Set<NetworkPair<IP4Address>> allowedNetworks;
@@ -96,36 +98,26 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
         this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
 
-        this.executor = Executors.newSingleThreadExecutor();
-        this.stopThread.set(false);
-        this.monitorTask = this.executor.submit(this::monitorDnsServerStatus);
+        this.monitorTask = this.executor.scheduleWithFixedDelay(this::monitorDnsServerStatus, 0, THREAD_INTERVAL,
+                TimeUnit.MILLISECONDS);
 
     }
 
     private void monitorDnsServerStatus() {
-        while (!this.stopThread.get()) {
-            logger.debug("DnsMonitor thread start");
-            Thread.currentThread().setName("DnsMonitorServiceImpl");
-            Set<IPAddress> dnsServers = DnsMonitorServiceImpl.this.dnsUtil.getDnServers();
 
-            // Check that resolv.conf matches what is configured
-            Set<IPAddress> configuredServers = getConfiguredDnsServers();
-            if (!configuredServers.equals(dnsServers)) {
-                setDnsServers(configuredServers);
-                dnsServers = configuredServers;
-            }
+        logger.debug("DnsMonitor task start");
+        Set<IPAddress> dnsServers = DnsMonitorServiceImpl.this.dnsUtil.getDnServers();
 
-            manageDnsProxies(dnsServers);
-            logger.debug("DnsMonitor thread stop");
-            try {
-                synchronized (this.stopThread) {
-                    this.stopThread.wait(THREAD_INTERVAL);
-                }
-            } catch (InterruptedException e) {
-                logger.debug("DNS monitor interrupted", e);
-                Thread.currentThread().interrupt();
-            }
+        // Check that resolv.conf matches what is configured
+        Set<IPAddress> configuredServers = getConfiguredDnsServers();
+        if (!configuredServers.equals(dnsServers)) {
+            setDnsServers(configuredServers);
+            dnsServers = configuredServers;
         }
+
+        manageDnsProxies(dnsServers);
+        logger.debug("DnsMonitor task stop");
+
     }
 
     private void manageDnsProxies(Set<IPAddress> dnsServers) {
@@ -158,17 +150,15 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
 
     protected void deactivate() {
         if (this.monitorTask != null && !this.monitorTask.isDone()) {
-            this.stopThread.set(true);
-            monitorNotity();
             logger.debug("Cancelling DnsMonitorServiceImpl task ...");
-            this.monitorTask.cancel(true);
+            this.monitorTask.cancel(false);
             logger.info("DnsMonitorServiceImpl task cancelled? = {}", this.monitorTask.isDone());
             this.monitorTask = null;
         }
 
         if (this.executor != null) {
             logger.debug("Terminating DnsMonitorServiceImpl Thread ...");
-            this.executor.shutdownNow();
+            this.executor.shutdown();
             try {
                 this.executor.awaitTermination(THREAD_TERMINATION_TOUT, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
@@ -215,7 +205,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
         logger.debug("handleEvent - topic: {}", event.getTopic());
         String topic = event.getTopic();
 
-        Thread thread = new Thread(() -> {
+        this.executor.execute(() -> {
             if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
                 try {
                     this.networkConfiguration = this.netConfigService.getNetworkConfiguration();
@@ -229,7 +219,6 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
                 updateDnsProxyConfig();
             }
         });
-        thread.start();
     }
 
     private void updateDnsResolverConfig() {
@@ -409,12 +398,6 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
             }
 
             now = System.currentTimeMillis();
-        }
-    }
-
-    private void monitorNotity() {
-        synchronized (this.stopThread) {
-            this.stopThread.notifyAll();
         }
     }
 

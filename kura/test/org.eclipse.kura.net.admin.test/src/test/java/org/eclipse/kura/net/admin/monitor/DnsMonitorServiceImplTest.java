@@ -31,8 +31,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraException;
@@ -76,7 +80,6 @@ public class DnsMonitorServiceImplTest {
         Future task = (Future) TestUtil.getFieldValue(svc, "monitorTask");
         assertNotNull(executor);
         assertNotNull(task);
-        assertNotNull(TestUtil.getFieldValue(svc, "stopThread"));
         assertNotNull(TestUtil.getFieldValue(svc, "dnsUtil"));
 
         svc.deactivate();
@@ -88,8 +91,9 @@ public class DnsMonitorServiceImplTest {
     }
 
     @Test
-    public void testHandleEventConfigChange() throws NoSuchFieldException {
-        AtomicBoolean visited = new AtomicBoolean(false);
+    public void testHandleEventConfigChange()
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        CompletableFuture<Void> visited = new CompletableFuture<>();
 
         DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl() {
 
@@ -98,7 +102,7 @@ public class DnsMonitorServiceImplTest {
                 assertTrue(dnsServerConfigIP4.getForwarders().isEmpty());
                 assertTrue(dnsServerConfigIP4.getAllowedNetworks().isEmpty());
 
-                visited.set(true);
+                visited.complete(null);
             }
         };
 
@@ -115,14 +119,15 @@ public class DnsMonitorServiceImplTest {
 
         svc.handleEvent(event);
 
-        assertTrue(visited.get());
+        visited.get(30, TimeUnit.SECONDS);
 
         assertNull(TestUtil.getFieldValue(svc, "networkConfiguration"));
     }
 
     @Test
-    public void testHandleEventStatusChange() throws NoSuchFieldException {
-        AtomicBoolean visited = new AtomicBoolean(false);
+    public void testHandleEventStatusChange()
+            throws NoSuchFieldException, InterruptedException, ExecutionException, TimeoutException {
+        CompletableFuture<Void> visited = new CompletableFuture<>();
 
         DnsMonitorServiceImpl svc = new DnsMonitorServiceImpl() {
 
@@ -131,7 +136,7 @@ public class DnsMonitorServiceImplTest {
                 assertTrue(dnsServerConfigIP4.getForwarders().isEmpty());
                 assertTrue(dnsServerConfigIP4.getAllowedNetworks().isEmpty());
 
-                visited.set(true);
+                visited.complete(null);
             }
         };
 
@@ -142,7 +147,7 @@ public class DnsMonitorServiceImplTest {
 
         svc.handleEvent(event);
 
-        assertTrue(visited.get());
+        visited.get(30, TimeUnit.SECONDS);
         assertNull(TestUtil.getFieldValue(svc, "networkConfiguration"));
     }
 

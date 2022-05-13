@@ -16,6 +16,7 @@ package org.eclipse.kura.ai.triton.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -177,8 +178,7 @@ public class TritonServerEncryptionUtilsTest {
         thenAFolderExistsAtPath(targetFolder + "/tf_autoencoder_fp32/1");
         thenAFolderExistsAtPath(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel");
         thenFileExistsAtPath(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb");
-        thenFileContentMatches(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb",
-                "model");
+        thenFileContentMatches(targetFolder + "/tf_autoencoder_fp32/1/model.savedmodel/saved_model.pb", "model");
         thenNoExceptionOccurred();
     }
 
@@ -288,7 +288,7 @@ public class TritonServerEncryptionUtilsTest {
             assertFalse(entries.findFirst().isPresent());
         } catch (IOException e) {
             e.printStackTrace();
-            this.exceptionOccurred = true;
+            fail();
         }
     }
 
@@ -303,7 +303,8 @@ public class TritonServerEncryptionUtilsTest {
         try {
             Files.createDirectory(targetFolderPath);
         } catch (IOException e) {
-            this.exceptionOccurred = true;
+            e.printStackTrace();
+            fail();
         }
 
         assertTrue(Files.isDirectory(targetFolderPath));
@@ -316,7 +317,8 @@ public class TritonServerEncryptionUtilsTest {
         try {
             Files.createFile(targetFolderPath);
         } catch (IOException e) {
-            this.exceptionOccurred = true;
+            e.printStackTrace();
+            fail();
         }
 
         assertTrue(Files.isRegularFile(targetFolderPath));
@@ -383,7 +385,8 @@ public class TritonServerEncryptionUtilsTest {
 
             assertEquals(expectedPermissions, readPermissions);
         } catch (IOException e) {
-            this.exceptionOccurred = true;
+            e.printStackTrace();
+            fail();
         }
     }
 
@@ -392,7 +395,7 @@ public class TritonServerEncryptionUtilsTest {
             assertFalse(entries.findFirst().isPresent());
         } catch (IOException e) {
             e.printStackTrace();
-            this.exceptionOccurred = true;
+            fail();
         }
     }
 
@@ -404,7 +407,7 @@ public class TritonServerEncryptionUtilsTest {
             assertEquals(expectedContent, content.get(0));
         } catch (IOException e) {
             e.printStackTrace();
-            this.exceptionOccurred = true;
+            fail();
         }
     }
 
@@ -425,6 +428,7 @@ public class TritonServerEncryptionUtilsTest {
             Files.createDirectories(Paths.get(WORKDIR));
         } catch (IOException e) {
             e.printStackTrace();
+            fail("Setup failed.");
         }
     }
 
@@ -435,6 +439,7 @@ public class TritonServerEncryptionUtilsTest {
             Files.delete(Paths.get(WORKDIR));
         } catch (IOException e) {
             e.printStackTrace();
+            fail("Teardown failed.");
         }
     }
 }

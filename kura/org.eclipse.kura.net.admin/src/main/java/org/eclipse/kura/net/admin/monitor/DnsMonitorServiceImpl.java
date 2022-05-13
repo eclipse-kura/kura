@@ -57,7 +57,7 @@ public class DnsMonitorServiceImpl implements DnsMonitorService, EventHandler {
     private static final long THREAD_INTERVAL = 60000;
     private static final long THREAD_TERMINATION_TOUT = 60; // in seconds
     private Future<?> monitorTask;
-    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor((r) -> {
+    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
         final Thread t = Executors.defaultThreadFactory().newThread(r);
         t.setName("DnsMonitorServiceImpl");
         return t;

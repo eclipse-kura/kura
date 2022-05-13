@@ -42,6 +42,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBu
 import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
 import org.eclipse.kura.KuraIOException;
+import org.eclipse.kura.cloud.app.command.UnZip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,8 +100,7 @@ public class TritonServerEncryptionUtils {
             throw new IOException("Output folder " + outputFolder + " does not exist/is not a folder");
         }
 
-        // TODO
-        // UnZip.unZipFile(inputFilePath, outputFolder);
+        UnZip.unZipFile(inputFilePath, outputFolder);
     }
 
     protected static void deleteModel(String modelRootPath) throws IOException {

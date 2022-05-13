@@ -41,6 +41,9 @@ public class TritonServerEncryptionUtilsTest {
     private static final String WORKDIR = System.getProperty("java.io.tmpdir") + "/decr_folder";
     private boolean exceptionOccurred = false;
     private String targetFolder;
+    private String modelName;
+    private String expectedEncryptedModelPath;
+    private String foundEncryptedModelPath;
     private String encryptedFile;
     private String decryptedFile;
     private String compressedFile;
@@ -48,6 +51,64 @@ public class TritonServerEncryptionUtilsTest {
     /*
      * Scenarios
      */
+    @Test
+    public void getEncryptedModelPathShouldWork() {
+        givenTargetFolder(WORKDIR + "/model_repository");
+        givenModelName("model_name");
+        givenExpectedModelPath(targetFolder + "/" + modelName + ".zip.enc");
+        givenAFolderAreadyExistsAtPath(targetFolder);
+        givenAFileAreadyExistsAtPath(expectedEncryptedModelPath);
+
+        whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
+
+        thenPathShouldMatch(expectedEncryptedModelPath, foundEncryptedModelPath);
+    }
+
+    @Test
+    public void getEncryptedModelPathShouldWorkWithMultipleFiles() {
+        givenTargetFolder(WORKDIR + "/model_repository");
+        givenModelName("model_name");
+        givenExpectedModelPath(targetFolder + "/" + modelName + ".zip.enc");
+        givenAFolderAreadyExistsAtPath(targetFolder);
+        givenAFileAreadyExistsAtPath(expectedEncryptedModelPath);
+        givenAFileAreadyExistsAtPath(targetFolder + "/another_model.zip.enc");
+        givenAFileAreadyExistsAtPath(targetFolder + "/preprocessor.zip.enc");
+        givenAFileAreadyExistsAtPath(targetFolder + "/postprocessor.zip.enc");
+
+        whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
+
+        thenPathShouldMatch(expectedEncryptedModelPath, foundEncryptedModelPath);
+    }
+
+    @Test
+    public void getEncryptedModelPathShouldThrowIfNoMatchFound() {
+        givenTargetFolder(WORKDIR + "/model_repository");
+        givenModelName("model_name");
+        givenExpectedModelPath(targetFolder + "/" + modelName + ".zip.enc");
+        givenAFolderAreadyExistsAtPath(targetFolder);
+        givenNoFileExistsAtPath(expectedEncryptedModelPath);
+        givenAFileAreadyExistsAtPath(targetFolder + "/another_model.zip.enc");
+        givenAFileAreadyExistsAtPath(targetFolder + "/preprocessor.zip.enc");
+        givenAFileAreadyExistsAtPath(targetFolder + "/postprocessor.zip.enc");
+
+        whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
+
+        thenAnExceptionOccurred();
+    }
+
+    @Test
+    public void getEncryptedModelPathShouldThrowIfMultipleMatchesFound() {
+        givenTargetFolder(WORKDIR + "/model_repository");
+        givenModelName("model_name");
+        givenExpectedModelPath(targetFolder + "/" + modelName + ".zip.enc");
+        givenAFolderAreadyExistsAtPath(targetFolder);
+        givenAFileAreadyExistsAtPath(expectedEncryptedModelPath);
+        givenAFileAreadyExistsAtPath(targetFolder + "/" + modelName + ".zip.gpg");
+
+        whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
+
+        thenAnExceptionOccurred();
+    }
 
     @Test
     public void createDecryptionFolderShouldWork() {
@@ -255,6 +316,14 @@ public class TritonServerEncryptionUtilsTest {
     /*
      * Given
      */
+    private void givenModelName(String modelName) {
+        this.modelName = modelName;
+    }
+
+    private void givenExpectedModelPath(String modelPath) {
+        this.expectedEncryptedModelPath = modelPath;
+    }
+
     private void givenTargetFolder(String folderPath) {
         this.targetFolder = folderPath;
     }
@@ -327,6 +396,10 @@ public class TritonServerEncryptionUtilsTest {
     /*
      * When
      */
+    private void whenGetEncryptedModelPathIsCalledWith(String modelName, String folderPath) {
+        TritonServerEncryptionUtils.getEncryptedModelPath(modelName, folderPath);
+    }
+
     private void whenCreateDecryptionFolderIsCalledWith(String folderPath) {
         try {
             TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
@@ -365,6 +438,10 @@ public class TritonServerEncryptionUtilsTest {
     /*
      * Then
      */
+    private void thenPathShouldMatch(String expectedPath, String foundPath) {
+        assertEquals(expectedPath, foundPath);
+    }
+
     private void thenFileExistsAtPath(String filePath) {
         assertTrue(Files.isRegularFile(Paths.get(filePath)));
     }

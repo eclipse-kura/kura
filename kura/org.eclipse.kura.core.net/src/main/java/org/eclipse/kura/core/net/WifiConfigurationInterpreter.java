@@ -41,21 +41,13 @@ public class WifiConfigurationInterpreter {
     private static final String WIFI_PASSPHRASE_KEY = ".passphrase";
     private static final String SECURITY_TYPE = ".securityType";
     private static final String NET_INTERFACE = "net.interface.";
-
     private static final String WIFI_CHANNELS_KEY = ".channel";
-
     private static final String WIFI_IGNORE_SSID_KEY = ".ignoreSSID";
-
     private static final String WIFI_PING_ACCESS_POINT_KEY = ".pingAccessPoint";
-
     private static final String WIFI_RADIO_MODE_KEY = ".radioMode";
-
     private static final String WIFI_GROUP_CIPHERS_KEY = ".groupCiphers";
-
     private static final String WIFI_PAIRWISE_CIPHERS_KEY = ".pairwiseCiphers";
-
     private static final String DRIVER_KEY = ".driver";
-
     private static final String WIFI_SSID_KEY = ".ssid";
 
     private WifiConfigurationInterpreter() {

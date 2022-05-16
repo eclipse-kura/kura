@@ -77,7 +77,7 @@ public class ContainerInstanceOptions {
     private final Optional<String> registryUsername;
     private final Optional<String> registryPassword;
     private final int imageDownloadTimeout;
-    private final String containerNetworkingMode;
+    private final Optional<String> containerNetworkingMode;
     private final List<String> containerEntryPoint;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
@@ -104,7 +104,7 @@ public class ContainerInstanceOptions {
         this.registryUsername = REGISTRY_USERNAME.getOptional(properties);
         this.registryPassword = REGISTRY_PASSWORD.getOptional(properties);
         this.imageDownloadTimeout = IMAGES_DOWNLOAD_TIMEOUT.get(properties);
-        this.containerNetworkingMode = CONTAINER_NETWORKING_MODE.get(properties);
+        this.containerNetworkingMode = CONTAINER_NETWORKING_MODE.getOptional(properties);
         this.containerEntryPoint = parseStringListSplitByComma(CONTAINER_ENTRY_POINT.get(properties));
     }
 
@@ -233,7 +233,7 @@ public class ContainerInstanceOptions {
         return this.containerLoggingParameters;
     }
 
-    public String getContainerNetworkingMode() {
+    public Optional<String> getContainerNetworkingMode() {
         return this.containerNetworkingMode;
     }
 
@@ -252,7 +252,7 @@ public class ContainerInstanceOptions {
 
     private ContainerNetworkConfiguration buildContainerNetworkConfig() {
         return new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
-                .setNetworkMode(Optional.of(getContainerNetworkingMode())).build();
+                .setNetworkMode(getContainerNetworkingMode()).build();
     }
 
     public List<String> getEntryPoint() {

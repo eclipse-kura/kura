@@ -8,9 +8,32 @@ Eclipse Kura provides a built-in REST Service based on the [osgi-jax-rs-connecto
 
 By default, REST service providers register their services using the context path ```/services```.
 
-The REST service provides the **BASIC** Authentication support. The allowed users and associated roles can be specified via the REST Service configuration as depicted in the image below:
+The REST service provides the **BASIC** Authentication support and HTTPS client certificate authentication support.
+
+REST API access is available on all HTTP ports defined in the **Security -> Http Service** section, unless access is restricted to dedicated ports using the corresponding configuration parameter (see below).
+
+Certificate authentication support is only available on the **HTTPS With Certificate Authentication Ports** configured in **Security -> Http Service** section.
+
+ Kura Identity names and passwords can be used for **BASIC** Authentication. Certificate authentication follows the same rules as Kura Web Console access.
+
+> If the forced password change feature for a  given identity is enabled, REST API password authentication will be blocked for that identity until the password is updated by the user or the feature is manually disabled.
+> Certificate authentication will continue to be allowed even if the forced password change feature is enabled
+
+JAX-RS roles are mapped to ESF permissions, the name of a permission associated with a JAX-RS role is the _rest._ prefix followed by the role name.
+For example the _assets_ role is mapped to the _rest.assets_ permission.
+REST related permissions can be assigned to an identity using the ESF Gateway Administration Console in the **Identities** section.
+
+# RestService configuration
 
 ![rest_service]({{ site.baseurl }}/assets/images/builtin/rest_service.png)
+
+The RestService configuration contains an **Allowed Ports** parameter that can be used to restrict REST API access to specific ports. If the port list is left empty, access will be enabled on all available ports.
+
+Starting from Kura 5.2.0, the **RestService** configuration provides options to disable the built-in authentication methods.
+
+# Custom authentication methods
+
+Starting from Kura 5.2.0, it is also possible to develop custom REST authentication method providers by registering an implementation of the `org.eclipse.kura.rest.auth.AuthenticationProvider` interface as an OSGi service. The `org.eclipse.kura.example.rest.authentication.provider` bundle in Kura repository provides an example on how to implement a custom authentication method.
 
 The System Administrator is required to specify:
 

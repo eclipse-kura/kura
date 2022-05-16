@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+  Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -9,22 +9,16 @@
 	SPDX-License-Identifier: EPL-2.0
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.internal.rest.provider.RestService" 
-         name="RestService" 
-         description="This service allows to configure settings related to Kura REST APIs">
-        
-        <AD id="allowed.ports"
-            name="Allowed ports"
-            type="Integer"
-            cardinality="3"
-            required="false"
-            min="1"
-            max="65535"
-            description="If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration.">
-        </AD>
+    <OCD id="org.eclipse.kura.internal.rest.provider.RestService" name="RestService" description="This service allows to configure settings related to Kura REST APIs">
+
+        <AD id="allowed.ports" name="Allowed ports" type="Integer" cardinality="3" required="false" min="1" max="65535" description="If set to a non empty list, REST API access will be allowed only on the specified ports. If set to an empty list, access will be allowed on all ports. Please make sure that the allowed ports are open in HttpService and Firewall configuration."></AD>
+
+        <AD id="auth.password.enabled" name="Password authentication enabled" type="Boolean" required="true" default="true" description="Enables or disables the built-in password authentication support."></AD>
+
+        <AD id="auth.certificate.enabled" name="Certificate authentication enabled" type="Boolean" required="true" default="true" description="Enables or disables the built-in certificate authentication support."></AD>
     </OCD>
-    
+
     <Designate pid="org.eclipse.kura.internal.rest.provider.RestService">
-        <Object ocdref="org.eclipse.kura.internal.rest.provider.RestService"/>
+        <Object ocdref="org.eclipse.kura.internal.rest.provider.RestService" />
     </Designate>
 </MetaData>

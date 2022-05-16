@@ -14,26 +14,20 @@
 package org.eclipse.kura.internal.rest.provider;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Base64.Decoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import javax.annotation.Priority;
-import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -42,14 +36,17 @@ import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.ext.Provider;
+
+import com.eclipsesource.jaxrs.provider.security.AuthenticationHandler;
+import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
 
 import org.eclipse.kura.audit.AuditConstants;
 import org.eclipse.kura.audit.AuditContext;
 import org.eclipse.kura.audit.AuditContext.Scope;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.rest.auth.AuthenticationProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
@@ -60,28 +57,18 @@ import org.osgi.service.useradmin.UserAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.eclipsesource.jaxrs.provider.security.AuthenticationHandler;
-import com.eclipsesource.jaxrs.provider.security.AuthorizationHandler;
-
 @Provider
 public class RestService
         implements AuthenticationHandler, AuthorizationHandler, ConfigurableComponent, ContainerResponseFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(RestService.class);
 
-    private static final String KURA_PASSWORD_CREDENTIAL = "kura.password";
-
     private static final String KURA_PERMISSION_PREFIX = "kura.permission.";
     private static final String KURA_PERMISSION_REST_PREFIX = KURA_PERMISSION_PREFIX + "rest.";
     private static final String KURA_USER_PREFIX = "kura.user.";
-    private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
-    private static final Decoder BASE64_DECODER = Base64.getDecoder();
-
-    private static final Response UNAUTHORIZED_RESPONSE = Response.status(Response.Status.UNAUTHORIZED)
-            .header("WWW-Authenticate", "Basic realm=\"kura-rest-api\"").build();
     private static final Response NOT_FOUND_RESPONSE = Response.status(Response.Status.NOT_FOUND).build();
 
     private CryptoService cryptoService;
@@ -90,9 +77,15 @@ public class RestService
     RestServiceOptions options;
 
     private final List<ServiceRegistration<?>> registeredServices = new ArrayList<>();
+    private final Set<AuthenticationProviderHolder> authenticationProviders = new TreeSet<>();
+
+    private AuthenticationProvider passwordAuthProvider;
+    private AuthenticationProvider certificateAuthProvider;
 
     @Context
-    private HttpServletRequest sr;
+    private HttpServletRequest request;
+    @Context
+    private HttpServletResponse response;
 
     public void setUserAdmin(final UserAdmin userAdmin) {
         this.userAdmin = userAdmin;
@@ -100,6 +93,23 @@ public class RestService
 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
+    }
+
+    public void bindAuthenticationProvider(final AuthenticationProvider provider) {
+        synchronized (this.authenticationProviders) {
+            final AuthenticationProviderHolder holder = new AuthenticationProviderHolder(provider);
+            this.authenticationProviders.add(holder);
+            holder.onEnabled();
+        }
+    }
+
+    public void unbindAuthenticationProvider(final AuthenticationProvider provider) {
+        synchronized (this.authenticationProviders) {
+            final AuthenticationProviderHolder holder = new AuthenticationProviderHolder(provider);
+            if (this.authenticationProviders.remove(holder)) {
+                holder.onDisabled();
+            }
+        }
     }
 
     public void activate(final Map<String, Object> properties) {
@@ -110,7 +120,10 @@ public class RestService
         registeredServices
                 .add(bundleContext.registerService(ContainerRequestFilter.class, new IncomingPortCheckFilter(), null));
 
-        options = new RestServiceOptions(properties);
+        this.passwordAuthProvider = new PasswordAuthenticationProvider(bundleContext, userAdmin, cryptoService);
+        this.certificateAuthProvider = new CertificateAuthenticationProvider(userAdmin);
+
+        update(properties);
 
         logger.info("activating...done");
     }
@@ -118,7 +131,12 @@ public class RestService
     public void update(final Map<String, Object> properties) {
         logger.info("updating...");
 
-        options = new RestServiceOptions(properties);
+        final RestServiceOptions newOptions = new RestServiceOptions(properties);
+
+        if (!Objects.equals(this.options, newOptions)) {
+            this.options = newOptions;
+            updateBuiltinAuthenticationProviders(newOptions);
+        }
 
         logger.info("updating...done");
     }
@@ -128,6 +146,14 @@ public class RestService
 
         for (final ServiceRegistration<?> reg : registeredServices) {
             reg.unregister();
+        }
+
+        synchronized (this.authenticationProviders) {
+            final Iterator<AuthenticationProviderHolder> iter = this.authenticationProviders.iterator();
+            while (iter.hasNext()) {
+                iter.next().onDisabled();
+                iter.remove();
+            }
         }
 
         logger.info("deactivating...done");
@@ -148,122 +174,27 @@ public class RestService
     }
 
     @Override
-    public Principal authenticate(ContainerRequestContext request) {
+    public Principal authenticate(ContainerRequestContext requestContext) {
 
-        final AuditContext auditContext = initAuditContext(request);
+        initAuditContext(requestContext);
 
-        try {
+        synchronized (this.authenticationProviders) {
+            for (final AuthenticationProviderHolder provider : this.authenticationProviders) {
+                final Optional<Principal> principal = provider.authenticate(request, requestContext);
 
-            final Optional<Principal> fromCertificateAuth = performCertificateAuthentication(request);
-
-            if (fromCertificateAuth.isPresent()) {
-                return fromCertificateAuth.get();
+                if (principal.isPresent()) {
+                    return principal.get();
+                }
             }
-
-            final Optional<Principal> principal = performBasicAuthentication(request);
-
-            if (principal.isPresent()) {
-                auditLogger.info("{} Rest - Success - Password Authentication succeeded", auditContext);
-                return principal.get();
-            } else {
-                throw new IllegalStateException();
-            }
-
-        } catch (final Exception e) {
-            auditLogger.warn("{} Rest - Failure - Received unauthorized REST request", auditContext);
-            request.abortWith(UNAUTHORIZED_RESPONSE);
-            return null;
         }
+
+        return null;
 
     }
 
     @Override
     public String getAuthenticationScheme() {
         return null;
-    }
-
-    private Optional<Principal> performBasicAuthentication(final ContainerRequestContext request)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
-        final AuditContext auditContext = AuditContext.currentOrInternal();
-
-        String authHeader = request.getHeaderString("Authorization");
-        if (authHeader == null) {
-            return Optional.empty();
-        }
-
-        StringTokenizer tokens = new StringTokenizer(authHeader);
-        String authScheme = tokens.nextToken();
-        if (!"Basic".equals(authScheme)) {
-            return Optional.empty();
-        }
-
-        final String credentials = new String(BASE64_DECODER.decode(tokens.nextToken()), StandardCharsets.UTF_8);
-
-        int colon = credentials.indexOf(':');
-        String userName = credentials.substring(0, colon);
-        String requestPassword = credentials.substring(colon + 1);
-
-        auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), userName);
-
-        final User user = (User) userAdmin.getRole(KURA_USER_PREFIX + userName);
-
-        if ("true".equals(user.getProperties().get(KURA_NEED_PASSWORD_CHANGE))) {
-            return Optional.empty();
-        }
-
-        final String passwordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
-
-        if (cryptoService.sha256Hash(requestPassword).equals(passwordHash)) {
-            return Optional.of(() -> userName);
-        } else {
-            return Optional.empty();
-        }
-
-    }
-
-    private Optional<Principal> performCertificateAuthentication(final ContainerRequestContext context) {
-        final AuditContext auditContext = AuditContext.currentOrInternal();
-
-        try {
-
-            final Object clientCertificatesRaw = context.getProperty("javax.servlet.request.X509Certificate");
-
-            if (!(clientCertificatesRaw instanceof X509Certificate[])) {
-                return Optional.empty();
-            }
-
-            final X509Certificate[] clientCertificates = (X509Certificate[]) clientCertificatesRaw;
-
-            if (clientCertificates.length == 0) {
-                throw new IllegalArgumentException("Certificate chain is empty");
-            }
-
-            final LdapName ldapName = new LdapName(clientCertificates[0].getSubjectX500Principal().getName());
-
-            final Optional<Rdn> commonNameRdn = ldapName.getRdns().stream()
-                    .filter(r -> "cn".equalsIgnoreCase(r.getType())).findAny();
-
-            if (!commonNameRdn.isPresent()) {
-                throw new IllegalArgumentException("Certificate common name is not present");
-            }
-
-            final String commonName = (String) commonNameRdn.get().getValue();
-
-            auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), commonName);
-
-            if (this.userAdmin.getRole(KURA_USER_PREFIX + commonName) instanceof User) {
-                auditLogger.info("{} Rest - Success - Certificate Authentication succeeded", auditContext);
-                return Optional.of(() -> commonName);
-            }
-
-            auditLogger.warn("{} Rest - Failure - Certificate Authentication failed", auditContext);
-            return Optional.empty();
-
-        } catch (final Exception e) {
-            auditLogger.warn("{} Rest - Failure - Certificate Authentication failed", auditContext);
-            return Optional.empty();
-        }
     }
 
     private static boolean containsBasicMember(final Role group, final User user) {
@@ -292,7 +223,6 @@ public class RestService
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         int responseStatus = responseContext.getStatus();
-        final SecurityContext context = requestContext.getSecurityContext();
 
         final AuditContext auditContext = initAuditContext(requestContext);
 
@@ -302,14 +232,19 @@ public class RestService
                 return;
             }
 
-            if (context == null) {
-                auditLogger.warn("{} Rest - Failure - No security context", auditContext);
-                return;
+            if (responseContext.getStatus() == 403) {
+                if (requestContext.getSecurityContext() == null
+                        || requestContext.getSecurityContext().getUserPrincipal() == null) {
+                    responseContext.setStatus(401);
+                } else {
+                    auditLogger.warn("{} Rest - Failure - User not authorized to perform the requested operation",
+                            auditContext);
+                    return;
+                }
+
             }
 
-            final Principal principal = context.getUserPrincipal();
-
-            if (principal == null) {
+            if (responseContext.getStatus() == 401) {
                 auditLogger.warn("{} Rest - Failure - User not authenticated", auditContext);
                 return;
             }
@@ -352,7 +287,7 @@ public class RestService
 
         String requestIp = request.getHeaderString("X-FORWARDED-FOR");
         if (requestIp == null) {
-            requestIp = this.sr.getRemoteAddr();
+            requestIp = this.request.getRemoteAddr();
         }
 
         properties.put(AuditConstants.KEY_ENTRY_POINT.getValue(), "RestService");
@@ -403,6 +338,20 @@ public class RestService
             }
         }
 
+    }
+
+    private void updateBuiltinAuthenticationProviders(final RestServiceOptions options) {
+        if (options.isPasswordAuthEnabled()) {
+            bindAuthenticationProvider(this.passwordAuthProvider);
+        } else {
+            unbindAuthenticationProvider(this.passwordAuthProvider);
+        }
+
+        if (options.isCertificateAuthEnabled()) {
+            bindAuthenticationProvider(this.certificateAuthProvider);
+        } else {
+            unbindAuthenticationProvider(this.certificateAuthProvider);
+        }
     }
 
 }

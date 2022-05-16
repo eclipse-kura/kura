@@ -534,13 +534,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private HostConfig containerNetworkConfigurationHandler(ContainerConfiguration containerDescription,
             HostConfig configuration) {
 
-        if (containerDescription.getContainerNetworkConfiguration().getNetworkMode() == null
-                || containerDescription.getContainerNetworkConfiguration().getNetworkMode().trim().isEmpty()) {
-            return configuration;
+        if (containerDescription.getContainerNetworkConfiguration().getNetworkMode().isPresent()
+                && !containerDescription.getContainerNetworkConfiguration().getNetworkMode().get().trim().isEmpty()) {
+            configuration.withNetworkMode(containerDescription.getContainerNetworkConfiguration().getNetworkMode().get()
+                    .toLowerCase().trim());
         }
-
-        configuration.withNetworkMode(
-                containerDescription.getContainerNetworkConfiguration().getNetworkMode().toLowerCase().trim());
 
         return configuration;
     }

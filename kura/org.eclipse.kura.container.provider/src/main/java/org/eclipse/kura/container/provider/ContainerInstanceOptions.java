@@ -166,7 +166,7 @@ public class ContainerInstanceOptions {
 
         for (String entry : stringToSplit.trim().split(",")) {
             if (entry.trim().length() > 0) {
-                stringList.add(entry.trim());                
+                stringList.add(entry.trim());
             }
         }
 
@@ -252,9 +252,9 @@ public class ContainerInstanceOptions {
 
     private ContainerNetworkConfiguration buildContainerNetworkConfig() {
         return new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
-                .setNetworkMode(getContainerNetworkingMode()).build();
+                .setNetworkMode(Optional.of(getContainerNetworkingMode())).build();
     }
-  
+
     public List<String> getEntryPoint() {
         return this.containerEntryPoint;
     }
@@ -272,8 +272,7 @@ public class ContainerInstanceOptions {
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
-                .setLoggerParameters(getLoggerParameters())
-                .setEntryPoint(getEntryPoint()).build();
+                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint()).build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -295,8 +294,8 @@ public class ContainerInstanceOptions {
                 this.containerLoggingParameters, this.containerName, this.containerVolumeString, this.containerVolumes,
                 this.enabled, this.externalPorts, this.image, this.imageDownloadTimeout, this.imageTag,
                 this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
-                this.registryURL, this.registryUsername, this.retryInterval,
-                this.containerEntryPoint, this.containerNetworkingMode);
+                this.registryURL, this.registryUsername, this.retryInterval, this.containerEntryPoint,
+                this.containerNetworkingMode);
     }
 
     @Override

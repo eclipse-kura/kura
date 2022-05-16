@@ -16,6 +16,7 @@ package org.eclipse.kura.container.orchestration;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -30,7 +31,7 @@ import org.osgi.annotation.versioning.ProviderType;
 @ProviderType
 public class ContainerNetworkConfiguration {
 
-    private String networkMode;
+    private Optional<String> networkMode;
 
     private ContainerNetworkConfiguration() {
     }
@@ -42,7 +43,7 @@ public class ContainerNetworkConfiguration {
      * 
      * @return
      */
-    public String getNetworkMode() {
+    public Optional<String> getNetworkMode() {
         return this.networkMode;
     }
 
@@ -75,9 +76,9 @@ public class ContainerNetworkConfiguration {
 
     public static final class ContainerNetworkConfigurationBuilder {
 
-        private String networkMode = "bridge";
+        private Optional<String> networkMode = Optional.empty();
 
-        public ContainerNetworkConfigurationBuilder setNetworkMode(String networkMode) {
+        public ContainerNetworkConfigurationBuilder setNetworkMode(Optional<String> networkMode) {
             this.networkMode = networkMode;
             return this;
         }

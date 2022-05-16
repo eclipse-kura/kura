@@ -15,6 +15,7 @@ package org.eclipse.kura.certificate.enrollment;
 import java.security.cert.Certificate;
 
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.security.keystore.KeystoreService;
 import org.osgi.annotation.versioning.ProviderType;
 
 /**
@@ -45,7 +46,7 @@ public interface EnrollmentService {
 
     /**
      * 
-     * Get the Certificate Authority <code>Certificate</code> stored in the relative <code>Keystore</code>
+     * Get the Certificate Authority <code>Certificate</code> stored in the relative {@link KeystoreService}
      * 
      * @return returns the Certificate Authority <code>Certificate</code>
      * @throws KuraException
@@ -54,9 +55,9 @@ public interface EnrollmentService {
     public Certificate getCACertificate() throws KuraException;
 
     /**
-     * Get the Client <code>Certificate</code> stored in the relative <code>Keystore</code>
+     * Get the Client <code>Certificate</code> stored in the relative {@link KeystoreService}
      * 
-     * @return returns the Client <code>Certificate</code> obtained by the Certificate Autorithy
+     * @return returns the Client <code>Certificate</code> obtained by the Certificate Authority
      * @throws KuraException
      *             if it is impossible to retrieve the certificate.
      */

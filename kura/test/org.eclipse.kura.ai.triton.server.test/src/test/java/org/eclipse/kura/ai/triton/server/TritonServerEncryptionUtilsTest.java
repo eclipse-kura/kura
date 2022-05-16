@@ -38,7 +38,7 @@ import org.junit.Test;
 
 public class TritonServerEncryptionUtilsTest {
 
-    private static final String WORKDIR = System.getProperty("java.io.tmpdir") + "decr_folder";
+    private static final String WORKDIR = System.getProperty("java.io.tmpdir") + "/decr_folder";
     private boolean exceptionOccurred = false;
     private String targetFolder;
     private String modelName;

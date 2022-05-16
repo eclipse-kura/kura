@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.provider;
 
+import static java.util.Objects.isNull;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
@@ -19,6 +21,7 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +52,7 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
     private static final String KURA_USER_PREFIX = "kura.user.";
     private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
     private static final String KURA_PASSWORD_CREDENTIAL = "kura.password";
+    private static final Pattern COLON = Pattern.compile("[:]");
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -72,8 +76,8 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
             final ContainerRequestContext requestContext) {
         final AuditContext auditContext = AuditContext.currentOrInternal();
 
-        String authHeader = requestContext.getHeaderString("Authorization");
-        if (authHeader == null) {
+        final String authHeader = requestContext.getHeaderString("Authorization");
+        if (isNull(authHeader)) {
             return Optional.empty();
         }
 
@@ -83,15 +87,19 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
             return Optional.empty();
         }
 
-        final String credentials = new String(BASE64_DECODER.decode(tokens.nextToken()), StandardCharsets.UTF_8);
+        final RequestCredentials credentials;
 
-        int colon = credentials.indexOf(':');
-        String userName = credentials.substring(0, colon);
-        String requestPassword = credentials.substring(colon + 1);
+        try {
+            credentials = RequestCredentials.fromBasicAuthorizationHeader(tokens.nextToken());
+        } catch (final Exception e) {
+            logger.debug("failed to parse basic credentials", e);
+            auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
+            return Optional.empty();
+        }
 
-        auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), userName);
+        auditContext.getProperties().put(AuditConstants.KEY_IDENTITY.getValue(), credentials.username);
 
-        final Role userRole = userAdmin.getRole(KURA_USER_PREFIX + userName);
+        final Role userRole = userAdmin.getRole(KURA_USER_PREFIX + credentials.username);
 
         if (!(userRole instanceof User)) {
             auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
@@ -104,21 +112,17 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
             return Optional.empty();
         }
 
-        final String passwordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
+        final String storedPasswordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
 
-        if (passwordHash == null) {
-            return Optional.empty();
-        }
-
-        if (requestPassword == null) {
+        if (isNull(storedPasswordHash)) {
             auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
             return Optional.empty();
         }
 
         try {
-            if (cryptoService.sha256Hash(requestPassword).equals(passwordHash)) {
+            if (cryptoService.sha256Hash(credentials.password).equals(storedPasswordHash)) {
                 auditLogger.info("{} Rest - Success - Password Authentication succeeded", auditContext);
-                return Optional.of(() -> userName);
+                return Optional.of(() -> credentials.username);
             } else {
                 auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);
                 return Optional.empty();
@@ -159,6 +163,30 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
             }
         }
 
+    }
+
+    private static class RequestCredentials {
+
+        final String username;
+        final String password;
+
+        RequestCredentials(final String username, final String password) {
+            this.username = username;
+            this.password = password;
+        }
+
+        static RequestCredentials fromBasicAuthorizationHeader(final String authHeaderToken) {
+
+            final String credentials = new String(BASE64_DECODER.decode(authHeaderToken), StandardCharsets.UTF_8);
+
+            final int colonIndex = credentials.indexOf(':');
+
+            String username = credentials.substring(0, colonIndex);
+            String password = credentials.substring(colonIndex + 1);
+
+            return new RequestCredentials(username, password);
+
+        }
     }
 
 }

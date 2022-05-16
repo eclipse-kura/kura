@@ -247,5 +247,11 @@ public enum KuraErrorCode {
      * 
      * @since 2.3
      */
-    UNSUPPORTED_MODEM;
+    UNSUPPORTED_MODEM,
+    /**
+     * Modem unsupported.
+     * 
+     * @since 2.4
+     */
+    INVALID_CERTIFICATE_EXCEPTION
 }

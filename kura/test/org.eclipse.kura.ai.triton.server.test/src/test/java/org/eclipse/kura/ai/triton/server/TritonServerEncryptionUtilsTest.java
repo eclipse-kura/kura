@@ -308,7 +308,8 @@ public class TritonServerEncryptionUtilsTest {
 
         whenCleanModelRepositoryIsCalledWith(targetFolder);
 
-        thenAnExceptionOccurred();
+        thenNoExceptionOccurred();
+        thenFileDoesNotExistsAtPath(targetFolder);
         thenAFolderExistsAtPath(WORKDIR);
     }
 
@@ -436,12 +437,7 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     private void whenCleanModelRepositoryIsCalledWith(String folderPath) {
-        try {
-            TritonServerEncryptionUtils.cleanRepository(folderPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        TritonServerEncryptionUtils.cleanRepository(folderPath);
     }
 
     /*

@@ -129,12 +129,17 @@ public class TritonServerEncryptionUtils {
         return b1 == 0x50 && b2 == 0x4B;
     }
 
-    protected static void cleanRepository(String modelRootPath) throws IOException {
+    protected static void cleanRepository(String modelRootPath) {
         if (!Files.isDirectory(Paths.get(modelRootPath))) {
-            throw new IOException("Model root folder " + modelRootPath + " does not exists");
+            logger.warn("Model root folder {} does not exist", modelRootPath);
+            return;
         }
 
-        FileUtils.cleanDirectory(new File(modelRootPath));
+        try {
+            FileUtils.cleanDirectory(new File(modelRootPath));
+        } catch (IOException e) {
+            logger.warn("Cannot clean directory at path {}", modelRootPath);
+        }
     }
 
     private static void decryptFile(String password, String inputFilePath, String outputFilePath)

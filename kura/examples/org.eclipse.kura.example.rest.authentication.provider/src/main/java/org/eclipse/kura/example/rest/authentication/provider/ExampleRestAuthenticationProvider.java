@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.example.rest.authentication.provider;
 
+import static java.util.Objects.isNull;
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
@@ -83,7 +85,7 @@ public class ExampleRestAuthenticationProvider implements AuthenticationProvider
 
         final String passwordHash = (String) user.getCredentials().get(KURA_PASSWORD_CREDENTIAL);
 
-        if (passwordHash == null) {
+        if (isNull(passwordHash)) {
             return Optional.empty();
         }
 

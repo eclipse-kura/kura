@@ -38,8 +38,8 @@ public class ContainerNetworkConfiguration {
 
     /**
      * 
-     * returns the network mode a container will be created with. supported modes
-     * include: 'bridge', 'none', 'container:', 'host'.
+     * Returns the network mode a container will be created with (e.g. 'bridge',
+     * 'none', 'container:', 'host').
      * 
      * @return
      */

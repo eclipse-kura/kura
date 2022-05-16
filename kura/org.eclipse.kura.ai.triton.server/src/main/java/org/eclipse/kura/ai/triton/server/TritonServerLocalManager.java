@@ -137,7 +137,11 @@ public class TritonServerLocalManager {
     private Command createServerCommand() {
         List<String> commandString = new ArrayList<>();
         commandString.add("tritonserver");
-        commandString.add("--model-repository=" + this.options.getModelRepositoryPath());
+        if (!this.options.getModelRepositoryPassword().isEmpty()) {
+            commandString.add("--model-repository=" + TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
+        } else {
+            commandString.add("--model-repository=" + this.options.getModelRepositoryPath());
+        }
         commandString.add("--backend-directory=" + this.options.getBackendsPath());
         if (!this.options.getBackendsConfigs().isEmpty()) {
             this.options.getBackendsConfigs().forEach(config -> commandString.add("--backend-config=" + config));

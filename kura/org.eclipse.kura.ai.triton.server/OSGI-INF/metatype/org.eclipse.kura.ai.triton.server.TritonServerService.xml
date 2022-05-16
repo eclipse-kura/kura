@@ -64,6 +64,15 @@
             default="" 
             description="Only for local instance, specify the path on the filesystem where the models are stored.">
        </AD>
+       
+       <AD id="local.model.repository.password"  
+            name="Local model decryption password"
+            type="Password"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="Only for local instance, specify the password to be used for decrypting models stored in the model repository. If none is specified, models are supposed to be plaintext.">
+       </AD>
         
         <AD id="local.backends.path"  
             name="Local backends path"

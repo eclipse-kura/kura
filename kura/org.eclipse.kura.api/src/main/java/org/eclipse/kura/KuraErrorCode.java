@@ -251,7 +251,7 @@ public enum KuraErrorCode {
     /**
      * Certificate invalid
      * 
-     * @since 3.0
+     * @since 2.4
      */
     INVALID_CERTIFICATE_EXCEPTION
 }

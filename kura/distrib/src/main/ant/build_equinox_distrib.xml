@@ -633,6 +633,9 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.core.certificates.enrollment.est_${org.eclipse.kura.core.certificates.enrollment.est.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />			
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.core.cloud_${org.eclipse.kura.core.cloud.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
@@ -993,6 +996,8 @@ fi]]>
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar@4:start" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.certificates.enrollment.est_${org.eclipse.kura.core.certificates.enrollment.est.version}.jar@4:start" />			
 		</propertyfile>
 	</target>
 

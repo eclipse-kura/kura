@@ -25,6 +25,7 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PasswordProtection;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.KeyStoreException;
 import java.security.SecureRandom;
 import java.security.Security;
 import java.security.cert.CRL;
@@ -83,6 +84,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.certificate.enrollment.EnrollmentService;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
@@ -125,10 +127,12 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
 
     private ExecutorService enrollmentService = Executors.newSingleThreadExecutor();
     private ScheduledExecutorService delayer = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService caExpirationChecker = Executors.newSingleThreadScheduledExecutor();
 
     private JcaX509CRLConverter jcaX509CRLConverter;
 
     public ESTEnrollmentService() {
+
         Security.addProvider(new BouncyCastleProvider());
         Security.addProvider(new BouncyCastleJsseProvider());
 
@@ -173,12 +177,23 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
                     performEnrollment(DO_NOT_RE_ENROLL);
                 }
 
+                startCAChecker();
+
             }
         } catch (MalformedURLException e) {
             logger.error("Invalid EST Server URL", e);
         } catch (Exception e) {
             logger.error("Error configuring EST client", e);
         }
+    }
+
+    private void startCAChecker() {
+
+        /*
+         * this.caExpirationChecker.scheduleAtFixedRate(() -> {
+         * 
+         * }, 0, 1, TimeUnit.DAYS);
+         */
     }
 
     private void initESTService() throws Exception {
@@ -230,10 +245,15 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         switch (this.estOptions.getClient().getKeyPairAlgorithm()) {
         case "ECDSA":
             algorithmParameter = new ECGenParameterSpec(this.estOptions.getClient().getKeyPairAlgorithmParameter());
+            break;
         case "RSA":
             algorithmParameter = new RSAKeyGenParameterSpec(
                     Integer.parseInt(this.estOptions.getClient().getKeyPairAlgorithmParameter()),
                     RSAKeyGenParameterSpec.F4);
+            break;
+        default:
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "client.keypair.algorithm",
+                    this.estOptions.getClient().getKeyPairAlgorithm());
         }
 
         this.keystoreService.createKeyPair(EST_PRIVATE_KEY_CERT, this.estOptions.getClient().getKeyPairAlgorithm(),
@@ -278,14 +298,29 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     private Object getStoredCACerts() throws KuraException {
-        Object truesteCACerts;
+        Object trustedCAcerts;
         Entry storedCaCerts = this.keystoreService.getEntry(EST_CACERTS_ALIAS);
         if (storedCaCerts != null && !(storedCaCerts instanceof TrustedCertificateEntry)) {
             throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION);
         }
 
-        truesteCACerts = storedCaCerts;
-        return truesteCACerts;
+        trustedCAcerts = storedCaCerts;
+        return trustedCAcerts;
+    }
+
+    private Certificate getStoredClientCerts() throws KuraException {
+
+        Certificate storedCaCerts;
+        try {
+            storedCaCerts = this.keystoreService.getKeyStore().getCertificate(EST_CLIENT_ALIAS);
+        } catch (KeyStoreException e) {
+            throw new KuraRuntimeException(KuraErrorCode.IO_ERROR, e, "Keystore not initialized");
+        }
+        if (storedCaCerts == null) {
+            throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION);
+        }
+
+        return storedCaCerts;
     }
 
     private PrivateKeyEntry getESTKeyPair() throws KuraException {
@@ -335,10 +370,18 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         this.estService = estServiceBuilder.withTimeout(60000).build();
     }
 
-    private void performEnrollment(boolean reEnroll) {
+    private synchronized void performEnrollment(boolean reEnroll) {
 
-        CompletableFuture.supplyAsync(this.enrollmentTask(reEnroll), this.enrollmentService).acceptEither(
-                this.timeoutAfter(ENROLLMENT_PROCESS_TIMEOUT, TimeUnit.MILLISECONDS), this.processEnrollmentResponse());
+        CompletableFuture.supplyAsync(this.enrollmentTask(reEnroll), this.enrollmentService)
+                .acceptEither(this.timeoutAfter(ENROLLMENT_PROCESS_TIMEOUT, TimeUnit.MILLISECONDS),
+                        this.processEnrollmentResponse())
+                .whenComplete((voidValue, ex) -> {
+                    if (ex != null) {
+                        logger.error("Error in the enrollment process", ex);
+                    } else {
+                        logger.info("The enrollment process has finished");
+                    }
+                });
 
     }
 
@@ -349,6 +392,8 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
                 try {
                     this.keystoreService.getKeyStore().setCertificateEntry(EST_CLIENT_ALIAS,
                             toJavaX509Certificate(certStore));
+                    logger.info("Client certificate with alias {} stored in keyservice {}", EST_CLIENT_ALIAS,
+                            this.keystoreServicePid.get());
                 } catch (Exception e) {
                     logger.error("Unable to store client cert with alias {} in keystore {}", EST_CLIENT_ALIAS,
                             this.keystoreServicePid.get());
@@ -408,7 +453,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     @Override
-    public void enroll() {
+    public synchronized void enroll() {
         // TODO Auto-generated method stub
 
     }
@@ -420,15 +465,13 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     @Override
-    public Certificate getCACertificate() {
-        // TODO Auto-generated method stub
-        return null;
+    public Certificate getCACertificate() throws KuraException {
+        return ((TrustedCertificateEntry) getStoredCACerts()).getTrustedCertificate();
     }
 
     @Override
     public void forceCACertificateRollover() {
-        // TODO Auto-generated method stub
-
+        // TODO
     }
 
     @Override
@@ -437,9 +480,8 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     @Override
-    public Certificate getClientCertificate() {
-        // TODO Auto-generated method stub
-        return null;
+    public Certificate getClientCertificate() throws KuraException {
+        return getStoredClientCerts();
     }
 
     private void checkCerts() throws KuraException {

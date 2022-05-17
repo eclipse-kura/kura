@@ -132,12 +132,15 @@ public class ESTEnrollmentServiceOptions {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Server other = (Server) obj;
             return Objects.equals(bootstrapCertificate, other.bootstrapCertificate)
                     && Objects.equals(automaticCertRollover, other.automaticCertRollover)
@@ -229,12 +232,15 @@ public class ESTEnrollmentServiceOptions {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Client other = (Client) obj;
             return Objects.equals(automaticCertRenew, other.automaticCertRenew)
                     && Objects.equals(basicAuthentication, other.basicAuthentication)
@@ -294,12 +300,15 @@ public class ESTEnrollmentServiceOptions {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             BasicAuthentication other = (BasicAuthentication) obj;
             return Objects.equals(digestEnabled, other.digestEnabled) && Objects.equals(enabled, other.enabled)
                     && Arrays.equals(password.getPassword(), other.password.getPassword())

@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -48,6 +49,7 @@ public class ContainerConfiguration {
     private Map<String, String> containerLoggerParameters;
     private String containerLoggingType;
     private ImageConfiguration imageConfig;
+    private ContainerNetworkConfiguration networkConfiguration;
     private List<String> entryPoint;
 
     private ContainerConfiguration() {
@@ -202,10 +204,21 @@ public class ContainerConfiguration {
     }
 
     /**
+     * return the container's network configuration as a
+     * {@link ContainerNetworkConfiguration}.
+     * 
+     * @return
+     * @since 2.4
+     */
+    public ContainerNetworkConfiguration getContainerNetworkConfiguration() {
+        return this.networkConfiguration;
+    }
+     
+    /**
      * Returns a List<String> of container entry points. An empty list can be returned if no entrypoints are specified.
      *
      * @return
-     * @since 2.6
+     * @since 2.4
      */
     public List<String> getEntryPoint() {
         return this.entryPoint;
@@ -264,6 +277,7 @@ public class ContainerConfiguration {
         private Map<String, String> containerLoggerParameters;
         private String containerLoggingType;
         private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
+        private ContainerNetworkConfigurationBuilder networkConfigurationBuilder = new ContainerNetworkConfigurationBuilder();
         private List<String> entryPoint = new LinkedList<>();
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
@@ -342,6 +356,17 @@ public class ContainerConfiguration {
         }
 
         /**
+         * Set the {@link NetworkConfiguration}
+         * 
+         * @since 2.4
+         */
+        public ContainerConfigurationBuilder setContainerNetowrkConfiguration(
+                ContainerNetworkConfiguration networkConfiguration) {
+            this.networkConfigurationBuilder.setNetworkMode(networkConfiguration.getNetworkMode());
+            return this;
+        }
+
+        /**
          * Set the {@link ImageConfiguration}
          * 
          * @since 2.4
@@ -368,6 +393,7 @@ public class ContainerConfiguration {
             result.containerLoggerParameters = this.containerLoggerParameters;
             result.containerLoggingType = this.containerLoggingType;
             result.imageConfig = this.imageConfigBuilder.build();
+            result.networkConfiguration = this.networkConfigurationBuilder.build();
             result.entryPoint = requireNonNull(this.entryPoint, "Container EntryPoint list must not be null");
 
             return result;

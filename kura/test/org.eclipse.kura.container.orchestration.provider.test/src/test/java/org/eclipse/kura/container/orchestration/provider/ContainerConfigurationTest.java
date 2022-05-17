@@ -26,6 +26,7 @@ import java.util.Optional;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration.ContainerConfigurationBuilder;
+import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
 import org.junit.Test;
@@ -132,7 +133,9 @@ public class ContainerConfigurationTest {
                 .setInternalPorts(CONTAINER_PORTS_INTERNAL).setEnvVars(CONTAINER_ENV_VARS)
                 .setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES).setPrivilegedMode(false)
                 .setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
-                .setLoggingType(CONTAINER_LOGGER_TYPE);
+                .setLoggingType(CONTAINER_LOGGER_TYPE).setContainerNetowrkConfiguration(
+                        new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
+                                .setNetworkMode(Optional.of("bridge")).build());
     }
 
     private void givenContainerOne() {

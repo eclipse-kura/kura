@@ -458,6 +458,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             configuration = containerLogConfigurationHandler(containerDescription, configuration);
 
+            configuration = containerNetworkConfigurationHandler(containerDescription, configuration);
+
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
@@ -525,6 +527,18 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         LogConfig lc = new LogConfig(lt, containerDescription.getLoggerParameters());
 
         configuration.withLogConfig(lc);
+
+        return configuration;
+    }
+
+    private HostConfig containerNetworkConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        if (containerDescription.getContainerNetworkConfiguration().getNetworkMode().isPresent()
+                && !containerDescription.getContainerNetworkConfiguration().getNetworkMode().get().trim().isEmpty()) {
+            configuration.withNetworkMode(containerDescription.getContainerNetworkConfiguration().getNetworkMode().get()
+                    .toLowerCase().trim());
+        }
 
         return configuration;
     }

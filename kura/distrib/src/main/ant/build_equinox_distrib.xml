@@ -946,6 +946,8 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcpkix_${org.bouncycastle.jar.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcprov_${org.bouncycastle.jar.version}.jar@3" />
+            <entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bctls_${org.bouncycastle.jar.version}.jar@3" />			
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"

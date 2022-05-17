@@ -106,8 +106,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
                         TritonServerEncryptionUtils
                                 .createDecryptionFolder(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
                     } catch (IOException e) {
-                        logger.warn("Failed to create decryption model directory");
-                        e.printStackTrace();
+                        logger.warn("Failed to create decryption model directory", e);
                     }
                 }
                 this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
@@ -136,8 +135,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
                         TritonServerEncryptionUtils
                                 .createDecryptionFolder(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
                     } catch (IOException e) {
-                        logger.warn("Failed to create decryption model directory");
-                        e.printStackTrace();
+                        logger.warn("Failed to create decryption model directory", e);
                     }
                 }
                 this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);

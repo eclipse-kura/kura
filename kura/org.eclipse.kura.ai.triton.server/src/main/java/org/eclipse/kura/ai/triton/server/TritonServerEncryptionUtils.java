@@ -121,10 +121,15 @@ public class TritonServerEncryptionUtils {
     }
 
     private static boolean isZipCompressed(String filePath) throws IOException {
-        InputStream is = new FileInputStream(filePath);
-        byte b1 = (byte) is.read();
-        byte b2 = (byte) is.read();
-        is.close();
+        byte b1 = 0;
+        byte b2 = 0;
+
+        try (InputStream is = new FileInputStream(filePath)) {
+            b1 = (byte) is.read();
+            b2 = (byte) is.read();
+        } catch (IOException e) {
+            throw new IOException(e);
+        }
 
         return b1 == 0x50 && b2 == 0x4B;
     }

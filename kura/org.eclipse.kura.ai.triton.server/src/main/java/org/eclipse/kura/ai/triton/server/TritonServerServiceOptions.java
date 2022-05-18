@@ -26,8 +26,6 @@ import org.eclipse.kura.KuraRuntimeException;
 
 public class TritonServerServiceOptions {
 
-    public static final String DECRYPTED_MODELS_REPO_PATH = "/tmp/decrypted_models/";
-
     private static final String PROPERTY_ADDRESS = "server.address";
     private static final String PROPERTY_PORTS = "server.ports";
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PATH = "local.model.repository.path";
@@ -115,6 +113,10 @@ public class TritonServerServiceOptions {
 
     public String getBackendsPath() {
         return getStringProperty(PROPERTY_LOCAL_BACKENDS_PATH);
+    }
+
+    public boolean modelsAreEncrypted() {
+        return !getModelRepositoryPassword().isEmpty();
     }
 
     public List<String> getBackendsConfigs() {

@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -67,20 +68,15 @@ public class TritonServerEncryptionUtils {
         return files[0].toString();
     }
 
-    protected static void createDecryptionFolder(String folderPath) throws IOException {
-        Path targetFolderPath = Paths.get(folderPath);
-
-        if (Files.exists(targetFolderPath)) {
-            throw new IOException("Target path " + targetFolderPath.toString() + " already exists");
-        }
-
-        logger.debug("Creating decryption folder at path: {}", folderPath);
-
-        Files.createDirectories(targetFolderPath);
-
+    protected static String createDecryptionFolder(String prefix) throws IOException {
         Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE));
-        Files.setPosixFilePermissions(targetFolderPath, permissions);
+        Path tempFolderPath = Files.createTempDirectory(prefix, PosixFilePermissions.asFileAttribute(permissions));
+        // TODO shutdown hook tempFolderPath.toFile().deleteOnExit();
+
+        logger.debug("Created temporary directory at path {}", tempFolderPath);
+
+        return tempFolderPath.toString();
     }
 
     protected static void decryptModel(String password, String inputFilePath, String outputFilePath)

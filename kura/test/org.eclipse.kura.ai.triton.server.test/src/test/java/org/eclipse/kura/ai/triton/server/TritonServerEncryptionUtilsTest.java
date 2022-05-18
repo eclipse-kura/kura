@@ -40,6 +40,7 @@ public class TritonServerEncryptionUtilsTest {
 
     private static final String WORKDIR = System.getProperty("java.io.tmpdir") + "/decr_folder";
     private boolean exceptionOccurred = false;
+    private String tempDirectoryPrefix;
     private String targetFolder;
     private String modelName;
     private String expectedEncryptedModelPath;
@@ -114,36 +115,13 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void createDecryptionFolderShouldWork() {
-        givenTargetFolder(WORKDIR + "/target_folder");
-        givenNoFileExistsAtPath(targetFolder);
+        givenTempDirectoryPrefix("prefix");
 
-        whenCreateDecryptionFolderIsCalledWith(targetFolder);
-
-        thenAFolderExistsAtPath(targetFolder);
-        thenTargetFolderHasPermissions(targetFolder, "rwx------");
-        thenNoExceptionOccurred();
-    }
-
-    @Test
-    public void createDecryptionFolderShouldWorkWithNestedPath() {
-        givenTargetFolder(WORKDIR + "/new/nested/folder");
-        givenNoFileExistsAtPath(targetFolder);
-
-        whenCreateDecryptionFolderIsCalledWith(targetFolder);
+        whenCreateDecryptionFolderIsCalledWith(tempDirectoryPrefix);
 
         thenAFolderExistsAtPath(targetFolder);
         thenTargetFolderHasPermissions(targetFolder, "rwx------");
         thenNoExceptionOccurred();
-    }
-
-    @Test
-    public void createDecryptionFolderShouldThrowOnNameClashes() {
-        givenTargetFolder(WORKDIR + "/another_folder");
-        givenAFileAreadyExistsAtPath(targetFolder);
-
-        whenCreateDecryptionFolderIsCalledWith(targetFolder);
-
-        thenAnExceptionOccurred();
     }
 
     @Test
@@ -328,6 +306,10 @@ public class TritonServerEncryptionUtilsTest {
         this.expectedEncryptedModelPath = modelPath;
     }
 
+    private void givenTempDirectoryPrefix(String prefix) {
+        this.tempDirectoryPrefix = prefix;
+    }
+
     private void givenTargetFolder(String folderPath) {
         this.targetFolder = folderPath;
     }
@@ -411,7 +393,7 @@ public class TritonServerEncryptionUtilsTest {
 
     private void whenCreateDecryptionFolderIsCalledWith(String folderPath) {
         try {
-            TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
+            this.targetFolder = TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;

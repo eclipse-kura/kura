@@ -23,7 +23,6 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +74,7 @@ import io.grpc.StatusRuntimeException;
 public class TritonServerServiceImpl implements InferenceEngineService, ConfigurableComponent {
 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceImpl.class);
+    private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
 
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
@@ -83,6 +83,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     private ManagedChannel grpcChannel;
     private GRPCInferenceServiceBlockingStub grpcStub;
+    private String decryptionFolderPath = "";
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -98,19 +99,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         if (isConfigurationValid()) {
             setGrpcResources();
             if (this.options.isLocalEnabled()) {
-                if (!this.options.getModelRepositoryPassword().isEmpty()
-                        && !Files.isDirectory(Paths.get(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH))) {
-                    logger.info("Creating decryption model directory at {}",
-                            TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
-                    try {
-                        TritonServerEncryptionUtils
-                                .createDecryptionFolder(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
-                    } catch (IOException e) {
-                        logger.warn("Failed to create decryption model directory", e);
-                    }
-                }
-                this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
-                this.tritonServerLocalManager.start();
+                startLocalInstance();
             }
             loadModels();
         } else {
@@ -127,19 +116,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         if (isConfigurationValid()) {
             setGrpcResources();
             if (this.options.isLocalEnabled()) {
-                if (!this.options.getModelRepositoryPassword().isEmpty()
-                        && !Files.isDirectory(Paths.get(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH))) {
-                    logger.info("Creating decryption model directory at {}",
-                            TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
-                    try {
-                        TritonServerEncryptionUtils
-                                .createDecryptionFolder(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
-                    } catch (IOException e) {
-                        logger.warn("Failed to create decryption model directory", e);
-                    }
-                }
-                this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService);
-                this.tritonServerLocalManager.start();
+                startLocalInstance();
             } else {
                 this.tritonServerLocalManager = null;
             }
@@ -147,6 +124,21 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         } else {
             logger.warn("The provided configuration is not valid");
         }
+    }
+
+    private void startLocalInstance() {
+        if (this.options.modelsAreEncrypted()) {
+            try {
+                decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
+            } catch (IOException e) {
+                logger.warn("Failed to create decryption model directory", e);
+            }
+
+            logger.info("Created decryption model directory at {}", decryptionFolderPath);
+        }
+        this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService,
+                this.decryptionFolderPath);
+        this.tritonServerLocalManager.start();
     }
 
     protected void deactivate() {
@@ -203,20 +195,18 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        String password = this.options.getModelRepositoryPassword();
-
-        if (!password.isEmpty()) {
+        if (this.options.modelsAreEncrypted()) {
+            String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
                     this.options.getModelRepositoryPath());
-            String decryptedModelPath = TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH + modelName + ".zip";
+            String decryptedModelPath = Paths.get(decryptionFolderPath, modelName + ".zip").toString();
 
             logger.info("Model decryption password detected. Decrypting model {} at {} into {}", modelName,
                     encryptedModelPath, decryptedModelPath);
             try {
                 TritonServerEncryptionUtils.decryptModel(plainPassword, encryptedModelPath, decryptedModelPath);
-                TritonServerEncryptionUtils.unzipModel(decryptedModelPath,
-                        TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
+                TritonServerEncryptionUtils.unzipModel(decryptedModelPath, decryptionFolderPath);
             } catch (KuraIOException | IOException e) {
                 throw new KuraIOException(e, "Cannot decrypt the model " + modelName);
             }
@@ -227,11 +217,13 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         try {
             this.grpcStub.repositoryModelLoad(builder.build());
         } catch (StatusRuntimeException e) {
-            TritonServerEncryptionUtils.cleanRepository(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
+            if (this.options.modelsAreEncrypted()) {
+                TritonServerEncryptionUtils.cleanRepository(decryptionFolderPath);
+            }
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (!password.isEmpty()) {
+        if (this.options.modelsAreEncrypted()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= 6) {
@@ -240,7 +232,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
                 }
                 TritonServerLocalManager.sleepFor(250);
             }
-            TritonServerEncryptionUtils.cleanRepository(TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
+            TritonServerEncryptionUtils.cleanRepository(decryptionFolderPath);
         }
     }
 

@@ -115,6 +115,10 @@ public class TritonServerServiceOptions {
         return getStringProperty(PROPERTY_LOCAL_BACKENDS_PATH);
     }
 
+    public boolean isModelEncryptionActive() {
+        return !getModelRepositoryPassword().isEmpty();
+    }
+
     public List<String> getBackendsConfigs() {
         List<String> backendsConfigs = new ArrayList<>();
         final Object propertyBackendsConfig = this.properties.get(PROPERTY_LOCAL_BACKENDS_CONFIG);

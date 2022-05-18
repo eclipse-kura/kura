@@ -127,7 +127,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     }
 
     private void startLocalInstance() {
-        if (!this.options.getModelRepositoryPassword().isEmpty()) {
+        if (this.options.isModelEncryptionActive()) {
             try {
                 decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
             } catch (IOException e) {
@@ -195,9 +195,8 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        String password = this.options.getModelRepositoryPassword();
-
-        if (!password.isEmpty()) {
+        if (this.options.isModelEncryptionActive()) {
+            String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
                     this.options.getModelRepositoryPath());
@@ -218,13 +217,13 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         try {
             this.grpcStub.repositoryModelLoad(builder.build());
         } catch (StatusRuntimeException e) {
-            if (!password.isEmpty() && !decryptionFolderPath.isEmpty()) {
+            if (this.options.isModelEncryptionActive()) {
                 TritonServerEncryptionUtils.cleanRepository(decryptionFolderPath);
             }
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (!password.isEmpty()) {
+        if (this.options.isModelEncryptionActive()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= 6) {

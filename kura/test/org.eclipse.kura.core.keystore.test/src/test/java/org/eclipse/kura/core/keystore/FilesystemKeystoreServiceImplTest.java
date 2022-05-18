@@ -898,7 +898,7 @@ public class FilesystemKeystoreServiceImplTest {
         assertNotNull(keystoreService.getKeyStore());
     }
 
-    @Test(expected = KuraException.class)
+    @Test
     public void testUpdatePathNotExisting() throws KuraException, GeneralSecurityException, IOException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);

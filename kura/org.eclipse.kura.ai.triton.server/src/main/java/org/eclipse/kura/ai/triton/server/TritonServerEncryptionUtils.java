@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.Security;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -76,11 +77,9 @@ public class TritonServerEncryptionUtils {
 
         logger.debug("Creating decryption folder at path: {}", folderPath);
 
-        Files.createDirectories(targetFolderPath);
-
         Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE));
-        Files.setPosixFilePermissions(targetFolderPath, permissions);
+        Files.createDirectories(targetFolderPath, PosixFilePermissions.asFileAttribute(permissions));
     }
 
     protected static void decryptModel(String password, String inputFilePath, String outputFilePath)

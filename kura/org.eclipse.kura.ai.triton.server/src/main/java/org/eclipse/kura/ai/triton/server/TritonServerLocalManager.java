@@ -36,6 +36,7 @@ public class TritonServerLocalManager {
     private static final int MONITOR_PERIOD = 30;
     private static final String[] TRITONSERVER = new String[] { "tritonserver" };
 
+    private final String decryptionFolderPath;
     private final CommandExecutorService commandExecutorService;
     private final TritonServerServiceOptions options;
     private Command serverCommand;
@@ -44,9 +45,10 @@ public class TritonServerLocalManager {
     private ScheduledFuture<?> scheduledFuture;
 
     protected TritonServerLocalManager(TritonServerServiceOptions options,
-            CommandExecutorService commandExecutorService) {
+            CommandExecutorService commandExecutorService, String decryptionFolderPath) {
         this.options = options;
         this.commandExecutorService = commandExecutorService;
+        this.decryptionFolderPath = decryptionFolderPath;
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
@@ -138,7 +140,7 @@ public class TritonServerLocalManager {
         List<String> commandString = new ArrayList<>();
         commandString.add("tritonserver");
         if (!this.options.getModelRepositoryPassword().isEmpty()) {
-            commandString.add("--model-repository=" + TritonServerServiceOptions.DECRYPTED_MODELS_REPO_PATH);
+            commandString.add("--model-repository=" + this.decryptionFolderPath);
         } else {
             commandString.add("--model-repository=" + this.options.getModelRepositoryPath());
         }

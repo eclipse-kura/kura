@@ -165,6 +165,59 @@ The Gherkin reference: https://cucumber.io/docs/gherkin/reference/
 
 Submit a pull request via the normal GitHub UI.
 
+We are using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) convention for our pull request titles. This convention dovetails with [SemVer](https://semver.org/), by describing the features, fixes, and breaking changes made in commit messages.
+
+Every PR which is not in draft mode should follow conventional commit convention for PR title.
+
+------
+
+Pull request title should follow the format:
+
+```
+<type>[optional scope]: <description>
+```
+
+Where:
+- `<type>` - see following _Type_ section
+- `[optional scope]` - see following _Scope_ section
+- `<description>` - description of the PR
+
+**BREAKING CHANGE:** a commit that appends a `!` after the type/scope, introduces a breaking API change. A BREAKING CHANGE can be part of commits of any _type_.
+
+------
+
+Once merged and squashed in the main development branch, the resulting commit message should match the PR title.
+
+For details see the [full specification](https://www.conventionalcommits.org/en/v1.0.0/#specification).
+
+##### Type
+
+1.  The type `feat` MUST be used when a commit adds a new feature to your application or library.
+2.  The type `fix` MUST be used when a commit represents a bug fix for your application.
+
+Types other than `feat` and `fix` MAY be used in your commit messages and must be one of the following:
+
+- `docs`: Documentation only changes
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `test`: Adding missing tests or correcting existing tests
+- `style`: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
+- `chore`: Tool changes, configuration changes, and changes to things that do not actually go into production at all (upticks/bumps, manual update of release notes...)
+- `build`: Changes that affect the build system or external dependencies (dependencies update)
+- `ci`: Changes to our CI configuration files and scripts
+- `revert`: Reverts a previous commit
+- `perf`: A code change that improves performance
+- `deprecate`: An API deprecation. Use the summary field to provide the API which was deprecated (eg: `deprecate: org.eclipse.kura.position.PositionService`)
+
+##### Scope
+
+A scope MAY be provided after a type. A scope MUST consist of a noun describing a section of the codebase surrounded by parenthesis, e.g., `fix(parser):`
+
+The scope should describe the section of the code affected by the changes as perceived by the person reading the changelog generated from commit messages.
+
+As a general rule use the last part of the bundle name as the scope (i.e. without `org.eclipse.kura`). If the PR spans across multiple bundles use the main one or do not fill the scope at all.
+
+Example: if a PR adds a feature to the `org.eclipse.kura.core.keystore` bundle, the PR title shoud be `feat(core.keystore): new awesome feature`.
+
 ## After Submitting
 
 * Do not use your branch for any other development, otherwise further changes that you make will be visible in the PR.

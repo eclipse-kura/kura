@@ -99,19 +99,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         if (isConfigurationValid()) {
             setGrpcResources();
             if (this.options.isLocalEnabled()) {
-                if (!this.options.getModelRepositoryPassword().isEmpty()) {
-                    try {
-                        decryptionFolderPath = TritonServerEncryptionUtils
-                                .createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
-                    } catch (IOException e) {
-                        logger.warn("Failed to create decryption model directory", e);
-                    }
-
-                    logger.info("Creating decryption model directory at {}", decryptionFolderPath);
-                }
-                this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService,
-                        this.decryptionFolderPath);
-                this.tritonServerLocalManager.start();
+                startLocalInstance();
             }
             loadModels();
         } else {
@@ -128,19 +116,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         if (isConfigurationValid()) {
             setGrpcResources();
             if (this.options.isLocalEnabled()) {
-                if (!this.options.getModelRepositoryPassword().isEmpty()) {
-                    try {
-                        decryptionFolderPath = TritonServerEncryptionUtils
-                                .createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
-                    } catch (IOException e) {
-                        logger.warn("Failed to create decryption model directory", e);
-                    }
-
-                    logger.info("Created decryption model directory at {}", decryptionFolderPath);
-                }
-                this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService,
-                        this.decryptionFolderPath);
-                this.tritonServerLocalManager.start();
+                startLocalInstance();
             } else {
                 this.tritonServerLocalManager = null;
             }
@@ -148,6 +124,21 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         } else {
             logger.warn("The provided configuration is not valid");
         }
+    }
+
+    private void startLocalInstance() {
+        if (!this.options.getModelRepositoryPassword().isEmpty()) {
+            try {
+                decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
+            } catch (IOException e) {
+                logger.warn("Failed to create decryption model directory", e);
+            }
+
+            logger.info("Created decryption model directory at {}", decryptionFolderPath);
+        }
+        this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService,
+                this.decryptionFolderPath);
+        this.tritonServerLocalManager.start();
     }
 
     protected void deactivate() {

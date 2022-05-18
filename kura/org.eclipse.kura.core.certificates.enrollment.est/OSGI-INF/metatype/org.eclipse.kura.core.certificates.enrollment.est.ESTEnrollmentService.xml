@@ -31,8 +31,8 @@
             type="String"
             cardinality="0" 
             required="true"
-            default="https://est-server-endpoint"
-            description="Specifies the EST server endpoint." />
+            default="est-server-endpoint:8443"
+            description="Specifies the EST server endpoint (without the protocol e.g: est-server-endpoint:8443" />
 
         <AD id="server.bootstrap-certificate"
             name="CA root certificate"

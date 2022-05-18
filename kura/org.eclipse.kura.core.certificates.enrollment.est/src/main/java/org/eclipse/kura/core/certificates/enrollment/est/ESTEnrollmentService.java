@@ -198,14 +198,14 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
 
     private void initESTService() throws Exception {
 
-        Object truesteCACerts = null;
+        Object[] truesteCACerts = null;
 
         if (needBootstrap()) {
             logger.info("Bootstrapping EST connection...");
             truesteCACerts = readPemCertificates(this.estOptions.getServer().getBootstrapCertificate());
         } else {
             // the ca certificate provided by the configuration is only needed for the bootstrapping
-            truesteCACerts = getStoredCACerts();
+            truesteCACerts = new Object[] { getCACertificate() };
         }
 
         buildESTService(truesteCACerts, getRevocationList());
@@ -232,7 +232,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
             }
 
             // rebuild client with the explicit Trust Anchor
-            buildESTService(getStoredCACerts(), getRevocationList());
+            buildESTService(new Object[] { getStoredCACerts() }, getRevocationList());
 
             logger.info("Bootstrap endend.");
         }
@@ -292,7 +292,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         CRL[] revocationList = null;
 
         if (this.keystoreService != null) {
-            revocationList = this.keystoreService.getCRLs().toArray(revocationList);
+            revocationList = this.keystoreService.getCRLs().toArray(new CRL[0]);
         }
         return revocationList;
     }
@@ -343,9 +343,8 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         return (PrivateKeyEntry) storedKeyPair;
     }
 
-    private void buildESTService(Object truesteCACerts, CRL[] revocationList) throws Exception {
-        JsseESTServiceBuilder estServiceBuilder = new JsseESTServiceBuilder(
-                this.estOptions.getServer().getUrl().toString(),
+    private void buildESTService(Object[] truesteCACerts, CRL[] revocationList) throws Exception {
+        JsseESTServiceBuilder estServiceBuilder = new JsseESTServiceBuilder(this.estOptions.getServer().getHost(),
                 JcaJceUtils.getCertPathTrustManager(toTrustAnchor(truesteCACerts), revocationList));
 
         estServiceBuilder.withProvider("BCJSSE");
@@ -405,7 +404,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     private Supplier<EnrollmentResponse> enrollmentTask(boolean reEnroll) {
 
         return () -> {
-            logger.info("Starting system enrollment with: {}", this.estOptions.getServer().getUrl());
+            logger.info("Starting system enrollment with: {}", this.estOptions.getServer().getHost());
             ContentSigner signer;
             EnrollmentResponse enrollmentResponse = null;
             try {
@@ -499,7 +498,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     private boolean needBootstrap() {
-        return this.needBootstrap;
+        return this.needBootstrap; // aggiungere certificato expired
     }
 
     private static Object[] readPemCertificates(String pemString) throws Exception {

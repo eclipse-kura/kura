@@ -15,7 +15,6 @@ package org.eclipse.kura.core.certificates.enrollment.est;
 import static java.util.Objects.requireNonNull;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +25,7 @@ import org.eclipse.kura.util.configuration.Property;
 public class ESTEnrollmentServiceOptions {
 
     private static final Property<Boolean> ENABLED = new Property<>("enabled", false);
-    private static final Property<String> SERVER_URL = new Property<>("server.url", "");
+    private static final Property<String> SERVER_HOST = new Property<>("server.url", "");
     private static final Property<String> SERVER_BOOTSTRAP_CERT = new Property<>("server.bootstrap-certificate", "");
     private static final Property<Boolean> SERVER_CERT_ROLLOVER = new Property<>("server.rollover", true);
     private static final Property<Boolean> HTTP_CLIENT_BASIC_AUTHENTICATION = new Property<>(
@@ -59,7 +58,7 @@ public class ESTEnrollmentServiceOptions {
 
         this.server = new Server();
 
-        this.server.setUrl(new URL(SERVER_URL.get(properties)));
+        this.server.setHost(SERVER_HOST.get(properties));
         this.server.setBootstrapCertificate(SERVER_BOOTSTRAP_CERT.get(properties));
         this.server.setAutomaticCertRollover(SERVER_CERT_ROLLOVER.get(properties));
 
@@ -96,17 +95,17 @@ public class ESTEnrollmentServiceOptions {
 
     public static class Server {
 
-        private URL url;
+        private String host;
         private String bootstrapCertificate;
 
         private Boolean automaticCertRollover;
 
-        public URL getUrl() {
-            return url;
+        public String getHost() {
+            return host;
         }
 
-        public void setUrl(URL url) {
-            this.url = url;
+        public void setHost(String host) {
+            this.host = host;
         }
 
         public String getBootstrapCertificate() {
@@ -127,7 +126,7 @@ public class ESTEnrollmentServiceOptions {
 
         @Override
         public int hashCode() {
-            return Objects.hash(bootstrapCertificate, automaticCertRollover, url);
+            return Objects.hash(bootstrapCertificate, automaticCertRollover, host);
         }
 
         @Override
@@ -144,7 +143,7 @@ public class ESTEnrollmentServiceOptions {
             Server other = (Server) obj;
             return Objects.equals(bootstrapCertificate, other.bootstrapCertificate)
                     && Objects.equals(automaticCertRollover, other.automaticCertRollover)
-                    && Objects.equals(url, other.url);
+                    && Objects.equals(host, other.host);
         }
 
     }

@@ -167,15 +167,15 @@ Submit a pull request via the normal GitHub UI.
 
 We are using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) convention for our pull request titles. This convention dovetails with [SemVer](https://semver.org/), by describing the features, fixes, and breaking changes made in commit messages.
 
-Every PR which is not in draft mode should follow conventional commit convention for PR title, thus should follow the format:
+Every PR which is not in draft mode should follow conventional commit convention for PR title. Therefore the title should be in the format:
 
 ```
 <type>[optional scope]: <description>
 ```
 
 Where:
-- `<type>` - see following [_Type_](#type) section
-- `[optional scope]` - see following [_Scope_](#scope) section
+- `<type>` - see [_Type_ section](#type)
+- `[optional scope]` - see [_Scope_ section](#scope)
 - `<description>` - description of the PR
 
 **BREAKING CHANGE:** a commit that appends a `!` after the type/scope, introduces a breaking API change. A BREAKING CHANGE can be part of commits of any _type_.

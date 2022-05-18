@@ -41,6 +41,7 @@ public class TritonServerEncryptionUtilsTest {
     private static final String WORKDIR = Paths.get(System.getProperty("java.io.tmpdir"), "decr_folder").toString();
     private boolean exceptionOccurred = false;
     private String tempDirectoryPrefix;
+    private String tempDirectoryPath;
     private String targetFolder;
     private String modelName;
     private String expectedEncryptedModelPath;
@@ -119,8 +120,8 @@ public class TritonServerEncryptionUtilsTest {
 
         whenCreateDecryptionFolderIsCalledWith(tempDirectoryPrefix);
 
-        thenAFolderExistsAtPath(targetFolder);
-        thenTargetFolderHasPermissions(targetFolder, "rwx------");
+        thenAFolderExistsAtPath(tempDirectoryPath);
+        thenTargetFolderHasPermissions(tempDirectoryPath, "rwx------");
         thenNoExceptionOccurred();
     }
 
@@ -393,7 +394,7 @@ public class TritonServerEncryptionUtilsTest {
 
     private void whenCreateDecryptionFolderIsCalledWith(String folderPath) {
         try {
-            this.targetFolder = TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
+            this.tempDirectoryPath = TritonServerEncryptionUtils.createDecryptionFolder(folderPath);
         } catch (IOException e) {
             e.printStackTrace();
             this.exceptionOccurred = true;

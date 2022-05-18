@@ -51,6 +51,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -90,7 +91,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.security.keystore.KeystoreService;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ESTEnrollmentService implements EnrollmentService, ConfigurableComponent {
@@ -234,7 +234,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
             // rebuild client with the explicit Trust Anchor
             buildESTService(new Object[] { getStoredCACerts() }, getRevocationList());
 
-            logger.info("Bootstrap endend.");
+            logger.info("Bootstrap ended.");
         }
     }
 
@@ -364,6 +364,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
                     clientKeystore, DEFAULT_KEYSTORE_PASSW).getKeyManagers();
 
             estServiceBuilder.withKeyManagers(keyManager);
+
         }
 
         this.estService = estServiceBuilder.withTimeout(60000).build();

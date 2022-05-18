@@ -72,7 +72,6 @@ public class TritonServerEncryptionUtils {
         Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE));
         Path tempFolderPath = Files.createTempDirectory(prefix, PosixFilePermissions.asFileAttribute(permissions));
-        // TODO shutdown hook tempFolderPath.toFile().deleteOnExit();
 
         logger.debug("Created temporary directory at path {}", tempFolderPath);
 

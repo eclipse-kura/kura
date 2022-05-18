@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
 import java.nio.ShortBuffer;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,7 +111,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     public void updated(Map<String, Object> properties) {
         logger.info("Update TritonServerService...");
         if (nonNull(this.tritonServerLocalManager)) {
-            this.tritonServerLocalManager.stop();
+            stopLocalInstance();
         }
         this.options = new TritonServerServiceOptions(properties);
         if (isConfigurationValid()) {
@@ -126,6 +127,14 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         }
     }
 
+    protected void deactivate() {
+        logger.info("Deactivate TritonServerService...");
+        if (nonNull(this.tritonServerLocalManager)) {
+            stopLocalInstance();
+        }
+        this.grpcChannel.shutdownNow();
+    }
+
     private void startLocalInstance() {
         if (this.options.modelsAreEncrypted()) {
             try {
@@ -133,7 +142,6 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             } catch (IOException e) {
                 logger.warn("Failed to create decryption model directory", e);
             }
-
             logger.info("Created decryption model directory at {}", decryptionFolderPath);
         }
         this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService,
@@ -141,12 +149,16 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         this.tritonServerLocalManager.start();
     }
 
-    protected void deactivate() {
-        logger.info("Deactivate TritonServerService...");
-        if (nonNull(this.tritonServerLocalManager)) {
-            this.tritonServerLocalManager.stop();
+    private void stopLocalInstance() {
+        this.tritonServerLocalManager.stop();
+        if (this.options.modelsAreEncrypted()) {
+            TritonServerEncryptionUtils.cleanRepository(decryptionFolderPath);
+            try {
+                Files.delete(Paths.get(decryptionFolderPath));
+            } catch (IOException e) {
+                logger.warn("Could not delete decryption folder {}", decryptionFolderPath, e);
+            }
         }
-        this.grpcChannel.shutdownNow();
     }
 
     private void setGrpcResources() {

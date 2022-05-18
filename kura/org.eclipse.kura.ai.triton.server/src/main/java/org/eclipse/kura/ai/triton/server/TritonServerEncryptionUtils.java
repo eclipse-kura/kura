@@ -68,18 +68,15 @@ public class TritonServerEncryptionUtils {
         return files[0].toString();
     }
 
-    protected static void createDecryptionFolder(String folderPath) throws IOException {
-        Path targetFolderPath = Paths.get(folderPath);
-
-        if (Files.exists(targetFolderPath)) {
-            throw new IOException("Target path " + targetFolderPath.toString() + " already exists");
-        }
-
-        logger.debug("Creating decryption folder at path: {}", folderPath);
-
+    protected static String createDecryptionFolder(String prefix) throws IOException {
         Set<PosixFilePermission> permissions = new HashSet<>(Arrays.asList(PosixFilePermission.OWNER_READ,
                 PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE));
-        Files.createDirectories(targetFolderPath, PosixFilePermissions.asFileAttribute(permissions));
+        Path tempFolderPath = Files.createTempDirectory(prefix, PosixFilePermissions.asFileAttribute(permissions));
+        // TODO shutdown hook tempFolderPath.toFile().deleteOnExit();
+
+        logger.debug("Created temporary directory at path {}", tempFolderPath);
+
+        return tempFolderPath.toString();
     }
 
     protected static void decryptModel(String password, String inputFilePath, String outputFilePath)

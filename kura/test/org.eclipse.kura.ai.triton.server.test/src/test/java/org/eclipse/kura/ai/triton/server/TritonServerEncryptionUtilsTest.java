@@ -267,7 +267,7 @@ public class TritonServerEncryptionUtilsTest {
 
     @Test
     public void unzipModelShouldThrowIfDestinationFolderDoesNotExist() {
-        givenCompressedFileAtPath("target/test-classes/armored_plain_file.asc");
+        givenCompressedFileAtPath("target/test-classes/tf_autoencoder_fp32.zip");
         givenAFileExistsAtPath(compressedFile);
         givenTargetFolder(WORKDIR + "/an_imaginary_folder");
         givenNoFileExistsAtPath(targetFolder);

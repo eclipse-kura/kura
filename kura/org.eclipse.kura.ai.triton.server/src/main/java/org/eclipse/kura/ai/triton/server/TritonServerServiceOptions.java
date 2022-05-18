@@ -115,7 +115,7 @@ public class TritonServerServiceOptions {
         return getStringProperty(PROPERTY_LOCAL_BACKENDS_PATH);
     }
 
-    public boolean isModelEncryptionActive() {
+    public boolean modelsAreEncrypted() {
         return !getModelRepositoryPassword().isEmpty();
     }
 

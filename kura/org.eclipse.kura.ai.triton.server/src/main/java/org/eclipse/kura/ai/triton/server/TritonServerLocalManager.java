@@ -139,7 +139,7 @@ public class TritonServerLocalManager {
     private Command createServerCommand() {
         List<String> commandString = new ArrayList<>();
         commandString.add("tritonserver");
-        if (!this.options.getModelRepositoryPassword().isEmpty()) {
+        if (this.options.modelsAreEncrypted()) {
             commandString.add("--model-repository=" + this.decryptionFolderPath);
         } else {
             commandString.add("--model-repository=" + this.options.getModelRepositoryPath());

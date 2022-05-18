@@ -174,8 +174,8 @@ Every PR which is not in draft mode should follow conventional commit convention
 ```
 
 Where:
-- `<type>` - see following _Type_ section
-- `[optional scope]` - see following _Scope_ section
+- `<type>` - see following [_Type_](#type) section
+- `[optional scope]` - see following [_Scope_](#scope) section
 - `<description>` - description of the PR
 
 **BREAKING CHANGE:** a commit that appends a `!` after the type/scope, introduces a breaking API change. A BREAKING CHANGE can be part of commits of any _type_.

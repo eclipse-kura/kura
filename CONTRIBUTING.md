@@ -167,11 +167,7 @@ Submit a pull request via the normal GitHub UI.
 
 We are using the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#summary) convention for our pull request titles. This convention dovetails with [SemVer](https://semver.org/), by describing the features, fixes, and breaking changes made in commit messages.
 
-Every PR which is not in draft mode should follow conventional commit convention for PR title.
-
-------
-
-Pull request title should follow the format:
+Every PR which is not in draft mode should follow conventional commit convention for PR title, thus should follow the format:
 
 ```
 <type>[optional scope]: <description>
@@ -184,13 +180,11 @@ Where:
 
 **BREAKING CHANGE:** a commit that appends a `!` after the type/scope, introduces a breaking API change. A BREAKING CHANGE can be part of commits of any _type_.
 
-------
-
 Once merged and squashed in the main development branch, the resulting commit message should match the PR title.
 
 For details see the [full specification](https://www.conventionalcommits.org/en/v1.0.0/#specification).
 
-##### Type
+### Type
 
 1.  The type `feat` MUST be used when a commit adds a new feature to your application or library.
 2.  The type `fix` MUST be used when a commit represents a bug fix for your application.
@@ -208,7 +202,7 @@ Types other than `feat` and `fix` MAY be used in your commit messages and mu
 - `perf`: A code change that improves performance
 - `deprecate`: An API deprecation. Use the summary field to provide the API which was deprecated (eg: `deprecate: org.eclipse.kura.position.PositionService`)
 
-##### Scope
+### Scope
 
 A scope MAY be provided after a type. A scope MUST consist of a noun describing a section of the codebase surrounded by parenthesis, e.g., `fix(parser):`
 

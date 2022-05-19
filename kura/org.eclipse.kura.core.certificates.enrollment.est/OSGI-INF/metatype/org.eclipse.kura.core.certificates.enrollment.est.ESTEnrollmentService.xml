@@ -119,8 +119,8 @@
             type="String"
             cardinality="0"
             required="true"
-            default="ECDSA"
-            description="KeyPair generator algorithm to use." />
+            default="EC"
+            description="KeyPair generator algorithm to use.(E.g. EC, RSA, etc..)" />
             
         <AD id="client.keypair.algorithm.parameter"
             name="KeyPair generator algorithm parameter set"

@@ -15,11 +15,9 @@ package org.eclipse.kura.core.certificates.enrollment.est;
 import static java.util.Objects.requireNonNull;
 
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
-import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.util.configuration.Property;
 
 public class ESTEnrollmentServiceOptions {
@@ -34,8 +32,8 @@ public class ESTEnrollmentServiceOptions {
             "client.http.basic-authentication.digest", false);
     private static final Property<String> HTTP_CLIENT_BASIC_AUTHENTICATION_USERNAME = new Property<>(
             "client.http.basic-authentication.username", "");
-    private static final Property<Password> HTTP_CLIENT_BASIC_AUTHENTICATION_PASSWORD = new Property<>(
-            "client.http.basic-authentication.password", new Password(""));
+    private static final Property<String> HTTP_CLIENT_BASIC_AUTHENTICATION_PASSWORD = new Property<>(
+            "client.http.basic-authentication.password", "");
     private static final Property<Boolean> HTTP_CLIENT_POF = new Property<>("client.pof", true);
     private static final Property<Boolean> CLIENT_RENEW = new Property<>("client.renew", false);
     private static final Property<Boolean> CLIENT_TLS_ENABLED = new Property<>("client.tls.enabled", false);
@@ -68,6 +66,7 @@ public class ESTEnrollmentServiceOptions {
         basicAuth.setEnabled(HTTP_CLIENT_BASIC_AUTHENTICATION.get(properties));
         basicAuth.setDigestEnabled(HTTP_CLIENT_BASIC_AUTHENTICATION_DIGEST.get(properties));
         basicAuth.setUsername(HTTP_CLIENT_BASIC_AUTHENTICATION_USERNAME.get(properties));
+
         basicAuth.setPassword(HTTP_CLIENT_BASIC_AUTHENTICATION_PASSWORD.get(properties));
 
         this.client.setBasicAuthentication(basicAuth);
@@ -258,7 +257,7 @@ public class ESTEnrollmentServiceOptions {
         private Boolean enabled;
         private Boolean digestEnabled;
         private String username;
-        private Password password;
+        private String password;
 
         public Boolean isEnabled() {
             return enabled;
@@ -284,17 +283,17 @@ public class ESTEnrollmentServiceOptions {
             this.username = username;
         }
 
-        public Password getPassword() {
+        public String getPassword() {
             return password;
         }
 
-        public void setPassword(Password password) {
+        public void setPassword(String password) {
             this.password = password;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(digestEnabled, enabled, password.getPassword(), username);
+            return Objects.hash(digestEnabled, enabled, password, username);
         }
 
         @Override
@@ -310,8 +309,7 @@ public class ESTEnrollmentServiceOptions {
             }
             BasicAuthentication other = (BasicAuthentication) obj;
             return Objects.equals(digestEnabled, other.digestEnabled) && Objects.equals(enabled, other.enabled)
-                    && Arrays.equals(password.getPassword(), other.password.getPassword())
-                    && Objects.equals(username, other.username);
+                    && Objects.equals(password, other.password) && Objects.equals(username, other.username);
         }
 
     }

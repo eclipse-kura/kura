@@ -260,7 +260,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         AlgorithmParameterSpec algorithmParameter = null;
 
         switch (this.estOptions.getClient().getKeyPairAlgorithm()) {
-        case "ECDSA":
+        case "EC":
             algorithmParameter = new ECGenParameterSpec(this.estOptions.getClient().getKeyPairAlgorithmParameter());
             break;
         case "RSA":
@@ -290,8 +290,9 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
 
         if (Boolean.TRUE.equals(this.estOptions.getClient().getBasicAuthentication().isEnabled())) {
             String username = this.estOptions.getClient().getBasicAuthentication().getUsername();
+
             char[] passw = this.cryptoService
-                    .decryptAes(this.estOptions.getClient().getBasicAuthentication().getPassword().getPassword());
+                    .decryptAes(this.estOptions.getClient().getBasicAuthentication().getPassword().toCharArray());
             if (Boolean.TRUE.equals(this.estOptions.getClient().getBasicAuthentication().isDigestEnabled())) {
                 DigestCalculatorProvider digestBuilder = new JcaDigestCalculatorProviderBuilder().setProvider("BC")
                         .build();

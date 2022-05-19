@@ -1,3 +1,5 @@
+> **Note**: We are using the Conventional Commits convention for our pull request titles. Please take a look at the [PR title format document](https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md#submitting-the-changes) for the supported [types](https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md#type) and [scopes](https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md#scope).
+
 Brief description of the PR. [e.g. Added `null` check on `object` to avoid `NullPointerException`]
 
 **Related Issue:** This PR fixes/closes {issue number}

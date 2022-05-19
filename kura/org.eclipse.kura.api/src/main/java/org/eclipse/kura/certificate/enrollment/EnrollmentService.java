@@ -45,14 +45,14 @@ public interface EnrollmentService {
 
     /**
      * 
-     * Get the Certificate Authority <code>Certificate</code> stored in the relative
+     * Get the list of the Certificate Authority <code>Certificate</code> stored in the relative
      * {@link org.eclipse.kura.security.keystore.KeystoreService}
      * 
      * @return returns the Certificate Authority <code>Certificate</code>
      * @throws KuraException
      *             if it is impossible to retrieve the certificate.
      */
-    public Certificate getCACertificate() throws KuraException;
+    public Certificate[] getCACertificate() throws KuraException;
 
     /**
      * Get the Client <code>Certificate</code> stored in the relative

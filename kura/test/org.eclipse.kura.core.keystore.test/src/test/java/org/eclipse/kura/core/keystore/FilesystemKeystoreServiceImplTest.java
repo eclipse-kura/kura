@@ -37,6 +37,7 @@ import java.security.KeyStore.Entry;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -58,6 +59,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Matchers;
@@ -80,16 +82,22 @@ public class FilesystemKeystoreServiceImplTest {
 
     private KeyStore store;
 
+    @BeforeClass
+    public static void setupProvider() {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     @Before
-    public void setupDefaultKeystore()
-            throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    public void setupDefaultKeystore() throws KeyStoreException, NoSuchAlgorithmException, CertificateException,
+            IOException, NoSuchProviderException {
+
         // create a new keystore each time the tests should run
 
         this.store = KeyStore.getInstance("jks");
 
         this.store.load(null, null);
 
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA", "BC");
         gen.initialize(1024);
         KeyPair pair = gen.generateKeyPair();
         Key key = pair.getPrivate();
@@ -492,7 +500,7 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.setCryptoService(cryptoService);
         keystoreService.activate(componentContext, properties);
 
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("DSA", "BC");
         gen.initialize(2048);
         KeyPair pair = gen.generateKeyPair();
         PrivateKey key = pair.getPrivate();
@@ -729,8 +737,6 @@ public class FilesystemKeystoreServiceImplTest {
     public void testCreateKeyPairWithEC()
             throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
 
-        Security.addProvider(new BouncyCastleProvider());
-
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -763,8 +769,6 @@ public class FilesystemKeystoreServiceImplTest {
     @Test
     public void testCreateKeyPairWithRSA()
             throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-
-        Security.addProvider(new BouncyCastleProvider());
 
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
@@ -816,7 +820,7 @@ public class FilesystemKeystoreServiceImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCreateCSRNullSignerAlg() throws KuraException, NoSuchAlgorithmException {
+    public void testCreateCSRNullSignerAlg() throws KuraException, NoSuchAlgorithmException, NoSuchProviderException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -833,7 +837,7 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "BC");
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keyPair = keyGen.generateKeyPair();
 
@@ -841,7 +845,7 @@ public class FilesystemKeystoreServiceImplTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testCreateCSREmptyAlg() throws KuraException, NoSuchAlgorithmException {
+    public void testCreateCSREmptyAlg() throws KuraException, NoSuchAlgorithmException, NoSuchProviderException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -858,7 +862,7 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA", "BC");
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keyPair = keyGen.generateKeyPair();
 
@@ -866,7 +870,7 @@ public class FilesystemKeystoreServiceImplTest {
     }
 
     @Test
-    public void testCreateCSRWithKeyPair() throws KuraException, NoSuchAlgorithmException {
+    public void testCreateCSRWithKeyPair() throws KuraException, NoSuchAlgorithmException, NoSuchProviderException {
         Map<String, Object> properties = new HashMap<>();
         properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
         properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
@@ -883,7 +887,7 @@ public class FilesystemKeystoreServiceImplTest {
         keystoreService.activate(componentContext, properties);
 
         X500Principal principal = new X500Principal("CN=Kura, OU=IoT, O=Eclipse, C=US");
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA", "BC");
         keyGen.initialize(1024, new SecureRandom());
         KeyPair keyPair = keyGen.generateKeyPair();
 

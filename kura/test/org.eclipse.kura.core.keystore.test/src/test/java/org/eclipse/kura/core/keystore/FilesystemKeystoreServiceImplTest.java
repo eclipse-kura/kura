@@ -39,9 +39,12 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +54,7 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Before;
@@ -719,6 +723,76 @@ public class FilesystemKeystoreServiceImplTest {
         assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
         assertEquals("DSA", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
         assertEquals("DSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
+    }
+
+    @Test
+    public void testCreateKeyPairWithEC()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+
+        Security.addProvider(new BouncyCastleProvider());
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        createEmptyKeystore(STORE_PATH, STORE_PASS);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.createKeyPair("alias", "EC", new ECGenParameterSpec("prime256v1"), "SHA256WithECDSA",
+                "CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        Entry entry = keystoreService.getEntry("alias");
+        assertNotNull(entry);
+        assertTrue(entry instanceof PrivateKeyEntry);
+        assertNotNull(((PrivateKeyEntry) entry).getPrivateKey());
+        assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
+        assertEquals("EC", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
+        assertEquals("EC", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
+    }
+
+    @Test
+    public void testCreateKeyPairWithRSA()
+            throws KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+
+        Security.addProvider(new BouncyCastleProvider());
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(KEY_KEYSTORE_PATH, STORE_PATH);
+        properties.put(KEY_KEYSTORE_PASSWORD, STORE_PASS);
+
+        CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decryptAes(STORE_PASS.toCharArray())).thenReturn(STORE_PASS.toCharArray());
+        when(cryptoService.getKeyStorePassword(STORE_PATH)).thenReturn(STORE_PASS.toCharArray());
+
+        ComponentContext componentContext = mock(ComponentContext.class);
+
+        createEmptyKeystore(STORE_PATH, STORE_PASS);
+        FilesystemKeystoreServiceImpl keystoreService = new FilesystemKeystoreServiceImpl();
+
+        keystoreService.setCryptoService(cryptoService);
+        keystoreService.setEventAdmin(mock(EventAdmin.class));
+        keystoreService.activate(componentContext, properties);
+
+        keystoreService.createKeyPair("alias", "RSA", new RSAKeyGenParameterSpec(2048, RSAKeyGenParameterSpec.F4),
+                "SHA256WithRSA", "CN=Kura, OU=IoT, O=Eclipse, C=US");
+
+        Entry entry = keystoreService.getEntry("alias");
+        assertNotNull(entry);
+        assertTrue(entry instanceof PrivateKeyEntry);
+        assertNotNull(((PrivateKeyEntry) entry).getPrivateKey());
+        assertNotNull(((PrivateKeyEntry) entry).getCertificate().getPublicKey());
+        assertEquals("RSA", ((PrivateKeyEntry) entry).getPrivateKey().getAlgorithm());
+        assertEquals("RSA", ((PrivateKeyEntry) entry).getCertificate().getPublicKey().getAlgorithm());
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -57,6 +57,10 @@ public class TritonServerEncryptionUtils {
     }
 
     protected static String getEncryptedModelPath(String modelName, String folderPath) throws KuraIOException {
+        if (!Files.isDirectory(Paths.get(folderPath))) {
+            throw new KuraIOException("Model repository folder " + folderPath + " does not exist/is not a folder");
+        }
+
         File dir = new File(folderPath);
         FileFilter fileFilter = new WildcardFileFilter(modelName + ".*");
         File[] files = dir.listFiles(fileFilter);

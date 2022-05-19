@@ -85,6 +85,17 @@ public class TritonServerEncryptionUtilsTest {
     }
 
     @Test
+    public void getEncryptedModelPathShouldThrowIfMissingDirectory() {
+        givenTargetFolder(WORKDIR + "/imaginary_folder");
+        givenModelName("model_name");
+        givenNoFileExistsAtPath(targetFolder);
+
+        whenGetEncryptedModelPathIsCalledWith(modelName, targetFolder);
+
+        thenAnExceptionOccurred();
+    }
+
+    @Test
     public void getEncryptedModelPathShouldThrowIfNoMatchFound() {
         givenTargetFolder(WORKDIR + "/model_repository");
         givenModelName("model_name");

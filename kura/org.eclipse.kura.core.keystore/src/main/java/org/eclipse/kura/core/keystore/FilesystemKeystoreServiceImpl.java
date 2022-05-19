@@ -234,8 +234,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         return keystorePath != null && new File(keystorePath).isFile();
     }
 
-    private void createKeystore(KeystoreServiceOptions options)
-            throws IOException, KuraException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+    private void createKeystore(KeystoreServiceOptions options) throws Exception {
         String keystorePath = options.getKeystorePath();
         char[] passwordChar = options.getKeystorePassword(this.cryptoService);
         if (keystorePath == null) {
@@ -255,6 +254,9 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
             newKeystore.load(null, passwordChar);
             newKeystore.store(os, passwordChar);
             os.flush();
+        } catch (Exception e) {
+            logger.error("Unable to load and store the keystore", e);
+            throw e;
         }
 
         setKeystorePassword(this.loadKeystore(options), passwordChar);

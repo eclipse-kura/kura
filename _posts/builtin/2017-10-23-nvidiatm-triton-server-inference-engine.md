@@ -125,6 +125,7 @@ For ensuring inference integrity and providing copyright protection of deep-lear
 **Prerequisites**: a deep-learning trained model (or more) exists with the corresponding necessary configuration for running on the Triton Server without encryption. A folder containing the required files (model, configuration etc) has been tested on a Triton Server.
 
 **Restrictions**: if model encryption is used, the following restrictions apply:
+  - model encryption support is only available for a *local* Triton Server instance
   - all models in the folder containing the encrypted models *must* be encrypted
   - all models *must* be encrypted with OpenPGP-compliant AES 256 cipher algorithm
   - all models *must* be encrypted with the same password

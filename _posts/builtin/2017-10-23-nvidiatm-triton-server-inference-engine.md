@@ -116,7 +116,7 @@ When the Nvidia™ Triton Server is running on a remote server, the following co
  - **Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
  - **Local Nvidia Triton Server**: false
 
-## AI Model Encryption
+## AI Model Encryption support
 
 For ensuring inference integrity and providing copyright protection of deep-learning models on edge devices, Kura provides decryption capabilites for trained models to be served through the Triton Server.
 

@@ -48,7 +48,7 @@ Pull the image using the following command.
 $ docker pull nvcr.io/nvidia/tritonserver:<xx.yy>-py3
 ```
 
-Where <xx.yy> is the version of Triton that you want to pull.
+Where \<xx.yy\> is the version of Triton that you want to pull.
 
 ### Triton Server setup
 
@@ -113,7 +113,7 @@ When the Nvidia™ Triton Server is running on a remote server, the following co
 
  - **Nvidia Triton Server address**: \<mandatory\>
  - **Nvidia Triton Server ports**: \<mandatory\>
- - ** Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
+ - **Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
  - **Local Nvidia Triton Server**: false
 
 ## AI Model Encryption

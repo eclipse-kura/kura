@@ -29,7 +29,7 @@ The parameters used to configure the Triton Service are the following:
 
 Before running Kura's Triton Server Service, you must install the Triton Inference Server. Here you can find the necessary steps for the two suggested installation methods.
 
-### Native Triton installation on Jetson devices
+### Native Triton installation on Jetson devices
 
 A release of Triton for JetPack is provided in the tar file in the Triton Inference Server [release notes](https://github.com/triton-inference-server/server/releases). Full documentation is available [here](https://github.com/triton-inference-server/server/blob/main/docs/jetson.md).
 

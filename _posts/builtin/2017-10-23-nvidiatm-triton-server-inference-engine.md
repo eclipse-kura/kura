@@ -115,3 +115,55 @@ When the Nvidia™ Triton Server is running on a remote server, the following co
  - **Nvidia Triton Server ports**: \<mandatory\>
  - ** Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
  - **Local Nvidia Triton Server**: false
+
+## AI Model Encryption
+
+For ensuring inference integrity and providing copyright protection of deep-learning models on edge devices, Kura provides decryption capabilites for trained models to be served through the Triton Server.
+
+### How it works
+
+**Prerequisites**: a deep-learning trained model (or more) exists with the corresponding necessary configuration for it to run on the Triton Server without ecryption. A folder containing the required files (model, configuration etc) has been tested on a Triton Server.
+
+**Restriction**: if Model Encryption is used, the following restrictions apply:
+  - all models in the folder containing the encrypted models *must* be encrypted
+  - all models *must* be encrypted with OpenPGP-compliant AES 256 cipher algorithm
+  - all models *must* be encrypted with the same password
+
+Once the development of the deep-learning model is complete, the developer who wants to deploy the model on the edge device in a secure manner can proceed with encrypting the Triton model using the procedure detailed below. After encrypting the model he/she can transfer the file on the edge device using his/her preferred method.
+
+<!-- image placeholder -->
+
+Kura will keep the stored model protected at all times and have the model decrypted **in runtime only** for use by the Inference Server Runtime. As soon as the model is correctly loaded into memory the decrypted model will be removed from the filesystem.
+
+As an additional security measure, the [Model Repository](https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md) containing the decrypted models will be stored in a temporary subfolder and will feature restrictive permission such that only Kura, the Inference Server and the `root` user will be able to access it.
+
+### Encryption procedure
+
+Given a trained model inside the folder `tf_autoencoder_fp32` with the following layout (see the [official documentation](https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md) for details):
+
+```
+tf_autoencoder_fp32
+├── 1
+│   └── model.savedmodel
+│       ├── assets
+│       ├── keras_metadata.pb
+│       ├── saved_model.pb
+│       └── variables
+│           ├── variables.data-00000-of-00001
+│           └── variables.index
+└── config.pbtxt
+```
+
+We'll need to archive it with:
+
+```bash
+zip -vr tf_autoencoder_fp32.zip tf_autoencoder_fp32/
+```
+
+and encrypt the archive with:
+
+```bash
+gpg --armor --symmetric --cipher-algo AES256 tf_autoencoder_fp32.zip
+```
+
+The resulting archive `tf_autoencoder_fp32.zip.asc` can be transferred to the target machine and will be decrypted by Kura.

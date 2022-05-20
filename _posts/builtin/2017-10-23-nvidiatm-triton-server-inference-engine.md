@@ -24,11 +24,42 @@ The parameters used to configure the Triton Service are the following:
 > :warning: Warning   
 > Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by ESF for debug purposes.
 > Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by ESF for debug purposes. 
- 
+
+## Nvidia™ Triton Server installation
+
+Before running Kura's Triton Server Service, you must install the Triton Inference Server. Here you can find the necessary steps for the two suggested installation methods.
+
+### Native Triton installation on Jetson devices
+
+A release of Triton for JetPack is provided in the tar file in the Triton Inference Server [release notes](https://github.com/triton-inference-server/server/releases). Full documentation is available [here](https://github.com/triton-inference-server/server/blob/main/docs/jetson.md).
+
+Installation steps:
+- Before running the executable you need to install the [Runtime Dependencies for Triton](https://github.com/triton-inference-server/server/blob/main/docs/jetson.md#runtime-dependencies-for-triton).
+- After doing so you can extract the tar file and run the executable in the `bin` folder.
+- It is highly recommended to add the `tritonserver` executable to your path or symlinking the executable to `/usr/local/bin`.
+
+### Triton Docker image installaiton
+
+Before you can use the Triton Docker image you must install [Docker](https://docs.docker.com/engine/install). If you plan on using a GPU for inference you must also install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker).
+
+Pull the image using the following command.
+
+```
+$ docker pull nvcr.io/nvidia/tritonserver:<xx.yy>-py3
+```
+
+Where <xx.yy> is the version of Triton that you want to pull.
+
+### Triton Server setup
+
+The Triton Inference Server serves models from one or more model repositories that are specified when the server is started. The model repository is the directory where you place the models that you want Triton to serve. Be sure to follow [the instructions](https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md) to setup the model repository directory.
+
+Further information about an examplpe Triton Server setup can be found in the [official documentation](https://github.com/triton-inference-server/server/blob/main/docs/quickstart.md).
+
 ## Configuration for a local native Triton Server
 
 > :warning: Warning   
-> **Requirement**: `tritonserver` executable needs to be available in the path. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.
+> **Requirement**: `tritonserver` executable needs to be available in the path to the `kurad` user. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.
 
 When the **Local Nvidia Triton Server** option is set to true, a local instance of the Nvidia™ Triton Server is started on the gateway. The following configuration is required:
 

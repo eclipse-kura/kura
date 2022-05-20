@@ -160,7 +160,7 @@ Compress the model into a zip archive with the following command:
 zip -vr tf_autoencoder_fp32.zip tf_autoencoder_fp32/
 ```
 
-then encrypt it using AES 256 algorithm using the following `gpg` command:
+then encrypt it with the AES 256 algorithm using the following `gpg` command:
 
 ```bash
 gpg --armor --symmetric --cipher-algo AES256 tf_autoencoder_fp32.zip

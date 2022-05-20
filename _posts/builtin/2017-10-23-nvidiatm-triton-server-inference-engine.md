@@ -27,6 +27,9 @@ The parameters used to configure the Triton Service are the following:
  
 ## Configuration for a local native Triton Server
 
+> :warning: Warning   
+> **Requirement**: `tritonserver` executable needs to be available in the path. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.
+
 When the **Local Nvidia Triton Server** option is set to true, a local instance of the Nvidia™ Triton Server is started on the gateway. The following configuration is required:
 
  - **Nvidia Triton Server address**: localhost

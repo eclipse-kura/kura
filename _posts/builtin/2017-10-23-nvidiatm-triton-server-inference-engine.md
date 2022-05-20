@@ -8,7 +8,7 @@ The [Nvidia™ Triton Server](https://developer.nvidia.com/nvidia-triton-inferen
 
 The ESF Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway or to communicate to an external server to load specific models.
 
-<!-- image placeholder -->
+![triton_server]({{ site.baseurl }}/assets/images/builtin/triton_server.png)
 
 The parameters used to configure the Triton Service are the following:
 

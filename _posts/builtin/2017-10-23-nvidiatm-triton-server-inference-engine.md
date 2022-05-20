@@ -122,9 +122,9 @@ For ensuring inference integrity and providing copyright protection of deep-lear
 
 ### How it works
 
-**Prerequisites**: a deep-learning trained model (or more) exists with the corresponding necessary configuration for it to run on the Triton Server without ecryption. A folder containing the required files (model, configuration etc) has been tested on a Triton Server.
+**Prerequisites**: a deep-learning trained model (or more) exists with the corresponding necessary configuration for running on the Triton Server without encryption. A folder containing the required files (model, configuration etc) has been tested on a Triton Server.
 
-**Restriction**: if Model Encryption is used, the following restrictions apply:
+**Restrictions**: if model encryption is used, the following restrictions apply:
   - all models in the folder containing the encrypted models *must* be encrypted
   - all models *must* be encrypted with OpenPGP-compliant AES 256 cipher algorithm
   - all models *must* be encrypted with the same password
@@ -139,7 +139,7 @@ As an additional security measure, the [Model Repository](https://github.com/tri
 
 ### Encryption procedure
 
-Given a trained model inside the folder `tf_autoencoder_fp32` with the following layout (see the [official documentation](https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md) for details):
+Given a trained model inside the folder `tf_autoencoder_fp32` (for example) with the following layout (see the [official documentation](https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md) for details):
 
 ```
 tf_autoencoder_fp32
@@ -154,13 +154,13 @@ tf_autoencoder_fp32
 └── config.pbtxt
 ```
 
-We'll need to archive it with:
+Compress the model into a zip archive with the following command:
 
 ```bash
 zip -vr tf_autoencoder_fp32.zip tf_autoencoder_fp32/
 ```
 
-and encrypt the archive with:
+then encrypt it using AES 256 algorithm using the following `gpg` command:
 
 ```bash
 gpg --armor --symmetric --cipher-algo AES256 tf_autoencoder_fp32.zip

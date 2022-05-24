@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.cloud.app.command;
+package org.eclipse.kura.util.zip;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,9 +39,6 @@ public class UnZip {
     private static int tooMany = 1024;     // Max number of files
 
     public static void main(String[] args) {
-        // UnZip unZip = new UnZip();
-        // unZip.unZipIt(INPUT_ZIP_FILE,OUTPUT_FOLDER);
-
         // Create a ZipInputStream from the bag of bytes of the file
         byte[] zipBytes = null;
         try {
@@ -71,21 +68,20 @@ public class UnZip {
     }
 
     private static void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-        FileOutputStream fos = null;
+        String outputFolder = outFolder;
+        if (outputFolder == null) {
+            outputFolder = System.getProperty("user.dir");
+        }
+
+        // create output directory is not exists
+        File folder = new File(outputFolder);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        int entries = 0;
+        long total = 0;
         try {
-            String outputFolder = outFolder;
-            if (outputFolder == null) {
-                outputFolder = System.getProperty("user.dir");
-            }
-
-            // create output directory is not exists
-            File folder = new File(outputFolder);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            int entries = 0;
-            long total = 0;
             ZipEntry ze = zis.getNextEntry();
 
             while (ze != null) {
@@ -93,8 +89,7 @@ public class UnZip {
 
                 String expectedFilePath = new StringBuilder(folder.getPath()).append(File.separator)
                         .append(ze.getName()).toString();
-                String fileName = validateFileName(expectedFilePath, folder.getPath());
-                File newFile = new File(fileName);
+                File newFile = getFile(expectedFilePath, folder);
 
                 if (ze.isDirectory()) {
                     newFile.mkdirs();
@@ -107,15 +102,15 @@ public class UnZip {
                     parent.mkdirs();
                 }
 
-                fos = new FileOutputStream(newFile);
+                try (FileOutputStream fos = new FileOutputStream(newFile)) {
 
-                int len;
-                while (total + BUFFER <= tooBig && (len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                    total += len;
+                    int len;
+                    while (total + BUFFER <= tooBig && (len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                        total += len;
+                    }
+                    fos.flush();
                 }
-                fos.flush();
-                fos.close();
 
                 entries++;
                 if (entries > tooMany) {
@@ -129,18 +124,21 @@ public class UnZip {
             }
 
             zis.closeEntry();
-        } catch (IOException e) {
-            throw e;
-        } catch (KuraException e) {
-            throw new IOException("File is outside extraction target directory.");
         } finally {
             if (zis != null) {
                 zis.close();
             }
-            if (fos != null) {
-                fos.close();
-            }
         }
+    }
+
+    private static File getFile(String expectedFilePath, File folder) throws IOException {
+        String fileName;
+        try {
+            fileName = validateFileName(expectedFilePath, folder.getPath());
+        } catch (KuraException e) {
+            throw new IOException("File is outside extraction target directory.");
+        }
+        return new File(fileName);
     }
 
     private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {

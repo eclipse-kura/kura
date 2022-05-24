@@ -46,6 +46,7 @@ import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireRecord;
 import org.eclipse.kura.wire.WireSupport;
+import org.eclipse.kura.wire.basedb.store.BaseDbWireRecordStoreOptions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -252,9 +253,9 @@ public class H2DbWireRecordStoreTest {
      */
 
     private void givenProperties(String tableName, int maxTableSize, int nRecordsToKeep) {
-        this.properties.put(H2DbWireRecordStoreOptions.TABLE_NAME, tableName);
-        this.properties.put(H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, maxTableSize);
-        this.properties.put(H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP, nRecordsToKeep);
+        this.properties.put("table.name", tableName);
+        this.properties.put("maximum.table.size", maxTableSize);
+        this.properties.put("cleanup.records.keep", nRecordsToKeep);
     }
 
     private void givenActivatedStoreComponent() {
@@ -424,7 +425,7 @@ public class H2DbWireRecordStoreTest {
         }
 
         this.properties.clear();
-        this.properties.put(H2DbWireRecordStoreOptions.TABLE_NAME, TEST_TABLE_NAME);
+        this.properties.put("table.name", TEST_TABLE_NAME);
     }
 
     @After

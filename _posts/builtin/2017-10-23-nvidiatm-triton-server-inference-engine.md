@@ -167,4 +167,4 @@ then encrypt it with the AES 256 algorithm using the following `gpg` command:
 gpg --armor --symmetric --cipher-algo AES256 tf_autoencoder_fp32.zip
 ```
 
-The resulting archive `tf_autoencoder_fp32.zip.asc` can be transferred to the Local Model Repository Path on the target machine and will be decrypted by Kura.
+The resulting archive `tf_autoencoder_fp32.zip.asc` can be transferred to the _Local Model Repository Path_ on the target machine and will be decrypted by Kura.

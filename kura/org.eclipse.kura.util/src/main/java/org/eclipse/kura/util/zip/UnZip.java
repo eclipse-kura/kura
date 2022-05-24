@@ -13,46 +13,24 @@
 package org.eclipse.kura.util.zip;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UnZip {
-
-    private static final Logger logger = LoggerFactory.getLogger(UnZip.class);
-
-    private static final String INPUT_ZIP_FILE = "/tmp/test.zip";
-    private static final String OUTPUT_FOLDER = "/tmp/";
 
     private static final int BUFFER = 1024;
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
 
-    public static void main(String[] args) {
-        // Create a ZipInputStream from the bag of bytes of the file
-        byte[] zipBytes = null;
-        try {
-            zipBytes = getFileBytes(new File(INPUT_ZIP_FILE));
-            unZipBytes(zipBytes, OUTPUT_FOLDER);
-        } catch (IOException e1) {
-            logger.warn("Failed to process Zip file - {}", INPUT_ZIP_FILE, e1);
-        }
-
-        try {
-            unZipFile(INPUT_ZIP_FILE, OUTPUT_FOLDER);
-        } catch (IOException e) {
-            logger.warn("Failed to process Zip file - {}", INPUT_ZIP_FILE, e);
-        }
+    private UnZip() {
+        // Do nothing...
     }
 
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
@@ -104,10 +82,11 @@ public class UnZip {
 
                 try (FileOutputStream fos = new FileOutputStream(newFile)) {
 
-                    int len;
-                    while (total + BUFFER <= tooBig && (len = zis.read(buffer)) > 0) {
+                    int len = zis.read(buffer);
+                    while (total + BUFFER <= tooBig && len > 0) {
                         fos.write(buffer, 0, len);
                         total += len;
+                        len = zis.read(buffer);
                     }
                     fos.flush();
                 }
@@ -155,14 +134,4 @@ public class UnZip {
         }
     }
 
-    private static byte[] getFileBytes(File file) throws IOException {
-        try (ByteArrayOutputStream ous = new ByteArrayOutputStream(); InputStream ios = new FileInputStream(file)) {
-            byte[] buffer = new byte[4096];
-            int read = 0;
-            while ((read = ios.read(buffer)) != -1) {
-                ous.write(buffer, 0, read);
-            }
-            return ous.toByteArray();
-        }
-    }
 }

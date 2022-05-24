@@ -64,7 +64,7 @@ import org.osgi.service.wireadmin.Wire;
  */
 public class BaseDbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
 
-    private static final Logger logger = LogManager.getLogger(BaseDbWireRecordStore.class);
+    protected static final Logger logger = LogManager.getLogger(BaseDbWireRecordStore.class);
     private static final String COLUMN_NAME = "COLUMN_NAME";
     private static final String DATA_TYPE = "DATA_TYPE";
     private static final String SQL_ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1} {2};";
@@ -77,14 +77,14 @@ public class BaseDbWireRecordStore implements WireEmitter, WireReceiver, Configu
     private static final String SQL_INSERT_RECORD = "INSERT INTO {0} ({1}) VALUES ({2});";
     private static final String SQL_TRUNCATE_TABLE = "TRUNCATE TABLE {0};";
     private static final String[] TABLE_TYPE = new String[] { "TABLE" };
-    private static final String NULL_TABLE_NAME_ERROR_MSG = "Table name cannot be null";
-    private static final String NULL_WIRE_RECORD_ERROR_MSG = "WireRecord cannot be null";
+    protected static final String NULL_TABLE_NAME_ERROR_MSG = "Table name cannot be null";
+    protected static final String NULL_WIRE_RECORD_ERROR_MSG = "WireRecord cannot be null";
 
-    private BaseDbServiceHelper dbHelper;
+    protected BaseDbServiceHelper dbHelper;
 
     private BaseDbService dbService;
 
-    private BaseDbWireRecordStoreOptions wireRecordStoreOptions;
+    protected BaseDbWireRecordStoreOptions wireRecordStoreOptions;
 
     private volatile WireHelperService wireHelperService;
 

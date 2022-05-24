@@ -74,7 +74,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
 
     public synchronized void bindDbService(H2DbService dbService) {
         this.dbService = dbService;
-        this.dbHelper = H2DbServiceHelper.of(dbService);
+        // this.dbHelper = H2DbServiceHelper.of(dbService);
     }
 
     public synchronized void unbindDbService(H2DbService dbService) {

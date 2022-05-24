@@ -27,9 +27,9 @@ import java.util.Map;
 public class BaseDbWireRecordStoreOptions {
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
-    protected static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
-    protected static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
-    protected static final String TABLE_NAME = "table.name";
+    public static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
+    public static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
+    public static final String TABLE_NAME = "table.name";
 
     private final Map<String, Object> properties;
 
@@ -49,7 +49,7 @@ public class BaseDbWireRecordStoreOptions {
      *
      * @return the number of records
      */
-    int getNoOfRecordsToKeep() {
+    public int getNoOfRecordsToKeep() {
         int noOfRecords = 5000;
         final Object cleanUp = this.properties.get(CLEANUP_RECORDS_KEEP);
         if (nonNull(cleanUp) && cleanUp instanceof Integer) {
@@ -58,7 +58,7 @@ public class BaseDbWireRecordStoreOptions {
         return noOfRecords;
     }
 
-    int getMaximumTableSize() {
+    public int getMaximumTableSize() {
         int maximumSize = DEFAULT_MAXIMUM_TABLE_SIZE;
         final Object propertiesMaximumSize = this.properties.get(MAXIMUM_TABLE_SIZE);
         if (nonNull(propertiesMaximumSize) && propertiesMaximumSize instanceof Integer) {
@@ -72,7 +72,7 @@ public class BaseDbWireRecordStoreOptions {
      *
      * @return the name of the table
      */
-    String getTableName() {
+    public String getTableName() {
         String tableName = null;
         final Object name = this.properties.get(TABLE_NAME);
         if (nonNull(name) && name instanceof String) {

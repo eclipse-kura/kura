@@ -26,11 +26,11 @@ import org.eclipse.kura.db.BaseDbService;
  * The Class DbServiceHelper is responsible for providing {@link BaseDbService}
  * instance dependent helper methods for quick database related operations
  */
-public final class BaseDbServiceHelper {
+public class BaseDbServiceHelper {
 
     private static final Logger logger = LogManager.getLogger(BaseDbServiceHelper.class);
 
-    private final BaseDbService dbService;
+    protected final BaseDbService dbService;
 
     /**
      * Instantiates a new DB Service Helper.
@@ -40,7 +40,7 @@ public final class BaseDbServiceHelper {
      * @throws NullPointerException
      *             if argument is null
      */
-    private BaseDbServiceHelper(final BaseDbService dbService) {
+    protected BaseDbServiceHelper(final BaseDbService dbService) {
         requireNonNull(dbService, "DB Service cannot be null");
         this.dbService = dbService;
     }

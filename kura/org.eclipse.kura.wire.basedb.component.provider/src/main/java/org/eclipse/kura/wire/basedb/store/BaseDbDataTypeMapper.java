@@ -47,11 +47,11 @@ public class BaseDbDataTypeMapper {
             this.typeStr = typeStr;
         }
 
-        int getType() {
+        public int getType() {
             return this.type;
         }
 
-        String getTypeString() {
+        public String getTypeString() {
             return this.typeStr;
         }
     }

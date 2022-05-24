@@ -14,7 +14,6 @@ package org.eclipse.kura.core.certificates.enrollment.est;
 
 import static java.util.Objects.requireNonNull;
 
-import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -49,7 +48,8 @@ public class ESTEnrollmentServiceOptions {
     private final Server server;
     private final Client client;
 
-    public ESTEnrollmentServiceOptions(final Map<String, Object> properties) throws MalformedURLException {
+    public ESTEnrollmentServiceOptions(final Map<String, Object> properties) {
+
         requireNonNull(properties, "Properties cannot be null");
 
         this.enabled = ENABLED.get(properties);
@@ -90,6 +90,24 @@ public class ESTEnrollmentServiceOptions {
 
     public Client getClient() {
         return client;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(client, enabled, server);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ESTEnrollmentServiceOptions other = (ESTEnrollmentServiceOptions) obj;
+        return Objects.equals(client, other.client) && Objects.equals(enabled, other.enabled)
+                && Objects.equals(server, other.server);
     }
 
     public static class Server {

@@ -142,7 +142,7 @@ public class TritonServerEncryptionUtils {
         try {
             FileUtils.cleanDirectory(new File(modelRootPath));
         } catch (IOException e) {
-            logger.warn("Cannot clean directory at path {}", modelRootPath);
+            logger.warn("Cannot clean directory at path {}", modelRootPath, e);
         }
     }
 

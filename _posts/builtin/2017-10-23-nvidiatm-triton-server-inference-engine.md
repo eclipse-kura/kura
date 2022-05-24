@@ -6,7 +6,7 @@ categories: [builtin]
 
 The [Nvidia™ Triton Server](https://developer.nvidia.com/nvidia-triton-inference-server) is an open-source inference service software that enables the user to deploy trained AI models from any framework on GPU or CPU infrastructure. It supports all major frameworks like TensorFlow, TensorRT, PyTorch, ONNX Runtime, and even custom framework backend. With specific backends, it is also possible to run Python scripts, mainly for pre-and post-processing purposes, and exploit the [DALI](https://github.com/triton-inference-server/dali_backend) building block for optimized operations. For more detail about the Triton Server, please refer to the official [website](https://github.com/triton-inference-server/server).
 
-The ESF Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway or to communicate to an external server to load specific models.
+The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway or to communicate to an external server to load specific models.
 
 ![triton_server]({{ site.baseurl }}/assets/images/builtin/triton_server.png)
 
@@ -22,8 +22,8 @@ The parameters used to configure the Triton Service are the following:
  - **Optional configuration for the local backends**: Only for local instance, a semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
  
 > :warning: Warning   
-> Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by ESF for debug purposes.
-> Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by ESF for debug purposes. 
+> Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
+> Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes. 
 
 ## Nvidia™ Triton Server installation
 
@@ -94,7 +94,7 @@ If the Nvidia™ Triton Server is running as a Docker container in the gateway, 
  - **Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
  - **Local Nvidia Triton Server**: false
 
-In order to correctly load the models at runtime, configure the server with the `--model-control-mode=explicit` option. The typical command used for running the docker container is as follows. Note the forward of the ports to not interfere with ESF.
+In order to correctly load the models at runtime, configure the server with the `--model-control-mode=explicit` option. The typical command used for running the docker container is as follows. Note the forward of the ports to not interfere with Kura.
  
 ```bash
 docker run --rm \

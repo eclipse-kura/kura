@@ -45,7 +45,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBu
 import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.cloud.app.command.UnZip;
+import org.eclipse.kura.util.zip.UnZip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

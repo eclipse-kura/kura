@@ -33,7 +33,9 @@ import java.security.Security;
 import java.security.cert.CRL;
 import java.security.cert.CertStore;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509CRL;
@@ -57,6 +59,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -107,7 +110,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     private static final Logger logger = LoggerFactory.getLogger(ESTEnrollmentService.class);
 
     private static final String EST_CACERTS_ALIAS_PREFIX = "est-cacerts_";
-    private static final String EST_CLIENT_ALIAS_PREFIX = "est-client-certs_";
+    private static final String EST_CLIENT_CERT_ALIAS = "est-client-certs";
     private static final String EST_PRIVATE_KEY_CERT = "est-private-key-certs";
 
     private static final String CLIENT_AUTH_ALIAS = "client-auth-certs";
@@ -122,7 +125,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     private ESTService estService;
 
     private ESTEnrollmentServiceOptions estOptions;
-    private boolean needBootstrap;
+    private boolean hasCaCerts;
 
     private boolean enrolled;
 
@@ -172,23 +175,28 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         logger.info("activating...");
         try {
             this.estOptions = new ESTEnrollmentServiceOptions(properties);
-            checkCerts();
             if (Boolean.TRUE.equals(this.estOptions.isEnabled())) {
-                initESTService();
-                if (!isEnrolled()) {
-                    generateKeyPair();
-                    createCSR();
-                    createAuthorization();
-                    performEnrollment(DO_NOT_RE_ENROLL);
-                }
-
-                startCAChecker();
-
+                checkCerts();
+                execServiceChain(isEnrolled());
             }
         } catch (MalformedURLException e) {
             logger.error("Invalid EST Server URL", e);
         } catch (Exception e) {
             logger.error("Error configuring EST client", e);
+        }
+    }
+
+    private void execServiceChain(boolean isEnrolled) throws Exception {
+
+        initESTService();
+        if (!isEnrolled) {
+            generateKeyPair();
+            createCSR();
+            createAuthorization();
+            performEnrollment(DO_NOT_RE_ENROLL);
+
+            startCAChecker();
+
         }
     }
 
@@ -207,11 +215,12 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         CRL[] revocationList = null;
 
         if (needBootstrap()) {
+            // the ca root certificate provided by the configuration is only needed for the bootstrapping
+            wipeAllCaCerts();
             logger.info("Bootstrapping EST connection...");
             truesteCACerts = readPemCertificates(this.estOptions.getServer().getBootstrapCertificate());
         } else {
-            // the ca certificate provided by the configuration is only needed for the bootstrapping
-            truesteCACerts = getCertificateAsX509Certificate(this::getStoredCACerts);
+            truesteCACerts = getCertificatesEntryAsX509Certificate(this::getStoredCACerts);
             revocationList = getRevocationList();
         }
 
@@ -235,10 +244,21 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
             }
 
             // rebuild client with the explicit Trust Anchor
-            buildESTService(getCertificateAsX509Certificate(this::getStoredCACerts), getRevocationList());
+            buildESTService(getCertificatesEntryAsX509Certificate(this::getStoredCACerts), getRevocationList());
 
             logger.info("Bootstrap ended.");
         }
+    }
+
+    private void wipeAllCaCerts() {
+        getStoredEntriesByAliasPrefix(EST_CACERTS_ALIAS_PREFIX).map(Map.Entry::getKey).forEach(alias -> {
+            try {
+                this.keystoreService.deleteEntry(alias);
+            } catch (KuraException e) {
+                logger.error("Cannot delete entry with alias {} from keystore service with pid: {}", alias,
+                        this.keystoreServicePid, e);
+            }
+        });
     }
 
     private void addCaCertsChainToKeystore(Store<X509CertificateHolder> certificateStore) {
@@ -333,53 +353,62 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         return getStoredCertByAliasPrefix(EST_CACERTS_ALIAS_PREFIX, TrustedCertificateEntry.class);
     }
 
-    private TrustedCertificateEntry[] getStoredClientCerts() {
-
-        return getStoredCertByAliasPrefix(EST_CLIENT_ALIAS_PREFIX, TrustedCertificateEntry.class);
-    }
-
     @SuppressWarnings("unchecked")
     private <T> T[] getStoredCertByAliasPrefix(String aliasPrefix, Class<T> clazz) {
         T[] storedCaCerts = (T[]) Array.newInstance(clazz, 0);
-        if (this.keystoreService != null) {
-            try {
-                Map<String, Entry> keystoreEntries = this.keystoreService.getEntries();
-                if (keystoreEntries != null && keystoreEntries.size() > 0) {
-                    storedCaCerts = this.keystoreService.getEntries().entrySet().stream()
-                            .filter(entry -> entry.getKey().startsWith(EST_CACERTS_ALIAS_PREFIX))
-                            .map(Map.Entry::getValue).collect(Collectors.toList())
-                            .toArray((T[]) Array.newInstance(clazz, 0));
+        try {
+            storedCaCerts = getStoredEntriesByAliasPrefix(aliasPrefix).map(Map.Entry::getValue)
+                    .collect(Collectors.toList()).toArray((T[]) Array.newInstance(clazz, 0));
 
-                    if (!Arrays.stream(storedCaCerts).allMatch(clazz::isInstance)) {
-                        throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION);
-                    }
-                }
-            } catch (Exception e) {
-                logger.error("Unable to get certificate from keystore with pid {}", this.keystoreServicePid);
+            if (!Arrays.stream(storedCaCerts).allMatch(clazz::isInstance)) {
+                throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION);
             }
+
+        } catch (Exception e) {
+            logger.error("Unable to get certificate from keystore with pid {}", this.keystoreServicePid);
         }
 
         return storedCaCerts;
     }
 
-    private PrivateKeyEntry getESTKeyPair() throws KuraException {
-        Entry storedKeyPair = this.keystoreService.getEntry(EST_PRIVATE_KEY_CERT);
+    private Stream<Map.Entry<String, Entry>> getStoredEntriesByAliasPrefix(String aliasPrefix) {
 
-        if (storedKeyPair != null && !(storedKeyPair instanceof PrivateKeyEntry)) {
+        Stream<Map.Entry<String, Entry>> storedEntriesStream = Stream.empty();
+
+        if (this.keystoreService != null) {
+            try {
+                storedEntriesStream = this.keystoreService.getEntries().entrySet().stream()
+                        .filter(entry -> entry.getKey().startsWith(aliasPrefix));
+            } catch (KuraException e) {
+                logger.error("Unable to get certificate from keystore with pid {}", this.keystoreServicePid);
+            }
+        }
+
+        return storedEntriesStream;
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T getESTEntity(String alias, Class<T> clazz) throws KuraException {
+        Entry storedEntity = this.keystoreService.getEntry(alias);
+
+        if (storedEntity != null && !(clazz.isInstance(storedEntity))) {
             throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION);
         }
 
-        return (PrivateKeyEntry) storedKeyPair;
+        return (T) storedEntity;
+    }
+
+    private TrustedCertificateEntry getESTClientCert() throws KuraException {
+        return getESTEntity(EST_CLIENT_CERT_ALIAS, TrustedCertificateEntry.class);
+    }
+
+    private PrivateKeyEntry getESTKeyPair() throws KuraException {
+        return getESTEntity(EST_PRIVATE_KEY_CERT, PrivateKeyEntry.class);
     }
 
     private PrivateKeyEntry getClientAuthKeyPair() throws KuraException {
-        Entry storedKeyPair = this.keystoreService.getEntry(CLIENT_AUTH_ALIAS);
-
-        if (storedKeyPair != null && !(storedKeyPair instanceof PrivateKeyEntry)) {
-            throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION);
-        }
-
-        return (PrivateKeyEntry) storedKeyPair;
+        return getESTEntity(CLIENT_AUTH_ALIAS, PrivateKeyEntry.class);
     }
 
     private void buildESTService(Object[] truesteCACerts, CRL[] revocationList) throws Exception {
@@ -427,25 +456,21 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     private Consumer<? super EnrollmentResponse> processEnrollmentResponse() {
         return (EnrollmentResponse response) -> {
             if (response != null) {
-                int i = 0;
-
                 try {
                     CertStore certStore = toCertStore(response.getStore());
-                    for (Certificate cert : certStore.getCertificates(null)) {
-                        String alias = EST_CLIENT_ALIAS_PREFIX + i++;
-                        try {
-                            this.keystoreService.setEntry(alias, new TrustedCertificateEntry(cert));
-                            logger.info("Client certificate with alias {} stored in keyservice {}", alias,
-                                    this.keystoreServicePid.get());
-                        } catch (Exception e) {
-                            logger.error("Unable to store client cert with alias {} in keystore {}", alias,
-                                    this.keystoreServicePid.get());
-                        }
-                    }
+                    // we expect only 1 certificate in the store
+                    Certificate cert = certStore.getCertificates(null).iterator().next();
+                    this.keystoreService.setEntry(EST_CLIENT_CERT_ALIAS, new TrustedCertificateEntry(cert));
+                    logger.info("Client certificate with alias {} stored in keyservice {}", EST_CLIENT_CERT_ALIAS,
+                            this.keystoreServicePid.get());
+
+                } catch (KuraException e) {
+                    logger.error("Unable to store client cert with alias {} in keystore {}", EST_CLIENT_CERT_ALIAS,
+                            this.keystoreServicePid.get());
+
                 } catch (Exception e) {
                     logger.error("Unable to retrieve certificates from the store", e);
                 }
-
             }
         };
     }
@@ -515,21 +540,93 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
 
     protected void updated(Map<String, Object> properties) {
         logger.info("updating...");
+
+        ESTEnrollmentServiceOptions newOptions;
+        try {
+            newOptions = new ESTEnrollmentServiceOptions(properties);
+            if (this.estOptions.equals(newOptions)) {
+                logger.info("Properties are not changed. Nothing to update");
+                return;
+            }
+
+            this.estOptions = newOptions;
+            if (Boolean.TRUE.equals(this.estOptions.isEnabled())) {
+                checkCerts();
+                execServiceChain(isEnrolled());
+            }
+        } catch (MalformedURLException e) {
+            logger.error("Invalid EST Server URL", e);
+        } catch (Exception e) {
+            logger.error("Error configuring EST client", e);
+        }
+
+        logger.info("update complete");
     }
 
     @Override
-    public synchronized void enroll() {
-        // TODO Auto-generated method stub
-
+    public synchronized void enroll() throws KuraException {
+        try {
+            execServiceChain(false);
+        } catch (Exception e) {
+            throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION, e);
+        }
     }
 
     @Override
     public void renew() {
+        // 2.3. Client Certificate Reissuance
+        //
+        // An EST client can renew/rekey its existing client certificate by
+        // submitting a re-enrollment request to an EST server.
+        //
+        // When the current EST client certificate can be used for TLS client
+        // authentication (Section 3.3.2), the client presents this certificate
+        // to the EST server for client authentication. When the to be reissued
+        // EST client certificate cannot be used for TLS client authentication,
+        // any of the authentication methods used for initial enrollment can be
+        // used.
+        //
+        // For example, if the client has an alternative certificate issued by
+        // the EST CA that can be used for TLS client authentication, then it
+        // can be used.
+
+        // Generally, the client will use an existing certificate for renew or
+        // rekey operations. If the certificate to be renewed or rekeyed is
+        // appropriate for the negotiated cipher suite, then the client MUST use
+        // it for the TLS handshake, otherwise the client SHOULD use an
+        // alternate certificate that is suitable for the cipher suite and
+        // contains the same subject identity information. When requesting an
+        // enroll operation, the client MAY use a client certificate issued by a
+        // third party to authenticate itself.
+
+        // 4.2.2. Simple Re-enrollment of Clients
+        //
+        // EST clients renew/rekey certificates with an HTTPS POST using the
+        // operation path value of "/simplereenroll".
+        //
+        // A certificate request employs the same format as the "simpleenroll"
+        // request, using the same HTTP content-type. The request Subject field
+        // and SubjectAltName extension MUST be identical to the corresponding
+        // fields in the certificate being renewed/rekeyed. The
+        // ChangeSubjectName attribute, as defined in [RFC6402], MAY be included
+        // in the CSR to request that these fields be changed in the new
+        // certificate.
+        //
+        // If the Subject Public Key Info in the certification request is the
+        // same as the current client certificate, then the EST server renews
+        // the client certificate. If the public key information in the
+        // certification request is different than the current client
+        // certificate, then the EST server rekeys the client certificate.
+
+    }
+
+    @Override
+    public void rekey() throws KuraException {
         // TODO Auto-generated method stub
 
     }
 
-    private Certificate[] getCertificateAsX509Certificate(Supplier<TrustedCertificateEntry[]> entrySupplier) {
+    private Certificate[] getCertificatesEntryAsX509Certificate(Supplier<TrustedCertificateEntry[]> entrySupplier) {
         TrustedCertificateEntry[] storedCaCerts = entrySupplier.get();
         Certificate[] certificates = new Certificate[0];
         if (storedCaCerts != null && storedCaCerts.length > 0) {
@@ -543,7 +640,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     public CertStore getCACertificate() throws KuraException {
         try {
             return CertStore.getInstance("Collection", new CollectionCertStoreParameters(
-                    Arrays.asList(getCertificateAsX509Certificate(this::getStoredCACerts))));
+                    Arrays.asList(getCertificatesEntryAsX509Certificate(this::getStoredCACerts))));
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION, e);
         }
@@ -560,33 +657,56 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     @Override
-    public CertStore getClientCertificate() throws KuraException {
+    public Certificate getClientCertificate() throws KuraException {
         try {
-            return CertStore.getInstance("Collection", new CollectionCertStoreParameters(
-                    Arrays.asList(getCertificateAsX509Certificate(this::getStoredClientCerts))));
+            TrustedCertificateEntry estClientCert = getESTClientCert();
+            return estClientCert != null ? estClientCert.getTrustedCertificate() : null;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INVALID_CERTIFICATE_EXCEPTION, e);
         }
 
     }
 
-    private void checkCerts() throws KuraException {
+    private synchronized void checkCerts() throws KuraException {
         this.enrolled = false;
-        this.needBootstrap = true;
+        this.hasCaCerts = false;
 
         Object[] storedCACerts = this.getStoredCACerts();
         if (this.keystoreService != null && storedCACerts != null && storedCACerts.length > 0) {
-            this.needBootstrap = false;
+            this.hasCaCerts = true;
         }
 
-        if (this.keystoreService != null && this.keystoreService.getEntry(EST_CLIENT_ALIAS_PREFIX) != null) {
+        if (this.keystoreService != null && this.getESTClientCert() != null) {
             this.enrolled = true;
         }
 
     }
 
     private boolean needBootstrap() {
-        return this.needBootstrap; // aggiungere certificato expired
+        return !this.hasCaCerts || isCaCertsExpired();
+    }
+
+    private boolean isCaCertsExpired() {
+        boolean isExpired = false;
+        for (TrustedCertificateEntry entry : getStoredCACerts()) {
+            X509Certificate x509cert = null;
+            try {
+                x509cert = toJavaX509Certificate(entry.getTrustedCertificate());
+            } catch (Exception e) {
+                logger.error("Unable to check certificate validity.");
+            }
+            try {
+                if (x509cert != null) {
+                    x509cert.checkValidity();
+                }
+            } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+                logger.info("Ca certificate with serial number {} is not valid anymore", x509cert.getSerialNumber());
+                isExpired = true;
+                break;
+            }
+        }
+
+        return isExpired;
     }
 
     private static Object[] readPemCertificates(String pemString) throws Exception {

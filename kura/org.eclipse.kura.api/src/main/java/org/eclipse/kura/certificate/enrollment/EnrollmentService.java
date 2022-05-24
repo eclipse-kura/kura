@@ -13,6 +13,7 @@
 package org.eclipse.kura.certificate.enrollment;
 
 import java.security.cert.CertStore;
+import java.security.cert.Certificate;
 
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
@@ -36,12 +37,20 @@ public interface EnrollmentService {
     public void enroll() throws KuraException;
 
     /**
-     * Renews the client certificate creating a new keypair and a new CSR submitted to the CA.
+     * Renew the client certificate submitting the certificate previously issued by the CA.
      * 
      * @throws KuraException
      *             it it is impossible to renew the system certificate
      */
     public void renew() throws KuraException;
+
+    /**
+     * Renew the client certificate creating a new keypair and a new CSR submitted to the CA.
+     * 
+     * @throws KuraException
+     *             it it is impossible to renew the system certificate
+     */
+    public void rekey() throws KuraException;
 
     /**
      * 
@@ -50,20 +59,20 @@ public interface EnrollmentService {
      * 
      * @return returns the Certificate Authority <code>CertStore</code>
      * @throws KuraException
-     *             if it is impossible to retrieve the certificate.
+     *             if it is impossible to retrieve the certificate store.
      */
     public CertStore getCACertificate() throws KuraException;
 
     /**
-     * Get the list of Client certificates stored in the relative
+     * Get the Client certificate stored in the relative
      * {@link org.eclipse.kura.security.keystore.KeystoreService}
      * 
-     * @return returns the Client <code>CertStore</code> containing the certificates chain obtained by the Certificate
+     * @return returns the Client <code>Certificate</code> obtained by the Certificate
      *         Authority
      * @throws KuraException
      *             if it is impossible to retrieve the certificate.
      */
-    public CertStore getClientCertificate() throws KuraException;
+    public Certificate getClientCertificate() throws KuraException;
 
     /**
      * Force the update of Certificate Authority certificate if a newest is available.

@@ -21,4 +21,5 @@
    </service>
    <property name="service.pid" type="String" value="org.eclipse.kura.ai.triton.server.TritonServerService"/>
    <reference bind="setCommandExecutorService" cardinality="1..1" interface="org.eclipse.kura.executor.PrivilegedExecutorService" name="PrivilegedExecutorService" policy="static" />
+   <reference bind="setCryptoService" cardinality="1..1" interface="org.eclipse.kura.crypto.CryptoService" name="CryptoService" policy="static"/>
 </scr:component>

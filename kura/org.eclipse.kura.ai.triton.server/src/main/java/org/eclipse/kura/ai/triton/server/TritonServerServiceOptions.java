@@ -29,6 +29,7 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_ADDRESS = "server.address";
     private static final String PROPERTY_PORTS = "server.ports";
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PATH = "local.model.repository.path";
+    private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PASSWORD = "local.model.repository.password";
     private static final String PROPERTY_LOCAL_BACKENDS_PATH = "local.backends.path";
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
     private static final String PROPERTY_MODELS = "models";
@@ -103,11 +104,19 @@ public class TritonServerServiceOptions {
     }
 
     public String getModelRepositoryPath() {
-        return getPath(PROPERTY_LOCAL_MODEL_REPOSITORY_PATH);
+        return getStringProperty(PROPERTY_LOCAL_MODEL_REPOSITORY_PATH);
+    }
+
+    public String getModelRepositoryPassword() {
+        return getStringProperty(PROPERTY_LOCAL_MODEL_REPOSITORY_PASSWORD);
     }
 
     public String getBackendsPath() {
-        return getPath(PROPERTY_LOCAL_BACKENDS_PATH);
+        return getStringProperty(PROPERTY_LOCAL_BACKENDS_PATH);
+    }
+
+    public boolean modelsAreEncrypted() {
+        return !getModelRepositoryPassword().isEmpty();
     }
 
     public List<String> getBackendsConfigs() {
@@ -128,12 +137,12 @@ public class TritonServerServiceOptions {
         return models;
     }
 
-    private String getPath(String propertyName) {
-        String path = "";
-        final Object propertyPath = this.properties.get(propertyName);
-        if (propertyPath instanceof String) {
-            path = (String) propertyPath;
+    private String getStringProperty(String propertyName) {
+        String stringProperty = "";
+        final Object stringPropertyObj = this.properties.get(propertyName);
+        if (stringPropertyObj instanceof String) {
+            stringProperty = (String) stringPropertyObj;
         }
-        return path;
+        return stringProperty;
     }
 }

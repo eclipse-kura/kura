@@ -12,12 +12,12 @@ The Kura Triton Server component is the implementation of the inference engine A
 
 The parameters used to configure the Triton Service are the following:
 
+ - **Local Nvidia Triton Server**: If enabled, a local native Nvidia Triton Server is started on the gateway. In this case, the model repository and backends path are mandatory. Moreover, the server address property is overridden and set to localhost. Be aware that the Triton Server has to be already installed on the system.
  - **Nvidia Triton Server address**: the address of the Nvidia Triton Server.
  - **Nvidia Triton Server ports**: the ports used to connect to the server for HTTP, GRPC, and Metrics services.
- - **Inference Models**: a comma-separated list of inference model names that the server will load. The models have to be already present in the filesystem where the server is running. This option simply tells the server to load the given models from a local or remote repository.
- - **Local Nvidia Triton Server**: If enabled, a local native Nvidia Triton Server is started on the gateway. In this case, the model repository and backends path are mandatory. Moreover, the server address property is overridden and set to localhost. Be aware that the Triton Server has to be already installed on the system.
  - **Local model repository path**: Only for a local instance, specify the path on the filesystem where the models are stored.
  - **Local model decryption password**: Only for local instance, specify the password to be used for decrypting models stored in the model repository. If none is specified, models are supposed to be plaintext.
+ - **Inference Models**: a comma-separated list of inference model names that the server will load. The models have to be already present in the filesystem where the server is running. This option simply tells the server to load the given models from a local or remote repository.
  - **Local backends path**: Only for a local instance, specify the path on the filesystem where the backends are stored.
  - **Optional configuration for the local backends**: Only for local instance, a semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
  
@@ -63,11 +63,11 @@ Further information about an example Triton Server setup can be found in the [of
 
 When the **Local Nvidia Triton Server** option is set to true, a local instance of the Nvidia™ Triton Server is started on the gateway. The following configuration is required:
 
+ - **Local Nvidia Triton Server**: true
  - **Nvidia Triton Server address**: localhost
  - **Nvidia Triton Server ports**: \<mandatory\>
- - **Inference Models**: \<mandatory\>. Note that the models have to be already present on the filesystem.
- - **Local Nvidia Triton Server**: true
  - **Local model repository path**: \<mandatory\>
+ - **Inference Models**: \<mandatory\>. Note that the models have to be already present on the filesystem.
  - **Local backends path**: \<mandatory\>
 
 The typical command used to start the Triton Server is like this: 
@@ -89,10 +89,10 @@ tritonserver --model-repository=<model_repository_path> \
 
 If the Nvidia™ Triton Server is running as a Docker container in the gateway, the following configuration is required:
 
+ - **Local Nvidia Triton Server**: false
  - **Nvidia Triton Server address**: localhost
  - **Nvidia Triton Server ports**: \<mandatory\>
  - **Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
- - **Local Nvidia Triton Server**: false
 
 In order to correctly load the models at runtime, configure the server with the `--model-control-mode=explicit` option. The typical command used for running the docker container is as follows. Note the forward of the ports to not interfere with Kura.
  
@@ -111,10 +111,10 @@ tritonserver --model-repository=/models --model-control-mode=explicit
 
 When the Nvidia™ Triton Server is running on a remote server, the following configuration is needed:
 
+ - **Local Nvidia Triton Server**: false
  - **Nvidia Triton Server address**: \<mandatory\>
  - **Nvidia Triton Server ports**: \<mandatory\>
  - **Inference Models**: \<mandatory\>. The models have to be already present on the filesystem.
- - **Local Nvidia Triton Server**: false
 
 ## AI Model Encryption support
 

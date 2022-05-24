@@ -38,7 +38,7 @@ Installation steps:
 - After doing so you can extract the tar file and run the executable in the `bin` folder.
 - It is highly recommended to add the `tritonserver` executable to your path or symlinking the executable to `/usr/local/bin`.
 
-### Triton Docker image installaiton
+### Triton Docker image installation
 
 Before you can use the Triton Docker image you must install [Docker](https://docs.docker.com/engine/install). If you plan on using a GPU for inference you must also install the [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-docker).
 

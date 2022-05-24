@@ -118,7 +118,7 @@ When the Nvidia™ Triton Server is running on a remote server, the following co
 
 ## AI Model Encryption support
 
-For ensuring inference integrity and providing copyright protection of deep-learning models on edge devices, Kura provides decryption capabilites for trained models to be served through the Triton Server.
+For ensuring inference integrity and providing copyright protection of deep-learning models on edge devices, Kura provides decryption capabilities for trained models to be served through the Triton Server.
 
 ### How it works
 

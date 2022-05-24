@@ -14,9 +14,12 @@ package org.eclipse.kura.core.certificates.enrollment.est;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
+import org.eclipse.kura.KuraException;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.util.configuration.Property;
 
 public class ESTEnrollmentServiceOptions {
@@ -48,7 +51,8 @@ public class ESTEnrollmentServiceOptions {
     private final Server server;
     private final Client client;
 
-    public ESTEnrollmentServiceOptions(final Map<String, Object> properties) {
+    public ESTEnrollmentServiceOptions(CryptoService cryptoService, final Map<String, Object> properties)
+            throws KuraException {
 
         requireNonNull(properties, "Properties cannot be null");
 
@@ -67,7 +71,8 @@ public class ESTEnrollmentServiceOptions {
         basicAuth.setDigestEnabled(HTTP_CLIENT_BASIC_AUTHENTICATION_DIGEST.get(properties));
         basicAuth.setUsername(HTTP_CLIENT_BASIC_AUTHENTICATION_USERNAME.get(properties));
 
-        basicAuth.setPassword(HTTP_CLIENT_BASIC_AUTHENTICATION_PASSWORD.get(properties));
+        basicAuth.setPassword(
+                cryptoService.decryptAes(HTTP_CLIENT_BASIC_AUTHENTICATION_PASSWORD.get(properties).toCharArray()));
 
         this.client.setBasicAuthentication(basicAuth);
 
@@ -278,7 +283,7 @@ public class ESTEnrollmentServiceOptions {
         private Boolean enabled;
         private Boolean digestEnabled;
         private String username;
-        private String password;
+        private char[] password;
 
         public Boolean isEnabled() {
             return enabled;
@@ -304,11 +309,11 @@ public class ESTEnrollmentServiceOptions {
             this.username = username;
         }
 
-        public String getPassword() {
+        public char[] getPassword() {
             return password;
         }
 
-        public void setPassword(String password) {
+        public void setPassword(char[] password) {
             this.password = password;
         }
 
@@ -330,7 +335,7 @@ public class ESTEnrollmentServiceOptions {
             }
             BasicAuthentication other = (BasicAuthentication) obj;
             return Objects.equals(digestEnabled, other.digestEnabled) && Objects.equals(enabled, other.enabled)
-                    && Objects.equals(password, other.password) && Objects.equals(username, other.username);
+                    && Arrays.equals(password, other.password) && Objects.equals(username, other.username);
         }
 
     }

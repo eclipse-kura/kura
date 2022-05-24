@@ -174,7 +174,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     protected void activate(Map<String, Object> properties) {
         logger.info("activating...");
         try {
-            this.estOptions = new ESTEnrollmentServiceOptions(properties);
+            this.estOptions = new ESTEnrollmentServiceOptions(this.cryptoService, properties);
             if (Boolean.TRUE.equals(this.estOptions.isEnabled())) {
                 checkCerts();
                 execServiceChain(isEnrolled());
@@ -319,8 +319,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
         if (Boolean.TRUE.equals(this.estOptions.getClient().getBasicAuthentication().isEnabled())) {
             String username = this.estOptions.getClient().getBasicAuthentication().getUsername();
 
-            char[] passw = this.cryptoService
-                    .decryptAes(this.estOptions.getClient().getBasicAuthentication().getPassword().toCharArray());
+            char[] passw = this.estOptions.getClient().getBasicAuthentication().getPassword();
             if (Boolean.TRUE.equals(this.estOptions.getClient().getBasicAuthentication().isDigestEnabled())) {
                 DigestCalculatorProvider digestBuilder = new JcaDigestCalculatorProviderBuilder().setProvider("BC")
                         .build();
@@ -543,7 +542,7 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
 
         ESTEnrollmentServiceOptions newOptions;
         try {
-            newOptions = new ESTEnrollmentServiceOptions(properties);
+            newOptions = new ESTEnrollmentServiceOptions(this.cryptoService, properties);
             if (this.estOptions.equals(newOptions)) {
                 logger.info("Properties are not changed. Nothing to update");
                 return;
@@ -653,6 +652,9 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
 
     @Override
     public boolean isEnrolled() {
+        if (this.enrolled) {
+            logger.info("System is enrolled");
+        }
         return this.enrolled;
     }
 
@@ -740,26 +742,10 @@ public class ESTEnrollmentService implements EnrollmentService, ConfigurableComp
     }
 
     private static Set<TrustAnchor> toTrustAnchor(Object[] oo) throws Exception {
-        CertificateFactory fac = CertificateFactory.getInstance("X509");
+
         Set<TrustAnchor> out = new HashSet<>();
         for (Object o : oo) {
-            if (o instanceof X509CertificateHolder) {
-                out.add(new TrustAnchor((java.security.cert.X509Certificate) fac
-                        .generateCertificate(new ByteArrayInputStream(((X509CertificateHolder) o).getEncoded())),
-                        null));
-            } else if (o instanceof X509Certificate) {
-                out.add(new TrustAnchor(
-                        (java.security.cert.X509Certificate) fac
-                                .generateCertificate(new ByteArrayInputStream(((X509Certificate) o).getEncoded())),
-                        null));
-            } else if (o instanceof java.security.cert.X509Certificate) {
-                out.add(new TrustAnchor((java.security.cert.X509Certificate) o, null));
-            } else if (o instanceof TrustAnchor) {
-                out.add((TrustAnchor) o);
-            } else {
-                throw new IllegalArgumentException(
-                        "Could not convert " + o.getClass().getName() + " to X509Certificate");
-            }
+            out.add(new TrustAnchor(toJavaX509Certificate(o), null));
         }
 
         return out;

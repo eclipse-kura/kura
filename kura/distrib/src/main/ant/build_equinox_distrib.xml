@@ -999,7 +999,7 @@ fi]]>
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.certificates_${org.eclipse.kura.core.certificates.version}.jar@4:start" />
             <entry key="osgi.bundles" operation="+"
-                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.certificates.enrollment.est_${org.eclipse.kura.core.certificates.enrollment.est.version}.jar@4:start" />			
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.core.certificates.enrollment.est_${org.eclipse.kura.core.certificates.enrollment.est.version}.jar@5:start" />
 		</propertyfile>
 	</target>
 

@@ -28,12 +28,16 @@ import org.junit.Test;
 public class UnZipTest {
 
     private static final String WORK_FOLDER = "/tmp/kura_test/";
-    private static final String INPUT_ZIP_FILE = "compressedFile.zip";
+    private static final String SINGLE_INPUT_ZIP_FILE = "singleCompressedFile.zip";
+    private static final String MULTIPLE_INPUT_ZIP_FILE = "multipleCompressedFile.zip";
     private static final String TOO_MANY_INPUT_ZIP_FILE = "tooManyCompressedFiles.zip";
     private static final String TOO_BIG_INPUT_ZIP_FILE = "tooBigCompressedFile.zip";
-    private static final String INPUT_ZIP_FILE_PATH = "target/test-classes/" + INPUT_ZIP_FILE;
+    private static final String ILLEGAL_PATH_INPUT_ZIP_FILE = "illegalPathCompressedFile.zip";
+    private static final String SINGLE_INPUT_ZIP_FILE_PATH = "target/test-classes/" + SINGLE_INPUT_ZIP_FILE;
+    private static final String MULTIPLE_INPUT_ZIP_FILE_PATH = "target/test-classes/" + MULTIPLE_INPUT_ZIP_FILE;
     private static final String TOO_MANY_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_MANY_INPUT_ZIP_FILE;
     private static final String TOO_BIG_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_BIG_INPUT_ZIP_FILE;
+    private static final String ILLEGAL_PATH_INPUT_ZIP_FILE_PATH = "target/test-classes/" + ILLEGAL_PATH_INPUT_ZIP_FILE;
 
     private byte[] compressedInput;
     private boolean exceptionCaught;
@@ -83,16 +87,34 @@ public class UnZipTest {
         thenExceptionIsCaught();
     }
 
+    @Test
+    public void catchExceptionWhenIllegalPathFileTest() throws IOException {
+        givenIllegalPathCompressedFile();
+
+        whenIllegalPathFileIsUnzipped();
+
+        thenExceptionIsCaught();
+    }
+
+    @Test
+    public void unZipMultipleFilesTest() throws IOException {
+        givenMultipleCompressedFile();
+
+        whenMultipleFileIsUnzipped();
+
+        thenMultipleUncompressedFileExists();
+    }
+
     private void givenCompressedFile() throws IOException {
         File inputFolder = new File(WORK_FOLDER);
         inputFolder.mkdirs();
-        FileUtils.copyFile(new File(INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + INPUT_ZIP_FILE));
+        FileUtils.copyFile(new File(SINGLE_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + SINGLE_INPUT_ZIP_FILE));
     }
 
     private void givenCompressedStream() throws IOException {
         File inputFolder = new File(WORK_FOLDER);
         inputFolder.mkdirs();
-        this.compressedInput = getFileBytes(new File(INPUT_ZIP_FILE_PATH));
+        this.compressedInput = getFileBytes(new File(SINGLE_INPUT_ZIP_FILE_PATH));
     }
 
     private void givenTooManyCompressedFile() throws IOException {
@@ -107,8 +129,21 @@ public class UnZipTest {
         FileUtils.copyFile(new File(TOO_BIG_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + TOO_BIG_INPUT_ZIP_FILE));
     }
 
+    private void givenIllegalPathCompressedFile() throws IOException {
+        File inputFolder = new File(WORK_FOLDER);
+        inputFolder.mkdirs();
+        FileUtils.copyFile(new File(ILLEGAL_PATH_INPUT_ZIP_FILE_PATH),
+                new File(WORK_FOLDER + ILLEGAL_PATH_INPUT_ZIP_FILE));
+    }
+
+    private void givenMultipleCompressedFile() throws IOException {
+        File inputFolder = new File(WORK_FOLDER);
+        inputFolder.mkdirs();
+        FileUtils.copyFile(new File(MULTIPLE_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + MULTIPLE_INPUT_ZIP_FILE));
+    }
+
     private void whenFileIsUnzipped() throws IOException {
-        UnZip.unZipFile(WORK_FOLDER + INPUT_ZIP_FILE, WORK_FOLDER);
+        UnZip.unZipFile(WORK_FOLDER + SINGLE_INPUT_ZIP_FILE, WORK_FOLDER);
     }
 
     private void whenStreamIsUnzipped() throws IOException {
@@ -133,6 +168,19 @@ public class UnZipTest {
         }
     }
 
+    private void whenIllegalPathFileIsUnzipped() {
+        this.exceptionCaught = false;
+        try {
+            UnZip.unZipFile(WORK_FOLDER + ILLEGAL_PATH_INPUT_ZIP_FILE, WORK_FOLDER);
+        } catch (IOException e) {
+            this.exceptionCaught = true;
+        }
+    }
+
+    private void whenMultipleFileIsUnzipped() throws IOException {
+        UnZip.unZipFile(WORK_FOLDER + MULTIPLE_INPUT_ZIP_FILE, WORK_FOLDER);
+    }
+
     private void thenUncompressedFileExists() {
         File uncompressedFile = new File(WORK_FOLDER + "file.txt");
         assertTrue(uncompressedFile.exists());
@@ -142,6 +190,13 @@ public class UnZipTest {
         File uncompressedFile = new File(WORK_FOLDER + "file.txt");
         assertTrue(!uncompressedFile.isDirectory());
         assertTrue(uncompressedFile.isFile());
+    }
+
+    private void thenMultipleUncompressedFileExists() {
+        File uncompressedFile = new File(WORK_FOLDER + "file.txt");
+        File uncompressedFile1 = new File(WORK_FOLDER + "file1.txt");
+        assertTrue(uncompressedFile.exists());
+        assertTrue(uncompressedFile1.exists());
     }
 
     private void thenUncompressedFileIsCorrect() throws IOException {

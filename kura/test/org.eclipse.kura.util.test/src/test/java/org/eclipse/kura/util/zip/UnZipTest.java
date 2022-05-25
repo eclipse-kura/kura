@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.util.zip;
 
 import static org.junit.Assert.assertEquals;
@@ -17,16 +29,15 @@ public class UnZipTest {
 
     private static final String WORK_FOLDER = "/tmp/kura_test/";
     private static final String INPUT_ZIP_FILE = "compressedFile.zip";
+    private static final String TOO_MANY_INPUT_ZIP_FILE = "tooManyCompressedFiles.zip";
     private static final String INPUT_ZIP_FILE_PATH = "target/test-classes/" + INPUT_ZIP_FILE;
+    private static final String TOO_MANY_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_MANY_INPUT_ZIP_FILE;
 
     private byte[] compressedInput;
+    private boolean exceptionCaught;
 
     @After
     public void clean() throws IOException {
-        File compressedFile = new File(WORK_FOLDER + INPUT_ZIP_FILE);
-        if (compressedFile.exists()) {
-            FileUtils.delete(new File(WORK_FOLDER + INPUT_ZIP_FILE));
-        }
         FileUtils.deleteDirectory(new File(WORK_FOLDER));
     }
 
@@ -52,6 +63,15 @@ public class UnZipTest {
         thenUncompressedFileIsCorrect();
     }
 
+    @Test
+    public void catchExceptionWhenTooManyFilesTest() throws IOException {
+        givenTooManyCompressedFile();
+
+        whenTooManyFilesIsUnzipped();
+
+        thenExceptionIsCaught();
+    }
+
     private void givenCompressedFile() throws IOException {
         File inputFolder = new File(WORK_FOLDER);
         inputFolder.mkdirs();
@@ -64,12 +84,27 @@ public class UnZipTest {
         this.compressedInput = getFileBytes(new File(INPUT_ZIP_FILE_PATH));
     }
 
+    private void givenTooManyCompressedFile() throws IOException {
+        File inputFolder = new File(WORK_FOLDER);
+        inputFolder.mkdirs();
+        FileUtils.copyFile(new File(TOO_MANY_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + TOO_MANY_INPUT_ZIP_FILE));
+    }
+
     private void whenFileIsUnzipped() throws IOException {
         UnZip.unZipFile(WORK_FOLDER + INPUT_ZIP_FILE, WORK_FOLDER);
     }
 
     private void whenStreamIsUnzipped() throws IOException {
         UnZip.unZipBytes(this.compressedInput, WORK_FOLDER);
+    }
+
+    private void whenTooManyFilesIsUnzipped() throws IOException {
+        this.exceptionCaught = false;
+        try {
+            UnZip.unZipFile(WORK_FOLDER + TOO_MANY_INPUT_ZIP_FILE, WORK_FOLDER);
+        } catch (IllegalStateException e) {
+            this.exceptionCaught = true;
+        }
     }
 
     private void thenUncompressedFileExists() {
@@ -87,6 +122,10 @@ public class UnZipTest {
         File file = new File(WORK_FOLDER + "file.txt");
         String content = FileUtils.readFileToString(file, "UTF-8");
         assertEquals("This is an awesome text file!\n", content);
+    }
+
+    private void thenExceptionIsCaught() {
+        assertTrue(this.exceptionCaught);
     }
 
     private static byte[] getFileBytes(File file) throws IOException {

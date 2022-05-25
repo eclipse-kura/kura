@@ -30,8 +30,10 @@ public class UnZipTest {
     private static final String WORK_FOLDER = "/tmp/kura_test/";
     private static final String INPUT_ZIP_FILE = "compressedFile.zip";
     private static final String TOO_MANY_INPUT_ZIP_FILE = "tooManyCompressedFiles.zip";
+    private static final String TOO_BIG_INPUT_ZIP_FILE = "tooBigCompressedFile.zip";
     private static final String INPUT_ZIP_FILE_PATH = "target/test-classes/" + INPUT_ZIP_FILE;
     private static final String TOO_MANY_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_MANY_INPUT_ZIP_FILE;
+    private static final String TOO_BIG_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_BIG_INPUT_ZIP_FILE;
 
     private byte[] compressedInput;
     private boolean exceptionCaught;
@@ -72,6 +74,15 @@ public class UnZipTest {
         thenExceptionIsCaught();
     }
 
+    @Test
+    public void catchExceptionWhenTooBigFileTest() throws IOException {
+        givenTooBigCompressedFile();
+
+        whenTooBigFileIsUnzipped();
+
+        thenExceptionIsCaught();
+    }
+
     private void givenCompressedFile() throws IOException {
         File inputFolder = new File(WORK_FOLDER);
         inputFolder.mkdirs();
@@ -90,6 +101,12 @@ public class UnZipTest {
         FileUtils.copyFile(new File(TOO_MANY_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + TOO_MANY_INPUT_ZIP_FILE));
     }
 
+    private void givenTooBigCompressedFile() throws IOException {
+        File inputFolder = new File(WORK_FOLDER);
+        inputFolder.mkdirs();
+        FileUtils.copyFile(new File(TOO_BIG_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + TOO_BIG_INPUT_ZIP_FILE));
+    }
+
     private void whenFileIsUnzipped() throws IOException {
         UnZip.unZipFile(WORK_FOLDER + INPUT_ZIP_FILE, WORK_FOLDER);
     }
@@ -102,6 +119,15 @@ public class UnZipTest {
         this.exceptionCaught = false;
         try {
             UnZip.unZipFile(WORK_FOLDER + TOO_MANY_INPUT_ZIP_FILE, WORK_FOLDER);
+        } catch (IllegalStateException e) {
+            this.exceptionCaught = true;
+        }
+    }
+
+    private void whenTooBigFileIsUnzipped() throws IOException {
+        this.exceptionCaught = false;
+        try {
+            UnZip.unZipFile(WORK_FOLDER + TOO_BIG_INPUT_ZIP_FILE, WORK_FOLDER);
         } catch (IllegalStateException e) {
             this.exceptionCaught = true;
         }

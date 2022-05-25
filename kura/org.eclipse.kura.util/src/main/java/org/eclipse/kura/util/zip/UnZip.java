@@ -95,7 +95,7 @@ public class UnZip {
                 if (entries > tooMany) {
                     throw new IllegalStateException("Too many files to unzip.");
                 }
-                if (total > tooBig) {
+                if (total + BUFFER > tooBig) {
                     throw new IllegalStateException("File being unzipped is too big.");
                 }
 

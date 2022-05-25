@@ -42,9 +42,10 @@
   <inherits name="com.google.gwt.http.HTTP" />
 
   <!-- Locales: English language, independent of country -->
-  <extend-property name="locale" values="en"/>
-  <extend-property name="locale" values="jp"/>
+  <extend-property name="locale" values="en,ja"/>
+  <set-property name="locale" value="en,ja" />
   <set-property-fallback name="locale" value="en"/>
+  <set-configuration-property name="locale.useragent" value="Y"/>
 
   <!-- Specify the app entry point class.                         -->
   <entry-point class='org.eclipse.kura.web.client.Login' />

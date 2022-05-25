@@ -17,6 +17,15 @@
     <OCD id="org.eclipse.kura.ai.triton.server.TritonServerService" 
          name="Nvidia Triton Server" 
          description="Configuration for the Nvidia Triton Server">
+
+         <AD id="enable.local"  
+            name="Local Nvidia Triton Server"
+            type="Boolean"
+            cardinality="0" 
+            required="true"
+            default="false" 
+            description="If enabled, a local native Nvidia Triton Server is started. In this case, the model repository and backends path are mandatory. Moreover, the server address property is overridden and set to localhost.">
+        </AD>
         
         <AD id="server.address"  
             name="Nvidia Triton Server address"
@@ -38,24 +47,6 @@
             description="The ports used to connect to the server for HTTP, GPRC and Metrics services.">
         </AD>
 
-        <AD id="models"  
-            name="Inference Models"
-            type="String"
-            cardinality="0" 
-            required="false"
-            default="" 
-            description="A comma separated list of inference model names that the server will load.">
-        </AD>
-        
-         <AD id="enable.local"  
-            name="Local Nvidia Triton Server"
-            type="Boolean"
-            cardinality="0" 
-            required="true"
-            default="false" 
-            description="If enabled, a local native Nvidia Triton Server is started. In this case, the model repository and backends path are mandatory. Moreover, the server address property is overridden and set to localhost.">
-        </AD>
-        
         <AD id="local.model.repository.path"  
             name="Local model repository path"
             type="String"
@@ -73,6 +64,15 @@
             default="" 
             description="Only for local instance, specify the password to be used for decrypting models stored in the model repository. If none is specified, models are supposed to be plaintext.">
        </AD>
+
+        <AD id="models"  
+            name="Inference Models"
+            type="String"
+            cardinality="0" 
+            required="false"
+            default="" 
+            description="A comma separated list of inference model names that the server will load.">
+        </AD>
         
         <AD id="local.backends.path"  
             name="Local backends path"

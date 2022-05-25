@@ -78,6 +78,7 @@ Import-Package: javax.comm;version="1.2.0",
  javax.usb;version="1.0.2",
  org.apache.commons.io.output;version="2.4.0",
  org.apache.logging.log4j;version="2.8.2",
+ org.bouncycastle.pkcs;version="1.71.0",
  org.osgi.annotation.versioning;version="[1.0.0,2.0.0)";resolution:=optional,
  org.osgi.framework;version="[1.5.0,2.0.0)",
  org.osgi.service.component;version="1.2.0",
@@ -86,4 +87,5 @@ Import-Package: javax.comm;version="1.2.0",
  org.osgi.service.wireadmin;version="1.0.1",
  org.osgi.util.measurement;version="1.0.1",
  org.osgi.util.position;version="1.0.1"
+
 Bundle-ActivationPolicy: lazy

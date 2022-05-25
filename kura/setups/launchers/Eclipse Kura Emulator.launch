@@ -24,6 +24,8 @@
 <setAttribute key="selected_target_bundles">
 <setEntry value="bcpkix@default:default"/>
 <setEntry value="bcprov@default:default"/>
+<setEntry value="bctls@default:default"/>
+<setEntry value="bcutil@default:default"/>
 <setEntry value="com.eclipsesource.jaxrs.jersey-min@default:default"/>
 <setEntry value="com.eclipsesource.jaxrs.provider.gson@default:default"/>
 <setEntry value="com.eclipsesource.jaxrs.provider.security@default:default"/>

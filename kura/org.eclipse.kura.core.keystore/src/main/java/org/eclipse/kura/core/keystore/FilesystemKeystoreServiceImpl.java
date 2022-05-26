@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
 import java.net.URI;
@@ -156,8 +157,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         if (!keystoreExists(this.keystoreServiceOptions.getKeystorePath())) {
             try {
-                createKeystore(this.keystoreServiceOptions.getKeystorePath());
-            } catch (IOException e) {
+                createKeystore(this.keystoreServiceOptions);
+            } catch (Exception e) {
                 logger.error("Keystore file creation failed", e);
             }
         }
@@ -233,21 +234,38 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         return keystorePath != null && new File(keystorePath).isFile();
     }
 
-    private void createKeystore(String keystorePath) throws IOException {
+    private void createKeystore(KeystoreServiceOptions options) throws Exception {
+        String keystorePath = options.getKeystorePath();
+        char[] passwordChar = options.getKeystorePassword(this.cryptoService);
         if (keystorePath == null) {
             return;
         }
         File fKeyStore = new File(keystorePath);
         if (!fKeyStore.createNewFile()) {
             logger.error("Keystore file already exists at location {}", keystorePath);
+            throw new KuraException(KuraErrorCode.CONFIGURATION_ATTRIBUTE_INVALID, "keystore.path", keystorePath,
+                    "file already exists");
         }
+
+        // Immediately save the keystore with the default password to allow to be loaded with the default password.
+        try (OutputStream os = new FileOutputStream(fKeyStore)) {
+            KeyStore newKeystore = KeyStore.getInstance(KeyStore.getDefaultType());
+            newKeystore.load(null, passwordChar);
+            newKeystore.store(os, passwordChar);
+            os.flush();
+        } catch (Exception e) {
+            logger.error("Unable to load and store the keystore", e);
+            throw e;
+        }
+
+        setKeystorePassword(this.loadKeystore(options), passwordChar);
     }
 
     private void updateKeystorePath(KeystoreServiceOptions newOptions) {
         if (!keystoreExists(newOptions.getKeystorePath())) {
             try {
-                createKeystore(newOptions.getKeystorePath());
-            } catch (IOException e) {
+                createKeystore(newOptions);
+            } catch (Exception e) {
                 logger.error("Keystore file creation failed", e);
             }
         }

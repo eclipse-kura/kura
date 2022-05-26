@@ -36,7 +36,7 @@ public class KeystoreServiceOptions {
     static final String KEY_KEYSTORE_PASSWORD = "keystore.password";
     static final String KEY_RANDOMIZE_PASSWORD = "randomize.password";
 
-    private static final String DEFAULT_KEYSTORE_PATH = "/tmp";
+    private static final String DEFAULT_KEYSTORE_PATH = "/tmp/keystore.ks";
     private static final boolean DEFAULT_RANDOMIZE_PASSWORD = false;
     static final String DEFAULT_KEYSTORE_PASSWORD = "changeit";
 

@@ -15,15 +15,14 @@ package org.eclipse.kura.core.keystore;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.any;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.KuraException;
-import org.eclipse.kura.core.keystore.KeystoreServiceOptions;
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Test;
 
@@ -53,7 +52,7 @@ public class KeystoreServiceOptionsTest {
 
         KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
 
-        assertEquals("/tmp", keystoreServiceOptions.getKeystorePath());
+        assertEquals("/tmp/keystore.ks", keystoreServiceOptions.getKeystorePath());
         assertArrayEquals(CHANGEIT_PASSWORD.toCharArray(), keystoreServiceOptions.getKeystorePassword(cryptoService));
     }
 

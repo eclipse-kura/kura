@@ -108,6 +108,10 @@ public class TritonServerEncryptionUtils {
             throw new IOException("Input file " + inputFilePath + " does not exist/is not a file");
         }
 
+        if (!UnZip.isZipCompressed(inputFilePath)) {
+            throw new IOException("ZIP magic number check failed. Wrong file format");
+        }
+
         if (!Files.isDirectory(Paths.get(outputFolder))) {
             throw new IOException("Output folder " + outputFolder + " does not exist/is not a folder");
         }

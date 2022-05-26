@@ -35,17 +35,11 @@ public class UnZip {
     }
 
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
-        if (!isZipCompressed(bytes)) {
-            throw new IOException("The provided file is not zip compressed.");
-        }
         ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
         unZipZipInputStream(zis, outputFolder);
     }
 
     public static void unZipFile(String filename, String outputFolder) throws IOException {
-        if (!isZipCompressed(filename)) {
-            throw new IOException("The provided file is not zip compressed.");
-        }
         File file = new File(filename);
         ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
         unZipZipInputStream(zis, outputFolder);
@@ -139,7 +133,7 @@ public class UnZip {
         }
     }
 
-    private static boolean isZipCompressed(String filePath) throws IOException {
+    public static boolean isZipCompressed(String filePath) throws IOException {
         byte b1 = 0;
         byte b2 = 0;
 
@@ -153,7 +147,7 @@ public class UnZip {
         return b1 == 0x50 && b2 == 0x4B;
     }
 
-    private static boolean isZipCompressed(byte[] bytes) throws IOException {
+    public static boolean isZipCompressed(byte[] bytes) {
         if (bytes.length > 2) {
             return bytes[0] == 0x50 && bytes[1] == 0x4B;
         } else {

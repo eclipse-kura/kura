@@ -13,6 +13,7 @@
 package org.eclipse.kura.util.zip;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -115,7 +116,7 @@ public class UnZipTest {
 
         whenUncompressedFileIsUnzipped();
 
-        thenExceptionIsCaught();
+        thenUncompressedFileNotExist();
     }
 
     @Test
@@ -124,7 +125,7 @@ public class UnZipTest {
 
         whenTarFileIsUnzipped();
 
-        thenExceptionIsCaught();
+        thenUncompressedFileNotExist();
     }
 
     private void givenCompressedFile() throws IOException {
@@ -216,21 +217,11 @@ public class UnZipTest {
     }
 
     private void whenUncompressedFileIsUnzipped() throws IOException {
-        this.exceptionCaught = false;
-        try {
-            UnZip.unZipFile(WORK_FOLDER + UNCOMPRESSED_INPUT_ZIP_FILE, WORK_FOLDER);
-        } catch (IOException e) {
-            this.exceptionCaught = true;
-        }
+        UnZip.unZipFile(WORK_FOLDER + UNCOMPRESSED_INPUT_ZIP_FILE, WORK_FOLDER);
     }
 
     private void whenTarFileIsUnzipped() throws IOException {
-        this.exceptionCaught = false;
-        try {
-            UnZip.unZipFile(WORK_FOLDER + INPUT_TAR_FILE, WORK_FOLDER);
-        } catch (IOException e) {
-            this.exceptionCaught = true;
-        }
+        UnZip.unZipFile(WORK_FOLDER + INPUT_TAR_FILE, WORK_FOLDER);
     }
 
     private void thenUncompressedFileExists() {
@@ -259,6 +250,11 @@ public class UnZipTest {
 
     private void thenExceptionIsCaught() {
         assertTrue(this.exceptionCaught);
+    }
+
+    private void thenUncompressedFileNotExist() {
+        File uncompressedFile = new File(WORK_FOLDER + "file.txt");
+        assertFalse(uncompressedFile.exists());
     }
 
     private static byte[] getFileBytes(File file) throws IOException {

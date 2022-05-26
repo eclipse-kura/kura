@@ -249,7 +249,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
 
         // Immediately save the keystore with the default password to allow to be loaded with the default password.
         try (OutputStream os = new FileOutputStream(fKeyStore)) {
-
             KeyStore newKeystore = KeyStore.getInstance(KeyStore.getDefaultType());
             newKeystore.load(null, passwordChar);
             newKeystore.store(os, passwordChar);

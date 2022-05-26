@@ -108,29 +108,11 @@ public class TritonServerEncryptionUtils {
             throw new IOException("Input file " + inputFilePath + " does not exist/is not a file");
         }
 
-        if (!isZipCompressed(inputFilePath)) {
-            throw new IOException("ZIP magic number check failed. Wrong file format");
-        }
-
         if (!Files.isDirectory(Paths.get(outputFolder))) {
             throw new IOException("Output folder " + outputFolder + " does not exist/is not a folder");
         }
 
         UnZip.unZipFile(inputFilePath, outputFolder);
-    }
-
-    private static boolean isZipCompressed(String filePath) throws IOException {
-        byte b1 = 0;
-        byte b2 = 0;
-
-        try (InputStream is = new FileInputStream(filePath)) {
-            b1 = (byte) is.read();
-            b2 = (byte) is.read();
-        } catch (IOException e) {
-            throw new IOException(e);
-        }
-
-        return b1 == 0x50 && b2 == 0x4B;
     }
 
     protected static void cleanRepository(String modelRootPath) {

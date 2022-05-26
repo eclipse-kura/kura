@@ -18,6 +18,8 @@ import java.security.KeyStore.Entry;
 import java.security.SecureRandom;
 import java.security.cert.CRL;
 import java.security.cert.CertStore;
+import java.security.cert.X509CRL;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,7 @@ import java.util.Map;
 import javax.net.ssl.KeyManager;
 import javax.security.auth.x500.X500Principal;
 
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -136,6 +139,39 @@ public interface KeystoreService {
             SecureRandom secureRandom) throws KuraException;
 
     /**
+     * Creates and persists a new keypair in the managed keystore using the specified alias
+     *
+     * @param alias
+     * @param algorithm
+     * @param algorithmParameter
+     * @param signatureAlgorithm
+     * @param attributes
+     * @param secureRandom
+     * @throws KuraException
+     *             if the keypair cannot be created or the keypair cannot be added to the managed keystore
+     * @throws IllegalArgumentException
+     *             if one of the arguments is null or empty
+     */
+    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm, String attributes, SecureRandom secureRandom) throws KuraException;
+
+    /**
+     * Creates and persists a new keypair in the managed keystore using the specified alias
+     *
+     * @param alias
+     * @param algorithm
+     * @param algorithmParameter
+     * @param signatureAlgorithm
+     * @param attributes
+     * @throws KuraException
+     *             if the keypair cannot be created or the keypair cannot be added to the managed keystore
+     * @throws IllegalArgumentException
+     *             if one of the arguments is null or empty
+     */
+    public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
+            String signatureAlgorithm, String attributes) throws KuraException;
+
+    /**
      * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected
      *
      * @param keyPair
@@ -164,6 +200,36 @@ public interface KeystoreService {
     public String getCSR(String alias, X500Principal principal, String signerAlg) throws KuraException;
 
     /**
+     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected
+     *
+     * @param keyPair
+     * @param principal
+     * @param signerAlg
+     * @return
+     * @throws KuraException
+     *             if the CSR cannot be computed or if it cannot be encoded
+     * @throws IllegalArgumentException
+     *             if one of the arguments is null or empty
+     */
+    public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(KeyPair keyPair, X500Principal principal)
+            throws KuraException;
+
+    /**
+     *
+     * @param alias
+     * @param principal
+     * @param signerAlg
+     * @return the <code>
+     * @throws KuraException
+     *             if the alias does not correspond to a managed entry of the keystore, it refers to an entry that
+     *             cannot be used to obtain a CSR or the CSR cannot be computed or encoded
+     * @throws IllegalArgumentException
+     *             if one of the arguments is null or empty
+     */
+    public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(String alias, X500Principal principal)
+            throws KuraException;
+
+    /**
      * Returns the list of all the aliases corresponding to the keystore service managed objects
      *
      * @return
@@ -189,5 +255,15 @@ public interface KeystoreService {
      *             if the <code>CertStore</code> cannot be created.
      */
     public CertStore getCRLStore() throws KuraException;
+
+    /**
+     * 
+     * 
+     * @param crl
+     *            a <code> X509CRL to be stored
+     * &#64;throws KuraException
+     *             if the <code>StoredCRL</code> cannot be added.
+     */
+    public void addCRL(X509CRL crl) throws KuraException;
 
 }

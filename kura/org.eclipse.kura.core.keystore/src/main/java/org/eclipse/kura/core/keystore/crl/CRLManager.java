@@ -134,6 +134,10 @@ public class CRLManager implements Closeable {
         return store.getCertStore();
     }
 
+    public CRLStore getCRLStore() {
+        return store;
+    }
+
     @Override
     public void close() {
         listener = Optional.empty();

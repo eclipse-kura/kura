@@ -109,6 +109,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private LinuxNetworkUtil linuxNetworkUtil;
 
     private Map<String, Object> properties;
+    private NetworkConfiguration currentNetworkConfiguration;
 
     // ----------------------------------------------------------------
     //
@@ -262,6 +263,8 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                     networkConfiguration.accept(visitor);
                 }
 
+                updateCurrentNetworkConfiguration();
+
                 this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
             } else {
                 logger.debug("properties are null");
@@ -347,6 +350,10 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
+        return this.currentNetworkConfiguration;
+    }
+
+    public synchronized void updateCurrentNetworkConfiguration() throws KuraException {
         NetworkConfiguration networkConfiguration = new NetworkConfiguration();
 
         // Get the current values
@@ -408,7 +415,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             }
         }
 
-        return networkConfiguration;
+        this.currentNetworkConfiguration = networkConfiguration;
     }
 
     private void populateModemConfig(NetworkConfiguration networkConfiguration,

@@ -259,7 +259,6 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         }
 
         setKeystorePassword(this.loadKeystore(options), passwordChar);
-
     }
 
     private void updateKeystorePath(KeystoreServiceOptions newOptions) {

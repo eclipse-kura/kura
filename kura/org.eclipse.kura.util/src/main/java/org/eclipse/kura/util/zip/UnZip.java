@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -34,12 +35,17 @@ public class UnZip {
     }
 
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
+        if (!isZipCompressed(bytes)) {
+            throw new IOException("The provided file is not zip compressed.");
+        }
         ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(bytes));
         unZipZipInputStream(zis, outputFolder);
     }
 
     public static void unZipFile(String filename, String outputFolder) throws IOException {
-        // get the zip file content
+        if (!isZipCompressed(filename)) {
+            throw new IOException("The provided file is not zip compressed.");
+        }
         File file = new File(filename);
         ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
         unZipZipInputStream(zis, outputFolder);
@@ -51,7 +57,6 @@ public class UnZip {
             outputFolder = System.getProperty("user.dir");
         }
 
-        // create output directory is not exists
         File folder = new File(outputFolder);
         if (!folder.exists()) {
             folder.mkdirs();
@@ -131,6 +136,28 @@ public class UnZip {
             return filePath;
         } else {
             throw new KuraException(KuraErrorCode.SECURITY_EXCEPTION);
+        }
+    }
+
+    private static boolean isZipCompressed(String filePath) throws IOException {
+        byte b1 = 0;
+        byte b2 = 0;
+
+        try (InputStream is = new FileInputStream(filePath)) {
+            b1 = (byte) is.read();
+            b2 = (byte) is.read();
+        } catch (IOException e) {
+            throw new IOException(e);
+        }
+
+        return b1 == 0x50 && b2 == 0x4B;
+    }
+
+    private static boolean isZipCompressed(byte[] bytes) throws IOException {
+        if (bytes.length > 2) {
+            return bytes[0] == 0x50 && bytes[1] == 0x4B;
+        } else {
+            return false;
         }
     }
 

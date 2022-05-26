@@ -33,11 +33,15 @@ public class UnZipTest {
     private static final String TOO_MANY_INPUT_ZIP_FILE = "tooManyCompressedFiles.zip";
     private static final String TOO_BIG_INPUT_ZIP_FILE = "tooBigCompressedFile.zip";
     private static final String ILLEGAL_PATH_INPUT_ZIP_FILE = "illegalPathCompressedFile.zip";
+    private static final String UNCOMPRESSED_INPUT_ZIP_FILE = "uncompressedFile.txt";
+    private static final String INPUT_TAR_FILE = "singleCompressedFile.tar";
     private static final String SINGLE_INPUT_ZIP_FILE_PATH = "target/test-classes/" + SINGLE_INPUT_ZIP_FILE;
     private static final String MULTIPLE_INPUT_ZIP_FILE_PATH = "target/test-classes/" + MULTIPLE_INPUT_ZIP_FILE;
     private static final String TOO_MANY_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_MANY_INPUT_ZIP_FILE;
     private static final String TOO_BIG_INPUT_ZIP_FILE_PATH = "target/test-classes/" + TOO_BIG_INPUT_ZIP_FILE;
     private static final String ILLEGAL_PATH_INPUT_ZIP_FILE_PATH = "target/test-classes/" + ILLEGAL_PATH_INPUT_ZIP_FILE;
+    private static final String UNCOMPRESSED_INPUT_ZIP_FILE_PATH = "target/test-classes/" + UNCOMPRESSED_INPUT_ZIP_FILE;
+    private static final String INPUT_TAR_FILE_PATH = "target/test-classes/" + INPUT_TAR_FILE;
 
     private byte[] compressedInput;
     private boolean exceptionCaught;
@@ -105,41 +109,71 @@ public class UnZipTest {
         thenMultipleUncompressedFileExists();
     }
 
+    @Test
+    public void unZipUncompressedFileTest() throws IOException {
+        givenUnCompressedFile();
+
+        whenUncompressedFileIsUnzipped();
+
+        thenExceptionIsCaught();
+    }
+
+    @Test
+    public void unZipTarFileTest() throws IOException {
+        givenTarCompressedFile();
+
+        whenTarFileIsUnzipped();
+
+        thenExceptionIsCaught();
+    }
+
     private void givenCompressedFile() throws IOException {
-        File inputFolder = new File(WORK_FOLDER);
-        inputFolder.mkdirs();
-        FileUtils.copyFile(new File(SINGLE_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + SINGLE_INPUT_ZIP_FILE));
+        createOutputFolder();
+        copyFile(SINGLE_INPUT_ZIP_FILE_PATH, SINGLE_INPUT_ZIP_FILE);
     }
 
     private void givenCompressedStream() throws IOException {
-        File inputFolder = new File(WORK_FOLDER);
-        inputFolder.mkdirs();
+        createOutputFolder();
         this.compressedInput = getFileBytes(new File(SINGLE_INPUT_ZIP_FILE_PATH));
     }
 
     private void givenTooManyCompressedFile() throws IOException {
-        File inputFolder = new File(WORK_FOLDER);
-        inputFolder.mkdirs();
-        FileUtils.copyFile(new File(TOO_MANY_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + TOO_MANY_INPUT_ZIP_FILE));
+        createOutputFolder();
+        copyFile(TOO_MANY_INPUT_ZIP_FILE_PATH, TOO_MANY_INPUT_ZIP_FILE);
     }
 
     private void givenTooBigCompressedFile() throws IOException {
-        File inputFolder = new File(WORK_FOLDER);
-        inputFolder.mkdirs();
-        FileUtils.copyFile(new File(TOO_BIG_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + TOO_BIG_INPUT_ZIP_FILE));
+        createOutputFolder();
+        copyFile(TOO_BIG_INPUT_ZIP_FILE_PATH, TOO_BIG_INPUT_ZIP_FILE);
     }
 
     private void givenIllegalPathCompressedFile() throws IOException {
-        File inputFolder = new File(WORK_FOLDER);
-        inputFolder.mkdirs();
-        FileUtils.copyFile(new File(ILLEGAL_PATH_INPUT_ZIP_FILE_PATH),
-                new File(WORK_FOLDER + ILLEGAL_PATH_INPUT_ZIP_FILE));
+        createOutputFolder();
+        copyFile(ILLEGAL_PATH_INPUT_ZIP_FILE_PATH, ILLEGAL_PATH_INPUT_ZIP_FILE);
     }
 
     private void givenMultipleCompressedFile() throws IOException {
+        createOutputFolder();
+        copyFile(MULTIPLE_INPUT_ZIP_FILE_PATH, MULTIPLE_INPUT_ZIP_FILE);
+    }
+
+    private void givenUnCompressedFile() throws IOException {
+        createOutputFolder();
+        copyFile(UNCOMPRESSED_INPUT_ZIP_FILE_PATH, UNCOMPRESSED_INPUT_ZIP_FILE);
+    }
+
+    private void givenTarCompressedFile() throws IOException {
+        createOutputFolder();
+        copyFile(INPUT_TAR_FILE_PATH, INPUT_TAR_FILE);
+    }
+
+    private void createOutputFolder() {
         File inputFolder = new File(WORK_FOLDER);
         inputFolder.mkdirs();
-        FileUtils.copyFile(new File(MULTIPLE_INPUT_ZIP_FILE_PATH), new File(WORK_FOLDER + MULTIPLE_INPUT_ZIP_FILE));
+    }
+
+    private void copyFile(String inputFilePath, String inputFileName) throws IOException {
+        FileUtils.copyFile(new File(inputFilePath), new File(WORK_FOLDER + inputFileName));
     }
 
     private void whenFileIsUnzipped() throws IOException {
@@ -179,6 +213,24 @@ public class UnZipTest {
 
     private void whenMultipleFileIsUnzipped() throws IOException {
         UnZip.unZipFile(WORK_FOLDER + MULTIPLE_INPUT_ZIP_FILE, WORK_FOLDER);
+    }
+
+    private void whenUncompressedFileIsUnzipped() throws IOException {
+        this.exceptionCaught = false;
+        try {
+            UnZip.unZipFile(WORK_FOLDER + UNCOMPRESSED_INPUT_ZIP_FILE, WORK_FOLDER);
+        } catch (IOException e) {
+            this.exceptionCaught = true;
+        }
+    }
+
+    private void whenTarFileIsUnzipped() throws IOException {
+        this.exceptionCaught = false;
+        try {
+            UnZip.unZipFile(WORK_FOLDER + INPUT_TAR_FILE, WORK_FOLDER);
+        } catch (IOException e) {
+            this.exceptionCaught = true;
+        }
     }
 
     private void thenUncompressedFileExists() {

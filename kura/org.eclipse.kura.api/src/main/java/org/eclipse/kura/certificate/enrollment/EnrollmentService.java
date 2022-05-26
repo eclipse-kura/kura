@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.certificate.enrollment;
 
+import java.security.cert.CertStore;
 import java.security.cert.Certificate;
 
 import org.eclipse.kura.KuraException;
@@ -36,29 +37,38 @@ public interface EnrollmentService {
     public void enroll() throws KuraException;
 
     /**
-     * Renews the client certificate creating a new keypair and a new CSR submitted to the CA.
+     * Renew the client certificate submitting the certificate previously issued by the CA.
      * 
      * @throws KuraException
-     *             it it is impossible to renew the system certificate
+     *             if it is impossible to renew the system certificate
      */
     public void renew() throws KuraException;
 
     /**
+     * Renew the client certificate creating a new keypair and a new CSR submitted to the CA.
      * 
-     * Get the Certificate Authority <code>Certificate</code> stored in the relative
-     * {@link org.eclipse.kura.security.keystore.KeystoreService}
-     * 
-     * @return returns the Certificate Authority <code>Certificate</code>
      * @throws KuraException
-     *             if it is impossible to retrieve the certificate.
+     *             if it is impossible to renew the system certificate
      */
-    public Certificate getCACertificate() throws KuraException;
+    public void rekey() throws KuraException;
 
     /**
-     * Get the Client <code>Certificate</code> stored in the relative
+     * 
+     * Get the list of the Certificate Authority certificates stored in the relative
      * {@link org.eclipse.kura.security.keystore.KeystoreService}
      * 
-     * @return returns the Client <code>Certificate</code> obtained by the Certificate Authority
+     * @return returns the Certificate Authority <code>CertStore</code>
+     * @throws KuraException
+     *             if it is impossible to retrieve the certificate store.
+     */
+    public CertStore getCACertificate() throws KuraException;
+
+    /**
+     * Get the Client certificate stored in the relative
+     * {@link org.eclipse.kura.security.keystore.KeystoreService}
+     * 
+     * @return returns the Client <code>Certificate</code> obtained by the Certificate
+     *         Authority
      * @throws KuraException
      *             if it is impossible to retrieve the certificate.
      */

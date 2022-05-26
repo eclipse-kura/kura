@@ -120,3 +120,15 @@ jobs:
             wire.provider
             wire.script.filter.provider
             xml.marshaller.unmarshaller.provider
+            container
+            distrib
+            emulator
+            examples
+            features
+            org.eclipse.kura-p2
+            setups
+            target-definition
+            target-platform
+            test
+            test-util
+            tools

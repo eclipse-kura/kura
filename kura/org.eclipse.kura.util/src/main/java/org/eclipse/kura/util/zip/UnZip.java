@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,10 +10,9 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.cloud.app.command;
+package org.eclipse.kura.util.zip;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -24,38 +23,15 @@ import java.util.zip.ZipInputStream;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UnZip {
-
-    private static final Logger logger = LoggerFactory.getLogger(UnZip.class);
-
-    private static final String INPUT_ZIP_FILE = "/tmp/test.zip";
-    private static final String OUTPUT_FOLDER = "/tmp/";
 
     private static final int BUFFER = 1024;
     private static int tooBig = 0x6400000; // Max size of unzipped data, 100MB
     private static int tooMany = 1024;     // Max number of files
 
-    public static void main(String[] args) {
-        // UnZip unZip = new UnZip();
-        // unZip.unZipIt(INPUT_ZIP_FILE,OUTPUT_FOLDER);
-
-        // Create a ZipInputStream from the bag of bytes of the file
-        byte[] zipBytes = null;
-        try {
-            zipBytes = getFileBytes(new File(INPUT_ZIP_FILE));
-            unZipBytes(zipBytes, OUTPUT_FOLDER);
-        } catch (IOException e1) {
-            logger.warn("Failed to process Zip file - {}", INPUT_ZIP_FILE, e1);
-        }
-
-        try {
-            unZipFile(INPUT_ZIP_FILE, OUTPUT_FOLDER);
-        } catch (IOException e) {
-            logger.warn("Failed to process Zip file - {}", INPUT_ZIP_FILE, e);
-        }
+    private UnZip() {
+        // Do nothing...
     }
 
     public static void unZipBytes(byte[] bytes, String outputFolder) throws IOException {
@@ -64,28 +40,25 @@ public class UnZip {
     }
 
     public static void unZipFile(String filename, String outputFolder) throws IOException {
-        // get the zip file content
         File file = new File(filename);
         ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
         unZipZipInputStream(zis, outputFolder);
     }
 
     private static void unZipZipInputStream(ZipInputStream zis, String outFolder) throws IOException {
-        FileOutputStream fos = null;
+        String outputFolder = outFolder;
+        if (outputFolder == null) {
+            outputFolder = System.getProperty("user.dir");
+        }
+
+        File folder = new File(outputFolder);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        int entries = 0;
+        long total = 0;
         try {
-            String outputFolder = outFolder;
-            if (outputFolder == null) {
-                outputFolder = System.getProperty("user.dir");
-            }
-
-            // create output directory is not exists
-            File folder = new File(outputFolder);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            }
-
-            int entries = 0;
-            long total = 0;
             ZipEntry ze = zis.getNextEntry();
 
             while (ze != null) {
@@ -93,8 +66,7 @@ public class UnZip {
 
                 String expectedFilePath = new StringBuilder(folder.getPath()).append(File.separator)
                         .append(ze.getName()).toString();
-                String fileName = validateFileName(expectedFilePath, folder.getPath());
-                File newFile = new File(fileName);
+                File newFile = getFile(expectedFilePath, folder);
 
                 if (ze.isDirectory()) {
                     newFile.mkdirs();
@@ -107,21 +79,22 @@ public class UnZip {
                     parent.mkdirs();
                 }
 
-                fos = new FileOutputStream(newFile);
+                try (FileOutputStream fos = new FileOutputStream(newFile)) {
 
-                int len;
-                while (total + BUFFER <= tooBig && (len = zis.read(buffer)) > 0) {
-                    fos.write(buffer, 0, len);
-                    total += len;
+                    int len = zis.read(buffer);
+                    while (total + BUFFER <= tooBig && len > 0) {
+                        fos.write(buffer, 0, len);
+                        total += len;
+                        len = zis.read(buffer);
+                    }
+                    fos.flush();
                 }
-                fos.flush();
-                fos.close();
 
                 entries++;
                 if (entries > tooMany) {
                     throw new IllegalStateException("Too many files to unzip.");
                 }
-                if (total > tooBig) {
+                if (total + BUFFER > tooBig) {
                     throw new IllegalStateException("File being unzipped is too big.");
                 }
 
@@ -129,18 +102,21 @@ public class UnZip {
             }
 
             zis.closeEntry();
-        } catch (IOException e) {
-            throw e;
-        } catch (KuraException e) {
-            throw new IOException("File is outside extraction target directory.");
         } finally {
             if (zis != null) {
                 zis.close();
             }
-            if (fos != null) {
-                fos.close();
-            }
         }
+    }
+
+    private static File getFile(String expectedFilePath, File folder) throws IOException {
+        String fileName;
+        try {
+            fileName = validateFileName(expectedFilePath, folder.getPath());
+        } catch (KuraException e) {
+            throw new IOException("File is outside extraction target directory.");
+        }
+        return new File(fileName);
     }
 
     private static String validateFileName(String zipFileName, String intendedDir) throws IOException, KuraException {
@@ -157,14 +133,26 @@ public class UnZip {
         }
     }
 
-    private static byte[] getFileBytes(File file) throws IOException {
-        try (ByteArrayOutputStream ous = new ByteArrayOutputStream(); InputStream ios = new FileInputStream(file)) {
-            byte[] buffer = new byte[4096];
-            int read = 0;
-            while ((read = ios.read(buffer)) != -1) {
-                ous.write(buffer, 0, read);
-            }
-            return ous.toByteArray();
+    public static boolean isZipCompressed(String filePath) throws IOException {
+        byte b1 = 0;
+        byte b2 = 0;
+
+        try (InputStream is = new FileInputStream(filePath)) {
+            b1 = (byte) is.read();
+            b2 = (byte) is.read();
+        } catch (IOException e) {
+            throw new IOException(e);
+        }
+
+        return b1 == 0x50 && b2 == 0x4B;
+    }
+
+    public static boolean isZipCompressed(byte[] bytes) {
+        if (bytes.length > 2) {
+            return bytes[0] == 0x50 && bytes[1] == 0x4B;
+        } else {
+            return false;
         }
     }
+
 }

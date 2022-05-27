@@ -45,7 +45,7 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBu
 import org.bouncycastle.openpgp.operator.jcajce.JcePBEDataDecryptorFactoryBuilder;
 import org.bouncycastle.util.io.Streams;
 import org.eclipse.kura.KuraIOException;
-import org.eclipse.kura.cloud.app.command.UnZip;
+import org.eclipse.kura.util.zip.UnZip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +108,7 @@ public class TritonServerEncryptionUtils {
             throw new IOException("Input file " + inputFilePath + " does not exist/is not a file");
         }
 
-        if (!isZipCompressed(inputFilePath)) {
+        if (!UnZip.isZipCompressed(inputFilePath)) {
             throw new IOException("ZIP magic number check failed. Wrong file format");
         }
 
@@ -117,20 +117,6 @@ public class TritonServerEncryptionUtils {
         }
 
         UnZip.unZipFile(inputFilePath, outputFolder);
-    }
-
-    private static boolean isZipCompressed(String filePath) throws IOException {
-        byte b1 = 0;
-        byte b2 = 0;
-
-        try (InputStream is = new FileInputStream(filePath)) {
-            b1 = (byte) is.read();
-            b2 = (byte) is.read();
-        } catch (IOException e) {
-            throw new IOException(e);
-        }
-
-        return b1 == 0x50 && b2 == 0x4B;
     }
 
     protected static void cleanRepository(String modelRootPath) {

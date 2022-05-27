@@ -40,6 +40,7 @@ import org.eclipse.kura.executor.PrivilegedExecutorService;
 import org.eclipse.kura.executor.UnprivilegedExecutorService;
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraResponsePayload;
+import org.eclipse.kura.util.zip.UnZip;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

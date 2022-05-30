@@ -41,30 +41,32 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
 
         super(device, platform, connectionFactory);
 
-        try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
-                this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity();
-                this.iccid = getIntegratedCirquitCardId();
-                this.model = getModel();
-                this.manufacturer = getManufacturer();
-                this.revisionId = getRevisionID();
-                this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength();
+        if (device != null) {
+            try {
+                String atPort = getAtPort();
+                String gpsPort = getGpsPort();
+                if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
+                    this.serialNumber = getSerialNumber();
+                    this.imsi = getMobileSubscriberIdentity();
+                    this.iccid = getIntegratedCirquitCardId();
+                    this.model = getModel();
+                    this.manufacturer = getManufacturer();
+                    this.revisionId = getRevisionID();
+                    this.gpsSupported = isGpsSupported();
+                    this.rssi = getSignalStrength();
 
-                logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
-                logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
-                logger.trace("{} :: Model={}", getClass().getName(), this.model);
-                logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
+                    logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
+                    logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
+                    logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
+                    logger.trace("{} :: Model={}", getClass().getName(), this.model);
+                    logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
+                    logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
+                    logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
+                    logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
+                }
+            } catch (KuraException e) {
+                logger.error("Failed to initialize " + QuectelGeneric.class.getName(), e);
             }
-        } catch (KuraException e) {
-            logger.error("Failed to initialize " + QuectelGeneric.class.getName(), e);
         }
     }
 
@@ -147,6 +149,9 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
                         break;
                     case 1:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                        getQueryNetworkInformation();
+                        getRegisteredNetwork();
+                        getExtendedRegistrationStatus();
                         break;
                     case 3:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
@@ -156,6 +161,9 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
                         break;
                     case 5:
                         modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                        getQueryNetworkInformation();
+                        getRegisteredNetwork();
+                        getExtendedRegistrationStatus();
                         break;
                     default:
                     }
@@ -163,6 +171,130 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
             }
         }
         return modemRegistrationStatus;
+    }
+
+    public void getQueryNetworkInformation() throws KuraException {
+        synchronized (this.atLock) {
+            String atPort = getAtPort();
+
+            logger.debug("sendCommand getQueryNetworkInformation :: {}", QuectelGenericAtCommands.GET_QUERY_NETWORK_INFORMATION.getCommand());
+            byte[] reply;
+            CommConnection commAtConnection = openSerialPort(atPort);
+            if (!isAtReachable(commAtConnection)) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+            }
+            try {
+                reply = commAtConnection.sendCommand(QuectelGenericAtCommands.GET_QUERY_NETWORK_INFORMATION.getCommand().getBytes(),
+                        1000, 100);
+            } catch (IOException e) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            }
+            closeSerialPort(commAtConnection);
+            if (reply != null) {
+                String sQnwinfo = this.getResponseString(reply);
+                getQueryNetworkInformationReply(sQnwinfo);
+            }
+        }
+    }
+
+    public String[] getQueryNetworkInformationReply(String sQnwinfo) throws KuraException {
+        if (sQnwinfo.startsWith("+QNWINFO:")) {
+            sQnwinfo = sQnwinfo.substring("+QNWINFO:".length()).trim();
+            logger.trace("getQueryNetworkInformation() :: +QNWINFO={}", sQnwinfo);
+            asQnwinfo = sQnwinfo.split(",");
+            this.band = asQnwinfo[2].substring(1, asQnwinfo[2].length() - 1);
+            logger.trace("getBand() :: Band={}", this.band);
+            this.radio = asQnwinfo[0].substring(1, asQnwinfo[0].length() - 1);
+            logger.info("getRadio() :: Radio={}", this.radio);
+        }
+        return this.asQnwinfo;
+    }
+
+    public void getExtendedRegistrationStatus() throws KuraException {
+        synchronized (this.atLock) {
+            String atPort = getAtPort();
+
+            logger.debug("sendCommand getLac :: {}", QuectelGenericAtCommands.GET_REGISTRATION_STATUS.getCommand());
+            byte[] reply;
+            CommConnection commAtConnection = openSerialPort(atPort);
+            if (!isAtReachable(commAtConnection)) {
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+            }
+            try {
+                commAtConnection.sendCommand(QuectelGenericAtCommands.GET_EXTENDED_REGISTRATION_STATUS.getCommand().getBytes(),
+                        1000, 100);
+                reply = commAtConnection.sendCommand(QuectelGenericAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(),
+                        1000, 100);
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            } finally {
+                closeSerialPort(commAtConnection);
+            }
+            if (reply != null) {
+                String sCgreg = this.getResponseString(reply);
+                getExtendedRegistrationStatusReply(sCgreg);
+            }
+        }
+    }
+
+    public String[] getExtendedRegistrationStatusReply(String sCgreg) throws KuraException {
+        int sLac;
+        int sCi;
+        if (sCgreg.startsWith("+CGREG:")) {
+            sCgreg = sCgreg.substring("+CGREG:".length()).trim();
+            logger.trace("getLac() :: +CGREG={}", sCgreg);
+            asCgreg = sCgreg.split(",");
+            sLac = Integer.parseInt(asCgreg[2].substring(1, asCgreg[2].length() - 1), 16);
+            sCi = Integer.parseInt(asCgreg[3].substring(1, asCgreg[3].length() - 1), 16);
+            this.lac = String.valueOf(sLac);
+            this.ci = String.valueOf(sCi);
+        }
+        return asCgreg;
+    }
+
+    @Override
+    public void getRegisteredNetwork() throws KuraException {
+        synchronized (this.atLock) {
+            String atPort = getAtPort();
+
+            logger.debug("sendCommand getRegisteredNetwork :: {}", QuectelGenericAtCommands.GET_REGISTERED_NETWORK.getCommand());
+            byte[] reply;
+            CommConnection commAtConnection = openSerialPort(atPort);
+            if (!isAtReachable(commAtConnection)) {
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+            }
+            try {
+                reply = commAtConnection.sendCommand(QuectelGenericAtCommands.GET_REGISTERED_NETWORK.getCommand().getBytes(),
+                        1000, 100);
+            } catch (IOException e) {
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            } finally {
+                closeSerialPort(commAtConnection);
+            }
+            closeSerialPort(commAtConnection);
+            if (reply != null) {
+                String sQspn = this.getResponseString(reply);
+                getRegisteredNetworkReply(sQspn);
+            }
+        }
+    }
+
+    public String[] getRegisteredNetworkReply(String sQspn) throws KuraException {
+        if (sQspn.startsWith("+QSPN:")) {
+            sQspn = sQspn.substring("+QSPN:".length()).trim();
+            logger.info("getRegisteredNetwork() :: +QSPN={}", sQspn);
+            asQspn = sQspn.split(",");
+            this.plmnid = asQspn[4];
+            if (this.plmnid.length() == 7 || this.plmnid.length() == 8) {
+                this.plmnid = this.plmnid.substring(1, this.plmnid.length() - 1);
+                logger.trace("getPLMNID() :: PLMNID={}", this.plmnid);
+            }
+            this.networkName = asQspn[0].substring(1, asQspn[0].length() - 1);
+            logger.info("getNetworkName() :: Network={}", this.networkName);
+        }
+        return this.asQspn;
     }
 
     @Override

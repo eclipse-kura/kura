@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Sterwen-Technology
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.hspa;
@@ -61,6 +62,15 @@ public class HspaModem implements HspaCellularModem {
     protected Boolean modemLTE;
     protected String imsi;
     protected String iccid;
+    protected String plmnid;
+    protected String[] asQspn;
+    protected String[] asQnwinfo;
+    protected String[] asCgreg;
+    protected String networkName;
+    protected String band;
+    protected String radio;
+    protected String lac;
+    protected String ci;
 
     private ModemDevice device;
     private final String platform;
@@ -262,6 +272,16 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
+    public String getRadio() throws KuraException {
+        return this.radio;
+    }
+
+    @Override
+    public String getBand() throws KuraException {
+        return this.band;
+    }
+
+    @Override
     public boolean isGpsSupported() throws KuraException {
         return false;
     }
@@ -307,11 +327,114 @@ public class HspaModem implements HspaCellularModem {
                             mobileSubscriberIdentity = mobileSubscriberIdentity.substring("+CIMI:".length()).trim();
                         }
                         this.imsi = mobileSubscriberIdentity;
+                        logger.info("GetIMSI={}", this.imsi);
                     }
                 }
             }
         }
         return this.imsi;
+    }
+
+    @Override
+    public String getLAC() throws KuraException {
+        return this.lac;
+    }
+
+    @Override
+    public String getCI() throws KuraException {
+        return this.ci;
+    }
+
+    @Override
+    public String getPLMNID() throws KuraException {
+        return this.plmnid;
+    }
+
+    @Override
+    public String getNetworkName() throws KuraException {
+        return this.networkName;
+    }
+
+    public void getExtendedRegistrationStatus() throws KuraException {
+        synchronized (this.atLock) {
+            String atPort = getAtPort();
+
+            logger.debug("sendCommand getLac :: {}", HspaModemAtCommands.GET_REGISTRATION_STATUS2.getCommand());
+            byte[] reply;
+            CommConnection commAtConnection = openSerialPort(atPort);
+            if (!isAtReachable(commAtConnection)) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+            }
+            try {
+                commAtConnection.sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS2.getCommand().getBytes(),
+                        1000, 100);
+                reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(),
+                        1000, 100);
+            } catch (IOException e) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            }
+            closeSerialPort(commAtConnection);
+            if (reply != null) {
+                String sCgreg = this.getResponseString(reply);
+                getExtendedRegistrationStatusReply(sCgreg);
+            }
+        }
+    }
+
+    public String[] getExtendedRegistrationStatusReply(String sCgreg) throws KuraException {
+        int sLac;
+        int sCi;
+        if (sCgreg.startsWith("+CGREG:")) {
+            sCgreg = sCgreg.substring("+CGREG:".length()).trim();
+            logger.info("getLac() :: +CGREG={}", sCgreg);
+            asCgreg = sCgreg.split(",");
+            sLac = Integer.parseInt(asCgreg[2].trim(), 16);
+            sCi = Integer.parseInt(asCgreg[3].trim(), 16);
+            this.lac = String.valueOf(sLac);
+            this.ci = String.valueOf(sCi);
+            logger.info("getLAC() :: LAC={}", this.lac);
+            logger.info("getCI() :: CI={}", this.ci);
+        }
+        return this.asCgreg;
+    }
+
+    public void getRegisteredNetwork() throws KuraException {
+        synchronized (this.atLock) {
+            String atPort = getAtPort();
+
+            logger.debug("sendCommand getRegisteredNetwork :: {}", HspaModemAtCommands.GET_NETWORK.getCommand());
+            byte[] reply;
+            CommConnection commAtConnection = openSerialPort(atPort);
+            if (!isAtReachable(commAtConnection)) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+            }
+            try {
+                reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_NETWORK.getCommand().getBytes(),
+                        1000, 100);
+            } catch (IOException e) {
+                closeSerialPort(commAtConnection);
+                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+            }
+            closeSerialPort(commAtConnection);
+            if (reply != null) {
+                String sQspn = this.getResponseString(reply);
+                getRegisteredNetworkReply(sQspn);
+            }
+        }
+    }
+
+    public String[] getRegisteredNetworkReply(String sQspn) throws KuraException {
+        if (sQspn.startsWith("+COPS:")) {
+            sQspn = sQspn.substring("+COPS:".length()).trim();
+            logger.info("getRegisteredNetwork() :: +COPS={}", sQspn);
+            asQspn = sQspn.split(",");
+            this.networkName = asQspn[2].substring(1, asQspn[2].length() - 1);
+            logger.info("getNetworkName() :: Network={}", this.networkName);
+        }
+        return this.asQspn;
     }
 
     @Override
@@ -604,7 +727,7 @@ public class HspaModem implements HspaCellularModem {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
             }
-            closeSerialPort(commAtConnection);
+            closeSerialPort(commAtConnection); 
             if (reply != null) {
                 String sRegStatus = getResponseString(reply);
                 String[] regStatusSplit = sRegStatus.split(",");

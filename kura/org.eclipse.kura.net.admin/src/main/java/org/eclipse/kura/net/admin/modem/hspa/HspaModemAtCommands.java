@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Sterwen-Technology
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.hspa;
@@ -26,6 +27,8 @@ public enum HspaModemAtCommands {
     GET_SIGNAL_STRENGTH("at+csq\r\n"),
     GET_MOBILE_STATION_CLASS("at+cgclass?\r\n"),
     GET_REGISTRATION_STATUS("at+cgreg?\r\n"),
+    GET_NETWORK("at+cops?\r\n"),
+    GET_REGISTRATION_STATUS2("at+cgreg=2\r\n"),
     PDP_CONTEXT("at+cgdcont");
 
     private String command;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  Sterwen-Technology
  ******************************************************************************/
 package org.eclipse.kura.net.modem;
 
@@ -147,6 +148,36 @@ public interface CellularModem {
      * @return <code>UsbModemDevice</code>
      */
     public ModemDevice getModemDevice();
+
+    /**
+     * @since 2.4
+     */
+    public String getLAC() throws KuraException;
+
+    /**
+     * @since 2.4
+     */
+    public String getCI() throws KuraException;
+
+    /**
+     * @since 2.4
+     */
+    public String getPLMNID() throws KuraException;
+
+    /**
+     * @since 2.4
+     */
+    public String getBand() throws KuraException;
+
+    /**
+     * @since 2.4
+     */
+    public String getNetworkName() throws KuraException;
+
+    /**
+     * @since 2.4
+     */
+    public String getRadio() throws KuraException;
 
     public String getDataPort() throws KuraException;
 

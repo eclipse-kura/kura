@@ -350,9 +350,18 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
+        return getNetworkConfiguration(false);
+    }
+
+    @Override
+    public synchronized NetworkConfiguration getNetworkConfiguration(boolean recompute) throws KuraException {
+        if (recompute) {
+            updateCurrentNetworkConfiguration();
+        }
         return this.currentNetworkConfiguration;
     }
 
+    @Override
     public synchronized void updateCurrentNetworkConfiguration() throws KuraException {
         NetworkConfiguration networkConfiguration = new NetworkConfiguration();
 

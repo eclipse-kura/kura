@@ -262,7 +262,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // It will save a call to determine the iface type and it will keep InterfaceState
                 // as a state object as it should be. Maybe introduce an InterfaceStateBuilder.
                 boolean isL2Only = ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config()
-                        .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                        .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
                 currentInterfaceState = getEthernetInterfaceState(interfaceName, isL2Only);
                 if (!currentInterfaceState.equals(prevInterfaceState)) {
                     postStatusChangeEvent = true;
@@ -337,7 +337,7 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                 // FIXME: reload the configuration IFF one of above enable/disable happened
                 if (interfaceStateChanged) {
                     isL2Only = ((AbstractNetInterface<?>) currentInterfaceConfig).getIP4config()
-                            .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only ? true : false;
+                            .getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
                     currentInterfaceState = getEthernetInterfaceState(interfaceName, isL2Only);
                 }
 
@@ -496,8 +496,8 @@ public class EthernetMonitorServiceImpl implements EthernetMonitorService, Event
                     }
                 }
                 if (newNetConfig.getClass() == currentNetConfig.getClass() && !newNetConfig.equals(currentNetConfig)) {
-                    logger.debug("\tConfig changed - Current config: {}", currentNetConfig.toString());
-                    logger.debug("\tConfig changed - New config: {}", newNetConfig.toString());
+                    logger.debug("\tConfig changed - Current config: {}", currentNetConfig);
+                    logger.debug("\tConfig changed - New config: {}", newNetConfig);
                     return true;
                 }
             }

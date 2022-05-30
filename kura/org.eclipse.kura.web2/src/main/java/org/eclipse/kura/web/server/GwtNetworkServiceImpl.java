@@ -119,6 +119,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     @Override
     public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
+        long started = System.currentTimeMillis();
         List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
 
         for (GwtNetInterfaceConfig netConfig : result) {
@@ -138,6 +139,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 modemConfig.setPassword(PASSWORD_PLACEHOLDER);
             }
         }
+        logger.info("GetConfiguration {}", (System.currentTimeMillis() - started));
         return result;
     }
 
@@ -173,6 +175,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             GwtNetInterfaceConfig gwtNetConfig;
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas
                     .getNetworkInterfaceConfigs()) {
+                long started = System.currentTimeMillis();
                 logger.debug("Getting config for {} with type {}", netIfConfig.getName(), netIfConfig.getType());
 
                 logger.debug("Interface State: {}", netIfConfig.getState());
@@ -528,6 +531,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
                                             final CellularModem cellModemService = m.get();
 
+                                            long start1 = System.currentTimeMillis();
                                             try {
                                                 String imei = cellModemService.getSerialNumber();
                                                 logger.debug("Setting IMEI/MEID to {}", imei);
@@ -536,14 +540,19 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                                 logger.warn("Failed to get IMEI from modem", e);
                                             }
 
+                                            logger.info("imei {}", System.currentTimeMillis() - start1);
+                                            start1 = System.currentTimeMillis();
+
                                             try {
                                                 int rssi = cellModemService.getSignalStrength();
                                                 logger.debug("Setting Received Signal Strength to {}", rssi);
                                                 gwtModemConfig.setHwRssi(Integer.toString(rssi));
+                                                // gwtModemConfig.setHwRssi("-99");
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get Received Signal Strength from modem", e);
                                             }
-
+                                            logger.info("rssi {}", System.currentTimeMillis() - start1);
+                                            start1 = System.currentTimeMillis();
                                             try {
                                                 String iccid = cellModemService.getIntegratedCirquitCardId();
                                                 logger.debug("Setting ICCID to {}", iccid);
@@ -561,7 +570,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             }
 
                                             try {
-                                                ModemRegistrationStatus registration = cellModemService.getRegistrationStatus();
+                                                ModemRegistrationStatus registration = cellModemService
+                                                        .getRegistrationStatus();
                                                 logger.debug("Setting Registration Status to {}", registration.name());
                                                 gwtModemConfig.setHwRegistration(registration.name());
                                             } catch (KuraException e) {
@@ -622,7 +632,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get model information from modem", e);
                                             }
-
+                                            logger.info("model {}", System.currentTimeMillis() - start1);
+                                            start1 = System.currentTimeMillis();
                                             try {
                                                 boolean gpsSupported = cellModemService.isGpsSupported();
                                                 logger.debug("Setting GPS supported to {}", gpsSupported);
@@ -630,16 +641,18 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get GPS supported from modem", e);
                                             }
-
+                                            logger.info("gps {}", System.currentTimeMillis() - start1);
+                                            start1 = System.currentTimeMillis();
                                             try {
                                                 String firmwareVersion = cellModemService.getFirmwareVersion();
                                                 logger.debug("Setting firwmare version to {}", firmwareVersion);
                                                 ((GwtModemInterfaceConfig) currentConfig)
                                                         .setHwFirmware(firmwareVersion);
+                                                // ((GwtModemInterfaceConfig) currentConfig).setHwFirmware("pippo");
                                             } catch (KuraException e) {
                                                 logger.warn("Failed to get firmware version from modem", e);
                                             }
-
+                                            logger.info("fw {}", System.currentTimeMillis() - start1);
                                             return (Void) null;
                                         });
                                     }
@@ -773,6 +786,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
 
                 gwtNetConfigs.add(gwtNetConfig);
+                logger.info("GetConfigurationInternal {} {}", netIfConfig.getName(),
+                        (System.currentTimeMillis() - started));
             }
         } catch (Throwable t) {
             KuraExceptionHandler.handle(t);
@@ -811,7 +826,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)
             throws GwtKuraException {
-
+        long started = System.currentTimeMillis();
         checkXSRFToken(xsrfToken);
         ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
         Map<String, Object> properties = new HashMap<>();
@@ -847,6 +862,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         } catch (UnknownHostException | KuraException e) {
             throw new GwtKuraException(GwtKuraErrorCode.INTERNAL_ERROR, e);
         }
+        logger.info("SetConfiguration {}", (System.currentTimeMillis() - started));
     }
 
     @Override
@@ -895,7 +911,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public ArrayList<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName,
             String wirelessSsid) throws GwtKuraException {
-
+        long started = System.currentTimeMillis();
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -990,6 +1006,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             KuraExceptionHandler.handle(t);
         }
 
+        logger.info("GetHotSpots {}", (System.currentTimeMillis() - started));
         return new ArrayList<>(gwtWifiHotspotsEntries);
     }
 

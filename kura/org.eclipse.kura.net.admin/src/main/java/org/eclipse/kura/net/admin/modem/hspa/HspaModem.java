@@ -151,7 +151,7 @@ public class HspaModem implements HspaCellularModem {
                 CommConnection commAtConnection = openSerialPort(getAtPort());
                 if (!isAtReachable(commAtConnection)) {
                     closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, "Modem not available for AT commands");
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
                 try {
                     reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_SERIAL_NUMBER.getCommand().getBytes(),

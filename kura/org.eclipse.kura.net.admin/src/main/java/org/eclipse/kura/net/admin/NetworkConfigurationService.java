@@ -24,10 +24,36 @@ public interface NetworkConfigurationService {
      */
     public void setNetworkConfiguration(NetworkConfiguration networkConfiguration) throws KuraException;
 
-    /*
+    /**
      * Returns the current network configuration with actual and desired properties.
      * i.e. the current ip address as read from the system and the ip address that should be applied.
+     * 
+     * @return the current NetworkConfiguration
+     * @throws KuraException
+     * 
+     * @deprecated since 1.5. Use {@link getNetworkConfiguration(boolean recompute)) instead.
      */
+    @Deprecated
     public NetworkConfiguration getNetworkConfiguration() throws KuraException;
+
+    /**
+     * Returns the current network configuration with actual and desired properties.
+     * i.e. the current ip address as read from the system and the ip address that should be applied.
+     * 
+     * @param recompute:
+     *            if true, the configuration is updated before returning it. Otherwise, a cached configuration is
+     *            returned.
+     * @return the current NetworkConfiguration
+     * @throws KuraException
+     * @since 1.5
+     */
+    public NetworkConfiguration getNetworkConfiguration(boolean recompute) throws KuraException;
+
+    /**
+     * Update the cached configuration.
+     * 
+     * @throws KuraException
+     */
+    public void updateCurrentNetworkConfiguration() throws KuraException;
 
 }

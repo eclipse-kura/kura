@@ -242,14 +242,16 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    // FIXME: This api should be deprecated in favor of the following signature:
-    // List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
     public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
             throws KuraException {
 
         try {
             logger.debug("Getting all networkInterfaceConfigs");
-            return this.networkConfigurationService.getNetworkConfiguration().getNetInterfaceConfigs();
+            long started = System.currentTimeMillis();
+            List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> nc = this.networkConfigurationService
+                    .getNetworkConfiguration(false).getNetInterfaceConfigs();
+            logger.info("GetNetworkConfiguration {}", (System.currentTimeMillis() - started));
+            return nc;
         } catch (Exception e) {
             throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
         }
@@ -259,7 +261,9 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName) throws KuraException {
 
         ArrayList<NetConfig> netConfigs = new ArrayList<>();
-        NetworkConfiguration networkConfig = this.networkConfigurationService.getNetworkConfiguration();
+        long started = System.currentTimeMillis();
+        NetworkConfiguration networkConfig = this.networkConfigurationService.getNetworkConfiguration(false);
+        logger.info("GetNetworkConfiguration1 {}", (System.currentTimeMillis() - started));
         if (interfaceName != null && networkConfig != null) {
             try {
                 logger.debug("Getting networkInterfaceConfigs for {}", interfaceName);
@@ -1334,6 +1338,12 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         String topic = event.getTopic();
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
             this.pendingNetworkConfigurationChange = false;
+            // } else if (topic.equals(NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC)) {
+            // try {
+            // this.networkConfigurationService.updateCurrentNetworkConfiguration();
+            // } catch (KuraException e) {
+            // logger.error("WTF", e);
+            // }
         }
     }
 

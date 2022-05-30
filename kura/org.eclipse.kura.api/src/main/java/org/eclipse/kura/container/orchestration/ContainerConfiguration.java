@@ -350,6 +350,9 @@ public class ContainerConfiguration {
             return this;
         }
 
+        /**
+         * @since 2.4
+         */
         public ContainerConfigurationBuilder setEntryPoint(List<String> entryPoint) {
             this.entryPoint = entryPoint;
             return this;

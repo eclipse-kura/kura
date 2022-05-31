@@ -119,7 +119,7 @@ public interface CellularModem {
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException;
 
     /**
-     * Reports number of bytes tarnsmitted during a call
+     * Reports number of bytes transmitted during a call
      *
      * @return number of bytes transmitted
      * @throws KuraException

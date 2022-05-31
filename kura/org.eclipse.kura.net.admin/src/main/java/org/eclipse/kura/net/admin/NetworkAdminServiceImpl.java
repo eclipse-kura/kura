@@ -20,9 +20,11 @@ import java.util.EnumSet;
 import java.util.Hashtable;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -245,15 +247,22 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
             throws KuraException {
 
-        try {
-            logger.debug("Getting all networkInterfaceConfigs");
-            long started = System.currentTimeMillis();
-            List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> nc = this.networkConfigurationService
-                    .getNetworkConfiguration(false).getNetInterfaceConfigs();
-            logger.info("GetNetworkConfiguration {}", (System.currentTimeMillis() - started));
-            return nc;
-        } catch (Exception e) {
-            throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+        logger.debug("Getting all networkInterfaceConfigs");
+        long started = System.currentTimeMillis();
+        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> nc = getNetworkConfigurationInternal()
+                .getNetInterfaceConfigs();
+        logger.info("GetNetworkConfiguration {}", (System.currentTimeMillis() - started));
+        return nc;
+    }
+
+    private NetworkConfiguration getNetworkConfigurationInternal() throws KuraException {
+        Optional<NetworkConfiguration> networkConfiguration = this.networkConfigurationService
+                .getNetworkConfiguration(false);
+        if (networkConfiguration.isPresent()) {
+            return networkConfiguration.get();
+        } else {
+            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
+                    "The network configuration cannot be retrieved");
         }
     }
 
@@ -262,7 +271,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         ArrayList<NetConfig> netConfigs = new ArrayList<>();
         long started = System.currentTimeMillis();
-        NetworkConfiguration networkConfig = this.networkConfigurationService.getNetworkConfiguration(false);
+        NetworkConfiguration networkConfig = getNetworkConfigurationInternal();
         logger.info("GetNetworkConfiguration1 {}", (System.currentTimeMillis() - started));
         if (interfaceName != null && networkConfig != null) {
             try {

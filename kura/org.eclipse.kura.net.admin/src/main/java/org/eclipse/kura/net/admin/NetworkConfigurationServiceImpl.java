@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -109,7 +110,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private LinuxNetworkUtil linuxNetworkUtil;
 
     private Map<String, Object> properties;
-    private NetworkConfiguration currentNetworkConfiguration;
+    private Optional<NetworkConfiguration> currentNetworkConfiguration = Optional.empty();
 
     // ----------------------------------------------------------------
     //
@@ -344,17 +345,28 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
         // This method returns the network configuration properties without the current values.
         // i.e. the ip address that should be applied to the system, but not the actual one.
         logger.debug("getConfiguration()");
-        return new ComponentConfigurationImpl(PID, getDefinition(),
-                getNetworkConfiguration().getConfigurationProperties());
+        Optional<NetworkConfiguration> networkConfiguration = getNetworkConfiguration(false);
+        if (networkConfiguration.isPresent()) {
+            return new ComponentConfigurationImpl(PID, getDefinition(),
+                    networkConfiguration.get().getConfigurationProperties());
+        } else {
+            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
+                    "The network component configuration cannot be retrieved");
+        }
     }
 
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
-        return getNetworkConfiguration(false);
+        if (this.currentNetworkConfiguration.isPresent()) {
+            return this.currentNetworkConfiguration.get();
+        } else {
+            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
+                    "The network configuration cannot be retrieved");
+        }
     }
 
     @Override
-    public synchronized NetworkConfiguration getNetworkConfiguration(boolean recompute) throws KuraException {
+    public synchronized Optional<NetworkConfiguration> getNetworkConfiguration(boolean recompute) throws KuraException {
         if (recompute) {
             updateCurrentNetworkConfiguration();
         }
@@ -424,7 +436,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             }
         }
 
-        this.currentNetworkConfiguration = networkConfiguration;
+        this.currentNetworkConfiguration = Optional.of(networkConfiguration);
     }
 
     private void populateModemConfig(NetworkConfiguration networkConfiguration,

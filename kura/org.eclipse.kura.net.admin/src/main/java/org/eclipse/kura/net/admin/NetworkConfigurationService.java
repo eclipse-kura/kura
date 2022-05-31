@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.net.admin;
 
+import java.util.Optional;
+
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 
@@ -47,7 +49,7 @@ public interface NetworkConfigurationService {
      * @throws KuraException
      * @since 1.5
      */
-    public NetworkConfiguration getNetworkConfiguration(boolean recompute) throws KuraException;
+    public Optional<NetworkConfiguration> getNetworkConfiguration(boolean recompute) throws KuraException;
 
     /**
      * Update the cached configuration.

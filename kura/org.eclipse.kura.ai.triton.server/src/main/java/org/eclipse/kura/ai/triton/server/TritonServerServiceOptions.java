@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
@@ -145,4 +146,23 @@ public class TritonServerServiceOptions {
         }
         return stringProperty;
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.grpcPort, this.httpPort, this.isLocal, this.metricsPort, this.properties);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof TritonServerServiceOptions)) {
+            return false;
+        }
+        TritonServerServiceOptions other = (TritonServerServiceOptions) obj;
+        return this.grpcPort == other.grpcPort && this.httpPort == other.httpPort && this.isLocal == other.isLocal
+                && this.metricsPort == other.metricsPort && Objects.equals(this.properties, other.properties);
+    }
+
 }

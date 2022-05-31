@@ -404,6 +404,10 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     @Override
     public String getCSR(KeyPair keypair, X500Principal principal, String signerAlg) throws KuraException {
 
+        if (isNull(principal) || isNull(keypair) || isNull(signerAlg) || signerAlg.trim().isEmpty()) {
+            throw new IllegalArgumentException("Input parameters cannot be null!");
+        }
+
         try (StringWriter str = new StringWriter(); JcaPEMWriter pemWriter = new JcaPEMWriter(str);) {
             ContentSigner signer = new JcaContentSignerBuilder(signerAlg).build(keypair.getPrivate());
             PKCS10CertificationRequest csr = getCSRAsPKCS10Builder(keypair, principal).build(signer);
@@ -446,10 +450,8 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         if (isNull(principal) || isNull(keyPair)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
-        PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(principal,
-                keyPair.getPublic());
+        return new JcaPKCS10CertificationRequestBuilder(principal, keyPair.getPublic());
 
-        return p10Builder;
     }
 
     @Override

@@ -142,15 +142,24 @@ public interface KeystoreService {
      * Creates and persists a new keypair in the managed keystore using the specified alias
      *
      * @param alias
+     *            a string that will be used to identify the certificate in a key store.
      * @param algorithm
+     *            a string indicating the algorithm used to generate the keypair.
      * @param algorithmParameter
+     *            a set of algorithm parameters passed to the keypair generator.
      * @param signatureAlgorithm
+     *            a string indicating the signature algorithm used to sign the certificate containing the generated
+     *            keypair.
      * @param attributes
+     *            a string representing the X.500 Distinguished Name to include in the generated certificate.
      * @param secureRandom
+     *            the RNG (Random Number Generator) to use in the keypair generator.
      * @throws KuraException
      *             if the keypair cannot be created or the keypair cannot be added to the managed keystore
      * @throws IllegalArgumentException
      *             if one of the arguments is null or empty
+     * 
+     * @since 2.4
      */
     public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
             String signatureAlgorithm, String attributes, SecureRandom secureRandom) throws KuraException;
@@ -159,14 +168,21 @@ public interface KeystoreService {
      * Creates and persists a new keypair in the managed keystore using the specified alias
      *
      * @param alias
+     *            a string that will be used to identify the certificate in a key store.
      * @param algorithm
+     *            a string indicating the algorithm used to generate the keypair.
      * @param algorithmParameter
+     *            a set of algorithm parameters passed to the keypair generator.
      * @param signatureAlgorithm
+     *            a string indicating the signature algorithm used to sign the certificate containing the generated
+     *            keypair.
      * @param attributes
+     *            a string representing the X.500 Distinguished Name to include in the generated certificate.
      * @throws KuraException
      *             if the keypair cannot be created or the keypair cannot be added to the managed keystore
      * @throws IllegalArgumentException
      *             if one of the arguments is null or empty
+     * @since 2.4
      */
     public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
             String signatureAlgorithm, String attributes) throws KuraException;
@@ -175,9 +191,12 @@ public interface KeystoreService {
      * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected
      *
      * @param keyPair
+     *            a keypair holding the private and public key.
      * @param principal
+     *            an X500Name containing the subject associated with the request we are building.
      * @param signerAlg
-     * @return
+     *            a String representing the signer algorithm used to sign the certificate signing request.
+     * @return the Certificate Signing Request in PEM format.
      * @throws KuraException
      *             if the CSR cannot be computed or if it cannot be encoded
      * @throws IllegalArgumentException
@@ -188,9 +207,12 @@ public interface KeystoreService {
     /**
      *
      * @param alias
+     *            a string that will be used to identify the entity in the keystore holding the private and public keys.
      * @param principal
+     *            an X500Name containing the subject associated with the request we are building.
      * @param signerAlg
-     * @return
+     *            a String representing the signer algorithm used to sign the certificate signing request.
+     * @return the Certificate Signing Request in PEM format.
      * @throws KuraException
      *             if the alias does not correspond to a managed entry of the keystore, it refers to an entry that
      *             cannot be used to obtain a CSR or the CSR cannot be computed or encoded
@@ -203,9 +225,11 @@ public interface KeystoreService {
      * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected
      *
      * @param keyPair
+     *            a keypair holding the private and public key.
      * @param principal
-     * @param signerAlg
-     * @return
+     *            an X500Name containing the subject associated with the request we are building.
+     * @return a <code>PKCS10CertificationRequestBuilder</code> that could be used to sign a Certificate Signing Request
+     *         with a <code>ContentSigner</code>
      * @throws KuraException
      *             if the CSR cannot be computed or if it cannot be encoded
      * @throws IllegalArgumentException
@@ -217,9 +241,11 @@ public interface KeystoreService {
     /**
      *
      * @param alias
+     *            a string that will be used to identify the entity in the keystore holding the private and public keys.
      * @param principal
-     * @param signerAlg
-     * @return the <code>
+     *            an X500Name containing the subject associated with the request we are building.
+     * @return a <code>PKCS10CertificationRequestBuilder</code> that could be used to sign a Certificate Signing Request
+     *         with a <code>ContentSigner</code>
      * @throws KuraException
      *             if the alias does not correspond to a managed entry of the keystore, it refers to an entry that
      *             cannot be used to obtain a CSR or the CSR cannot be computed or encoded
@@ -260,8 +286,8 @@ public interface KeystoreService {
      * 
      * 
      * @param crl
-     *            a <code> X509CRL to be stored
-     * &#64;throws KuraException
+     *            a <code>X509CRL</code> to be stored
+     * @throws KuraException
      *             if the <code>StoredCRL</code> cannot be added.
      */
     public void addCRL(X509CRL crl) throws KuraException;

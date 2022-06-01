@@ -106,7 +106,7 @@ public interface KeystoreService {
     public List<KeyManager> getKeyManagers(String algorithm) throws KuraException;
 
     /**
-     * Creates and persists a new keypair in the managed keystore using the specified alias
+     * Creates and persists a new keypair in the managed keystore using the specified alias.
      *
      * @param alias
      * @param algorithm
@@ -122,7 +122,7 @@ public interface KeystoreService {
             throws KuraException;
 
     /**
-     * Creates and persists a new keypair in the managed keystore using the specified alias
+     * Creates and persists a new keypair in the managed keystore using the specified alias.
      *
      * @param alias
      * @param algorithm
@@ -139,7 +139,7 @@ public interface KeystoreService {
             SecureRandom secureRandom) throws KuraException;
 
     /**
-     * Creates and persists a new keypair in the managed keystore using the specified alias
+     * Creates and persists a new keypair in the managed keystore using the specified alias.
      *
      * @param alias
      *            a string that will be used to identify the certificate in a key store.
@@ -165,7 +165,7 @@ public interface KeystoreService {
             String signatureAlgorithm, String attributes, SecureRandom secureRandom) throws KuraException;
 
     /**
-     * Creates and persists a new keypair in the managed keystore using the specified alias
+     * Creates and persists a new keypair in the managed keystore using the specified alias.
      *
      * @param alias
      *            a string that will be used to identify the certificate in a key store.
@@ -188,7 +188,7 @@ public interface KeystoreService {
             String signatureAlgorithm, String attributes) throws KuraException;
 
     /**
-     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected
+     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
      *
      * @param keyPair
      *            a keypair holding the private and public key.
@@ -205,6 +205,7 @@ public interface KeystoreService {
     public String getCSR(KeyPair keyPair, X500Principal principal, String signerAlg) throws KuraException;
 
     /**
+     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
      *
      * @param alias
      *            a string that will be used to identify the entity in the keystore holding the private and public keys.
@@ -222,7 +223,7 @@ public interface KeystoreService {
     public String getCSR(String alias, X500Principal principal, String signerAlg) throws KuraException;
 
     /**
-     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected
+     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
      *
      * @param keyPair
      *            a keypair holding the private and public key.
@@ -239,6 +240,7 @@ public interface KeystoreService {
             throws KuraException;
 
     /**
+     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
      *
      * @param alias
      *            a string that will be used to identify the entity in the keystore holding the private and public keys.
@@ -283,12 +285,14 @@ public interface KeystoreService {
     public CertStore getCRLStore() throws KuraException;
 
     /**
-     * 
+     * Add a <code>X509CRL</code> to the CRLs list.
      * 
      * @param crl
      *            a <code>X509CRL</code> to be stored
      * @throws KuraException
-     *             if the <code>StoredCRL</code> cannot be added.
+     *             if the <code>X509CRL</code> cannot be added.
+     * 
+     * @since 2.4
      */
     public void addCRL(X509CRL crl) throws KuraException;
 

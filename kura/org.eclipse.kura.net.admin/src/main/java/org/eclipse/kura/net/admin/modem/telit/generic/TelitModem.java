@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
@@ -30,6 +31,7 @@ import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.admin.util.SerialUtil;
 import org.eclipse.kura.net.modem.CellularModem.SerialPortType;
 import org.eclipse.kura.net.modem.ModemDevice;
+import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.osgi.service.io.ConnectionFactory;
 import org.slf4j.Logger;
@@ -51,6 +53,8 @@ public abstract class TelitModem {
     protected Boolean gpsSupported;
     protected String imsi;
     protected String iccid;
+    protected ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+    protected String firmwareVersion;
 
     private boolean gpsEnabled;
     private ModemDevice device;
@@ -223,53 +227,66 @@ public abstract class TelitModem {
         return ret;
     }
 
-    public int getSignalStrength() throws KuraException {
+    public int getSignalStrength(boolean recompute) throws KuraException {
 
-        int signalStrength = -113;
-        synchronized (this.atLock) {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if ((atPort.equals(getDataPort()) || atPort.equals(gpsPort) && this.gpsEnabled) && this.rssi < 0) {
-                logger.trace("getSignalStrength() :: returning previously obtained RSSI={} :: m_gpsEnabled={}",
-                        this.rssi, this.gpsEnabled);
-                return this.rssi;
-            }
+        if (recompute) {
+            int signalStrength = -113;
+            synchronized (this.atLock) {
+                String atPort = getAtPort();
+                String gpsPort = getGpsPort();
+                if ((atPort.equals(getDataPort()) || atPort.equals(gpsPort) && this.gpsEnabled) && this.rssi < 0) {
+                    logger.trace("getSignalStrength() :: returning previously obtained RSSI={} :: m_gpsEnabled={}",
+                            this.rssi, this.gpsEnabled);
+                    return this.rssi;
+                }
 
-            logger.debug("sendCommand getSignalStrength :: {}", TelitModemAtCommands.GET_SIGNAL_STRENGTH.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = openSerialPort(atPort);
-            if (!isAtReachable(commAtConnection)) {
+                logger.debug("sendCommand getSignalStrength :: {}",
+                        TelitModemAtCommands.GET_SIGNAL_STRENGTH.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = openSerialPort(atPort);
+                if (!isAtReachable(commAtConnection)) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                            MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
+                }
+                try {
+                    reply = commAtConnection
+                            .sendCommand(TelitModemAtCommands.GET_SIGNAL_STRENGTH.getCommand().getBytes(), 1000, 100);
+                } catch (IOException e) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
+                }
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
-            }
-            try {
-                reply = commAtConnection.sendCommand(TelitModemAtCommands.GET_SIGNAL_STRENGTH.getCommand().getBytes(),
-                        1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
-            }
-            closeSerialPort(commAtConnection);
-            if (reply != null) {
-                String[] asCsq;
-                String sCsq = this.getResponseString(reply);
-                if (sCsq.startsWith("+CSQ:")) {
-                    sCsq = sCsq.substring("+CSQ:".length()).trim();
-                    logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
-                    asCsq = sCsq.split(",");
-                    if (asCsq.length == 2) {
-                        int rssiVal = Integer.parseInt(asCsq[0]);
-                        if (rssiVal < 99) {
-                            signalStrength = -113 + 2 * rssiVal;
-                        }
-                        logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);
-                    }
+                if (reply != null) {
+                    signalStrength = parseRssi(reply);
                 }
             }
+            this.rssi = signalStrength;
         }
-        this.rssi = signalStrength;
+        return this.rssi;
+    }
+
+    private int parseRssi(byte[] reply) {
+        int signalStrength = -113;
+        String[] asCsq;
+        String sCsq = this.getResponseString(reply);
+        if (sCsq.startsWith("+CSQ:")) {
+            sCsq = sCsq.substring("+CSQ:".length()).trim();
+            logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
+            asCsq = sCsq.split(",");
+            if (asCsq.length == 2) {
+                int rssiVal = Integer.parseInt(asCsq[0]);
+                if (rssiVal < 99) {
+                    signalStrength = -113 + 2 * rssiVal;
+                }
+                logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);
+            }
+        }
         return signalStrength;
+    }
+
+    public int getSignalStrength() throws KuraException {
+        return getSignalStrength(true);
     }
 
     public boolean isGpsSupported() throws KuraException {
@@ -773,34 +790,34 @@ public abstract class TelitModem {
     }
 
     protected String getTelitFirmwareVersion() throws KuraException {
-        String firmwareVersion = "N/A";
-        synchronized (this.atLock) {
-            CommConnection commAtConnection = null;
-            try {
-                String port = getUnusedAtPort();
-                commAtConnection = openSerialPort(port);
-                if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-                }
+        if (StringUtils.isBlank(this.firmwareVersion)) {
+            synchronized (this.atLock) {
+                CommConnection commAtConnection = null;
+                try {
+                    String port = getUnusedAtPort();
+                    commAtConnection = openSerialPort(port);
+                    if (!isAtReachable(commAtConnection)) {
+                        throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                    }
 
-                firmwareVersion = readTelitFirmwareVersion(commAtConnection);
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            } finally {
-                closeSerialPort(commAtConnection);
+                    readTelitFirmwareVersion(commAtConnection);
+                } catch (IOException e) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
+                }
             }
         }
-        return firmwareVersion;
+        return this.firmwareVersion;
     }
 
-    private String readTelitFirmwareVersion(CommConnection comm) throws IOException, KuraException {
-        String firmwareVersion = "N/A";
+    private void readTelitFirmwareVersion(CommConnection comm) throws IOException, KuraException {
+        this.firmwareVersion = "N/A";
         byte[] reply = comm.sendCommand(
                 TelitModemAtCommands.GET_REVISION.getCommand().getBytes(StandardCharsets.US_ASCII), 1000, 100);
         if (reply != null) {
-            firmwareVersion = getResponseString(reply);
+            this.firmwareVersion = getResponseString(reply);
         }
-        return firmwareVersion;
     }
 
     protected String getUnusedAtPort() throws KuraException {

@@ -107,7 +107,10 @@ public interface CellularModem {
      *
      * @throws KuraException
      * @return signal strength
+     * 
+     * @deprecated since 2.4. Use {@link getSignalStrength(boolean recompute)} instead.
      */
+    @Deprecated
     public int getSignalStrength() throws KuraException;
 
     /**
@@ -115,7 +118,10 @@ public interface CellularModem {
      *
      * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
+     * 
+     * @deprecated since 2.4. Use {@link getRegistrationStatus(boolean recompute)} instead.
      */
+    @Deprecated
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException;
 
     /**
@@ -234,4 +240,28 @@ public interface CellularModem {
      * @since 2.3
      */
     public String getFirmwareVersion() throws KuraException;
+
+    /**
+     * Reports signal strength in dBm
+     * 
+     * @param recompute:
+     *            if true the value is recomputed. Otherwise, a cached value is returned
+     * @return an integer representing the rssi
+     * @throws KuraException
+     * 
+     * @since 2.4
+     */
+    public int getSignalStrength(boolean recompute) throws KuraException;
+
+    /**
+     * Reports modem registration status
+     *
+     * @param recompute:
+     *            if true the value is recomputed. Otherwise, a cached value is returned
+     * @throws KuraException
+     * @return modem registration status as {@link ModemRegistrationStatus}
+     * 
+     * @since 2.4
+     */
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException;
 }

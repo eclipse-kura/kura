@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2019, 2021 3 PORT d.o.o. and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  3 PORT d.o.o.
  *  Sterwen-Technology
@@ -122,58 +122,59 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
     }
 
     @Override
-    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
 
-        ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getRegistrationStatus :: {}",
-                    ZteMe3630AtCommands.getRegistrationStatus.getCommand());
-            byte[] reply = null;
-            CommConnection commAtConnection = openSerialPort(getAtPort());
-            if (!isAtReachable(commAtConnection)) {
+        if (recompute) {
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getRegistrationStatus :: {}",
+                        ZteMe3630AtCommands.getRegistrationStatus.getCommand());
+                byte[] reply = null;
+                CommConnection commAtConnection = openSerialPort(getAtPort());
+                if (!isAtReachable(commAtConnection)) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                            MODEM_NOT_AVAILABLE_FOR_AT_COMMANDS + ZteMe3630.class.getName());
+                }
+                try {
+                    reply = commAtConnection
+                            .sendCommand(ZteMe3630AtCommands.getRegistrationStatus.getCommand().getBytes(), 1000, 100);
+                } catch (IOException e) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                }
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        MODEM_NOT_AVAILABLE_FOR_AT_COMMANDS + ZteMe3630.class.getName());
-            }
-            try {
-                reply = commAtConnection.sendCommand(ZteMe3630AtCommands.getRegistrationStatus.getCommand().getBytes(),
-                        1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            }
-            closeSerialPort(commAtConnection);
-            if (reply != null) {
-                String sRegStatus = getResponseString(reply);
-                String[] regStatusSplit = sRegStatus.split(",");
-                if (regStatusSplit.length >= 2) {
-                    int status = Integer.parseInt(regStatusSplit[1]);
-                    switch (status) {
-                    case 0:
-                        modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                        break;
-                    case 1:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                        getRegisteredNetwork();
-                        getExtendedRegistrationStatus();
-                        getMobileSubscriberIdentity();
-                        break;
-                    case 3:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                        break;
-                    case 5:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                        getRegisteredNetwork();
-                        getExtendedRegistrationStatus();
-                        getMobileSubscriberIdentity();
-                        break;
-                    default:
-                        modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                if (reply != null) {
+                    String sRegStatus = getResponseString(reply);
+                    String[] regStatusSplit = sRegStatus.split(",");
+                    if (regStatusSplit.length >= 2) {
+                        int status = Integer.parseInt(regStatusSplit[1]);
+                        switch (status) {
+                        case 0:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                            break;
+                        case 1:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                            getRegisteredNetwork();
+                            getExtendedRegistrationStatus();
+                            getMobileSubscriberIdentity();
+                            break;
+                        case 3:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+                            break;
+                        case 5:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                            getRegisteredNetwork();
+                            getExtendedRegistrationStatus();
+                            getMobileSubscriberIdentity();
+                            break;
+                        default:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                        }
                     }
                 }
             }
         }
-        return modemRegistrationStatus;
+        return this.modemRegistrationStatus;
     }
 
     @Override

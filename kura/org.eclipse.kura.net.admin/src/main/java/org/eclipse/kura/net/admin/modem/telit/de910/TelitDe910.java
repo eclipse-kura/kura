@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -85,53 +85,64 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     }
 
     @Override
-    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
-        ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getRegistrationStatus :: {}",
-                    TelitDe910AtCommands.getNetRegistrationStatus.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = openSerialPort(getAtPort());
-            if (!isAtReachable(commAtConnection)) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-            }
-            try {
-                reply = commAtConnection
-                        .sendCommand(TelitDe910AtCommands.getNetRegistrationStatus.getCommand().getBytes(), 1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            }
-            closeSerialPort(commAtConnection);
-            if (reply != null) {
-                String sRegStatus = getResponseString(reply);
-                if (sRegStatus.startsWith("+CREG:")) {
-                    sRegStatus = sRegStatus.substring("+CREG:".length()).trim();
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
+
+        if (recompute) {
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getRegistrationStatus :: {}",
+                        TelitDe910AtCommands.getNetRegistrationStatus.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = openSerialPort(getAtPort());
+                if (!isAtReachable(commAtConnection)) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                 }
-                String[] regStatusSplit = sRegStatus.split(",");
-                if (regStatusSplit.length >= 2) {
-                    int status = Integer.parseInt(regStatusSplit[1]);
-                    switch (status) {
-                    case 0:
-                        modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                        break;
-                    case 1:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                        break;
-                    case 3:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                        break;
-                    case 5:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                        break;
-                    default:
-                        break;
-                    }
+                try {
+                    reply = commAtConnection.sendCommand(
+                            TelitDe910AtCommands.getNetRegistrationStatus.getCommand().getBytes(), 1000, 100);
+                } catch (IOException e) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                }
+                closeSerialPort(commAtConnection);
+                if (reply != null) {
+                    parseRegistrationStatus(reply);
                 }
             }
         }
-        return modemRegistrationStatus;
+        return this.modemRegistrationStatus;
+    }
+
+    private void parseRegistrationStatus(byte[] reply) {
+        String sRegStatus = getResponseString(reply);
+        if (sRegStatus.startsWith("+CREG:")) {
+            sRegStatus = sRegStatus.substring("+CREG:".length()).trim();
+        }
+        String[] regStatusSplit = sRegStatus.split(",");
+        if (regStatusSplit.length >= 2) {
+            int status = Integer.parseInt(regStatusSplit[1]);
+            switch (status) {
+            case 0:
+                this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                break;
+            case 1:
+                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                break;
+            case 3:
+                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+                break;
+            case 5:
+                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    @Override
+    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+        return getRegistrationStatus(true);
     }
 
     @Override

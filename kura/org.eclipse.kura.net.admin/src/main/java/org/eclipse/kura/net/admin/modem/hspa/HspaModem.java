@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
@@ -57,7 +58,7 @@ public class HspaModem implements HspaCellularModem {
     protected String manufacturer;
     protected String serialNumber;
     protected String revisionId;
-    protected int rssi;
+    protected int rssi = -113;
     protected Boolean gpsSupported;
     protected Boolean modemLTE;
     protected String imsi;
@@ -71,6 +72,8 @@ public class HspaModem implements HspaCellularModem {
     protected String radio;
     protected String lac;
     protected String ci;
+    protected ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+    protected String firmwareVersion;
 
     private ModemDevice device;
     private final String platform;
@@ -229,46 +232,60 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
-    public int getSignalStrength() throws KuraException {
+    public int getSignalStrength(boolean recompute) throws KuraException {
 
-        int signalStrength = -113;
-        synchronized (this.atLock) {
-            String atPort = getAtPort();
+        if (recompute) {
+            int signalStrength = -113;
+            synchronized (this.atLock) {
+                String atPort = getAtPort();
 
-            logger.debug("sendCommand getSignalStrength :: {}", HspaModemAtCommands.GET_SIGNAL_STRENGTH.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = openSerialPort(atPort);
-            if (!isAtReachable(commAtConnection)) {
+                logger.debug("sendCommand getSignalStrength :: {}",
+                        HspaModemAtCommands.GET_SIGNAL_STRENGTH.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = openSerialPort(atPort);
+                if (!isAtReachable(commAtConnection)) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                }
+                try {
+                    reply = commAtConnection
+                            .sendCommand(HspaModemAtCommands.GET_SIGNAL_STRENGTH.getCommand().getBytes(), 1000, 100);
+                } catch (IOException e) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                }
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-            }
-            try {
-                reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_SIGNAL_STRENGTH.getCommand().getBytes(),
-                        1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            }
-            closeSerialPort(commAtConnection);
-            if (reply != null) {
-                String[] asCsq;
-                String sCsq = this.getResponseString(reply);
-                if (sCsq.startsWith("+CSQ:")) {
-                    sCsq = sCsq.substring("+CSQ:".length()).trim();
-                    logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
-                    asCsq = sCsq.split(",");
-                    if (asCsq.length == 2) {
-                        int rssiVal = Integer.parseInt(asCsq[0]);
-                        if (rssiVal < 99) {
-                            signalStrength = -113 + 2 * rssiVal;
-                        }
-                        logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);
-                    }
+                if (reply != null) {
+                    signalStrength = parseRssi(reply);
                 }
             }
+            this.rssi = signalStrength;
         }
-        this.rssi = signalStrength;
+        return this.rssi;
+    }
+
+    private int parseRssi(byte[] reply) {
+        int signalStrength = -113;
+        String[] asCsq;
+        String sCsq = this.getResponseString(reply);
+        if (sCsq.startsWith("+CSQ:")) {
+            sCsq = sCsq.substring("+CSQ:".length()).trim();
+            logger.trace("getSignalStrength() :: +CSQ={}", sCsq);
+            asCsq = sCsq.split(",");
+            if (asCsq.length == 2) {
+                int rssiVal = Integer.parseInt(asCsq[0]);
+                if (rssiVal < 99) {
+                    signalStrength = -113 + 2 * rssiVal;
+                }
+                logger.trace("getSignalStrength() :: signalStrength={}", signalStrength);
+            }
+        }
         return signalStrength;
+    }
+
+    @Override
+    public int getSignalStrength() throws KuraException {
+        return getSignalStrength(true);
     }
 
     @Override
@@ -367,10 +384,10 @@ public class HspaModem implements HspaCellularModem {
                 throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
-                commAtConnection.sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS2.getCommand().getBytes(),
-                        1000, 100);
-                reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(),
-                        1000, 100);
+                commAtConnection.sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS2.getCommand().getBytes(), 1000,
+                        100);
+                reply = commAtConnection
+                        .sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(), 1000, 100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -389,9 +406,9 @@ public class HspaModem implements HspaCellularModem {
         if (sCgreg.startsWith("+CGREG:")) {
             sCgreg = sCgreg.substring("+CGREG:".length()).trim();
             logger.info("getLac() :: +CGREG={}", sCgreg);
-            asCgreg = sCgreg.split(",");
-            sLac = Integer.parseInt(asCgreg[2].trim(), 16);
-            sCi = Integer.parseInt(asCgreg[3].trim(), 16);
+            this.asCgreg = sCgreg.split(",");
+            sLac = Integer.parseInt(this.asCgreg[2].trim(), 16);
+            sCi = Integer.parseInt(this.asCgreg[3].trim(), 16);
             this.lac = String.valueOf(sLac);
             this.ci = String.valueOf(sCi);
             logger.info("getLAC() :: LAC={}", this.lac);
@@ -412,8 +429,8 @@ public class HspaModem implements HspaCellularModem {
                 throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
-                reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_NETWORK.getCommand().getBytes(),
-                        1000, 100);
+                reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_NETWORK.getCommand().getBytes(), 1000,
+                        100);
             } catch (IOException e) {
                 closeSerialPort(commAtConnection);
                 throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
@@ -426,12 +443,12 @@ public class HspaModem implements HspaCellularModem {
         }
     }
 
-    public String[] getRegisteredNetworkReply(String sQspn) throws KuraException {
+    public String[] getRegisteredNetworkReply(String sQspn) {
         if (sQspn.startsWith("+COPS:")) {
             sQspn = sQspn.substring("+COPS:".length()).trim();
             logger.info("getRegisteredNetwork() :: +COPS={}", sQspn);
-            asQspn = sQspn.split(",");
-            this.networkName = asQspn[2].substring(1, asQspn[2].length() - 1);
+            this.asQspn = sQspn.split(",");
+            this.networkName = this.asQspn[2].substring(1, this.asQspn[2].length() - 1);
             logger.info("getNetworkName() :: Network={}", this.networkName);
         }
         return this.asQspn;
@@ -708,44 +725,57 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
-    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
 
-        ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getRegistrationStatus :: {}",
-                    HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = openSerialPort(getAtPort());
-            if (!isAtReachable(commAtConnection)) {
+        if (recompute) {
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getRegistrationStatus :: {}",
+                        HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = openSerialPort(getAtPort());
+                if (!isAtReachable(commAtConnection)) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                }
+                try {
+                    reply = commAtConnection.sendCommand(
+                            HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(), 1000, 100);
+                } catch (IOException e) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                }
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-            }
-            try {
-                reply = commAtConnection
-                        .sendCommand(HspaModemAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(), 1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            }
-            closeSerialPort(commAtConnection); 
-            if (reply != null) {
-                String sRegStatus = getResponseString(reply);
-                String[] regStatusSplit = sRegStatus.split(",");
-                if (regStatusSplit.length >= 2) {
-                    int status = Integer.parseInt(regStatusSplit[1]);
-                    if (status == 0) {
-                        modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                    } else if (status == 1) {
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                    } else if (status == 3) {
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                    } else if (status == 5) {
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                if (reply != null) {
+                    String sRegStatus = getResponseString(reply);
+                    String[] regStatusSplit = sRegStatus.split(",");
+                    if (regStatusSplit.length >= 2) {
+                        int status = Integer.parseInt(regStatusSplit[1]);
+                        switch (status) {
+                        case 0:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                            break;
+                        case 1:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                            break;
+                        case 3:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+                            break;
+                        case 5:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                            break;
+                        default:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                        }
                     }
                 }
             }
         }
-        return modemRegistrationStatus;
+        return this.modemRegistrationStatus;
+    }
+
+    @Override
+    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+        return getRegistrationStatus(true);
     }
 
     @Override
@@ -876,33 +906,33 @@ public class HspaModem implements HspaCellularModem {
 
     @Override
     public String getFirmwareVersion() throws KuraException {
-        String firmwareVersion = "N/A";
-        synchronized (this.atLock) {
-            CommConnection commAtConnection = null;
-            try {
-                String port = getAtPort();
-                commAtConnection = openSerialPort(port);
-                if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-                }
+        if (StringUtils.isBlank(this.firmwareVersion)) {
+            synchronized (this.atLock) {
+                CommConnection commAtConnection = null;
+                try {
+                    String port = getAtPort();
+                    commAtConnection = openSerialPort(port);
+                    if (!isAtReachable(commAtConnection)) {
+                        throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                    }
 
-                firmwareVersion = readFirmwareVersion(commAtConnection);
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            } finally {
-                closeSerialPort(commAtConnection);
+                    readFirmwareVersion(commAtConnection);
+                } catch (IOException e) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
+                }
             }
         }
-        return firmwareVersion;
+        return this.firmwareVersion;
     }
 
-    protected String readFirmwareVersion(CommConnection comm) throws IOException, KuraException {
-        String firmwareVersion = "N/A";
+    protected void readFirmwareVersion(CommConnection comm) throws IOException, KuraException {
+        this.firmwareVersion = "N/A";
         byte[] reply = comm.sendCommand(
                 HspaModemAtCommands.GET_REVISION.getCommand().getBytes(StandardCharsets.US_ASCII), 1000, 100);
         if (reply != null) {
-            firmwareVersion = getResponseString(reply);
+            this.firmwareVersion = getResponseString(reply);
         }
-        return firmwareVersion;
     }
 }

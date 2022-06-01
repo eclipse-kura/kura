@@ -284,8 +284,18 @@ public class SierraUsb598 implements EvdoCellularModem {
     }
 
     @Override
+    public int getSignalStrength(boolean recompute) throws KuraException {
+        return 0;
+    }
+
+    @Override
     public int getSignalStrength() throws KuraException {
         return 0;
+    }
+
+    @Override
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
+        return null;
     }
 
     @Override

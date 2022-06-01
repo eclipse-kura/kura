@@ -104,6 +104,7 @@ import org.slf4j.LoggerFactory;
 
 public class FilesystemKeystoreServiceImpl implements KeystoreService, ConfigurableComponent {
 
+    private static final String NULL_INPUT_PARAMS_MESSAGE = "Input parameters cannot be null!";
     private static final String KURA_SERVICE_PID = "kura.service.pid";
     private static final String PEM_CERTIFICATE_REQUEST_TYPE = "CERTIFICATE REQUEST";
 
@@ -405,7 +406,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     public String getCSR(KeyPair keypair, X500Principal principal, String signerAlg) throws KuraException {
 
         if (isNull(principal) || isNull(keypair) || isNull(signerAlg) || signerAlg.trim().isEmpty()) {
-            throw new IllegalArgumentException("Input parameters cannot be null!");
+            throw new IllegalArgumentException(FilesystemKeystoreServiceImpl.NULL_INPUT_PARAMS_MESSAGE);
         }
 
         try (StringWriter str = new StringWriter(); JcaPEMWriter pemWriter = new JcaPEMWriter(str);) {
@@ -428,7 +429,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     public String getCSR(String alias, X500Principal principal, String signerAlg) throws KuraException {
         if (isNull(principal) || isNull(alias) || alias.trim().isEmpty() || isNull(signerAlg)
                 || signerAlg.trim().isEmpty()) {
-            throw new IllegalArgumentException("Input parameters cannot be null!");
+            throw new IllegalArgumentException(FilesystemKeystoreServiceImpl.NULL_INPUT_PARAMS_MESSAGE);
         }
 
         Entry entry = getEntry(alias);
@@ -448,7 +449,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(KeyPair keyPair, X500Principal principal)
             throws KuraException {
         if (isNull(principal) || isNull(keyPair)) {
-            throw new IllegalArgumentException("Input parameters cannot be null!");
+            throw new IllegalArgumentException(FilesystemKeystoreServiceImpl.NULL_INPUT_PARAMS_MESSAGE);
         }
         return new JcaPKCS10CertificationRequestBuilder(principal, keyPair.getPublic());
 
@@ -458,7 +459,7 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
     public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(String alias, X500Principal principal)
             throws KuraException {
         if (isNull(principal) || isNull(alias) || alias.trim().isEmpty()) {
-            throw new IllegalArgumentException("Input parameters cannot be null!");
+            throw new IllegalArgumentException(FilesystemKeystoreServiceImpl.NULL_INPUT_PARAMS_MESSAGE);
         }
 
         Entry entry = getEntry(alias);

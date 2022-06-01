@@ -77,7 +77,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceImpl.class);
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
     private static final int N_ATTEMPT = 6;
-    private static final int WAIT_ATTEMPT_MS = 250;
+    private static final int WAIT_ATTEMPT_MS = 500;
 
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;

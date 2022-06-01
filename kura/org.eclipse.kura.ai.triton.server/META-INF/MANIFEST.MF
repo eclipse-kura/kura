@@ -7,7 +7,6 @@ Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ClassPath: .,
- lib/bcpg-jdk15on-1.68.jar,
  lib/grpc-netty-shaded-1.33.1.jar,
  lib/grpc-protobuf-1.33.1.jar,
  lib/grpc-stub-1.33.1.jar,
@@ -31,6 +30,9 @@ Import-Package: com.google.common.base;version="25.0.0",
  org.bouncycastle.jcajce.spec;version="1.68.0",
  org.bouncycastle.jcajce.util;version="1.68.0",
  org.bouncycastle.jce.provider;version="1.68.0",
+ org.bouncycastle.openpgp;version="1.71.0",
+ org.bouncycastle.openpgp.jcajce;version="1.71.0",
+ org.bouncycastle.openpgp.operator.jcajce;version="1.71.0",
  org.bouncycastle.util;version="1.68.0",
  org.bouncycastle.util.encoders;version="1.68.0",
  org.bouncycastle.util.io;version="1.68.0",

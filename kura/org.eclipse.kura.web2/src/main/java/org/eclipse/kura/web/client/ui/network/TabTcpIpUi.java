@@ -595,8 +595,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             // changed to WAN
             if (isWanEnabled()) {
                 EntryClassUi.showWaitModal();
-                TabTcpIpUi.this.gwtNetworkService
-                        .findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
+                TabTcpIpUi.this.gwtNetworkService.findNetInterfaceConfigurations(false,
+                        new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {

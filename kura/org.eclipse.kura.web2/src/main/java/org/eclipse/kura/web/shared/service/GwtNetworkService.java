@@ -36,7 +36,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RequiredPermissions(KuraPermission.NETWORK_ADMIN)
 public interface GwtNetworkService extends RemoteService {
 
-    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException;
+    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute) throws GwtKuraException;
 
     @Audit(componentName = "UI Network", description = "Update network interface configurations")
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)

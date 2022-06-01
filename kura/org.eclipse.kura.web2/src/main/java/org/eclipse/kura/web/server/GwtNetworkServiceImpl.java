@@ -485,14 +485,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                                         .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
                                             gwtNetConfig.setHwRssi("N/A");
                                         } else {
-                                            try {
-                                                int rssi = wifiClientMonitorService
-                                                        .getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
-                                                logger.debug("Setting Received Signal Strength to {}", rssi);
-                                                gwtNetConfig.setHwRssi(Integer.toString(rssi));
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed", e);
-                                            }
+                                            fillRssi(wifiClientMonitorService, gwtNetConfig, netIfConfig.getName(),
+                                                    wifiConfig.getSSID());
                                         }
                                     }
                                 } else if (activeWirelessMode == WifiMode.ADHOC) {
@@ -828,6 +822,17 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
         logger.debug("Returning");
         return gwtNetConfigs;
+    }
+
+    private void fillRssi(WifiClientMonitorService wifiClientMonitorService, GwtNetInterfaceConfig gwtNetConfig,
+            String interfaceName, String ssid) {
+        try {
+            int rssi = wifiClientMonitorService.getSignalLevel(interfaceName, ssid, false);
+            logger.debug("Setting Received Signal Strength to {}", rssi);
+            gwtNetConfig.setHwRssi(Integer.toString(rssi));
+        } catch (KuraException e) {
+            logger.warn("Failed", e);
+        }
     }
 
     private GwtNetInterfaceConfig createGwtNetConfig(

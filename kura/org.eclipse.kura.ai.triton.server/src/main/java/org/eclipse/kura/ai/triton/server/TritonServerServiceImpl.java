@@ -76,6 +76,8 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceImpl.class);
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
+    private static final int N_ATTEMPT = 6;
+    private static final int WAIT_ATTEMPT_MS = 250;
 
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
@@ -154,11 +156,11 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
         int counter = 0;
         while (this.tritonServerLocalManager.isLocalServerRunning()) {
-            if (counter++ >= 6) {
+            if (counter++ >= N_ATTEMPT) {
                 logger.warn("Cannot stop local server instance.");
                 return;
             }
-            TritonServerLocalManager.sleepFor(250);
+            TritonServerLocalManager.sleepFor(WAIT_ATTEMPT_MS);
         }
 
         if (this.options.modelsAreEncrypted()) {
@@ -199,11 +201,11 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
         int counter = 0;
         while (!isEngineReady()) {
-            if (counter++ >= 6) {
+            if (counter++ >= N_ATTEMPT) {
                 logger.warn("Cannot load models since server is not ready.");
                 return;
             }
-            TritonServerLocalManager.sleepFor(250);
+            TritonServerLocalManager.sleepFor(WAIT_ATTEMPT_MS);
         }
 
         this.options.getModels().forEach(modelName -> {
@@ -248,11 +250,11 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         if (this.options.modelsAreEncrypted()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
-                if (counter++ >= 6) {
+                if (counter++ >= N_ATTEMPT) {
                     logger.warn("Cannot check if model was correctly loaded. Wiping decrypted model anyway");
                     break;
                 }
-                TritonServerLocalManager.sleepFor(250);
+                TritonServerLocalManager.sleepFor(WAIT_ATTEMPT_MS);
             }
             TritonServerEncryptionUtils.cleanRepository(decryptionFolderPath);
         }

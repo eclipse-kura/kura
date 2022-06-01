@@ -61,7 +61,7 @@ public interface EnrollmentService {
      * @throws KuraException
      *             if it is impossible to retrieve the certificate store.
      */
-    public CertStore getCACertificate() throws KuraException;
+    public CertStore getCACertificates() throws KuraException;
 
     /**
      * Get the Client certificate stored in the relative

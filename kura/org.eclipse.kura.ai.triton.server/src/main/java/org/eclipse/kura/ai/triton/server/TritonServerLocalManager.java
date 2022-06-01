@@ -74,7 +74,7 @@ public class TritonServerLocalManager {
     private void startLocalServer() {
         this.commandExecutorService.execute(this.serverCommand, status -> {
             if (status.getExitStatus().isSuccessful()) {
-                logger.info("Nvidia Triton Server started");
+                logger.info("Nvidia Triton Server gracefully shutdown");
             } else {
                 logger.info("Nvidia Triton Server not started. Exit value: {}", status.getExitStatus().getExitCode());
             }

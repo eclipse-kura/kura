@@ -151,6 +151,20 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     private void stopLocalInstance() {
         this.tritonServerLocalManager.stop();
+
+        // Wait for server to be stopped correctly
+        int counter = 0;
+        while (this.tritonServerLocalManager.isLocalServerRunning()) {
+            if (counter++ >= 6) {
+                logger.warn("Cannot stop local server instance.");
+                return;
+            }
+            logger.info("Server still running"); // DEBUG
+            TritonServerLocalManager.sleepFor(250);
+        }
+        logger.info("Server down");
+
+
         if (this.options.modelsAreEncrypted()) {
             TritonServerEncryptionUtils.cleanRepository(decryptionFolderPath);
             try {

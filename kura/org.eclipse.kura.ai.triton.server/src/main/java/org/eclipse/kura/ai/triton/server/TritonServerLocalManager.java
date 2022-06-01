@@ -119,7 +119,7 @@ public class TritonServerLocalManager {
         }
     }
 
-    private boolean isLocalServerRunning() {
+    public boolean isLocalServerRunning() {
         boolean isRunning = false;
         if (this.commandExecutorService.isRunning(TRITONSERVER)) {
             isRunning = true;

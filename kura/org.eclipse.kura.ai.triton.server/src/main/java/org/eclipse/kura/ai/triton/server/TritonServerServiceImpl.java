@@ -162,7 +162,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             logger.info("Server still running"); // DEBUG
             TritonServerLocalManager.sleepFor(250);
         }
-        logger.info("Server down");
+        logger.info("Server down"); // DEBUG
 
 
         if (this.options.modelsAreEncrypted()) {

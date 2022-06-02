@@ -536,8 +536,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
         if (containerDescription.getContainerNetworkConfiguration().getNetworkMode().isPresent()
                 && !containerDescription.getContainerNetworkConfiguration().getNetworkMode().get().trim().isEmpty()) {
-            configuration.withNetworkMode(containerDescription.getContainerNetworkConfiguration().getNetworkMode().get()
-                    .toLowerCase().trim());
+            configuration.withNetworkMode(containerDescription.getContainerNetworkConfiguration().getNetworkMode().get().trim());
         }
 
         return configuration;

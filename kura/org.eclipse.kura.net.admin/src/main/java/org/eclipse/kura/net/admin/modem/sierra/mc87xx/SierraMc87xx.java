@@ -149,13 +149,25 @@ public class SierraMc87xx implements HspaCellularModem {
     }
 
     @Override
+    public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
+        // not implemented
+        return null;
+    }
+
+    @Override
     public String getMobileSubscriberIdentity() throws KuraException {
+        return getMobileSubscriberIdentity(true);
+    }
+
+    @Override
+    public String getIntegratedCirquitCardId(boolean recompute) throws KuraException {
+        // not implemented
         return null;
     }
 
     @Override
     public String getIntegratedCirquitCardId() throws KuraException {
-        return null;
+        return getIntegratedCirquitCardId(true);
     }
 
     @Override

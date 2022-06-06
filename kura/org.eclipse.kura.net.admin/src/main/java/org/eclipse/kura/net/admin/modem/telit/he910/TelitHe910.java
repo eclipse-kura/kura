@@ -137,8 +137,9 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
                     reply = commAtConnection.sendCommand(TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand()
                             .getBytes(StandardCharsets.US_ASCII), 1000, 100);
                 } catch (IOException e) {
-                    closeSerialPort(commAtConnection);
                     throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
                 }
                 if (reply != null) {
                     String sRegStatus = getResponseString(reply);

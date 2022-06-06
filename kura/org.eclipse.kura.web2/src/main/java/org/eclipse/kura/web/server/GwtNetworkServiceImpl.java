@@ -550,7 +550,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             start1 = System.currentTimeMillis();
 
                                             try {
-                                                String iccid = cellModemService.getIntegratedCirquitCardId();
+                                                String iccid = cellModemService.getIntegratedCirquitCardId(recompute);
                                                 logger.debug("Setting ICCID to {}", iccid);
                                                 gwtModemConfig.setHwICCID(iccid);
                                             } catch (KuraException e) {
@@ -561,7 +561,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             start1 = System.currentTimeMillis();
 
                                             try {
-                                                String imsi = cellModemService.getMobileSubscriberIdentity();
+                                                String imsi = cellModemService.getMobileSubscriberIdentity(recompute);
                                                 logger.debug("Setting IMSI to {}", imsi);
                                                 gwtModemConfig.setHwIMSI(imsi);
                                             } catch (KuraException e) {

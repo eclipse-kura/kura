@@ -319,37 +319,48 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
-    public String getMobileSubscriberIdentity() throws KuraException {
-        synchronized (this.atLock) {
-            if (this.imsi == null && isSimCardReady()) {
-                logger.debug("sendCommand getIMSI :: {}", HspaModemAtCommands.GET_IMSI.getCommand());
-                byte[] reply;
-                CommConnection commAtConnection = openSerialPort(getAtPort());
-                if (!isAtReachable(commAtConnection)) {
-                    closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-                }
-                try {
-                    reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_IMSI.getCommand().getBytes(), 1000,
-                            100);
-                } catch (IOException e) {
-                    closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-                }
-                closeSerialPort(commAtConnection);
-                if (reply != null) {
-                    String mobileSubscriberIdentity = getResponseString(reply);
-                    if (mobileSubscriberIdentity != null && !mobileSubscriberIdentity.isEmpty()) {
-                        if (mobileSubscriberIdentity.startsWith("+CIMI:")) {
-                            mobileSubscriberIdentity = mobileSubscriberIdentity.substring("+CIMI:".length()).trim();
-                        }
-                        this.imsi = mobileSubscriberIdentity;
-                        logger.info("GetIMSI={}", this.imsi);
+    public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
+        if (recompute) {
+            synchronized (this.atLock) {
+                if (this.imsi == null && isSimCardReady()) {
+                    logger.debug("sendCommand getIMSI :: {}", HspaModemAtCommands.GET_IMSI.getCommand());
+                    byte[] reply;
+                    CommConnection commAtConnection = openSerialPort(getAtPort());
+                    if (!isAtReachable(commAtConnection)) {
+                        closeSerialPort(commAtConnection);
+                        throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                     }
+                    try {
+                        reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_IMSI.getCommand().getBytes(), 1000,
+                                100);
+                    } catch (IOException e) {
+                        closeSerialPort(commAtConnection);
+                        throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                    }
+                    closeSerialPort(commAtConnection);
+                    parseIMSI(reply);
                 }
             }
         }
         return this.imsi;
+    }
+
+    private void parseIMSI(byte[] reply) {
+        if (reply != null) {
+            String mobileSubscriberIdentity = getResponseString(reply);
+            if (mobileSubscriberIdentity != null && !mobileSubscriberIdentity.isEmpty()) {
+                if (mobileSubscriberIdentity.startsWith("+CIMI:")) {
+                    mobileSubscriberIdentity = mobileSubscriberIdentity.substring("+CIMI:".length()).trim();
+                }
+                this.imsi = mobileSubscriberIdentity;
+                logger.info("GetIMSI={}", this.imsi);
+            }
+        }
+    }
+
+    @Override
+    public String getMobileSubscriberIdentity() throws KuraException {
+        return getMobileSubscriberIdentity(true);
     }
 
     @Override
@@ -455,36 +466,47 @@ public class HspaModem implements HspaCellularModem {
     }
 
     @Override
-    public String getIntegratedCirquitCardId() throws KuraException {
-        synchronized (this.atLock) {
-            if (this.iccid == null && isSimCardReady()) {
-                logger.debug("sendCommand getICCID :: {}", HspaModemAtCommands.GET_ICCID.getCommand());
-                byte[] reply;
-                CommConnection commAtConnection = openSerialPort(getAtPort());
-                if (!isAtReachable(commAtConnection)) {
-                    closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-                }
-                try {
-                    reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_ICCID.getCommand().getBytes(), 1000,
-                            100);
-                } catch (IOException e) {
-                    closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-                }
-                closeSerialPort(commAtConnection);
-                if (reply != null) {
-                    String cirquitCardId = getResponseString(reply);
-                    if (cirquitCardId != null && !cirquitCardId.isEmpty()) {
-                        if (cirquitCardId.startsWith("+CCID:")) {
-                            cirquitCardId = cirquitCardId.substring("+CCID:".length()).trim();
-                        }
-                        this.iccid = cirquitCardId;
+    public String getIntegratedCirquitCardId(boolean recompute) throws KuraException {
+        if (recompute) {
+            synchronized (this.atLock) {
+                if (this.iccid == null && isSimCardReady()) {
+                    logger.debug("sendCommand getICCID :: {}", HspaModemAtCommands.GET_ICCID.getCommand());
+                    byte[] reply;
+                    CommConnection commAtConnection = openSerialPort(getAtPort());
+                    if (!isAtReachable(commAtConnection)) {
+                        closeSerialPort(commAtConnection);
+                        throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
                     }
+                    try {
+                        reply = commAtConnection.sendCommand(HspaModemAtCommands.GET_ICCID.getCommand().getBytes(),
+                                1000, 100);
+                    } catch (IOException e) {
+                        closeSerialPort(commAtConnection);
+                        throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                    }
+                    closeSerialPort(commAtConnection);
+                    parseICCID(reply);
                 }
             }
         }
         return this.iccid;
+    }
+
+    private void parseICCID(byte[] reply) {
+        if (reply != null) {
+            String cirquitCardId = getResponseString(reply);
+            if (cirquitCardId != null && !cirquitCardId.isEmpty()) {
+                if (cirquitCardId.startsWith("+CCID:")) {
+                    cirquitCardId = cirquitCardId.substring("+CCID:".length()).trim();
+                }
+                this.iccid = cirquitCardId;
+            }
+        }
+    }
+
+    @Override
+    public String getIntegratedCirquitCardId() throws KuraException {
+        return getIntegratedCirquitCardId(true);
     }
 
     @Override

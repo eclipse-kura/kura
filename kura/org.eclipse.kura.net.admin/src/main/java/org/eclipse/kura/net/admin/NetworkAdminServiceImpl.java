@@ -244,20 +244,26 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
-            throws KuraException {
+    public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs(
+            boolean recompute) throws KuraException {
 
         logger.debug("Getting all networkInterfaceConfigs");
         long started = System.currentTimeMillis();
-        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> nc = getNetworkConfigurationInternal()
-                .getNetInterfaceConfigs();
+        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> nc = getNetworkConfigurationInternal(
+                recompute).getNetInterfaceConfigs();
         logger.info("GetNetworkConfiguration {}", (System.currentTimeMillis() - started));
         return nc;
     }
 
-    private NetworkConfiguration getNetworkConfigurationInternal() throws KuraException {
+    @Override
+    public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
+            throws KuraException {
+        return getNetworkInterfaceConfigs(true);
+    }
+
+    private NetworkConfiguration getNetworkConfigurationInternal(boolean recompute) throws KuraException {
         Optional<NetworkConfiguration> networkConfiguration = this.networkConfigurationService
-                .getNetworkConfiguration(false);
+                .getNetworkConfiguration(recompute);
         if (networkConfiguration.isPresent()) {
             return networkConfiguration.get();
         } else {
@@ -271,7 +277,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         ArrayList<NetConfig> netConfigs = new ArrayList<>();
         long started = System.currentTimeMillis();
-        NetworkConfiguration networkConfig = getNetworkConfigurationInternal();
+        NetworkConfiguration networkConfig = getNetworkConfigurationInternal(false);
         logger.info("GetNetworkConfiguration1 {}", (System.currentTimeMillis() - started));
         if (interfaceName != null && networkConfig != null) {
             try {

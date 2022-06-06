@@ -472,7 +472,7 @@ public abstract class TelitModem {
     public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
         if (recompute) {
             synchronized (this.atLock) {
-                if (this.imsi == null && isTelitSimCardReady()) {
+                if (this.imsi == null || this.imsi.equals("ERROR") && isTelitSimCardReady()) {
                     logger.debug("sendCommand getIMSI :: {}", TelitModemAtCommands.GET_IMSI.getCommand());
                     byte[] reply;
                     CommConnection commAtConnection = openSerialPort(getAtPort());

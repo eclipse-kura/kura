@@ -56,4 +56,5 @@ jobs:
       with:
         title: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
         commit-message: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
+        body: "Automated changes by _Release Notes automation_ action: add Kura ${{ steps.get-version.outputs.version }} version release notes"
         branch-suffix: short-commit-hash

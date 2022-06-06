@@ -950,6 +950,8 @@ fi]]>
             <entry key="osgi.bundles" operation="+"
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcutil_${org.bouncycastle.jar.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
+                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bcpg_${org.bouncycastle.jar.version}.jar@3" />
+			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/bluez-dbus-osgi_${bluez-dbus-osgi.version}.jar@3" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/jakarta.activation-api_${jakarta.activation-api.version}.jar@2" />

@@ -513,6 +513,11 @@
                                   <version>${org.bouncycastle.version}</version>
                                 </artifactItem>
                                 <artifactItem>
+                                    <groupId>org.bouncycastle</groupId>
+                                    <artifactId>bcpg-jdk18on</artifactId>
+                                    <version>${org.bouncycastle.version}</version>
+                                  </artifactItem>
+                                <artifactItem>
                                     <groupId>com.eurotech</groupId>
                                     <artifactId>gpsd4java</artifactId>
                                     <version>${com.eurotech.gpsd4java.version}</version>
@@ -620,10 +625,11 @@
                                 <move file="target/source/plugins/geronimo-jta_1.1_spec.jar" tofile="target/source/plugins/geronimo-jta_1.1_spec_${org.apache.geronimo.specs.jta.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.activemq.artemis.jar" tofile="target/source/plugins/org.apache.activemq.artemis_${org.apache.activemq.artemis.version}.jar"/>
                                 <move file="target/source/plugins/org.apache.felix.useradmin.jar" tofile="target/source/plugins/org.apache.felix.useradmin_${org.apache.felix.useradmin.version}.jar"/>
-                                <move file="target/source/plugins/bcpkix-jdk18on.jar" tofile="target/source/plugins/org.bouncycastle.bcpkix-jdk18on_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcprov-jdk18on.jar" tofile="target/source/plugins/org.bouncycastle.bcprov-jdk18on_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bctls-jdk18on.jar" tofile="target/source/plugins/org.bouncycastle.bctls-jdk18on_${org.bouncycastle.version}.jar"/>
-                                <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/org.bouncycastle.bcutil-jdk18on_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bcpkix-jdk18on.jar" tofile="target/source/plugins/bcpkix_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bcprov-jdk18on.jar" tofile="target/source/plugins/bcprov_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bctls-jdk18on.jar" tofile="target/source/plugins/bctls_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/bcutil_${org.bouncycastle.version}.jar"/>
+                                <move file="target/source/plugins/bcpg-jdk18on.jar" tofile="target/source/plugins/bcpg_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
                             </tasks>
                         </configuration>

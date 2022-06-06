@@ -175,7 +175,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
             GwtNetInterfaceConfig gwtNetConfig;
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas
-                    .getNetworkInterfaceConfigs()) {
+                    .getNetworkInterfaceConfigs(recompute)) {
                 long started = System.currentTimeMillis();
                 logger.debug("Getting config for {} with type {}", netIfConfig.getName(), netIfConfig.getType());
 

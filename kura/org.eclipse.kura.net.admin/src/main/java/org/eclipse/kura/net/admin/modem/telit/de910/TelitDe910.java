@@ -57,13 +57,13 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
             String gpsPort = getGpsPort();
             if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
                 this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity();
-                this.iccid = getIntegratedCirquitCardId();
+                this.imsi = getMobileSubscriberIdentity(true);
+                this.iccid = getIntegratedCirquitCardId(true);
                 this.model = getModel();
                 this.manufacturer = getManufacturer();
                 this.revisionId = getRevisionID();
                 this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength();
+                this.rssi = getSignalStrength(true);
 
                 logger.trace("TelitDe910() :: Serial Number={}", this.serialNumber);
                 logger.trace("TelitDe910() :: IMSI={}", this.imsi);

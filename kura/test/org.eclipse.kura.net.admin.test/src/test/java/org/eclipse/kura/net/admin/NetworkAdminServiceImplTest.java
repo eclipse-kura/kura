@@ -25,6 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
+import static org.mockito.Matchers.anyBoolean;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
@@ -93,10 +95,10 @@ public class NetworkAdminServiceImplTest {
         WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(interfaceName);
         nc.addNetInterfaceConfig(netInterfaceConfig);
 
-        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+        when(networkConfigurationServiceMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> configs = nasi
-                .getNetworkInterfaceConfigs();
+                .getNetworkInterfaceConfigs(false);
 
         assertEquals(1, configs.size());
         assertEquals(interfaceName, configs.get(0).getName());
@@ -129,9 +131,9 @@ public class NetworkAdminServiceImplTest {
         netInterfaceConfig = new WifiInterfaceConfigImpl("intf2");
         nc.addNetInterfaceConfig(netInterfaceConfig);
 
-        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+        when(networkConfigurationServiceMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
-        List<NetConfig> configs = nasi.getNetworkInterfaceConfigs(interfaceName);
+        List<NetConfig> configs = nasi.getNetworkInterfaceConfigs(interfaceName, false);
 
         assertEquals(1, configs.size());
         DhcpServerConfigIP4 cfgdhcp = (DhcpServerConfigIP4) configs.get(0);

@@ -51,13 +51,13 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
             String gpsPort = getGpsPort();
             if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
                 this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity();
-                this.iccid = getIntegratedCirquitCardId();
+                this.imsi = getMobileSubscriberIdentity(true);
+                this.iccid = getIntegratedCirquitCardId(true);
                 this.model = getModel();
                 this.manufacturer = getManufacturer();
                 this.revisionId = getRevisionID();
                 this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength();
+                this.rssi = getSignalStrength(true);
 
                 logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
                 logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
@@ -130,51 +130,55 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
                         ZteMe3630AtCommands.getRegistrationStatus.getCommand());
                 byte[] reply = null;
                 CommConnection commAtConnection = openSerialPort(getAtPort());
-                if (!isAtReachable(commAtConnection)) {
-                    closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                            MODEM_NOT_AVAILABLE_FOR_AT_COMMANDS + ZteMe3630.class.getName());
-                }
+                checkConnection(commAtConnection);
                 try {
                     reply = commAtConnection
                             .sendCommand(ZteMe3630AtCommands.getRegistrationStatus.getCommand().getBytes(), 1000, 100);
-                } catch (IOException e) {
-                    closeSerialPort(commAtConnection);
-                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-                }
-                closeSerialPort(commAtConnection);
-                if (reply != null) {
-                    String sRegStatus = getResponseString(reply);
-                    String[] regStatusSplit = sRegStatus.split(",");
-                    if (regStatusSplit.length >= 2) {
-                        int status = Integer.parseInt(regStatusSplit[1]);
-                        switch (status) {
-                        case 0:
-                            this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                            break;
-                        case 1:
-                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                            getRegisteredNetwork();
-                            getExtendedRegistrationStatus();
-                            getMobileSubscriberIdentity();
-                            break;
-                        case 3:
-                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                            break;
-                        case 5:
-                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                            getRegisteredNetwork();
-                            getExtendedRegistrationStatus();
-                            getMobileSubscriberIdentity();
-                            break;
-                        default:
-                            this.modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                    if (reply != null) {
+                        String sRegStatus = getResponseString(reply);
+                        String[] regStatusSplit = sRegStatus.split(",");
+                        if (regStatusSplit.length >= 2) {
+                            int status = Integer.parseInt(regStatusSplit[1]);
+                            switch (status) {
+                            case 0:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                                break;
+                            case 1:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                                getRegisteredNetwork();
+                                getExtendedRegistrationStatus();
+                                getMobileSubscriberIdentity();
+                                break;
+                            case 3:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+                                break;
+                            case 5:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                                getRegisteredNetwork();
+                                getExtendedRegistrationStatus();
+                                getMobileSubscriberIdentity();
+                                break;
+                            default:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                            }
                         }
                     }
+                } catch (KuraException | IOException e) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
                 }
             }
         }
         return this.modemRegistrationStatus;
+    }
+
+    private void checkConnection(CommConnection commAtConnection) throws KuraException {
+        if (!isAtReachable(commAtConnection)) {
+            closeSerialPort(commAtConnection);
+            throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                    MODEM_NOT_AVAILABLE_FOR_AT_COMMANDS + ZteMe3630.class.getName());
+        }
     }
 
     @Override

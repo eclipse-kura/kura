@@ -273,31 +273,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
     }
 
     @Override
-    public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName) throws KuraException {
+    public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName, boolean recompute) throws KuraException {
 
-        ArrayList<NetConfig> netConfigs = new ArrayList<>();
+        List<NetConfig> netConfigs = new ArrayList<>();
         long started = System.currentTimeMillis();
-        NetworkConfiguration networkConfig = getNetworkConfigurationInternal(false);
+        NetworkConfiguration networkConfig = getNetworkConfigurationInternal(recompute);
         logger.info("GetNetworkConfiguration1 {}", (System.currentTimeMillis() - started));
         if (interfaceName != null && networkConfig != null) {
             try {
                 logger.debug("Getting networkInterfaceConfigs for {}", interfaceName);
                 if (networkConfig.getNetInterfaceConfigs() != null
                         && !networkConfig.getNetInterfaceConfigs().isEmpty()) {
-                    for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig
-                            .getNetInterfaceConfigs()) {
-                        if (interfaceName.equals(netInterfaceConfig.getName())) {
-                            List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
-                                    .getNetInterfaceAddresses();
-                            if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
-                                for (NetInterfaceAddressConfig netInterfaceAddressConfig : netInterfaceAddressConfigs) {
-                                    netConfigs.addAll(netInterfaceAddressConfig.getConfigs());
-                                }
-                            }
-
-                            break;
-                        }
-                    }
+                    netConfigs = getNetConfigs(interfaceName, networkConfig);
                 }
             } catch (Exception e) {
                 throw new KuraException(KuraErrorCode.INTERNAL_ERROR, e);
@@ -305,6 +292,29 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         }
 
         return netConfigs;
+    }
+
+    private List<NetConfig> getNetConfigs(String interfaceName, NetworkConfiguration networkConfig) {
+        ArrayList<NetConfig> netConfigs = new ArrayList<>();
+        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig
+                .getNetInterfaceConfigs()) {
+            if (interfaceName.equals(netInterfaceConfig.getName())) {
+                List<? extends NetInterfaceAddressConfig> netInterfaceAddressConfigs = netInterfaceConfig
+                        .getNetInterfaceAddresses();
+                if (netInterfaceAddressConfigs != null && !netInterfaceAddressConfigs.isEmpty()) {
+                    netInterfaceAddressConfigs.forEach(
+                            netInterfaceAddressConfig -> netConfigs.addAll(netInterfaceAddressConfig.getConfigs()));
+                }
+
+                break;
+            }
+        }
+        return netConfigs;
+    }
+
+    @Override
+    public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName) throws KuraException {
+        return getNetworkInterfaceConfigs(interfaceName, true);
     }
 
     @SuppressWarnings("checkstyle:methodLength")
@@ -1078,7 +1088,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getWifiInterfaceConfigs()
             throws KuraException {
-        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
+        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs(
+                false);
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiNetInterfaceConfigs = new ArrayList<>();
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
@@ -1542,7 +1553,8 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
     private WifiMode getWifiMode(String ifaceName) throws KuraException {
         WifiMode wifiMode = WifiMode.UNKNOWN;
-        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs();
+        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = getNetworkInterfaceConfigs(
+                false);
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
             if (netInterfaceConfig.getName().equals(ifaceName)) {
                 List<? extends NetInterfaceAddressConfig> netInterfaceAddresses = netInterfaceConfig

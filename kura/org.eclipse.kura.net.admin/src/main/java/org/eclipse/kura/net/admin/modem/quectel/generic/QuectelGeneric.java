@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2020, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -47,13 +47,13 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
                 String gpsPort = getGpsPort();
                 if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
                     this.serialNumber = getSerialNumber();
-                    this.imsi = getMobileSubscriberIdentity();
-                    this.iccid = getIntegratedCirquitCardId();
+                    this.imsi = getMobileSubscriberIdentity(true);
+                    this.iccid = getIntegratedCirquitCardId(true);
                     this.model = getModel();
                     this.manufacturer = getManufacturer();
                     this.revisionId = getRevisionID();
                     this.gpsSupported = isGpsSupported();
-                    this.rssi = getSignalStrength();
+                    this.rssi = getSignalStrength(true);
 
                     logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
                     logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
@@ -184,6 +184,8 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
             getQueryNetworkInformationReply(sQnwinfo);
         }
 
+        logger.debug("sendCommand getRegisteredNetwork :: {}",
+                QuectelGenericAtCommands.GET_REGISTERED_NETWORK.getCommand());
         reply = commAtConnection.sendCommand(QuectelGenericAtCommands.GET_REGISTERED_NETWORK.getCommand().getBytes(),
                 1000, 100);
         if (reply != null) {
@@ -191,8 +193,12 @@ public class QuectelGeneric extends HspaModem implements HspaCellularModem {
             getRegisteredNetworkReply(sQspn);
         }
 
+        logger.debug("sendCommand getExtendedRegistrationStatus :: {}",
+                QuectelGenericAtCommands.GET_EXTENDED_REGISTRATION_STATUS.getCommand());
         commAtConnection.sendCommand(QuectelGenericAtCommands.GET_EXTENDED_REGISTRATION_STATUS.getCommand().getBytes(),
                 1000, 100);
+        logger.debug("sendCommand getRegistrationStatus :: {}",
+                QuectelGenericAtCommands.GET_REGISTRATION_STATUS.getCommand());
         reply = commAtConnection.sendCommand(QuectelGenericAtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(),
                 1000, 100);
         if (reply != null) {

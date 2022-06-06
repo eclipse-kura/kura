@@ -1,0 +1,59 @@
+name: "Release Notes automation"
+
+on:
+  workflow_dispatch:
+    inputs:
+        target_branch:
+          type: string
+          default: 'master'
+          description: Target branch
+          required: true
+        starting_commit:
+          type: string
+          description: Commit from which to start generating the release notes
+          required: true
+
+jobs:
+  main:
+    name: Generate Release Notes
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout target branch
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.target_branch }}
+        fetch-depth: '0'
+
+    - name: Get version
+      id: get-version
+      uses: JActions/maven-version@v1.0.0
+      with:
+        pom: ./kura/pom.xml
+
+    - name: Download git-changelog-command-line tool
+      id: download-changelog-cli
+      uses: clausnz/github-action-download-maven-artifact@master
+      with:
+        url: 'https://repo1.maven.org'
+        repository: 'maven2'
+        groupId: 'se.bjurr.gitchangelog'
+        artifactId: 'git-changelog-command-line'
+        version: '1.100.2'
+        extension: 'jar'
+
+    - name: Generate Release Notes
+      run: |
+        java -jar ${{ steps.download-changelog-cli.outputs.file }} \
+        -fc "${{ github.event.inputs.starting_commit }}" \
+        -ex "{\"version\":\"${{ steps.get-version.outputs.version }}\"}" \
+        -t .github/release_notes_template/template.hbs \
+        -hhf .github/release_notes_template/helper.hbs \
+        -of kura/distrib/RELEASE_NOTES.txt
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
+      with:
+        title: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
+        commit-message: "chore: add Kura ${{ steps.get-version.outputs.version }} release notes"
+        branch-suffix: short-commit-hash

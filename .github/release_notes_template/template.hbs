@@ -1,0 +1,71 @@
+Eclipse Kura - {{extended.version}} - {{{date}}}
+-------------------------------------------------------------------------------------------------
+Description:
+[TODO]
+
+{{#issues}}
+{{! Features section }}
+{{#ifContainsType commits type='feat'}}
+
+Features:
+  {{#commits}}
+    {{#ifCommitType . type='feat'}}
+  * {{firstLetters hash number='10'}} - {{#eachCommitScope .}}[{{.}}] {{/eachCommitScope}}{{{commitDescription .}}} ({{authorName}})
+    {{/ifCommitType}}
+  {{/commits}}
+{{/ifContainsType}}
+{{! Target environments section }}
+
+Target Environments:
+[TODO]
+{{! Breaking changes section }}
+{{#ifContainsBreaking commits}}
+
+Breaking changes:
+  {{#commits}}
+    {{#ifCommitBreaking .}}
+  * {{firstLetters hash number='10'}} - {{#eachCommitScope .}}[{{.}}] {{/eachCommitScope}}{{{commitDescription .}}} ({{authorName}})
+    {{/ifCommitBreaking}}
+  {{/commits}}
+{{/ifContainsBreaking}}
+{{! Bug Fixes section }}
+{{#ifContainsType commits type='fix'}}
+
+Bug Fixes:
+  {{#commits}}
+    {{#ifCommitType . type='fix'}}
+  * {{firstLetters hash number='10'}} - {{#eachCommitScope .}}[{{.}}] {{/eachCommitScope}}{{{commitDescription .}}} ({{authorName}})
+    {{/ifCommitType}}
+  {{/commits}}
+{{/ifContainsType}}
+{{! Deprecated APIs section }}
+{{#ifContainsType commits type='deprecate'}}
+
+Deprecated APIs:
+  {{#commits}}
+    {{#ifCommitType . type='deprecate'}}
+  * {{firstLetters hash number='10'}} - {{{commitDescription .}}} ({{authorName}})
+    {{/ifCommitType}}
+  {{/commits}}
+{{/ifContainsType}}
+{{! Target Platform updates section }}
+{{#ifContainsType commits type='build'}}
+
+Target Platform Updates:
+  {{#commits}}
+    {{#ifCommitType . type='build'}}
+  * {{firstLetters hash number='10'}} - {{{commitDescription .}}} ({{authorName}})
+    {{/ifCommitType}}
+  {{/commits}}
+{{/ifContainsType}}
+{{! Known issues section }}
+
+Known Issues:
+[TODO]
+{{! Changelog section }}
+
+Changelog:
+{{#commits}}
+  * {{firstLetters hash number='10'}} - {{#eachCommitScope .}}[{{.}}] {{/eachCommitScope}}{{{commitDescription .}}} ({{authorName}})
+{{/commits}}
+{{/issues}}

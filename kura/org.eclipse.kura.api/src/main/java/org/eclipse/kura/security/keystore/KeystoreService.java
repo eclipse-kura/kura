@@ -223,7 +223,8 @@ public interface KeystoreService {
     public String getCSR(String alias, X500Principal principal, String signerAlg) throws KuraException;
 
     /**
-     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
+     * Creates and returns a <code>PKCS10CertificationRequestBuilder</code> for the given keypair based on the provided
+     * principal and signer algorithm selected.
      *
      * @param keyPair
      *            a keypair holding the private and public key.
@@ -240,7 +241,8 @@ public interface KeystoreService {
             throws KuraException;
 
     /**
-     * Creates and returns a CSR for the given keypair based on the provided principal and signer algorithm selected.
+     * Creates and returns a <code>PKCS10CertificationRequestBuilder</code> for the given keypair based on the provided
+     * principal and signer algorithm selected.
      *
      * @param alias
      *            a string that will be used to identify the entity in the keystore holding the private and public keys.

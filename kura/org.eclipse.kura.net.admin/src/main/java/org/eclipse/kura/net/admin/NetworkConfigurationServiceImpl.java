@@ -24,8 +24,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -101,12 +101,11 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private EventAdmin eventAdmin;
     private UsbService usbService;
     private ModemManagerService modemManagerService;
-    private CommandExecutorService executorService;
+    private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
 
     private List<NetworkConfigurationVisitor> writeVisitors;
 
-    private ScheduledExecutorService executorUtil;
     private LinuxNetworkUtil linuxNetworkUtil;
 
     private Map<String, Object> properties;
@@ -160,12 +159,12 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     public void setExecutorService(CommandExecutorService executorService) {
-        this.executorService = executorService;
+        this.commandExecutorService = executorService;
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        if (this.executorService.equals(executorService)) {
-            this.executorService = null;
+        if (this.commandExecutorService.equals(executorService)) {
+            this.commandExecutorService = null;
         }
     }
 
@@ -186,11 +185,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     // ----------------------------------------------------------------
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("activate(componentContext, properties)...");
-        this.executorUtil = Executors.newSingleThreadScheduledExecutor();
-
         initVisitors();
 
-        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         if (properties == null) {
             logger.debug("Got null properties...");
         } else {
@@ -212,7 +209,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     public void deactivate(ComponentContext componentContext) {
         logger.debug("deactivate()");
         this.writeVisitors = null;
-        this.executorUtil.shutdownNow();
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
@@ -260,7 +256,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                 NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
 
                 for (NetworkConfigurationVisitor visitor : getVisitors()) {
-                    visitor.setExecutorService(this.executorService);
+                    visitor.setExecutorService(this.commandExecutorService);
                     networkConfiguration.accept(visitor);
                 }
 

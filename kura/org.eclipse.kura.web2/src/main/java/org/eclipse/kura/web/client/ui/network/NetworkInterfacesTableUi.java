@@ -73,7 +73,7 @@ public class NetworkInterfacesTableUi extends Composite {
         this.session = s;
         this.tabs = tabsPanel;
         initTable();
-        loadData(true);
+        loadData(false);
 
         this.selectionModel.addSelectionChangeHandler(event -> {
             if (NetworkInterfacesTableUi.this.selection == NetworkInterfacesTableUi.this.selectionModel

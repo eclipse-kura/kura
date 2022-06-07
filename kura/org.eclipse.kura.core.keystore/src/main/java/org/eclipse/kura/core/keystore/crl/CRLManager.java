@@ -127,18 +127,22 @@ public class CRLManager implements Closeable {
     }
 
     public synchronized List<X509CRL> getCrls() {
-        return store.getCRLs().stream().map(StoredCRL::getCrl).collect(Collectors.toList());
+        return this.store.getCRLs().stream().map(StoredCRL::getCrl).collect(Collectors.toList());
     }
 
     public CertStore getCertStore() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        return store.getCertStore();
+        return this.store.getCertStore();
+    }
+
+    public CRLStore getCRLStore() {
+        return this.store;
     }
 
     @Override
     public void close() {
-        listener = Optional.empty();
-        updateExecutor.shutdown();
-        downloadExecutor.shutdown();
+        this.listener = Optional.empty();
+        this.updateExecutor.shutdown();
+        this.downloadExecutor.shutdown();
     }
 
     private void requestUpdate() {
@@ -155,14 +159,15 @@ public class CRLManager implements Closeable {
         boolean changed = false;
         final long now = System.nanoTime();
 
-        for (final DistributionPointState state : referencedDistributionPoints) {
+        for (final DistributionPointState state : this.referencedDistributionPoints) {
 
-            final Optional<StoredCRL> storedCrl = store.getCRLs().stream()
+            final Optional<StoredCRL> storedCrl = this.store.getCRLs().stream()
                     .filter(c -> c.getDistributionPoints().equals(state.distributionPoints)).findAny();
 
             if (!storedCrl.isPresent() || storedCrl.get().isExpired() || !state.lastDownloadInstantNanos.isPresent()
                     || now - state.lastDownloadInstantNanos.getAsLong() > this.forceUpdateIntervalNanos) {
-                final CompletableFuture<X509CRL> future = CRLUtil.fetchCRL(state.distributionPoints, downloadExecutor);
+                final CompletableFuture<X509CRL> future = CRLUtil.fetchCRL(state.distributionPoints,
+                        this.downloadExecutor);
 
                 try {
                     final X509CRL crl = future.get(1, TimeUnit.MINUTES);
@@ -183,7 +188,7 @@ public class CRLManager implements Closeable {
                 .noneMatch(p -> p.distributionPoints.equals(c.getDistributionPoints())));
 
         if (changed) {
-            listener.ifPresent(Listener::onCRLCacheChanged);
+            this.listener.ifPresent(Listener::onCRLCacheChanged);
         }
     }
 
@@ -205,8 +210,8 @@ public class CRLManager implements Closeable {
             }
         }
 
-        if (verifier.verifyCRL(newCrl)) {
-            store.storeCRL(new StoredCRL(state.distributionPoints, newCrl));
+        if (this.verifier.verifyCRL(newCrl)) {
+            this.store.storeCRL(new StoredCRL(state.distributionPoints, newCrl));
             state.lastDownloadInstantNanos = OptionalLong.of(now);
             return true;
         } else {

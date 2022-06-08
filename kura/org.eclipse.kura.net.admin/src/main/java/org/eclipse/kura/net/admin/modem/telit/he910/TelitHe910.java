@@ -59,32 +59,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     public TelitHe910(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         super(device, platform, connectionFactory);
-
-        try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
-                this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity(true);
-                this.iccid = getIntegratedCirquitCardId(true);
-                this.model = getModel();
-                this.manufacturer = getManufacturer();
-                this.revisionId = getRevisionID();
-                this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength(true);
-
-                logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
-                logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
-                logger.trace("{} :: Model={}", getClass().getName(), this.model);
-                logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to initialize TelitHe910", e);
-        }
+        initModemParameters();
     }
 
     @Override

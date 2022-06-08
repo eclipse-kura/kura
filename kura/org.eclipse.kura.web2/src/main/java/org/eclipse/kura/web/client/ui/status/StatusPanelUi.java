@@ -88,11 +88,11 @@ public class StatusPanelUi extends Composite {
 
         loadStatusTable(this.statusGrid, this.statusGridProvider);
 
-        this.statusRefresh.addClickHandler(e -> loadStatusData());
+        this.statusRefresh.addClickHandler(e -> loadStatusData(true));
 
         EventService.Handler stateChangeHandler = eventInfo -> {
             if (StatusPanelUi.this.isVisible() && StatusPanelUi.this.isAttached()) {
-                loadStatusData();
+                loadStatusData(false);
             }
         };
 
@@ -133,11 +133,11 @@ public class StatusPanelUi extends Composite {
     }
 
     // fetch table data
-    public void loadStatusData() {
+    public void loadStatusData(boolean recompute) {
         this.statusGridProvider.getList().clear();
         RequestQueue.submit(c -> this.gwtXSRFService
                 .generateSecurityToken(c.callback(token -> StatusPanelUi.this.gwtStatusService.getDeviceConfig(token,
-                        StatusPanelUi.this.currentSession.isNetAdminAvailable(), c.callback(result -> {
+                        StatusPanelUi.this.currentSession.isNetAdminAvailable(), recompute, c.callback(result -> {
                             String title = "cloudStatus";
                             StatusPanelUi.this.statusGridProvider.getList()
                                     .add(new GwtGroupedNVPair(" ", msgs.getString(title), " "));

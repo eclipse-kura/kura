@@ -51,32 +51,7 @@ public class TelitDe910 extends TelitModem implements EvdoCellularModem {
     public TelitDe910(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         super(device, platform, connectionFactory);
-
-        try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
-                this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity(true);
-                this.iccid = getIntegratedCirquitCardId(true);
-                this.model = getModel();
-                this.manufacturer = getManufacturer();
-                this.revisionId = getRevisionID();
-                this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength(true);
-
-                logger.trace("TelitDe910() :: Serial Number={}", this.serialNumber);
-                logger.trace("TelitDe910() :: IMSI={}", this.imsi);
-                logger.trace("TelitDe910() :: ICCID={}", this.iccid);
-                logger.trace("TelitDe910() :: Model={}", this.model);
-                logger.trace("TelitDe910() :: Manufacturer={}", this.manufacturer);
-                logger.trace("TelitDe910() :: Revision ID={}", this.revisionId);
-                logger.trace("TelitDe910() :: GPS Supported={}", this.gpsSupported);
-                logger.trace("TelitDe910() :: RSSI={}", this.rssi);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to initialize TelitDe910", e);
-        }
+        initModemParameters();
     }
 
     @Override

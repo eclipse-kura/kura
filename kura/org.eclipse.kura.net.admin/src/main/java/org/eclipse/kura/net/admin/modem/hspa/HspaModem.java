@@ -31,7 +31,6 @@ import org.eclipse.kura.linux.net.modem.SupportedUsbModemsInfo;
 import org.eclipse.kura.linux.net.modem.UsbModemDriver;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.admin.modem.HspaCellularModem;
-import org.eclipse.kura.net.admin.modem.telit.he910.TelitHe910;
 import org.eclipse.kura.net.admin.util.SerialUtil;
 import org.eclipse.kura.net.modem.ModemDevice;
 import org.eclipse.kura.net.modem.ModemPdpContext;
@@ -48,6 +47,8 @@ public class HspaModem implements HspaCellularModem {
     private static final Logger logger = LoggerFactory.getLogger(HspaModem.class);
 
     protected static final String MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG = "Modem not available for AT commands";
+    private static final String NO_SERIAL_PORTS_AVAILABLE = "No serial ports available";
+    private static final String UNSUPPORTED_MODEM_DEVICE = "Unsupported modem device";
 
     // FIXME PDP context should not be hard coded
     protected int pdpContext = 1;
@@ -84,6 +85,37 @@ public class HspaModem implements HspaCellularModem {
         this.device = device;
         this.platform = platform;
         this.connectionFactory = connectionFactory;
+    }
+
+    public void initModemParameters() {
+        if (device != null) {
+            try {
+                String atPort = getAtPort();
+                if (atPort != null) {
+                    this.serialNumber = getSerialNumber();
+                    this.imsi = getMobileSubscriberIdentity(true);
+                    this.iccid = getIntegratedCirquitCardId(true);
+                    this.model = getModel();
+                    this.manufacturer = getManufacturer();
+                    this.revisionId = getRevisionID();
+                    this.gpsSupported = isGpsSupported();
+                    this.rssi = getSignalStrength(true);
+                    this.firmwareVersion = getFirmwareVersion();
+
+                    logger.debug("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
+                    logger.debug("{} :: IMSI={}", getClass().getName(), this.imsi);
+                    logger.debug("{} :: ICCID={}", getClass().getName(), this.iccid);
+                    logger.debug("{} :: Model={}", getClass().getName(), this.model);
+                    logger.debug("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
+                    logger.debug("{} :: Revision ID={}", getClass().getName(), this.revisionId);
+                    logger.debug("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
+                    logger.debug("{} :: RSSI={}", getClass().getName(), this.rssi);
+                    logger.debug("{} :: FW version={}", getClass().getName(), this.firmwareVersion);
+                }
+            } catch (KuraException e) {
+                logger.error("Failed to initialize modem", e);
+            }
+        }
     }
 
     @Override
@@ -411,7 +443,7 @@ public class HspaModem implements HspaCellularModem {
         }
     }
 
-    public String[] getExtendedRegistrationStatusReply(String sCgreg) throws KuraException {
+    public String[] getExtendedRegistrationStatusReply(String sCgreg) {
         int sLac;
         int sCi;
         if (sCgreg.startsWith("+CGREG:")) {
@@ -522,10 +554,10 @@ public class HspaModem implements HspaCellularModem {
                     throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No PPP serial port available");
                 }
             } else {
-                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, UNSUPPORTED_MODEM_DEVICE);
             }
         } else {
-            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, NO_SERIAL_PORTS_AVAILABLE);
         }
         return port;
     }
@@ -543,10 +575,10 @@ public class HspaModem implements HspaCellularModem {
                     throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No AT serial port available");
                 }
             } else {
-                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, UNSUPPORTED_MODEM_DEVICE);
             }
         } else {
-            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, NO_SERIAL_PORTS_AVAILABLE);
         }
         return port;
     }
@@ -567,10 +599,10 @@ public class HspaModem implements HspaCellularModem {
                     throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No GPS serial port available");
                 }
             } else {
-                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
+                throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, UNSUPPORTED_MODEM_DEVICE);
             }
         } else {
-            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, "No serial ports available");
+            throw new KuraException(KuraErrorCode.SERIAL_PORT_NOT_EXISTING, NO_SERIAL_PORTS_AVAILABLE);
         }
         return port;
     }
@@ -635,8 +667,7 @@ public class HspaModem implements HspaCellularModem {
             CommConnection commAtConnection = openSerialPort(getAtPort());
             if (!isAtReachable(commAtConnection)) {
                 closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG + TelitHe910.class.getName());
+                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
             }
             try {
                 reply = commAtConnection.sendCommand(formGetPdpContextAtCommand().getBytes(), 1000, 100);
@@ -724,7 +755,7 @@ public class HspaModem implements HspaCellularModem {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
-            // ignore
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -866,7 +897,7 @@ public class HspaModem implements HspaCellularModem {
                 throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "No usbModemInfo available");
             }
         } else {
-            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, "Unsupported modem device");
+            throw new KuraException(KuraErrorCode.UNAVAILABLE_DEVICE, UNSUPPORTED_MODEM_DEVICE);
         }
         return modemTechnologyTypes;
     }

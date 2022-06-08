@@ -62,12 +62,41 @@ public abstract class TelitModem {
     private final ConnectionFactory connectionFactory;
     private List<NetConfig> netConfigs = null;
 
-    public TelitModem(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
+    protected TelitModem(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         this.device = device;
         this.platform = platform;
         this.connectionFactory = connectionFactory;
         this.gpsEnabled = false;
+    }
+
+    public void initModemParameters() {
+        if (device != null) {
+            try {
+                String atPort = getAtPort();
+                if (atPort != null) {
+                    this.serialNumber = getSerialNumber();
+                    this.imsi = getMobileSubscriberIdentity(true);
+                    this.iccid = getIntegratedCirquitCardId(true);
+                    this.model = getModel();
+                    this.manufacturer = getManufacturer();
+                    this.revisionId = getRevisionID();
+                    this.gpsSupported = isGpsSupported();
+                    this.rssi = getSignalStrength(true);
+
+                    logger.debug("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
+                    logger.debug("{} :: IMSI={}", getClass().getName(), this.imsi);
+                    logger.debug("{} :: ICCID={}", getClass().getName(), this.iccid);
+                    logger.debug("{} :: Model={}", getClass().getName(), this.model);
+                    logger.debug("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
+                    logger.debug("{} :: Revision ID={}", getClass().getName(), this.revisionId);
+                    logger.debug("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
+                    logger.debug("{} :: RSSI={}", getClass().getName(), this.rssi);
+                }
+            } catch (KuraException e) {
+                logger.error("Failed to initialize modem", e);
+            }
+        }
     }
 
     public void reset() {

@@ -37,6 +37,6 @@ public interface GwtStatusService extends RemoteService {
      * @return
      * @throws GwtKuraException
      */
-    public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
+    public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin, boolean recompute)
             throws GwtKuraException;
 }

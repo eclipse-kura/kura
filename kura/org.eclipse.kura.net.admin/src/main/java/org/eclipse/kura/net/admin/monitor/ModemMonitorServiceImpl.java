@@ -900,7 +900,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             int rssi = 0;
 
             try {
-                rssi = modem.getSignalStrength();
+                rssi = modem.getSignalStrength(true);
             } catch (KuraException e) {
                 logger.error("monitor() :: Failed to obtain signal strength", e);
             }

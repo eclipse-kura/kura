@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.metatype.AD;
 import org.eclipse.kura.configuration.metatype.OCD;
@@ -69,9 +70,7 @@ import org.osgi.service.event.EventHandler;
 public class NetworkConfigurationServiceImplTest {
 
     @Test
-    public void testActivateDeactivate() throws NoSuchFieldException {
-        // test activate and deactivate sequence
-
+    public void testActivate() throws NoSuchFieldException {
         AtomicBoolean inited = new AtomicBoolean(false);
 
         NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
@@ -105,15 +104,6 @@ public class NetworkConfigurationServiceImplTest {
         svc.activate(componentContextMock, properties);
 
         assertTrue(inited.get());
-
-        ScheduledExecutorService executor = (ScheduledExecutorService) TestUtil.getFieldValue(svc, "executorUtil");
-
-        assertNotNull(executor);
-        assertFalse(executor.isShutdown());
-
-        svc.deactivate(componentContextMock);
-
-        assertTrue(executor.isShutdown());
     }
 
     @Test
@@ -130,6 +120,7 @@ public class NetworkConfigurationServiceImplTest {
             }
         };
 
+        NetworkService networkService = mock(NetworkService.class);
         ComponentContext componentContextMock = mock(ComponentContext.class);
         BundleContext bundleCtxMock = mock(BundleContext.class);
         when(componentContextMock.getBundleContext()).thenReturn(bundleCtxMock);
@@ -156,6 +147,7 @@ public class NetworkConfigurationServiceImplTest {
         Map<String, Object> properties = new HashMap<>();
         properties.put("net.interfaces", "");
 
+        svc.setNetworkService(networkService);
         svc.activate(componentContextMock, properties);
 
         synchronized (lock) {
@@ -265,7 +257,17 @@ public class NetworkConfigurationServiceImplTest {
 
     @Test
     public void testGetNetworkConfiguration() throws KuraException, NoSuchFieldException {
-        NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl();
+        NetworkConfigurationServiceImpl svc = new NetworkConfigurationServiceImpl() {
+
+            @Override
+            protected void initVisitors() {
+            }
+
+            @Override
+            protected List<NetworkConfigurationVisitor> getVisitors() {
+                return new ArrayList<>();
+            }
+        };
 
         NetworkService networkServiceMock = mock(NetworkService.class);
         svc.setNetworkService(networkServiceMock);
@@ -316,6 +318,10 @@ public class NetworkConfigurationServiceImplTest {
         interfaces.add(netInterface);
         when(networkServiceMock.getNetworkInterfaces()).thenReturn(interfaces);
 
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("net.interfaces", "");
+
+        svc.activate(null, properties);
         NetworkConfiguration networkConfiguration = svc.getNetworkConfiguration();
 
         assertEquals(4, networkConfiguration.getNetInterfaceConfigs().size());
@@ -358,10 +364,9 @@ public class NetworkConfigurationServiceImplTest {
         try {
             svc.getConfiguration();
             fail("Exception was expected.");
-        } catch (KuraException e) {
-            e = (KuraException) e.getCause();
-            assertEquals(KuraErrorCode.CONFIGURATION_UPDATE, e.getCode());
-            assertTrue(e.getMessage().endsWith("test"));
+        } catch (KuraRuntimeException e) {
+            assertEquals(KuraErrorCode.CONFIGURATION_ERROR, e.getCode());
+            assertTrue(e.getMessage().endsWith("retrieved"));
         }
 
     }
@@ -405,6 +410,15 @@ public class NetworkConfigurationServiceImplTest {
 
                 return type;
             }
+
+            @Override
+            protected void initVisitors() {
+            }
+
+            @Override
+            protected List<NetworkConfigurationVisitor> getVisitors() {
+                return new ArrayList<>();
+            }
         };
 
         NetworkService networkServiceMock = mock(NetworkService.class);
@@ -425,6 +439,11 @@ public class NetworkConfigurationServiceImplTest {
         UsbService usbServiceMock = mock(UsbService.class);
         svc.setUsbService(usbServiceMock);
 
+        Map<String, Object> inputProperties = new HashMap<>();
+        inputProperties.put("net.interfaces", "");
+
+        svc.activate(null, inputProperties);
+
         List<UsbNetDevice> usbNetDevices = new ArrayList<>();
         usbNetDevices.add(new UsbNetDevice("vendor", "product", "manufacturer", "productName", "usbBusNumber",
                 "usbDevicePath", "wlan1"));
@@ -437,7 +456,7 @@ public class NetworkConfigurationServiceImplTest {
         Map<String, Object> properties = configuration.getConfigurationProperties();
 
         assertNotNull(properties);
-        assertEquals(6, properties.size());
+        assertEquals(83, properties.size());
         assertEquals("ETHERNET", properties.get("net.interface.eth2.type"));
         assertEquals("LOOPBACK", properties.get("net.interface.lo.type"));
         assertEquals("MODEM", properties.get("net.interface.ppp1.type"));

@@ -974,7 +974,7 @@ public class NetworkAdminServiceImplTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
         nc.addNetInterfaceConfig(netInterfaceConfig);
 
-        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+        when(networkConfigurationServiceMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> result = (List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>>) TestUtil
                 .invokePrivate(nasi, "getWifiInterfaceConfigs");
@@ -1006,7 +1006,7 @@ public class NetworkAdminServiceImplTest {
         wifiInterfaceConfig.setNetInterfaceAddresses(wifiAddressConfigs);
         nc.addNetInterfaceConfig(wifiInterfaceConfig);
 
-        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+        when(networkConfigurationServiceMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> result = (List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>>) TestUtil
                 .invokePrivate(nasi, "getWifiInterfaceConfigs");
@@ -1044,7 +1044,7 @@ public class NetworkAdminServiceImplTest {
         wifiInterfaceConfig2.setNetInterfaceAddresses(wifiAddressConfigs2);
         nc.addNetInterfaceConfig(wifiInterfaceConfig2);
 
-        when(networkConfigurationServiceMock.getNetworkConfiguration()).thenReturn(nc);
+        when(networkConfigurationServiceMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> result = (List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>>) TestUtil
                 .invokePrivate(nasi, "getWifiInterfaceConfigs");
@@ -1481,7 +1481,7 @@ public class NetworkAdminServiceImplTest {
         svc.setNetworkConfigurationService(ncsMock);
 
         NetworkConfiguration nc = new NetworkConfiguration();
-        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+        when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<WifiInterfaceAddressConfig> addresses = new ArrayList<>();
         WifiInterfaceAddressConfigImpl iac = new WifiInterfaceAddressConfigImpl();
@@ -1589,7 +1589,7 @@ public class NetworkAdminServiceImplTest {
         ias.add(wiac);
         nic.setNetInterfaceAddresses(ias);
         nc.addNetInterfaceConfig(nic);
-        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+        when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         try {
             svc.getWifiHotspotList(ifaceName);
@@ -1628,7 +1628,7 @@ public class NetworkAdminServiceImplTest {
         ias.add(wiac);
         nic.setNetInterfaceAddresses(ias);
         nc.addNetInterfaceConfig(nic);
-        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+        when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<WifiHotspotInfo> hotspotList = svc.getWifiHotspotList(ifaceName);
 
@@ -1671,7 +1671,7 @@ public class NetworkAdminServiceImplTest {
         ias.add(wiac);
         nic.setNetInterfaceAddresses(ias);
         nc.addNetInterfaceConfig(nic);
-        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+        when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
 
         List<WifiHotspotInfo> hotspotList = svc.getWifiHotspotList(ifaceName);
 

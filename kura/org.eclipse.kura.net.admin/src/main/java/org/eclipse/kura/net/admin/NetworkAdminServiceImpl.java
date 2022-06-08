@@ -1510,11 +1510,15 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
 
         logger.debug("getWifiHotspots() :: Starting temporary instance of wpa_supplicant");
         StringBuilder key = new StringBuilder("net.interface.").append(ifaceName).append(".config.wifi.infra.driver");
-        String driver = (String) this.networkConfigurationService.getNetworkConfiguration().getConfigurationProperties()
-                .get(key.toString());
-
-        this.wpaSupplicantManager.startTemp(ifaceName, driver);
-        wifiModeWait(ifaceName, WifiMode.INFRA, 10);
+        Optional<NetworkConfiguration> networkConfiguration = this.networkConfigurationService
+                .getNetworkConfiguration(false);
+        if (networkConfiguration.isPresent()) {
+            String driver = (String) networkConfiguration.get().getConfigurationProperties().get(key.toString());
+            this.wpaSupplicantManager.startTemp(ifaceName, driver);
+            wifiModeWait(ifaceName, WifiMode.INFRA, 10);
+        } else {
+            throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER, "The network configuration object is null");
+        }
     }
 
     private String getMacAddress(byte[] baMacAddress) {

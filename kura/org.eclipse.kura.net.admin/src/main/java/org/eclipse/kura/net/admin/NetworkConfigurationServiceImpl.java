@@ -351,12 +351,12 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
 
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
-        if (this.currentNetworkConfiguration.isPresent()) {
-            return this.currentNetworkConfiguration.get();
-        } else {
+        if (!this.currentNetworkConfiguration.isPresent()) {
             throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
                     "The network configuration cannot be retrieved");
         }
+        return this.currentNetworkConfiguration.get();
+
     }
 
     @Override

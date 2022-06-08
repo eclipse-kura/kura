@@ -68,8 +68,6 @@ public class GetWifiHotSpotListTest {
         when(wpaSupplicantConfigWriterFactory.getInstance()).thenReturn(wpaSupplicantConfigWriter);
 
         this.nas = new NetworkAdminServiceImpl(wpaSupplicantConfigWriterFactory);
-        // NetworkConfigurationService ncs = mock(NetworkConfigurationService.class);
-        // this.nas.setNetworkConfigurationService(ncs);
 
         LinuxNetworkUtil linuxNetworkUtil = mock(LinuxNetworkUtil.class);
 

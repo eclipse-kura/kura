@@ -25,7 +25,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
-import static org.mockito.Matchers.anyBoolean;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;

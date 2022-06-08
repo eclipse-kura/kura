@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">
+    <!--
+        Copyright (c) 2022 Eurotech and/or its affiliates and others
+
+        This program and the accompanying materials are made
+        available under the terms of the Eclipse Public License 2.0
+        which is available at https://www.eclipse.org/legal/epl-2.0/
+
+        SPDX-License-Identifier: EPL-2.0
+
+        Contributors:
+          Eurotech
+    -->
+    <esf:configuration pid="asset-sensehat-write">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#resource" type="String">
+                <esf:value>LED_MATRIX_FRONT_COLOR_G</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.wire.WireAsset</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="component.id" type="Long">
+                <esf:value>65</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="emit.all.channels" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#resource" type="String">
+                <esf:value>LED_MATRIX_BACK_COLOR_R</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#resource" type="String">
+                <esf:value>LED_MATRIX_CHARS</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="componentName" type="String">
+                <esf:value>Wire Asset</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#+name" type="String">
+                <esf:value>LED_MATRIX_BACK_COLOR_G</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="driver.pid" type="String">
+                <esf:value>driver-sensehat</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="factoryPid" type="String">
+                <esf:value>org.eclipse.kura.wire.WireAsset</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#+name" type="String">
+                <esf:value>LED_MATRIX_FRONT_COLOR_B</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="component.name" type="String">
+                <esf:value>org.eclipse.kura.wire.WireAsset</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#+name" type="String">
+                <esf:value>LED_MATRIX_BACK_COLOR_R</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="emit.errors" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.wire.WireAsset-1646035034125-4</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#resource" type="String">
+                <esf:value>LED_MATRIX_FRONT_COLOR_R</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#+name" type="String">
+                <esf:value>LED_MATRIX_CHARS</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="timestamp.mode" type="String">
+                <esf:value>PER_CHANNEL</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.ui.service.hide" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+name" type="String">
+                <esf:value>LED_MATRIX_FRONT_COLOR_R</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="isDriver" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#resource" type="String">
+                <esf:value>LED_MATRIX_FRONT_COLOR_B</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="componentId" type="String">
+                <esf:value>asset-sensehat-write</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#+name" type="String">
+                <esf:value>LED_MATRIX_BACK_COLOR_B</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_CHARS#+value.type" type="String">
+                <esf:value>STRING</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_G#resource" type="String">
+                <esf:value>LED_MATRIX_BACK_COLOR_G</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#resource" type="String">
+                <esf:value>LED_MATRIX_BACK_COLOR_B</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#+name" type="String">
+                <esf:value>LED_MATRIX_FRONT_COLOR_G</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="factoryComponent" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="componentDescription" type="String">
+                <esf:value>Configure Wire Asset Instance</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_G#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_B#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>asset-sensehat-write</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_B#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="asset.desc" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_FRONT_COLOR_R#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="LED_MATRIX_BACK_COLOR_R#+type" type="String">
+                <esf:value>WRITE</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="asset-sensehat">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="ACC_Z#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#resource" type="String">
+                <esf:value>GYROSCOPE_X</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#+name" type="String">
+                <esf:value>GYRO_Z</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.wire.WireAsset</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#resource" type="String">
+                <esf:value>ACCELERATION_Y</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Z#+name" type="String">
+                <esf:value>ACC_Z</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="receiver.port.count" type="Integer">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="emit.all.channels" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#+name" type="String">
+                <esf:value>TEMP_PRESS</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Z#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Z#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="driver.pid" type="String">
+                <esf:value>driver-sensehat</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#resource" type="String">
+                <esf:value>TEMPERATURE_FROM_HUMIDITY</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#+name" type="String">
+                <esf:value>HUMIDITY</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#resource" type="String">
+                <esf:value>GYROSCOPE_Y</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#+name" type="String">
+                <esf:value>PRESSURE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="emit.errors" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#+name" type="String">
+                <esf:value>GYRO_Y</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.wire.WireAsset-1646040333307-23</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="timestamp.mode" type="String">
+                <esf:value>PER_CHANNEL</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#+name" type="String">
+                <esf:value>ACC_Y</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#resource" type="String">
+                <esf:value>TEMPERATURE_FROM_PRESSURE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#resource" type="String">
+                <esf:value>ACCELERATION_X</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Y#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#+name" type="String">
+                <esf:value>GYRO_X</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#resource" type="String">
+                <esf:value>GYROSCOPE_Z</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Z#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#resource" type="String">
+                <esf:value>HUMIDITY</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#+name" type="String">
+                <esf:value>ACC_X</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Z#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_PRESS#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#+name" type="String">
+                <esf:value>TEMP_HUM</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Z#resource" type="String">
+                <esf:value>ACCELERATION_Z</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="HUMIDITY#+value.type" type="String">
+                <esf:value>FLOAT</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_Z#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#resource" type="String">
+                <esf:value>PRESSURE</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="ACC_X#+enabled" type="Boolean">
+                <esf:value>true</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="TEMP_HUM#+unit" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>asset-sensehat</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="emitter.port.count" type="Integer">
+                <esf:value>1</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="PRESSURE#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="asset.desc" type="String">
+                <esf:value/>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_X#+listen" type="Boolean">
+                <esf:value>false</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="GYRO_Y#+type" type="String">
+                <esf:value>READ</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+    <esf:configuration pid="driver-sensehat">
+        <esf:properties>
+            <esf:property array="false" encrypted="false" name="service.factoryPid" type="String">
+                <esf:value>org.eclipse.kura.driver.sensehat</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="kura.service.pid" type="String">
+                <esf:value>driver-sensehat</esf:value>
+            </esf:property>
+            <esf:property array="false" encrypted="false" name="service.pid" type="String">
+                <esf:value>org.eclipse.kura.driver.sensehat-1646035051119-16</esf:value>
+            </esf:property>
+        </esf:properties>
+    </esf:configuration>
+</esf:configurations>

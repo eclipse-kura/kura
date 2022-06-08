@@ -1,0 +1,43 @@
+# Copyright (c) 2022 Eurotech and/or its affiliates and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#  Eurotech
+
+name: "postprocessor"
+backend: "python"
+
+input [
+  {
+    name: "RECONSTR0"
+    data_type: TYPE_FP32
+    dims: [ 1, 10 ]
+  }
+]
+input [
+  {
+    name: "ORIG0"
+    data_type: TYPE_FP32
+    dims: [ 1, 10 ]
+  }
+]
+output [
+  {
+    name: "ANOMALY_SCORE0"
+    data_type: TYPE_FP32
+    dims: [ 1 ]
+  }
+]
+output [
+  {
+    name: "ANOMALY0"
+    data_type: TYPE_BOOL
+    dims: [ 1 ]
+  }
+]
+instance_group [{ kind: KIND_CPU }]

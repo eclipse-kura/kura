@@ -86,17 +86,20 @@ public class NetworkButtonBarUi extends Composite {
         initRefreshButton();
     }
 
-    public void setApplyButtonDirty(boolean dirty) {
+    public void setButtonsDirty(boolean dirty) {
         this.apply.setEnabled(dirty);
+        this.reset.setEnabled(dirty);
     }
 
     protected void initResetButton() {
         this.reset.setText(MSGS.reset());
+        this.reset.setEnabled(false);
         this.reset.addClickHandler(event -> NetworkButtonBarUi.this.table.reset());
     }
 
     protected void initRefreshButton() {
         this.refresh.setText(MSGS.refresh());
+        this.refresh.setEnabled(true);
         this.refresh.addClickHandler(event -> NetworkButtonBarUi.this.table.refresh());
     }
 

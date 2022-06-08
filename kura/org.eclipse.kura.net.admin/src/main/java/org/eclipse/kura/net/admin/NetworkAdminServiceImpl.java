@@ -1364,12 +1364,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
         String topic = event.getTopic();
         if (topic.equals(NetworkConfigurationChangeEvent.NETWORK_EVENT_CONFIG_CHANGE_TOPIC)) {
             this.pendingNetworkConfigurationChange = false;
-            // } else if (topic.equals(NetworkStatusChangeEvent.NETWORK_EVENT_STATUS_CHANGE_TOPIC)) {
-            // try {
-            // this.networkConfigurationService.updateCurrentNetworkConfiguration();
-            // } catch (KuraException e) {
-            // logger.error("WTF", e);
-            // }
         }
     }
 

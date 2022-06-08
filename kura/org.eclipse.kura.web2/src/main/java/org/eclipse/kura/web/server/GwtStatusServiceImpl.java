@@ -274,7 +274,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
 
         try {
-            gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations(false);
+            gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations(true);
         } catch (GwtKuraException e) {
             logger.warn("Get network status failed");
             return Collections.emptyList();

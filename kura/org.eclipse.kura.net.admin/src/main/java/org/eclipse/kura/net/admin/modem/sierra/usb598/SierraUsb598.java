@@ -213,8 +213,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 
     @Override
     public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
-        // not implemented
-        return null;
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getMobileSubscriberIdentity");
     }
 
     @Override
@@ -224,8 +223,7 @@ public class SierraUsb598 implements EvdoCellularModem {
 
     @Override
     public String getIntegratedCirquitCardId(boolean recompute) throws KuraException {
-        // not implemented
-        return null;
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getIntegratedCirquitCardId");
     }
 
     @Override

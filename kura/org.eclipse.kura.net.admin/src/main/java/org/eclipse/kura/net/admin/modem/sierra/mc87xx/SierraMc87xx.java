@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.comm.CommConnection;
@@ -150,8 +152,7 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
-        // not implemented
-        return null;
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getMobileSubscriberIdentity");
     }
 
     @Override
@@ -161,8 +162,7 @@ public class SierraMc87xx implements HspaCellularModem {
 
     @Override
     public String getIntegratedCirquitCardId(boolean recompute) throws KuraException {
-        // not implemented
-        return null;
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getIntegratedCirquitCardId");
     }
 
     @Override

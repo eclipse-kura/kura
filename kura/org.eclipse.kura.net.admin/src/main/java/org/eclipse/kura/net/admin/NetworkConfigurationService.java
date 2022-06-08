@@ -55,6 +55,8 @@ public interface NetworkConfigurationService {
      * Update the cached configuration.
      * 
      * @throws KuraException
+     * 
+     * @since 1.5
      */
     public void updateCurrentNetworkConfiguration() throws KuraException;
 

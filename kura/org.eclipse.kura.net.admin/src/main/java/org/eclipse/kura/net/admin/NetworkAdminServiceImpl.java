@@ -248,11 +248,7 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             boolean recompute) throws KuraException {
 
         logger.debug("Getting all networkInterfaceConfigs");
-        long started = System.currentTimeMillis();
-        List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> nc = getNetworkConfigurationInternal(
-                recompute).getNetInterfaceConfigs();
-        logger.info("GetNetworkConfiguration {}", (System.currentTimeMillis() - started));
-        return nc;
+        return getNetworkConfigurationInternal(recompute).getNetInterfaceConfigs();
     }
 
     @Override

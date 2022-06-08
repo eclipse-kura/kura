@@ -88,33 +88,34 @@ public class HspaModem implements HspaCellularModem {
     }
 
     public void initModemParameters() {
-        if (device != null) {
-            try {
-                String atPort = getAtPort();
-                if (atPort != null) {
-                    this.serialNumber = getSerialNumber();
-                    this.imsi = getMobileSubscriberIdentity(true);
-                    this.iccid = getIntegratedCirquitCardId(true);
-                    this.model = getModel();
-                    this.manufacturer = getManufacturer();
-                    this.revisionId = getRevisionID();
-                    this.gpsSupported = isGpsSupported();
-                    this.rssi = getSignalStrength(true);
-                    this.firmwareVersion = getFirmwareVersion();
+        if (device == null) {
+            return;
+        }
+        try {
+            String atPort = getAtPort();
+            if (atPort != null) {
+                this.serialNumber = getSerialNumber();
+                this.imsi = getMobileSubscriberIdentity(true);
+                this.iccid = getIntegratedCirquitCardId(true);
+                this.model = getModel();
+                this.manufacturer = getManufacturer();
+                this.revisionId = getRevisionID();
+                this.gpsSupported = isGpsSupported();
+                this.rssi = getSignalStrength(true);
+                this.firmwareVersion = getFirmwareVersion();
 
-                    logger.debug("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                    logger.debug("{} :: IMSI={}", getClass().getName(), this.imsi);
-                    logger.debug("{} :: ICCID={}", getClass().getName(), this.iccid);
-                    logger.debug("{} :: Model={}", getClass().getName(), this.model);
-                    logger.debug("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                    logger.debug("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                    logger.debug("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                    logger.debug("{} :: RSSI={}", getClass().getName(), this.rssi);
-                    logger.debug("{} :: FW version={}", getClass().getName(), this.firmwareVersion);
-                }
-            } catch (KuraException e) {
-                logger.error("Failed to initialize modem", e);
+                logger.debug("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
+                logger.debug("{} :: IMSI={}", getClass().getName(), this.imsi);
+                logger.debug("{} :: ICCID={}", getClass().getName(), this.iccid);
+                logger.debug("{} :: Model={}", getClass().getName(), this.model);
+                logger.debug("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
+                logger.debug("{} :: Revision ID={}", getClass().getName(), this.revisionId);
+                logger.debug("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
+                logger.debug("{} :: RSSI={}", getClass().getName(), this.rssi);
+                logger.debug("{} :: FW version={}", getClass().getName(), this.firmwareVersion);
             }
+        } catch (KuraException e) {
+            logger.error("Failed to initialize modem", e);
         }
     }
 

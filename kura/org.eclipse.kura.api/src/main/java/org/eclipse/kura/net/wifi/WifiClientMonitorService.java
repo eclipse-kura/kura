@@ -53,6 +53,8 @@ public interface WifiClientMonitorService {
      *            if set to true, the rssi is recomputed. Otherwise a cached value is returned
      * @return an integer number representing the rssi
      * @throws KuraException
+     * 
+     * @since 2.4
      */
     public int getSignalLevel(String interfaceName, String ssid, boolean recompute) throws KuraException;
 }

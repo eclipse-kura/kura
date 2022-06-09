@@ -8,6 +8,9 @@ To configure the gateway network interfaces using the Administration Console, se
 
 By default, the loopback (lo) interface is selected when the network interfaces are displayed. Choose the desired network interface (e.g., eth0, eth1, wlan0, ppp0) and apply the necessary configuration changes using the tabs on the right. Submit the modified configuration by clicking the **Apply** button.
 
+In case of typing errors, the **Reset** button can be used to reload the prior configuration on the screen.
+Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the **Refresh** button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.
+
 {% include alerts.html message='It is recommended that the **TCP/IP** tab is configured first since it defines how the interface is going to be used.' %}
 
 ## TCP/IP Configuration

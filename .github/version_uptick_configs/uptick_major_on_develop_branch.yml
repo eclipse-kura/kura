@@ -1,0 +1,25 @@
+---
+exclusions:
+  - "**/.git/**/*"
+  - "**/.github/**/*"
+  - "**/target/**/*"
+  - "**/RELEASE_INFO/**/*"
+  - "**/.settings/**/*"
+  - "**/.classpath"
+  - "**/.project"
+  - "./distrib/esf-addon-archetype/src/main/resources/**/*"
+  - "./kura/tools/archetype/example/src/main/resources/**/*"
+  - "./target-platform/javax.bluetooth-parent/javax.bluetooth/src/**/*"
+
+tasks:
+  - selector:
+      and:
+        - snapshot
+        - not:
+            artifact_id: "moquette-broker"
+    actions:
+      - print
+      - transform_version:
+        - add_major: 1
+        - set_minor: 0
+        - set_patch: 0

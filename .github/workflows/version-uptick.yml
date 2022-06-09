@@ -1,0 +1,63 @@
+name: Version uptick automation
+
+on:
+  workflow_dispatch:
+    inputs:
+        target_branch:
+          type: string
+          default: 'develop'
+          required: true
+        uptick_config:
+          type: choice
+          description: Configuration to use for the uptick
+          options:
+            - uptick_major_on_develop_branch.yml
+            - uptick_minor_on_develop_branch.yml
+            - uptick_patch_on_maintenance_branch.yml
+            - uptick_snapshot_to_release.yml
+          required: true
+
+jobs:
+  uptick:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.inputs.target_branch }}
+
+    - name: Download ESF version upticker tool
+      uses: carlosperate/download-file-action@v1
+      with:
+        file-url: https://kura-repo.s3.us-west-2.amazonaws.com/esf_upticker_tool/version-uptick-0.1.0-linux-x86_64
+
+    - name: Make the uptick tool executable
+      run: |
+        chmod +x ./version-uptick-0.1.0-linux-x86_64
+      shell: bash
+
+    - name: Run the uptick tool
+      run: |
+        ./version-uptick-0.1.0-linux-x86_64 \
+        --commit --trace process-versions \
+        --config-path .github/version_uptick_configs/${{ github.event.inputs.uptick_config }} \
+        --root-dir .
+      shell: bash
+
+    - name: Cleanup uptick tool
+      run: |
+        rm ./version-uptick-0.1.0-linux-x86_64
+      shell: bash
+
+    - name: Get version
+      id: get-version
+      uses: JActions/maven-version@v1.0.0
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v4
+      with:
+        title: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
+        commit-message: "chore: automated uptick to ${{ steps.get-version.outputs.version }}"
+        body: "Automated changes by _Version uptick automation_ action: automated uptick to ${{ steps.get-version.outputs.version }} version"
+        branch-suffix: short-commit-hash

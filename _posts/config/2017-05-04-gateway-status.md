@@ -6,6 +6,8 @@ categories: [config]
 
 The status of a gateway may be viewed from the Status window, which is accessed by selecting the **Status** option located in the **System** area. The Status window provides a summary of the key information regarding the status of the gateway including its IoT Cloud connection and network configuration.
 
+The values reported in the page can be reloaded using the Refresh button. This will read the current values from the system and update the page. Since the update procedure can take time, the update can be performed at most every 30 seconds.
+
 ## Cloud and Data Services
 
 This section provides a summary of the IoT Cloud connections status including the following details:
@@ -37,3 +39,5 @@ This section provides the GPS status and latest known position (if applicable) i
 - **Altitude** - altitude as reported by the _PositionService_ in meters.
 
 ![]({{ site.baseurl }}/assets/images/config/GatewayStatus.png)
+
+{% include alerts.html message='The status reported in the page may not be synchronized with the real state of the system. In this case, use the Refresh button to updated the values in the page.' %}

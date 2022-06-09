@@ -1,0 +1,16 @@
+Handlebars.registerHelper('firstLetters', function(input, options) {
+  const number = parseInt(options.hash['number'] || "0")
+  return input.substring(0,number);
+});
+
+Handlebars.registerHelper('date', function() {
+  const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+  ];
+
+  const date = new Date();
+  const month = monthNames[date.getMonth()];
+  const year = date.getYear() + 1900;
+
+  return month + " " + year;
+});

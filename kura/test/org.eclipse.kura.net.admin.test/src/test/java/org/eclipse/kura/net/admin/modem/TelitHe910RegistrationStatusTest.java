@@ -20,7 +20,7 @@ import org.eclipse.kura.net.modem.ModemRegistrationStatus;
 import org.eclipse.kura.usb.UsbModemDevice;
 import org.junit.Test;
 
-public class TelitHe910Test {
+public class TelitHe910RegistrationStatusTest {
 
     private TelitHe910 telitModem;
     private ModemRegistrationStatus modemRegistrationStatus;

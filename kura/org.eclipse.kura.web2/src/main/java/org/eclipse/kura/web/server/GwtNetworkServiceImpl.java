@@ -118,8 +118,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     private static final String UNKNOWN_NETWORK = "0.0.0.0/0";
 
     @Override
-    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations() throws GwtKuraException {
-        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+    public List<GwtNetInterfaceConfig> findNetInterfaceConfigurations(boolean recompute) throws GwtKuraException {
+        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations(recompute);
 
         for (GwtNetInterfaceConfig netConfig : result) {
             if (netConfig instanceof GwtWifiNetInterfaceConfig) {
@@ -141,7 +141,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return result;
     }
 
-    private List<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations() throws GwtKuraException {
+    private List<GwtNetInterfaceConfig> privateFindNetInterfaceConfigurations(boolean recompute)
+            throws GwtKuraException {
 
         logger.debug("Starting");
 
@@ -172,7 +173,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
             GwtNetInterfaceConfig gwtNetConfig;
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig : nas
-                    .getNetworkInterfaceConfigs()) {
+                    .getNetworkInterfaceConfigs(recompute)) {
                 logger.debug("Getting config for {} with type {}", netIfConfig.getName(), netIfConfig.getType());
 
                 logger.debug("Interface State: {}", netIfConfig.getState());
@@ -482,14 +483,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                                         .equals(GwtNetIfStatus.netIPv4StatusUnmanaged.name())) {
                                             gwtNetConfig.setHwRssi("N/A");
                                         } else {
-                                            try {
-                                                int rssi = wifiClientMonitorService
-                                                        .getSignalLevel(netIfConfig.getName(), wifiConfig.getSSID());
-                                                logger.debug("Setting Received Signal Strength to {}", rssi);
-                                                gwtNetConfig.setHwRssi(Integer.toString(rssi));
-                                            } catch (KuraException e) {
-                                                logger.warn("Failed", e);
-                                            }
+                                            readRssi(wifiClientMonitorService, gwtNetConfig, netIfConfig.getName(),
+                                                    wifiConfig.getSSID(), recompute);
                                         }
                                     }
                                 } else if (activeWirelessMode == WifiMode.ADHOC) {
@@ -537,7 +532,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             }
 
                                             try {
-                                                int rssi = cellModemService.getSignalStrength();
+                                                int rssi = cellModemService.getSignalStrength(recompute);
                                                 logger.debug("Setting Received Signal Strength to {}", rssi);
                                                 gwtModemConfig.setHwRssi(Integer.toString(rssi));
                                             } catch (KuraException e) {
@@ -545,7 +540,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             }
 
                                             try {
-                                                String iccid = cellModemService.getIntegratedCirquitCardId();
+                                                String iccid = cellModemService.getIntegratedCirquitCardId(recompute);
                                                 logger.debug("Setting ICCID to {}", iccid);
                                                 gwtModemConfig.setHwICCID(iccid);
                                             } catch (KuraException e) {
@@ -553,7 +548,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             }
 
                                             try {
-                                                String imsi = cellModemService.getMobileSubscriberIdentity();
+                                                String imsi = cellModemService.getMobileSubscriberIdentity(recompute);
                                                 logger.debug("Setting IMSI to {}", imsi);
                                                 gwtModemConfig.setHwIMSI(imsi);
                                             } catch (KuraException e) {
@@ -561,7 +556,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                                             }
 
                                             try {
-                                                ModemRegistrationStatus registration = cellModemService.getRegistrationStatus();
+                                                ModemRegistrationStatus registration = cellModemService
+                                                        .getRegistrationStatus(recompute);
                                                 logger.debug("Setting Registration Status to {}", registration.name());
                                                 gwtModemConfig.setHwRegistration(registration.name());
                                             } catch (KuraException e) {
@@ -782,6 +778,17 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
         return gwtNetConfigs;
     }
 
+    private void readRssi(WifiClientMonitorService wifiClientMonitorService, GwtNetInterfaceConfig gwtNetConfig,
+            String interfaceName, String ssid, boolean recompute) {
+        try {
+            int rssi = wifiClientMonitorService.getSignalLevel(interfaceName, ssid, recompute);
+            logger.debug("Setting Received Signal Strength to {}", rssi);
+            gwtNetConfig.setHwRssi(Integer.toString(rssi));
+        } catch (KuraException e) {
+            logger.warn("Failed", e);
+        }
+    }
+
     private GwtNetInterfaceConfig createGwtNetConfig(
             NetInterfaceConfig<? extends NetInterfaceAddressConfig> netIfConfig) {
         GwtNetInterfaceConfig gwtNetConfig;
@@ -811,7 +818,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public void updateNetInterfaceConfigurations(GwtXSRFToken xsrfToken, GwtNetInterfaceConfig config)
             throws GwtKuraException {
-
         checkXSRFToken(xsrfToken);
         ConfigurationService configurationService = ServiceLocator.getInstance().getService(ConfigurationService.class);
         Map<String, Object> properties = new HashMap<>();
@@ -895,7 +901,6 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
     @Override
     public ArrayList<GwtWifiHotspotEntry> findWifiHotspots(GwtXSRFToken xsrfToken, String interfaceName,
             String wirelessSsid) throws GwtKuraException {
-
         checkXSRFToken(xsrfToken);
         NetworkAdminService nas = ServiceLocator.getInstance().getService(NetworkAdminService.class);
         SystemService systemService = ServiceLocator.getInstance().getService(SystemService.class);
@@ -1526,7 +1531,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
             String basePropName) throws GwtKuraException {
         String passKey = GwtSafeHtmlUtils.htmlUnescape(gwtModemConfig.getPassword());
         if (passKey != null && passKey.equals(PASSWORD_PLACEHOLDER)) {
-            List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+            List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations(false);
             for (GwtNetInterfaceConfig netConfig : result) {
                 if (netConfig instanceof GwtModemInterfaceConfig) {
                     GwtModemInterfaceConfig oldModemConfig = (GwtModemInterfaceConfig) netConfig;
@@ -1734,7 +1739,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
 
     private Optional<GwtWifiConfig> getOldGwtWifiConfig(String interfaceName, String mode) throws GwtKuraException {
         Optional<GwtWifiConfig> config = Optional.empty();
-        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations();
+        List<GwtNetInterfaceConfig> result = privateFindNetInterfaceConfigurations(false);
         for (GwtNetInterfaceConfig netConfig : result) {
             if (netConfig instanceof GwtWifiNetInterfaceConfig
                     && interfaceName.equals(((GwtWifiNetInterfaceConfig) netConfig).getName())) {

@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Sterwen-Technology
@@ -59,32 +59,7 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     public TelitHe910(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         super(device, platform, connectionFactory);
-
-        try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
-                this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity();
-                this.iccid = getIntegratedCirquitCardId();
-                this.model = getModel();
-                this.manufacturer = getManufacturer();
-                this.revisionId = getRevisionID();
-                this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength();
-
-                logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
-                logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
-                logger.trace("{} :: Model={}", getClass().getName(), this.model);
-                logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to initialize TelitHe910", e);
-        }
+        initModemParameters();
     }
 
     @Override
@@ -121,51 +96,57 @@ public class TelitHe910 extends TelitModem implements HspaCellularModem {
     }
 
     @Override
-    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
 
-        ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getRegistrationStatus :: {}",
-                    TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = openSerialPort(getAtPort());
-            if (!isAtReachable(commAtConnection)) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-            }
-            try {
-                reply = commAtConnection.sendCommand(
-                        TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand().getBytes(StandardCharsets.US_ASCII),
-                        1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            }
-            if (reply != null) {
-                String sRegStatus = getResponseString(reply);
-                String[] regStatusSplit = sRegStatus.split(",");
-                if (regStatusSplit.length >= 2) {
-                    int status = Integer.parseInt(regStatusSplit[1]);
-                    switch (status) {
-                    case 0:
-                        modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                        break;
-                    case 1:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                        break;
-                    case 3:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                        break;
-                    case 5:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                        break;
-                    default:
-                        break;
+        if (recompute) {
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getRegistrationStatus :: {}",
+                        TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = openSerialPort(getAtPort());
+                if (!isAtReachable(commAtConnection)) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                }
+                try {
+                    reply = commAtConnection.sendCommand(TelitHe910AtCommands.GET_REGISTRATION_STATUS.getCommand()
+                            .getBytes(StandardCharsets.US_ASCII), 1000, 100);
+                } catch (IOException e) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
+                }
+                if (reply != null) {
+                    String sRegStatus = getResponseString(reply);
+                    String[] regStatusSplit = sRegStatus.split(",");
+                    if (regStatusSplit.length >= 2) {
+                        int status = Integer.parseInt(regStatusSplit[1]);
+                        switch (status) {
+                        case 0:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                            break;
+                        case 1:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                            break;
+                        case 3:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+                            break;
+                        case 5:
+                            this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 }
             }
         }
-        return modemRegistrationStatus;
+        return this.modemRegistrationStatus;
+    }
+
+    @Override
+    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+        return getRegistrationStatus(true);
     }
 
     @Override

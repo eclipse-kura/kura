@@ -1,15 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2019, 2021 3 PORT d.o.o. and others
- * 
+ * Copyright (c) 2019, 2022 3 PORT d.o.o. and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  3 PORT d.o.o.
  *  Sterwen-Technology
+ *  Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.zte.me3630;
@@ -45,32 +46,7 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
     public ZteMe3630(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         super(device, platform, connectionFactory);
-
-        try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
-                this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity();
-                this.iccid = getIntegratedCirquitCardId();
-                this.model = getModel();
-                this.manufacturer = getManufacturer();
-                this.revisionId = getRevisionID();
-                this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength();
-
-                logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
-                logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
-                logger.trace("{} :: Model={}", getClass().getName(), this.model);
-                logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to initialize " + ZteMe3630.class.getName(), e);
-        }
+        initModemParameters();
     }
 
     @Override
@@ -122,58 +98,63 @@ public class ZteMe3630 extends HspaModem implements HspaCellularModem {
     }
 
     @Override
-    public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
 
-        ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getRegistrationStatus :: {}",
-                    ZteMe3630AtCommands.getRegistrationStatus.getCommand());
-            byte[] reply = null;
-            CommConnection commAtConnection = openSerialPort(getAtPort());
-            if (!isAtReachable(commAtConnection)) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.NOT_CONNECTED,
-                        MODEM_NOT_AVAILABLE_FOR_AT_COMMANDS + ZteMe3630.class.getName());
-            }
-            try {
-                reply = commAtConnection.sendCommand(ZteMe3630AtCommands.getRegistrationStatus.getCommand().getBytes(),
-                        1000, 100);
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            }
-            closeSerialPort(commAtConnection);
-            if (reply != null) {
-                String sRegStatus = getResponseString(reply);
-                String[] regStatusSplit = sRegStatus.split(",");
-                if (regStatusSplit.length >= 2) {
-                    int status = Integer.parseInt(regStatusSplit[1]);
-                    switch (status) {
-                    case 0:
-                        modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                        break;
-                    case 1:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                        getRegisteredNetwork();
-                        getExtendedRegistrationStatus();
-                        getMobileSubscriberIdentity();
-                        break;
-                    case 3:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
-                        break;
-                    case 5:
-                        modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                        getRegisteredNetwork();
-                        getExtendedRegistrationStatus();
-                        getMobileSubscriberIdentity();
-                        break;
-                    default:
-                        modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+        if (recompute) {
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getRegistrationStatus :: {}",
+                        ZteMe3630AtCommands.getRegistrationStatus.getCommand());
+                byte[] reply = null;
+                CommConnection commAtConnection = openSerialPort(getAtPort());
+                checkConnection(commAtConnection);
+                try {
+                    reply = commAtConnection
+                            .sendCommand(ZteMe3630AtCommands.getRegistrationStatus.getCommand().getBytes(), 1000, 100);
+                    if (reply != null) {
+                        String sRegStatus = getResponseString(reply);
+                        String[] regStatusSplit = sRegStatus.split(",");
+                        if (regStatusSplit.length >= 2) {
+                            int status = Integer.parseInt(regStatusSplit[1]);
+                            switch (status) {
+                            case 0:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                                break;
+                            case 1:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                                getRegisteredNetwork();
+                                getExtendedRegistrationStatus();
+                                getMobileSubscriberIdentity();
+                                break;
+                            case 3:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTRATION_DENIED;
+                                break;
+                            case 5:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                                getRegisteredNetwork();
+                                getExtendedRegistrationStatus();
+                                getMobileSubscriberIdentity();
+                                break;
+                            default:
+                                this.modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
+                            }
+                        }
                     }
+                } catch (KuraException | IOException e) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
                 }
             }
         }
-        return modemRegistrationStatus;
+        return this.modemRegistrationStatus;
+    }
+
+    private void checkConnection(CommConnection commAtConnection) throws KuraException {
+        if (!isAtReachable(commAtConnection)) {
+            closeSerialPort(commAtConnection);
+            throw new KuraException(KuraErrorCode.NOT_CONNECTED,
+                    MODEM_NOT_AVAILABLE_FOR_AT_COMMANDS + ZteMe3630.class.getName());
+        }
     }
 
     @Override

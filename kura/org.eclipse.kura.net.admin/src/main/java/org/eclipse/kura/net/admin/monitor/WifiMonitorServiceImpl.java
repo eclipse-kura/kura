@@ -105,6 +105,7 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     private NetworkConfiguration newNetConfiguration;
     private RouteService routeService;
     private LinuxNetworkUtil linuxNetworkUtil;
+    private int rssi;
 
     private WifiDriverService wifiDriverService;
 
@@ -419,20 +420,20 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
                 if (WifiMode.INFRA.equals(wifiConfig.getMode())) {
                     // get signal strength only if somebody needs it
                     if (this.listeners != null && !this.listeners.isEmpty()) {
-                        int rssi = 0;
+                        int signalLevel = 0;
                         try {
                             logger.debug("monitor() :: Getting Signal Level for {} -> {}", interfaceName,
                                     wifiConfig.getSSID());
-                            rssi = getSignalLevel(interfaceName, wifiConfig.getSSID());
-                            logger.debug("monitor() :: Wifi RSSI is {}", rssi);
+                            signalLevel = getSignalLevel(interfaceName, wifiConfig.getSSID());
+                            logger.debug("monitor() :: Wifi RSSI is {}", signalLevel);
                         } catch (KuraException e) {
                             logger.error("monitor() :: Failed to get Signal Level for {} -> {}", interfaceName,
                                     wifiConfig.getSSID());
                             logger.error("monitor() :: Failed to get Signal Level ", e);
-                            rssi = 0;
+                            signalLevel = 0;
                         }
                         for (WifiClientMonitorListener listener : this.listeners) {
-                            listener.setWifiSignalLevel(interfaceName, rssi);
+                            listener.setWifiSignalLevel(interfaceName, signalLevel);
                         }
                     }
 
@@ -979,18 +980,28 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
     }
 
     @Override
+    public int getSignalLevel(String interfaceName, String ssid, boolean recompute) throws KuraException {
+        if (recompute) {
+            int signalLevel;
+            if (this.wifiDriverService != null
+                    && !this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
+                logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName,
+                        WifiMode.INFRA);
+                reloadKernelModule(interfaceName, WifiMode.INFRA);
+            }
+            signalLevel = getSignalLevelWithLinkTool(interfaceName, ssid);
+            if (signalLevel != 0) {
+                this.rssi = signalLevel;
+            } else {
+                this.rssi = getSignalLevelWithScanTool(interfaceName, ssid);
+            }
+        }
+        return this.rssi;
+    }
+
+    @Override
     public int getSignalLevel(String interfaceName, String ssid) throws KuraException {
-        int rssi;
-        if (this.wifiDriverService != null
-                && !this.wifiDriverService.isKernelModuleLoadedForMode(interfaceName, WifiMode.INFRA)) {
-            logger.info("getSignalLevel() :: reload {} kernel module for WiFi mode {}", interfaceName, WifiMode.INFRA);
-            reloadKernelModule(interfaceName, WifiMode.INFRA);
-        }
-        rssi = getSignalLevelWithLinkTool(interfaceName, ssid);
-        if (rssi != 0) {
-            return rssi;
-        }
-        return getSignalLevelWithScanTool(interfaceName, ssid);
+        return getSignalLevel(interfaceName, ssid, true);
     }
 
     private int getSignalLevelWithLinkTool(String interfaceName, String ssid) throws KuraException {
@@ -998,37 +1009,37 @@ public class WifiMonitorServiceImpl implements WifiClientMonitorService, EventHa
         if (wifiState == null || ssid == null) {
             return 0;
         }
-        int rssi = 0;
+        int signalLevel = 0;
         if (wifiState.isUp()) {
             logger.trace("getSignalLevelWithLinkTool() :: using 'iw dev wlan0 link' command ...");
             LinkTool linkTool = getLinkTool(interfaceName);
 
             if (linkTool != null && linkTool.get() && linkTool.isLinkDetected()) {
-                rssi = linkTool.getSignal();
-                logger.debug("getSignalLevelWithLinkTool() :: rssi={} (using 'iw dev wlan0 link')", rssi);
+                signalLevel = linkTool.getSignal();
+                logger.debug("getSignalLevelWithLinkTool() :: rssi={} (using 'iw dev wlan0 link')", signalLevel);
             }
         }
-        return rssi;
+        return signalLevel;
     }
 
     private int getSignalLevelWithScanTool(String interfaceName, String ssid) throws KuraException {
         logger.trace("getSignalLevelWithScanTool() :: using 'iw dev wlan0 scan' command ...");
         IScanTool scanTool = getScanTool(interfaceName);
-        if (scanTool == null) {
+        if (scanTool == null || ssid == null) {
             return 0;
         }
-        int rssi = 0;
+        int signalLevel = 0;
         List<WifiAccessPoint> wifiAccessPoints = scanTool.scan();
         for (WifiAccessPoint wap : wifiAccessPoints) {
             if (ssid.equals(wap.getSSID())) {
                 if (wap.getStrength() > 0) {
-                    rssi = 0 - wap.getStrength();
-                    logger.debug("getSignalLevelWithScanTool() :: rssi={} (using 'iw dev wlan0 scan')", rssi);
+                    signalLevel = 0 - wap.getStrength();
+                    logger.debug("getSignalLevelWithScanTool() :: rssi={} (using 'iw dev wlan0 scan')", signalLevel);
                 }
                 break;
             }
         }
-        return rssi;
+        return signalLevel;
     }
 
     private boolean isAccessPointReachable(String interfaceName, int tout) throws KuraException {

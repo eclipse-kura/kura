@@ -81,14 +81,14 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
     private static long lastUpdate;
 
     @Override
-    public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin)
+    public ArrayList<GwtGroupedNVPair> getDeviceConfig(GwtXSRFToken xsrfToken, boolean hasNetAdmin, boolean recompute)
             throws GwtKuraException {
         checkXSRFToken(xsrfToken);
         List<GwtGroupedNVPair> pairs = new ArrayList<>();
 
         pairs.addAll(getCloudStatus());
         if (hasNetAdmin) {
-            pairs.addAll(getNetworkStatus());
+            pairs.addAll(getNetworkStatus(recompute));
         }
         pairs.addAll(getPositionStatus());
         pairs.addAll(getTamperDetectionStatus());
@@ -258,7 +258,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         }
     }
 
-    private static List<GwtGroupedNVPair> getNetworkStatus() throws GwtKuraException {
+    private static List<GwtGroupedNVPair> getNetworkStatus(boolean recompute) throws GwtKuraException {
         long currentTime = System.currentTimeMillis();
         if (GwtStatusServiceImpl.networkStatus != null
                 && currentTime - GwtStatusServiceImpl.lastUpdate < NETWORK_INFO_REFRESH_TIMEOUT) {
@@ -274,7 +274,7 @@ public class GwtStatusServiceImpl extends OsgiRemoteServiceServlet implements Gw
         List<GwtNetInterfaceConfig> gwtNetInterfaceConfigs;
 
         try {
-            gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations();
+            gwtNetInterfaceConfigs = gwtNetworkService.findNetInterfaceConfigurations(recompute);
         } catch (GwtKuraException e) {
             logger.warn("Get network status failed");
             return Collections.emptyList();

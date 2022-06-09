@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -192,7 +192,7 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
     public void setDirty(boolean flag) {
         this.dirty = flag;
         if (this.tabs.getButtons() != null) {
-            this.tabs.getButtons().setApplyButtonDirty(flag);
+            this.tabs.getButtons().setButtonsDirty(flag);
         }
     }
 
@@ -595,8 +595,8 @@ public class TabTcpIpUi extends Composite implements NetworkTab {
             // changed to WAN
             if (isWanEnabled()) {
                 EntryClassUi.showWaitModal();
-                TabTcpIpUi.this.gwtNetworkService
-                        .findNetInterfaceConfigurations(new AsyncCallback<List<GwtNetInterfaceConfig>>() {
+                TabTcpIpUi.this.gwtNetworkService.findNetInterfaceConfigurations(false,
+                        new AsyncCallback<List<GwtNetInterfaceConfig>>() {
 
                             @Override
                             public void onFailure(Throwable caught) {

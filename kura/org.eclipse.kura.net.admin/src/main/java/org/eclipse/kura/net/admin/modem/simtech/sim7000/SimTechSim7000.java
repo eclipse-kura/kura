@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020, 2021 3 PORT d.o.o. and others
+ * Copyright (c) 2020, 2022 3 PORT d.o.o. and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  3 PORT d.o.o.
+ *  Eurotech
  *******************************************************************************/
 
 package org.eclipse.kura.net.admin.modem.simtech.sim7000;
@@ -43,32 +44,7 @@ public class SimTechSim7000 extends HspaModem implements HspaCellularModem {
     public SimTechSim7000(ModemDevice device, String platform, ConnectionFactory connectionFactory) {
 
         super(device, platform, connectionFactory);
-
-        try {
-            String atPort = getAtPort();
-            String gpsPort = getGpsPort();
-            if (atPort != null && (atPort.equals(getDataPort()) || atPort.equals(gpsPort))) {
-                this.serialNumber = getSerialNumber();
-                this.imsi = getMobileSubscriberIdentity();
-                this.iccid = getIntegratedCirquitCardId();
-                this.model = getModel();
-                this.manufacturer = getManufacturer();
-                this.revisionId = getRevisionID();
-                this.gpsSupported = isGpsSupported();
-                this.rssi = getSignalStrength();
-
-                logger.trace("{} :: Serial Number={}", getClass().getName(), this.serialNumber);
-                logger.trace("{} :: IMSI={}", getClass().getName(), this.imsi);
-                logger.trace("{} :: ICCID={}", getClass().getName(), this.iccid);
-                logger.trace("{} :: Model={}", getClass().getName(), this.model);
-                logger.trace("{} :: Manufacturer={}", getClass().getName(), this.manufacturer);
-                logger.trace("{} :: Revision ID={}", getClass().getName(), this.revisionId);
-                logger.trace("{} :: GPS Supported={}", getClass().getName(), this.gpsSupported);
-                logger.trace("{} :: RSSI={}", getClass().getName(), this.rssi);
-            }
-        } catch (KuraException e) {
-            logger.error("Failed to initialize " + SimTechSim7000.class.getName(), e);
-        }
+        initModemParameters();
     }
 
     @Override

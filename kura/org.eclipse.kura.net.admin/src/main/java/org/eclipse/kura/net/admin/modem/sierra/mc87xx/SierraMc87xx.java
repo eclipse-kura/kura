@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -51,6 +51,8 @@ public class SierraMc87xx implements HspaCellularModem {
     private String manufacturer = null;
     private String serialNumber = null;
     private String revisionId = null;
+    private int rssi = -113;
+    private ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
 
     private final Object atLock = new Object();
 
@@ -147,13 +149,23 @@ public class SierraMc87xx implements HspaCellularModem {
     }
 
     @Override
+    public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getMobileSubscriberIdentity");
+    }
+
+    @Override
     public String getMobileSubscriberIdentity() throws KuraException {
-        return null;
+        return getMobileSubscriberIdentity(true);
+    }
+
+    @Override
+    public String getIntegratedCirquitCardId(boolean recompute) throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getIntegratedCirquitCardId");
     }
 
     @Override
     public String getIntegratedCirquitCardId() throws KuraException {
-        return null;
+        return getIntegratedCirquitCardId(true);
     }
 
     @Override
@@ -225,83 +237,102 @@ public class SierraMc87xx implements HspaCellularModem {
     }
 
     @Override
-    public int getSignalStrength() throws KuraException {
+    public int getSignalStrength(boolean recompute) throws KuraException {
 
-        int rssi = -113;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getSignalStrength :: {}", SierraMc87xxAtCommands.getSignalStrength.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = null;
-            try {
-                commAtConnection = openSerialPort(getAtPort());
-                if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-                }
-                reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getSignalStrength.getCommand().getBytes(),
-                        1000, 100);
+        if (recompute) {
+            int signalStrength = -113;
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getSignalStrength :: {}",
+                        SierraMc87xxAtCommands.getSignalStrength.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = null;
+                try {
+                    commAtConnection = openSerialPort(getAtPort());
+                    if (!isAtReachable(commAtConnection)) {
+                        throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                    }
+                    reply = commAtConnection
+                            .sendCommand(SierraMc87xxAtCommands.getSignalStrength.getCommand().getBytes(), 1000, 100);
 
-                if (reply != null) {
-                    String[] asCsq;
-                    String sCsq = this.getResponseString(reply);
-                    if (sCsq.startsWith("+CSQ:")) {
-                        sCsq = sCsq.substring("+CSQ:".length()).trim();
-                        asCsq = sCsq.split(",");
-                        if (asCsq.length == 2) {
-                            rssi = -113 + 2 * Integer.parseInt(asCsq[0]);
+                    if (reply != null) {
+                        String[] asCsq;
+                        String sCsq = this.getResponseString(reply);
+                        if (sCsq.startsWith("+CSQ:")) {
+                            sCsq = sCsq.substring("+CSQ:".length()).trim();
+                            asCsq = sCsq.split(",");
+                            if (asCsq.length == 2) {
+                                signalStrength = -113 + 2 * Integer.parseInt(asCsq[0]);
 
+                            }
                         }
                     }
+                    this.rssi = signalStrength;
+                } catch (IOException e) {
+                    closeSerialPort(commAtConnection);
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
                 }
-            } catch (IOException e) {
-                closeSerialPort(commAtConnection);
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            } finally {
-                closeSerialPort(commAtConnection);
             }
         }
-        return rssi;
+        return this.rssi;
+    }
+
+    @Override
+    public int getSignalStrength() throws KuraException {
+        return getSignalStrength(true);
+    }
+
+    @Override
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
+
+        if (recompute) {
+            synchronized (this.atLock) {
+                logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
+                byte[] reply;
+                CommConnection commAtConnection = null;
+                try {
+                    commAtConnection = openSerialPort(getAtPort());
+                    if (!isAtReachable(commAtConnection)) {
+                        throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
+                    }
+                    reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getSystemInfo.getCommand().getBytes(),
+                            1000, 100);
+
+                    if (reply != null) {
+                        parseRegistrationStatus(reply);
+                    }
+                } catch (IOException e) {
+                    throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
+                } finally {
+                    closeSerialPort(commAtConnection);
+                }
+            }
+        }
+        return this.modemRegistrationStatus;
+    }
+
+    private void parseRegistrationStatus(byte[] reply) {
+        String sSysInfo = getResponseString(reply);
+        if (sSysInfo != null && sSysInfo.length() > 0) {
+            String[] aSysInfo = sSysInfo.split(",");
+            if (aSysInfo.length == 5) {
+                int srvStatus = Integer.parseInt(aSysInfo[0]);
+                int roamingStatus = Integer.parseInt(aSysInfo[2]);
+                if (srvStatus == 0) {
+                    this.modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
+                } else if (srvStatus == 2 && roamingStatus == 0) {
+                    this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
+                } else if (srvStatus == 2 && roamingStatus == 1) {
+                    this.modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
+                }
+            }
+        }
     }
 
     @Override
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException {
-
-        ModemRegistrationStatus modemRegistrationStatus = ModemRegistrationStatus.UNKNOWN;
-        synchronized (this.atLock) {
-            logger.debug("sendCommand getSystemInfo :: {}", SierraMc87xxAtCommands.getSystemInfo.getCommand());
-            byte[] reply;
-            CommConnection commAtConnection = null;
-            try {
-                commAtConnection = openSerialPort(getAtPort());
-                if (!isAtReachable(commAtConnection)) {
-                    throw new KuraException(KuraErrorCode.NOT_CONNECTED, MODEM_NOT_AVAILABLE_FOR_AT_CMDS_MSG);
-                }
-                reply = commAtConnection.sendCommand(SierraMc87xxAtCommands.getSystemInfo.getCommand().getBytes(), 1000,
-                        100);
-
-                if (reply != null) {
-                    String sSysInfo = getResponseString(reply);
-                    if (sSysInfo != null && sSysInfo.length() > 0) {
-                        String[] aSysInfo = sSysInfo.split(",");
-                        if (aSysInfo.length == 5) {
-                            int srvStatus = Integer.parseInt(aSysInfo[0]);
-                            int roamingStatus = Integer.parseInt(aSysInfo[2]);
-                            if (srvStatus == 0) {
-                                modemRegistrationStatus = ModemRegistrationStatus.NOT_REGISTERED;
-                            } else if (srvStatus == 2 && roamingStatus == 0) {
-                                modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_HOME;
-                            } else if (srvStatus == 2 && roamingStatus == 1) {
-                                modemRegistrationStatus = ModemRegistrationStatus.REGISTERED_ROAMING;
-                            }
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                throw new KuraException(KuraErrorCode.CONNECTION_FAILED, e);
-            } finally {
-                closeSerialPort(commAtConnection);
-            }
-        }
-        return modemRegistrationStatus;
+        return getRegistrationStatus(true);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -177,7 +178,7 @@ public class ModemMonitorServiceImplTest {
         interfaceAddressConfigs.add(modemInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
-        when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+        when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
         svc.setNetworkConfigurationService(ncsMock);
 
         // for obtaining the available network interfaces, ppp port
@@ -348,9 +349,9 @@ public class ModemMonitorServiceImplTest {
         modemFactory.setModem(modem);
 
         when(modem.getSerialNumber()).thenReturn("imei");
-        when(modem.getMobileSubscriberIdentity()).thenReturn("phoneno");
-        when(modem.getIntegratedCirquitCardId()).thenReturn("cardid");
-        when(modem.getSignalStrength()).thenReturn(2);
+        when(modem.getMobileSubscriberIdentity(false)).thenReturn("phoneno");
+        when(modem.getIntegratedCirquitCardId(false)).thenReturn("cardid");
+        when(modem.getSignalStrength(false)).thenReturn(2);
         when(modem.isGpsSupported()).thenReturn(true);
         // 1. for start of disabling, 2. check after being disabled, 3. log it, 4. another check before enabling it
         when(modem.isGpsEnabled()).thenReturn(true).thenReturn(false).thenReturn(false).thenReturn(false);
@@ -939,7 +940,7 @@ public class ModemMonitorServiceImplTest {
         NetworkConfigurationService nsCfgMock = mock(NetworkConfigurationService.class);
         NetworkConfiguration networkConfigMock = mock(NetworkConfiguration.class);
 
-        when(nsCfgMock.getNetworkConfiguration()).thenReturn(networkConfigMock);
+        when(nsCfgMock.getNetworkConfiguration(false)).thenReturn(Optional.of(networkConfigMock));
         svc.setNetworkConfigurationService(nsCfgMock);
 
         svc.setNetworkService(nsMock);
@@ -1030,7 +1031,7 @@ public class ModemMonitorServiceImplTest {
             if (resetExpected && System.currentTimeMillis() - startTime < 1000) {
                 verify(mockModem, times(0)).reset();
             }
-            verify(pppMock, connectExpected ? times(i + 1) : times(0)).connect();
+            verify(pppMock, connectExpected ? times(i + 2) : times(0)).connect();
         }
 
         verify(mockModem, resetExpected ? times(1) : times(0)).reset();

@@ -24,13 +24,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
+import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.configuration.SelfConfiguringComponent;
@@ -100,15 +99,15 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     private EventAdmin eventAdmin;
     private UsbService usbService;
     private ModemManagerService modemManagerService;
-    private CommandExecutorService executorService;
+    private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
 
     private List<NetworkConfigurationVisitor> writeVisitors;
 
-    private ScheduledExecutorService executorUtil;
     private LinuxNetworkUtil linuxNetworkUtil;
 
     private Map<String, Object> properties;
+    private Optional<NetworkConfiguration> currentNetworkConfiguration = Optional.empty();
 
     // ----------------------------------------------------------------
     //
@@ -158,12 +157,12 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     }
 
     public void setExecutorService(CommandExecutorService executorService) {
-        this.executorService = executorService;
+        this.commandExecutorService = executorService;
     }
 
     public void unsetExecutorService(CommandExecutorService executorService) {
-        if (this.executorService.equals(executorService)) {
-            this.executorService = null;
+        if (this.commandExecutorService.equals(executorService)) {
+            this.commandExecutorService = null;
         }
     }
 
@@ -184,11 +183,9 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     // ----------------------------------------------------------------
     public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("activate(componentContext, properties)...");
-        this.executorUtil = Executors.newSingleThreadScheduledExecutor();
-
         initVisitors();
 
-        this.linuxNetworkUtil = new LinuxNetworkUtil(this.executorService);
+        this.linuxNetworkUtil = new LinuxNetworkUtil(this.commandExecutorService);
         if (properties == null) {
             logger.debug("Got null properties...");
         } else {
@@ -210,7 +207,6 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     public void deactivate(ComponentContext componentContext) {
         logger.debug("deactivate()");
         this.writeVisitors = null;
-        this.executorUtil.shutdownNow();
     }
 
     protected List<String> getAllInterfaceNames() throws KuraException {
@@ -258,9 +254,11 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
                 NetworkConfiguration networkConfiguration = new NetworkConfiguration(modifiedProps);
 
                 for (NetworkConfigurationVisitor visitor : getVisitors()) {
-                    visitor.setExecutorService(this.executorService);
+                    visitor.setExecutorService(this.commandExecutorService);
                     networkConfiguration.accept(visitor);
                 }
+
+                updateCurrentNetworkConfiguration();
 
                 this.eventAdmin.postEvent(new NetworkConfigurationChangeEvent(modifiedProps));
             } else {
@@ -340,13 +338,36 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
     public synchronized ComponentConfiguration getConfiguration() throws KuraException {
         // This method returns the network configuration properties without the current values.
         // i.e. the ip address that should be applied to the system, but not the actual one.
-        logger.debug("getConfiguration()");
+        Optional<NetworkConfiguration> networkConfiguration = getNetworkConfiguration(false);
+        if (!networkConfiguration.isPresent()) {
+            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
+                    "The network component configuration cannot be retrieved");
+
+        }
         return new ComponentConfigurationImpl(PID, getDefinition(),
-                getNetworkConfiguration().getConfigurationProperties());
+                networkConfiguration.get().getConfigurationProperties());
     }
 
     @Override
     public synchronized NetworkConfiguration getNetworkConfiguration() throws KuraException {
+        if (!this.currentNetworkConfiguration.isPresent()) {
+            throw new KuraRuntimeException(KuraErrorCode.CONFIGURATION_ERROR,
+                    "The network configuration cannot be retrieved");
+        }
+        return this.currentNetworkConfiguration.get();
+
+    }
+
+    @Override
+    public synchronized Optional<NetworkConfiguration> getNetworkConfiguration(boolean recompute) throws KuraException {
+        if (recompute) {
+            updateCurrentNetworkConfiguration();
+        }
+        return this.currentNetworkConfiguration;
+    }
+
+    @Override
+    public synchronized void updateCurrentNetworkConfiguration() throws KuraException {
         NetworkConfiguration networkConfiguration = new NetworkConfiguration();
 
         // Get the current values
@@ -408,7 +429,7 @@ public class NetworkConfigurationServiceImpl implements NetworkConfigurationServ
             }
         }
 
-        return networkConfiguration;
+        this.currentNetworkConfiguration = Optional.of(networkConfiguration);
     }
 
     private void populateModemConfig(NetworkConfiguration networkConfiguration,

@@ -107,7 +107,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
     private final Map<String, MonitoredModem> modems = new ConcurrentHashMap<>();
     private Map<String, InterfaceState> interfaceStatuses = new HashMap<>();
 
-    private NetworkConfiguration networkConfig;
+    private Optional<NetworkConfiguration> networkConfig = Optional.empty();
 
     private final AtomicBoolean monitorRequestPending = new AtomicBoolean();
     private volatile boolean serviceActivated;
@@ -169,7 +169,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
         executor.execute(() -> {
             // track currently installed modems
             try {
-                this.networkConfig = this.netConfigService.getNetworkConfiguration();
+                this.networkConfig = this.netConfigService.getNetworkConfiguration(false);
                 for (NetInterface<? extends NetInterfaceAddress> netInterface : this.networkService
                         .getNetworkInterfaces()) {
                     if (netInterface instanceof ModemInterface) {
@@ -227,7 +227,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
         this.serviceActivated = false;
 
-        this.networkConfig = null;
+        this.networkConfig = Optional.empty();
     }
 
     @Override
@@ -410,7 +410,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
                     if (oldNetConfigs == null || !isConfigsEqual(oldNetConfigs, newNetConfigs)) {
                         logger.info("new configuration for cellular modem on usb port {} netinterface {}", usbPort,
                                 ifaceName);
-                        this.networkConfig = newNetworkConfig;
+                        this.networkConfig = Optional.of(newNetworkConfig);
                         NetInterfaceStatus netInterfaceStatus = getNetInterfaceStatus(newNetConfigs);
                         if (pppService != null && netInterfaceStatus != NetInterfaceStatus.netIPv4StatusUnmanaged) {
                             PppState pppSt = pppService.getPppState();
@@ -654,7 +654,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
     private void logCurrentNetworkConfiguration() throws KuraException {
         if (logger.isDebugEnabled()) {
-            logger.debug(this.netConfigService.getNetworkConfiguration().toString());
+            logger.debug(this.netConfigService.getNetworkConfiguration(false).toString());
         }
     }
 
@@ -683,9 +683,9 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             HashMap<String, Object> modemInfoMap = new HashMap<>();
             modemInfoMap.put(ModemReadyEvent.MODEM_DEVICE, modemDevice);
             modemInfoMap.put(ModemReadyEvent.IMEI, modem.getSerialNumber());
-            modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity());
-            modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId());
-            modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength()));
+            modemInfoMap.put(ModemReadyEvent.IMSI, modem.getMobileSubscriberIdentity(false));
+            modemInfoMap.put(ModemReadyEvent.ICCID, modem.getIntegratedCirquitCardId(false));
+            modemInfoMap.put(ModemReadyEvent.RSSI, Integer.toString(modem.getSignalStrength(false)));
             modemInfoMap.put(ModemReadyEvent.FW_VERSION, modem.getRevisionID());
             logger.info("posting ModemReadyEvent on topic {}", ModemReadyEvent.MODEM_EVENT_READY_TOPIC);
             this.eventAdmin.postEvent(new ModemReadyEvent(modemInfoMap));
@@ -900,7 +900,7 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             int rssi = 0;
 
             try {
-                rssi = modem.getSignalStrength();
+                rssi = modem.getSignalStrength(true);
             } catch (KuraException e) {
                 logger.error("monitor() :: Failed to obtain signal strength", e);
             }
@@ -946,6 +946,10 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
 
         void initialize() throws KuraException {
 
+            if (!networkConfig.isPresent()) {
+                logger.debug("The network configuration is empty");
+                return;
+            }
             UsbModemDevice modemDevice;
             if (modem.getModemDevice() instanceof UsbModemDevice) {
                 modemDevice = (UsbModemDevice) modem.getModemDevice();
@@ -955,12 +959,14 @@ public class ModemMonitorServiceImpl implements ModemMonitorService, ModemManage
             String ifaceName = modemDevice.getUsbPort();
             List<NetConfig> netConfigs = null;
             if (ifaceName != null) {
-                NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = networkConfig
+                NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig = networkConfig.get()
                         .getNetInterfaceConfig(ifaceName);
 
                 if (netInterfaceConfig == null) {
-                    networkConfig = netConfigService.getNetworkConfiguration();
-                    netInterfaceConfig = networkConfig.getNetInterfaceConfig(ifaceName);
+                    networkConfig = netConfigService.getNetworkConfiguration(false);
+                    if (networkConfig.isPresent()) {
+                        netInterfaceConfig = networkConfig.get().getNetInterfaceConfig(ifaceName);
+                    }
                 }
 
                 if (netInterfaceConfig != null) {

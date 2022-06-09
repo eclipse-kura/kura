@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -40,7 +40,10 @@ public interface NetworkAdminService {
      *
      * @return list of NetInterfaceConfigs on the system
      * @throws KuraException
+     * 
+     * @deprecated since 2.4. Use {@link getNetworkInterfaceConfigs(boolean recompute)} instead.
      */
+    @Deprecated
     public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs()
             throws KuraException;
 
@@ -53,7 +56,10 @@ public interface NetworkAdminService {
      *
      * @param interfaceName
      * @return list of NetConfig for this interface.
+     * 
+     * @deprecated since 2.4. Use {@link getNetworkInterfaceConfigs(tring interfaceName, boolean recompute)} instead.
      */
+    @Deprecated
     public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName) throws KuraException;
 
     /**
@@ -290,4 +296,35 @@ public interface NetworkAdminService {
      * @since 2.3
      */
     public List<DhcpLease> getDhcpLeases() throws KuraException;
+
+    /**
+     * Returns a list of all of the configurations associated with all of the interfaces on
+     * the system and their current values.
+     *
+     * @param recompute:
+     *            if true the configuration and current values are recomputed. Otherwise, a cached value is returned
+     * @return list of NetInterfaceConfigs on the system
+     * @throws KuraException
+     * 
+     * @since 2.4
+     */
+    public List<? extends NetInterfaceConfig<? extends NetInterfaceAddressConfig>> getNetworkInterfaceConfigs(
+            boolean recompute) throws KuraException;
+
+    /**
+     * Returns the configuration information for the specified NetworkInterface name.
+     * The returned NetConfig captured how the interface was configured; the returned
+     * list will have a NetConfig4 instance for IPv4 and an NetConfig6 instance for IPv6.
+     * This should not be confused with the currently active NetInterfaceAddress associated
+     * with the NetInterface.
+     *
+     * @param interfaceName:
+     *            the name of the network interface
+     * @param recompute:
+     *            if true the configuration are recomputed. Otherwise, a cached value is returned
+     * @return list of NetConfig for this interface.
+     * 
+     * @since 2.4
+     */
+    public List<NetConfig> getNetworkInterfaceConfigs(String interfaceName, boolean recompute) throws KuraException;
 }

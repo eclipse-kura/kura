@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,6 +58,8 @@ public class NetworkButtonBarUi extends Composite {
     @UiField
     Button apply;
     @UiField
+    Button reset;
+    @UiField
     Button refresh;
 
     @UiField
@@ -80,23 +82,28 @@ public class NetworkButtonBarUi extends Composite {
 
     private void initButtons() {
         initApplyButton();
+        initResetButton();
         initRefreshButton();
     }
 
-    public void setApplyButtonDirty(boolean dirty) {
+    public void setButtonsDirty(boolean dirty) {
         this.apply.setEnabled(dirty);
+        this.reset.setEnabled(dirty);
+    }
+
+    protected void initResetButton() {
+        this.reset.setText(MSGS.reset());
+        this.reset.setEnabled(false);
+        this.reset.addClickHandler(event -> NetworkButtonBarUi.this.table.reset());
     }
 
     protected void initRefreshButton() {
-        // Refresh Button
         this.refresh.setText(MSGS.refresh());
-        this.refresh.addClickHandler(event -> {
-            NetworkButtonBarUi.this.table.refresh();
-        });
+        this.refresh.setEnabled(true);
+        this.refresh.addClickHandler(event -> NetworkButtonBarUi.this.table.refresh());
     }
 
     protected void initApplyButton() {
-        // Apply Button
         this.apply.setText(MSGS.apply());
         this.apply.setEnabled(false);
         this.apply.addClickHandler(event -> {
@@ -106,7 +113,7 @@ public class NetworkButtonBarUi extends Composite {
 
                 // submit updated netInterfaceConfig and priorities
                 if (prevNetIf != null && prevNetIf.equals(updatedNetIf)) {
-                    NetworkButtonBarUi.this.table.refresh();
+                    NetworkButtonBarUi.this.table.reset();
                     NetworkButtonBarUi.this.apply.setEnabled(false);
                 } else {
                     alertDialog.show(MSGS.confirm(), MSGS.netConfigChangeConfirm(), AlertDialog.Severity.INFO,
@@ -150,7 +157,7 @@ public class NetworkButtonBarUi extends Composite {
                             public void onSuccess(Void result) {
                                 EntryClassUi.hideWaitModal();
                                 NetworkButtonBarUi.this.tabs.setDirty(false);
-                                NetworkButtonBarUi.this.table.refresh();
+                                NetworkButtonBarUi.this.table.reset();
                                 NetworkButtonBarUi.this.tabs.refresh();
                                 NetworkButtonBarUi.this.apply.setEnabled(false);
                             }

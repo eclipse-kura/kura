@@ -20,6 +20,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.NetworkConfiguration;
@@ -40,7 +41,7 @@ public class GetWifiHotSpotListTest {
     private String interfaceName;
 
     @Test
-    public void getHotSpotWhileInfMasterMode() {
+    public void getHotSpotWhileInMasterMode() {
         givenInterfaceName("test_iName");
         givenNetworkAdminService();
 
@@ -67,8 +68,6 @@ public class GetWifiHotSpotListTest {
         when(wpaSupplicantConfigWriterFactory.getInstance()).thenReturn(wpaSupplicantConfigWriter);
 
         this.nas = new NetworkAdminServiceImpl(wpaSupplicantConfigWriterFactory);
-        NetworkConfigurationService ncs = mock(NetworkConfigurationService.class);
-        this.nas.setNetworkConfigurationService(ncs);
 
         LinuxNetworkUtil linuxNetworkUtil = mock(LinuxNetworkUtil.class);
 
@@ -104,7 +103,7 @@ public class GetWifiHotSpotListTest {
         nc.addNetInterfaceConfig(nic);
 
         try {
-            when(ncsMock.getNetworkConfiguration()).thenReturn(nc);
+            when(ncsMock.getNetworkConfiguration(false)).thenReturn(Optional.of(nc));
         } catch (KuraException e) {
             fail();
         }

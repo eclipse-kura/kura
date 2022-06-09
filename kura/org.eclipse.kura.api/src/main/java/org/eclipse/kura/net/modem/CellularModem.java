@@ -59,7 +59,10 @@ public interface CellularModem {
      *
      * @return IMSI number, null if not known
      * @throws KuraException
+     * 
+     * @deprecated since 2.4. Use {@link getMobileSubscriberIdentity(boolean recompute)} instead.
      */
+    @Deprecated
     public String getMobileSubscriberIdentity() throws KuraException;
 
     /**
@@ -67,7 +70,10 @@ public interface CellularModem {
      *
      * @return ICCID, "N/A" if not applicable
      * @throws KuraException
+     * 
+     * @deprecated since 2.4. Use {@link getIntegratedCirquitCardId(boolean recompute)} instead.
      */
+    @Deprecated
     public String getIntegratedCirquitCardId() throws KuraException;
 
     /**
@@ -107,7 +113,10 @@ public interface CellularModem {
      *
      * @throws KuraException
      * @return signal strength
+     * 
+     * @deprecated since 2.4. Use {@link getSignalStrength(boolean recompute)} instead.
      */
+    @Deprecated
     public int getSignalStrength() throws KuraException;
 
     /**
@@ -115,11 +124,14 @@ public interface CellularModem {
      *
      * @throws KuraException
      * @return modem registration status as {@link ModemRegistrationStatus}
+     * 
+     * @deprecated since 2.4. Use {@link getRegistrationStatus(boolean recompute)} instead.
      */
+    @Deprecated
     public ModemRegistrationStatus getRegistrationStatus() throws KuraException;
 
     /**
-     * Reports number of bytes tarnsmitted during a call
+     * Reports number of bytes transmitted during a call
      *
      * @return number of bytes transmitted
      * @throws KuraException
@@ -234,4 +246,52 @@ public interface CellularModem {
      * @since 2.3
      */
     public String getFirmwareVersion() throws KuraException;
+
+    /**
+     * Reports signal strength in dBm
+     * 
+     * @param recompute:
+     *            if true the value is recomputed. Otherwise, a cached value is returned
+     * @return an integer representing the rssi
+     * @throws KuraException
+     * 
+     * @since 2.4
+     */
+    public int getSignalStrength(boolean recompute) throws KuraException;
+
+    /**
+     * Reports modem registration status
+     *
+     * @param recompute:
+     *            if true the value is recomputed. Otherwise, a cached value is returned
+     * @throws KuraException
+     * @return modem registration status as {@link ModemRegistrationStatus}
+     * 
+     * @since 2.4
+     */
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException;
+
+    /**
+     * Answers International Mobile Subscribe Identity (IMSI)
+     *
+     * @param recompute:
+     *            if true the value is recomputed. Otherwise, a cached value is returned
+     * @return IMSI number, null if not known
+     * @throws KuraException
+     * 
+     * @since 2.4
+     */
+    public String getMobileSubscriberIdentity(boolean recompute) throws KuraException;
+
+    /**
+     * Answers Integrated Circuit Card Identification (ICCID)
+     *
+     * @param recompute:
+     *            if true the value is recomputed. Otherwise, a cached value is returned
+     * @return ICCID, "N/A" if not applicable
+     * @throws KuraException
+     * 
+     * @since 2.4
+     */
+    public String getIntegratedCirquitCardId(boolean recompute) throws KuraException;
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -212,15 +212,23 @@ public class SierraUsb598 implements EvdoCellularModem {
     }
 
     @Override
+    public String getMobileSubscriberIdentity(boolean recompute) throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getMobileSubscriberIdentity");
+    }
+
+    @Override
     public String getMobileSubscriberIdentity() throws KuraException {
-        // not implemented
-        return null;
+        return getMobileSubscriberIdentity(true);
+    }
+
+    @Override
+    public String getIntegratedCirquitCardId(boolean recompute) throws KuraException {
+        throw new KuraException(KuraErrorCode.OPERATION_NOT_SUPPORTED, "getIntegratedCirquitCardId");
     }
 
     @Override
     public String getIntegratedCirquitCardId() throws KuraException {
-        // not implemented
-        return null;
+        return getIntegratedCirquitCardId(true);
     }
 
     @Override
@@ -284,8 +292,18 @@ public class SierraUsb598 implements EvdoCellularModem {
     }
 
     @Override
+    public int getSignalStrength(boolean recompute) throws KuraException {
+        return 0;
+    }
+
+    @Override
     public int getSignalStrength() throws KuraException {
         return 0;
+    }
+
+    @Override
+    public ModemRegistrationStatus getRegistrationStatus(boolean recompute) throws KuraException {
+        return null;
     }
 
     @Override

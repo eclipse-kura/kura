@@ -13,6 +13,7 @@
 package org.eclipse.kura.net.admin.modem;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ public class HspaModemRssiTest {
     private HspaModem hspaModem;
     private CommConnection connectionMock;
     private int rssi;
+    private boolean exceptionCaught;
 
     @Test
     public void shouldGetRssi() throws KuraException, IOException, URISyntaxException {
@@ -52,6 +54,25 @@ public class HspaModemRssiTest {
         whenGetRssi(false);
 
         thenDefaultRssiIsReturned();
+    }
+
+    @Test
+    public void shouldGetRssiWithOldMethod() throws KuraException, IOException, URISyntaxException {
+        givenHspaModem();
+        givenRssiReply();
+
+        whenGetRssiWithOldMethod();
+
+        thenRssiIsReturned();
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenModemNotReachable() throws KuraException, IOException, URISyntaxException {
+        givenHspaModemNotReachable();
+
+        whenGetRssi(true);
+
+        thenExceptionIsCaught();
     }
 
     private void givenHspaModem() throws KuraException, IOException, URISyntaxException {
@@ -78,13 +99,46 @@ public class HspaModemRssiTest {
         };
     }
 
+    private void givenHspaModemNotReachable() throws KuraException, IOException, URISyntaxException {
+        this.exceptionCaught = false;
+        List<String> ports = new ArrayList<>();
+        ports.add("/dev/ttyUSB123");
+        ports.add("/dev/ttyUSB456");
+        ports.add("/dev/ttyUSB789");
+        UsbModemDevice modemMock = mock(UsbModemDevice.class);
+        when(modemMock.getSerialPorts()).thenReturn(ports);
+        when(modemMock.getProductId()).thenReturn("0125");
+        when(modemMock.getVendorId()).thenReturn("2c7c");
+        when(modemMock.getProductName()).thenReturn("EX25");
+
+        this.connectionMock = mock(CommConnection.class);
+        when(this.connectionMock.getURI()).thenReturn(CommURI.parseString("comm://port"));
+        when(this.connectionMock.sendCommand(HspaModemAtCommands.AT.getCommand().getBytes(), 1000, 100))
+                .thenReturn("ERROR".getBytes());
+        this.hspaModem = new HspaModem(modemMock, "MyAwesomePlatform", null) {
+
+            @Override
+            protected CommConnection openSerialPort(String port) throws KuraException {
+                return connectionMock;
+            }
+        };
+    }
+
     private void givenRssiReply() throws KuraException, IOException {
         when(this.connectionMock.sendCommand(HspaModemAtCommands.GET_SIGNAL_STRENGTH.getCommand().getBytes(), 1000,
                 100)).thenReturn("at+csq\n+CSQ: 14,99\n\nOK".getBytes());
     }
 
-    private void whenGetRssi(boolean recompute) throws KuraException {
-        this.rssi = this.hspaModem.getSignalStrength(recompute);
+    private void whenGetRssi(boolean recompute) {
+        try {
+            this.rssi = this.hspaModem.getSignalStrength(recompute);
+        } catch (KuraException e) {
+            this.exceptionCaught = true;
+        }
+    }
+
+    private void whenGetRssiWithOldMethod() throws KuraException {
+        this.rssi = this.hspaModem.getSignalStrength();
     }
 
     private void thenRssiIsReturned() {
@@ -93,5 +147,9 @@ public class HspaModemRssiTest {
 
     private void thenDefaultRssiIsReturned() {
         assertEquals(-113, this.rssi);
+    }
+
+    private void thenExceptionIsCaught() {
+        assertTrue(this.exceptionCaught);
     }
 }

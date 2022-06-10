@@ -80,8 +80,16 @@ public class TritonServerServiceOptions {
         }
 
         final Object propertyTimeout = this.properties.get(PROPERTY_TIMEOUT);
-        if (propertyTimeout instanceof Integer && (Integer) propertyTimeout >= 0) {
-            this.timeout = (Integer) propertyTimeout;
+        if (propertyTimeout instanceof Integer) {
+            Integer readTimeout = (Integer) propertyTimeout;
+
+            requireNonNull(readTimeout, "timeout cannot be null");
+
+            if (readTimeout < 0) {
+                throw new KuraRuntimeException(KuraErrorCode.INVALID_PARAMETER, PROPERTY_TIMEOUT);
+            }
+
+            this.timeout = readTimeout;
         } else {
             this.timeout = 3;
         }

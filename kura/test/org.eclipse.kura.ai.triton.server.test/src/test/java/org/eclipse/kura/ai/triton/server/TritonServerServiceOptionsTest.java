@@ -11,6 +11,9 @@ public class TritonServerServiceOptionsTest {
 
     private Map<String, Object> properties = new HashMap<>();
     private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+    private TritonServerServiceOptions otherOptions = new TritonServerServiceOptions(properties);
+
+    private boolean equalsResult = false;
 
     @Test
     public void portOptionsShouldWork() {
@@ -92,6 +95,65 @@ public class TritonServerServiceOptionsTest {
         thenNRetriesIsEqualTo(6);
     }
 
+    @Test
+    public void equalsMethodWorksWithSameOptions() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
+        givenServiceOptionsBuiltWith(this.properties);
+
+        whenEqualsIsCalledWith(this.options, this.options);
+
+        thenEqualsMethodShouldReturn(true);
+    }
+
+    @Test
+    public void equalsMethodWorksWithDifferentType() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
+        givenServiceOptionsBuiltWith(this.properties);
+
+        whenEqualsIsCalledWith(this.options, null);
+
+        thenEqualsMethodShouldReturn(false);
+    }
+
+    @Test
+    public void equalsMethodWorksWithOptionsBuiltWithSameProperties() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
+        givenServiceOptionsBuiltWith(this.properties);
+        givenOtherServiceOptionsBuiltWith(this.properties);
+
+        whenEqualsIsCalledWith(this.options, this.otherOptions);
+
+        thenEqualsMethodShouldReturn(true);
+    }
+
+    @Test
+    public void equalsMethodWorksWithOptionsBuiltWithDifferentProperties() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
+        givenServiceOptionsBuiltWith(this.properties);
+
+        givenPropertyWith("server.address", "192.168.1.66");
+        givenPropertyWith("server.ports", new Integer[] { 5000, 5001, 5002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenPropertyWith("timeout", 60);
+        givenOtherServiceOptionsBuiltWith(this.properties);
+
+        whenEqualsIsCalledWith(this.options, this.otherOptions);
+
+        thenEqualsMethodShouldReturn(false);
+    }
+
     /*
      * Given
      */
@@ -103,10 +165,16 @@ public class TritonServerServiceOptionsTest {
         this.options = new TritonServerServiceOptions(properties);
     }
 
+    private void givenOtherServiceOptionsBuiltWith(Map<String, Object> properties) {
+        this.otherOptions = new TritonServerServiceOptions(properties);
+    }
+
     /*
      * When
      */
-    // TODO
+    private void whenEqualsIsCalledWith(TritonServerServiceOptions lhs, TritonServerServiceOptions rhs) {
+        this.equalsResult = lhs.equals(rhs);
+    }
 
     /*
      * Then
@@ -137,5 +205,9 @@ public class TritonServerServiceOptionsTest {
 
     private void thenLocalConfigIsEqualTo(boolean value) {
         assertEquals(value, this.options.isLocalEnabled());
+    }
+
+    private void thenEqualsMethodShouldReturn(boolean value) {
+        assertEquals(value, this.equalsResult);
     }
 }

@@ -97,6 +97,7 @@
             type="Integer"
             cardinality="0" 
             required="false"
+            min="0"
             default="3" 
             description="Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout the operation will be terminated with an error. If timeout is set to zero the operation will wait indefinitely">
         </AD>

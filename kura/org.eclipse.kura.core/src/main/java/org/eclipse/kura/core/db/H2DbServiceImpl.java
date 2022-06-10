@@ -39,7 +39,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.crypto.CryptoService;
-import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.db.BaseDbService;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.h2.jdbcx.JdbcDataSource;
 import org.h2.tools.DeleteDbFiles;
@@ -47,7 +47,7 @@ import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
+public class H2DbServiceImpl implements BaseDbService, ConfigurableComponent {
 
     private static final String ANONYMOUS_MEM_INSTANCE_JDBC_URL = "jdbc:h2:mem:";
     private static Map<String, H2DbServiceImpl> activeInstances = Collections.synchronizedMap(new HashMap<>());

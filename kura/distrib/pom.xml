@@ -710,6 +710,7 @@
                                 <move file="target/plugins/org.eclipse.kura.emulator.usb.jar" tofile="target/plugins/org.eclipse.kura.emulator.usb_${org.eclipse.kura.emulator.usb.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.emulator.watchdog.jar" tofile="target/plugins/org.eclipse.kura.emulator.watchdog_${org.eclipse.kura.emulator.watchdog.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.h2db.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar" />
+                                <move file="target/plugins/org.eclipse.kura.wire.basedb.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.basedb.component.provider_${org.eclipse.kura.wire.basedb.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.camel.jar" tofile="target/plugins/org.eclipse.kura.wire.camel_${org.eclipse.kura.wire.camel.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.component.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar" />
                                 <move file="target/plugins/org.eclipse.kura.wire.helper.provider.jar" tofile="target/plugins/org.eclipse.kura.wire.helper.provider_${org.eclipse.kura.wire.helper.provider.version}.jar" />

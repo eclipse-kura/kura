@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.db.BaseDbService;
+import org.eclipse.kura.db.BaseDbService.ConnectionCallable;
 
 /**
  * The Class DbServiceHelper is responsible for providing {@link BaseDbService}
@@ -88,6 +89,10 @@ public class BaseDbServiceHelper {
 
     public Connection getConnection() throws SQLException {
         return this.dbService.getConnection();
+    }
+
+    public <T> T withConnection(final ConnectionCallable<T> callable) throws SQLException {
+        return (this.dbService).withConnection(callable);
     }
 
     /**

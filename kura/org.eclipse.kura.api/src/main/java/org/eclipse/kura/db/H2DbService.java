@@ -56,7 +56,9 @@ public interface H2DbService extends BaseDbService {
      * @throws SQLException
      *             if the provided task throws a {@link SQLException}.
      * @since 2.0
+     * @Deprecated sine 2.4. Use {@link BaseDbService.withConnection} instead.
      */
+    @Deprecated
     public <T> T withConnection(ConnectionCallable<T> task) throws SQLException;
 
     /**
@@ -65,8 +67,10 @@ public interface H2DbService extends BaseDbService {
      * @param <T>
      *            The return type of the task.
      * @since 2.0
+     * @Deprecated sine 2.4. Use {@link BaseDbService.ConnectionCallable} instead.
      */
     @FunctionalInterface
+    @Deprecated
     public interface ConnectionCallable<T> {
 
         public T call(Connection connection) throws SQLException;

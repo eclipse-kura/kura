@@ -1261,6 +1261,8 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.util_${org.eclipse.kura.util.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar@4:start" />
+	         <entry key="osgi.bundles" operation="+"
+	                value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.basedb.component.provider_${org.eclipse.kura.wire.basedb.component.provider.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar@4:start" />
 			<entry key="osgi.bundles" operation="+"
@@ -1358,6 +1360,9 @@ fi]]>
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
+            <zipfileset
+                file="${project.build.directory}/plugins/org.eclipse.kura.wire.basedb.component.provider_${org.eclipse.kura.wire.basedb.component.provider.version}.jar"
+                prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
@@ -1756,6 +1761,9 @@ fi]]>
 		<copy
 			file="${project.build.directory}/plugins/org.eclipse.kura.wire.h2db.component.provider_${org.eclipse.kura.wire.h2db.component.provider.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />
+        <copy
+            file="${project.build.directory}/plugins/org.eclipse.kura.wire.basedb.component.provider_${org.eclipse.kura.wire.basedb.component.provider.version}.jar"
+            todir="${build.install.dir.kura}/kura/plugins" />
 		<copy
 			file="${project.build.directory}/plugins/org.eclipse.kura.wire.component.provider_${org.eclipse.kura.wire.component.provider.version}.jar"
 			todir="${build.install.dir.kura}/kura/plugins" />

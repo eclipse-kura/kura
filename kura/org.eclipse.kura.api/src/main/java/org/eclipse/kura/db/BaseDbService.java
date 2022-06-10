@@ -67,4 +67,36 @@ public interface BaseDbService {
      * The method will catch any SQLExcepton thrown and log it.
      */
     public void close(Statement... stmts);
+
+    /**
+     * Executes the provided {@link ConnectionCallable} task on the current thread, and returns the result.
+     * It is not necessary to close the {@link Connection} received as argument. If an exception is thrown by the task,
+     * the connection will be rolled back automatically.
+     *
+     * This method guarantees that the execution of the provided task will not be affected by the defragmentation
+     * process.
+     * Performing long running operations in the provided tasks might delay the defragmentation
+     * process.
+     *
+     * @param task
+     *            the task to be executed.
+     * @return the result of the executed task.
+     * @throws SQLException
+     *             if the provided task throws a {@link SQLException}.
+     * @since 2.4
+     */
+    public <T> T withConnection(ConnectionCallable<T> task) throws SQLException;
+
+    /**
+     * Represents a task that can be executed using the {@link H2DbService#withConnection(ConnectionCallable)} method.
+     *
+     * @param <T>
+     *            The return type of the task.
+     * @since 2.4
+     */
+    @FunctionalInterface
+    public interface ConnectionCallable<T> {
+
+        public T call(Connection connection) throws SQLException;
+    }
 }

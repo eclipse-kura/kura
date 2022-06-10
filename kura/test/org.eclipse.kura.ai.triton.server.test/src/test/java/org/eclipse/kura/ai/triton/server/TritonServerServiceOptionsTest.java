@@ -19,7 +19,7 @@ public class TritonServerServiceOptionsTest {
     private int otherHashCode;
 
     @Test
-    public void portOptionsShouldWork() {
+    public void portGettersShouldWork() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -31,7 +31,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void portOptionsShouldWorkWithNullPorts() {
+    public void portGettersShouldWorkWithNullProperty() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", null);
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -43,7 +43,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void localOptionsShouldWorkWithLocal() {
+    public void isLocalGetterShouldWorkWithLocal() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.TRUE);
@@ -53,7 +53,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void localOptionsShouldWorkWithRemote() {
+    public void isLocalGetterShouldWorkWithRemote() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -63,7 +63,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void localOptionsShouldWorkWithNull() {
+    public void isLocalGetterShouldWorkWithNullProperty() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", null);
@@ -73,7 +73,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void timeoutOptionsShouldWork() {
+    public void timeoutGettersShouldWork() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -86,7 +86,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void timeoutOptionsShouldWorkWithNullTimeout() {
+    public void timeoutGettersShouldWorkWithNullProperty() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -99,7 +99,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void equalsMethodWorksWithSameOptions() {
+    public void equalsMethodShouldWorkWithSameOptions() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -112,7 +112,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void equalsMethodWorksWithDifferentType() {
+    public void equalsMethodShouldWorkWithNullArgument() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -125,7 +125,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void equalsMethodWorksWithOptionsBuiltWithSameProperties() {
+    public void equalsMethodShouldWorkWithOptionsBuiltWithSameProperties() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -139,7 +139,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void equalsMethodWorksWithOptionsBuiltWithDifferentProperties() {
+    public void equalsMethodShouldWorkWithOptionsBuiltWithDifferentProperties() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -158,7 +158,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void hashCodeMethodWorksWithOptionsBuiltWithSameProperties() {
+    public void hashCodeMethodShouldWorkWithOptionsBuiltWithSameProperties() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
@@ -173,7 +173,7 @@ public class TritonServerServiceOptionsTest {
     }
 
     @Test
-    public void hashCodeMethodWorksWithOptionsBuiltWithDifferentProperties() {
+    public void hashCodeMethodShouldWorkWithOptionsBuiltWithDifferentProperties() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);

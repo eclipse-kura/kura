@@ -470,14 +470,16 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             return;
         }
 
-        if (!oldDeployedPackages.equals(deployedPackages)) {
-            try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
-                deployedPackages.store(fos, null);
-                fos.flush();
-                fos.getFD().sync();
-            } catch (IOException e) {
-                logger.error("Error writing package configuration file", e);
-            }
+        if (oldDeployedPackages.equals(deployedPackages)) {
+           return;
+        }
+
+        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
+            deployedPackages.store(fos, null);
+            fos.flush();
+            fos.getFD().sync();
+        } catch (IOException e) {
+            logger.error("Error writing package configuration file", e);
         }
     }
 }

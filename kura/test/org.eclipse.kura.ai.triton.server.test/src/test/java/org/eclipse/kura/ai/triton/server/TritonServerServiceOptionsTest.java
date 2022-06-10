@@ -17,8 +17,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenHttpPortIsEqualTo(4000);
         thenGrpcPortIsEqualTo(4001);
@@ -30,8 +29,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", null);
         givenPropertyWith("enable.local", Boolean.FALSE);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenHttpPortIsEqualTo(5000);
         thenGrpcPortIsEqualTo(5001);
@@ -43,8 +41,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.TRUE);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenLocalConfigIsEqualTo(true);
     }
@@ -54,8 +51,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenLocalConfigIsEqualTo(false);
     }
@@ -65,8 +61,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", null);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenLocalConfigIsEqualTo(false);
     }
@@ -77,8 +72,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
         givenPropertyWith("timeout", 5);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenTimeoutIsEqualTo(5);
         thenRetryIntervalIsEqualTo(500);
@@ -91,8 +85,7 @@ public class TritonServerServiceOptionsTest {
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("enable.local", Boolean.FALSE);
         givenPropertyWith("timeout", null);
-
-        whenServiceOptionsAreBuiltWith(properties);
+        givenServiceOptionsBuiltWith(properties);
 
         thenTimeoutIsEqualTo(3);
         thenRetryIntervalIsEqualTo(500);
@@ -106,12 +99,14 @@ public class TritonServerServiceOptionsTest {
         this.properties.put(name, value);
     }
 
+    private void givenServiceOptionsBuiltWith(Map<String, Object> properties) {
+        this.options = new TritonServerServiceOptions(properties);
+    }
+
     /*
      * When
      */
-    private void whenServiceOptionsAreBuiltWith(Map<String, Object> properties) {
-        this.options = new TritonServerServiceOptions(properties);
-    }
+    // TODO
 
     /*
      * Then

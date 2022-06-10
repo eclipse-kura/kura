@@ -151,8 +151,8 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         int counter = 0;
         while (this.tritonServerLocalManager.isLocalServerRunning()) {
             if (this.options.getTimeout() != 0 && counter++ >= this.options.getNRetries()) {
-                logger.warn("Cannot stop local server instance.");
-                return;
+                logger.warn("Cannot stop local server instance. Killing it.");
+                this.tritonServerLocalManager.kill();
             }
             TritonServerLocalManager.sleepFor(this.options.getRetryInterval());
         }

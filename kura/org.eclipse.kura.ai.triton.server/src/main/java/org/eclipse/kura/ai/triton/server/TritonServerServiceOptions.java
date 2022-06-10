@@ -80,13 +80,12 @@ public class TritonServerServiceOptions {
         }
 
         final Object propertyTimeout = this.properties.get(PROPERTY_TIMEOUT);
-        if (propertyTimeout instanceof Integer && (Integer) propertyTimeout >= 0) {
+        if (propertyTimeout instanceof Integer) {
             this.timeout = (Integer) propertyTimeout;
         } else {
             this.timeout = 3;
         }
         this.nRetries = (this.timeout * 1000) / RETRY_INTERVAL;
-
     }
 
     public String getAddress() {

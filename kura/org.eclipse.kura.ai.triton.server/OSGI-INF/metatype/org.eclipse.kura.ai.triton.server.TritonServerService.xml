@@ -92,6 +92,15 @@
             description="Only for local instance, a semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false">
         </AD>
 
+        <AD id="timeout"  
+            name="Timeout (in seconds) for time consuming tasks"
+            type="Integer"
+            cardinality="0" 
+            required="false"
+            default="3" 
+            description="Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout the operation will be terminated with an error. If timeout is set to zero the operation will wait indefinitely">
+        </AD>
+
     </OCD>
     <Designate factoryPid="org.eclipse.kura.ai.triton.server.TritonServerService">
         <Object ocdref="org.eclipse.kura.ai.triton.server.TritonServerService"/>

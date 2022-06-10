@@ -1,8 +1,6 @@
 package org.eclipse.kura.ai.triton.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,105 +10,137 @@ import org.junit.Test;
 public class TritonServerServiceOptionsTest {
 
     private Map<String, Object> properties = new HashMap<>();
+    private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
 
     @Test
     public void portOptionsShouldWork() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.FALSE);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertEquals(4000, options.getHttpPort());
-        assertEquals(4001, options.getGrpcPort());
-        assertEquals(4002, options.getMetricsPort());
+        thenHttpPortIsEqualTo(4000);
+        thenGrpcPortIsEqualTo(4001);
+        thenMetricsPortIsEqualTo(4002);
     }
 
     @Test
     public void portOptionsShouldWorkWithNullPorts() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", null);
-        properties.put("enable.local", Boolean.FALSE);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", null);
+        givenPropertyWith("enable.local", Boolean.FALSE);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertEquals(5000, options.getHttpPort());
-        assertEquals(5001, options.getGrpcPort());
-        assertEquals(5002, options.getMetricsPort());
+        thenHttpPortIsEqualTo(5000);
+        thenGrpcPortIsEqualTo(5001);
+        thenMetricsPortIsEqualTo(5002);
     }
 
     @Test
     public void localOptionsShouldWorkWithLocal() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.TRUE);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertTrue(options.isLocalEnabled());
+        thenLocalConfigIsEqualTo(true);
     }
 
     @Test
     public void localOptionsShouldWorkWithRemote() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.FALSE);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertFalse(options.isLocalEnabled());
+        thenLocalConfigIsEqualTo(false);
     }
 
     @Test
     public void localOptionsShouldWorkWithNull() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", null);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", null);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertFalse(options.isLocalEnabled());
+        thenLocalConfigIsEqualTo(false);
     }
 
     @Test
     public void timeoutOptionsShouldWork() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.FALSE);
-        properties.put("timeout", 5);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", 5);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertEquals(5, options.getTimeout());
-        assertEquals(500, options.getRetryInterval());
-        assertEquals(10, options.getNRetries());
+        thenTimeoutIsEqualTo(5);
+        thenRetryIntervalIsEqualTo(500);
+        thenNRetriesIsEqualTo(10);
     }
 
     @Test
     public void timeoutOptionsShouldWorkWithNullTimeout() {
-        // Given
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.FALSE);
-        properties.put("timeout", null);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        whenServiceOptionsAreBuiltWith(properties);
 
-        // Then
-        assertEquals(3, options.getTimeout());
-        assertEquals(500, options.getRetryInterval());
-        assertEquals(6, options.getNRetries());
+        thenTimeoutIsEqualTo(3);
+        thenRetryIntervalIsEqualTo(500);
+        thenNRetriesIsEqualTo(6);
+    }
+
+    /*
+     * Given
+     */
+    private void givenPropertyWith(String name, Object value) {
+        this.properties.put(name, value);
+    }
+
+    /*
+     * When
+     */
+    private void whenServiceOptionsAreBuiltWith(Map<String, Object> properties) {
+        this.options = new TritonServerServiceOptions(properties);
+    }
+
+    /*
+     * Then
+     */
+    private void thenTimeoutIsEqualTo(int value) {
+        assertEquals(value, this.options.getTimeout());
+    }
+
+    private void thenRetryIntervalIsEqualTo(int value) {
+        assertEquals(value, this.options.getRetryInterval());
+    }
+
+    private void thenNRetriesIsEqualTo(int value) {
+        assertEquals(value, this.options.getNRetries());
+    }
+
+    private void thenHttpPortIsEqualTo(int value) {
+        assertEquals(value, this.options.getHttpPort());
+    }
+
+    private void thenGrpcPortIsEqualTo(int value) {
+        assertEquals(value, this.options.getGrpcPort());
+    }
+
+    private void thenMetricsPortIsEqualTo(int value) {
+        assertEquals(value, this.options.getMetricsPort());
+    }
+
+    private void thenLocalConfigIsEqualTo(boolean value) {
+        assertEquals(value, this.options.isLocalEnabled());
     }
 }

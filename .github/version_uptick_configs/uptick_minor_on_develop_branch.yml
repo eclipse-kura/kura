@@ -7,9 +7,7 @@ exclusions:
   - "**/.settings/**/*"
   - "**/.classpath"
   - "**/.project"
-  - "./distrib/esf-addon-archetype/src/main/resources/**/*"
   - "./kura/tools/archetype/example/src/main/resources/**/*"
-  - "./target-platform/javax.bluetooth-parent/javax.bluetooth/src/**/*"
 
 tasks:
   - selector:

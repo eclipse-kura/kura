@@ -150,10 +150,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
         int counter = 0;
         while (this.tritonServerLocalManager.isLocalServerRunning()) {
-            if (this.options.getTimeout() != 0) {
-                counter++;
-            }
-            if (counter >= this.options.getNRetries()) {
+            if (this.options.getTimeout() != 0 && counter++ >= this.options.getNRetries()) {
                 logger.warn("Cannot stop local server instance.");
                 return;
             }
@@ -198,10 +195,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
         int counter = 0;
         while (!isEngineReady()) {
-            if (this.options.getTimeout() != 0) {
-                counter++;
-            }
-            if (counter >= this.options.getNRetries()) {
+            if (this.options.getTimeout() != 0 && counter++ >= this.options.getNRetries()) {
                 logger.warn("Cannot load models since server is not ready.");
                 return;
             }
@@ -250,10 +244,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         if (this.options.modelsAreEncrypted()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
-                if (this.options.getTimeout() != 0) {
-                    counter++;
-                }
-                if (counter >= this.options.getNRetries()) {
+                if (this.options.getTimeout() != 0 && counter++ >= this.options.getNRetries()) {
                     logger.warn("Cannot check if model was correctly loaded. Wiping decrypted model anyway");
                     break;
                 }

@@ -174,7 +174,8 @@ public class TritonServerServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.grpcPort, this.httpPort, this.isLocal, this.metricsPort, this.properties);
+        return Objects.hash(this.grpcPort, this.httpPort, this.isLocal, this.metricsPort, this.timeout, this.nRetries,
+                this.properties);
     }
 
     @Override
@@ -187,7 +188,8 @@ public class TritonServerServiceOptions {
         }
         TritonServerServiceOptions other = (TritonServerServiceOptions) obj;
         return this.grpcPort == other.grpcPort && this.httpPort == other.httpPort && this.isLocal == other.isLocal
-                && this.metricsPort == other.metricsPort && Objects.equals(this.properties, other.properties);
+                && this.metricsPort == other.metricsPort && this.timeout == other.timeout
+                && this.nRetries == other.nRetries && Objects.equals(this.properties, other.properties);
     }
 
 }

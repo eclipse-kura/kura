@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  3 PORT d.o.o.
  *******************************************************************************/
 package org.eclipse.kura.core.deployment.install;
 
@@ -273,22 +274,23 @@ public class InstallImpl {
         DeploymentPackage dp = null;
         File dpPersistentFile = null;
         File downloadedFile = fileReference;
+        File packagesFolder = new File(this.packagesPath);
 
         try (InputStream dpInputStream = new FileInputStream(downloadedFile);) {
-            String dpBasename = fileReference.getName();
             StringBuilder pathSB = new StringBuilder();
             pathSB.append(this.packagesPath);
             pathSB.append(File.separator);
-            pathSB.append(dpBasename);
-            String dpPersistentFilePath = pathSB.toString();
-            dpPersistentFile = new File(dpPersistentFilePath);
 
             dp = this.deploymentAdmin.installDeploymentPackage(dpInputStream);
 
+            pathSB.append(dp.getName()).append("_");
+            pathSB.append(dp.getVersion()).append(".dp");
+            String dpPersistentFilePath = pathSB.toString();
+            dpPersistentFile = new File(pathSB.toString());
+
             // Now we need to copy the deployment package file to the Kura
             // packages directory unless it's already there.
-
-            if (!downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+            if (!downloadedFile.getCanonicalPath().startsWith(packagesFolder.getCanonicalPath())) {
                 logger.debug("dpFile.getCanonicalPath(): {}", downloadedFile.getCanonicalPath());
                 logger.debug("dpPersistentFile.getCanonicalPath(): {}", dpPersistentFile.getCanonicalPath());
                 FileUtils.copyFile(downloadedFile, dpPersistentFile);
@@ -299,8 +301,7 @@ public class InstallImpl {
         } finally {
             // The file from which we have installed the deployment package will be deleted
             // unless it's a persistent deployment package file.
-            if (dpPersistentFile != null
-                    && !downloadedFile.getCanonicalPath().equals(dpPersistentFile.getCanonicalPath())) {
+            if (!downloadedFile.getCanonicalPath().startsWith(packagesFolder.getCanonicalPath())) {
                 downloadedFile.delete();
             }
         }

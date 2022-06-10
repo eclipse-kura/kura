@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
+ *  3 PORT d.o.o.
  *******************************************************************************/
 package org.eclipse.kura.deployment.agent.impl;
 
@@ -436,6 +437,8 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
 
     private void addPackageToConfFile(String packageName, String packageUrl) {
         Properties deployedPackages = readDeployedPackages();
+        Properties oldDeployedPackages = new Properties();
+        oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.setProperty(packageName, packageUrl);
 
         if (this.dpaConfPath == null) {
@@ -443,17 +446,21 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             return;
         }
 
-        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
-            deployedPackages.store(fos, null);
-            fos.flush();
-            fos.getFD().sync();
-        } catch (IOException e) {
-            logger.error("Error writing package configuration file", e);
+        if (!oldDeployedPackages.equals(deployedPackages)) {
+            try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
+                deployedPackages.store(fos, null);
+                fos.flush();
+                fos.getFD().sync();
+            } catch (IOException e) {
+                logger.error("Error writing package configuration file", e);
+            }
         }
     }
 
     private void removePackageFromConfFile(String packageName) {
         Properties deployedPackages = readDeployedPackages();
+        Properties oldDeployedPackages = new Properties();
+        oldDeployedPackages.putAll(deployedPackages);
         deployedPackages.remove(packageName);
 
         if (this.dpaConfPath == null) {
@@ -461,12 +468,14 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             return;
         }
 
-        try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
-            deployedPackages.store(fos, null);
-            fos.flush();
-            fos.getFD().sync();
-        } catch (IOException e) {
-            logger.error("Error writing package configuration file", e);
+        if (!oldDeployedPackages.equals(deployedPackages)) {
+            try (FileOutputStream fos = new FileOutputStream(this.dpaConfPath)) {
+                deployedPackages.store(fos, null);
+                fos.flush();
+                fos.getFD().sync();
+            } catch (IOException e) {
+                logger.error("Error writing package configuration file", e);
+            }
         }
     }
 }

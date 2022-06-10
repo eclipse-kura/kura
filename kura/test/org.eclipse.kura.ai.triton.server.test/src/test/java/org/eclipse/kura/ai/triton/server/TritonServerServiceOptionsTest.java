@@ -1,6 +1,7 @@
 package org.eclipse.kura.ai.triton.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,8 @@ public class TritonServerServiceOptionsTest {
     private TritonServerServiceOptions otherOptions = new TritonServerServiceOptions(properties);
 
     private boolean equalsResult = false;
+    private int hashCode;
+    private int otherHashCode;
 
     @Test
     public void portOptionsShouldWork() {
@@ -154,6 +157,41 @@ public class TritonServerServiceOptionsTest {
         thenEqualsMethodShouldReturn(false);
     }
 
+    @Test
+    public void hashCodeMethodWorksWithOptionsBuiltWithSameProperties() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
+        givenServiceOptionsBuiltWith(this.properties);
+        givenOtherServiceOptionsBuiltWith(this.properties);
+
+        whenHashCodeIsCalledWith(this.options);
+        whenOtherHashCodeIsCalledWith(this.otherOptions);
+
+        thenHashCodesShouldMatch();
+    }
+
+    @Test
+    public void hashCodeMethodWorksWithOptionsBuiltWithDifferentProperties() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("timeout", null);
+        givenServiceOptionsBuiltWith(this.properties);
+
+        givenPropertyWith("server.address", "192.168.1.66");
+        givenPropertyWith("server.ports", new Integer[] { 5000, 5001, 5002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenPropertyWith("timeout", 60);
+        givenOtherServiceOptionsBuiltWith(this.properties);
+
+        whenHashCodeIsCalledWith(this.options);
+        whenOtherHashCodeIsCalledWith(this.otherOptions);
+
+        thenHashCodesShouldNotMatch();
+    }
+
     /*
      * Given
      */
@@ -174,6 +212,14 @@ public class TritonServerServiceOptionsTest {
      */
     private void whenEqualsIsCalledWith(TritonServerServiceOptions lhs, TritonServerServiceOptions rhs) {
         this.equalsResult = lhs.equals(rhs);
+    }
+
+    private void whenHashCodeIsCalledWith(TritonServerServiceOptions options) {
+        this.hashCode = options.hashCode();
+    }
+
+    private void whenOtherHashCodeIsCalledWith(TritonServerServiceOptions options) {
+        this.otherHashCode = options.hashCode();
     }
 
     /*
@@ -209,5 +255,13 @@ public class TritonServerServiceOptionsTest {
 
     private void thenEqualsMethodShouldReturn(boolean value) {
         assertEquals(value, this.equalsResult);
+    }
+
+    private void thenHashCodesShouldMatch() {
+        assertEquals(this.hashCode, this.otherHashCode);
+    }
+
+    private void thenHashCodesShouldNotMatch() {
+        assertNotEquals(this.hashCode, this.otherHashCode);
     }
 }

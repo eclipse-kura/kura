@@ -1,0 +1,21 @@
+---
+exclusions:
+  - "**/.git/**/*"
+  - "**/.github/**/*"
+  - "**/target/**/*"
+  - "**/RELEASE_INFO/**/*"
+  - "**/.settings/**/*"
+  - "**/.classpath"
+  - "**/.project"
+  - "./kura/tools/archetype/example/src/main/resources/**/*"
+
+tasks:
+  - selector:
+      and:
+        - snapshot
+        - not:
+            artifact_id: "moquette-broker"
+    actions:
+      - print
+      - transform_version:
+        - snapshot: remove

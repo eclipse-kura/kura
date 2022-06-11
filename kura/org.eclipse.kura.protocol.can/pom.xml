@@ -34,9 +34,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>de.entropia</groupId>
+			<groupId>com.eurotech</groupId>
 			<artifactId>libsocket-can-java</artifactId>
-			<version>1.0.2</version>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 

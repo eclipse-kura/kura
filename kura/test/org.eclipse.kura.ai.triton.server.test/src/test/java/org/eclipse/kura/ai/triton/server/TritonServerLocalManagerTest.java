@@ -14,54 +14,88 @@ import org.junit.Test;
 
 public class TritonServerLocalManagerTest {
 
+    private static final String[] TRITONSERVERCMD = new String[] { "tritonserver" };
+    private static final String MOCK_DECRYPT_FOLDER = "test";
+
+    private Map<String, Object> properties = new HashMap<>();
+    private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+
+    private CommandExecutorService ces;
+    private TritonServerLocalManager manager;
+
     @Test
     public void killMethodShouldWork() {
-        // Given option
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.TRUE);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        givenMockCommandExecutionService();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning();
 
-        // Given command executor service
-        CommandExecutorService ces = mock(CommandExecutorService.class);
-        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(true);
+        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
-        // Given TritonServerLocalManager built with
-        TritonServerLocalManager manager = new TritonServerLocalManager(options, ces, "test");
+        whenKillIsCalled();
 
-        // When method is called
-        manager.kill();
-
-        // Then command execution kill method is called
-        String[] cmd = new String[] { "tritonserver" };
-        verify(ces, times(1)).kill(cmd, LinuxSignal.SIGKILL);
+        thenCommandServiceKillWasCalledWith(TRITONSERVERCMD, LinuxSignal.SIGKILL);
     }
 
     @Test
     public void stopMethodShouldWork() {
-        // Given option
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("server.address", "localhost");
-        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", Boolean.TRUE);
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
 
-        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+        givenMockCommandExecutionService();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning();
 
-        // Given command executor service
-        CommandExecutorService ces = mock(CommandExecutorService.class);
-        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(true);
+        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
-        // Given TritonServerLocalManager built with
-        TritonServerLocalManager manager = new TritonServerLocalManager(options, ces, "test");
+        whenStopIsCalled();
 
-        // When method is called
-        manager.stop();
-
-        // Then command execution kill method is called
-        String[] cmd = new String[] { "tritonserver" };
-        verify(ces, times(1)).kill(cmd, LinuxSignal.SIGINT);
+        thenCommandServiceKillWasCalledWith(TRITONSERVERCMD, LinuxSignal.SIGINT);
     }
 
+    /*
+     * Given
+     */
+    private void givenPropertyWith(String name, Object value) {
+        this.properties.put(name, value);
+    }
+
+    private void givenServiceOptionsBuiltWith(Map<String, Object> properties) {
+        this.options = new TritonServerServiceOptions(properties);
+    }
+
+    private void givenMockCommandExecutionService() {
+        this.ces = mock(CommandExecutorService.class);
+    }
+
+    private void givenMockCommandExecutionServiceReturnsTritonIsRunning() {
+        when(this.ces.isRunning(new String[] { "tritonserver" })).thenReturn(true);
+    }
+
+    private void givenLocalManagerBuiltWith(TritonServerServiceOptions options, CommandExecutorService ces,
+            String decryptionFolder) {
+        this.manager = new TritonServerLocalManager(options, ces, decryptionFolder);
+    }
+
+    /*
+     * When
+     */
+    private void whenKillIsCalled() {
+        this.manager.kill();
+    }
+
+    private void whenStopIsCalled() {
+        this.manager.stop();
+    }
+
+    /*
+     * Then
+     */
+    private void thenCommandServiceKillWasCalledWith(String[] expectedCmd, LinuxSignal expectedSignal) {
+        verify(this.ces, times(1)).kill(expectedCmd, expectedSignal);
+    }
 }

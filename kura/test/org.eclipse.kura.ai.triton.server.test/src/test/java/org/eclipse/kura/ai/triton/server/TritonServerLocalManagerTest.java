@@ -39,4 +39,29 @@ public class TritonServerLocalManagerTest {
         verify(ces, times(1)).kill(cmd, LinuxSignal.SIGKILL);
     }
 
+    @Test
+    public void stopMethodShouldWork() {
+        // Given option
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("server.address", "localhost");
+        properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
+        properties.put("enable.local", Boolean.TRUE);
+
+        TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
+
+        // Given command executor service
+        CommandExecutorService ces = mock(CommandExecutorService.class);
+        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(true);
+
+        // Given TritonServerLocalManager built with
+        TritonServerLocalManager manager = new TritonServerLocalManager(options, ces, "test");
+
+        // When method is called
+        manager.stop();
+
+        // Then command execution kill method is called
+        String[] cmd = new String[] { "tritonserver" };
+        verify(ces, times(1)).kill(cmd, LinuxSignal.SIGINT);
+    }
+
 }

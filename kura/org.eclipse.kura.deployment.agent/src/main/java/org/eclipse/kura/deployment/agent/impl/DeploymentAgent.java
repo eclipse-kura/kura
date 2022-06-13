@@ -446,7 +446,7 @@ public class DeploymentAgent implements DeploymentAgentService, ConfigurableComp
             return;
         }
 
-        if(oldDeployedPackages.equals(deployedPackages)) {
+        if (oldDeployedPackages.equals(deployedPackages)) {
             return;
         }
 

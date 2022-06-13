@@ -33,6 +33,7 @@ import org.eclipse.kura.KuraStoreCapacityReachedException;
 import org.eclipse.kura.KuraStoreException;
 import org.eclipse.kura.core.data.DataMessage;
 import org.eclipse.kura.core.data.DataStore;
+import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.system.SystemService;
 import org.osgi.framework.BundleContext;
@@ -638,7 +639,7 @@ public class DbDataStore implements DataStore {
         return builder;
     }
 
-    private <T> T withConnection(final H2DbService.ConnectionCallable<T> callable, final String exceptionMessage)
+    private <T> T withConnection(final BaseDbService.ConnectionCallable<T> callable, final String exceptionMessage)
             throws KuraStoreException {
         if (this.dbService == null) {
             throw new KuraStoreException("DbService instance not attached");

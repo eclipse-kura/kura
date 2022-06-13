@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.db.H2DbService;
-import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
+import org.eclipse.kura.internal.wire.basedb.common.H2DbServiceHelper;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;

@@ -415,7 +415,7 @@ public class H2DbWireRecordStoreTest {
             this.dbConnection = DriverManager.getConnection("jdbc:h2:mem:kuradb", "SA", "");
             this.dbServiceMock = mock(H2DbService.class);
 
-            when(this.dbServiceMock.withConnection(anyObject())).thenAnswer(invocation -> {
+            when(((BaseDBService) this.dbServiceMock).withConnection(anyObject())).thenAnswer(invocation -> {
                 return invocation.getArgumentAt(0, H2DbService.ConnectionCallable.class).call(this.dbConnection);
             });
 

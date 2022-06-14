@@ -35,12 +35,17 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_LOCAL_BACKENDS_CONFIG = "local.backends.config";
     private static final String PROPERTY_MODELS = "models";
     private static final String PROPERTY_LOCAL = "enable.local";
+    private static final String PROPERTY_TIMEOUT = "timeout";
     private final Map<String, Object> properties;
+
+    private static final int RETRY_INTERVAL = 500; // ms
 
     private final int httpPort;
     private final int grpcPort;
     private final int metricsPort;
     private final boolean isLocal;
+    private final int timeout;
+    private final int nRetries;
 
     public TritonServerServiceOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -73,6 +78,14 @@ public class TritonServerServiceOptions {
         } else {
             this.isLocal = false;
         }
+
+        final Object propertyTimeout = this.properties.get(PROPERTY_TIMEOUT);
+        if (propertyTimeout instanceof Integer) {
+            this.timeout = (Integer) propertyTimeout;
+        } else {
+            this.timeout = 3;
+        }
+        this.nRetries = (this.timeout * 1000) / RETRY_INTERVAL;
     }
 
     public String getAddress() {
@@ -138,6 +151,18 @@ public class TritonServerServiceOptions {
         return models;
     }
 
+    public int getNRetries() {
+        return this.nRetries;
+    }
+
+    public int getTimeout() {
+        return this.timeout;
+    }
+
+    public int getRetryInterval() {
+        return RETRY_INTERVAL;
+    }
+
     private String getStringProperty(String propertyName) {
         String stringProperty = "";
         final Object stringPropertyObj = this.properties.get(propertyName);
@@ -149,7 +174,8 @@ public class TritonServerServiceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.grpcPort, this.httpPort, this.isLocal, this.metricsPort, this.properties);
+        return Objects.hash(this.grpcPort, this.httpPort, this.isLocal, this.metricsPort, this.timeout, this.nRetries,
+                this.properties);
     }
 
     @Override
@@ -162,7 +188,8 @@ public class TritonServerServiceOptions {
         }
         TritonServerServiceOptions other = (TritonServerServiceOptions) obj;
         return this.grpcPort == other.grpcPort && this.httpPort == other.httpPort && this.isLocal == other.isLocal
-                && this.metricsPort == other.metricsPort && Objects.equals(this.properties, other.properties);
+                && this.metricsPort == other.metricsPort && this.timeout == other.timeout
+                && this.nRetries == other.nRetries && Objects.equals(this.properties, other.properties);
     }
 
 }

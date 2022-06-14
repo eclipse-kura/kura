@@ -61,6 +61,11 @@ public class TritonServerLocalManager {
         stopScheduledExecutor();
     }
 
+    protected void kill() {
+        killLocalServerMonitor();
+        stopScheduledExecutor();
+    }
+
     private void startLocalServerMonitor() {
         this.serverCommand = createServerCommand();
         this.scheduledFuture = this.scheduledExecutorService.scheduleAtFixedRate(() -> {
@@ -96,6 +101,11 @@ public class TritonServerLocalManager {
         stopLocalServer();
     }
 
+    private void killLocalServerMonitor() {
+        stopMonitor();
+        killLocalServer();
+    }
+
     private void stopMonitor() {
         if (nonNull(this.scheduledFuture)) {
             this.scheduledFuture.cancel(true);
@@ -107,6 +117,10 @@ public class TritonServerLocalManager {
 
     private synchronized void stopLocalServer() {
         TritonServerLocalManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGINT);
+    }
+
+    private synchronized void killLocalServer() {
+        TritonServerLocalManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGKILL);
     }
 
     private void stopScheduledExecutor() {

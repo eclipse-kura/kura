@@ -534,9 +534,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     private HostConfig containerNetworkConfigurationHandler(ContainerConfiguration containerDescription,
             HostConfig configuration) {
 
-        if (containerDescription.getContainerNetworkConfiguration().getNetworkMode().isPresent()
-                && !containerDescription.getContainerNetworkConfiguration().getNetworkMode().get().trim().isEmpty()) {
-            configuration.withNetworkMode(containerDescription.getContainerNetworkConfiguration().getNetworkMode().get().trim());
+        Optional<String> networkMode = containerDescription.getContainerNetworkConfiguration().getNetworkMode();
+        if (networkMode.isPresent() && !networkMode.get().trim().isEmpty()) {
+            configuration.withNetworkMode(networkMode.get().trim());
         }
 
         return configuration;
@@ -818,11 +818,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private String getImageTag(Image image) {
-        if (image.getRepoTags() == null || image.getRepoTags().length < 1) {
-            return "";
-        }
-
-        if (image.getRepoTags()[0].split(":").length < 2) {
+        if (image.getRepoTags() == null || image.getRepoTags().length < 1 || (image.getRepoTags()[0].split(":").length < 2)) {
             return "";
         }
 

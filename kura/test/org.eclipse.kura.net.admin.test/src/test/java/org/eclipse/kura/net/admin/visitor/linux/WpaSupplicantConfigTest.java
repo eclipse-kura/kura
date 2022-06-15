@@ -351,7 +351,7 @@ public class WpaSupplicantConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         WifiInterfaceAddressConfigImpl wifiInterfaceAddressConfig = new WifiInterfaceAddressConfigImpl();
-        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER); // produces INFRA in the end
+        wifiInterfaceAddressConfig.setMode(WifiMode.INFRA);
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.ADHOC);
@@ -435,7 +435,7 @@ public class WpaSupplicantConfigTest {
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
         WifiInterfaceAddressConfigImpl wifiInterfaceAddressConfig = new WifiInterfaceAddressConfigImpl();
-        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER); // produces INFRA in the end
+        wifiInterfaceAddressConfig.setMode(WifiMode.INFRA);
         List<NetConfig> netConfigs = new ArrayList<>();
         WifiConfig wifiConfig = new WifiConfig();
         wifiConfig.setMode(WifiMode.ADHOC);

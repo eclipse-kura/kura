@@ -109,8 +109,8 @@ public class HostapdConfigTest {
         wifiConfig.setDriver("wifiDriver");
         netConfigs.add(wifiConfig);
         wifiConfig = new WifiConfig(); // add one without a driver
-        wifiConfig.setMode(WifiMode.MASTER);
         netConfigs.add(wifiConfig);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);

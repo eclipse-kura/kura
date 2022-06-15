@@ -113,7 +113,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         if (wifiConfig.isPresent()) {
             WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((WifiInterfaceConfigImpl) wifiConfig
-                    .get());
+                    .get()).getNetInterfaceAddressConfig();
             wifiMode = Optional.of(wifiInterfaceAddressConfig.getMode());
         }
 

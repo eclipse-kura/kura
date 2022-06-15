@@ -19,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -115,7 +114,6 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         if (wifiConfig.isPresent()) {
             WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((WifiInterfaceConfigImpl) wifiConfig
                     .get());
-            Collections.is.getNetInterfaceAddressConfig();
             wifiMode = Optional.of(wifiInterfaceAddressConfig.getMode());
         }
 

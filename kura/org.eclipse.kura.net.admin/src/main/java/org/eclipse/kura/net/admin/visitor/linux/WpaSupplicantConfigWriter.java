@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 
 import org.apache.commons.io.Charsets;
@@ -30,6 +31,7 @@ import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
+import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -43,6 +45,7 @@ import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
+import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.util.base.StringUtil;
@@ -82,7 +85,11 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
                 .getModifiedNetInterfaceConfigs();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            if (netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
+
+            Optional<WifiMode> wifiMode = getWifiMode(netInterfaceConfig);
+
+            if (wifiMode.isPresent() && (wifiMode.get() == WifiMode.INFRA || wifiMode.get() == WifiMode.ADHOC)
+                    && netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
                 // ignore 'mon' interface
                 if (netInterfaceConfig.getName().startsWith("mon.")) {
                     continue;
@@ -92,6 +99,24 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             }
         }
 
+    }
+
+    private Optional<WifiMode> getWifiMode(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+            throws KuraException {
+
+        Optional<WifiMode> wifiMode = Optional.empty();
+
+        Optional<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiConfig = netInterfaceConfig instanceof WifiInterfaceConfigImpl
+                ? Optional.of(netInterfaceConfig)
+                : Optional.empty();
+
+        if (wifiConfig.isPresent()) {
+            WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((WifiInterfaceConfigImpl) wifiConfig
+                    .get()).getNetInterfaceAddressConfig();
+            wifiMode = Optional.of(wifiInterfaceAddressConfig.getMode());
+        }
+
+        return wifiMode;
     }
 
     public void generateTempWpaSupplicantConf(WifiConfig wifiConfig) throws KuraException {

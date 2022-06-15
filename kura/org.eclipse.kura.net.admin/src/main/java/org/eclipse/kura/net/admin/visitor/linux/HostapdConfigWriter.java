@@ -94,14 +94,17 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
                 .getModifiedNetInterfaceConfigs();
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
+
+            // skip monitor interface
+            if (netInterfaceConfig.getName().startsWith("mon.")) {
+                continue;
+            }
+
             Optional<WifiMode> wifiMode = getWifiMode(netInterfaceConfig);
 
             if (wifiMode.isPresent() && wifiMode.get() == WifiMode.MASTER
                     && netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
 
-                if (netInterfaceConfig.getName().startsWith("mon.")) {
-                    continue;
-                }
                 writeConfig(netInterfaceConfig);
             }
         }

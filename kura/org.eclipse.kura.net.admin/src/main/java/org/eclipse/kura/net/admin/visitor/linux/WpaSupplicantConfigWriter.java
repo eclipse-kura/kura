@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -86,14 +87,15 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
 
+            // skip monitor interface
+            if (netInterfaceConfig.getName().startsWith("mon.")) {
+                continue;
+            }
+
             Optional<WifiMode> wifiMode = getWifiMode(netInterfaceConfig);
 
             if (wifiMode.isPresent() && (wifiMode.get() == WifiMode.INFRA || wifiMode.get() == WifiMode.ADHOC)
                     && netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-                // ignore 'mon' interface
-                if (netInterfaceConfig.getName().startsWith("mon.")) {
-                    continue;
-                }
 
                 writeConfig(netInterfaceConfig);
             }
@@ -112,7 +114,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
 
         if (wifiConfig.isPresent()) {
             WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((WifiInterfaceConfigImpl) wifiConfig
-                    .get()).getNetInterfaceAddressConfig();
+                    .get());
+            Collections.is.getNetInterfaceAddressConfig();
             wifiMode = Optional.of(wifiInterfaceAddressConfig.getMode());
         }
 

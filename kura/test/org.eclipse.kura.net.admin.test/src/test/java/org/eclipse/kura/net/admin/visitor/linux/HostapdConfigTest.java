@@ -241,6 +241,7 @@ public class HostapdConfigTest {
         NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true, true);
         netConfigs.add(netConfig);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
@@ -534,6 +535,7 @@ public class HostapdConfigTest {
         NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true, true);
         netConfigs.add(netConfig);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 

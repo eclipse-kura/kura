@@ -62,10 +62,9 @@ public class WpaSupplicantConfigTest {
         new File(dir).mkdirs();
 
         String intfName = "testinterface-disabled";
-        String pass = "Pa$&wrd";
-        String ssid = "ID WITH SPACE";
 
         WpaSupplicantConfigWriter writer = new WpaSupplicantConfigWriter();
+        writer.setExecutorService(mock(CommandExecutorService.class));
 
         NetworkConfiguration config = new NetworkConfiguration();
 

@@ -18,20 +18,16 @@ import static org.eclipse.kura.net.admin.visitor.linux.WriterHelper.copyFile;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 
-import org.apache.commons.io.Charsets;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraIOException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
-import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -41,11 +37,9 @@ import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.admin.visitor.linux.util.WpaSupplicantUtil;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
-import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
 import org.eclipse.kura.util.base.StringUtil;
@@ -55,7 +49,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
+public class WpaSupplicantConfigWriter extends AbstractLinuxConfigWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(WpaSupplicantConfigWriter.class);
 
@@ -77,47 +71,6 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
     @Override
     public void setExecutorService(CommandExecutorService executorService) {
         this.executorService = executorService;
-    }
-
-    @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
-                .getModifiedNetInterfaceConfigs();
-
-        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-
-            // skip monitor interface
-            if (netInterfaceConfig.getName().startsWith("mon.")) {
-                continue;
-            }
-
-            Optional<WifiMode> wifiMode = getWifiMode(netInterfaceConfig);
-
-            if (wifiMode.isPresent() && (wifiMode.get() == WifiMode.INFRA || wifiMode.get() == WifiMode.ADHOC)
-                    && netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-
-                writeConfig(netInterfaceConfig);
-            }
-        }
-
-    }
-
-    private Optional<WifiMode> getWifiMode(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
-            throws KuraException {
-
-        Optional<WifiMode> wifiMode = Optional.empty();
-
-        Optional<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiConfig = netInterfaceConfig instanceof WifiInterfaceConfigImpl
-                ? Optional.of(netInterfaceConfig)
-                : Optional.empty();
-
-        if (wifiConfig.isPresent()) {
-            WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((WifiInterfaceConfigImpl) wifiConfig
-                    .get()).getNetInterfaceAddressConfig();
-            wifiMode = Optional.ofNullable(wifiInterfaceAddressConfig.getMode());
-        }
-
-        return wifiMode;
     }
 
     public void generateTempWpaSupplicantConf(WifiConfig wifiConfig) throws KuraException {
@@ -153,7 +106,8 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         return IOUtil.readResource(bundle, path);
     }
 
-    private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+    @Override
+    protected void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
         String interfaceName = netInterfaceConfig.getName();
         logger.debug("Writing wpa_supplicant config for {}", interfaceName);
@@ -438,7 +392,7 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
             CommandStatus status = this.executorService.execute(command);
             if (status.getExitStatus().isSuccessful()) {
                 String networkConfig = new String(((ByteArrayOutputStream) status.getOutputStream()).toByteArray(),
-                        Charsets.UTF_8);
+                        StandardCharsets.UTF_8);
 
                 String[] networkConfigLines = networkConfig.split("\n");
 
@@ -566,6 +520,16 @@ public class WpaSupplicantConfigWriter implements NetworkConfigurationVisitor {
         }
 
         return sbFrequencies.toString();
+    }
+
+    @Override
+    protected CommandExecutorService getExecutorService() {
+        return this.executorService;
+    }
+
+    @Override
+    protected boolean acceptMode(WifiMode mode) {
+        return (mode == WifiMode.INFRA || mode == WifiMode.ADHOC);
     }
 
 }

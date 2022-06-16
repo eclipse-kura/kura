@@ -19,15 +19,11 @@ import static org.eclipse.kura.net.admin.visitor.linux.WriterHelper.copyFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
-import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.IwCapabilityTool;
@@ -35,11 +31,9 @@ import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
 import org.eclipse.kura.net.wifi.WifiInterface.Capability;
-import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
@@ -48,7 +42,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HostapdConfigWriter implements NetworkConfigurationVisitor {
+public class HostapdConfigWriter extends AbstractLinuxConfigWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
 
@@ -84,51 +78,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
-
-        if (this.executorService == null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "The CommandExecutorService cannot be null");
-        }
-
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
-                .getModifiedNetInterfaceConfigs();
-
-        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-
-            // skip monitor interface
-            if (netInterfaceConfig.getName().startsWith("mon.")) {
-                continue;
-            }
-
-            Optional<WifiMode> wifiMode = getWifiMode(netInterfaceConfig);
-
-            if (wifiMode.isPresent() && wifiMode.get() == WifiMode.MASTER
-                    && netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-
-                writeConfig(netInterfaceConfig);
-            }
-        }
-    }
-
-    private Optional<WifiMode> getWifiMode(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
-            throws KuraException {
-
-        Optional<WifiMode> wifiMode = Optional.empty();
-
-        Optional<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiConfig = netInterfaceConfig instanceof WifiInterfaceConfigImpl
-                ? Optional.of(netInterfaceConfig)
-                : Optional.empty();
-
-        if (wifiConfig.isPresent()) {
-            WifiInterfaceAddressConfig wifiInterfaceAddressConfig = (WifiInterfaceAddressConfig) ((WifiInterfaceConfigImpl) wifiConfig
-                    .get()).getNetInterfaceAddressConfig();
-            wifiMode = Optional.ofNullable(wifiInterfaceAddressConfig.getMode());
-        }
-
-        return wifiMode;
-    }
-
-    private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+    protected void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
         if (netInterfaceConfig == null) {
@@ -514,6 +464,16 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private boolean isDfs(String interfaceName) throws KuraException {
         return IwCapabilityTool.probeCapabilities(interfaceName, this.executorService).contains(Capability.DFS);
+    }
+
+    @Override
+    protected CommandExecutorService getExecutorService() {
+        return this.executorService;
+    }
+
+    @Override
+    protected boolean acceptMode(WifiMode mode) {
+        return mode == WifiMode.MASTER;
     }
 
 }

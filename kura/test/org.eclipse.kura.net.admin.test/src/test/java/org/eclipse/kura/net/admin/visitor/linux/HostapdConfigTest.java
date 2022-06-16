@@ -109,8 +109,8 @@ public class HostapdConfigTest {
         wifiConfig.setDriver("wifiDriver");
         netConfigs.add(wifiConfig);
         wifiConfig = new WifiConfig(); // add one without a driver
-        wifiConfig.setMode(WifiMode.MASTER);
         netConfigs.add(wifiConfig);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
@@ -241,6 +241,7 @@ public class HostapdConfigTest {
         NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true, true);
         netConfigs.add(netConfig);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 
@@ -336,6 +337,7 @@ public class HostapdConfigTest {
         netConfigs.add(wifiConfig);
         NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true, true);
         netConfigs.add(netConfig);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
@@ -533,6 +535,7 @@ public class HostapdConfigTest {
         NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true, true);
         netConfigs.add(netConfig);
         wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
+        wifiInterfaceAddressConfig.setMode(WifiMode.MASTER);
         interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
         netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
 

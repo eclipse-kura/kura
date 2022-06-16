@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -24,8 +24,6 @@ import java.util.regex.Matcher;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
-import org.eclipse.kura.core.net.NetworkConfiguration;
-import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
 import org.eclipse.kura.core.util.IOUtil;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.util.IwCapabilityTool;
@@ -33,19 +31,18 @@ import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.NetInterfaceConfig;
-import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiCiphers;
 import org.eclipse.kura.net.wifi.WifiConfig;
+import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.eclipse.kura.net.wifi.WifiMode;
 import org.eclipse.kura.net.wifi.WifiRadioMode;
 import org.eclipse.kura.net.wifi.WifiSecurity;
-import org.eclipse.kura.net.wifi.WifiInterface.Capability;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HostapdConfigWriter implements NetworkConfigurationVisitor {
+public class HostapdConfigWriter extends AbstractLinuxConfigWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(HostapdConfigWriter.class);
 
@@ -81,26 +78,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
     }
 
     @Override
-    public void visit(NetworkConfiguration config) throws KuraException {
-        if (this.executorService == null) {
-            throw new KuraException(KuraErrorCode.CONFIGURATION_ERROR, "The CommandExecutorService cannot be null");
-        }
-
-        List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> netInterfaceConfigs = config
-                .getModifiedNetInterfaceConfigs();
-
-        for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
-            if (netInterfaceConfig.getType() == NetInterfaceType.WIFI) {
-                if (netInterfaceConfig.getName().startsWith("mon.")) {
-                    continue;
-                }
-
-                writeConfig(netInterfaceConfig);
-            }
-        }
-    }
-
-    private void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+    protected void writeConfig(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
         if (netInterfaceConfig == null) {
@@ -422,7 +400,7 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
             fileAsString = fileAsString.replaceFirst(KURA_WME_ENABLED, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211N, "1");
             fileAsString = fileAsString.replaceFirst(KURA_IEEE80211AC, "1");
-            
+
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
 
             fileAsString = fileAsString.replaceFirst(HT_CAPAB_KURA_HTCAPAB, "");
@@ -486,6 +464,16 @@ public class HostapdConfigWriter implements NetworkConfigurationVisitor {
 
     private boolean isDfs(String interfaceName) throws KuraException {
         return IwCapabilityTool.probeCapabilities(interfaceName, this.executorService).contains(Capability.DFS);
+    }
+
+    @Override
+    protected CommandExecutorService getExecutorService() {
+        return this.executorService;
+    }
+
+    @Override
+    protected boolean acceptMode(WifiMode mode) {
+        return mode == WifiMode.MASTER;
     }
 
 }

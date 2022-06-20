@@ -1,91 +1,22 @@
-Eclipse Kura - 5.1.1   - April 2022
--------------------------------------------------------------------------
+Eclipse Kura - [ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.0.0:exec (default-cli): Goal requires a project to execute but there is no POM in this directory (/home/runner/work/kura/kura). Please verify you invoked Maven from the correct directory. -&gt; [Help 1] - June 2022
+-------------------------------------------------------------------------------------------------
 Description:
-This service release of Eclipse Kura fixes the Container Management support for Inventory-V1 request handler. 
-Minor additional fixes in installers to stop unneeded services in the target devices.
+[TODO]
 
-
-Bug Fixes:
-  * Corrected wrong container service reference in Inventory code
-  * Removed features folder in Kura examples to prevent duplication
-  * Removed unnecessary disabling of services upon installation
-  * Network related permission cleanup 
 
 Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits)
-    * Raspberry Pi 3/4 based on Ubuntu 20.04 (64 bits)
-    * Intel Up Squared board running Ubuntu 20.04
-    * Nvidia Jetson Nano board running Ubuntu 18
-  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine  
+[TODO]
 
-Breaking Changes:
-  * Eclipse Kura v5.1 does not introduce API breakage with previous releases.
-  * The H2DB package has been updated from 1.4.199 to 2.1.210 in response to CVEs that affected the 
-    dependency. The new package introduces breaking changes (documented in https://github.com/eclipse/kura/pull/3728), 
-    both in database persistence format and behaviour, that will make existing persisted databases not usable with the 
-    latest version. Manual migration is required as the H2db project does not provide an automated upgrade solution. 
-  * In order to better comply with Wi-Fi regulations on frequency usage, you must now configure the regulatory domain 
-    and radio mode before accessing Wi-Fi hotspots that use regulated channels.
-  * Configuring the PPP interface number for a cellular interface is no longer supported, the PPP interface number is now assigned automatically.
-  * The properties that describe the configuration of a cellular interface are now identified by the modem USB port and not by the PPP interface number.
+Target Platform Updates:
+  * 997d9736f8 - updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
 
-Known Issues :
-  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is 
-    built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
-    The issue impact is limited, if the dataservice reconnect option is enabled.  
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #3913: Potential incorrect keystore password after rollback to snapshot0
-  * #3796: Server manager does not close properly
-  * #3211: Kura Docker | Bluetooth error in log during starting service
-  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
-  * #2843: Access Banner Content All in One Line
-  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
-  * #2728: WireGraph Component Description Windows Too Wide
-  * #2725: Different Pop-up Windows for Warnings
-  * #2702: Error Message For Long Item Names Not Displayed Properly
-  * #2696: Component Name Inteferes With Wire Graph Border
-  * #2695: Component Names in Wires Not Limited
-  * #2410: Deployment handler and URLs with many query parameters
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #1993: Search Domains Are Not Supported
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+Known Issues:
+[TODO]
 
 Changelog:
-  * 53c47f859a - First version for Kura 5.1.1 release notes (#3952) (Matteo Maiero)
-  * 6dbef99a95 - Fixed incorrect permission name (#3950) (#3951) (github-actions[bot])
-  * be2a792efc - Added all known permissions to snapshot_0 (#3948) (#3949) (github-actions[bot])
-  * c3eaf1abef - Upticked versions for 5.1.1 release (#3946) (nicolatimeus)
-  * f73e7ee2b6 - Disabled systemd-timedated.service and isc-dhcp-server6.service (#3927) (#3945) (github-actions[bot])
-  * 3f6ff9c11a - Removed unnecessary disable of `systemd-timedated` upon installation (#3943) (#3944) (github-actions[bot])
-  * 78afcdd727 - Removed the features in the examples folder (#3939) (#3942) (nicolatimeus)
-  * 54ae56908d - Fixed wrong container service ref from Inventory (#3933) (#3941) (github-actions[bot])
-  * 26e5e9213e - Updated build.properties files for 5.1.1 (#3940) (nicolatimeus)
-  * d3ee3a12ff - Upticked versions to 5.1.1-SNAPSHOT  (#3932) (nicolatimeus)
+  * 55d3cd60da - ci: add release notes generation workflow (#4011) [backport] (#4027) (nicolatimeus)
+  * 997d9736f8 - build: updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
+  * 3fc52d4826 - chore: Upticked remaining version in target platform build.properties (#4024) (nicolatimeus)
+  * 9c506e962a - chore: Upticked versions for 5.1.2 release  (#4021) (nicolatimeus)
+  * 703d491693 - [Backport release-5.1.0] build: updated H2 to 2.1.212 (#4015) (github-actions[bot])
+  * d9a59b4f59 - Upticked versions to 5.1.2-SNAPSHOT  (#3963) (nicolatimeus)

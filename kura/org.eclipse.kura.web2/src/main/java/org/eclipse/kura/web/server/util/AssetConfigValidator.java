@@ -17,11 +17,14 @@ import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_P
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -66,37 +69,99 @@ public class AssetConfigValidator {
                 }));
     }
 
+    private static class ColumnHeaderInfo {
+
+        String name;
+        int totalOccurrenceCount;
+        int occurrenceIndex;
+
+        public ColumnHeaderInfo(String name, int totalOccurrenceCount, int occurrenceIndex) {
+            this.name = name;
+            this.totalOccurrenceCount = totalOccurrenceCount;
+            this.occurrenceIndex = occurrenceIndex;
+        }
+    }
+
     private class LineScanner {
 
         private final List<Tad> adsByIndex;
         private final List<GwtConfigParameter> defaultValues;
 
-        public LineScanner(final List<Tad> fullChannelMetatype, final List<String> columnHeaders) {
+        public LineScanner(final List<Tad> fullChannelMetatype, final List<String> columnHeaders)
+                throws ValidationException {
             this.adsByIndex = probeAdsByIndex(fullChannelMetatype, columnHeaders);
-            this.defaultValues = probeDefaultValues(fullChannelMetatype, columnHeaders);
+            this.defaultValues = probeDefaultValues(fullChannelMetatype, this.adsByIndex);
         }
 
-        private List<Tad> probeAdsByIndex(final List<Tad> fullChannelMetatype, final List<String> columnHeaders) {
+        private <T> Optional<T> findLast(final Collection<T> collection, final Predicate<T> predicate) {
+            Optional<T> result = Optional.empty();
+
+            for (final T item : collection) {
+                if (predicate.test(item)) {
+                    result = Optional.of(item);
+                }
+            }
+
+            return result;
+        }
+
+        private <T> Optional<T> findFirst(final Collection<T> collection, final Predicate<T> predicate) {
+
+            for (final T item : collection) {
+                if (predicate.test(item)) {
+                    return Optional.of(item);
+                }
+            }
+
+            return Optional.empty();
+        }
+
+        private List<ColumnHeaderInfo> getColumnHeaderInfo(final List<String> columnHeaders) {
+            final Map<String, Integer> occurrenceCount = new HashMap<>();
+            final List<ColumnHeaderInfo> result = new ArrayList<>();
+
+            for (final String columnHeader : columnHeaders) {
+                final int index = occurrenceCount.merge(columnHeader, 0, (o, n) -> o + 1);
+                result.add(new ColumnHeaderInfo(columnHeader, 0, index));
+            }
+
+            for (final ColumnHeaderInfo info : result) {
+                info.totalOccurrenceCount = occurrenceCount.get(info.name) + 1;
+            }
+
+            return result;
+        }
+
+        private List<Tad> probeAdsByIndex(final List<Tad> fullChannelMetatype, final List<String> columnHeaders)
+                throws ValidationException {
             final List<Tad> result = new ArrayList<>();
+            final List<ColumnHeaderInfo> headerInfo = getColumnHeaderInfo(columnHeaders);
 
-            for (final String h : columnHeaders) {
-                final Optional<Tad> exactMatch = fullChannelMetatype.stream().filter(p -> h.equals(p.getId()))
-                        .findAny();
+            for (final ColumnHeaderInfo header : headerInfo) {
 
-                if (exactMatch.isPresent()) {
-                    result.add(exactMatch.get());
-                    continue;
+                final Optional<Tad> boundAd;
+
+                if (header.totalOccurrenceCount == 1) {
+                    // we have a single column with the given name, try to associate it with the last matching Driver or
+                    // Asset AD
+                    boundAd = findLast(fullChannelMetatype,
+                            ad -> ad.getId().equals(header.name) || ad.getId().equals("+" + header.name));
+                } else if (header.totalOccurrenceCount == 2 && header.occurrenceIndex == 0) {
+                    // we have two columns with the given name in CSV file, associate the first CSV column with the
+                    // first Asset configuration parameter
+                    boundAd = findFirst(fullChannelMetatype, ad -> ad.getId().equals("+" + header.name));
+                } else if (header.totalOccurrenceCount == 2 && header.occurrenceIndex == 1) {
+                    // we have two columns with the given name, associate the second CSV column with the last Driver
+                    // configuration parameter
+                    boundAd = findLast(fullChannelMetatype, ad -> ad.getId().equals(header.name));
+                } else {
+                    throw new ValidationException("CSV contains more than two columns with the same name");
                 }
 
-                final String assetId = "+" + h;
-
-                final Optional<Tad> assetParam = fullChannelMetatype.stream().filter(p -> assetId.equals(p.getId()))
-                        .findAny();
-
-                if (assetParam.isPresent()) {
-                    result.add(assetParam.get());
+                if (boundAd.isPresent()) {
+                    result.add(boundAd.get());
                 } else {
-                    throw new IllegalStateException("Unknown parameter name " + h);
+                    throw new ValidationException("Cannot find an AD for column " + header.name);
                 }
             }
 
@@ -104,15 +169,10 @@ public class AssetConfigValidator {
         }
 
         private List<GwtConfigParameter> probeDefaultValues(final List<Tad> fullChannelMetatype,
-                final List<String> columnHeaders) {
-            final List<Tad> missing = fullChannelMetatype.stream().filter(c -> {
-                if (c.getId().startsWith("+")) {
-                    return !columnHeaders.contains(c.getId().substring(1));
-                } else {
-                    return !columnHeaders.contains(c.getId());
-                }
-
-            }).collect(Collectors.toList());
+                final List<Tad> boundAds) {
+            final List<Tad> missing = fullChannelMetatype.stream()
+                    .filter(c -> boundAds.stream().noneMatch(b -> b.getId().equals(c.getId())))
+                    .collect(Collectors.toList());
 
             final List<GwtConfigParameter> result = new ArrayList<>();
 
@@ -309,6 +369,13 @@ public class AssetConfigValidator {
     protected class ValidationException extends Exception {
 
         private static final long serialVersionUID = 5954147929480218028L;
+
+        public ValidationException() {
+        }
+
+        public ValidationException(final String message) {
+            super(message);
+        }
 
     }
 

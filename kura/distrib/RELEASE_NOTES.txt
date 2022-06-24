@@ -1,15 +1,7 @@
-Eclipse Kura - 5.1.1   - April 2022
--------------------------------------------------------------------------
+Eclipse Kura - 5.1.2 - June 2022
+-------------------------------------------------------------------------------------------------
 Description:
-This service release of Eclipse Kura fixes the Container Management support for Inventory-V1 request handler. 
-Minor additional fixes in installers to stop unneeded services in the target devices.
-
-
-Bug Fixes:
-  * Corrected wrong container service reference in Inventory code
-  * Removed features folder in Kura examples to prevent duplication
-  * Removed unnecessary disabling of services upon installation
-  * Network related permission cleanup 
+This service release of Eclipse Kura updates H2 to version 2.1.214, that includes fixes for database defragmentation and BLOB handling. 
 
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
@@ -21,17 +13,12 @@ Target Environments:
 
 Breaking Changes:
   * Eclipse Kura v5.1 does not introduce API breakage with previous releases.
-  * The H2DB package has been updated from 1.4.199 to 2.1.210 in response to CVEs that affected the 
-    dependency. The new package introduces breaking changes (documented in https://github.com/eclipse/kura/pull/3728), 
-    both in database persistence format and behaviour, that will make existing persisted databases not usable with the 
-    latest version. Manual migration is required as the H2db project does not provide an automated upgrade solution. 
-  * In order to better comply with Wi-Fi regulations on frequency usage, you must now configure the regulatory domain 
-    and radio mode before accessing Wi-Fi hotspots that use regulated channels.
-  * Configuring the PPP interface number for a cellular interface is no longer supported, the PPP interface number is now assigned automatically.
-  * The properties that describe the configuration of a cellular interface are now identified by the modem USB port and not by the PPP interface number.
 
-Known Issues :
-  * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
+Target Platform Updates:
+  * 997d9736f8 - updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
+
+Known Issues:
+* The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
   * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is 
     built and run immediately after installation.
   * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
@@ -79,13 +66,9 @@ Known Issues :
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
-  * 53c47f859a - First version for Kura 5.1.1 release notes (#3952) (Matteo Maiero)
-  * 6dbef99a95 - Fixed incorrect permission name (#3950) (#3951) (github-actions[bot])
-  * be2a792efc - Added all known permissions to snapshot_0 (#3948) (#3949) (github-actions[bot])
-  * c3eaf1abef - Upticked versions for 5.1.1 release (#3946) (nicolatimeus)
-  * f73e7ee2b6 - Disabled systemd-timedated.service and isc-dhcp-server6.service (#3927) (#3945) (github-actions[bot])
-  * 3f6ff9c11a - Removed unnecessary disable of `systemd-timedated` upon installation (#3943) (#3944) (github-actions[bot])
-  * 78afcdd727 - Removed the features in the examples folder (#3939) (#3942) (nicolatimeus)
-  * 54ae56908d - Fixed wrong container service ref from Inventory (#3933) (#3941) (github-actions[bot])
-  * 26e5e9213e - Updated build.properties files for 5.1.1 (#3940) (nicolatimeus)
-  * d3ee3a12ff - Upticked versions to 5.1.1-SNAPSHOT  (#3932) (nicolatimeus)
+  * 55d3cd60da - ci: add release notes generation workflow (#4011) [backport] (#4027) (nicolatimeus)
+  * 997d9736f8 - build: updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
+  * 3fc52d4826 - chore: Upticked remaining version in target platform build.properties (#4024) (nicolatimeus)
+  * 9c506e962a - chore: Upticked versions for 5.1.2 release  (#4021) (nicolatimeus)
+  * 703d491693 - [Backport release-5.1.0] build: updated H2 to 2.1.212 (#4015) (github-actions[bot])
+  * d9a59b4f59 - Upticked versions to 5.1.2-SNAPSHOT  (#3963) (nicolatimeus)

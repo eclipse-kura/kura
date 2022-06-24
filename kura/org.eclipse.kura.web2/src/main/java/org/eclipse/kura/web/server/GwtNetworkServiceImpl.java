@@ -1191,8 +1191,8 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 portForwarding.append(((IP4Address) IPAddress.parseHostAddress(entry.getAddress())).getHostAddress())
                         .append(",");
                 portForwarding.append(entry.getProtocol()).append(",");
-                portForwarding.append(entry.getOutPort()).append(",");
                 portForwarding.append(entry.getInPort()).append(",");
+                portForwarding.append(entry.getOutPort()).append(",");
                 if (entry.getMasquerade().equals("yes")) {
                     portForwarding.append("true");
                 } else {

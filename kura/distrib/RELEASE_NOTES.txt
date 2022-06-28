@@ -1,7 +1,9 @@
 Eclipse Kura - 5.1.2 - June 2022
 -------------------------------------------------------------------------------------------------
 Description:
-This service release of Eclipse Kura updates H2 to version 2.1.214, that includes fixes for database defragmentation and BLOB handling. 
+This service release of Eclipse Kura includes the following changes:
+  - Updated H2 to 2.1.214, that includes fixes for database defragmentation and BLOB handling
+  - Fixed regression related to CSV Asset channel upload handling in case of two columns with the same header
 
 Target Environments:
   * Kura is released as pre-compiled binary installers for the following platforms:
@@ -12,7 +14,10 @@ Target Environments:
   * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine  
 
 Breaking Changes:
-  * Eclipse Kura v5.1 does not introduce API breakage with previous releases.
+  * Eclipse Kura v5.1.2 does not introduce API breakage with previous releases.
+
+Bug Fixes:
+  * ac0ba18b6d - Backport fix csv duplicate column name [Backport] (#4032) (Matteo Maiero)
 
 Target Platform Updates:
   * 997d9736f8 - updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
@@ -66,6 +71,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * ac0ba18b6d - fix: Backport fix csv duplicate column name [Backport] (#4032) (Matteo Maiero)
+  * 2b0a8f7c9a - chore: add Kura 5.1.2 release notes (#4029) (github-actions[bot])
   * 55d3cd60da - ci: add release notes generation workflow (#4011) [backport] (#4027) (nicolatimeus)
   * 997d9736f8 - build: updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
   * 3fc52d4826 - chore: Upticked remaining version in target platform build.properties (#4024) (nicolatimeus)

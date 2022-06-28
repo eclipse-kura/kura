@@ -1,71 +1,24 @@
-Eclipse Kura - 5.1.2 - June 2022
+Eclipse Kura - [ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.0.0:exec (default-cli): Goal requires a project to execute but there is no POM in this directory (/home/runner/work/kura/kura). Please verify you invoked Maven from the correct directory. -&gt; [Help 1] - June 2022
 -------------------------------------------------------------------------------------------------
 Description:
-This service release of Eclipse Kura updates H2 to version 2.1.214, that includes fixes for database defragmentation and BLOB handling. 
+[TODO]
+
 
 Target Environments:
-  * Kura is released as pre-compiled binary installers for the following platforms:
-    * Raspberry Pi 2/3/4 based on Raspberry Pi OS (32 bits)
-    * Raspberry Pi 3/4 based on Ubuntu 20.04 (64 bits)
-    * Intel Up Squared board running Ubuntu 20.04
-    * Nvidia Jetson Nano board running Ubuntu 18
-  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine  
+[TODO]
 
-Breaking Changes:
-  * Eclipse Kura v5.1 does not introduce API breakage with previous releases.
+Bug Fixes:
+  * ac0ba18b6d - Backport fix csv duplicate column name [Backport] (#4032) (Matteo Maiero)
 
 Target Platform Updates:
   * 997d9736f8 - updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
 
 Known Issues:
-* The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is 
-    built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
-    The issue impact is limited, if the dataservice reconnect option is enabled.  
-  * The implementation of the CryptoService performs encryption using a
-    password that is hardcoded and published.
-  * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
-  * WiFi on Raspberry Pi 2 has only been tested with WiPi WiFi Dongle (Realink RT5370 chipset) and official Pi USB WiFi Dongle (Broadcom BCM43143 chipset).
-    AccessPoint WiFi mode not working for Broadcom chipset.
-  * Hardware watchdog: not implemented on all platforms
-  * Only one WAN interface is currently supported. A warning in displayed
-    in the WEB UI if the user attempts to enable more than one WAN interface
-  * #3913: Potential incorrect keystore password after rollback to snapshot0
-  * #3796: Server manager does not close properly
-  * #3211: Kura Docker | Bluetooth error in log during starting service
-  * #3005: Kura Gets Stuck in Loading View if Services Clicked Too Fast
-  * #2843: Access Banner Content All in One Line
-  * #2747: No Spacing Between "Wire Components" and Error in Wire Graph
-  * #2728: WireGraph Component Description Windows Too Wide
-  * #2725: Different Pop-up Windows for Warnings
-  * #2702: Error Message For Long Item Names Not Displayed Properly
-  * #2696: Component Name Inteferes With Wire Graph Border
-  * #2695: Component Names in Wires Not Limited
-  * #2410: Deployment handler and URLs with many query parameters
-  * #2038: [Kura 3.2.0 QA] Package uninstallation log
-  * #1993: Search Domains Are Not Supported
-  * #1663: Authentication Issue with Deploy V2
-  * #1572: serial modbus has errors on some hardware
-  * #1529: OSGI console is not redirected to Eclipse IDE with Kura 3.0
-  * #1201: Wifi password incorrectly read from snapshot in Access Point mode
-  * #1161: Incorrectly configuring a component can be irreversable.
-  * #1128: [Kura 3.0.0 M1 QA] Unable to delete manually added CamelFactory services
-  * #1016: ConfigurationServiceImpl creates duplicate instances
-  * #797:  Design of ServiceUtil is broken
-  * #771:  Web UI fails with INTERNAL_ERROR when WireHelperService is not registered
-  * #654:  Clean up static initialization around "modem" functionality
-  * #645:  Clean up internal dependencies in Kura
-  * #522:  [Net] Modem monitor should monitor interfaces, not modems
-  * #486:  Build environment broken on Windows
-  * #406:  Replace System.get* with calls to SystemService.getProperties
-  * #348:  WpaSupplicantConfigReader.getWifiClientConfig() should support cases where key_mgmt scheme is not set
-  * #329:  [DEPLOY-V2] Review/refactoring needed
-  * #297:  [Status led] What connection instance controls the status led?
-  * #253:  Check if bundle contexes correctly unget services after invoking getService
-  * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
+[TODO]
 
 Changelog:
+  * ac0ba18b6d - fix: Backport fix csv duplicate column name [Backport] (#4032) (Matteo Maiero)
+  * 2b0a8f7c9a - chore: add Kura 5.1.2 release notes (#4029) (github-actions[bot])
   * 55d3cd60da - ci: add release notes generation workflow (#4011) [backport] (#4027) (nicolatimeus)
   * 997d9736f8 - build: updated H2 to 2.1.214 (#4022) [backport] (#4026) (nicolatimeus)
   * 3fc52d4826 - chore: Upticked remaining version in target platform build.properties (#4024) (nicolatimeus)

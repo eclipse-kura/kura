@@ -36,9 +36,11 @@ public class TritonServerServiceOptions {
     private static final String PROPERTY_MODELS = "models";
     private static final String PROPERTY_LOCAL = "enable.local";
     private static final String PROPERTY_TIMEOUT = "timeout";
+    private static final String PROPERTY_MAX_GRPC_MESSAGE_SIZE = "grpc.max.size";
     private final Map<String, Object> properties;
 
     private static final int RETRY_INTERVAL = 500; // ms
+    private static final int DEFAULT_MAX_GRPC_MESSAGE_SIZE = 4194304; // bytes
 
     private final int httpPort;
     private final int grpcPort;
@@ -46,6 +48,7 @@ public class TritonServerServiceOptions {
     private final boolean isLocal;
     private final int timeout;
     private final int nRetries;
+    private final int grpcMaxMessageSize;
 
     public TritonServerServiceOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -86,6 +89,13 @@ public class TritonServerServiceOptions {
             this.timeout = 3;
         }
         this.nRetries = (this.timeout * 1000) / RETRY_INTERVAL;
+
+        final Object propertyGrpcMaxMessageSize = properties.get(PROPERTY_MAX_GRPC_MESSAGE_SIZE);
+        if (propertyGrpcMaxMessageSize instanceof Integer) {
+            this.grpcMaxMessageSize = (int) propertyGrpcMaxMessageSize;
+        } else {
+            this.grpcMaxMessageSize = DEFAULT_MAX_GRPC_MESSAGE_SIZE;
+        }
     }
 
     public String getAddress() {
@@ -161,6 +171,10 @@ public class TritonServerServiceOptions {
 
     public int getRetryInterval() {
         return RETRY_INTERVAL;
+    }
+
+    public int getGrpcMaxMessageSize() {
+        return this.grpcMaxMessageSize;
     }
 
     private String getStringProperty(String propertyName) {

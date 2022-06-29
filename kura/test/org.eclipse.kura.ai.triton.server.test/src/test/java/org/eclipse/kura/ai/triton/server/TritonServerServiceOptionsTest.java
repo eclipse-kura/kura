@@ -19,6 +19,7 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.kura.ai.triton.server.TritonServerServiceOptions;
 import org.junit.Test;
 
 public class TritonServerServiceOptionsTest {
@@ -205,6 +206,28 @@ public class TritonServerServiceOptionsTest {
         thenHashCodesShouldNotMatch();
     }
 
+    @Test
+    public void shouldReturnInputGrpcMaxMessageSize() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("grpc.max.size", 2000);
+        givenServiceOptionsBuiltWith(this.properties);
+
+        thenGrpcMaxMessageSizeIsEqualTo(2000);
+    }
+
+    @Test
+    public void shouldReturnDefaultGrpcMaxMessageSize() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("grpc.max.size", null);
+        givenServiceOptionsBuiltWith(this.properties);
+
+        thenGrpcMaxMessageSizeIsEqualTo(4194304);
+    }
+
     /*
      * Given
      */
@@ -266,6 +289,10 @@ public class TritonServerServiceOptionsTest {
         assertEquals(value, this.options.isLocalEnabled());
     }
 
+    private void thenGrpcMaxMessageSizeIsEqualTo(int expectedValue) {
+        assertEquals(expectedValue, this.options.getGrpcMaxMessageSize());
+    }
+
     private void thenEqualsMethodShouldReturn(boolean value) {
         assertEquals(value, this.equalsResult);
     }
@@ -277,4 +304,5 @@ public class TritonServerServiceOptionsTest {
     private void thenHashCodesShouldNotMatch() {
         assertNotEquals(this.hashCode, this.otherHashCode);
     }
+
 }

@@ -106,10 +106,11 @@
         <AD id="grpc.max.size"
         	name="Max. GRPC message size (bytes)"
         	type="Integer"
-        	description="Maximum accepted input size for the GRPC calls. If left empty, a default of 4194304 bytes is used.
+        	description="Maximum accepted input size for the GRPC calls.
         	Increase this value if the model input size is bigger than the default."
         	cardinality="0"
-        	required="false"
+        	required="true"
+        	default="4194304"
         	min="1">
         </AD>        	
 

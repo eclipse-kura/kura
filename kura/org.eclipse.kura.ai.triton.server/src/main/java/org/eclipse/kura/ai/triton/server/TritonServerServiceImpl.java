@@ -169,7 +169,8 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
 
     private void setGrpcResources() {
         this.grpcChannel = ManagedChannelBuilder.forAddress(this.options.getAddress(), this.options.getGrpcPort())
-                .usePlaintext().maxInboundMessageSize(this.options.getGrpcMaxMessageSize()).build();
+                .usePlaintext().maxInboundMessageSize(this.options.getGrpcMaxMessageSize())
+                .maxInboundMetadataSize(Integer.MAX_VALUE).build();
         setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(this.grpcChannel));
     }
 

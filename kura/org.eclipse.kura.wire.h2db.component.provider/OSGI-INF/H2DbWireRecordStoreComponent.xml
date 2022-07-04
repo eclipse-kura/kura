@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    
+    Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+	SPDX-License-Identifier: EPL-2.0
+	
+	Contributors:
+     Eurotech
+     
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+    name="org.eclipse.kura.wire.H2DbWireRecordStore"
+    activate="activate"
+    deactivate="deactivate"
+    modified="updated"
+    enabled="true"
+    immediate="true"
+    configuration-policy="require">
+   <implementation class="org.eclipse.kura.internal.wire.h2db.store.H2DbWireRecordStore"/>
+   <property name="kura.ui.service.hide" type="Boolean" value="true"/>
+   <service>
+      <provide interface="org.eclipse.kura.db.BaseDBWireComponentQueries"/>
+   </service>
+</scr:component>

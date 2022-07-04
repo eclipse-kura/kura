@@ -228,11 +228,6 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
     }
 
     @Override
-    public <T> T withConnection(ConnectionCallable<T> task) throws SQLException {
-        return withConnection((BaseDbService.ConnectionCallable<T>) task);
-    }
-
-    @Override
     public void rollback(Connection conn) {
         try {
             if (conn != null) {
@@ -597,6 +592,11 @@ public class H2DbServiceImpl implements H2DbService, ConfigurableComponent {
                 lock.unlock();
             }
         }
+    }
+
+    @Override
+    public <T> T withConnection(H2DbService.ConnectionCallable<T> task) throws SQLException {
+        return withConnection((BaseDbService.ConnectionCallable<T>) task);
     }
 
 }

@@ -45,10 +45,8 @@ public class LogEntry {
      *            a Map representing the properties in a key-value format
      */
     public LogEntry(Map<String, Object> readProperties) {
-        requireNonNull(readProperties, "Log properties cannot be null.");
+        this(readProperties, 0);
 
-        this.properties = Collections.unmodifiableMap(readProperties);
-        this.timestamp = 0;
     }
 
     /**

@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -33,7 +33,7 @@ import org.osgi.annotation.versioning.ProviderType;
 @ThreadSafe
 @ProviderType
 public class LogEntry {
-    
+
     private final long timestamp;
 
     private final Map<String, Object> properties;
@@ -50,12 +50,15 @@ public class LogEntry {
         this.properties = Collections.unmodifiableMap(readProperties);
         this.timestamp = 0;
     }
-    
+
     /**
      * Instantiates a new {@link LogEntry}
      *
      * @param readProperties
      *            a Map representing the properties in a key-value format
+     * @param timestamp
+     *            a long representing the source timestamp
+     *
      * @since 2.4
      */
     public LogEntry(Map<String, Object> readProperties, long timestamp) {
@@ -73,7 +76,7 @@ public class LogEntry {
     public Map<String, Object> getProperties() {
         return this.properties;
     }
-    
+
     /**
      * @since 2.4
      */
@@ -83,6 +86,6 @@ public class LogEntry {
 
     @Override
     public String toString() {
-        return this.properties.toString() + " timestamp: " + timestamp;
+        return this.properties.toString() + " timestamp: " + this.timestamp;
     }
 }

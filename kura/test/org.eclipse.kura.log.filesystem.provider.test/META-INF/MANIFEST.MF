@@ -7,7 +7,7 @@ Bundle-Vendor: Eclipse Kura
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Fragment-Host: org.eclipse.kura.log.filesystem.provider
 Import-Package: org.eclipse.kura.core.testutil;version="1.0.0",
- org.eclipse.kura.log;version="[1.0,1.1)",
+ org.eclipse.kura.log;version="[1.1,1.2)",
  org.eclipse.kura.log.listener;version="[1.0,2.0)",
  org.junit;version="4.12.0",
  org.junit.runner;version="4.12.0",

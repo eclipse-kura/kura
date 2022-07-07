@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,8 @@ import org.osgi.annotation.versioning.ProviderType;
 @ThreadSafe
 @ProviderType
 public class LogEntry {
+    
+    private final long timestamp;
 
     private final Map<String, Object> properties;
 
@@ -46,6 +48,21 @@ public class LogEntry {
         requireNonNull(readProperties, "Log properties cannot be null.");
 
         this.properties = Collections.unmodifiableMap(readProperties);
+        this.timestamp = 0;
+    }
+    
+    /**
+     * Instantiates a new {@link LogEntry}
+     *
+     * @param readProperties
+     *            a Map representing the properties in a key-value format
+     * @since 2.4
+     */
+    public LogEntry(Map<String, Object> readProperties, long timestamp) {
+        requireNonNull(readProperties, "Log properties cannot be null.");
+
+        this.properties = Collections.unmodifiableMap(readProperties);
+        this.timestamp = timestamp;
     }
 
     /**
@@ -56,9 +73,16 @@ public class LogEntry {
     public Map<String, Object> getProperties() {
         return this.properties;
     }
+    
+    /**
+     * @since 2.4
+     */
+    public long getTimestamp() {
+        return this.timestamp;
+    }
 
     @Override
     public String toString() {
-        return this.properties.toString();
+        return this.properties.toString() + " timestamp: " + timestamp;
     }
 }

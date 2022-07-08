@@ -63,10 +63,14 @@ Containers may be configured using the following fields:
 - **Privileged Mode** - This flag if enabled will give the container root capabilities to all devices on the host system. Please be aware that setting this flag can be dangerous, and must only be used in exceptional situations.
   
 - **Environment Variables (optional)** - This field accepts a comma-separated list of environment variables, which will be set inside the container when spun up.
+
+- **Entrypoint Override (optional)** - This field accepts a comma-separated list which is used to override the command used to start a container. Example: ```./test.sh,-v,-d,--human-readable```.
   
 - **Volume Mount (optional)** - This field accepts a comma-separated list of system-to-container file mounts. This allows for the container to access files on the host machine.
   
 - **Peripheral Device (optional)** - This field accepts a comma-separated list of device paths. This parameter allows for devices to be passed through from the host to the container.
+
+- **Networking Mode (optional)** - Use this field to specify what networking mode the container will use. Possible Drivers include: bridge, none, container:{container id}, host. Please note that this field is case-sensitive. This field can also be used to connect to any of the networks listed by the cli command ```docker network ls```.
 
 - **Logger Type** - This field provides a drop-down selection of supported container logging drivers.
 

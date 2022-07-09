@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *******************************************************************************/
 package org.eclipse.kura.web.server;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +74,7 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
                         GwtLogEntry gwtEntry = new GwtLogEntry();
                         gwtEntry.setProperties(entry.getProperties());
                         gwtEntry.setSourceLogProviderPid(pid);
+                        gwtEntry.setTimestamp(getFormattedTimestamp(entry));
 
                         GwtLogServiceImpl.cache.add(gwtEntry);
                     });
@@ -89,6 +92,16 @@ public class GwtLogServiceImpl extends OsgiRemoteServiceServlet implements GwtLo
             }
         } catch (GwtKuraException e) {
             logger.error("Error loading log providers.");
+        }
+    }
+
+    private String getFormattedTimestamp(LogEntry entry) {
+        String time = "UNDEFINED";
+        try {
+            return Instant.ofEpochSecond(entry.getTimestamp()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                    .toString();
+        } catch (Exception ex) {
+            return time;
         }
     }
 

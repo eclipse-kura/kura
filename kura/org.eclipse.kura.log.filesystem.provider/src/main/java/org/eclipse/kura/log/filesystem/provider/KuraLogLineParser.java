@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -16,8 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.kura.log.LogEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class KuraLogLineParser {
+
+    private static final Logger logger = LoggerFactory.getLogger(KuraLogLineParser.class);
 
     public static final String DEFAULT_TIMESTAMP = "undefined";
     public static final String DEFAULT_PID = "undefined";
@@ -29,7 +33,7 @@ public final class KuraLogLineParser {
     private String pid;
     private String priority;
     private String message;
-    private String transport;
+    private final String transport;
     private String syslogIdentifier;
     private String stacktrace;
 
@@ -61,7 +65,7 @@ public final class KuraLogLineParser {
 
     /*
      * kura.log message format:
-     * 
+     *
      * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
      */
     private void parseKuraLog() {
@@ -83,7 +87,7 @@ public final class KuraLogLineParser {
 
     /*
      * kura-audit.log message format:
-     * 
+     *
      * <ID>NUMBER TIMESTAMP DEVICE SYSLOG_IDENTIFIER - - [RequestContext@28392 category="AuditLogger"
      * exception="STACKTRACE" priority="PRIORITY" thread="PID"] MESSAGE_WITH_POSSIBLE_SPACES
      */
@@ -106,13 +110,20 @@ public final class KuraLogLineParser {
 
     private LogEntry generateLogEntry() {
         Map<String, Object> entryProperties = new HashMap<>();
-        entryProperties.put("_SOURCE_REALTIME_TIMESTAMP", instance.timestamp);
         entryProperties.put("_PID", instance.pid);
         entryProperties.put("MESSAGE", instance.message);
         entryProperties.put("PRIORITY", instance.priority);
         entryProperties.put("SYSLOG_IDENTIFIER", instance.syslogIdentifier);
         entryProperties.put("_TRANSPORT", instance.transport);
         entryProperties.put("STACKTRACE", instance.stacktrace);
+        
+        if (!DEFAULT_TIMESTAMP.equals(instance.timestamp)) {
+            try {
+                return new LogEntry(entryProperties, Long.parseLong(instance.timestamp.substring(0, 13)));
+            } catch (NumberFormatException e) {
+                logger.error("Unable to parse timestamp");
+            }
+        }
         return new LogEntry(entryProperties);
     }
 }

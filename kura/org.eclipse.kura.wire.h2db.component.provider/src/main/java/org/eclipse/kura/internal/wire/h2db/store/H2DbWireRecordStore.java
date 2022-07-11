@@ -59,9 +59,12 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
 /**
- * The Class DbWireRecordStore is a wire component which is responsible to store
+ * The Class H2DbWireRecordStore is a wire component which is responsible to store
  * the received {@link WireRecord}.
+ * 
+ * @deprecated this class is deprecated since 2.2. Use {@link org.eclipse.kura.internal.wire.db.store.DbWireRecordStore}
  */
+@Deprecated
 public class H2DbWireRecordStore implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final String COLUMN_NAME = "COLUMN_NAME";

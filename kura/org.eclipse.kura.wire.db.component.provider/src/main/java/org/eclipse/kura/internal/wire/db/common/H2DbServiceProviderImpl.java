@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.internal.wire.db.common;
 
 import static java.util.Objects.isNull;
@@ -55,9 +67,20 @@ public class H2DbServiceProviderImpl implements DbServiceProvider {
     }
 
     @Override
-    public void truncate(final int noOfRecordsToKeep, final String tableName, final String limit,
-            final String tableSize) throws SQLException {
+    public void truncate(final int noOfRecordsToKeep, final String tableName, final int maxTableSize)
+            throws SQLException {
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
+
+        int tableSize = getTableSize(tableName);
+        int entriesToDeleteCount = tableSize + 1; // +1 to make room for the new record
+        if (maxTableSize < noOfRecordsToKeep) {
+            entriesToDeleteCount -= maxTableSize;
+        } else {
+            entriesToDeleteCount -= noOfRecordsToKeep;
+        }
+
+        final String limit = Integer.toString(entriesToDeleteCount);
+
         this.dbHelper.withConnection(c -> {
             final String catalog = c.getCatalog();
             final DatabaseMetaData dbMetaData = c.getMetaData();

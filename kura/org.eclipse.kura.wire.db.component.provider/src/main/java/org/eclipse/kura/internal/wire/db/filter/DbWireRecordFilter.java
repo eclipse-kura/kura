@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,7 +32,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.internal.wire.db.common.DbServiceHelper;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -57,27 +57,20 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
     private static final Logger logger = LogManager.getLogger(DbWireRecordFilter.class);
 
     private List<WireRecord> lastRecords;
-
     private DbServiceHelper dbHelper;
-
-    private H2DbService dbService;
-
+    private BaseDbService dbService;
     private DbWireRecordFilterOptions options;
-
-    private volatile WireHelperService wireHelperService;
-
+    private WireHelperService wireHelperService;
     private WireSupport wireSupport;
-
     private Calendar lastRefreshedTime;
-
     private int cacheExpirationInterval;
 
-    public synchronized void bindDbService(H2DbService dbService) {
+    public synchronized void bindDbService(BaseDbService dbService) {
         this.dbService = dbService;
         this.dbHelper = DbServiceHelper.of(dbService);
     }
 
-    public synchronized void unbindDbService(H2DbService dbService) {
+    public synchronized void unbindDbService(BaseDbService dbService) {
         if (this.dbService == dbService) {
             this.dbHelper = null;
             this.dbService = null;
@@ -303,9 +296,6 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
         nextRefreshTime.setTime(this.lastRefreshedTime.getTime());
         nextRefreshTime.add(Calendar.SECOND, this.cacheExpirationInterval);
 
-        if (nextRefreshTime.after(now)) {
-            return false;
-        }
-        return true;
+        return !nextRefreshTime.after(now);
     }
 }

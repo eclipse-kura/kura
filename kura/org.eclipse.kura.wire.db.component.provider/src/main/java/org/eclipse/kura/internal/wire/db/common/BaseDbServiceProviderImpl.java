@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ * 
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ * 
+ * SPDX-License-Identifier: EPL-2.0
+ * 
+ * Contributors:
+ *  Eurotech
+ *******************************************************************************/
 package org.eclipse.kura.internal.wire.db.common;
 
 import static java.util.Objects.isNull;
@@ -32,9 +44,9 @@ import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.util.collection.CollectionUtil;
 import org.eclipse.kura.wire.WireRecord;
 
-public class DbServiceProviderImpl implements DbServiceProvider {
+public class BaseDbServiceProviderImpl implements DbServiceProvider {
 
-    private static final Logger logger = LogManager.getLogger(DbServiceProviderImpl.class);
+    private static final Logger logger = LogManager.getLogger(BaseDbServiceProviderImpl.class);
     private static final String COLUMN_NAME = "COLUMN_NAME";
     private static final String DATA_TYPE = "DATA_TYPE";
     private static final String SQL_ADD_COLUMN = "ALTER TABLE {0} ADD COLUMN {1} {2};";
@@ -50,14 +62,25 @@ public class DbServiceProviderImpl implements DbServiceProvider {
 
     private final DbServiceHelper dbHelper;
 
-    public DbServiceProviderImpl(BaseDbService dbService) {
+    public BaseDbServiceProviderImpl(BaseDbService dbService) {
         this.dbHelper = DbServiceHelper.of(dbService);
     }
 
     @Override
-    public void truncate(final int noOfRecordsToKeep, final String tableName, final String limit,
-            final String tableSize) throws SQLException {
+    public void truncate(final int noOfRecordsToKeep, final String tableName, final int maxTableSize)
+            throws SQLException {
         final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
+
+        int tableSize = getTableSize(tableName);
+        int entriesToDeleteCount = tableSize + 1; // +1 to make room for the new record
+        if (maxTableSize < noOfRecordsToKeep) {
+            entriesToDeleteCount -= maxTableSize;
+        } else {
+            entriesToDeleteCount -= noOfRecordsToKeep;
+        }
+
+        final String limit = Integer.toString(entriesToDeleteCount);
+
         try (Connection c = this.dbHelper.getConnection()) {
             final String catalog = c.getCatalog();
             final DatabaseMetaData dbMetaData = c.getMetaData();

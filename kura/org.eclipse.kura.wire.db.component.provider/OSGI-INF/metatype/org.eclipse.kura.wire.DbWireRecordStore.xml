@@ -47,8 +47,8 @@
             min="0">
         </AD>
         
-        <AD id="H2DbService.target"
-            name="H2DbService Target Filter"
+        <AD id="BaseDbService.target"
+            name="DbService Target Filter"
             type="String"
             cardinality="0"
             required="true"

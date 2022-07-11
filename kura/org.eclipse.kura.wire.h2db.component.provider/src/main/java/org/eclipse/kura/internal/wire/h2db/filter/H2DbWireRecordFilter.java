@@ -48,10 +48,14 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
 /**
- * The Class DbWireRecordFilter is responsible for representing a wire component
+ * The Class H2DbWireRecordFilter is responsible for representing a wire component
  * which is focused on performing an user defined SQL query in a database table and emitting the result as a Wire
  * Envelope.
+ * 
+ * @deprecated this class is deprecated since 2.2. Use
+ *             {@link org.eclipse.kura.internal.wire.db.store.DbWireRecordFilter}
  */
+@Deprecated
 public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, ConfigurableComponent {
 
     private static final Logger logger = LogManager.getLogger(H2DbWireRecordFilter.class);

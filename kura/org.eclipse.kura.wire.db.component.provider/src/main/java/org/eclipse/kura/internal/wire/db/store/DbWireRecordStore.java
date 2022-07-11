@@ -27,7 +27,7 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.BaseDbService;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.internal.wire.db.common.DbServiceProvider;
-import org.eclipse.kura.internal.wire.db.common.DbServiceProviderImpl;
+import org.eclipse.kura.internal.wire.db.common.BaseDbServiceProviderImpl;
 import org.eclipse.kura.internal.wire.db.common.H2DbServiceProviderImpl;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
@@ -61,7 +61,7 @@ public class DbWireRecordStore implements WireEmitter, WireReceiver, Configurabl
         if (this.dbService instanceof H2DbService) {
             this.dbServiceProvider = new H2DbServiceProviderImpl((H2DbService) this.dbService);
         } else {
-            this.dbServiceProvider = new DbServiceProviderImpl(this.dbService);
+            this.dbServiceProvider = new BaseDbServiceProviderImpl(this.dbService);
         }
         if (nonNull(this.dbService) && nonNull(this.wireRecordStoreOptions)) {
             reconcileDB(this.wireRecordStoreOptions.getTableName());
@@ -158,23 +158,7 @@ public class DbWireRecordStore implements WireEmitter, WireReceiver, Configurabl
         final int maxTableSize = this.wireRecordStoreOptions.getMaximumTableSize();
 
         try {
-
-            int tableSize = getTableSize();
-            int entriesToDeleteCount = tableSize + 1; // +1 to make room for the new record
-            if (maxTableSize < noOfRecordsToKeep) {
-                logger.info("{} > {}, using {} = {}.", DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
-                        DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
-                        DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE);
-                entriesToDeleteCount -= maxTableSize;
-            } else {
-                entriesToDeleteCount -= noOfRecordsToKeep;
-            }
-
-            final String limit = Integer.toString(entriesToDeleteCount);
-            final String tableSizeString = Integer.toString(tableSize);
-
-            this.dbServiceProvider.truncate(noOfRecordsToKeep, tableName, limit, tableSizeString);
-
+            this.dbServiceProvider.truncate(noOfRecordsToKeep, tableName, maxTableSize);
         } catch (final SQLException sqlException) {
             logger.error("Error in truncating the table {}...", tableName, sqlException);
         }

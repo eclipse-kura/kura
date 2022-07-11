@@ -195,9 +195,9 @@ public class CertificateUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static Store<X509CertificateHolder> toX509CertificateHolderStore(String permString) throws Exception {
+    public static Store<X509CertificateHolder> toX509CertificateHolderStore(String pemString) throws Exception {
 
-        List<X509Certificate> certs = readPemCertificates(permString);
+        List<X509Certificate> certs = readPemCertificates(pemString);
 
         List<X509CertificateHolder> x509CertificateHolderCerts = certs.stream().map(cert -> {
             try {

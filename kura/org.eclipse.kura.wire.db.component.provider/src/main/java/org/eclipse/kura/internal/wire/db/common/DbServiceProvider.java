@@ -13,6 +13,7 @@
 package org.eclipse.kura.internal.wire.db.common;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import org.eclipse.kura.wire.WireRecord;
 
@@ -81,4 +82,6 @@ public interface DbServiceProvider {
      *             if any of the provided arguments is null
      */
     public void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException;
+
+    public List<WireRecord> performSQLQuery(String query) throws SQLException;
 }

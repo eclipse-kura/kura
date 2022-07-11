@@ -17,15 +17,10 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
-import java.sql.Blob;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,9 +28,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.BaseDbService;
-import org.eclipse.kura.internal.wire.db.common.DbServiceHelper;
-import org.eclipse.kura.type.TypedValue;
-import org.eclipse.kura.type.TypedValues;
+import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.common.BaseDbServiceProviderImpl;
+import org.eclipse.kura.internal.wire.db.common.DbServiceProvider;
+import org.eclipse.kura.internal.wire.db.common.H2DbServiceProviderImpl;
 import org.eclipse.kura.wire.WireComponent;
 import org.eclipse.kura.wire.WireEmitter;
 import org.eclipse.kura.wire.WireEnvelope;
@@ -56,8 +52,8 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
 
     private static final Logger logger = LogManager.getLogger(DbWireRecordFilter.class);
 
+    private DbServiceProvider dbServiceProvider;
     private List<WireRecord> lastRecords;
-    private DbServiceHelper dbHelper;
     private BaseDbService dbService;
     private DbWireRecordFilterOptions options;
     private WireHelperService wireHelperService;
@@ -67,12 +63,16 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
 
     public synchronized void bindDbService(BaseDbService dbService) {
         this.dbService = dbService;
-        this.dbHelper = DbServiceHelper.of(dbService);
+        if (this.dbService instanceof H2DbService) {
+            this.dbServiceProvider = new H2DbServiceProviderImpl((H2DbService) this.dbService);
+        } else {
+            this.dbServiceProvider = new BaseDbServiceProviderImpl(this.dbService);
+        }
     }
 
     public synchronized void unbindDbService(BaseDbService dbService) {
         if (this.dbService == dbService) {
-            this.dbHelper = null;
+            this.dbServiceProvider = null;
             this.dbService = null;
             this.options = null;
         }
@@ -162,7 +162,7 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
      */
     protected void deactivate(final ComponentContext componentContext) {
         logger.debug("Dectivating DB Wire Record Filter...");
-        this.dbHelper = null;
+        this.dbServiceProvider = null;
         this.dbService = null;
         this.options = null;
         logger.debug("Dectivating DB Wire Record Filter... Done");
@@ -175,58 +175,8 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
     }
 
     private List<WireRecord> performSQLQuery() throws SQLException {
-
         final String sqlView = this.options.getSqlView();
-
-        return this.dbHelper.withConnection(c -> {
-            final List<WireRecord> dataRecords = new ArrayList<>();
-
-            try (final Statement stmt = c.createStatement(); final ResultSet rset = stmt.executeQuery(sqlView)) {
-                while (rset.next()) {
-                    final WireRecord wireRecord = new WireRecord(convertSQLRowToWireRecord(rset));
-                    dataRecords.add(wireRecord);
-                }
-            }
-            logger.debug("Refreshed typed values");
-            return dataRecords;
-        });
-    }
-
-    private Map<String, TypedValue<?>> convertSQLRowToWireRecord(ResultSet rset) throws SQLException {
-        final Map<String, TypedValue<?>> wireRecordProperties = new HashMap<>();
-        final ResultSetMetaData rmet = rset.getMetaData();
-        for (int i = 1; i <= rmet.getColumnCount(); i++) {
-            String fieldName = rmet.getColumnLabel(i);
-            Object dbExtractedData = rset.getObject(i);
-
-            if (isNull(fieldName)) {
-                fieldName = rmet.getColumnName(i);
-            }
-
-            if (isNull(dbExtractedData)) {
-                continue;
-            }
-
-            if (dbExtractedData instanceof Blob) {
-                final Blob dbExtractedBlob = (Blob) dbExtractedData;
-                final int dbExtractedBlobLength = (int) dbExtractedBlob.length();
-                dbExtractedData = dbExtractedBlob.getBytes(1, dbExtractedBlobLength);
-            }
-
-            try {
-                final TypedValue<?> value = TypedValues.newTypedValue(dbExtractedData);
-                wireRecordProperties.put(fieldName, value);
-            } catch (final Exception e) {
-                logger.error(
-                        "Failed to convert result for column {} (SQL type {}, Java type {}) "
-                                + "to any of the supported Wires data type, "
-                                + "please consider using a conversion function like CAST in your query. "
-                                + "The result for this column will not be included in emitted envelope",
-                        fieldName, rmet.getColumnTypeName(i), dbExtractedData.getClass().getName(), e);
-            }
-
-        }
-        return wireRecordProperties;
+        return this.dbServiceProvider.performSQLQuery(sqlView);
     }
 
     /**
@@ -241,12 +191,12 @@ public class DbWireRecordFilter implements WireEmitter, WireReceiver, Configurab
     public synchronized void onWireReceive(final WireEnvelope wireEnvelope) {
         requireNonNull(wireEnvelope, "Wire Envelope cannot be null");
 
-        if (this.dbHelper == null) {
-            logger.warn("H2DbService instance not attached");
+        if (this.dbServiceProvider == null) {
+            logger.warn("DbService instance not attached");
             return;
         }
 
-        if (isCacheExpired() && this.dbHelper != null) {
+        if (isCacheExpired()) {
             refreshCachedRecords();
         }
 

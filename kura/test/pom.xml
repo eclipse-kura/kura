@@ -891,6 +891,7 @@
         <module>org.eclipse.kura.watchdog.criticaltest</module>
         <module>org.eclipse.kura.wire.component.provider.test</module>
         <module>org.eclipse.kura.wire.h2db.component.provider.test</module>
+        <module>org.eclipse.kura.wire.db.component.provider.test</module>
         <module>org.eclipse.kura.wire.script.filter.provider.test</module>
         <module>org.eclipse.kura.wire.provider.test</module>
         <module>org.eclipse.kura.json.marshaller.unmarshaller.provider.test</module>

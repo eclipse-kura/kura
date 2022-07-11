@@ -34,6 +34,7 @@ import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilter;
 import org.eclipse.kura.internal.wire.db.common.DbServiceHelper;
+import org.eclipse.kura.internal.wire.db.common.DbServiceProvider;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;
@@ -79,8 +80,9 @@ public class DbWireRecordFilterTest {
         assertEquals(expectedCacheExpirationInterval, options.getCacheExpirationInterval());
         assertEquals(expectedSqlView, options.getSqlView());
 
-        DbServiceHelper dbHelper = (DbServiceHelper) TestUtil.getFieldValue(filter, "dbHelper");
-        H2DbService dbService = (H2DbService) TestUtil.getFieldValue(dbHelper, "dbService");
+        DbServiceProvider dbServiceProvider = (DbServiceProvider) TestUtil.getFieldValue(filter, "dbServiceProvider");
+        DbServiceHelper dbServiceHelper = (DbServiceHelper) TestUtil.getFieldValue(dbServiceProvider, "dbHelper");
+        H2DbService dbService = (H2DbService) TestUtil.getFieldValue(dbServiceHelper, "dbService");
         assertEquals(mockDbService, dbService);
 
         verify(mockWireHelperService).newWireSupport(filter, null);

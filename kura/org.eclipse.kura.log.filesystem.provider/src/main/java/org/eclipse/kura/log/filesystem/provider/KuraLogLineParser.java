@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.kura.log.filesystem.provider;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,13 +26,13 @@ public final class KuraLogLineParser {
 
     private static final Logger logger = LoggerFactory.getLogger(KuraLogLineParser.class);
 
-    public static final String DEFAULT_TIMESTAMP = "undefined";
+    public static final long DEFAULT_TIMESTAMP = new Date(0).getTime();
     public static final String DEFAULT_PID = "undefined";
     public static final String DEFAULT_PRIORITY = "INFO";
     public static final String DEFAULT_SYSLOG_IDENTIFIER = "Kura";
     public static final String DEFAULT_STACKTRACE = "";
 
-    private String timestamp;
+    private long timestamp;
     private String pid;
     private String priority;
     private String message;
@@ -71,7 +74,13 @@ public final class KuraLogLineParser {
     private void parseKuraLog() {
         String[] splits = this.message.split(" ");
         if (splits.length >= 3) {
-            instance.timestamp = splits[0];
+            try {
+                Date parsedDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss,S").parse(splits[0]);
+                instance.timestamp = parsedDate.getTime();
+            } catch (ParseException e) {
+                logger.error("Error parsing Kura log timestamp.", e);
+            }
+
             instance.pid = splits[1];
             instance.pid = instance.pid.replace("[", "");
             instance.pid = instance.pid.replace("]", "");
@@ -94,7 +103,13 @@ public final class KuraLogLineParser {
     private void parseKuraAuditLog() {
         String[] splits = this.message.split(" ");
         if (splits.length >= 11) {
-            instance.timestamp = splits[1];
+            try {
+                Date parsedDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SZ").parse(splits[1]);
+                instance.timestamp = parsedDate.getTime();
+            } catch (ParseException e) {
+                logger.error("Error parsing Kura audit log timestamp.", e);
+            }
+
             instance.syslogIdentifier = splits[3];
             instance.stacktrace += splits[8].replace("exception=", "").replace("\"", "");
             instance.priority = splits[9].replace("priority=", "").replace("\"", "");
@@ -117,13 +132,10 @@ public final class KuraLogLineParser {
         entryProperties.put("_TRANSPORT", instance.transport);
         entryProperties.put("STACKTRACE", instance.stacktrace);
         
-        if (!DEFAULT_TIMESTAMP.equals(instance.timestamp)) {
-            try {
-                return new LogEntry(entryProperties, Long.parseLong(instance.timestamp.substring(0, 13)));
-            } catch (NumberFormatException e) {
-                logger.error("Unable to parse timestamp");
-            }
+        if (DEFAULT_TIMESTAMP != instance.timestamp) {
+            return new LogEntry(entryProperties, instance.timestamp);
+        } else {
+            return new LogEntry(entryProperties);
         }
-        return new LogEntry(entryProperties);
     }
 }

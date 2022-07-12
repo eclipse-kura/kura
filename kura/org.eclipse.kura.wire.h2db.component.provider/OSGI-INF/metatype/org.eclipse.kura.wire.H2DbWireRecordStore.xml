@@ -16,7 +16,7 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.wire.H2DbWireRecordStore"
-         name="H2 DB Store" 
+         name="H2 DB Store (Deprecated)" 
          description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected H2 Database instance. **Deprecated** Use the DB Store instead.">
 
         <AD id="table.name"

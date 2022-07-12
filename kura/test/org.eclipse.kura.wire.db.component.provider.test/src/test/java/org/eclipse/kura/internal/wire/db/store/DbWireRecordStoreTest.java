@@ -33,6 +33,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.kura.db.H2DbService;
 import org.eclipse.kura.internal.wire.db.store.DbWireRecordStore;
+import org.eclipse.kura.internal.wire.db.store.DbWireRecordStoreOptions;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DataType;

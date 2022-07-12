@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilterOptions;
 import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
@@ -73,7 +74,7 @@ public class H2DbWireRecordFilterTest {
         filter.activate(mock(ComponentContext.class), properties);
         filter.bindDbService(mockDbService);
 
-        H2DbWireRecordFilterOptions options = (H2DbWireRecordFilterOptions) TestUtil.getFieldValue(filter, "options");
+        DbWireRecordFilterOptions options = (DbWireRecordFilterOptions) TestUtil.getFieldValue(filter, "options");
 
         assertEquals(expectedCacheExpirationInterval, options.getCacheExpirationInterval());
         assertEquals(expectedSqlView, options.getSqlView());
@@ -101,7 +102,7 @@ public class H2DbWireRecordFilterTest {
         properties.put("sql.view", expectedSqlView);
         filter.updated(properties);
 
-        options = (H2DbWireRecordFilterOptions) TestUtil.getFieldValue(filter, "options");
+        options = (DbWireRecordFilterOptions) TestUtil.getFieldValue(filter, "options");
 
         assertEquals(expectedCacheExpirationInterval, options.getCacheExpirationInterval());
         assertEquals(expectedSqlView, options.getSqlView());

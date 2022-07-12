@@ -33,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilterOptions;
 import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
 import org.eclipse.kura.type.TypedValue;
 import org.eclipse.kura.type.TypedValues;
@@ -66,7 +67,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
 
     private H2DbService dbService;
 
-    private H2DbWireRecordFilterOptions options;
+    private DbWireRecordFilterOptions options;
 
     private volatile WireHelperService wireHelperService;
 
@@ -123,7 +124,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating DB Wire Record Filter...");
-        this.options = new H2DbWireRecordFilterOptions(properties);
+        this.options = new DbWireRecordFilterOptions(properties);
 
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
@@ -148,7 +149,7 @@ public class H2DbWireRecordFilter implements WireEmitter, WireReceiver, Configur
 
         final String oldSqlView = this.options.getSqlView();
 
-        this.options = new H2DbWireRecordFilterOptions(properties);
+        this.options = new DbWireRecordFilterOptions(properties);
 
         this.cacheExpirationInterval = this.options.getCacheExpirationInterval();
 

@@ -35,8 +35,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.store.DbDataTypeMapper;
+import org.eclipse.kura.internal.wire.db.store.DbWireRecordStoreOptions;
+import org.eclipse.kura.internal.wire.db.store.DbDataTypeMapper.JdbcType;
 import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
-import org.eclipse.kura.internal.wire.h2db.store.H2DbDataTypeMapper.JdbcType;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DataType;
@@ -99,7 +101,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
     private H2DbService dbService;
 
-    private H2DbWireRecordStoreOptions wireRecordStoreOptions;
+    private DbWireRecordStoreOptions wireRecordStoreOptions;
 
     private volatile WireHelperService wireHelperService;
 
@@ -143,7 +145,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
      */
     protected void activate(final ComponentContext componentContext, final Map<String, Object> properties) {
         logger.debug("Activating DB Wire Record Store...");
-        this.wireRecordStoreOptions = new H2DbWireRecordStoreOptions(properties);
+        this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
 
         this.wireSupport = this.wireHelperService.newWireSupport(this,
                 (ServiceReference<WireComponent>) componentContext.getServiceReference());
@@ -164,7 +166,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
     public synchronized void updated(final Map<String, Object> properties) {
         logger.debug("Updating DB Wire Record Store...");
 
-        this.wireRecordStoreOptions = new H2DbWireRecordStoreOptions(properties);
+        this.wireRecordStoreOptions = new DbWireRecordStoreOptions(properties);
 
         reconcileDB(this.wireRecordStoreOptions.getTableName());
 
@@ -209,9 +211,9 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
 
             int entriesToDeleteCount = getTableSize() + 1; // +1 to make room for the new record
             if (maxTableSize < noOfRecordsToKeep) {
-                logger.info("{} > {}, using {} = {}.", H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
-                        H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
-                        H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE);
+                logger.info("{} > {}, using {} = {}.", DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
+                        DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP,
+                        DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE);
                 entriesToDeleteCount -= maxTableSize;
             } else {
                 entriesToDeleteCount -= noOfRecordsToKeep;
@@ -420,7 +422,7 @@ public class H2DbWireRecordStore implements WireEmitter, WireReceiver, Configura
             for (Entry<String, TypedValue<?>> entry : wireRecord.getProperties().entrySet()) {
                 final String sqlColName = this.dbHelper.sanitizeSqlTableAndColumnName(entry.getKey());
                 final Integer sqlColType = columns.get(sqlColName);
-                final JdbcType jdbcType = H2DbDataTypeMapper.getJdbcType(entry.getValue().getType());
+                final JdbcType jdbcType = DbDataTypeMapper.getJdbcType(entry.getValue().getType());
                 final String sqlTableName = this.dbHelper.sanitizeSqlTableAndColumnName(tableName);
                 if (isNull(sqlColType)) {
                     // add column

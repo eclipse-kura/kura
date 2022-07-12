@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.store.DbWireRecordStoreOptions;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
 import org.eclipse.kura.type.DataType;
@@ -252,9 +253,9 @@ public class H2DbWireRecordStoreTest {
      */
 
     private void givenProperties(String tableName, int maxTableSize, int nRecordsToKeep) {
-        this.properties.put(H2DbWireRecordStoreOptions.TABLE_NAME, tableName);
-        this.properties.put(H2DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, maxTableSize);
-        this.properties.put(H2DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP, nRecordsToKeep);
+        this.properties.put(DbWireRecordStoreOptions.TABLE_NAME, tableName);
+        this.properties.put(DbWireRecordStoreOptions.MAXIMUM_TABLE_SIZE, maxTableSize);
+        this.properties.put(DbWireRecordStoreOptions.CLEANUP_RECORDS_KEEP, nRecordsToKeep);
     }
 
     private void givenActivatedStoreComponent() {
@@ -424,7 +425,7 @@ public class H2DbWireRecordStoreTest {
         }
 
         this.properties.clear();
-        this.properties.put(H2DbWireRecordStoreOptions.TABLE_NAME, TEST_TABLE_NAME);
+        this.properties.put(DbWireRecordStoreOptions.TABLE_NAME, TEST_TABLE_NAME);
     }
 
     @After

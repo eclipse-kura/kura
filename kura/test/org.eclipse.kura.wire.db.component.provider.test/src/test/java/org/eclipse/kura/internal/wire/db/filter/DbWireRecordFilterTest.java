@@ -32,9 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.db.H2DbService;
-import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilter;
 import org.eclipse.kura.internal.wire.db.common.DbServiceHelper;
 import org.eclipse.kura.internal.wire.db.common.DbServiceProvider;
+import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilter;
+import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilterOptions;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;

@@ -24,15 +24,15 @@ import java.util.Map;
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
  */
-final class DbWireRecordStoreOptions {
+public final class DbWireRecordStoreOptions {
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
 
-    protected static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
+    public static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
 
-    protected static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
+    public static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
 
-    protected static final String TABLE_NAME = "table.name";
+    public static final String TABLE_NAME = "table.name";
 
     private final Map<String, Object> properties;
 
@@ -42,7 +42,7 @@ final class DbWireRecordStoreOptions {
      * @param properties
      *            the configured properties
      */
-    DbWireRecordStoreOptions(final Map<String, Object> properties) {
+    public DbWireRecordStoreOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
         this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
     }
@@ -52,7 +52,7 @@ final class DbWireRecordStoreOptions {
      *
      * @return the number of records
      */
-    int getNoOfRecordsToKeep() {
+    public int getNoOfRecordsToKeep() {
         int noOfRecords = 5000;
         final Object cleanUp = this.properties.get(CLEANUP_RECORDS_KEEP);
         if (nonNull(cleanUp) && cleanUp instanceof Integer) {
@@ -61,7 +61,7 @@ final class DbWireRecordStoreOptions {
         return noOfRecords;
     }
 
-    int getMaximumTableSize() {
+    public int getMaximumTableSize() {
         int maximumSize = DEFAULT_MAXIMUM_TABLE_SIZE;
         final Object propertiesMaximumSize = this.properties.get(MAXIMUM_TABLE_SIZE);
         if (nonNull(propertiesMaximumSize) && propertiesMaximumSize instanceof Integer) {
@@ -75,7 +75,7 @@ final class DbWireRecordStoreOptions {
      *
      * @return the name of the table
      */
-    String getTableName() {
+    public String getTableName() {
         String tableName = null;
         final Object name = this.properties.get(TABLE_NAME);
         if (nonNull(name) && name instanceof String) {

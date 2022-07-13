@@ -83,5 +83,13 @@ public interface DbServiceProvider {
      */
     public void insertDataRecord(final String tableName, final WireRecord wireRecord) throws SQLException;
 
+    /**
+     * Perform the given query
+     * 
+     * @param query
+     *            the query to be run
+     * @return a List of WireRecords that contains the result of the query
+     * @throws SQLException
+     */
     public List<WireRecord> performSQLQuery(String query) throws SQLException;
 }

@@ -11,11 +11,14 @@ The DB Store component allows the wire graphs to interact with the database inst
 * table.name : the name of the table to be created.
 * maximum.table.size : the size of the table.
 * cleanup.records.keep : the number of records in the table to keep while performing a cleanup operation.
+* DbService Target Filter : the database instance to be used.
 
 The DB Filter component, instead, can run a custom SQL query on the Kura database. It can be configured as follows:
 
 * sql.view : SQL to be executed to build a view.
 * cache.expiration.interval : cache validity in seconds. When the cache expires, it will cause a new read in the database.
+* DbService Target Filter : the database instance to be used.
+* emit.empty.result : defines if the envelope should be emitted even if the query return an empty result.
 
 The following procedure will create a wire graph that collects data from a simulated OPC/UA server, stores them in a table using the DB Store component and publishes them on the cloud platform. Moreover, the DB Filter is used to read from the database and write data to the OPC/UA server based on the read values.
 
@@ -52,24 +55,28 @@ The following procedure will create a wire graph that collects data from a simul
 ![opcua_driver_config1]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig1.png)
 
 {:start="7"}
-7. Add a new "H2 DB Store" component and configure it as follows:
+7. Add a new "DB Store" component and configure it as follows:
   * table.name : WR_data
   * maximum.table.size : 10000
   * cleanup.records.keep : 0
+  * DbService Target Filter : the DB Service pid to be used
 8. Add a new "Publisher" component and configure the chosen cloud platform stack in "cloud.service.pid" option
 9. Add "Logger" component
 10. Add another instance of "Timer"
-11. Add a new "H2 DB Filter" component and configure as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
+11. Add a new "DB Filter" component and configure as follows. The query will get the values from the light sensor and if they are less than 200, the fan is activated.
   * sql.view :
     ```
     SELECT (CASE WHEN "light" < 200 THEN 1 ELSE 0 END) AS "led" FROM "WR_data" ORDER BY TIMESTAMP DESC LIMIT 1;
     ```
 
   * cache.expiration.interval : 0
+  * DbService Target Filter : the DB Service pid to be used
 12. Add another "WireAsset" with the OPC/UA driver, configured as shown in the following image. Be sure that all channels are set to WRITE and that the associated "node.id" fields are set to:
   * "fan" for the fan channel;
   * "buzzer" for the buzzer channel;
   * "led" for the led channel
+
+{% include alerts.html message='Be aware that the **sql.view** syntax can vary accordingly to the SQL dialect used by the database. For example, the MySQL dialect doesn't allow to surrond the table or columns names with double-quotes. In the H2DB, this is mandatory instead. ' %}
 
 ![opcua_driver_config2]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig2.png)
 

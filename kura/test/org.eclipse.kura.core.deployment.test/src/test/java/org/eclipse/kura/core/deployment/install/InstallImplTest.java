@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2018, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -9,6 +9,7 @@
  * 
  * Contributors:
  *  Eurotech
+ *  3 PORT d.o.o.
  ******************************************************************************/
 package org.eclipse.kura.core.deployment.install;
 
@@ -92,6 +93,7 @@ public class InstallImplTest {
         CloudDeploymentHandlerV2 callbackMock = mock(CloudDeploymentHandlerV2.class);
         String kuraDataDir = "/tmp";
         InstallImpl ii = new InstallImpl(callbackMock, kuraDataDir, null);
+        ii.setPackagesPath(kuraDataDir);
 
         final String clientId = "clientid";
         final long jobid = 1234;

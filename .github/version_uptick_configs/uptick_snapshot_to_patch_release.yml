@@ -1,0 +1,38 @@
+---
+exclusions:
+  - "**/.git/**/*"
+  - "**/target/**/*"
+  - "**/RELEASE_INFO/**/*"
+  - "**/.settings/**/*"
+  - "**/.classpath"
+  - "**/.project"
+  - "./distrib/esf-addon-archetype/src/main/resources/**/*"
+  - "./kura/tools/archetype/example/src/main/resources/**/*"
+  - "./target-platform/javax.bluetooth-parent/javax.bluetooth/src/**/*"
+
+tasks:
+  - selector:
+      or:
+        - and:
+          - group_id: "org.eclipse.kura"
+          - artifact_id: "distrib"
+        - and:
+          - group_id: "org.eclipse.kura"
+          - artifact_id: "tools"
+        - and:
+          - group_id: "org.eclipse.kura"
+          - artifact_id: "target-platform"
+        - and:
+          - group_id: "org.eclipse.kura"
+          - artifact_id: "examples"
+        - and:
+          - group_id: "org.eclipse.kura.tools"
+          - artifact_id: "archetype"
+        - and:
+          - group_id: "org.eclipse.kura"
+          - artifact_id: "kura"
+    actions:
+      - print
+      - transform_version:
+        - snapshot: remove
+

@@ -14,6 +14,7 @@ on:
             - uptick_major_on_develop_branch.yml
             - uptick_minor_on_develop_branch.yml
             - uptick_patch_on_maintenance_branch.yml
+            - uptick_snapshot_to_patch_release.yml
             - uptick_snapshot_to_release.yml
           required: true
 

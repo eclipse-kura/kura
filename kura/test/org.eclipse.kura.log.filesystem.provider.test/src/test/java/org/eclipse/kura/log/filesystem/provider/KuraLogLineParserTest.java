@@ -41,7 +41,7 @@ public class KuraLogLineParserTest {
 
         whenParseLogLine();
 
-        thenLogEntryIs("2021-11-12T17:13:47,184", // timestamp
+        thenLogEntryIs(1636733627, // timestamp
                 "qtp30640932-8244", // pid
                 "o.e.k.w.s.s.SkinServlet - Failed to load skin resource, Resource File /skin.js does not exist", // message
                 "WARN", // priority
@@ -56,7 +56,7 @@ public class KuraLogLineParserTest {
 
         whenParseLogLine();
 
-        thenLogEntryIs("2021-11-12T23:32:15.594Z", // timestamp
+        thenLogEntryIs(1636759935, // timestamp
                 "qtp30640932-60362", // pid
                 "{entrypoint=Internal} UI Session - Failure - Session expired", // message
                 "WARN", // priority
@@ -86,7 +86,7 @@ public class KuraLogLineParserTest {
 
         whenParseLogLine();
 
-        thenLogEntryIs("14:01:17.971", // timestamp
+        thenLogEntryIs(0, // timestamp
                 "Thread-2", // pid
                 "org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider - Unexpected exception in FilesystemLogProvider.", // message
                 "ERROR", // priority
@@ -140,10 +140,10 @@ public class KuraLogLineParserTest {
      * Then
      */
 
-    private void thenLogEntryIs(String expectedTimestamp, String expectedPid, String expectedMessage,
+    private void thenLogEntryIs(long expectedTimestamp, String expectedPid, String expectedMessage,
             String expectedPriority, String expectedSyslogId, String expectedTransport, String expectedStacktrace) {
 
-        assertEquals(this.parsedLogEntry.getProperties().get("_SOURCE_REALTIME_TIMESTAMP"), expectedTimestamp);
+        assertEquals(this.parsedLogEntry.getTimestamp(), expectedTimestamp);
         assertEquals(this.parsedLogEntry.getProperties().get("_PID"), expectedPid);
         assertEquals(this.parsedLogEntry.getProperties().get("MESSAGE"), expectedMessage);
         assertEquals(this.parsedLogEntry.getProperties().get("PRIORITY"), expectedPriority);

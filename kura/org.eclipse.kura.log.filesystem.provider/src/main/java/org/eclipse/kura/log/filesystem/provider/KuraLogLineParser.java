@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -74,12 +74,7 @@ public final class KuraLogLineParser {
     private void parseKuraLog() {
         String[] splits = this.message.split(" ");
         if (splits.length >= 3) {
-            try {
-                Date parsedDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss,S").parse(splits[0]);
-                instance.timestamp = parsedDate.getTime();
-            } catch (ParseException e) {
-                logger.error("Error parsing Kura log timestamp.", e);
-            }
+            instance.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss,S", splits[0]);
 
             instance.pid = splits[1];
             instance.pid = instance.pid.replace("[", "");
@@ -94,6 +89,16 @@ public final class KuraLogLineParser {
         }
     }
 
+    private long parseStringToEpoch(String format, String date) {
+        try {
+            Date parsedDate = new SimpleDateFormat(format).parse(date);
+            return parsedDate.toInstant().getEpochSecond();
+        } catch (ParseException e) {
+            logger.error("Error parsing Kura log timestamp.", e);
+        }
+        return 0;
+    }
+
     /*
      * kura-audit.log message format:
      *
@@ -103,12 +108,7 @@ public final class KuraLogLineParser {
     private void parseKuraAuditLog() {
         String[] splits = this.message.split(" ");
         if (splits.length >= 11) {
-            try {
-                Date parsedDate = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SZ").parse(splits[1]);
-                instance.timestamp = parsedDate.getTime();
-            } catch (ParseException e) {
-                logger.error("Error parsing Kura audit log timestamp.", e);
-            }
+            instance.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss.SSSXXX", splits[1]);
 
             instance.syslogIdentifier = splits[3];
             instance.stacktrace += splits[8].replace("exception=", "").replace("\"", "");
@@ -131,11 +131,7 @@ public final class KuraLogLineParser {
         entryProperties.put("SYSLOG_IDENTIFIER", instance.syslogIdentifier);
         entryProperties.put("_TRANSPORT", instance.transport);
         entryProperties.put("STACKTRACE", instance.stacktrace);
-        
-        if (DEFAULT_TIMESTAMP != instance.timestamp) {
-            return new LogEntry(entryProperties, instance.timestamp);
-        } else {
-            return new LogEntry(entryProperties);
-        }
+
+        return new LogEntry(entryProperties, instance.timestamp);
     }
 }

@@ -8,7 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.kura;version="[1.0,2.0)",
- org.eclipse.kura.log;version="[1.0,1.1)",
+ org.eclipse.kura.log;version="[1.1,1.2)",
  org.eclipse.kura.log.listener;version="[1.0,2.0)",
  org.eclipse.kura.configuration;version="[1.0,2.0)",
  org.osgi.framework;version="1.8.0",

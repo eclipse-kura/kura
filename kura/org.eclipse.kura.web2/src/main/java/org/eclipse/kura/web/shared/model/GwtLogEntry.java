@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -13,16 +13,15 @@
 package org.eclipse.kura.web.shared.model;
 
 import java.io.Serializable;
-import java.util.Date;
 
 public class GwtLogEntry extends KuraBaseModel implements Serializable {
 
     private static final long serialVersionUID = 8526545631929936271L;
     private int id;
+    private String timestamp;
 
     public enum LogEntryKeys {
 
-        SOURCE_TIMESTAMP("_SOURCE_REALTIME_TIMESTAMP"),
         SOURCE_LOGPROVIDER_PID("SOURCE_LOGPROVIDER_PID"),
         PID("_PID"),
         SYSLOG_ID("SYSLOG_IDENTIFIER"),
@@ -32,7 +31,7 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
         STACKTRACE("STACKTRACE"),
         CODE_LINE("CODE_LINE");
 
-        private String fieldKey;
+        private final String fieldKey;
 
         LogEntryKeys(String key) {
             this.fieldKey = key;
@@ -45,6 +44,10 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public void setSourceLogProviderPid(String sourceLogProviderPid) {
@@ -60,12 +63,7 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
     }
 
     public String getSourceRealtimeTimestamp() {
-        String time = (String) super.get(LogEntryKeys.SOURCE_TIMESTAMP.getKey());
-        try {
-            return new Date(Long.parseLong(time.substring(0, 13))).toString();
-        } catch (Exception ex) {
-            return time;
-        }
+        return this.timestamp;
     }
 
     public String getPid() {
@@ -97,27 +95,27 @@ public class GwtLogEntry extends KuraBaseModel implements Serializable {
     }
 
     public String prettyPrint(boolean includeMoreInfo, boolean includeStacktrace) {
-        this.setUnescaped(true);
+        setUnescaped(true);
         StringBuilder prettyEntry = new StringBuilder();
-        prettyEntry.append(this.getSourceRealtimeTimestamp());
+        prettyEntry.append(getSourceRealtimeTimestamp());
         prettyEntry.append("\t[priority: ");
-        prettyEntry.append(this.getPriority());
+        prettyEntry.append(getPriority());
 
         if (includeMoreInfo) {
             prettyEntry.append(" - PID: ");
-            prettyEntry.append(this.getPid());
+            prettyEntry.append(getPid());
             prettyEntry.append(" - syslog ID: ");
-            prettyEntry.append(this.getSyslogIdentifier());
+            prettyEntry.append(getSyslogIdentifier());
             prettyEntry.append(" - source: ");
-            prettyEntry.append(this.getTransport());
+            prettyEntry.append(getTransport());
         }
 
         prettyEntry.append("]\nMessage: ");
-        prettyEntry.append(this.getMessage());
+        prettyEntry.append(getMessage());
 
-        if (includeStacktrace && !this.getStacktrace().isEmpty()) {
+        if (includeStacktrace && !getStacktrace().isEmpty()) {
             prettyEntry.append("\nStacktrace: ");
-            prettyEntry.append(this.getStacktrace());
+            prettyEntry.append(getStacktrace());
         }
 
         prettyEntry.append("\n\n");

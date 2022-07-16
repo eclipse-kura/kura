@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  *  Eurotech
  *  Amit Kumar Mondal
  *******************************************************************************/
-package org.eclipse.kura.internal.wire.h2db.filter;
+package org.eclipse.kura.internal.wire.db.filter;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -24,7 +24,7 @@ import java.util.Map;
  * The Class DbWireRecordFilterOptions is responsible to contain all the Db Wire
  * Record related filter options
  */
-final class H2DbWireRecordFilterOptions {
+public final class DbWireRecordFilterOptions {
 
     private static final String CONF_CACHE_EXPIRATION_INTERVAL = "cache.expiration.interval";
 
@@ -40,7 +40,7 @@ final class H2DbWireRecordFilterOptions {
      * @param properties
      *            the provided properties
      */
-    H2DbWireRecordFilterOptions(final Map<String, Object> properties) {
+    public DbWireRecordFilterOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
         this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
     }
@@ -50,7 +50,7 @@ final class H2DbWireRecordFilterOptions {
      *
      * @return the configured cache interval
      */
-    int getCacheExpirationInterval() {
+    public int getCacheExpirationInterval() {
         int cacheInterval = 0;
         final Object cacheInt = this.properties.get(CONF_CACHE_EXPIRATION_INTERVAL);
         if (nonNull(cacheInt) && cacheInt instanceof Integer) {
@@ -64,7 +64,7 @@ final class H2DbWireRecordFilterOptions {
      *
      * @return the configured SQL view
      */
-    String getSqlView() {
+    public String getSqlView() {
         String sqlView = null;
         final Object view = this.properties.get(CONF_SQL_VIEW);
         if (nonNull(view) && view instanceof String) {
@@ -73,7 +73,7 @@ final class H2DbWireRecordFilterOptions {
         return sqlView;
     }
 
-    boolean emitOnEmptyResult() {
+    public boolean emitOnEmptyResult() {
         boolean result = true;
         final Object emitOnEmptyResult = this.properties.get(EMIT_ON_EMPTY_RESULT);
         if (nonNull(emitOnEmptyResult) && emitOnEmptyResult instanceof Boolean) {

@@ -86,6 +86,7 @@
         <module>org.eclipse.kura.util</module>
         <module>org.eclipse.kura.wire.camel</module>
         <module>org.eclipse.kura.wire.script.filter.provider</module>
+        <module>org.eclipse.kura.wire.db.component.provider</module>
         <module>org.eclipse.kura.wire.h2db.component.provider</module>
         <module>org.eclipse.kura.wire.component.provider</module>
         <module>org.eclipse.kura.wire.helper.provider</module>

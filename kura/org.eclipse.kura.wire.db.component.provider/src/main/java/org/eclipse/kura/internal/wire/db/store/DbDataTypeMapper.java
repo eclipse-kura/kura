@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  *  Eurotech
  *  Amit Kumar Mondal
  *******************************************************************************/
-package org.eclipse.kura.internal.wire.h2db.store;
+package org.eclipse.kura.internal.wire.db.store;
 
 import static org.eclipse.kura.type.DataType.BOOLEAN;
 import static org.eclipse.kura.type.DataType.BYTE_ARRAY;
@@ -30,7 +30,7 @@ import org.eclipse.kura.util.collection.CollectionUtil;
 /**
  * This class maps all the Kura specific data types to JDBC Data Types
  */
-public final class H2DbDataTypeMapper {
+public final class DbDataTypeMapper {
 
     /**
      * The Class JdbcType represent a pair of the generic SQL Type and its
@@ -47,11 +47,11 @@ public final class H2DbDataTypeMapper {
             this.typeStr = typeStr;
         }
 
-        int getType() {
+        public int getType() {
             return this.type;
         }
 
-        String getTypeString() {
+        public String getTypeString() {
             return this.typeStr;
         }
     }
@@ -85,7 +85,7 @@ public final class H2DbDataTypeMapper {
         jdbcTypeMap.put(Types.VARCHAR, DataType.STRING);
     }
 
-    private H2DbDataTypeMapper() {
+    private DbDataTypeMapper() {
         // Not needed
     }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  *  Eurotech
  *  Amit Kumar Mondal
  *******************************************************************************/
-package org.eclipse.kura.internal.wire.h2db.store;
+package org.eclipse.kura.internal.wire.db.store;
 
 import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
@@ -24,15 +24,15 @@ import java.util.Map;
  * The Class DbWireRecordStoreOptions is responsible to contain all the DB Wire
  * Record Store related options
  */
-final class H2DbWireRecordStoreOptions {
+public final class DbWireRecordStoreOptions {
 
     private static final int DEFAULT_MAXIMUM_TABLE_SIZE = 10000;
 
-    protected static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
+    public static final String MAXIMUM_TABLE_SIZE = "maximum.table.size";
 
-    protected static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
+    public static final String CLEANUP_RECORDS_KEEP = "cleanup.records.keep";
 
-    protected static final String TABLE_NAME = "table.name";
+    public static final String TABLE_NAME = "table.name";
 
     private final Map<String, Object> properties;
 
@@ -42,7 +42,7 @@ final class H2DbWireRecordStoreOptions {
      * @param properties
      *            the configured properties
      */
-    H2DbWireRecordStoreOptions(final Map<String, Object> properties) {
+    public DbWireRecordStoreOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
         this.properties = Collections.unmodifiableMap(new HashMap<>(properties));
     }
@@ -52,7 +52,7 @@ final class H2DbWireRecordStoreOptions {
      *
      * @return the number of records
      */
-    int getNoOfRecordsToKeep() {
+    public int getNoOfRecordsToKeep() {
         int noOfRecords = 5000;
         final Object cleanUp = this.properties.get(CLEANUP_RECORDS_KEEP);
         if (nonNull(cleanUp) && cleanUp instanceof Integer) {
@@ -61,7 +61,7 @@ final class H2DbWireRecordStoreOptions {
         return noOfRecords;
     }
 
-    int getMaximumTableSize() {
+    public int getMaximumTableSize() {
         int maximumSize = DEFAULT_MAXIMUM_TABLE_SIZE;
         final Object propertiesMaximumSize = this.properties.get(MAXIMUM_TABLE_SIZE);
         if (nonNull(propertiesMaximumSize) && propertiesMaximumSize instanceof Integer) {
@@ -75,7 +75,7 @@ final class H2DbWireRecordStoreOptions {
      *
      * @return the name of the table
      */
-    String getTableName() {
+    public String getTableName() {
         String tableName = null;
         final Object name = this.properties.get(TABLE_NAME);
         if (nonNull(name) && name instanceof String) {

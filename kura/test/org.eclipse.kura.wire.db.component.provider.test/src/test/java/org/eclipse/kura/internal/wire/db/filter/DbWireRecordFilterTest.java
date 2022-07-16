@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.internal.wire.h2db.filter;
+package org.eclipse.kura.internal.wire.db.filter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -32,8 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.common.DbServiceHelper;
+import org.eclipse.kura.internal.wire.db.common.DbServiceProvider;
+import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilter;
 import org.eclipse.kura.internal.wire.db.filter.DbWireRecordFilterOptions;
-import org.eclipse.kura.internal.wire.h2db.common.H2DbServiceHelper;
 import org.eclipse.kura.wire.WireEnvelope;
 import org.eclipse.kura.wire.WireHelperService;
 import org.eclipse.kura.wire.WireSupport;
@@ -41,7 +43,7 @@ import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.wireadmin.Wire;
 
-public class H2DbWireRecordFilterTest {
+public class DbWireRecordFilterTest {
 
     private H2DbService createMockH2DbService(final Connection connection) throws SQLException {
         final H2DbService dbServiceMock = mock(H2DbService.class);
@@ -59,7 +61,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
+        DbWireRecordFilter filter = new DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -79,8 +81,9 @@ public class H2DbWireRecordFilterTest {
         assertEquals(expectedCacheExpirationInterval, options.getCacheExpirationInterval());
         assertEquals(expectedSqlView, options.getSqlView());
 
-        H2DbServiceHelper dbHelper = (H2DbServiceHelper) TestUtil.getFieldValue(filter, "dbHelper");
-        H2DbService dbService = (H2DbService) TestUtil.getFieldValue(dbHelper, "dbService");
+        DbServiceProvider dbServiceProvider = (DbServiceProvider) TestUtil.getFieldValue(filter, "dbServiceProvider");
+        DbServiceHelper dbServiceHelper = (DbServiceHelper) TestUtil.getFieldValue(dbServiceProvider, "dbHelper");
+        H2DbService dbService = (H2DbService) TestUtil.getFieldValue(dbServiceHelper, "dbService");
         assertEquals(mockDbService, dbService);
 
         verify(mockWireHelperService).newWireSupport(filter, null);
@@ -122,7 +125,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
+        DbWireRecordFilter filter = new DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -152,7 +155,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
+        DbWireRecordFilter filter = new DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -190,7 +193,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
+        DbWireRecordFilter filter = new DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -215,7 +218,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
+        DbWireRecordFilter filter = new DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);
@@ -243,7 +246,7 @@ public class H2DbWireRecordFilterTest {
 
         WireHelperService mockWireHelperService = mock(WireHelperService.class);
 
-        H2DbWireRecordFilter filter = new H2DbWireRecordFilter();
+        DbWireRecordFilter filter = new DbWireRecordFilter();
         filter.bindWireHelperService(mockWireHelperService);
 
         WireSupport mockWireSupport = mock(WireSupport.class);

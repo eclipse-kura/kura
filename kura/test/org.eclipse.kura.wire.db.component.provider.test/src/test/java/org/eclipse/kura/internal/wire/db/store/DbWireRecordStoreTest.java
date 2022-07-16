@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.internal.wire.h2db.store;
+package org.eclipse.kura.internal.wire.db.store;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.kura.db.H2DbService;
+import org.eclipse.kura.internal.wire.db.store.DbWireRecordStore;
 import org.eclipse.kura.internal.wire.db.store.DbWireRecordStoreOptions;
 import org.eclipse.kura.type.BooleanValue;
 import org.eclipse.kura.type.ByteArrayValue;
@@ -53,12 +54,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.component.ComponentContext;
 
-public class H2DbWireRecordStoreTest {
+public class DbWireRecordStoreTest {
 
     private ComponentContext ctx;
     private Connection dbConnection;
     private H2DbService dbServiceMock;
-    private H2DbWireRecordStore storeWireComp;
+    private DbWireRecordStore storeWireComp;
     private Map<String, Object> properties = new HashMap<>();
     private WireEnvelope wireEnvelope;
 
@@ -259,7 +260,7 @@ public class H2DbWireRecordStoreTest {
     }
 
     private void givenActivatedStoreComponent() {
-        this.storeWireComp = new H2DbWireRecordStore();
+        this.storeWireComp = new DbWireRecordStore();
 
         WireHelperService whsMock = mock(WireHelperService.class);
         WireSupport wireSupportMock = mock(WireSupport.class);

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
     
-    Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
     which is available at https://www.eclipse.org/legal/epl-2.0/
  
-	SPDX-License-Identifier: EPL-2.0
-	
-	Contributors:
-	 Eurotech
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
      Amit Kumar Mondal
      
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.wire.H2DbWireRecordStore"
-         name="H2 DB Store (Deprecated)" 
-         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected H2 Database instance. **Deprecated** Use the DB Store instead.">
+    <OCD id="org.eclipse.kura.wire.DbWireRecordStore"
+         name="DB Store" 
+         description="A wire component that provides storage for Wire Records produced by connected WireEmitters. The storage will be performed in the selected Database instance.">
 
         <AD id="table.name"
             name="table.name"
@@ -47,17 +47,17 @@
             min="0">
         </AD>
         
-        <AD id="H2DbService.target"
-            name="H2DbService Target Filter"
+        <AD id="BaseDbService.target"
+            name="DbService Target Filter"
             type="String"
             cardinality="0"
             required="true"
             default="(kura.service.pid=org.eclipse.kura.db.H2DbService)"
-            description="Specifies, as an OSGi target filter, the pid of the of the H2 database instance to be used.">
+            description="Specifies, as an OSGi target filter, the pid of the of the database instance to be used.">
         </AD>
     </OCD>
     
-    <Designate pid="org.eclipse.kura.wire.H2DbWireRecordStore" factoryPid="org.eclipse.kura.wire.H2DbWireRecordStore">
-        <Object ocdref="org.eclipse.kura.wire.H2DbWireRecordStore"/>
+    <Designate pid="org.eclipse.kura.wire.DbWireRecordStore" factoryPid="org.eclipse.kura.wire.DbWireRecordStore">
+        <Object ocdref="org.eclipse.kura.wire.DbWireRecordStore"/>
     </Designate>
 </MetaData>

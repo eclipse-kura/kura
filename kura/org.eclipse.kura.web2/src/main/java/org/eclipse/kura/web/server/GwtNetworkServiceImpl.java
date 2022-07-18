@@ -1206,7 +1206,7 @@ public class GwtNetworkServiceImpl extends OsgiRemoteServiceServlet implements G
                 }
                 portForwarding.append(",");
                 if (entry.getPermittedMAC() != null) {
-                    portForwarding.append(entry.getPermittedMAC()).append(",");
+                    portForwarding.append(entry.getPermittedMAC());
                 }
                 portForwarding.append(",");
                 if (entry.getSourcePortRange() != null) {

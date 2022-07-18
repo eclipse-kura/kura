@@ -192,7 +192,7 @@ For details see the [full specification](https://www.conventionalcommits.org/en/
 Types other than `feat` and `fix` MAY be used in your commit messages and must be one of the following:
 
 - `docs`: Documentation only changes
-- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `refactor`: A code change that neither fixes a bug nor adds a feature (removing redundant code, code semplification, renaming variables, removing features, etc)
 - `test`: Adding missing tests or correcting existing tests
 - `style`: Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)
 - `chore`: Tool changes, configuration changes, and changes to things that do not actually go into production at all (upticks/bumps, manual update of release notes...)

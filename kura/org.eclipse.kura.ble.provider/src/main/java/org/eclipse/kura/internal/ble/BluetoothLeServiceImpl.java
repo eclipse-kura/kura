@@ -152,6 +152,7 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     }
 
     protected DeviceManager getDeviceManagerInternal() throws DBusException {
-        return DeviceManager.createInstance(false);
+        this.deviceManager = DeviceManager.createInstance(false);
+        return this.deviceManager;
     }
 }

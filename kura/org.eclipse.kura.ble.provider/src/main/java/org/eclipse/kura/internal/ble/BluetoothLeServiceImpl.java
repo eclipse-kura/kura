@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -58,14 +58,6 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
 
     protected void activate(ComponentContext context) {
         logger.info("Activating Bluetooth Le Service...");
-        if (!startBluetoothSuppressed() && !startBluetoothUbuntuSnap() && !startBluetoothSystemd() && !startBluetoothInitd()) {
-            startBluetoothDaemon();
-        }
-        try {
-            this.deviceManager = getDeviceManager();
-        } catch (DBusException e) {
-            logger.error("Failed to start bluetooth service", e);
-        }
     }
 
     protected void deactivate(ComponentContext context) {
@@ -79,10 +71,13 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     @Override
     public List<BluetoothLeAdapter> getAdapters() {
         List<BluetoothLeAdapter> adapters = new ArrayList<>();
-        if (this.deviceManager != null) {
-            for (BluetoothAdapter adapter : this.deviceManager.getAdapters()) {
+        try {
+            DeviceManager dm = getDeviceManager();
+            for (BluetoothAdapter adapter : dm.getAdapters()) {
                 adapters.add(new BluetoothLeAdapterImpl(adapter));
             }
+        } catch (DBusException e) {
+            logger.error("Cannot initialize BT Device Manager", e);
         }
         return adapters;
     }
@@ -90,13 +85,23 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
     @Override
     public BluetoothLeAdapter getAdapter(String interfaceName) {
         BluetoothLeAdapterImpl adapter = null;
-        if (this.deviceManager != null) {
-            BluetoothAdapter ba = this.deviceManager.getAdapter(interfaceName);
+        try {
+            DeviceManager dm = getDeviceManager();
+            BluetoothAdapter ba = dm.getAdapter(interfaceName);
             if (ba != null) {
                 adapter = new BluetoothLeAdapterImpl(ba);
             }
+        } catch (DBusException e) {
+            logger.error("Cannot initialize BT Device Manager", e);
         }
         return adapter;
+    }
+
+    private void initializeDaemon() {
+        if (!startBluetoothSuppressed() && !startBluetoothUbuntuSnap() && !startBluetoothSystemd()
+                && !startBluetoothInitd()) {
+            startBluetoothDaemon();
+        }
     }
 
     private boolean startBluetoothSystemd() {
@@ -137,8 +142,17 @@ public class BluetoothLeServiceImpl implements BluetoothLeService {
         return started;
     }
 
-    // For test only
-    public DeviceManager getDeviceManager() throws DBusException {
-        return DeviceManager.createInstance(false);
+    private DeviceManager getDeviceManager() throws DBusException {
+        if (this.deviceManager == null) {
+            initializeDaemon();
+            return getDeviceManagerInternal();
+        } else {
+            return this.deviceManager;
+        }
+    }
+
+    protected DeviceManager getDeviceManagerInternal() throws DBusException {
+        this.deviceManager = DeviceManager.createInstance(false);
+        return this.deviceManager;
     }
 }

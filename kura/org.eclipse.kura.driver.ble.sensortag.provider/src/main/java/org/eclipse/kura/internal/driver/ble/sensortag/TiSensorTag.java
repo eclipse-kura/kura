@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 
-import org.eclipse.kura.KuraBluetoothConnectionException;
 import org.eclipse.kura.KuraBluetoothIOException;
 import org.eclipse.kura.KuraBluetoothResourceNotFoundException;
 import org.eclipse.kura.KuraException;

@@ -98,7 +98,7 @@ public class TiSensorTag {
             if (!isConnected() || !this.device.isServicesResolved()) {
                 throw new ConnectionException("Connection failed");
             }
-        } catch (KuraBluetoothConnectionException e) {
+        } catch (Exception e) {
             throw new ConnectionException(e);
         }
     }
@@ -139,7 +139,7 @@ public class TiSensorTag {
             if (isConnected()) {
                 throw new ConnectionException("Disconnection failed");
             }
-        } catch (KuraBluetoothConnectionException e) {
+        } catch (Exception e) {
             throw new ConnectionException(e);
         }
         // Wait a while after disconnection

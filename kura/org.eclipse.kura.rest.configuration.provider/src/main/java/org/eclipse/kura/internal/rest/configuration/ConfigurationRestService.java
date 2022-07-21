@@ -1,16 +1,18 @@
 /*******************************************************************************
  * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
 package org.eclipse.kura.internal.rest.configuration;
+
+import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -235,7 +237,7 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ocds, cryptoService, false);
+        return DTOUtil.toComponentConfigurationList(ocds, this.cryptoService, false);
     }
 
     @POST
@@ -255,7 +257,7 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ocds, cryptoService, false);
+        return DTOUtil.toComponentConfigurationList(ocds, this.cryptoService, false);
     }
 
     /**
@@ -343,7 +345,7 @@ public class ConfigurationRestService {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }
 
-        return DTOUtil.toComponentConfigurationList(ccs, cryptoService, true);
+        return DTOUtil.toComponentConfigurationList(ccs, this.cryptoService, true);
 
     }
 
@@ -365,16 +367,20 @@ public class ConfigurationRestService {
     public ComponentConfigurationList listComponentConfigurations(final PidSet pids) {
         pids.validate();
 
-        final List<ComponentConfiguration> configs;
+        final List<ComponentConfiguration> configs = new ArrayList<>();
 
-        try {
-            configs = this.configurationService.getComponentConfigurations().stream()
-                    .filter(c -> pids.getPids().contains(c.getPid())).collect(Collectors.toList());
-        } catch (final Exception e) {
-            throw DefaultExceptionHandler.toWebApplicationException(e);
-        }
+        pids.getPids().forEach(pid -> {
+            try {
+                ComponentConfiguration config = this.configurationService.getComponentConfiguration(pid);
+                if (!isNull(config)) {
+                    configs.add(config);
+                }
+            } catch (Exception e) {
+                throw DefaultExceptionHandler.toWebApplicationException(e);
+            }
+        });
 
-        return DTOUtil.toComponentConfigurationList(configs, cryptoService, true);
+        return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, true);
     }
 
     /**
@@ -404,7 +410,7 @@ public class ConfigurationRestService {
                     continue;
                 }
 
-                result.add(DTOUtil.toComponentConfigurationDTO(cc, cryptoService, true));
+                result.add(DTOUtil.toComponentConfigurationDTO(cc, this.cryptoService, true));
             } catch (final Exception e) {
                 logger.warn("failed to get default configuration for {}", pid, e);
             }
@@ -466,7 +472,7 @@ public class ConfigurationRestService {
         try {
             List<ComponentConfiguration> configs = this.configurationService.getSnapshot(id.getId());
 
-            return DTOUtil.toComponentConfigurationList(configs, cryptoService, false);
+            return DTOUtil.toComponentConfigurationList(configs, this.cryptoService, false);
         } catch (KuraException e) {
             throw DefaultExceptionHandler.toWebApplicationException(e);
         }

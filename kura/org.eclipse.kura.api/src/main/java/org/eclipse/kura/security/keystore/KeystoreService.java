@@ -236,6 +236,7 @@ public interface KeystoreService {
      *             if the CSR cannot be computed or if it cannot be encoded
      * @throws IllegalArgumentException
      *             if one of the arguments is null or empty
+     * @since 2.4
      */
     public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(KeyPair keyPair, X500Principal principal)
             throws KuraException;
@@ -255,6 +256,7 @@ public interface KeystoreService {
      *             cannot be used to obtain a CSR or the CSR cannot be computed or encoded
      * @throws IllegalArgumentException
      *             if one of the arguments is null or empty
+     * @since 2.4
      */
     public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(String alias, X500Principal principal)
             throws KuraException;

@@ -29,7 +29,7 @@ import org.eclipse.kura.net.wifi.WifiMode;
 
 public abstract class AbstractLinuxConfigWriter implements NetworkConfigurationVisitor {
 
-    protected Optional<WifiMode> getWifiMode(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
+    private Optional<WifiMode> getWifiMode(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig)
             throws KuraException {
 
         Optional<WifiMode> wifiMode = Optional.empty();
@@ -59,12 +59,8 @@ public abstract class AbstractLinuxConfigWriter implements NetworkConfigurationV
 
         for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : netInterfaceConfigs) {
 
-            if (netInterfaceConfig.getType() != NetInterfaceType.WIFI) {
-                return;
-            }
-
             // skip monitor interface
-            if (netInterfaceConfig.getName().startsWith("mon.")) {
+            if (netInterfaceConfig.getType() != NetInterfaceType.WIFI || netInterfaceConfig.getName().startsWith("mon.")) {
                 continue;
             }
 

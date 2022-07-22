@@ -25,7 +25,7 @@ import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.junit.Test;
 
-public class TritonServerLocalManagerTest {
+public class TritonServerNativeManagerTest {
 
     private static final String[] TRITONSERVERCMD = new String[] { "tritonserver" };
     private static final String MOCK_DECRYPT_FOLDER = "test";

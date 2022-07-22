@@ -80,7 +80,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
     private TritonServerServiceOptions options;
-    private TritonServerLocalManager tritonServerLocalManager;
+    private TritonServerNativeManager tritonServerLocalManager;
 
     private ManagedChannel grpcChannel;
     private GRPCInferenceServiceBlockingStub grpcStub;
@@ -140,7 +140,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             }
             logger.info("Created decryption model directory at {}", this.decryptionFolderPath);
         }
-        this.tritonServerLocalManager = new TritonServerLocalManager(this.options, this.commandExecutorService,
+        this.tritonServerLocalManager = new TritonServerNativeManager(this.options, this.commandExecutorService,
                 this.decryptionFolderPath);
         this.tritonServerLocalManager.start();
     }
@@ -149,12 +149,12 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
         this.tritonServerLocalManager.stop();
 
         int counter = 0;
-        while (this.tritonServerLocalManager.isLocalServerRunning()) {
+        while (this.tritonServerLocalManager.isServerRunning()) {
             if (counter++ >= this.options.getNRetries()) {
                 logger.warn("Cannot stop local server instance. Killing it.");
                 this.tritonServerLocalManager.kill();
             }
-            TritonServerLocalManager.sleepFor(this.options.getRetryInterval());
+            sleepFor(this.options.getRetryInterval());
         }
 
         if (this.options.modelsAreEncrypted()) {
@@ -200,7 +200,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
                 logger.warn("Cannot load models since server is not ready.");
                 return;
             }
-            TritonServerLocalManager.sleepFor(this.options.getRetryInterval());
+            sleepFor(this.options.getRetryInterval());
         }
 
         this.options.getModels().forEach(modelName -> {
@@ -249,7 +249,7 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
                     logger.warn("Cannot check if model was correctly loaded. Wiping decrypted model anyway");
                     break;
                 }
-                TritonServerLocalManager.sleepFor(this.options.getRetryInterval());
+                sleepFor(this.options.getRetryInterval());
             }
             TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
         }
@@ -778,6 +778,15 @@ public class TritonServerServiceImpl implements InferenceEngineService, Configur
             booleanList.add(byteValue == 0x01);
         }
         return booleanList;
+    }
+
+    private static void sleepFor(long timeout) {
+        try {
+            Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.debug(e.getMessage(), e);
+        }
     }
 
 }

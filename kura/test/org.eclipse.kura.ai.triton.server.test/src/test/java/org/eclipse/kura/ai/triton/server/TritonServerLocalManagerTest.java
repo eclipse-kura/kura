@@ -34,7 +34,7 @@ public class TritonServerLocalManagerTest {
     private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
 
     private CommandExecutorService ces;
-    private TritonServerLocalManager manager;
+    private TritonServerNativeManager manager;
 
     @Test
     public void killMethodShouldWork() {
@@ -91,7 +91,7 @@ public class TritonServerLocalManagerTest {
 
     private void givenLocalManagerBuiltWith(TritonServerServiceOptions options, CommandExecutorService ces,
             String decryptionFolder) {
-        this.manager = new TritonServerLocalManager(options, ces, decryptionFolder);
+        this.manager = new TritonServerNativeManager(options, ces, decryptionFolder);
     }
 
     /*

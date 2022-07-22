@@ -29,9 +29,9 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TritonServerLocalManager {
+public class TritonServerNativeManager implements TritonServerInstanceManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(TritonServerLocalManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(TritonServerNativeManager.class);
 
     private static final int MONITOR_PERIOD = 30;
     private static final String[] TRITONSERVER = new String[] { "tritonserver" };
@@ -44,7 +44,7 @@ public class TritonServerLocalManager {
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture<?> scheduledFuture;
 
-    protected TritonServerLocalManager(TritonServerServiceOptions options,
+    protected TritonServerNativeManager(TritonServerServiceOptions options,
             CommandExecutorService commandExecutorService, String decryptionFolderPath) {
         this.options = options;
         this.commandExecutorService = commandExecutorService;
@@ -52,25 +52,42 @@ public class TritonServerLocalManager {
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
-    protected void start() {
+    @Override
+    public void start() {
         startLocalServerMonitor();
     }
 
-    protected void stop() {
+    @Override
+    public void stop() {
         stopLocalServerMonitor();
         stopScheduledExecutor();
     }
 
-    protected void kill() {
+    @Override
+    public void kill() {
         killLocalServerMonitor();
         stopScheduledExecutor();
+    }
+
+    @Override
+    public boolean isLifecycleManaged() {
+        return true;
+    }
+
+    @Override
+    public boolean isServerRunning() {
+        boolean isRunning = false;
+        if (this.commandExecutorService.isRunning(TRITONSERVER)) {
+            isRunning = true;
+        }
+        return isRunning;
     }
 
     private void startLocalServerMonitor() {
         this.serverCommand = createServerCommand();
         this.scheduledFuture = this.scheduledExecutorService.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName(getClass().getSimpleName());
-            if (!isLocalServerRunning()) {
+            if (!isServerRunning()) {
                 startLocalServer();
             }
         }, 0, MONITOR_PERIOD, TimeUnit.SECONDS);
@@ -116,11 +133,11 @@ public class TritonServerLocalManager {
     }
 
     private synchronized void stopLocalServer() {
-        TritonServerLocalManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGINT);
+        TritonServerNativeManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGINT);
     }
 
     private synchronized void killLocalServer() {
-        TritonServerLocalManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGKILL);
+        TritonServerNativeManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGKILL);
     }
 
     private void stopScheduledExecutor() {
@@ -133,15 +150,7 @@ public class TritonServerLocalManager {
         }
     }
 
-    protected boolean isLocalServerRunning() {
-        boolean isRunning = false;
-        if (this.commandExecutorService.isRunning(TRITONSERVER)) {
-            isRunning = true;
-        }
-        return isRunning;
-    }
-
-    protected static void sleepFor(long timeout) {
+    private static void sleepFor(long timeout) {
         try {
             Thread.sleep(timeout);
         } catch (InterruptedException e) {

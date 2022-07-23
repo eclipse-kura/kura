@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -15,6 +15,8 @@ package org.eclipse.kura.web.client.ui.cloudconnection;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
@@ -38,6 +40,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class CloudConnectionConfigurationsUi extends Composite {
 
+    protected static final Logger logger = Logger.getLogger(CloudConnectionConfigurationsUi.class.getSimpleName());
+
     private static CloudServiceConfigurationsUiUiBinder uiBinder = GWT
             .create(CloudServiceConfigurationsUiUiBinder.class);
     private final GwtSecurityTokenServiceAsync gwtXSRFService = GWT.create(GwtSecurityTokenService.class);
@@ -48,7 +52,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
     interface CloudServiceConfigurationsUiUiBinder extends UiBinder<Widget, CloudConnectionConfigurationsUi> {
     }
 
-    private boolean dirty;
     private final CloudConnectionsUi cloudServicesUi;
 
     @UiField
@@ -62,7 +65,7 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     public void setDirty(boolean dirty) {
-        this.dirty = dirty;
+        logger.log(Level.INFO, "Setting dirty " + dirty);
         for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
@@ -75,16 +78,21 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     public boolean isDirty() {
+        boolean dirty = false;
+        logger.log(Level.INFO, "Checking dirty");
         for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
                 CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane
                         .getWidget(paneIndex);
-                this.dirty = this.dirty || serviceConfigUi.isDirty();
+                boolean dirtyTab = serviceConfigUi.isDirty();
+                logger.log(Level.INFO, "Checking dirty tab " + dirtyTab);
+                dirty = dirty || dirtyTab;
             }
         }
-        return this.dirty;
+        logger.log(Level.INFO, "Is dirty? " + dirty);
+        return dirty;
     }
 
     public CloudConnectionConfigurationUi getDirtyCloudConfiguration() {

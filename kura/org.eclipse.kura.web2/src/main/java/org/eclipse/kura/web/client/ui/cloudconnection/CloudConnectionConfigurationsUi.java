@@ -15,7 +15,6 @@ package org.eclipse.kura.web.client.ui.cloudconnection;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.request.RequestQueue;

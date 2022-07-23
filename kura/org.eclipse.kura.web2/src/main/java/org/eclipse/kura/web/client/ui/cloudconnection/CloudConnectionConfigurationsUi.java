@@ -65,7 +65,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     public void setDirty(boolean dirty) {
-        logger.log(Level.INFO, "Setting dirty " + dirty);
         for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
@@ -79,7 +78,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
 
     public boolean isDirty() {
         boolean dirty = false;
-        logger.log(Level.INFO, "Checking dirty");
         for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
@@ -87,11 +85,9 @@ public class CloudConnectionConfigurationsUi extends Composite {
                 CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane
                         .getWidget(paneIndex);
                 boolean dirtyTab = serviceConfigUi.isDirty();
-                logger.log(Level.INFO, "Checking dirty tab " + dirtyTab);
                 dirty = dirty || dirtyTab;
             }
         }
-        logger.log(Level.INFO, "Is dirty? " + dirty);
         return dirty;
     }
 

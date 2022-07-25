@@ -13,6 +13,7 @@
 
 package org.eclipse.kura.ai.triton.server;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,6 +36,8 @@ public class TritonServerNativeManagerTest {
 
     private CommandExecutorService ces;
     private TritonServerNativeManager manager;
+    private boolean isRunning;
+    private boolean isManaged;
 
     @Test
     public void killMethodShouldWork() {
@@ -70,6 +73,57 @@ public class TritonServerNativeManagerTest {
         thenCommandServiceKillWasCalledWith(TRITONSERVERCMD, LinuxSignal.SIGINT);
     }
 
+    @Test
+    public void isLifecycleManagedWorks() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockCommandExecutionService();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning();
+
+        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
+
+        whenIsLifecycleManagedIsCalled();
+
+        thenServerIsManaged(true);
+    }
+
+    @Test
+    public void isServerRunningWorksWhenRunning() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockCommandExecutionService();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning();
+
+        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
+
+        whenIsServerRunningIsCalled();
+
+        thenServerIsRunning(true);
+    }
+
+    @Test
+    public void isServerRunningWorksWhenNotRunning() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.TRUE);
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockCommandExecutionService();
+        givenMockCommandExecutionServiceReturnsTritonIsNotRunning();
+
+        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
+
+        whenIsServerRunningIsCalled();
+
+        thenServerIsRunning(false);
+    }
+
     /*
      * Given
      */
@@ -89,6 +143,10 @@ public class TritonServerNativeManagerTest {
         when(this.ces.isRunning(new String[] { "tritonserver" })).thenReturn(true);
     }
 
+    private void givenMockCommandExecutionServiceReturnsTritonIsNotRunning() {
+        when(this.ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
+    }
+
     private void givenLocalManagerBuiltWith(TritonServerServiceOptions options, CommandExecutorService ces,
             String decryptionFolder) {
         this.manager = new TritonServerNativeManager(options, ces, decryptionFolder);
@@ -105,10 +163,27 @@ public class TritonServerNativeManagerTest {
         this.manager.stop();
     }
 
+    private void whenIsServerRunningIsCalled() {
+        this.isRunning = this.manager.isServerRunning();
+    }
+
+    private void whenIsLifecycleManagedIsCalled() {
+        this.isManaged = this.manager.isLifecycleManaged();
+    }
+
     /*
      * Then
      */
     private void thenCommandServiceKillWasCalledWith(String[] expectedCmd, LinuxSignal expectedSignal) {
         verify(this.ces, times(1)).kill(expectedCmd, expectedSignal);
     }
+
+    private void thenServerIsRunning(boolean expectedState) {
+        assertEquals(expectedState, this.isRunning);
+    }
+
+    private void thenServerIsManaged(boolean expectedState) {
+        assertEquals(expectedState, this.isManaged);
+    }
+
 }

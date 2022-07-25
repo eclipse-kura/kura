@@ -77,14 +77,14 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceAbs.class);
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
 
-    protected CommandExecutorService commandExecutorService;
+    private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
-    protected TritonServerServiceOptions options;
+    private TritonServerServiceOptions options;
     private TritonServerInstanceManager tritonServerInstanceManager;
 
     private ManagedChannel grpcChannel;
     private GRPCInferenceServiceBlockingStub grpcStub;
-    protected String decryptionFolderPath = "";
+    private String decryptionFolderPath = "";
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -99,7 +99,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         updated(properties);
     }
 
-    abstract TritonServerInstanceManager createInstanceManager();
+    abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
+            CommandExecutorService executorService, String decryptionFolderPath);
 
     abstract boolean isConfigurationValid(TritonServerServiceOptions options);
 
@@ -119,7 +120,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         if (isConfigurationValid(this.options)) {
             setGrpcResources();
 
-            this.tritonServerInstanceManager = createInstanceManager();
+            this.tritonServerInstanceManager = createInstanceManager(this.options, this.commandExecutorService,
+                    this.decryptionFolderPath);
             logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
 
             startLocalInstance();

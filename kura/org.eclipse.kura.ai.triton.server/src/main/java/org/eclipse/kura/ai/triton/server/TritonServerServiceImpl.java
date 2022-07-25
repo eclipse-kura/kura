@@ -12,12 +12,15 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.triton.server;
 
+import org.eclipse.kura.executor.CommandExecutorService;
+
 public class TritonServerServiceImpl extends TritonServerServiceAbs {
 
     @Override
-    TritonServerInstanceManager createInstanceManager() {
-        if (this.options.isLocalEnabled()) {
-            return new TritonServerNativeManager(this.options, this.commandExecutorService, this.decryptionFolderPath);
+    TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
+            CommandExecutorService executorService, String decryptionFolderPath) {
+        if (options.isLocalEnabled()) {
+            return new TritonServerNativeManager(options, executorService, decryptionFolderPath);
         } else {
             return new TritonServerRemoteManager();
         }

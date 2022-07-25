@@ -80,7 +80,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     protected CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
     protected TritonServerServiceOptions options;
-    private TritonServerInstanceManager tritonServerLocalManager;
+    private TritonServerInstanceManager tritonServerInstanceManager;
 
     private ManagedChannel grpcChannel;
     private GRPCInferenceServiceBlockingStub grpcStub;
@@ -112,15 +112,15 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         }
         this.options = newOptions;
 
-        if (nonNull(this.tritonServerLocalManager)) {
+        if (nonNull(this.tritonServerInstanceManager)) {
             stopLocalInstance();
         }
 
         if (isConfigurationValid()) {
             setGrpcResources();
 
-            this.tritonServerLocalManager = createInstanceManager();
-            logger.info("Created {} type", this.tritonServerLocalManager.getClass().getSimpleName());
+            this.tritonServerInstanceManager = createInstanceManager();
+            logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
 
             startLocalInstance();
             loadModels();
@@ -136,7 +136,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void startLocalInstance() {
-        if (!this.tritonServerLocalManager.isLifecycleManaged()) {
+        if (!this.tritonServerInstanceManager.isLifecycleManaged()) {
             return;
         }
 
@@ -148,21 +148,21 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             }
             logger.info("Created decryption model directory at {}", this.decryptionFolderPath);
         }
-        this.tritonServerLocalManager.start();
+        this.tritonServerInstanceManager.start();
     }
 
     private void stopLocalInstance() {
-        if (!this.tritonServerLocalManager.isLifecycleManaged()) {
+        if (!this.tritonServerInstanceManager.isLifecycleManaged()) {
             return;
         }
 
-        this.tritonServerLocalManager.stop();
+        this.tritonServerInstanceManager.stop();
 
         int counter = 0;
-        while (this.tritonServerLocalManager.isServerRunning()) {
+        while (this.tritonServerInstanceManager.isServerRunning()) {
             if (counter++ >= this.options.getNRetries()) {
                 logger.warn("Cannot stop local server instance. Killing it.");
-                this.tritonServerLocalManager.kill();
+                this.tritonServerInstanceManager.kill();
             }
             sleepFor(this.options.getRetryInterval());
         }
@@ -217,7 +217,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        if (this.options.modelsAreEncrypted() && this.tritonServerLocalManager.isLifecycleManaged()) {
+        if (this.options.modelsAreEncrypted() && this.tritonServerInstanceManager.isLifecycleManaged()) {
             String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(this.cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
@@ -245,7 +245,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (this.options.modelsAreEncrypted() && this.tritonServerLocalManager.isLifecycleManaged()) {
+        if (this.options.modelsAreEncrypted() && this.tritonServerInstanceManager.isLifecycleManaged()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= this.options.getNRetries()) {

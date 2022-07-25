@@ -7,25 +7,46 @@ import org.junit.Test;
 public class TritonServerRemoteManagerTest {
 
     private TritonServerRemoteManager manager;
-    private boolean isRunning;
-    private boolean isManaged;
 
     @Test
     public void isServerRunningWorks() {
         givenInstanceManager();
 
-        whenIsServerRunningIsCalled();
-
-        thenServerIsRunning(true);
+        thenServerIsRunningReturns(true);
     }
 
     @Test
     public void isLifecycleManagedWorks() {
         givenInstanceManager();
 
-        whenIsLifecycleManagedIsCalled();
+        thenServerIsManagedReturns(false);
+    }
 
-        thenServerIsManaged(false);
+    @Test
+    public void startMethodWorks() {
+        givenInstanceManager();
+
+        whenStartMethodIsCalled();
+
+        thenServerIsRunningReturns(true);
+    }
+
+    @Test
+    public void stopMethodWorks() {
+        givenInstanceManager();
+
+        whenStopMethodIsCalled();
+
+        thenServerIsRunningReturns(true);
+    }
+
+    @Test
+    public void killMethodWorks() {
+        givenInstanceManager();
+
+        whenKillMethodIsCalled();
+
+        thenServerIsRunningReturns(true);
     }
 
     /*
@@ -38,23 +59,27 @@ public class TritonServerRemoteManagerTest {
     /*
      * When
      */
-    private void whenIsServerRunningIsCalled() {
-        this.isRunning = this.manager.isServerRunning();
+    private void whenStartMethodIsCalled() {
+        this.manager.start();
     }
 
-    private void whenIsLifecycleManagedIsCalled() {
-        this.isManaged = this.manager.isLifecycleManaged();
+    private void whenStopMethodIsCalled() {
+        this.manager.stop();
+    }
+
+    private void whenKillMethodIsCalled() {
+        this.manager.kill();
     }
 
     /*
      * Then
      */
-    private void thenServerIsRunning(boolean expectedState) {
-        assertEquals(expectedState, this.isRunning);
+    private void thenServerIsRunningReturns(boolean expectedState) {
+        assertEquals(expectedState, this.manager.isServerRunning());
     }
 
-    private void thenServerIsManaged(boolean expectedState) {
-        assertEquals(expectedState, this.isManaged);
+    private void thenServerIsManagedReturns(boolean expectedState) {
+        assertEquals(expectedState, this.manager.isLifecycleManaged());
     }
 
 }

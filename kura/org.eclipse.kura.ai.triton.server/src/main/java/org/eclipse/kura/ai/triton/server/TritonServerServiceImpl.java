@@ -19,7 +19,7 @@ public class TritonServerServiceImpl extends TritonServerServiceAbs {
         if (this.options.isLocalEnabled()) {
             return new TritonServerNativeManager(this.options, this.commandExecutorService, this.decryptionFolderPath);
         } else {
-            return null;
+            return new TritonServerRemoteManager();
         }
     }
 

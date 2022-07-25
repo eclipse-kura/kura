@@ -38,6 +38,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.junit.Before;
@@ -95,6 +96,7 @@ public abstract class TritonServerServiceStepDefinitions {
     private List<Tensor> tensorList = new ArrayList<>();
     private boolean isEngineReady;
     private CommandExecutorService ces;
+    private CryptoService cry;
 
     protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
@@ -327,6 +329,9 @@ public abstract class TritonServerServiceStepDefinitions {
         when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
 
         tritonServerServiceImpl.setCommandExecutorService(ces);
+
+        this.cry = mock(CryptoService.class);
+        tritonServerServiceImpl.setCryptoService(cry);
 
         if (activate) {
             tritonServerServiceImpl.activate(properties);

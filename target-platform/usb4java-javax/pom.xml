@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.eclipse.kura</groupId>
         <artifactId>target-platform</artifactId>
-        <version>5.1.2</version>
+        <version>5.1.3-SNAPSHOT</version>
     </parent>
     <artifactId>usb4java-javax</artifactId>
     <version>1.3.2-SNAPSHOT</version>

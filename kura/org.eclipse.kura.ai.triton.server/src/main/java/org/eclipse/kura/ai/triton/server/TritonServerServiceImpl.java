@@ -24,10 +24,10 @@ public class TritonServerServiceImpl extends TritonServerServiceAbs {
     }
 
     @Override
-    boolean isConfigurationValid() {
-        if (!this.options.isLocalEnabled()) {
-            return !isNullOrEmpty(this.options.getAddress());
+    boolean isConfigurationValid(TritonServerServiceOptions options) {
+        if (!options.isLocalEnabled()) {
+            return !isNullOrEmpty(options.getAddress());
         }
-        return !isNullOrEmpty(this.options.getBackendsPath()) && !isNullOrEmpty(this.options.getModelRepositoryPath());
+        return !isNullOrEmpty(options.getBackendsPath()) && !isNullOrEmpty(options.getModelRepositoryPath());
     }
 }

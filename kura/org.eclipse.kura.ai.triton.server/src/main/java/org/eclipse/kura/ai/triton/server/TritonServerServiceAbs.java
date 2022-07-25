@@ -101,7 +101,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     abstract TritonServerInstanceManager createInstanceManager();
 
-    abstract boolean isConfigurationValid();
+    abstract boolean isConfigurationValid(TritonServerServiceOptions options);
 
     public void updated(Map<String, Object> properties) {
         logger.info("Update TritonServerService...");
@@ -116,7 +116,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             stopLocalInstance();
         }
 
-        if (isConfigurationValid()) {
+        if (isConfigurationValid(this.options)) {
             setGrpcResources();
 
             this.tritonServerInstanceManager = createInstanceManager();

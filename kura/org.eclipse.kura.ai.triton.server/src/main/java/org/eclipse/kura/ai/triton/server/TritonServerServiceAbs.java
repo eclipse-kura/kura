@@ -113,9 +113,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         }
         this.options = newOptions;
 
-        if (nonNull(this.tritonServerInstanceManager)) {
-            stopLocalInstance();
-        }
+        stopLocalInstance();
 
         if (isConfigurationValid(this.options)) {
             setGrpcResources();
@@ -138,7 +136,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void startLocalInstance() {
-        if (!this.tritonServerInstanceManager.isLifecycleManaged()) {
+        if (isNull(this.tritonServerInstanceManager) || !this.tritonServerInstanceManager.isLifecycleManaged()) {
             return;
         }
 
@@ -154,7 +152,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void stopLocalInstance() {
-        if (!this.tritonServerInstanceManager.isLifecycleManaged()) {
+        if (isNull(this.tritonServerInstanceManager) || !this.tritonServerInstanceManager.isLifecycleManaged()) {
             return;
         }
 
@@ -219,7 +217,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        if (this.options.modelsAreEncrypted() && this.tritonServerInstanceManager.isLifecycleManaged()) {
+        if (this.options.modelsAreEncrypted() && nonNull(this.tritonServerInstanceManager)
+                && this.tritonServerInstanceManager.isLifecycleManaged()) {
             String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(this.cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
@@ -247,7 +246,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (this.options.modelsAreEncrypted() && this.tritonServerInstanceManager.isLifecycleManaged()) {
+        if (this.options.modelsAreEncrypted() && nonNull(this.tritonServerInstanceManager)
+                && this.tritonServerInstanceManager.isLifecycleManaged()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= this.options.getNRetries()) {

@@ -28,7 +28,7 @@ jobs:
       with:
         ref: ${{ github.event.inputs.target_branch }}
 
-    - name: Download ESF version upticker tool
+    - name: Download version upticker tool
       uses: carlosperate/download-file-action@v1
       with:
         file-url: https://kura-repo.s3.us-west-2.amazonaws.com/esf_upticker_tool/version-uptick-0.2.0-linux-x86_64

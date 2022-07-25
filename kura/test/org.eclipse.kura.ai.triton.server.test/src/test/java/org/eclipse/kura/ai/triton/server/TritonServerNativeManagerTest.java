@@ -36,8 +36,6 @@ public class TritonServerNativeManagerTest {
 
     private CommandExecutorService ces;
     private TritonServerNativeManager manager;
-    private boolean isRunning;
-    private boolean isManaged;
 
     @Test
     public void killMethodShouldWork() {
@@ -47,7 +45,7 @@ public class TritonServerNativeManagerTest {
         givenServiceOptionsBuiltWith(properties);
 
         givenMockCommandExecutionService();
-        givenMockCommandExecutionServiceReturnsTritonIsRunning();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning(true);
 
         givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
@@ -64,7 +62,7 @@ public class TritonServerNativeManagerTest {
         givenServiceOptionsBuiltWith(properties);
 
         givenMockCommandExecutionService();
-        givenMockCommandExecutionServiceReturnsTritonIsRunning();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning(true);
 
         givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
@@ -81,13 +79,11 @@ public class TritonServerNativeManagerTest {
         givenServiceOptionsBuiltWith(properties);
 
         givenMockCommandExecutionService();
-        givenMockCommandExecutionServiceReturnsTritonIsRunning();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning(true);
 
         givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
-        whenIsLifecycleManagedIsCalled();
-
-        thenServerIsManaged(true);
+        thenServerIsManagedReturns(true);
     }
 
     @Test
@@ -98,13 +94,11 @@ public class TritonServerNativeManagerTest {
         givenServiceOptionsBuiltWith(properties);
 
         givenMockCommandExecutionService();
-        givenMockCommandExecutionServiceReturnsTritonIsRunning();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning(true);
 
         givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
-        whenIsServerRunningIsCalled();
-
-        thenServerIsRunning(true);
+        thenServerIsRunningReturns(true);
     }
 
     @Test
@@ -115,13 +109,11 @@ public class TritonServerNativeManagerTest {
         givenServiceOptionsBuiltWith(properties);
 
         givenMockCommandExecutionService();
-        givenMockCommandExecutionServiceReturnsTritonIsNotRunning();
+        givenMockCommandExecutionServiceReturnsTritonIsRunning(false);
 
         givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
 
-        whenIsServerRunningIsCalled();
-
-        thenServerIsRunning(false);
+        thenServerIsRunningReturns(false);
     }
 
     /*
@@ -139,12 +131,8 @@ public class TritonServerNativeManagerTest {
         this.ces = mock(CommandExecutorService.class);
     }
 
-    private void givenMockCommandExecutionServiceReturnsTritonIsRunning() {
-        when(this.ces.isRunning(new String[] { "tritonserver" })).thenReturn(true);
-    }
-
-    private void givenMockCommandExecutionServiceReturnsTritonIsNotRunning() {
-        when(this.ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
+    private void givenMockCommandExecutionServiceReturnsTritonIsRunning(boolean expectedState) {
+        when(this.ces.isRunning(new String[] { "tritonserver" })).thenReturn(expectedState);
     }
 
     private void givenLocalManagerBuiltWith(TritonServerServiceOptions options, CommandExecutorService ces,
@@ -163,14 +151,6 @@ public class TritonServerNativeManagerTest {
         this.manager.stop();
     }
 
-    private void whenIsServerRunningIsCalled() {
-        this.isRunning = this.manager.isServerRunning();
-    }
-
-    private void whenIsLifecycleManagedIsCalled() {
-        this.isManaged = this.manager.isLifecycleManaged();
-    }
-
     /*
      * Then
      */
@@ -178,12 +158,12 @@ public class TritonServerNativeManagerTest {
         verify(this.ces, times(1)).kill(expectedCmd, expectedSignal);
     }
 
-    private void thenServerIsRunning(boolean expectedState) {
-        assertEquals(expectedState, this.isRunning);
+    private void thenServerIsRunningReturns(boolean expectedState) {
+        assertEquals(expectedState, this.manager.isServerRunning());
     }
 
-    private void thenServerIsManaged(boolean expectedState) {
-        assertEquals(expectedState, this.isManaged);
+    private void thenServerIsManagedReturns(boolean expectedState) {
+        assertEquals(expectedState, this.manager.isLifecycleManaged());
     }
 
 }

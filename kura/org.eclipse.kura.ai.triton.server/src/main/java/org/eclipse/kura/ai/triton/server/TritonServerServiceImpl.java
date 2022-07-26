@@ -36,6 +36,6 @@ public class TritonServerServiceImpl extends TritonServerServiceAbs {
 
     @Override
     boolean isModelEncryptionEnabled(TritonServerServiceOptions options) {
-        return options.isLocalEnabled() && options.modelsAreEncrypted();
+        return options.isLocalEnabled() && options.isModelEncryptionPasswordSet();
     }
 }

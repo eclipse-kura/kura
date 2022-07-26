@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -15,7 +15,6 @@ package org.eclipse.kura.web.client.ui.cloudconnection;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.logging.Logger;
 
 import org.eclipse.kura.web.client.util.request.RequestQueue;
 import org.eclipse.kura.web.shared.model.GwtCloudConnectionEntry;
@@ -38,8 +37,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 
 public class CloudConnectionConfigurationsUi extends Composite {
-
-    protected static final Logger logger = Logger.getLogger(CloudConnectionConfigurationsUi.class.getSimpleName());
 
     private static CloudServiceConfigurationsUiUiBinder uiBinder = GWT
             .create(CloudServiceConfigurationsUiUiBinder.class);

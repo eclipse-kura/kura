@@ -2,29 +2,25 @@ package org.eclipse.kura.ai.triton.server;
 
 public class TritonServerRemoteManager implements TritonServerInstanceManager {
 
+    private boolean isRunning = false;
+
     @Override
     public void start() {
-        // Not supported for remote instance
+        this.isRunning = true;
     }
 
     @Override
     public void stop() {
-        // Not supported for remote instance
+        this.isRunning = false;
     }
 
     @Override
     public void kill() {
-        // Not supported for remote instance
+        this.isRunning = false;
     }
 
     @Override
     public boolean isServerRunning() {
-        return true;
+        return this.isRunning;
     }
-
-    @Override
-    public boolean isLifecycleManaged() {
-        return false;
-    }
-
 }

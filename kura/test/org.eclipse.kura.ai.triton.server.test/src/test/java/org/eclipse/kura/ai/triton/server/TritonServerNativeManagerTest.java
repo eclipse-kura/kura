@@ -81,21 +81,6 @@ public class TritonServerNativeManagerTest {
     }
 
     @Test
-    public void isLifecycleManagedWorks() {
-        givenPropertyWith("server.address", "localhost");
-        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
-        givenPropertyWith("enable.local", Boolean.TRUE);
-        givenServiceOptionsBuiltWith(properties);
-
-        givenMockCommandExecutionService();
-        givenMockCommandExecutionServiceReturnsTritonIsRunning(true);
-
-        givenLocalManagerBuiltWith(this.options, this.ces, MOCK_DECRYPT_FOLDER);
-
-        thenServerIsManagedReturns(true);
-    }
-
-    @Test
     public void isServerRunningWorksWhenRunning() {
         givenPropertyWith("server.address", "localhost");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
@@ -229,10 +214,6 @@ public class TritonServerNativeManagerTest {
 
     private void thenServerIsRunningReturns(boolean expectedState) {
         assertEquals(expectedState, this.manager.isServerRunning());
-    }
-
-    private void thenServerIsManagedReturns(boolean expectedState) {
-        assertEquals(expectedState, this.manager.isLifecycleManaged());
     }
 
     private void thenNoExceptionOccurred() {

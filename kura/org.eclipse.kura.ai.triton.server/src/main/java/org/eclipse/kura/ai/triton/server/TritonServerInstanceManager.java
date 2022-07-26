@@ -23,13 +23,4 @@ public interface TritonServerInstanceManager {
      * @return whether the server instance is running
      */
     public boolean isServerRunning();
-
-    /**
-     * Check whether the manager can handle the Triton Server instance lifecycle
-     * should be always true for local instances (Native, Container)
-     *
-     * @return whether the server instance lifecycle is managed
-     */
-    public boolean isLifecycleManaged();
-
 }

@@ -70,11 +70,6 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
     }
 
     @Override
-    public boolean isLifecycleManaged() {
-        return true;
-    }
-
-    @Override
     public boolean isServerRunning() {
         boolean isRunning = false;
         if (this.commandExecutorService.isRunning(TRITONSERVER)) {

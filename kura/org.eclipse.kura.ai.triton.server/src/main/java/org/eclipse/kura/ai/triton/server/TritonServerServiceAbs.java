@@ -115,25 +115,12 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         }
         this.options = newOptions;
 
-        stopManagedInstance();
+        if (nonNull(this.tritonServerInstanceManager)) {
+            stopManagedInstance();
+        }
 
         if (isConfigurationValid(this.options)) {
             setGrpcResources();
-
-            if (isModelEncryptionEnabled(this.options)) {
-                try {
-                    this.decryptionFolderPath = TritonServerEncryptionUtils
-                            .createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
-                } catch (IOException e) {
-                    logger.warn("Failed to create decryption model directory", e);
-                }
-                logger.info("Using decryption model directory at path {}", this.decryptionFolderPath);
-            }
-
-            this.tritonServerInstanceManager = createInstanceManager(this.options, this.commandExecutorService,
-                    this.decryptionFolderPath);
-            logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
-
             startManagedInstance();
             loadModels();
         } else {
@@ -148,18 +135,23 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void startManagedInstance() {
-        if (isNull(this.tritonServerInstanceManager) || !this.tritonServerInstanceManager.isLifecycleManaged()) {
-            return;
+        if (isModelEncryptionEnabled(this.options)) {
+            try {
+                this.decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
+            } catch (IOException e) {
+                logger.warn("Failed to create decryption model directory", e);
+            }
+            logger.info("Using decryption model directory at path {}", this.decryptionFolderPath);
         }
+
+        this.tritonServerInstanceManager = createInstanceManager(this.options, this.commandExecutorService,
+                this.decryptionFolderPath);
+        logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
 
         this.tritonServerInstanceManager.start();
     }
 
     private void stopManagedInstance() {
-        if (isNull(this.tritonServerInstanceManager) || !this.tritonServerInstanceManager.isLifecycleManaged()) {
-            return;
-        }
-
         this.tritonServerInstanceManager.stop();
 
         int counter = 0;

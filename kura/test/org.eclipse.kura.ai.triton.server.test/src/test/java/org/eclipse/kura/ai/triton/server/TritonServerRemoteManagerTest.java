@@ -12,14 +12,7 @@ public class TritonServerRemoteManagerTest {
     public void isServerRunningWorks() {
         givenInstanceManager();
 
-        thenServerIsRunningReturns(true);
-    }
-
-    @Test
-    public void isLifecycleManagedWorks() {
-        givenInstanceManager();
-
-        thenServerIsManagedReturns(false);
+        thenServerIsRunningReturns(false);
     }
 
     @Test
@@ -37,7 +30,7 @@ public class TritonServerRemoteManagerTest {
 
         whenStopMethodIsCalled();
 
-        thenServerIsRunningReturns(true);
+        thenServerIsRunningReturns(false);
     }
 
     @Test
@@ -46,7 +39,7 @@ public class TritonServerRemoteManagerTest {
 
         whenKillMethodIsCalled();
 
-        thenServerIsRunningReturns(true);
+        thenServerIsRunningReturns(false);
     }
 
     /*
@@ -77,9 +70,4 @@ public class TritonServerRemoteManagerTest {
     private void thenServerIsRunningReturns(boolean expectedState) {
         assertEquals(expectedState, this.manager.isServerRunning());
     }
-
-    private void thenServerIsManagedReturns(boolean expectedState) {
-        assertEquals(expectedState, this.manager.isLifecycleManaged());
-    }
-
 }

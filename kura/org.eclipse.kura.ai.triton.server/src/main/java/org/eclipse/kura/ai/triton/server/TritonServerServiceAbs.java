@@ -115,7 +115,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         }
         this.options = newOptions;
 
-        stopLocalInstance();
+        stopManagedInstance();
 
         if (isConfigurationValid(this.options)) {
             setGrpcResources();
@@ -134,7 +134,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
                     this.decryptionFolderPath);
             logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
 
-            startLocalInstance();
+            startManagedInstance();
             loadModels();
         } else {
             logger.warn("The provided configuration is not valid");
@@ -143,11 +143,11 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     protected void deactivate() {
         logger.info("Deactivate TritonServerService...");
-        stopLocalInstance();
+        stopManagedInstance();
         this.grpcChannel.shutdownNow();
     }
 
-    private void startLocalInstance() {
+    private void startManagedInstance() {
         if (isNull(this.tritonServerInstanceManager) || !this.tritonServerInstanceManager.isLifecycleManaged()) {
             return;
         }
@@ -155,7 +155,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.tritonServerInstanceManager.start();
     }
 
-    private void stopLocalInstance() {
+    private void stopManagedInstance() {
         if (isNull(this.tritonServerInstanceManager) || !this.tritonServerInstanceManager.isLifecycleManaged()) {
             return;
         }

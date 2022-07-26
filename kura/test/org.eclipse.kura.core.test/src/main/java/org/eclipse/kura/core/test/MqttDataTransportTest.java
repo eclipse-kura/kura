@@ -64,13 +64,16 @@ public class MqttDataTransportTest {
     private static final String SSL_MANAGER_SERVICE_FACTORY_PID = "org.eclipse.kura.ssl.SslManagerService";
     private static final String TEST_SSL_MANAGER_SERVICE_FILTER = "(kura.service.pid=testSsl)";
     private static final String TEST_KEYSTORE_FILTER = "(kura.service.pid=testKeystore)";
+    private static final String TEST_TRUSTSTORE_FILTER = "(kura.service.pid=testTruststore)";
     private static final String TEST_SSL_MANAGER_SERVICE_PID = "testSsl";
     private static final String TEST_KEYSTORE_PID = "testKeystore";
+    private static final String TEST_TRUSTSTORE_PID = "testTruststore";
     private static final String KEYSTORE_SERVICE_FACTORY_PID = "org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl";
     private static final String MQTT_DATA_TRANSPORT_FACTORY_PID = "org.eclipse.kura.core.data.transport.mqtt.MqttDataTransport";
     private static File brokerKeyStore;
     private static File brokerTrustStore;
     private static File mqttKeyStore;
+    private static File mqttKeyStoreKeyOnly;
     private static File mqttTrustStore;
 
     private static ConfigurationService configurationService;
@@ -104,6 +107,8 @@ public class MqttDataTransportTest {
                 new PrivateKeyEntry(clientKeyPair.getPrivate(),
                         new Certificate[] { clientCertificate, clientCA.getCertificate() }),
                 new TrustedCertificateEntry(brokerCertificate));
+        mqttKeyStoreKeyOnly = TestCA.writeKeystore(new PrivateKeyEntry(clientKeyPair.getPrivate(),
+                new Certificate[] { clientCertificate, clientCA.getCertificate() }));
         mqttTrustStore = TestCA.writeKeystore(new TrustedCertificateEntry(brokerCA.getCertificate()));
 
         String brokerConfigXml = loadResource("/artemis_config.xml");
@@ -482,6 +487,142 @@ public class MqttDataTransportTest {
     }
 
     @Test
+    public void shouldConnectOverWssWithClientSideAuthWithSeparateTruststore() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID,
+                    KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER).withHostnameVerification(false)
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            test.connect();
+        }
+    }
+
+    @Test
+    public void shouldNotConnectOverWssWithClientSideAuthWithWrongTruststore() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withTruststoreTargetFilter(TEST_KEYSTORE_FILTER).withHostnameVerification(false)
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("wss://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            try {
+                test.connect();
+            } catch (final KuraConnectException e) {
+                return;
+            }
+
+            fail("connection should have failed");
+        }
+    }
+
+    @Test
+    public void shouldConnectOverMqttsWithClientSideAuthWithSeparateTruststore() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID,
+                    KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER).withHostnameVerification(false)
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            test.connect();
+        }
+    }
+
+    @Test
+    public void shouldNotConnectOverMqttsWithClientSideAuthWithWrongTruststore() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withTruststoreTargetFilter(TEST_KEYSTORE_FILTER).withHostnameVerification(false)
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            try {
+                test.connect();
+            } catch (final KuraConnectException e) {
+                return;
+            }
+
+            fail("connection should have failed");
+        }
+    }
+
+    @Test
     public void connectionShouldFailWithRevocationChechEnabled() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 
@@ -564,6 +705,7 @@ public class MqttDataTransportTest {
 
         private Optional<Boolean> hostnameVerification = Optional.empty();
         private Optional<String> keystoreTargetFilter = Optional.empty();
+        private Optional<String> truststoreTargetFilter = Optional.empty();
         private Optional<Boolean> revocationCheckEnabled = Optional.empty();
         private Optional<RevocationCheckMode> revocationCheckMode = Optional.empty();
 
@@ -594,11 +736,17 @@ public class MqttDataTransportTest {
             return this;
         }
 
+        SslManagerServiceOptions withTruststoreTargetFilter(final String truststoreTargetFilter) {
+            this.truststoreTargetFilter = Optional.of(truststoreTargetFilter);
+            return this;
+        }
+
         Map<String, Object> toProperties() {
             final Map<String, Object> result = new HashMap<>();
 
             this.hostnameVerification.ifPresent(v -> result.put("ssl.hostname.verification", v));
             this.keystoreTargetFilter.ifPresent(v -> result.put("KeystoreService.target", v));
+            this.truststoreTargetFilter.ifPresent(v -> result.put("TruststoreKeystoreService.target", v));
             this.revocationCheckEnabled.ifPresent(v -> result.put("ssl.revocation.check.enabled", v));
             this.revocationCheckMode.ifPresent(v -> result.put("ssl.revocation.mode", v.name()));
 

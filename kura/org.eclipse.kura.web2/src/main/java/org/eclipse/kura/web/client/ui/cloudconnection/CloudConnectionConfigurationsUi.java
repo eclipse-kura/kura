@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
- * 
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *  Red Hat Inc
@@ -48,7 +48,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
     interface CloudServiceConfigurationsUiUiBinder extends UiBinder<Widget, CloudConnectionConfigurationsUi> {
     }
 
-    private boolean dirty;
     private final CloudConnectionsUi cloudServicesUi;
 
     @UiField
@@ -62,7 +61,6 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     public void setDirty(boolean dirty) {
-        this.dirty = dirty;
         for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
@@ -75,16 +73,18 @@ public class CloudConnectionConfigurationsUi extends Composite {
     }
 
     public boolean isDirty() {
+        boolean dirty = false;
         for (int connectionTabIndex = 0; connectionTabIndex < this.connectionTabContent
                 .getWidgetCount(); connectionTabIndex++) {
             TabPane pane = (TabPane) this.connectionTabContent.getWidget(connectionTabIndex);
             for (int paneIndex = 0; paneIndex < pane.getWidgetCount(); paneIndex++) {
                 CloudConnectionConfigurationUi serviceConfigUi = (CloudConnectionConfigurationUi) pane
                         .getWidget(paneIndex);
-                this.dirty = this.dirty || serviceConfigUi.isDirty();
+                boolean dirtyTab = serviceConfigUi.isDirty();
+                dirty = dirty || dirtyTab;
             }
         }
-        return this.dirty;
+        return dirty;
     }
 
     public CloudConnectionConfigurationUi getDirtyCloudConfiguration() {

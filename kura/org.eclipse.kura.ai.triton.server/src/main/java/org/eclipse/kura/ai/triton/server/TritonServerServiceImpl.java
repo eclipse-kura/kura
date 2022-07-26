@@ -33,4 +33,9 @@ public class TritonServerServiceImpl extends TritonServerServiceAbs {
         }
         return !isNullOrEmpty(options.getBackendsPath()) && !isNullOrEmpty(options.getModelRepositoryPath());
     }
+
+    @Override
+    boolean isModelEncryptionEnabled(TritonServerServiceOptions options) {
+        return options.isLocalEnabled() && options.modelsAreEncrypted();
+    }
 }

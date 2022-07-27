@@ -145,7 +145,7 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
         return isRunning;
     }
 
-    protected static void sleepFor(long timeout) {
+    private static void sleepFor(long timeout) {
         try {
             Thread.sleep(timeout);
         } catch (InterruptedException e) {

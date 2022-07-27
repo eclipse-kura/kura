@@ -29,9 +29,9 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TritonServerLocalManager {
+public class TritonServerNativeManager {
 
-    private static final Logger logger = LoggerFactory.getLogger(TritonServerLocalManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(TritonServerNativeManager.class);
 
     private static final int MONITOR_PERIOD = 30;
     private static final String[] TRITONSERVER = new String[] { "tritonserver" };
@@ -44,7 +44,7 @@ public class TritonServerLocalManager {
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture<?> scheduledFuture;
 
-    protected TritonServerLocalManager(TritonServerServiceOptions options,
+    protected TritonServerNativeManager(TritonServerServiceOptions options,
             CommandExecutorService commandExecutorService, String decryptionFolderPath) {
         this.options = options;
         this.commandExecutorService = commandExecutorService;
@@ -116,11 +116,11 @@ public class TritonServerLocalManager {
     }
 
     private synchronized void stopLocalServer() {
-        TritonServerLocalManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGINT);
+        TritonServerNativeManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGINT);
     }
 
     private synchronized void killLocalServer() {
-        TritonServerLocalManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGKILL);
+        TritonServerNativeManager.this.commandExecutorService.kill(TRITONSERVER, LinuxSignal.SIGKILL);
     }
 
     private void stopScheduledExecutor() {

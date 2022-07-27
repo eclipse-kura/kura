@@ -25,7 +25,7 @@ import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.junit.Test;
 
-public class TritonServerLocalManagerTest {
+public class TritonServerNativeManagerTest {
 
     private static final String[] TRITONSERVERCMD = new String[] { "tritonserver" };
     private static final String MOCK_DECRYPT_FOLDER = "test";
@@ -34,7 +34,7 @@ public class TritonServerLocalManagerTest {
     private TritonServerServiceOptions options = new TritonServerServiceOptions(properties);
 
     private CommandExecutorService ces;
-    private TritonServerLocalManager manager;
+    private TritonServerNativeManager manager;
 
     @Test
     public void killMethodShouldWork() {
@@ -91,7 +91,7 @@ public class TritonServerLocalManagerTest {
 
     private void givenLocalManagerBuiltWith(TritonServerServiceOptions options, CommandExecutorService ces,
             String decryptionFolder) {
-        this.manager = new TritonServerLocalManager(options, ces, decryptionFolder);
+        this.manager = new TritonServerNativeManager(options, ces, decryptionFolder);
     }
 
     /*

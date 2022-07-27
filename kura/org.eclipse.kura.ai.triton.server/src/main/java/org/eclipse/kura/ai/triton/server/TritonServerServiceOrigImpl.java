@@ -27,15 +27,15 @@ public class TritonServerServiceOrigImpl extends TritonServerServiceAbs {
     }
 
     @Override
-    boolean isConfigurationValid(TritonServerServiceOptions options) {
-        if (!options.isLocalEnabled()) {
-            return !isNullOrEmpty(options.getAddress());
+    boolean isConfigurationValid() {
+        if (!this.options.isLocalEnabled()) {
+            return !isNullOrEmpty(this.options.getAddress());
         }
-        return !isNullOrEmpty(options.getBackendsPath()) && !isNullOrEmpty(options.getModelRepositoryPath());
+        return !isNullOrEmpty(this.options.getBackendsPath()) && !isNullOrEmpty(this.options.getModelRepositoryPath());
     }
 
     @Override
-    boolean isModelEncryptionEnabled(TritonServerServiceOptions options) {
-        return options.isLocalEnabled() && options.isModelEncryptionPasswordSet();
+    boolean isModelEncryptionEnabled() {
+        return this.options.isLocalEnabled() && this.options.isModelEncryptionPasswordSet();
     }
 }

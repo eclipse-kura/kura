@@ -79,7 +79,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
-    private TritonServerServiceOptions options;
+    protected TritonServerServiceOptions options;
     private TritonServerInstanceManager tritonServerInstanceManager;
 
     private ManagedChannel grpcChannel;
@@ -98,9 +98,9 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
             CommandExecutorService executorService, String decryptionFolderPath);
 
-    abstract boolean isConfigurationValid(TritonServerServiceOptions options);
+    abstract boolean isConfigurationValid();
 
-    abstract boolean isModelEncryptionEnabled(TritonServerServiceOptions options);
+    abstract boolean isModelEncryptionEnabled();
 
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate TritonServerService...");
@@ -120,7 +120,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             stopManagedInstance();
         }
 
-        if (isConfigurationValid(this.options)) {
+        if (isConfigurationValid()) {
             setGrpcResources();
             startManagedInstance();
             loadModels();
@@ -136,7 +136,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void startManagedInstance() {
-        if (isModelEncryptionEnabled(this.options)) {
+        if (isModelEncryptionEnabled()) {
             try {
                 this.decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
                 this.decryptionFolderNeedsCleanup = true;
@@ -216,7 +216,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        if (isModelEncryptionEnabled(this.options)) {
+        if (isModelEncryptionEnabled()) {
             String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(this.cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
@@ -238,13 +238,13 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         try {
             this.grpcStub.repositoryModelLoad(builder.build());
         } catch (StatusRuntimeException e) {
-            if (isModelEncryptionEnabled(this.options)) {
+            if (isModelEncryptionEnabled()) {
                 TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
             }
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (isModelEncryptionEnabled(this.options)) {
+        if (isModelEncryptionEnabled()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= this.options.getNRetries()) {

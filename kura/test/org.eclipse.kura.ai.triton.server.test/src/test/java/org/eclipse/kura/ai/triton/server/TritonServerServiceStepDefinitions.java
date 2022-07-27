@@ -70,7 +70,7 @@ import io.grpc.testing.GrpcCleanupRule;
 
 public abstract class TritonServerServiceStepDefinitions {
 
-    protected TritonServerServiceImpl tritonServerService;
+    protected TritonServerServiceAbs tritonServerService;
     protected boolean methodCalled;
     protected boolean exceptionCaught;
     protected Optional<ModelInfo> modelInfo;
@@ -318,10 +318,10 @@ public abstract class TritonServerServiceStepDefinitions {
         return tensors;
     }
 
-    private TritonServerServiceImpl createTritonServerServiceImpl(Map<String, Object> properties,
+    private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
-        TritonServerServiceImpl tritonServerServiceImpl = new TritonServerServiceImpl();
+        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceAbs();
 
         this.ces = mock(CommandExecutorService.class);
         when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);

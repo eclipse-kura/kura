@@ -72,9 +72,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
 
-public class TritonServerServiceImpl implements InferenceEngineService, ConfigurableComponent {
+public abstract class TritonServerServiceAbs implements InferenceEngineService, ConfigurableComponent {
 
-    private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(TritonServerServiceAbs.class);
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
 
     private CommandExecutorService commandExecutorService;

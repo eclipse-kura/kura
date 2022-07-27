@@ -132,7 +132,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void startLocalInstance() {
-        if (this.options.modelsAreEncrypted()) {
+        if (this.options.isModelEncryptionPasswordSet()) {
             try {
                 this.decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
             } catch (IOException e) {
@@ -157,7 +157,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             TritonServerNativeManager.sleepFor(this.options.getRetryInterval());
         }
 
-        if (this.options.modelsAreEncrypted()) {
+        if (this.options.isModelEncryptionPasswordSet()) {
             TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
             try {
                 Files.delete(Paths.get(this.decryptionFolderPath));
@@ -214,7 +214,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        if (this.options.modelsAreEncrypted()) {
+        if (this.options.isModelEncryptionPasswordSet()) {
             String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(this.cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
@@ -236,13 +236,13 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         try {
             this.grpcStub.repositoryModelLoad(builder.build());
         } catch (StatusRuntimeException e) {
-            if (this.options.modelsAreEncrypted()) {
+            if (this.options.isModelEncryptionPasswordSet()) {
                 TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
             }
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (this.options.modelsAreEncrypted()) {
+        if (this.options.isModelEncryptionPasswordSet()) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= this.options.getNRetries()) {

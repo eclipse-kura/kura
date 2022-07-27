@@ -157,7 +157,7 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
     private Command createServerCommand() {
         List<String> commandString = new ArrayList<>();
         commandString.add("tritonserver");
-        if (this.options.modelsAreEncrypted()) {
+        if (this.options.isModelEncryptionPasswordSet()) {
             commandString.add("--model-repository=" + this.decryptionFolderPath);
         } else {
             commandString.add("--model-repository=" + this.options.getModelRepositoryPath());

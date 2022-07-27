@@ -85,6 +85,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     private ManagedChannel grpcChannel;
     private GRPCInferenceServiceBlockingStub grpcStub;
     private String decryptionFolderPath = "";
+    private boolean decryptionFolderNeedsCleanup = false;
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -138,6 +139,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         if (isModelEncryptionEnabled(this.options)) {
             try {
                 this.decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
+                this.decryptionFolderNeedsCleanup = true;
             } catch (IOException e) {
                 logger.warn("Failed to create decryption model directory", e);
             }
@@ -163,13 +165,14 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             sleepFor(this.options.getRetryInterval());
         }
 
-        if (isModelEncryptionEnabled(this.options)) {
+        if (this.decryptionFolderNeedsCleanup) {
             TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
             try {
                 Files.delete(Paths.get(this.decryptionFolderPath));
             } catch (IOException e) {
                 logger.warn("Could not delete decryption folder {}", this.decryptionFolderPath, e);
             }
+            this.decryptionFolderNeedsCleanup = false;
         }
     }
 

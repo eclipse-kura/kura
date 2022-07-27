@@ -80,11 +80,12 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     private CommandExecutorService commandExecutorService;
     private CryptoService cryptoService;
     private TritonServerServiceOptions options;
-    private TritonServerNativeManager tritonServerLocalManager;
+    private TritonServerInstanceManager tritonServerInstanceManager;
 
     private ManagedChannel grpcChannel;
     private GRPCInferenceServiceBlockingStub grpcStub;
     private String decryptionFolderPath = "";
+    private boolean decryptionFolderNeedsCleanup = false;
 
     public void setCommandExecutorService(CommandExecutorService executorService) {
         this.commandExecutorService = executorService;
@@ -93,6 +94,13 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
+
+    abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
+            CommandExecutorService executorService, String decryptionFolderPath);
+
+    abstract boolean isConfigurationValid(TritonServerServiceOptions options);
+
+    abstract boolean isModelEncryptionEnabled(TritonServerServiceOptions options);
 
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate TritonServerService...");
@@ -107,16 +115,14 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             return;
         }
         this.options = newOptions;
-        if (nonNull(this.tritonServerLocalManager)) {
-            stopLocalInstance();
+
+        if (nonNull(this.tritonServerInstanceManager)) {
+            stopManagedInstance();
         }
-        if (isConfigurationValid()) {
+
+        if (isConfigurationValid(this.options)) {
             setGrpcResources();
-            if (this.options.isLocalEnabled()) {
-                startLocalInstance();
-            } else {
-                this.tritonServerLocalManager = null;
-            }
+            startManagedInstance();
             loadModels();
         } else {
             logger.warn("The provided configuration is not valid");
@@ -125,45 +131,48 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     protected void deactivate() {
         logger.info("Deactivate TritonServerService...");
-        if (nonNull(this.tritonServerLocalManager)) {
-            stopLocalInstance();
-        }
+        stopManagedInstance();
         this.grpcChannel.shutdownNow();
     }
 
-    private void startLocalInstance() {
-        if (this.options.isModelEncryptionPasswordSet()) {
+    private void startManagedInstance() {
+        if (isModelEncryptionEnabled(this.options)) {
             try {
                 this.decryptionFolderPath = TritonServerEncryptionUtils.createDecryptionFolder(TEMP_DIRECTORY_PREFIX);
+                this.decryptionFolderNeedsCleanup = true;
             } catch (IOException e) {
                 logger.warn("Failed to create decryption model directory", e);
             }
-            logger.info("Created decryption model directory at {}", this.decryptionFolderPath);
+            logger.info("Using decryption model directory at path {}", this.decryptionFolderPath);
         }
-        this.tritonServerLocalManager = new TritonServerNativeManager(this.options, this.commandExecutorService,
+
+        this.tritonServerInstanceManager = createInstanceManager(this.options, this.commandExecutorService,
                 this.decryptionFolderPath);
-        this.tritonServerLocalManager.start();
+        logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
+
+        this.tritonServerInstanceManager.start();
     }
 
-    private void stopLocalInstance() {
-        this.tritonServerLocalManager.stop();
+    private void stopManagedInstance() {
+        this.tritonServerInstanceManager.stop();
 
         int counter = 0;
-        while (this.tritonServerLocalManager.isServerRunning()) {
+        while (this.tritonServerInstanceManager.isServerRunning()) {
             if (counter++ >= this.options.getNRetries()) {
                 logger.warn("Cannot stop local server instance. Killing it.");
-                this.tritonServerLocalManager.kill();
+                this.tritonServerInstanceManager.kill();
             }
-            TritonServerNativeManager.sleepFor(this.options.getRetryInterval());
+            sleepFor(this.options.getRetryInterval());
         }
 
-        if (this.options.isModelEncryptionPasswordSet()) {
+        if (this.decryptionFolderNeedsCleanup) {
             TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
             try {
                 Files.delete(Paths.get(this.decryptionFolderPath));
             } catch (IOException e) {
                 logger.warn("Could not delete decryption folder {}", this.decryptionFolderPath, e);
             }
+            this.decryptionFolderNeedsCleanup = false;
         }
     }
 
@@ -178,14 +187,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.grpcStub = grpcStub;
     }
 
-    private boolean isConfigurationValid() {
-        if (!this.options.isLocalEnabled()) {
-            return !isNullOrEmpty(this.options.getAddress());
-        }
-        return !isNullOrEmpty(this.options.getBackendsPath()) && !isNullOrEmpty(this.options.getModelRepositoryPath());
-    }
-
-    private boolean isNullOrEmpty(String property) {
+    protected boolean isNullOrEmpty(String property) {
         return isNull(property) || property.isEmpty();
     }
 
@@ -200,7 +202,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
                 logger.warn("Cannot load models since server is not ready.");
                 return;
             }
-            TritonServerNativeManager.sleepFor(this.options.getRetryInterval());
+            sleepFor(this.options.getRetryInterval());
         }
 
         this.options.getModels().forEach(modelName -> {
@@ -214,7 +216,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     @Override
     public void loadModel(String modelName, Optional<String> modelPath) throws KuraException {
-        if (this.options.isModelEncryptionPasswordSet()) {
+        if (isModelEncryptionEnabled(this.options)) {
             String password = this.options.getModelRepositoryPassword();
             String plainPassword = String.valueOf(this.cryptoService.decryptAes(password.toCharArray()));
             String encryptedModelPath = TritonServerEncryptionUtils.getEncryptedModelPath(modelName,
@@ -236,20 +238,20 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         try {
             this.grpcStub.repositoryModelLoad(builder.build());
         } catch (StatusRuntimeException e) {
-            if (this.options.isModelEncryptionPasswordSet()) {
+            if (isModelEncryptionEnabled(this.options)) {
                 TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
             }
             throw new KuraIOException(e, "Cannot load the model " + modelName);
         }
 
-        if (this.options.isModelEncryptionPasswordSet()) {
+        if (isModelEncryptionEnabled(this.options)) {
             int counter = 0;
             while (!isModelLoaded(modelName)) {
                 if (counter++ >= this.options.getNRetries()) {
                     logger.warn("Cannot check if model was correctly loaded. Wiping decrypted model anyway");
                     break;
                 }
-                TritonServerNativeManager.sleepFor(this.options.getRetryInterval());
+                sleepFor(this.options.getRetryInterval());
             }
             TritonServerEncryptionUtils.cleanRepository(this.decryptionFolderPath);
         }
@@ -778,6 +780,15 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
             booleanList.add(byteValue == 0x01);
         }
         return booleanList;
+    }
+
+    private static void sleepFor(long timeout) {
+        try {
+            Thread.sleep(timeout);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.debug(e.getMessage(), e);
+        }
     }
 
 }

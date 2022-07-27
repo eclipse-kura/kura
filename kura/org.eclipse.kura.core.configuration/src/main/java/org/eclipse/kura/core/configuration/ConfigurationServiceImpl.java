@@ -89,6 +89,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigurationServiceImpl implements ConfigurationService, OCDService {
 
+    private static final String GETTING_CONFIGURATION_ERROR = "Error getting Configuration for component: {}. Ignoring it.";
+
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
 
     private ComponentContext ctx;
@@ -408,9 +410,11 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
     @Override
     public ComponentConfiguration getDefaultComponentConfiguration(String pid) throws KuraException {
-        Tocd ocd = getOCDForPid(pid);
-        Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
-        return new ComponentConfigurationImpl(pid, ocd, props);
+        ComponentConfiguration tempConfig = getDefaultComponentConfigurationInternal(pid);
+        if (tempConfig != null && tempConfig.getConfigurationProperties() != null) {
+            decryptConfigurationProperties(tempConfig.getConfigurationProperties());
+        }
+        return tempConfig;
     }
 
     @Override
@@ -875,12 +879,79 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     }
 
     // returns configurations with encrypted passwords
-    private ComponentConfiguration getComponentConfigurationInternal(String pid) throws KuraException {
+    private ComponentConfiguration getComponentConfigurationInternal(String pid) {
         ComponentConfiguration cc;
         if (!this.activatedSelfConfigComponents.contains(pid)) {
             cc = getConfigurableComponentConfiguration(pid);
         } else {
             cc = getSelfConfiguringComponentConfiguration(pid);
+        }
+        return cc;
+    }
+
+    private ComponentConfiguration getDefaultComponentConfigurationInternal(String pid) {
+        ComponentConfiguration cc;
+        if (!this.activatedSelfConfigComponents.contains(pid)) {
+            cc = getConfigurableComponentDefaultConfiguration(pid);
+        } else {
+            cc = getSelfConfiguringComponentDefaultConfiguration(pid);
+        }
+        return cc;
+    }
+
+    private ComponentConfiguration getConfigurableComponentDefaultConfiguration(String pid) {
+        Tocd ocd = getOCDForPid(pid);
+        Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+        return new ComponentConfigurationImpl(pid, ocd, props);
+    }
+
+    private ComponentConfiguration getSelfConfiguringComponentDefaultConfiguration(String pid) {
+        ComponentConfiguration cc = null;
+        try {
+            ServiceReference<?>[] refs = this.ctx.getBundleContext().getServiceReferences((String) null, null);
+            if (refs != null) {
+                for (ServiceReference<?> ref : refs) {
+                    String ppid = (String) ref.getProperty(KURA_SERVICE_PID);
+                    if (pid.equals(ppid)) {
+                        Object obj = this.ctx.getBundleContext().getService(ref);
+                        try {
+                            cc = getSelfConfiguringComponentDefaultConfigurationInternal(obj, pid);
+                        } finally {
+                            this.ctx.getBundleContext().ungetService(ref);
+                        }
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
+        }
+
+        return cc;
+    }
+
+    private ComponentConfiguration getSelfConfiguringComponentDefaultConfigurationInternal(Object obj, String pid) {
+        ComponentConfiguration cc = null;
+        if (obj instanceof SelfConfiguringComponent) {
+            SelfConfiguringComponent selfConfigComp = (SelfConfiguringComponent) obj;
+            try {
+                ComponentConfiguration tempCc = selfConfigComp.getConfiguration();
+                if (tempCc.getPid() == null || !tempCc.getPid().equals(pid)) {
+                    logger.error(
+                            "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: {} Ignoring it.",
+                            pid);
+                    return null;
+                }
+
+                OCD ocd = tempCc.getDefinition();
+                if (ocd != null) {
+                    Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
+                    return new ComponentConfigurationImpl(pid, (Tocd) ocd, props);
+                }
+            } catch (KuraException e) {
+                logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
+            }
+        } else {
+            logger.error("Component {} is not a SelfConfiguringComponent. Ignoring it.", obj);
         }
         return cc;
     }
@@ -1220,7 +1291,8 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
 
                                                         try {
                                                             logger.debug(
-                                                                    "pid: {}, property name: {}, type: {}, value: {}", pid, adId, propType, value);
+                                                                    "pid: {}, property name: {}, type: {}, value: {}",
+                                                                    pid, adId, propType, value);
                                                             Scalar propertyScalar = Scalar.fromValue(propType);
                                                             Scalar adScalar = Scalar.fromValue(adType);
                                                             if (propertyScalar != adScalar) {
@@ -1242,7 +1314,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                                         }
                                     }
                                 } catch (KuraException e) {
-                                    logger.error("Error getting Configuration for component: {}. Ignoring it.", pid, e);
+                                    logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
                                 }
                             } else {
                                 logger.error("Component {} is not a SelfConfiguringComponent. Ignoring it.", obj);
@@ -1254,7 +1326,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                 }
             }
         } catch (InvalidSyntaxException e) {
-            logger.error("Error getting Configuration for component: {}. Ignoring it.", pid, e);
+            logger.error(GETTING_CONFIGURATION_ERROR, pid, e);
         }
 
         return cc;

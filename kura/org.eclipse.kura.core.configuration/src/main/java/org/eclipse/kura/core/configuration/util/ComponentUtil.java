@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -56,6 +56,11 @@ import org.slf4j.LoggerFactory;
 public class ComponentUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(ComponentUtil.class);
+    private static final String OSGI_INF_METATYPE = "OSGI-INF/metatype/";
+
+    private ComponentUtil() {
+        // Do nothing...
+    }
 
     /**
      * Returns a Map with all the MetaType Object Class Definitions contained in the bundle.
@@ -77,19 +82,17 @@ public class ComponentUtil {
                 final List<String> pids = new ArrayList<>();
                 pids.addAll(Arrays.asList(mti.getPids()));
                 pids.addAll(Arrays.asList(mti.getFactoryPids()));
-                if (pids != null) {
-                    for (String pid : pids) {
+                for (String pid : pids) {
 
-                        final Tmetadata metadata;
-                        try {
-                            metadata = readMetadata(bnd, pid);
-                            if (metadata != null) {
-                                bundleMetadata.put(pid, metadata);
-                            }
-                        } catch (Exception e) {
-                            // ignore: Metadata for the specified pid is not found
-                            logger.warn("Error loading Metadata for pid " + pid, e);
+                    final Tmetadata metadata;
+                    try {
+                        metadata = readMetadata(bnd, pid);
+                        if (metadata != null) {
+                            bundleMetadata.put(pid, metadata);
                         }
+                    } catch (Exception e) {
+                        // ignore: Metadata for the specified pid is not found
+                        logger.warn("Error loading Metadata for pid " + pid, e);
                     }
                 }
             }
@@ -218,10 +221,10 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static Tmetadata readMetadata(Bundle bundle, String pid)
-            throws IOException, Exception, XMLStreamException, FactoryConfigurationError {
+            throws IOException, KuraException, XMLStreamException, FactoryConfigurationError {
         Tmetadata metaData = null;
         StringBuilder sbMetatypeXmlName = new StringBuilder();
-        sbMetatypeXmlName.append("OSGI-INF/metatype/").append(pid).append(".xml");
+        sbMetatypeXmlName.append(OSGI_INF_METATYPE).append(pid).append(".xml");
 
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
@@ -245,7 +248,7 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static OCD readObjectClassDefinition(URL resourceUrl)
-            throws IOException, XMLStreamException, FactoryConfigurationError, Exception {
+            throws IOException, XMLStreamException, FactoryConfigurationError, KuraException {
         OCD ocd = null;
         String metatypeXml = IOUtil.readResource(resourceUrl);
         if (metatypeXml != null) {
@@ -253,7 +256,7 @@ public class ComponentUtil {
             if (metaData.getOCD() != null && !metaData.getOCD().isEmpty()) {
                 ocd = metaData.getOCD().get(0);
             } else {
-                logger.warn("Cannot find OCD for component with url: {}", resourceUrl.toString());
+                logger.warn("Cannot find OCD for component with url: {}", resourceUrl);
             }
         }
         return ocd;
@@ -273,10 +276,10 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static Tocd readObjectClassDefinition(String pid)
-            throws IOException, Exception, XMLStreamException, FactoryConfigurationError {
+            throws IOException, KuraException, XMLStreamException, FactoryConfigurationError {
         Tocd ocd = null;
         StringBuilder sbMetatypeXmlName = new StringBuilder();
-        sbMetatypeXmlName.append("OSGI-INF/metatype/").append(pid).append(".xml");
+        sbMetatypeXmlName.append(OSGI_INF_METATYPE).append(pid).append(".xml");
 
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(metatypeXmlName);
@@ -306,10 +309,10 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static Tocd readObjectClassDefinition(Bundle bundle, String pid)
-            throws IOException, Exception, XMLStreamException, FactoryConfigurationError {
+            throws IOException, KuraException, XMLStreamException, FactoryConfigurationError {
         Tocd ocd = null;
         StringBuilder sbMetatypeXmlName = new StringBuilder();
-        sbMetatypeXmlName.append("OSGI-INF/metatype/").append(pid).append(".xml");
+        sbMetatypeXmlName.append(OSGI_INF_METATYPE).append(pid).append(".xml");
 
         String metatypeXmlName = sbMetatypeXmlName.toString();
         String metatypeXml = IOUtil.readResource(bundle, metatypeXmlName);
@@ -350,7 +353,7 @@ public class ComponentUtil {
         // then split it by comma-separate list
         // keeping in mind the possible escape sequence "\,"
         String defaultValue = attrDef.getDefault();
-        if (defaultValue == null || defaultValue.length() == 0) {
+        if (defaultValue == null) {
             return null;
         }
 
@@ -362,7 +365,7 @@ public class ComponentUtil {
             // if cardinality is greater than 0 or abs(1)
             String[] defaultValues = new String[] { defaultValue };
             int cardinality = attrDef.getCardinality();
-            if (cardinality != 0 || cardinality != 1 || cardinality != -1) {
+            if (cardinality != 0 && cardinality != 1 && cardinality != -1) {
                 defaultValues = StringUtil.splitValues(defaultValue);
             }
 

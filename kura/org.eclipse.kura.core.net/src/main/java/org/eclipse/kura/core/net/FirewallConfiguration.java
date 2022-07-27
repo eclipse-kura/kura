@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -42,12 +42,7 @@ public class FirewallConfiguration {
     public static final String PORT_FORWARDING_PROP_NAME = "firewall.port.forwarding";
     public static final String NAT_PROP_NAME = "firewall.nat";
 
-    public static final String DFLT_OPEN_PORTS_VALUE = "22,tcp,,,,,,#;80,tcp,,eth0,,,,#;"
-            + "80,tcp,,eth1,,,,#;80,tcp,,wlan0,,,,#;80,tcp,10.234.0.0/16,,,,,#;1450,tcp,,eth0,,,,#;"
-            + "1450,tcp,,eth1,,,,#;1450,tcp,,wlan0,,,,#;502,tcp,127.0.0.1/32,,,,,#;53,udp,,eth0,,,,#;"
-            + "53,udp,,eth1,,,,#;53,udp,,wlan0,,,,#;67,udp,,eth0,,,,#;67,udp,,eth1,,,,#;67,udp,,wlan0,,,,#;"
-            + "8000,tcp,,eth0,,,,#;8000,tcp,,eth1,,,,#;8000,tcp,,wlan0,,,,#";
-
+    public static final String DFLT_OPEN_PORTS_VALUE = "";
     public static final String DFLT_PORT_FORWARDING_VALUE = "";
     public static final String DFLT_NAT_VALUE = "";
 

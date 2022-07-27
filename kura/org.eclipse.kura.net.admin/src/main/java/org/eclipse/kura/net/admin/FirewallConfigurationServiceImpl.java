@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -364,7 +364,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setId(FirewallConfiguration.OPEN_PORTS_PROP_NAME);
         tad.setName(FirewallConfiguration.OPEN_PORTS_PROP_NAME);
         tad.setType(Tscalar.STRING);
-        tad.setCardinality(10000);
+        tad.setCardinality(1);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_OPEN_PORTS_VALUE);
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
@@ -374,7 +374,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setId(FirewallConfiguration.PORT_FORWARDING_PROP_NAME);
         tad.setName(FirewallConfiguration.PORT_FORWARDING_PROP_NAME);
         tad.setType(Tscalar.STRING);
-        tad.setCardinality(10000);
+        tad.setCardinality(1);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_PORT_FORWARDING_VALUE);
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
@@ -384,7 +384,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setId(FirewallConfiguration.NAT_PROP_NAME);
         tad.setName(FirewallConfiguration.NAT_PROP_NAME);
         tad.setType(Tscalar.STRING);
-        tad.setCardinality(10000);
+        tad.setCardinality(1);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_NAT_VALUE);
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));

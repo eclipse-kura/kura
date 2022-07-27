@@ -22,6 +22,10 @@ public class StringUtil {
     private static final char DELIMITER = ',';
     private static final char ESCAPE = '\\';
 
+    private StringUtil() {
+        // Do nothing...
+    }
+
     public static String[] splitValues(String strValues) {
         if (strValues == null) {
             return null;

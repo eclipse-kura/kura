@@ -95,17 +95,17 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.cryptoService = cryptoService;
     }
 
-    protected void activate(Map<String, Object> properties) {
-        logger.info("Activate TritonServerService...");
-        updated(properties);
-    }
-
     abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
             CommandExecutorService executorService, String decryptionFolderPath);
 
     abstract boolean isConfigurationValid(TritonServerServiceOptions options);
 
     abstract boolean isModelEncryptionEnabled(TritonServerServiceOptions options);
+
+    protected void activate(Map<String, Object> properties) {
+        logger.info("Activate TritonServerService...");
+        updated(properties);
+    }
 
     public void updated(Map<String, Object> properties) {
         logger.info("Update TritonServerService...");

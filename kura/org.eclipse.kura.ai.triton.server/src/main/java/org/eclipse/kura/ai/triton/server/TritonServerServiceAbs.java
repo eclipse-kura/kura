@@ -149,7 +149,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.tritonServerLocalManager.stop();
 
         int counter = 0;
-        while (this.tritonServerLocalManager.isLocalServerRunning()) {
+        while (this.tritonServerLocalManager.isServerRunning()) {
             if (counter++ >= this.options.getNRetries()) {
                 logger.warn("Cannot stop local server instance. Killing it.");
                 this.tritonServerLocalManager.kill();

@@ -70,7 +70,7 @@ public class TritonServerNativeManager {
         this.serverCommand = createServerCommand();
         this.scheduledFuture = this.scheduledExecutorService.scheduleAtFixedRate(() -> {
             Thread.currentThread().setName(getClass().getSimpleName());
-            if (!isLocalServerRunning()) {
+            if (!isServerRunning()) {
                 startLocalServer();
             }
         }, 0, MONITOR_PERIOD, TimeUnit.SECONDS);
@@ -133,7 +133,7 @@ public class TritonServerNativeManager {
         }
     }
 
-    protected boolean isLocalServerRunning() {
+    protected boolean isServerRunning() {
         boolean isRunning = false;
         if (this.commandExecutorService.isRunning(TRITONSERVER)) {
             isRunning = true;

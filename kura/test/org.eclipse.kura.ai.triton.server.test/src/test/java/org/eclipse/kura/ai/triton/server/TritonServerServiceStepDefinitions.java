@@ -321,7 +321,7 @@ public abstract class TritonServerServiceStepDefinitions {
     private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
-        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceAbs();
+        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
 
         this.ces = mock(CommandExecutorService.class);
         when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);

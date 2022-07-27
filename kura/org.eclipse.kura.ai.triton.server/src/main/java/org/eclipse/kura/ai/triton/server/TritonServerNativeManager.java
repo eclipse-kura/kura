@@ -29,7 +29,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TritonServerNativeManager {
+public class TritonServerNativeManager implements TritonServerInstanceManager {
 
     private static final Logger logger = LoggerFactory.getLogger(TritonServerNativeManager.class);
 
@@ -52,16 +52,19 @@ public class TritonServerNativeManager {
         this.scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     }
 
-    protected void start() {
+    @Override
+    public void start() {
         startLocalServerMonitor();
     }
 
-    protected void stop() {
+    @Override
+    public void stop() {
         stopLocalServerMonitor();
         stopScheduledExecutor();
     }
 
-    protected void kill() {
+    @Override
+    public void kill() {
         killLocalServerMonitor();
         stopScheduledExecutor();
     }
@@ -133,7 +136,8 @@ public class TritonServerNativeManager {
         }
     }
 
-    protected boolean isServerRunning() {
+    @Override
+    public boolean isServerRunning() {
         boolean isRunning = false;
         if (this.commandExecutorService.isRunning(TRITONSERVER)) {
             isRunning = true;

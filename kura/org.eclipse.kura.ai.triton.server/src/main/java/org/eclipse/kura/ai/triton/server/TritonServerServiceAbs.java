@@ -102,6 +102,8 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
 
     abstract boolean isModelEncryptionEnabled();
 
+    abstract String getServerAddress();
+
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate TritonServerService...");
         updated(properties);
@@ -177,7 +179,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     }
 
     private void setGrpcResources() {
-        this.grpcChannel = ManagedChannelBuilder.forAddress(this.options.getAddress(), this.options.getGrpcPort())
+        this.grpcChannel = ManagedChannelBuilder.forAddress(getServerAddress(), this.options.getGrpcPort())
                 .usePlaintext().maxInboundMessageSize(this.options.getGrpcMaxMessageSize())
                 .maxInboundMetadataSize(Integer.MAX_VALUE).build();
         setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(this.grpcChannel));

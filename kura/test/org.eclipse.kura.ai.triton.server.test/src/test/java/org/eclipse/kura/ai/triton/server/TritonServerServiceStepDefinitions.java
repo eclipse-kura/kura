@@ -38,6 +38,7 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.junit.Before;
@@ -70,7 +71,7 @@ import io.grpc.testing.GrpcCleanupRule;
 
 public abstract class TritonServerServiceStepDefinitions {
 
-    protected TritonServerServiceImpl tritonServerService;
+    protected TritonServerServiceAbs tritonServerService;
     protected boolean methodCalled;
     protected boolean exceptionCaught;
     protected Optional<ModelInfo> modelInfo;
@@ -95,6 +96,7 @@ public abstract class TritonServerServiceStepDefinitions {
     private List<Tensor> tensorList = new ArrayList<>();
     private boolean isEngineReady;
     private CommandExecutorService ces;
+    private CryptoService cry;
 
     protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
@@ -318,15 +320,18 @@ public abstract class TritonServerServiceStepDefinitions {
         return tensors;
     }
 
-    private TritonServerServiceImpl createTritonServerServiceImpl(Map<String, Object> properties,
+    private TritonServerServiceAbs createTritonServerServiceImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
-        TritonServerServiceImpl tritonServerServiceImpl = new TritonServerServiceImpl();
+        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
 
         this.ces = mock(CommandExecutorService.class);
         when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
 
         tritonServerServiceImpl.setCommandExecutorService(ces);
+
+        this.cry = mock(CryptoService.class);
+        tritonServerServiceImpl.setCryptoService(cry);
 
         if (activate) {
             tritonServerServiceImpl.activate(properties);

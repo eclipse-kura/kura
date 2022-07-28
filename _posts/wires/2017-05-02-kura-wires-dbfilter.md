@@ -76,7 +76,7 @@ The following procedure will create a wire graph that collects data from a simul
   * "buzzer" for the buzzer channel;
   * "led" for the led channel
 
-{% include alerts.html message='Be aware that the **sql.view** syntax can vary accordingly to the SQL dialect used by the database. For example, the MySQL dialect doesn\'t allow to surrond the table or columns names with double-quotes. In the H2DB, this is mandatory instead.' %}
+{% include alerts.html message='Be aware that the **sql.view** syntax can vary accordingly to the SQL dialect used by the database. For example, the MySQL dialect doesn\'t allow to surrond the table or columns names with double-quotes. Instead, this is mandatory in the H2DB.' %}
 
 ![opcua_driver_config2]({{ site.baseurl }}/assets/images/wires/OPCUADriverConfig2.png)
 

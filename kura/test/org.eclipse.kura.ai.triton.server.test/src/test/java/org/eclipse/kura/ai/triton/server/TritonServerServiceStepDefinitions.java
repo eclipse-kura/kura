@@ -337,8 +337,20 @@ public abstract class TritonServerServiceStepDefinitions {
             tritonServerServiceImpl.activate(properties);
         }
 
-        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = mock(
-                GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase.class,
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+
+        String serverName = InProcessServerBuilder.generateName();
+        grpcCleanup.register(
+                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
+        ManagedChannel channel = grpcCleanup
+                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
+        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
+
+        return tritonServerServiceImpl;
+    }
+
+    private GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase createGRPCMock(List<String> tritonModelRepoStub) {
+        return mock(GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase.class,
                 delegatesTo(new GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase() {
 
                     @Override
@@ -458,15 +470,6 @@ public abstract class TritonServerServiceStepDefinitions {
                     }
 
                 }));
-
-        String serverName = InProcessServerBuilder.generateName();
-        grpcCleanup.register(
-                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
-        ManagedChannel channel = grpcCleanup
-                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
-        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
-
-        return tritonServerServiceImpl;
     }
 
     @Before

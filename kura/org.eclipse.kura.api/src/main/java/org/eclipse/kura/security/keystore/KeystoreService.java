@@ -27,7 +27,6 @@ import java.util.Map;
 import javax.net.ssl.KeyManager;
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.eclipse.kura.KuraException;
 import org.osgi.annotation.versioning.ProviderType;
 
@@ -158,7 +157,7 @@ public interface KeystoreService {
      *             if the keypair cannot be created or the keypair cannot be added to the managed keystore
      * @throws IllegalArgumentException
      *             if one of the arguments is null or empty
-     * 
+     *
      * @since 2.4
      */
     public void createKeyPair(String alias, String algorithm, AlgorithmParameterSpec algorithmParameter,
@@ -223,43 +222,6 @@ public interface KeystoreService {
     public String getCSR(String alias, X500Principal principal, String signerAlg) throws KuraException;
 
     /**
-     * Creates and returns a <code>PKCS10CertificationRequestBuilder</code> for the given keypair based on the provided
-     * principal and signer algorithm selected.
-     *
-     * @param keyPair
-     *            a keypair holding the private and public key.
-     * @param principal
-     *            an X500Name containing the subject associated with the request we are building.
-     * @return a <code>PKCS10CertificationRequestBuilder</code> that could be used to sign a Certificate Signing Request
-     *         with a <code>ContentSigner</code>
-     * @throws KuraException
-     *             if the CSR cannot be computed or if it cannot be encoded
-     * @throws IllegalArgumentException
-     *             if one of the arguments is null or empty
-     */
-    public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(KeyPair keyPair, X500Principal principal)
-            throws KuraException;
-
-    /**
-     * Creates and returns a <code>PKCS10CertificationRequestBuilder</code> for the given keypair based on the provided
-     * principal and signer algorithm selected.
-     *
-     * @param alias
-     *            a string that will be used to identify the entity in the keystore holding the private and public keys.
-     * @param principal
-     *            an X500Name containing the subject associated with the request we are building.
-     * @return a <code>PKCS10CertificationRequestBuilder</code> that could be used to sign a Certificate Signing Request
-     *         with a <code>ContentSigner</code>
-     * @throws KuraException
-     *             if the alias does not correspond to a managed entry of the keystore, it refers to an entry that
-     *             cannot be used to obtain a CSR or the CSR cannot be computed or encoded
-     * @throws IllegalArgumentException
-     *             if one of the arguments is null or empty
-     */
-    public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(String alias, X500Principal principal)
-            throws KuraException;
-
-    /**
      * Returns the list of all the aliases corresponding to the keystore service managed objects
      *
      * @return
@@ -270,7 +232,7 @@ public interface KeystoreService {
 
     /**
      * Returns a list of the current cached CRLs.
-     * 
+     *
      * @return a list of the current cached CRLs.
      * @throws KuraException
      *             if the list cannot be retrieved
@@ -279,7 +241,7 @@ public interface KeystoreService {
 
     /**
      * Returns a <code>CertStore</code> containing the cached CRLs.
-     * 
+     *
      * @return a <code>CertStore</code> containing the cached CRLs.
      * @throws KuraException
      *             if the <code>CertStore</code> cannot be created.
@@ -288,12 +250,12 @@ public interface KeystoreService {
 
     /**
      * Add a <code>X509CRL</code> to the CRLs list.
-     * 
+     *
      * @param crl
      *            a <code>X509CRL</code> to be stored
      * @throws KuraException
      *             if the <code>X509CRL</code> cannot be added.
-     * 
+     *
      * @since 2.4
      */
     public void addCRL(X509CRL crl) throws KuraException;

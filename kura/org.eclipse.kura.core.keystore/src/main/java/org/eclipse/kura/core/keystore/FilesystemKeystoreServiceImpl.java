@@ -445,34 +445,12 @@ public class FilesystemKeystoreServiceImpl implements KeystoreService, Configura
         return getCSR(keyPair, principal, signerAlg);
     }
 
-    @Override
-    public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(KeyPair keyPair, X500Principal principal)
-            throws KuraException {
+    private PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(KeyPair keyPair, X500Principal principal) {
         if (isNull(principal) || isNull(keyPair)) {
             throw new IllegalArgumentException(FilesystemKeystoreServiceImpl.NULL_INPUT_PARAMS_MESSAGE);
         }
         return new JcaPKCS10CertificationRequestBuilder(principal, keyPair.getPublic());
 
-    }
-
-    @Override
-    public PKCS10CertificationRequestBuilder getCSRAsPKCS10Builder(String alias, X500Principal principal)
-            throws KuraException {
-        if (isNull(principal) || isNull(alias) || alias.trim().isEmpty()) {
-            throw new IllegalArgumentException(FilesystemKeystoreServiceImpl.NULL_INPUT_PARAMS_MESSAGE);
-        }
-
-        Entry entry = getEntry(alias);
-        if (entry == null) {
-            throw new KuraException(KuraErrorCode.NOT_FOUND);
-        }
-        if (!(entry instanceof PrivateKeyEntry)) {
-            throw new KuraException(KuraErrorCode.BAD_REQUEST);
-        }
-        PrivateKey privateKey = ((PrivateKeyEntry) entry).getPrivateKey();
-        PublicKey publicKey = ((PrivateKeyEntry) entry).getCertificate().getPublicKey();
-        KeyPair keyPair = new KeyPair(publicKey, privateKey);
-        return getCSRAsPKCS10Builder(keyPair, principal);
     }
 
     @Override

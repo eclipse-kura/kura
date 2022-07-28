@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -84,10 +84,12 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     private SslManagerServiceOptions options;
 
     private KeystoreService keystoreService;
+    private KeystoreService truststoreKeystoreService;
 
     private Map<ConnectionSslOptions, SSLContext> sslContexts;
 
     private Optional<String> keystoreServicePid = Optional.empty();
+    private Optional<String> truststoreKeystoreServicePid = Optional.empty();
 
     // ----------------------------------------------------------------
     //
@@ -112,6 +114,33 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
             this.keystoreService = null;
             this.keystoreServicePid = Optional.empty();
+
+            this.clearSslContexCache();
+
+            if (this.sslServiceListeners != null) {
+                // Notify listeners that service has been updated
+                this.sslServiceListeners.onConfigurationUpdated();
+            }
+        }
+    }
+
+    public void setTruststoreKeystoreService(KeystoreService keystoreService, final Map<String, Object> properties) {
+        this.truststoreKeystoreService = keystoreService;
+        this.truststoreKeystoreServicePid = Optional.of((String) properties.get(ConfigurationService.KURA_SERVICE_PID));
+
+        this.clearSslContexCache();
+
+        if (this.sslServiceListeners != null) {
+            // Notify listeners that service has been updated
+            this.sslServiceListeners.onConfigurationUpdated();
+        }
+    }
+
+    public void unsetTruststoreKeystoreService(KeystoreService keystoreService) {
+        if (this.keystoreService == truststoreKeystoreService) {
+
+            this.truststoreKeystoreService = null;
+            this.truststoreKeystoreServicePid = Optional.empty();
 
             this.clearSslContexCache();
 
@@ -350,16 +379,26 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     private TrustManager[] getTrustManagers() throws GeneralSecurityException, IOException {
         TrustManager[] result = new TrustManager[0];
         TrustManagerFactory tmf = null;
-        if (this.keystoreService != null) {
-            try {
-                KeyStore ts = this.keystoreService.getKeyStore();
-                tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                initTrustManagerFactory(tmf, ts);
-                result = tmf.getTrustManagers();
-            } catch (KuraException e) {
-                throw new IOException(e);
-            }
+
+        final KeystoreService ks;
+
+        if (this.truststoreKeystoreService != null) {
+            ks = truststoreKeystoreService;
+        } else if (this.keystoreService != null) {
+            ks = keystoreService;
+        } else {
+            return result;
         }
+
+        try {
+            KeyStore ts = ks.getKeyStore();
+            tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            initTrustManagerFactory(tmf, ts);
+            result = tmf.getTrustManagers();
+        } catch (KuraException e) {
+            throw new IOException(e);
+        }
+
         return result;
     }
 
@@ -546,7 +585,9 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
 
         final KeystoreChangedEvent keystoreChangedEvent = (KeystoreChangedEvent) event;
 
-        if (this.keystoreServicePid.equals(Optional.of(keystoreChangedEvent.getSenderPid()))) {
+        final Optional<String> eventPid = Optional.of(keystoreChangedEvent.getSenderPid());
+
+        if (this.keystoreServicePid.equals(eventPid) || this.truststoreKeystoreServicePid.equals(eventPid)) {
             this.clearSslContexCache();
             this.sslServiceListeners.onConfigurationUpdated();
         }

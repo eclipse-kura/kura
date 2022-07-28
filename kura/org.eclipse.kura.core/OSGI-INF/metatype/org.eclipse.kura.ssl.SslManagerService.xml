@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
   
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -37,12 +37,21 @@
         	description="Enable or disable hostname verification." />
 
         <AD id="KeystoreService.target"
-            name="KeystoreService Target Filter"
+            name="Keystore Target Filter"
             type="String"
             cardinality="0"
             required="true"
             default="(kura.service.pid=changeme)"
-            description="Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the HTTPS Keystore.">
+            description="Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the SSL key store.">
+        </AD>
+        
+        <AD id="TruststoreKeystoreService.target"
+            name="Truststore Target Filter"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="(kura.service.pid=changeme)"
+            description="Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the SSL trust Store. If the target service cannot be found, the service configured with the Keystore Target Filter parameter will be used as truststore.">
         </AD>
 
         <AD id="ssl.default.cipherSuites"

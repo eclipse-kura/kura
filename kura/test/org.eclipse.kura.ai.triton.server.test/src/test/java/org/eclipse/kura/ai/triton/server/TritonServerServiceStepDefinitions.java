@@ -106,6 +106,10 @@ public abstract class TritonServerServiceStepDefinitions {
         this.tritonServerService = createTritonServerServiceRemoteImpl(properties, tritonModelRepoStub, true);
     }
 
+    protected void givenTritonServerServiceNativeImpl(Map<String, Object> properties) throws IOException {
+        this.tritonServerService = createTritonServerServiceNativeImpl(properties, tritonModelRepoStub, true);
+    }
+
     protected void givenTritonServerServiceImplNotActive() throws IOException {
         this.tritonServerService = createTritonServerServiceImpl(null, tritonModelRepoStub, false);
     }
@@ -328,6 +332,35 @@ public abstract class TritonServerServiceStepDefinitions {
             List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
         TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceOrigImpl();
+
+        this.ces = mock(CommandExecutorService.class);
+        when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
+
+        tritonServerServiceImpl.setCommandExecutorService(ces);
+
+        this.cry = mock(CryptoService.class);
+        tritonServerServiceImpl.setCryptoService(cry);
+
+        if (activate) {
+            tritonServerServiceImpl.activate(properties);
+        }
+
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+
+        String serverName = InProcessServerBuilder.generateName();
+        grpcCleanup.register(
+                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
+        ManagedChannel channel = grpcCleanup
+                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
+        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
+
+        return tritonServerServiceImpl;
+    }
+
+    private TritonServerServiceAbs createTritonServerServiceNativeImpl(Map<String, Object> properties,
+            List<String> tritonModelRepoStub, boolean activate) throws IOException {
+
+        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceNativeImpl();
 
         this.ces = mock(CommandExecutorService.class);
         when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);

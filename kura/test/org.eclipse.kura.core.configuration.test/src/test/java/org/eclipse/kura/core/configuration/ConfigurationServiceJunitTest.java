@@ -70,7 +70,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
-public class ConfigurationServiceTest {
+public class ConfigurationServiceJunitTest {
 
     @Test
     public void testGetFactoryComponentPids() throws NoSuchFieldException, KuraException {

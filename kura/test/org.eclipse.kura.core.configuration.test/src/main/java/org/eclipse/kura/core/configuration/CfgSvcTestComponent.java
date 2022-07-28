@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.core.configuration.test;
+package org.eclipse.kura.core.configuration;
 
 import java.util.Map;
 import java.util.Map.Entry;

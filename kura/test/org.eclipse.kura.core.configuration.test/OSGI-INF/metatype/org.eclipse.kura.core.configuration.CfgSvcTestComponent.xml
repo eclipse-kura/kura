@@ -14,7 +14,7 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.core.configuration.test.CfgSvcTestComponent"
+    <OCD id="org.eclipse.kura.core.configuration.CfgSvcTestComponent"
          name="CfgSvcTestComponent"
          description="Component for testing Configuration Service.">
 
@@ -29,7 +29,7 @@
             description="Field for test"/>
 
     </OCD>
-    <Designate pid="org.eclipse.kura.core.configuration.test.CfgSvcTestComponent">
-        <Object ocdref="org.eclipse.kura.core.configuration.test.CfgSvcTestComponent"/>
+    <Designate pid="org.eclipse.kura.core.configuration.CfgSvcTestComponent">
+        <Object ocdref="org.eclipse.kura.core.configuration.CfgSvcTestComponent"/>
     </Designate>
 </MetaData>

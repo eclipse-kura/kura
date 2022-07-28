@@ -14,7 +14,7 @@
 
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="org.eclipse.kura.core.configuration.test.TestFactoryComponent"
+    <OCD id="org.eclipse.kura.core.configuration.TestFactoryComponent"
          name="TestFactoryComponent"
          description="Component for testing Configuration Service factory.">
 
@@ -29,8 +29,8 @@
             description="Field for test"/>
 
     </OCD>
-    <Designate pid="org.eclipse.kura.core.configuration.test.TestFactoryComponent"
-            factoryPid="org.eclipse.kura.core.configuration.test.TestFactoryComponent">
-        <Object ocdref="org.eclipse.kura.core.configuration.test.TestFactoryComponent"/>
+    <Designate pid="org.eclipse.kura.core.configuration.TestFactoryComponent"
+            factoryPid="org.eclipse.kura.core.configuration.TestFactoryComponent">
+        <Object ocdref="org.eclipse.kura.core.configuration.TestFactoryComponent"/>
     </Designate>
 </MetaData>

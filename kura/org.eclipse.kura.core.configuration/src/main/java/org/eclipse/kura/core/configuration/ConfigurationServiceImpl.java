@@ -908,18 +908,15 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
     private ComponentConfiguration getSelfConfiguringComponentDefaultConfiguration(String pid) {
         ComponentConfiguration cc = null;
         try {
-            ServiceReference<?>[] refs = this.ctx.getBundleContext().getServiceReferences((String) null, null);
-            if (refs != null) {
-                for (ServiceReference<?> ref : refs) {
-                    String ppid = (String) ref.getProperty(KURA_SERVICE_PID);
-                    if (pid.equals(ppid)) {
-                        Object obj = this.ctx.getBundleContext().getService(ref);
-                        try {
-                            cc = getSelfConfiguringComponentDefaultConfigurationInternal(obj, pid);
-                        } finally {
-                            this.ctx.getBundleContext().ungetService(ref);
-                        }
-                    }
+            String filter = String.format("(kura.service.pid=%s)", pid);
+            ServiceReference<?>[] refs = this.ctx.getBundleContext().getServiceReferences((String) null, filter);
+            if (refs != null && refs.length > 0) {
+                ServiceReference<?> ref = refs[0];
+                Object obj = this.ctx.getBundleContext().getService(ref);
+                try {
+                    cc = getSelfConfiguringComponentDefaultConfigurationInternal(obj, pid);
+                } finally {
+                    this.ctx.getBundleContext().ungetService(ref);
                 }
             }
         } catch (InvalidSyntaxException e) {

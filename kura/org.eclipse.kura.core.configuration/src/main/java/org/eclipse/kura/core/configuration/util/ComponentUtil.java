@@ -221,7 +221,7 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static Tmetadata readMetadata(Bundle bundle, String pid)
-            throws IOException, KuraException, XMLStreamException, FactoryConfigurationError {
+            throws IOException, KuraException, FactoryConfigurationError {
         Tmetadata metaData = null;
         StringBuilder sbMetatypeXmlName = new StringBuilder();
         sbMetatypeXmlName.append(OSGI_INF_METATYPE).append(pid).append(".xml");
@@ -248,7 +248,7 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static OCD readObjectClassDefinition(URL resourceUrl)
-            throws IOException, XMLStreamException, FactoryConfigurationError, KuraException {
+            throws IOException, FactoryConfigurationError, KuraException {
         OCD ocd = null;
         String metatypeXml = IOUtil.readResource(resourceUrl);
         if (metatypeXml != null) {
@@ -276,7 +276,7 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static Tocd readObjectClassDefinition(String pid)
-            throws IOException, KuraException, XMLStreamException, FactoryConfigurationError {
+            throws IOException, KuraException, FactoryConfigurationError {
         Tocd ocd = null;
         StringBuilder sbMetatypeXmlName = new StringBuilder();
         sbMetatypeXmlName.append(OSGI_INF_METATYPE).append(pid).append(".xml");
@@ -309,7 +309,7 @@ public class ComponentUtil {
      * @throws FactoryConfigurationError
      */
     public static Tocd readObjectClassDefinition(Bundle bundle, String pid)
-            throws IOException, KuraException, XMLStreamException, FactoryConfigurationError {
+            throws IOException, KuraException, FactoryConfigurationError {
         Tocd ocd = null;
         StringBuilder sbMetatypeXmlName = new StringBuilder();
         sbMetatypeXmlName.append(OSGI_INF_METATYPE).append(pid).append(".xml");

@@ -805,16 +805,19 @@ public class ConfigurationServiceJunitTest {
     }
 
     @Test
-    public void testEncryptConfigsNoConfigs() throws Throwable {
+    public void testEncryptConfigsNoConfigs() {
         // empty list
-
+        boolean exceptionCaught = false;
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         List<? extends ComponentConfiguration> configs = new ArrayList<>();
 
-        TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-
-        // runs without problems, but there's nothing else to check, here
+        try {
+            TestUtil.invokePrivate(cs, "encryptConfigs", configs);
+        } catch (Throwable t) {
+            exceptionCaught = true;
+        }
+        assertFalse(exceptionCaught);
     }
 
     @Test
@@ -2565,20 +2568,6 @@ public class ConfigurationServiceJunitTest {
         assertTrue("method called", calls[0]);
 
         verify(cfgMock, times(1)).update((Dictionary<String, ?>) anyObject());
-    }
-
-    @Test
-    public void testRegisterComponentConfigurationAllNulls() {
-        // only null inputs
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        String pid = null;
-        String servicePid = null;
-        String factoryPid = null;
-
-        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
-
-        // no checks really possible...
     }
 
     @Test

@@ -6,6 +6,11 @@ categories: [builtin]
 
 The [Nvidia™ Triton Server](https://developer.nvidia.com/nvidia-triton-inference-server) is an open-source inference service software that enables the user to deploy trained AI models from any framework on GPU or CPU infrastructure. It supports all major frameworks like TensorFlow, TensorRT, PyTorch, ONNX Runtime, and even custom framework backend. With specific backends, it is also possible to run Python scripts, mainly for pre-and post-processing purposes, and exploit the [DALI](https://github.com/triton-inference-server/dali_backend) building block for optimized operations. For more detail about the Triton Server, please refer to the official [website](https://github.com/triton-inference-server/server).
 
+Kura provides three components for exposing the Triton Server service functionality which implement the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server:
+- **TritonServerService**: provides methods for interacting with a local or remote Nvidia™ Triton Server within the same component. **Note**: _deprecated since 5.2.0_ 
+- **TritonServerRemoteService**: provides methods for interacting with a remote Nvidia™ Triton Server without managing the server lifecycle. Can be used both for connecting to a remote instance or a local non-managed instance. It exposes a simpler but more limited configuration.
+- **TritonServerNativeService**: provides methods for interacting with a local native Nvidia™ Triton Server. Requires the Triton Server executable to be already available on the device and offers more options and features (like AI Model Encryption).
+
 The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway or to communicate to an external server to load specific models.
 
 ![triton_server]({{ site.baseurl }}/assets/images/builtin/triton_server.png)

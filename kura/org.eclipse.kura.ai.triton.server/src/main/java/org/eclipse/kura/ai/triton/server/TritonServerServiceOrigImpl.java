@@ -38,4 +38,13 @@ public class TritonServerServiceOrigImpl extends TritonServerServiceAbs {
     boolean isModelEncryptionEnabled() {
         return this.options.isLocalEnabled() && this.options.isModelEncryptionPasswordSet();
     }
+
+    @Override
+    String getServerAddress() {
+        if (this.options.isLocalEnabled()) {
+            return "localhost";
+        } else {
+            return this.options.getAddress();
+        }
+    }
 }

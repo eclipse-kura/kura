@@ -16,7 +16,7 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.ai.triton.server.TritonServerRemoteService"
          name="Nvidia Triton Remote Server"
-         description="Configuration for the Remote-mode Nvidia Triton Server">
+         description="Configuration for the Remote Nvidia Triton Server">
 
         <AD id="server.address"
             name="Nvidia Triton Server address"
@@ -24,7 +24,7 @@
             cardinality="0"
             required="true"
             default="localhost"
-            description="The address of the Nvidia Triton Server.">
+            description="The address of the remote Nvidia Triton Server.">
         </AD>
 
         <AD id="server.ports"

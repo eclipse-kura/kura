@@ -52,6 +52,7 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ContainerPort;
 import com.github.dockerjava.api.model.Device;
+import com.github.dockerjava.api.model.DeviceRequest;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.api.model.Image;
@@ -67,6 +68,7 @@ import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import com.google.common.collect.ImmutableList;
 
 public class ContainerOrchestrationServiceImpl implements ConfigurableComponent, ContainerOrchestrationService {
 
@@ -465,6 +467,12 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             configuration = containerNetworkConfigurationHandler(containerDescription, configuration);
 
+            configuration = containerMemoryConfigurationHandler(containerDescription, configuration);
+
+            configuration = containerCpusConfigurationHandler(containerDescription, configuration);
+
+            configuration = containerGpusConfigurationHandler(containerDescription, configuration);
+
             if (containerDescription.isContainerPrivileged()) {
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
@@ -543,6 +551,44 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         if (networkMode.isPresent() && !networkMode.get().trim().isEmpty()) {
             configuration.withNetworkMode(networkMode.get().trim());
         }
+
+        return configuration;
+    }
+
+    private HostConfig containerMemoryConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        Optional<Long> memory = containerDescription.getMemory();
+        if (memory.isPresent()) {
+            try {
+                configuration.withMemory(memory.get());
+            } catch (NumberFormatException e) {
+                logger.warn("Memory value {} not valid", memory.get());
+            }
+        }
+
+        return configuration;
+    }
+
+    private HostConfig containerCpusConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        Optional<Float> cpus = containerDescription.getCpus();
+        cpus.ifPresent(cpu -> {
+            configuration.withCpuPeriod(100000L);
+            configuration.withCpuQuota((long) (100000L * cpus.get()));
+        });
+
+        return configuration;
+    }
+
+    private HostConfig containerGpusConfigurationHandler(ContainerConfiguration containerDescription,
+            HostConfig configuration) {
+
+        Optional<String> gpus = containerDescription.getGpus();
+        gpus.ifPresent(gpu -> configuration.withDeviceRequests(ImmutableList
+                .of(new DeviceRequest().withDriver("nvidia").withCount(gpu.equals("all") ? -1 : Integer.parseInt(gpu))
+                        .withCapabilities(ImmutableList.of(ImmutableList.of("gpu"))))));
 
         return configuration;
     }
@@ -823,7 +869,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
     }
 
     private String getImageTag(Image image) {
-        if (image.getRepoTags() == null || image.getRepoTags().length < 1 || (image.getRepoTags()[0].split(":").length < 2)) {
+        if (image.getRepoTags() == null || image.getRepoTags().length < 1
+                || (image.getRepoTags()[0].split(":").length < 2)) {
             return "";
         }
 

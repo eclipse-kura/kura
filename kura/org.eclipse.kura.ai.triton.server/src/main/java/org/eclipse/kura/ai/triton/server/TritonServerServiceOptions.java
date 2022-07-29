@@ -99,7 +99,12 @@ public class TritonServerServiceOptions {
     }
 
     public String getAddress() {
-        return getStringProperty(PROPERTY_ADDRESS);
+        String address = "";
+        final Object propertyAddress = this.properties.get(PROPERTY_ADDRESS);
+        if (propertyAddress instanceof String) {
+            address = ((String) propertyAddress).trim();
+        }
+        return address;
     }
 
     public boolean isLocalEnabled() {

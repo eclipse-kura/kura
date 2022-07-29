@@ -29,6 +29,21 @@ The parameters used to configure the Triton Service are the following:
 
 > **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
+## Triton Server Native Service component
+
+![triton_native_server]({{ site.baseurl }}/assets/images/builtin/triton_native_server.png)
+
+The parameters used to configure the Triton Service are the following:
+
+ - **Nvidia Triton Server ports**: the ports used to connect to the server for HTTP, GRPC, and Metrics services.
+ - **Local model repository path**: Specify the path on the filesystem where the models are stored.
+ - **Local model decryption password**: Specify the password to be used for decrypting models stored in the model repository. If none is specified, models are supposed to be plaintext.
+ - **Inference Models**: a comma-separated list of inference model names that the server will load. The models have to be already present in the filesystem where the server is running. This option simply tells the server to load the given models from a local or remote repository.
+ - **Local backends path**: Specify the path on the filesystem where the backends are stored.
+ - **Optional configuration for the local backends**: A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
+ - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
+ - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
+
 ## Triton Server Service component [deprecated since 5.2.0]
 
 The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local or remote Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway or to communicate to an external server to load specific models.

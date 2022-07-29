@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -32,13 +32,13 @@ public class KeystoreServiceOptionsTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullPropertiesCrypto() {
-        new KeystoreServiceOptions(null, null);
+        new FilesystemKeystoreServiceOptions(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNullCrypto() {
         Map<String, Object> properties = new HashMap<>();
-        new KeystoreServiceOptions(properties, null);
+        new FilesystemKeystoreServiceOptions(properties, null);
     }
 
     @Test
@@ -50,10 +50,12 @@ public class KeystoreServiceOptionsTest {
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn(CHANGEIT_PASSWORD.toCharArray());
         when(cryptoService.getKeyStorePassword(any(String.class))).thenReturn(CHANGEIT_PASSWORD.toCharArray());
 
-        KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
+        FilesystemKeystoreServiceOptions FilesystemKeystoreServiceOptions = new FilesystemKeystoreServiceOptions(
+                properties, cryptoService);
 
-        assertEquals("/tmp/keystore.ks", keystoreServiceOptions.getKeystorePath());
-        assertArrayEquals(CHANGEIT_PASSWORD.toCharArray(), keystoreServiceOptions.getKeystorePassword(cryptoService));
+        assertEquals("/tmp/keystore.ks", FilesystemKeystoreServiceOptions.getKeystorePath());
+        assertArrayEquals(CHANGEIT_PASSWORD.toCharArray(),
+                FilesystemKeystoreServiceOptions.getKeystorePassword(cryptoService));
     }
 
     @Test
@@ -68,10 +70,12 @@ public class KeystoreServiceOptionsTest {
         when(cryptoService.decryptAes("testPassword".toCharArray())).thenReturn("testPassword".toCharArray());
         when(cryptoService.getKeyStorePassword(any(String.class))).thenReturn("testPassword".toCharArray());
 
-        KeystoreServiceOptions keystoreServiceOptions = new KeystoreServiceOptions(properties, cryptoService);
+        FilesystemKeystoreServiceOptions FilesystemKeystoreServiceOptions = new FilesystemKeystoreServiceOptions(
+                properties, cryptoService);
 
-        assertEquals("/abc", keystoreServiceOptions.getKeystorePath());
-        assertArrayEquals("testPassword".toCharArray(), keystoreServiceOptions.getKeystorePassword(cryptoService));
+        assertEquals("/abc", FilesystemKeystoreServiceOptions.getKeystorePath());
+        assertArrayEquals("testPassword".toCharArray(),
+                FilesystemKeystoreServiceOptions.getKeystorePassword(cryptoService));
     }
 
     @Test
@@ -84,11 +88,13 @@ public class KeystoreServiceOptionsTest {
         when(cryptoService.encryptAes("testPassword".toCharArray())).thenReturn("encrypted".toCharArray());
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn("testPassword".toCharArray());
 
-        KeystoreServiceOptions keystoreServiceOptions1 = new KeystoreServiceOptions(properties, cryptoService);
+        FilesystemKeystoreServiceOptions FilesystemKeystoreServiceOptions1 = new FilesystemKeystoreServiceOptions(
+                properties, cryptoService);
 
-        KeystoreServiceOptions keystoreServiceOptions2 = new KeystoreServiceOptions(properties, cryptoService);
+        FilesystemKeystoreServiceOptions FilesystemKeystoreServiceOptions2 = new FilesystemKeystoreServiceOptions(
+                properties, cryptoService);
 
-        assertEquals(keystoreServiceOptions1, keystoreServiceOptions2);
+        assertEquals(FilesystemKeystoreServiceOptions1, FilesystemKeystoreServiceOptions2);
     }
 
     @Test
@@ -103,14 +109,16 @@ public class KeystoreServiceOptionsTest {
         when(cryptoService.decryptAes("encrypted".toCharArray())).thenReturn("testPassword".toCharArray());
         when(cryptoService.decryptAes("encrypted1".toCharArray())).thenReturn("testPassword1".toCharArray());
 
-        KeystoreServiceOptions keystoreServiceOptions1 = new KeystoreServiceOptions(properties, cryptoService);
+        FilesystemKeystoreServiceOptions FilesystemKeystoreServiceOptions1 = new FilesystemKeystoreServiceOptions(
+                properties, cryptoService);
 
         Map<String, Object> properties2 = new HashMap<>();
         properties2.put("keystore.path", "/abc1");
         properties2.put("keystore.password", "testPassword1");
-        KeystoreServiceOptions keystoreServiceOptions2 = new KeystoreServiceOptions(properties2, cryptoService);
+        FilesystemKeystoreServiceOptions FilesystemKeystoreServiceOptions2 = new FilesystemKeystoreServiceOptions(
+                properties2, cryptoService);
 
-        assertNotEquals(keystoreServiceOptions1, keystoreServiceOptions2);
+        assertNotEquals(FilesystemKeystoreServiceOptions1, FilesystemKeystoreServiceOptions2);
 
     }
 

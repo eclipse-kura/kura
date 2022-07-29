@@ -27,9 +27,9 @@ import org.eclipse.kura.crypto.CryptoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeystoreServiceOptions {
+public class FilesystemKeystoreServiceOptions {
 
-    private static final Logger logger = LoggerFactory.getLogger(KeystoreServiceOptions.class);
+    private static final Logger logger = LoggerFactory.getLogger(FilesystemKeystoreServiceOptions.class);
 
     private static final String KEY_SERVICE_PID = "kura.service.pid";
     static final String KEY_KEYSTORE_PATH = "keystore.path";
@@ -46,7 +46,7 @@ public class KeystoreServiceOptions {
     private final Password keystorePassword;
     private final boolean randomPassword;
 
-    public KeystoreServiceOptions(Map<String, Object> properties, final CryptoService cryptoService) {
+    public FilesystemKeystoreServiceOptions(Map<String, Object> properties, final CryptoService cryptoService) {
         if (isNull(properties) || isNull(cryptoService)) {
             throw new IllegalArgumentException("Input parameters cannot be null!");
         }
@@ -128,7 +128,7 @@ public class KeystoreServiceOptions {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        KeystoreServiceOptions other = (KeystoreServiceOptions) obj;
+        FilesystemKeystoreServiceOptions other = (FilesystemKeystoreServiceOptions) obj;
         return Arrays.equals(keystorePassword.getPassword(), other.keystorePassword.getPassword())
                 && Objects.equals(keystorePath, other.keystorePath) && Objects.equals(pid, other.pid)
                 && randomPassword == other.randomPassword;

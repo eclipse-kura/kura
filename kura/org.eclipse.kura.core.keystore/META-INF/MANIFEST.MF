@@ -54,3 +54,4 @@ Import-Package: com.eclipsesource.json;version="0.9.5",
 Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.kura.core.keystore.util;version="1.1.0"
+Eclipse-BuddyPolicy: ext

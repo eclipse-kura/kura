@@ -13,7 +13,7 @@ Kura provides three components for exposing the Triton Server service functional
 
 ## Triton Server Remote Service component
 
-![triton_server]({{ site.baseurl }}/assets/images/builtin/triton_remote_server.png)
+![triton_remote_server]({{ site.baseurl }}/assets/images/builtin/triton_remote_server.png)
 
 The parameters used to configure the Triton Service are the following:
 

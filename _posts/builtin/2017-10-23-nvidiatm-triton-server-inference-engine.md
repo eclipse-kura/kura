@@ -36,6 +36,12 @@ $ docker pull nvcr.io/nvidia/tritonserver:<xx.yy>-py3
 
 Where \<xx.yy\> is the version of Triton that you want to pull.
 
+### Native Triton installation on supported devices
+
+The official docs mention the possibility to perform a native installation on supported platform by [extracting the binaries](https://github.com/triton-inference-server/server/blob/main/docs/build.md#extract-build-artifacts) from the Docker images. To do so you must install the necessary dependencies (some can be found in the Jetson [runtime dependencies docs](https://github.com/triton-inference-server/server/blob/main/docs/jetson.md#runtime-dependencies-for-triton)) on the system. For Triton to support NVIDIA GPUs you must install CUDA, cuBLAS and cuDNN referencing the [support matrix](https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html).
+
+**Note**: for Python models the libraries available to the Python model are the ones available for the user running the Triton server. Therefore you'll need to install the libraries through `pip` for the `kurad` user.
+
 ### Triton Server setup
 
 The Triton Inference Server serves models from one or more model repositories that are specified when the server is started. The model repository is the directory where you place the models that you want Triton to serve. Be sure to follow [the instructions](https://github.com/triton-inference-server/server/blob/main/docs/model_repository.md) to setup the model repository directory.

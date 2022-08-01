@@ -70,7 +70,7 @@ The parameters used to configure the Triton Service are the following:
 
 ## Triton Server Native Service component
 
-The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway and handles its lifecycle. This operating mode supports more features for interacting with the server like the [AI Model Encryption](#ai-model-encryption-support).
+The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local native Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway and handles its lifecycle. This operating mode supports more features for interacting with the server like the [AI Model Encryption](#ai-model-encryption-support).
 
 > **Requirement**: `tritonserver` executable needs to be available in the path to the `kurad` user. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.
 

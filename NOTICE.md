@@ -35,8 +35,8 @@ This project leverages the following third party content.
 
 ### Maven Dependencies
 
-- maven/mavencentral/com.eclipsesource.jaxrs/jersey-min/2.22.2, NOASSERTION, restricted, clearlydefined
-- maven/mavencentral/com.eclipsesource.jaxrs/publisher/5.3.1, NOASSERTION, restricted, clearlydefined
+maven/mavencentral/com.eclipsesource.jaxrs/jersey-min/2.22.2, CDDL-1.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND (Apache-2.0 AND LGPL-2.1-or-later AND MPL-1.1) AND (CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND Apache-2.0 AND (Apache-2.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND CC0-1.0 AND (Apache-2.0 AND CC0-1.0) AND (Apache-2.0 AND CC-PDDC) AND (CDDL-1.0 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND (CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND W3C) AND (CC0-1.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND (CC-PDDC AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND MIT) AND (CDDL-1.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND MIT), restricted, #3084
+maven/mavencentral/com.eclipsesource.jaxrs/publisher/5.3.1, EPL-1.0, approved, #3085
 maven/mavencentral/com.eclipsesource.minimal-json/minimal-json/0.9.5, MIT, approved, CQ10061
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.10.3, Apache-2.0, approved, CQ21280
 maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.10.3, Apache-2.0, approved, CQ21186
@@ -53,8 +53,8 @@ maven/mavencentral/com.google.guava/guava/25.0-jre, Apache-2.0, approved, clearl
 maven/mavencentral/com.google.protobuf/protobuf-java/3.19.3, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/com.h2database/h2/2.1.214, (EPL-1.0 AND MPL-2.0) AND (EPL-1.0 AND MPL-2.0 AND LGPL-3.0-or-later) AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #2713
 maven/mavencentral/com.sun.xml.bind/jaxb-osgi/2.3.3, BSD-3-Clause, approved, ee4j.jaxb-impl
-- maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
-- maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
+maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
+maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
 maven/mavencentral/commons-beanutils/commons-beanutils/1.9.3, Apache-2.0, approved, CQ12654
 maven/mavencentral/commons-codec/commons-codec/1.13, Apache-2.0, approved, clearlydefined
 maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
@@ -88,7 +88,7 @@ maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, ap
 maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/1.4.2, , approved, eclipse
 maven/mavencentral/jakarta.xml.ws/jakarta.xml.ws-api/2.3.3, , approved, eclipse
 maven/mavencentral/net.java.dev.jna/jna/5.8.0, Apache-2.0 OR LGPL-2.1-or-later, approved, CQ23217
-maven/mavencentral/org.apache.activemq/artemis-mqtt-protocol/2.6.4, Apache-2.0, restricted, clearlydefined
+maven/mavencentral/org.apache.activemq/artemis-mqtt-protocol/2.6.4, Apache-2.0, approved, #3086
 maven/mavencentral/org.apache.activemq/artemis-native/2.6.4, Apache-2.0, approved, CQ19010
 maven/mavencentral/org.apache.camel/camel-amqp/2.25.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.apache.camel/camel-core-osgi/2.25.3, Apache-2.0, approved, clearlydefined
@@ -179,6 +179,7 @@ maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved,
 maven/mavencentral/org.osgi/osgi.annotation/6.0.1, Apache-2.0, approved, CQ11704
 maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.32, Apache-2.0, approved, CQ12843
 maven/mavencentral/org.slf4j/slf4j-api/1.7.32, MIT, approved, CQ13368
+
 
 ### Additional Dependencies
 

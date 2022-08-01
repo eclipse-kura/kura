@@ -33,1112 +33,154 @@ The project maintains the following source code repositories:
 
 This project leverages the following third party content.
 
-antlr4-runtime Version: 4.5 (4.5)
-
-* License: New BSD license
-* Project: http://www.antlr.org
-* Source: https://github.com/antlr/antlr4/tree/4.5
-
-Apache Camel AMQP (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: http://camel.apache.org/source.html
-
-Apache Camel Core (2.16.0)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source:
-   http://www.apache.org/dyn/closer.cgi/camel/apache-camel/2.16.0/apache-camel-2.16.0-src.zip
-
-Apache Camel Core OSGi (2.16.0)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source:
-   https://repository.apache.org/content/repositories/releases/org/apache/camel/camel-core-osgi/2.16.0/camel-core-osgi-2.16.0-sources.jar
-
-Apache Camel JMS (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: http://svn.apache.org/viewvc/qpid/java/trunk/
-
-Apache Camel Kura (2.16.0)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source:
-   https://repository.apache.org/content/repositories/releases/org/apache/camel/camel-kura/2.16.0/camel-kura-2.16.0-sources.jar
-
-Apache Camel Spring (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: http://svn.apache.org/viewvc/qpid/java/trunk/
-
-Apache Commons BeanUtils (1.9.2)
-
-* License: Apache-2.0 
-
-Apache Commons BeanUtils (1.9.3)
-
-* License: Apache-2.0
-
-Apache Commons CSV (1.4)
-
-* License: Apache-2.0
-
-Apache Commons Exec (1.3)
-
-* License: Apache License, 2.0
-
-Apache Commons FileUpload (1.2.2)
-
-* License: Apache License 2.0
-
-Apache Commons IO (2.4.0)
-
-* License: Apache License 2.0
-* Project: http://commons.apache.org/proper/commons-io/
-* Source:
-   http://www.bizdirusa.com/mirrors/apache//commons/io/source/commons-io-2.4-src.zip
-
-Apache Commons Net (3.1)
-
-* License: Apache License 2.0
-
-Apache commons-lang3 (3.4)
-
-* License: Apache License, 2.0
-
-Apache Felix Dependency Manager (3.0.0)
-
-* License: Apache License 2.0
-* Project: http://felix.apache.org/site/apache-felix-dependency-manager.html
-* Source:
-   http://archive.apache.org/dist/felix/org.apache.felix.dependencymanager-3.0.0-sources.jar
-
-Apache Felix Deployment Admin (0.9.5)
-
-* License: Apache License 2.0
-* Project: http://felix.apache.org/site/apache-felix-deployment-admin.html
-* Source:
-   http://apache.mirrors.hoobly.com//felix/org.apache.felix.deploymentadmin-0.9.5-project.zip
-
-Apache Felix Gogo (0.8.0)
-
-* License: Apache License 2.0
-
-Apache Geronimo Java Transaction API (JTA) 1.1_spec (1.1.1)
-
-* License: Apache-2.0 
-
-Apache geronimo-jms_2.0_spec (1.0)
-
-* License: Apache-2.0
-* Project: http://geronimo.apache.org/maven/specs/index.html
-* Source:
-   http://svn.apache.org/viewcvs.cgi/geronimo/specs/tags/geronimo-jms_2.0_spec-1.0-alpha-2
-
-Apache Log4j (1.2.17)
-
-* License: Apache License 2.0
-* Project: http://logging.apache.org/log4j/1.2/
-* Source:
-   http://www.apache.org/dyn/closer.cgi/logging/log4j/1.2.17/log4j-1.2.17.zip
-
-Apache Log4j Extras (1.1)
-
-* License: Apache License 2.0
-* Project: http://logging.apache.org/log4j/extras/
-* Source:
-   http://archive.apache.org/dist/logging/log4j/companions/extras/1.1/apache-log4j-extras-1.1.zip
-
-Apache Qpid Client (0.28)
-
-* License: Apache License, 2.0
-* Project: http://qpid.apache.org
-* Source: http://svn.apache.org/viewvc/qpid/java/trunk/
-
-Apache Qpid Common (0.28)
-
-* License: Apache License, 2.0
-* Project: http://qpid.apache.org/
-* Source: http://svn.apache.org/viewvc/qpid/java/trunk/
-
-artemis-commons (2.1.0)
-
-* License: Apache-2.0 AND LicenseRef-Public-Domain
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-commons (2.5.0)
-
-* License: Apache-2.0 AND LicenseRef-Public-Domain
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-commons (2.6.4)
-
-* License: Apache-2.0 AND LicenseRef-Public-Domain
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-core-client (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-core-client (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-core-client (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-jms-client (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-jms-client (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-jms-client (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-jms-server (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-jms-server (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-jms-server (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-journal (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-journal (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-journal (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-mqtt-protocol (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-mqtt-protocol (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-mqtt-protocol (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-native (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-native (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-native (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-selector (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-selector (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-selector (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-server (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-server (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-server (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-service-extensions (2.1.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-service-extensions (2.5.0)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-artemis-service-extensions (2.6.4)
-
-* License: Apache-2.0
-* Project: https://activemq.apache.org/artemis/
-* Source: https://github.com/apache/activemq-artemis
-
-Backbone.js (1.2.1)
-
-* License: MIT License
-* Project: http://backbonejs.org/
-* Source: https://github.com/jashkenas/backbone/blob/1.2.1/backbone.js
-
-c10n (1.2)
-
-* License: Apache License, 2.0
-* Project: https://github.com/rodionmoiseev/c10n
-* Source: https://github.com/rodionmoiseev/c10n/tree/master/core
-
-com.eurotech:gpsd4java:1.0.0 (1.0.0)
-
-* License: Apache-2.0
-
-com.github.hypfvieh:bluez-dbus:0.1.3 (0.1.3)
-
-* License: MIT
-
-com.github.hypfvieh:dbus-java:3.3.0 (3.3.0)
-
-* License: MIT
-
-com.github.hypfvieh:java-utils:1.0.6 (1.0.6)
-
-* License: MIT
-
-com.github.jnr:jffi:1.3.1 (1.3.1)
-
-* License: Apache-2.0 OR LGPL-3.0-or-later
-
-com.github.jnr:jnr-a64asm:1.0.0 (1.0.0)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-constants:0.10.1 (0.10.1)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-enxio:0.28 (0.28)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-enxio:0.32.3 (0.32.3)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-ffi:2.1.15 (2.1.15)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-ffi:2.2.1 (2.2.1)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-posix::3.0.58 (3.0.58)
-
-* License: EPL-2.0 OR GPL-2.0-or-later OR LGPL-2.1-or-later
-
-com.github.jnr:jnr-posix::3.1.4 (3.1.4)
-
-* License: EPL-2.0 OR (GPL-2.0-or-later OR LGPL-2.1-or-later)
-
-com.github.jnr:jnr-unixsocket:0.33 (0.33)
-
-* License: Apache-2.0
-
-com.github.jnr:jnr-unixsocket:0.38.5 (0.38.5)
-
-* License: Apache-2.0
-
-commons-collections (3.2.2)
-
-* License: Apache-2.0 
-
-commons-fileupload (1.3.2)
-
-* License: Apache License, 2.0
-
-commons-fileupload (1.3.3)
-
-* License: Apache-2.0
-
-ConditionalIgnoreRule Version: Unknown (n/a)
-
-* License: Eclipse Public License 1.0
-* Project: http://www.codeaffine.com
-* Source: https://gist.github.com/rherrmann/7447571
-
-dbus-java (2.7)
-
-* License: Expat License (MIT Style)
-* Project: http://dbus.freedesktop.org/doc/dbus-java/
-* Source: http://dbus.freedesktop.org/releases/dbus-java/dbus-java-2.7.tar.gz
-
-Font Awesome (4.3.0)
-
-* License: OFL-1.1 AND MIT
-
-geronimo-json_1.0_spec (1.0)
-
-* License: Apache-2.0
-
-Glassfish servlet-api (3.1)
-
-* License: CDDL, Apache 2.0
-
-Google Gson (2.2.4)
-
-* License: Apache-2.0
-
-Google Gson (2.7)
-
-* License: Apache-2.0
-
-Google Guava (19.0)
-
-* License: Apache-2.0 
-
-Google Guava (25.0)
-
-* License: Apache-2.0 AND CC0-1.0
-
-Google Web Toolkit GWT User Library (2.4.0)
-
-* License: Apache License, 2.0, W3C, CDDL, Apache License 1.1
-* Project: http://www.gwtproject.org/
-* Source: http://google-web-toolkit.googlecode.com/files/gwt-2.4.0.zip
-
-Google Web Toolkit GWT User Library (2.7.0)
-
-* License: Apache License, 2.0, W3C, CDDL, Apache 1.1
-* Project: http://www.gwtproject.org/
-* Source: http://goo.gl/t7FQSn
-
-Google Web Toolkit GWT User Library (2.8.0)
-
-* License: Apache License, 2.0, W3C, CDDL
-* Project: http://www.gwtproject.org/
-* Source: https://gwt.googlesource.com/gwt/
-
-GWT Log (3.1.8)
-
-* License: Apache License, 2.0
-* Project: http://code.google.com/p/gwt-log/
-* Source: http://gwt-log.googlecode.com/files/gwt-log-3.1.8.jar
-
-gwtbootstrap3 (0.9.1)
-
-* License: Apache License, 2.0
-* Project: https://github.com/gwtbootstrap3/gwtbootstrap3
-* Source: https://github.com/gwtbootstrap3/gwtbootstrap3/tree/0.9.1
-
-H2 (1.4.199)
-
-* License: (EPL-1.0 OR MPL-2.0) AND (EPL-1.0 OR MPL-2.0 OR LGPL-3.0-or-later)
-   AND BSD-3-Clause AND LicenseRef-Public-Domain
-
-h2 database (1.4.192)
-
-* License: EPL-1.0
-
-hamcrest - all (1.1)
-
-* License: New BSD license
-
-hamcrest-core (1.3)
-
-* License: New BSD license
-
-hidapi natives (1.1)
-
-* License: New BSD License
-* Project: http://code.google.com/p/javahidapi/
-* Source: http://code.google.com/p/javahidapi/source/checkout
-
-hsqldb (2.3.0)
-
-* License: New BSD license
-* Project: http://sourceforge.net/projects/hsqldb/
-* Source:
-   http://sourceforge.net/projects/hsqldb/files/hsqldb/hsqldb_2_3/hsqldb-2.3.0.zip/download
-
-javahidapi (1.1)
-
-* License: New BSD License
-* Project: http://code.google.com/p/javahidapi/
-* Source: http://code.google.com/p/javahidapi/source/checkout
-
-javax-usb (1.0.2)
-
-* License: Common Public License 1.0
-* Project: http://javax-usb.sourceforge.net/
-* Source: http://javax-usb.cvs.sourceforge.net/javax-usb/javax-usb/
-
-javax-usb-ri (1.0.2)
-
-* License: Common Public License 1.0
-* Project: http://javax-usb.sourceforge.net/
-* Source: http://javax-usb.cvs.sourceforge.net/javax-usb/javax-usb-ri/
-
-javax-usb-ri-linux (1.0.3)
-
-* License: Common Public License 1.0
-* Project: http://javax-usb.sourceforge.net/
-* Source: http://javax-usb.cvs.sourceforge.net/javax-usb/javax-usb-ri-linux/
-
-jboss-logging (3.3.1)
-
-* License: Apache-2.0
-* Project: http://www.jboss.org
-* Source: https://github.com/jboss-logging/jboss-logging
-
-jcl-over-slf4j (1.7.25)
-
-* License: Apache-2.0
-
-Jersey 2.22.2 Bundle Minimal (repackaged by OSGi JAX-RS Connector (5.3.1)
-
-* License: (CDDL-1.1 OR GPL-2.0-only OR GPL-2.0-only with
-   Classpath-exception-2.0) AND (MPL-1.1 OR LGPL-2.1-or-later OR Apache-2.0) AND
-   Apache-2.0 AND LicenseRef-Public-Domain 
-
-joint.shapes.devs.js (0.9.6)
-
-* License: Mozilla Public License 2.0 (MPL)
-* Project: http://jointjs.com/download
-* Source: http://jointjs.com/cms/downloads/joint.shapes.devs.js
-
-joint.shapes.devs.js (0.9.9)
-
-* License: MPL-2.0
-* Project: http://jointjs.com/download
-* Source:
-   https://github.com/clientIO/joint/blob/v0.9.9/dist/joint.shapes.devs.js
-
-JointJs (0.9.9)
-
-* License: Mozilla Public License 2.0 (MPL)
-* Project: http://jointjs.com/
-* Source: http://jointjs.com/cms/downloads/joint.js
-
-jquery (1.11.2)
-
-* License: MIT License
-
-jQuery (2.0.3)
-
-* License: MIT License
-
-json.org java impl of json parser Version: 2008-09-18 (n/a)
-
-* License: MIT License
-
-junit (4.10)
-
-* License: Common Public License 1.0
-
-JUnit (4.12)
-
-* License: Eclipse Public License
-
-Knowhowlab Monitor Admin (1.0.2)
-
-* License: Apache License, 2.0
-* Project: http://code.google.com/p/osgilab/wiki/MonitorAdmin
-* Source: http://osgilab.googlecode.com/files/monitoradmin-1.0.2-sources.jar
-
-libmatthew (0.8)
-
-* License: Expat License (MIT Style)
-* Project: http://www.matthew.ath.cx/projects/java/
-* Source: http://www.matthew.ath.cx/projects/java/libmatthew-java-0.8.tar.gz
-
-libusb4java (1.2.0)
-
-* License: MIT License
-* Project: http://usb4java.org/
-* Source: https://github.com/usb4java/libusb4java/
-
-lodash (3.10.1)
-
-* License: MIT License
-* Project: https://lodash.com/
-* Source: https://github.com/lodash/lodash/blob/3.10.1/lodash.js
-
-log4j-api (2.8.2)
-
-* License: Apache-2.0
-
-log4j-core (2.8.2)
-
-* License: Apache-2.0
-* Project: https://logging.apache.org/log4j/2.x/index.html
-* Source:
-   https://archive.apache.org/dist/logging/log4j/2.8.2/apache-log4j-2.8.2-src.tar.gz
-
-log4j-slf4j-impl (2.8.2)
-
-* License: Apache-2.0
-* Project: https://logging.apache.org/log4j/2.x/index.html
-
-minimal-json (0.9.4)
-
-* License: MIT License
-
-Mockito - Core (1.10.19)
-
-* License: Apache License, 2.0, New BSD license, MIT license
-
-Moka7 (n/a)
-
-* License: Eclipse Public License 1.0
-* Project: http://snap7.sourceforge.net/
-* Source: https://sourceforge.net/projects/snap7/files/Moka7/1.0.2/
-
-Netty (4.1.9)
-
-* License: Apache-2.0, Public Domain, New BSD License, MIT
-* Project: http://netty.io/
-* Source: https://github.com/netty/netty
-
-Netty (4.1.22)
-
-* License: Apache-2.0, Public Domain, New BSD License, MIT 
-
-Netty (4.1.24)
-
-* License: Apache-2.0 AND Public Domain AND BSD-3-Clause AND MIT
-
-Objenesis (2.4)
-
-* License: Apache License, 2.0
-
-OpenJDK Device I/O (1.0)
-
-* License: GNU General Public License, version 2, with the Classpath Exception
-* Project: https://wiki.openjdk.java.net/display/dio/Main
-* Source: http://hg.openjdk.java.net/dio/dev/archive/tip.tar.gz
-
-org.apache.camel : camel-amqp : (2.21.1)
-
-* License: Apache-2.0
-* Project: https://camel.apache.org/
-* Source: https://github.com/apache/camel/
-
-org.apache.camel : camel-amqp : (2.25.3)
-
-* License: Apache-2.0
-
-org.apache.camel : camel-core : (2.21.1)
-
-* License: Apache-2.0
-* Project: https://camel.apache.org/
-* Source: https://github.com/apache/camel/
-
-org.apache.camel : camel-core : (2.25.3)
-
-* License: Apache-2.0
-
-org.apache.camel : camel-core-osgi : (2.21.1)
-
-* License: Apache-2.0
-* Project: https://camel.apache.org/
-* Source: https://github.com/apache/camel/
-
-org.apache.camel : camel-core-osgi : (2.25.3)
-
-* License: Apache-2.0
-
-org.apache.camel : camel-jms : (2.21.1)
-
-* License: Apache-2.0
-* Project: https://camel.apache.org/
-* Source: https://github.com/apache/camel/
-
-org.apache.camel : camel-jms : (2.25.3)
-
-* License: Apache-2.0
-
-org.apache.camel : camel-script : (2.21.1)
-
-* License: Apache-2.0
-* Project: https://camel.apache.org/
-* Source: https://github.com/apache/camel/tree/master/components/camel-script
-
-org.apache.camel : camel-script : (2.25.3)
-
-* License: Apache-2.0
-
-org.apache.camel : camel-stream : (2.21.1)
-
-* License: Apache-2.0
-* Project: https://camel.apache.org/
-* Source: https://github.com/apache/camel/
-
-org.apache.camel : camel-stream : (2.25.3)
-
-* License: Apache-2.0
-
-org.apache.camel:camel-core:2.17.2 (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: https://github.com/apache/camel
-
-org.apache.camel:camel-kura:2.17.2 (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: https://github.com/apache/camel
-
-org.apache.camel:camel-osgi:2.17.2 (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: https://github.com/apache/camel
-
-org.apache.camel:camel-stream:2.17.2 (2.17.2)
-
-* License: Apache License, 2.0
-* Project: http://camel.apache.org/
-* Source: https://github.com/apache/camel
-
-org.apache.felix:org.apache.felix.useradmin:1.0.4 (1.0.4)
-
-* License: Apache-2.0
-
-org.apache.felix:org.apache.felix.useradmin:1.0.4.k1 (1.0.4)
-
-* License: Apache-2.0
-
-org.apache.httpcomponents.client5:httpclient5:5.0.3 (5.0.3)
-
-* License: Apache-2.0 and MIT
-
-org.apache.qpid : proton-j : (0.26.0)
-
-* License: Apache-2.0
-* Project: https://qpid.apache.org/proton/index.html
-* Source: https://github.com/apache/qpid-proton-j
-
-org.apache.qpid : qpid-jms-client : (0.31.0)
-
-* License: Apache-2.0
-* Project: https://qpid.apache.org/components/jms/index.html
-* Source: https://github.com/apache/qpid-jms
-
-org.apache.servicemix.bundles : org.apache.servicemix.bundles.spring-beans :
-(4.3.14)
-
-* License: Apache-2.0
-* Project: https://servicemix.apache.org/
-* Source: https://github.com/apache/servicemix-bundles
-
-org.apache.servicemix.bundles : org.apache.servicemix.bundles.spring-context :
-(4.3.14)
-
-* Project: https://servicemix.apache.org/
-* Source: https://github.com/apache/servicemix-bundles
-
-org.apache.servicemix.bundles : org.apache.servicemix.bundles.spring-core :
-(4.3.14)
-
-* License: Apache-2.0
-
-org.apache.servicemix.bundles : org.apache.servicemix.bundles.spring-expression
-: (4.3.14)
-
-* License: Apache-2.0
-
-org.apache.servicemix.bundles : org.apache.servicemix.bundles.spring-jms :
-(4.3.14)
-
-* License: Apache-2.0
-* Project: https://servicemix.apache.org/
-* Source: https://github.com/apache/servicemix-bundles
-
-org.apache.servicemix.bundles : org.apache.servicemix.bundles.spring-tx :
-(4.3.14)
-
-* License: Apache-2.0
-* Project: https://servicemix.apache.org/
-* Source: https://github.com/apache/servicemix-bundles
-
-org.osgi.service.cm (1.5.0)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.osgi.service.component (1.3.0)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.osgi.service.event (1.3.1)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.osgi.service.io (1.0.0)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.osgi.service.wireadmin (1.0.1)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.osgi.util.measurement (1.0.1)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.osgi.util.position (1.0.1)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source: https://osgi.org/git/build.git
-
-org.ow2.asm:asm-analysis:7.1 (7.1)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-analysis:9.0 (9.0)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-commons:7.1 (7.1)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-commons:9.0 (9.0)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-tree:7.1 (7.1)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-tree:9.0 (9.0)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-util:7.1 (7.1)
-
-* License: BSD-3-Clause
-
-org.ow2.asm:asm-util:9.0 (9.0)
-
-* License: BSD-3-Clause
-
-org.quartz (2.2.3)
-
-* License: Apache License, 2.0
-* Project: http://www.quartz-scheduler.org/
-* Source: https://github.com/quartz-scheduler/quartz
-
-org.springframework.aop (4.2.4)
-
-* License: Apache License, 2.0
-
-org.springframework.beans (4.2.4)
-
-* License: Apache License, 2.0
-
-org.springframework.context (4.2.4)
-
-* License: Apache License, 2.0
-
-org.springframework.expression (4.2.4)
-
-* License: Apache License, 2.0
-
-org.springframework.jms (4.2.4)
-
-* License: Apache License, 2.0
-
-org.tigris.mtoolkit.certmanager (1.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.common (5.1.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.dpeditor (1.2.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.dpeditor.userdoc (1.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.iagent (3.1.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.iagent.rpc (3.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.osgimanagement (5.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.osgimanagement.ext.application (1.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.osgimanagement.ext.dp (1.0.0.20110411)
-
-* License: Eclipse Public License 
-
-org.tigris.mtoolkit.osgimanagement.ext.dp.userdoc (1.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-org.tigris.mtoolkit.userdoc (1.0.0.20110411)
-
-* License: Eclipse Public License 
-* Project: http://mtoolkit.tigris.org/
-* Source:
-   http://mtoolkit.tigris.org/files/documents/6489/48916/org.tigris.mtoolkit.sdk-3.1.8-20110411-0918.zip
-
-OSGi JAX-RS Connector (4.1)
-
-* License: EPL-1.0
-
-OSGi Service Platform Compendium Companion Code (4.3.0.201111011443)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-* Source:
-   http://repo1.maven.org/maven2/org/osgi/org.osgi.compendium/4.3.0/org.osgi.compendium-4.3.0.jar
-
-OSGi Service Platform Core Annotation Code (6.0.1)
-
-* License: Apache License, 2.0
-* Project: http://www.osgi.org/
-
-protobuf-java (3.8.0)
-
-* License: BSD-3-Clause
-
-Protocol Buffers (2.4.0)
-
-* License: New BSD license
-* Project: http://code.google.com/p/protobuf/
-* Source: http://protobuf.googlecode.com/files/protobuf-2.4.1.zip
-
-Protocol Buffers (2.6.0)
-
-* License: New BSD license
-* Project: http://code.google.com/p/protobuf/
-* Source: https://protobuf.googlecode.com/svn/rc/protobuf-2.6.0.tar.gz
-
-qpid-jms-client (0.11.0)
-
-* License: Apache License, 2.0
-* Project: https://qpid.apache.org
-* Source: https://git-wip-us.apache.org/repos/asf?p=qpid-jms.git
-
-SLF4J API (1.6.4)
-
-* License: MIT License
-
-SLF4J API (1.7.21)
-
-* License: MIT License
-* Project: http://www.slf4j.org
-* Source: https://github.com/qos-ch/slf4j
-
-SLF4J jcl-over-slf4j (1.7.21)
-
-* License: Apache License, 2.0
-* Project: http://www.slf4j.org/
-* Source: https://github.com/qos-ch/slf4j
-
-SLF4J JDK14 Binding (1.6.4)
-
-* License: MIT License
-* Project: http://www.slf4j.org
-* Source: https://github.com/qos-ch/slf4j
-
-SLF4J JDK14 Binding (1.7.21)
-
-* License: MIT License
-* Project: http://www.slf4j.org
-* Source: https://github.com/qos-ch/slf4j
-
-slf4j-api (1.7.25)
-
-* License: MIT
-
-slf4j-jdk14 (1.7.25)
-
-* License: MIT
-
-slf4j-log4j12 (1.6.0)
-
-* License: MIT license, + MIT License with no endorsement clause
-* Project: http://www.slf4j.org/
-* Source: https://github.com/qos-ch/slf4j/archive/v_1.6.0.zip
-
-slf4j-log4j12 (1.7.21)
-
-* License: MIT License
-* Project: http://www.slf4j.org
-* Source: https://github.com/qos-ch/slf4j
-
-SODA - Service Oriented Device Architecture Version: Device Kit (1.0.0)
-
-* License: Eclipse Public License
-
-spring-tx (4.2.4)
-
-* License: Apache License, 2.0
-
-Tango Icons (0.8.90)
-
-* License: Public Domain
-
-Tinyb (n/a)
-
-* License: MIT
-* Project: http://iotdk.intel.com/docs/master/tinyb/java/
-* Source: https://github.com/intel-iot-devkit/tinyb
-
-Tinyb (0.5.1)
-
-* License: MIT
-* Project: http://iotdk.intel.com/docs/master/tinyb/java/
-* Source: https://github.com/intel-iot-devkit/tinyb
-
-Twitter Bootstrap (3.3.2)
-
-* License: MIT License
-
-udev Example (0.1.0)
-
-* License: Custom Permissive Terms
-* Project: http://www.signal11.us/oss/udev/
-* Source: http://www.signal11.us/oss/udev/udev_example.c
-
-usb4java (1.2.0)
-
-* License: MIT License
-* Project: http://usb4java.org/
-* Source: http://github.com/usb4java/
-
-usb4java-javax (1.2.0)
-
-* License: MIT License
-* Project: http://usb4java.org/
-* Source: https://github.com/usb4java/usb4java-javax
+### Maven Dependencies
+
+- maven/mavencentral/com.eclipsesource.jaxrs/jersey-min/2.22.2, NOASSERTION, restricted, clearlydefined
+- maven/mavencentral/com.eclipsesource.jaxrs/publisher/5.3.1, NOASSERTION, restricted, clearlydefined
+maven/mavencentral/com.eclipsesource.minimal-json/minimal-json/0.9.5, MIT, approved, CQ10061
+maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.10.3, Apache-2.0, approved, CQ21280
+maven/mavencentral/com.fasterxml.jackson.core/jackson-core/2.10.3, Apache-2.0, approved, CQ21186
+maven/mavencentral/com.fasterxml.jackson.core/jackson-databind/2.10.3, Apache-2.0, approved, CQ21187
+maven/mavencentral/com.github.docker-java/docker-java-api/3.2.12, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.docker-java/docker-java-core/3.2.12, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.docker-java/docker-java-transport-httpclient5/3.2.12, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.docker-java/docker-java-transport/3.2.12, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.docker-java/docker-java/3.2.12, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.github.hypfvieh/bluez-dbus-osgi/0.1.4, MIT, approved, clearlydefined
+maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.google.code.findbugs/jsr305/3.0.1, Apache-2.0, approved, #20
+maven/mavencentral/com.google.guava/guava/25.0-jre, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.google.protobuf/protobuf-java/3.19.3, BSD-3-Clause, approved, clearlydefined
+maven/mavencentral/com.h2database/h2/2.1.214, (EPL-1.0 AND MPL-2.0) AND (EPL-1.0 AND MPL-2.0 AND LGPL-3.0-or-later) AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #2713
+maven/mavencentral/com.sun.xml.bind/jaxb-osgi/2.3.3, BSD-3-Clause, approved, ee4j.jaxb-impl
+- maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.core.jobs/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
+- maven/mavencentral/com.vertispan.j2cl.external/org.eclipse.equinox.preferences/0.10.0-3c97afeac, Apache-2.0, restricted, clearlydefined
+maven/mavencentral/commons-beanutils/commons-beanutils/1.9.3, Apache-2.0, approved, CQ12654
+maven/mavencentral/commons-codec/commons-codec/1.13, Apache-2.0, approved, clearlydefined
+maven/mavencentral/commons-collections/commons-collections/3.2.2, Apache-2.0, approved, CQ10385
+maven/mavencentral/commons-fileupload/commons-fileupload/1.3.3, Apache-2.0, approved, CQ13884
+maven/mavencentral/commons-io/commons-io/2.11.0, Apache-2.0, approved, CQ23745
+maven/mavencentral/commons-io/commons-io/2.6, Apache-2.0, approved, CQ19090
+maven/mavencentral/commons-lang/commons-lang/2.6, Apache-2.0, approved, CQ6183
+maven/mavencentral/commons-net/commons-net/3.8.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-api/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-context/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-core/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-netty-shaded/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-protobuf-lite/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-protobuf/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.grpc/grpc-stub/1.33.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/io.netty/netty-all/4.1.68.Final, Apache-2.0 AND MIT AND BSD-3-Clause AND CC0-1.0 AND LicenseRef-Public-Domain, approved, CQ22582
+maven/mavencentral/io.netty/netty-buffer/4.1.68.Final, Apache-2.0, approved, CQ21842
+maven/mavencentral/io.netty/netty-codec-http/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-codec-mqtt/4.1.68.Final, Apache-2.0 OR LicenseRef-Public-Domain OR BSD-2-Clause OR MIT, approved, CQ15280
+maven/mavencentral/io.netty/netty-codec/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-common/4.1.68.Final, Apache-2.0 AND MIT AND CC0-1.0, approved, CQ21843
+maven/mavencentral/io.netty/netty-handler/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-resolver/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-native-epoll/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-native-kqueue/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport-native-unix-common/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.netty/netty-transport/4.1.68.Final, Apache-2.0 AND BSD-3-Clause AND MIT, approved, CQ20926
+maven/mavencentral/io.perfmark/perfmark-api/0.19.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/jakarta.activation/jakarta.activation-api/1.2.2, EPL-2.0 OR BSD-3-Clause OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.jaf
+maven/mavencentral/jakarta.xml.bind/jakarta.xml.bind-api/2.3.3, BSD-3-Clause, approved, ee4j.jaxb
+maven/mavencentral/jakarta.xml.soap/jakarta.xml.soap-api/1.4.2, , approved, eclipse
+maven/mavencentral/jakarta.xml.ws/jakarta.xml.ws-api/2.3.3, , approved, eclipse
+maven/mavencentral/net.java.dev.jna/jna/5.8.0, Apache-2.0 OR LGPL-2.1-or-later, approved, CQ23217
+maven/mavencentral/org.apache.activemq/artemis-mqtt-protocol/2.6.4, Apache-2.0, restricted, clearlydefined
+maven/mavencentral/org.apache.activemq/artemis-native/2.6.4, Apache-2.0, approved, CQ19010
+maven/mavencentral/org.apache.camel/camel-amqp/2.25.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.camel/camel-core-osgi/2.25.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.camel/camel-core/2.25.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.camel/camel-jms/2.25.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.camel/camel-script/2.25.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.camel/camel-stream/2.25.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.commons/commons-compress/1.21, Apache-2.0 AND BSD-3-Clause AND bzip2-1.0.6 AND LicenseRef-Public-Domain, approved, CQ23710
+maven/mavencentral/org.apache.commons/commons-csv/1.4, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.commons/commons-exec/1.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.commons/commons-lang3/3.12.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.felix/org.apache.felix.dependencymanager/3.0.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.felix/org.apache.felix.deploymentadmin/0.9.5, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.geronimo.specs/geronimo-jms_2.0_spec/1.0-alpha-2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.geronimo.specs/geronimo-json_1.0_spec/1.0-alpha-1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.geronimo.specs/geronimo-jta_1.1_spec/1.1.1, Apache-2.0, approved, CQ2334
+maven/mavencentral/org.apache.httpcomponents.client5/httpclient5/5.0.3, Apache-2.0 and MIT, approved, CQ23948
+maven/mavencentral/org.apache.httpcomponents.core5/httpcore5/5.0.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.logging.log4j/log4j-api/2.17.1, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.logging.log4j/log4j-core/2.17.1, Apache-2.0, approved, #2168
+maven/mavencentral/org.apache.logging.log4j/log4j-slf4j-impl/2.17.1, Apache-2.0, approved, #2537
+maven/mavencentral/org.apache.qpid/proton-j/0.33.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.qpid/qpid-jms-client/0.45.0, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-beans/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16239
+maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-context/4.3.20.RELEASE_1, , approved, CQ16240
+maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-core/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16241
+maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-expression/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16242
+maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-jms/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16243
+maven/mavencentral/org.apache.servicemix.bundles/org.apache.servicemix.bundles.spring-tx/4.3.20.RELEASE_1, Apache-2.0, approved, CQ16244
+maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.71, Apache-2.0, approved, #2665
+maven/mavencentral/org.bouncycastle/bcpkix-jdk18on/1.71, MIT, approved, #2662
+maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.71, MIT AND LicenseRef-scancode-ocb-open-source-2013, approved, #2666
+maven/mavencentral/org.bouncycastle/bctls-jdk18on/1.71, MIT, approved, #2664
+maven/mavencentral/org.bouncycastle/bcutil-jdk18on/1.71, MIT, approved, #2663
+maven/mavencentral/org.eclipse.jetty/jetty-continuation/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-http/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-io/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-security/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-server/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-servlet/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-util-ajax/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.jetty/jetty-util/9.4.44.v20210927, EPL-2.0 OR Apache-2.0, approved, rt.jetty
+maven/mavencentral/org.eclipse.milo/bsd-parser-core/0.2.4, EPL-2.0, approved, iot.milo
+maven/mavencentral/org.eclipse.milo/bsd-parser-gson/0.2.4, EPL-2.0, approved, iot.milo
+maven/mavencentral/org.eclipse.milo/sdk-client/0.2.4, EPL-2.0, approved, iot.milo
+maven/mavencentral/org.eclipse.milo/sdk-core/0.2.4, EPL-2.0, approved, iot.milo
+maven/mavencentral/org.eclipse.milo/stack-client/0.2.4, EPL-2.0, approved, iot.milo
+maven/mavencentral/org.eclipse.milo/stack-core/0.2.4, EPL-2.0, approved, iot.milo
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.app/1.5.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.bidi/1.3.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.cm/1.4.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.common/3.13.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.concurrent/1.1.500, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.console/1.4.200, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.coordinator/1.3.800, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.device/1.1.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.ds/1.6.200, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.event/1.5.500, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.frameworkadmin.equinox/1.1.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.frameworkadmin/2.1.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.http.jetty/3.7.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.http.registry/1.2.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.http.servlet/1.6.600, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.io/1.1.100, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.jsp.jasper.registry/1.1.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.jsp.jasper/1.1.500, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.log.stream/1.0.300, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.metatype/1.5.300, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.preferences/3.8.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.region/1.5.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.registry/3.9.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.supplement/1.10.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.transforms.hook/1.2.500, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.transforms.xslt/1.1.100, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.useradmin/1.2.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.util/1.1.300, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.weaving.caching.j9/1.1.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.weaving.caching/1.1.400, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.weaving.hook/1.2.700, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.equinox.wireadmin/1.0.800, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.osgi.services/3.9.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.osgi.util/3.5.300, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.eclipse.platform/org.eclipse.osgi/3.16.0, EPL-2.0, approved, eclipse.platform
+maven/mavencentral/org.glassfish.hk2/osgi-resource-locator/1.0.3, CDDL-1.0, approved, CQ10889
+maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, approved, CQ13843
+maven/mavencentral/org.jooq/jool/0.9.10, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.osgi/osgi.annotation/6.0.1, Apache-2.0, approved, CQ11704
+maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.32, Apache-2.0, approved, CQ12843
+maven/mavencentral/org.slf4j/slf4j-api/1.7.32, MIT, approved, CQ13368
+
+### Additional Dependencies
 
 ## Cryptography
 

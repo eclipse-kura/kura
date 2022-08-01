@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+	SPDX-License-Identifier: EPL-2.0
+
+	Contributors:
+	 Eurotech
+
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.ai.triton.server.TritonServerRemoteService"
+         name="Nvidia Triton Remote Server"
+         description="Configuration for the Remote Nvidia Triton Server">
+
+        <AD id="server.address"
+            name="Nvidia Triton Server address"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="localhost"
+            description="The address of the remote Nvidia Triton Server.">
+        </AD>
+
+        <AD id="server.ports"
+            name="Nvidia Triton Server ports"
+            type="Integer"
+            cardinality="3"
+            min="1024"
+            max="65535"
+            required="true"
+            default="4000,4001,4002"
+            description="The ports used to connect to the server for HTTP, GPRC and Metrics services.">
+        </AD>
+
+        <AD id="models"
+            name="Inference Models"
+            type="String"
+            cardinality="0"
+            required="false"
+            default=""
+            description="A comma separated list of inference model names that the server will load.">
+        </AD>
+
+        <AD id="timeout"
+            name="Timeout (in seconds) for time consuming tasks"
+            type="Integer"
+            cardinality="0"
+            required="false"
+            min="1"
+            max="3600"
+            default="3"
+            description="Timeout (in seconds) for time consuming tasks like model load. If the task exceeds the timeout, the operation will be terminated with an error.">
+        </AD>
+
+        <AD id="grpc.max.size"
+        	name="Max. GRPC message size (bytes)"
+        	type="Integer"
+        	description="Maximum accepted input size for the GRPC calls.
+        	Increase this value if the model input size is bigger than the default."
+        	cardinality="0"
+        	required="true"
+        	default="4194304"
+        	min="1">
+        </AD>
+
+    </OCD>
+    <Designate factoryPid="org.eclipse.kura.ai.triton.server.TritonServerRemoteService">
+        <Object ocdref="org.eclipse.kura.ai.triton.server.TritonServerRemoteService"/>
+    </Designate>
+</MetaData>

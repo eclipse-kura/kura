@@ -50,6 +50,8 @@ Further information about an example Triton Server setup can be found in the [of
 
 ## Triton Server Remote Service component
 
+The Kura Triton Server Remote Service component is the implementation of the inference engine APIs and provides methods for interacting with a remote (i.e. unmnanaged) Nvidia™ Triton Server. As presented below, the component enables the user to communicate to an external server to load specific models. With this component the server lifecycle (startup, shutdown) won't be handled by Kura and it's the user responsibility to make it available to Kura for connecting.
+
 ![triton_remote_server]({{ site.baseurl }}/assets/images/builtin/triton_remote_server.png)
 
 The parameters used to configure the Triton Service are the following:

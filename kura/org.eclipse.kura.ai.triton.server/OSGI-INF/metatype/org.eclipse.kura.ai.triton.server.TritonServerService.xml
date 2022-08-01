@@ -15,8 +15,8 @@
 -->
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.ai.triton.server.TritonServerService" 
-         name="Nvidia Triton Server" 
-         description="Configuration for the Nvidia Triton Server">
+         name="Nvidia Triton Server (Deprecated)" 
+         description="Configuration for the Nvidia Triton Server. **Deprecated** use TritonServerRemoteService or TritonServerNativeService instead.">
 
          <AD id="enable.local"  
             name="Local Nvidia Triton Server"

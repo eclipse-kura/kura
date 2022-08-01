@@ -70,6 +70,10 @@ The parameters used to configure the Triton Service are the following:
 
 ## Triton Server Native Service component
 
+The Kura Triton Server component is the implementation of the inference engine APIs and provides methods for interacting with a local Nvidia™ Triton Server. As presented below, the component enables the user to configure a local server running on the gateway and handles its lifecycle. This operating mode supports more features for interacting with the server like the [AI Model Encryption](#ai-model-encryption-support).
+
+> **Requirement**: `tritonserver` executable needs to be available in the path to the `kurad` user. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.
+
 ![triton_native_server]({{ site.baseurl }}/assets/images/builtin/triton_native_server.png)
 
 The parameters used to configure the Triton Service are the following:
@@ -82,6 +86,8 @@ The parameters used to configure the Triton Service are the following:
  - **Optional configuration for the local backends**: A semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
  - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
  - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
+
+> **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
 ## Triton Server Service component [deprecated since 5.2.0]
 
@@ -100,12 +106,8 @@ The parameters used to configure the Triton Service are the following:
  - **Local backends path**: Only for a local instance, specify the path on the filesystem where the backends are stored.
  - **Optional configuration for the local backends**: Only for local instance, a semi-colon separated list of configuration for the backends. i.e. tensorflow,version=2;tensorflow,allow-soft-placement=false 
  - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
- - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance. By default, size of 4194304 bytes (= 4.19 MB) is used. Increase this value to be able to send large amounts of data as input to the Triton server (like Full HD images). The Kura logs will show the following error when exceeding such limit:
+ - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
 
-    ```
-    io.grpc.StatusRuntimeException: RESOURCE_EXHAUSTED: gRPC message exceeds maximum size 4194304
-    ```
- 
 > **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
 ### Configuration for a local native Triton Server

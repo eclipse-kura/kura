@@ -26,7 +26,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.crypto.CryptoService;
 import org.junit.Test;
 
-public class KeystoreServiceOptionsTest {
+public class FilesystemKeystoreServiceOptionsTest {
 
     private static final String CHANGEIT_PASSWORD = "changeit";
 

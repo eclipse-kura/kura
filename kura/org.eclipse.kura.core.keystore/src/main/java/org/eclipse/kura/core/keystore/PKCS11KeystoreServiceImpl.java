@@ -71,14 +71,17 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
     @Override
     public void updated(Map<String, Object> properties) {
 
+        super.updated(properties);
+
         PKCS11KeystoreServiceOptions newOptions = new PKCS11KeystoreServiceOptions(properties, ownPid);
 
         if (!newOptions.equals(this.options)) {
             logger.info("Options changed...");
+
             removeProvider();
+            this.options = newOptions;
         }
 
-        super.updated(properties);
     }
 
     @Override
@@ -96,7 +99,7 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
         try {
             final KeyStore store = KeyStore.getInstance("PKCS11", currentProvider);
 
-            final char[] pin = this.options.getPin(cryptoService);
+            final char[] pin = this.options.getPin(cryptoService).orElse(null);
 
             store.load(null, pin);
 

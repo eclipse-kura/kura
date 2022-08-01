@@ -35,7 +35,7 @@ public class PKCS11KeystoreServiceOptions {
 
     private final String ownPid;
     private final Optional<String> libraryPath;
-    private final String pin;
+    private final Optional<String> pin;
     private final Optional<Integer> slot;
     private final Optional<Integer> slotListIndex;
     private final Optional<String> enabledMechanisms;
@@ -45,7 +45,7 @@ public class PKCS11KeystoreServiceOptions {
 
     public PKCS11KeystoreServiceOptions(final Map<String, Object> properties, final String ownPid) {
         this.libraryPath = PKCS11_LIBRARY_PROPERTY.getOptional(properties);
-        this.pin = PIN_PROPERTY.get(properties);
+        this.pin = PIN_PROPERTY.getOptional(properties);
         this.ownPid = ownPid;
         this.slot = SLOT_PROPERTY.getOptional(properties);
         this.slotListIndex = SLOT_LIST_INDEX_PROPERTY.getOptional(properties);
@@ -59,8 +59,12 @@ public class PKCS11KeystoreServiceOptions {
         return libraryPath;
     }
 
-    public char[] getPin(final CryptoService cryptoService) throws KuraException {
-        return cryptoService.decryptAes(pin.toCharArray());
+    public Optional<char[]> getPin(final CryptoService cryptoService) throws KuraException {
+        if (!pin.isPresent()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(cryptoService.decryptAes(pin.get().toCharArray()));
     }
 
     public String getOwnPid() {

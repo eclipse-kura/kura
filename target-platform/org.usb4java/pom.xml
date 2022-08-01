@@ -92,7 +92,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.name}</Bundle-Name>
                         <Bundle-Version>${project.version}</Bundle-Version>
-                        <Embed-Dependency>*;scope=system|runtime</Embed-Dependency>
+                        <Embed-Dependency>libusb4java;scope=system</Embed-Dependency>
                         <Include-Resource>
                             ${project.basedir}/src/main,
                             ${project.basedir}/about.html,

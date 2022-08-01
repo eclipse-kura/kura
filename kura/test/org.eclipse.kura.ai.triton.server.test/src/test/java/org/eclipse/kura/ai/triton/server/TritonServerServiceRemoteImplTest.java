@@ -50,7 +50,7 @@ public class TritonServerServiceRemoteImplTest extends TritonServerServiceStepDe
         Map<String, Object> properties = new HashMap<>();
 
         properties.put("server.ports", new Integer[] { 4000, 4001, 4002 });
-        properties.put("enable.local", null);
+        properties.put("server.address", "");
 
         return properties;
     }

@@ -110,7 +110,7 @@ The parameters used to configure the Triton Service are the following:
 
 > **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
-### Configuration for a local native Triton Server
+### Configuration for a local native Triton Server with Triton Server Service component [deprecated since 5.2.0]
 
 > **Requirement**: `tritonserver` executable needs to be available in the path to the `kurad` user. Be sure to have a working Triton Server installation before configuring the local native Triton Server instance through Kura UI.
 
@@ -138,7 +138,7 @@ tritonserver --model-repository=<model_repository_path> \
 ...
 ```
 
-### Configuration for a local Triton Server running in a Docker container
+### Configuration for a local Triton Server running in a Docker container with Triton Server Service component [deprecated since 5.2.0]
 
 If the Nvidia™ Triton Server is running as a Docker container in the gateway, the following configuration is required:
 
@@ -160,7 +160,7 @@ nvcr.io/nvidia/tritonserver:[version] \
 tritonserver --model-repository=/models --model-control-mode=explicit
 ```
 
-### Configuration for a remote Triton Server
+### Configuration for a remote Triton Server with Triton Server Service component [deprecated since 5.2.0]
 
 When the Nvidia™ Triton Server is running on a remote server, the following configuration is needed:
 

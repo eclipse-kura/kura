@@ -13,7 +13,7 @@ Kura provides three components for exposing the Triton Server service functional
 
 ## Nvidia™ Triton Server installation
 
-Before running Kura's Triton Server Service, you must install the Triton Inference Server. Here you can find the necessary steps for the two suggested installation methods.
+Before running Kura's Triton Server Service, you must install the Triton Inference Server. Here you can find the necessary steps for the available installation methods.
 
 ### Native Triton installation on Jetson devices
 

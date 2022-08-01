@@ -14,6 +14,12 @@ package org.eclipse.kura.ai.triton.server;
 
 import org.eclipse.kura.executor.CommandExecutorService;
 
+/*
+ * @deprecated since version 1.1 in favor of
+ * {@link org.eclipse.kura.ai.triton.server.TritonServerRemoteServiceImpl} and
+ * {@link org.eclipse.kura.ai.triton.server.TritonServerNativeServiceImpl}.
+ */
+@Deprecated
 public class TritonServerServiceOrigImpl extends TritonServerServiceAbs {
 
     @Override

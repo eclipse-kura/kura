@@ -15,6 +15,7 @@ package org.eclipse.kura.ai.triton.server;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceStepDefinit
 import org.junit.Test;
 
 public class TritonServerServiceNativeImplTest extends TritonServerServiceStepDefinitions {
+
+    private TritonServerServiceNativeImpl tritonServerNativeService;
 
     @Test
     public void isConfigurationValidWorksWithNativeConfiguration() throws IOException {
@@ -101,14 +104,22 @@ public class TritonServerServiceNativeImplTest extends TritonServerServiceStepDe
     }
 
     /*
+     * Given
+     */
+    private void givenTritonServerServiceNativeImpl(Map<String, Object> properties) throws IOException {
+        this.tritonServerNativeService = createTritonServerServiceNativeImpl(properties, Arrays.asList("myModel"),
+                true);
+    }
+
+    /*
      * Then
      */
     private void thenIsConfigurationValidReturns(boolean expectedValue) {
-        assertEquals(expectedValue, this.tritonServerService.isConfigurationValid());
+        assertEquals(expectedValue, this.tritonServerNativeService.isConfigurationValid());
     }
 
     private void thenIsModelEncryptionEnabled(boolean expectedValue) {
-        assertEquals(expectedValue, this.tritonServerService.isModelEncryptionEnabled());
+        assertEquals(expectedValue, this.tritonServerNativeService.isModelEncryptionEnabled());
     }
 
 }

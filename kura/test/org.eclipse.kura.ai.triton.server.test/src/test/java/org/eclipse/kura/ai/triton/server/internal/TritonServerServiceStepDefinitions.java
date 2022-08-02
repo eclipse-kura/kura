@@ -41,7 +41,6 @@ import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.triton.server.TritonServerServiceNativeImpl;
 import org.eclipse.kura.ai.triton.server.TritonServerServiceOrigImpl;
 import org.eclipse.kura.ai.triton.server.TritonServerServiceRemoteImpl;
-import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceAbs;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -104,14 +103,6 @@ public abstract class TritonServerServiceStepDefinitions {
 
     protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
-    }
-
-    protected void givenTritonServerServiceRemoteImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceRemoteImpl(properties, tritonModelRepoStub, true);
-    }
-
-    protected void givenTritonServerServiceNativeImpl(Map<String, Object> properties) throws IOException {
-        this.tritonServerService = createTritonServerServiceNativeImpl(properties, tritonModelRepoStub, true);
     }
 
     protected void givenTritonServerServiceImplNotActive() throws IOException {
@@ -361,10 +352,10 @@ public abstract class TritonServerServiceStepDefinitions {
         return tritonServerServiceImpl;
     }
 
-    private TritonServerServiceAbs createTritonServerServiceNativeImpl(Map<String, Object> properties,
+    protected TritonServerServiceNativeImpl createTritonServerServiceNativeImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
-        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceNativeImpl();
+        TritonServerServiceNativeImpl tritonServerServiceImpl = new TritonServerServiceNativeImpl();
 
         this.ces = mock(CommandExecutorService.class);
         when(ces.isRunning(new String[] { "tritonserver" })).thenReturn(false);
@@ -390,10 +381,10 @@ public abstract class TritonServerServiceStepDefinitions {
         return tritonServerServiceImpl;
     }
 
-    private TritonServerServiceAbs createTritonServerServiceRemoteImpl(Map<String, Object> properties,
+    protected TritonServerServiceRemoteImpl createTritonServerServiceRemoteImpl(Map<String, Object> properties,
             List<String> tritonModelRepoStub, boolean activate) throws IOException {
 
-        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceRemoteImpl();
+        TritonServerServiceRemoteImpl tritonServerServiceImpl = new TritonServerServiceRemoteImpl();
 
         this.ces = mock(CommandExecutorService.class);
         tritonServerServiceImpl.setCommandExecutorService(ces);

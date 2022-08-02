@@ -40,6 +40,6 @@ Import-Package: org.apache.logging.log4j;version="2.8.2",
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
-Bundle-ClassPath: lib/quartz-2.2.3.jar,
+Bundle-ClassPath: lib/quartz.jar,
  .
 Export-Package: org.eclipse.kura.internal.wire.asset;version="1.0.0"

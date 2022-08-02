@@ -10,20 +10,24 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.core.configuration.test;
+package org.eclipse.kura.core.configuration;
 
+import static org.eclipse.kura.configuration.ConfigurationService.KURA_SERVICE_PID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.osgi.framework.Constants.SERVICE_PID;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,23 +43,30 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.KuraPartialSuccessException;
 import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurationService;
+import org.eclipse.kura.configuration.SelfConfiguringComponent;
 import org.eclipse.kura.configuration.metatype.OCDService;
 import org.eclipse.kura.core.configuration.ComponentConfigurationImpl;
-import org.eclipse.kura.crypto.CryptoService;
+import org.eclipse.kura.core.configuration.metatype.Tscalar;
 import org.eclipse.kura.system.SystemService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.ComponentException;
 
 public class ConfigurationServiceTest {
 
     private static final String DATA_SERVICE_FACTORY_PID = "org.eclipse.kura.data.DataService";
-    private static final String TEST_COMPONENT_PID = "org.eclipse.kura.core.configuration.test.CfgSvcTestComponent";
-    private static final String TEST_COMPONENT_FPID = "org.eclipse.kura.core.configuration.test.TestFactoryComponent";
+    private static final String TEST_COMPONENT_PID = "org.eclipse.kura.core.configuration.CfgSvcTestComponent";
+    private static final String TEST_SELF_COMPONENT_PID = "org.eclipse.kura.core.configuration.CfgSvcTestSelfComponent";
+    private static final String TEST_COMPONENT_FPID = "org.eclipse.kura.core.configuration.TestFactoryComponent";
     private static final String TEST_COMPONENT_PROPERTY_KEY = "field.test";
     private static final int TEST_COMPONENT_PROPERTY_VALUE = 1;
+    private static final String TEST_SELF_COMPONENT_PROPERTY_KEY = "TestADId";
+    private static final String TEST_SELF_COMPONENT_PROPERTY_VALUE = "TestADDefaultValue";
     private static final String KURA_SNAPSHOTS_DIR = "/tmp/kura/snapshots";
 
     /*
@@ -125,9 +136,7 @@ public class ConfigurationServiceTest {
     private int kuraSnapshotsCount = 10;
     private String kuraSnapshotsDir = KURA_SNAPSHOTS_DIR;
 
-    BundleContext bundleContext;
-    private CryptoService cryptoServiceMock;
-    private SystemService systemServiceMock;
+    // private BundleContext bundleContext;
 
     private Optional<Exception> exceptionOccurred;
 
@@ -192,8 +201,7 @@ public class ConfigurationServiceTest {
     public void testCreateFactoryConfigurationMergePropertiesAndSnapshot() {
         // positive test; the created snapshot contains the properties
 
-        whenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "cfcmp_pid_1",
-                this.exampleProperties, true);
+        whenCreateFactoryConfiguration(TEST_COMPONENT_FPID, "cfcmp_pid_1", this.exampleProperties, true);
 
         thenSnapshotsIncreasedBy(1);
         thenLastSnapshotContainsProperties("cfcmp_pid_1", this.exampleProperties);
@@ -355,6 +363,18 @@ public class ConfigurationServiceTest {
     }
 
     @Test
+    public void testGetDefaultSelfConfiguringComponentConfigurationExisting() {
+        givenSelfConfiguringComponentConfiguration(TEST_SELF_COMPONENT_PID, TEST_SELF_COMPONENT_PID);
+
+        whenGetDefaultComponentConfiguration(TEST_SELF_COMPONENT_PID);
+
+        thenDefaultConfigurationIs(TEST_SELF_COMPONENT_PID, false, false);
+        thenDefaultConfigurationPropertiesHas(1, TEST_SELF_COMPONENT_PROPERTY_KEY, TEST_SELF_COMPONENT_PROPERTY_VALUE);
+        thenDefaultConfigurationDefinitionIsPopulated();
+        thenNoExceptionOccurred();
+    }
+
+    @Test
     public void testUpdateConfigurationPidPropertiesNull() {
         whenUpdateConfiguration(null, null);
 
@@ -380,7 +400,7 @@ public class ConfigurationServiceTest {
 
         thenConfigurationPropertiesHaveNotChanged();
     }
-    
+
     @Test
     public void testUpdateConfigurationPidPropertiesValid() {
         // try it with a registered component and an existing PID with invalid properties
@@ -464,7 +484,7 @@ public class ConfigurationServiceTest {
         givenInputConfigurationsWithExampleProperties("ex1", "ex2", "ex3");
 
         whenUpdateConfigurations();
-        
+
         thenComponentConfigurationsContainPidsWithExampleProperties("ex1", "ex2", "ex3");
         thenSnapshotsIncreasedBy(1);
         thenLastSnapshotNotContainsProperties("ex1", this.exampleProperties);
@@ -501,7 +521,7 @@ public class ConfigurationServiceTest {
         givenCreateFactoryConfiguration(DATA_SERVICE_FACTORY_PID, "pid_rollback_dontsave_2", null, false);
 
         whenRollback();
-        
+
         thenRollbackIdIsLessThanPrevious();
         thenLastSnapshotNotContainsProperties("pid_rollback_dontsave_2", null);
     }
@@ -569,6 +589,20 @@ public class ConfigurationServiceTest {
             if (takeSnapshot) {
                 this.snapshotsBefore = ConfigurationServiceTest.configurationService.getSnapshots();
             }
+        } catch (Exception e) {
+            this.exceptionOccurred = Optional.of(e);
+        }
+    }
+
+    private void givenSelfConfiguringComponentConfiguration(String pid, String servicePid) {
+        try {
+            Dictionary<String, Object> componentConfigurationProperties = new Hashtable<>();
+            componentConfigurationProperties.put(KURA_SERVICE_PID, pid);
+            componentConfigurationProperties.put(SERVICE_PID, servicePid);
+            BundleContext bundleContext = FrameworkUtil.getBundle(ConfigurationServiceTest.class).getBundleContext();
+            bundleContext.registerService(SelfConfiguringComponent.class, new CfgSvcTestSelfComponent(),
+                    componentConfigurationProperties);
+
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
         }
@@ -815,11 +849,12 @@ public class ConfigurationServiceTest {
 
         Set<Long> before = this.snapshotsBefore;
         Set<Long> after = this.snapshotsAfter;
-        
+
         after.removeAll(before);
 
         try {
-            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService.getSnapshot(after.iterator().next().longValue());
+            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
+                    .getSnapshot(after.iterator().next().longValue());
             assertTrue(snapshotContains(lastSnapshot, pid, expectedProperties));
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -841,7 +876,8 @@ public class ConfigurationServiceTest {
         after.removeAll(before);
 
         try {
-            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService.getSnapshot(after.iterator().next().longValue());
+            List<ComponentConfiguration> lastSnapshot = ConfigurationServiceTest.configurationService
+                    .getSnapshot(after.iterator().next().longValue());
             assertFalse(snapshotContains(lastSnapshot, pid, expectedProperties));
         } catch (Exception e) {
             this.exceptionOccurred = Optional.of(e);
@@ -967,7 +1003,7 @@ public class ConfigurationServiceTest {
 
         long snapshotID = after.iterator().next().longValue();
         File file = new File(this.kuraSnapshotsDir, "snapshot_" + snapshotID + ".xml");
-        
+
         try (FileReader fr = new FileReader(file)) {
             char[] chars = new char[100];
             fr.read(chars);
@@ -1000,8 +1036,8 @@ public class ConfigurationServiceTest {
 
     @Before
     public void cleanUp() {
-        this.bundleContext = null;
-        this.bundleContext = FrameworkUtil.getBundle(ConfigurationServiceTest.class).getBundleContext();
+        // this.bundleContext = null;
+        // this.bundleContext = FrameworkUtil.getBundle(ConfigurationServiceTest.class).getBundleContext();
 
         this.exceptionOccurred = Optional.empty();
 
@@ -1059,7 +1095,7 @@ public class ConfigurationServiceTest {
     private boolean snapshotsEqual(List<ComponentConfiguration> snap1, List<ComponentConfiguration> snap2) {
         List<String> pids1 = snap1.stream().flatMap(cc -> Stream.of(cc.getPid())).collect(Collectors.toList());
         List<String> pids2 = snap2.stream().flatMap(cc -> Stream.of(cc.getPid())).collect(Collectors.toList());
-        
+
         return pids1.containsAll(pids2) && pids2.containsAll(pids1);
     }
 

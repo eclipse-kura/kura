@@ -246,7 +246,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             int maxRetries = options.getMaxDownloadRetries();
             int retryInterval = options.getRetryInterval();
 
-            final ContainerConfiguration containerCongiguration = options.getContainerConfiguration();
+            final ContainerConfiguration containerConfiguration = options.getContainerConfiguration();
 
             int retries = 0;
             while ((unlimitedRetries || retries < maxRetries) && !Thread.currentThread().isInterrupted()) {
@@ -258,7 +258,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
                     }
 
                     final String containerId = ContainerInstance.this.containerOrchestrationService
-                            .startContainer(containerCongiguration);
+                            .startContainer(containerConfiguration);
                     updateState(s -> s.onContainerReady(containerId));
 
                     return;

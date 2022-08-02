@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2016, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -70,7 +70,7 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.runtime.ServiceComponentRuntime;
 import org.osgi.service.component.runtime.dto.ComponentDescriptionDTO;
 
-public class ConfigurationServiceTest {
+public class ConfigurationServiceJunitTest {
 
     @Test
     public void testGetFactoryComponentPids() throws NoSuchFieldException, KuraException {
@@ -805,16 +805,19 @@ public class ConfigurationServiceTest {
     }
 
     @Test
-    public void testEncryptConfigsNoConfigs() throws Throwable {
+    public void testEncryptConfigsNoConfigs() {
         // empty list
-
+        boolean exceptionCaught = false;
         ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
 
         List<? extends ComponentConfiguration> configs = new ArrayList<>();
 
-        TestUtil.invokePrivate(cs, "encryptConfigs", configs);
-
-        // runs without problems, but there's nothing else to check, here
+        try {
+            TestUtil.invokePrivate(cs, "encryptConfigs", configs);
+        } catch (Throwable t) {
+            exceptionCaught = true;
+        }
+        assertFalse(exceptionCaught);
     }
 
     @Test
@@ -2565,20 +2568,6 @@ public class ConfigurationServiceTest {
         assertTrue("method called", calls[0]);
 
         verify(cfgMock, times(1)).update((Dictionary<String, ?>) anyObject());
-    }
-
-    @Test
-    public void testRegisterComponentConfigurationAllNulls() {
-        // only null inputs
-        ConfigurationServiceImpl cs = new ConfigurationServiceImpl();
-
-        String pid = null;
-        String servicePid = null;
-        String factoryPid = null;
-
-        cs.registerComponentConfiguration(pid, servicePid, factoryPid);
-
-        // no checks really possible...
     }
 
     @Test

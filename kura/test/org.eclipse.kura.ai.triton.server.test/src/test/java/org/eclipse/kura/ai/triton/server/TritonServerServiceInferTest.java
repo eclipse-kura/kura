@@ -15,6 +15,7 @@ package org.eclipse.kura.ai.triton.server;
 
 import java.io.IOException;
 
+import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceStepDefinitions;
 import org.junit.Test;
 
 public class TritonServerServiceInferTest extends TritonServerServiceStepDefinitions {

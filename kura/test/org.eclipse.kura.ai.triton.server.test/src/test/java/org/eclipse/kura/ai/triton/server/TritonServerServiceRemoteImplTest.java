@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceStepDefinitions;
 import org.junit.Test;
 
 public class TritonServerServiceRemoteImplTest extends TritonServerServiceStepDefinitions {

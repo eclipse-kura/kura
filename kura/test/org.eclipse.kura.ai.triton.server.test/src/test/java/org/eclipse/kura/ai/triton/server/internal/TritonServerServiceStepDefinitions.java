@@ -11,7 +11,7 @@
  *  Eurotech
  ******************************************************************************/
 
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.internal;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -38,6 +38,9 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.ai.triton.server.TritonServerServiceNativeImpl;
+import org.eclipse.kura.ai.triton.server.TritonServerServiceOrigImpl;
+import org.eclipse.kura.ai.triton.server.TritonServerServiceRemoteImpl;
 import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceAbs;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;

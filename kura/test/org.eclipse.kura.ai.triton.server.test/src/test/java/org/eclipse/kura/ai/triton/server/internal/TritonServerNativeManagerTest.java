@@ -11,7 +11,7 @@
  *  Eurotech
  ******************************************************************************/
 
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.eclipse.kura.ai.triton.server.TritonServerServiceOptions;
+import org.eclipse.kura.ai.triton.server.internal.TritonServerNativeManager;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;

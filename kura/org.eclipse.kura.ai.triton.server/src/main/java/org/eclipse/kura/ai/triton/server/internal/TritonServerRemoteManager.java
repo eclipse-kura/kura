@@ -10,9 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.ai.triton.server;
-
-import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
+package org.eclipse.kura.ai.triton.server.internal;
 
 public class TritonServerRemoteManager implements TritonServerInstanceManager {
 

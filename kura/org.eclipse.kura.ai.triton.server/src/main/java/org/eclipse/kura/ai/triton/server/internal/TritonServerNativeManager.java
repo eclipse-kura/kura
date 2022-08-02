@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.internal;
 
 import static java.util.Objects.nonNull;
 
@@ -23,7 +23,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
+import org.eclipse.kura.ai.triton.server.TritonServerServiceOptions;
 import org.eclipse.kura.core.linux.executor.LinuxSignal;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -45,8 +45,8 @@ public class TritonServerNativeManager implements TritonServerInstanceManager {
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture<?> scheduledFuture;
 
-    protected TritonServerNativeManager(TritonServerServiceOptions options,
-            CommandExecutorService commandExecutorService, String decryptionFolderPath) {
+    public TritonServerNativeManager(TritonServerServiceOptions options, CommandExecutorService commandExecutorService,
+            String decryptionFolderPath) {
         this.options = options;
         this.commandExecutorService = commandExecutorService;
         this.decryptionFolderPath = decryptionFolderPath;

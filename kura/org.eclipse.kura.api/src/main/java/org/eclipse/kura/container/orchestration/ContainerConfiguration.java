@@ -51,6 +51,7 @@ public class ContainerConfiguration {
     private ImageConfiguration imageConfig;
     private ContainerNetworkConfiguration networkConfiguration;
     private List<String> entryPoint;
+    private Boolean containerRestartOnFailure = false;
 
     private ContainerConfiguration() {
     }
@@ -223,6 +224,16 @@ public class ContainerConfiguration {
     public List<String> getEntryPoint() {
         return this.entryPoint;
     }
+    
+    /**
+     * Returns boolean which determines if container will restart on failure
+     * 
+     * @return
+     * @since 2.5
+     */
+    public boolean getRestartOnFailure() {
+        return this.containerRestartOnFailure;
+    }
 
     /**
      * Creates a builder for creating a new {@link ContainerConfiguration} instance.
@@ -279,6 +290,7 @@ public class ContainerConfiguration {
         private ImageConfigurationBuilder imageConfigBuilder = new ImageConfiguration.ImageConfigurationBuilder();
         private ContainerNetworkConfigurationBuilder networkConfigurationBuilder = new ContainerNetworkConfigurationBuilder();
         private List<String> entryPoint = new LinkedList<>();
+        private Boolean containerRestartOnFailure = false;
 
         public ContainerConfigurationBuilder setContainerName(String serviceName) {
             this.containerName = serviceName;
@@ -381,6 +393,16 @@ public class ContainerConfiguration {
             this.imageConfigBuilder.setImageDownloadTimeoutSeconds(imageConfig.getimageDownloadTimeoutSeconds());
             return this;
         }
+        
+        /**
+         * Set if container will restart on failure
+         * 
+         * @since 2.5
+         */
+        public ContainerConfigurationBuilder setRestartOnFailure(boolean containerRestartOnFailure) {
+            this.containerRestartOnFailure = containerRestartOnFailure;
+            return this;
+        }
 
         public ContainerConfiguration build() {
             ContainerConfiguration result = new ContainerConfiguration();
@@ -398,6 +420,7 @@ public class ContainerConfiguration {
             result.imageConfig = this.imageConfigBuilder.build();
             result.networkConfiguration = this.networkConfigurationBuilder.build();
             result.entryPoint = requireNonNull(this.entryPoint, "Container EntryPoint list must not be null");
+            result.containerRestartOnFailure = this.containerRestartOnFailure;
 
             return result;
         }

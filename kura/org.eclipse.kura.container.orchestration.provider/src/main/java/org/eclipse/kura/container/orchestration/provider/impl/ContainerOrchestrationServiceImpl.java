@@ -61,6 +61,7 @@ import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
 import com.github.dockerjava.api.model.Volume;
+import com.github.dockerjava.api.model.RestartPolicy;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -448,6 +449,10 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             commandBuilder = containerEnviromentVariablesHandler(containerDescription, commandBuilder);
 
             commandBuilder = containerEntrypointHandler(containerDescription, commandBuilder);
+            
+            if (containerDescription.getRestartOnFailure()) {
+                commandBuilder = commandBuilder.withRestartPolicy(RestartPolicy.unlessStoppedRestart());                
+            }
 
             // Host Configuration Related
             configuration = containerVolumeMangamentHandler(containerDescription, configuration);

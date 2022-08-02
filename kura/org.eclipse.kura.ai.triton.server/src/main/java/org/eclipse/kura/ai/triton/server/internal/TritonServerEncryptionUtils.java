@@ -11,7 +11,7 @@
  *  Eurotech
  ******************************************************************************/
 
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.internal;
 
 import java.io.BufferedInputStream;
 import java.io.File;

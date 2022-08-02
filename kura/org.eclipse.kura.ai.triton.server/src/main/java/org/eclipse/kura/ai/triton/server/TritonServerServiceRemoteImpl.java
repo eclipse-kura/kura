@@ -13,28 +13,29 @@
 package org.eclipse.kura.ai.triton.server;
 
 import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
+import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceAbs;
 import org.eclipse.kura.executor.CommandExecutorService;
 
 public class TritonServerServiceRemoteImpl extends TritonServerServiceAbs {
 
     @Override
-    TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
+    protected TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
             CommandExecutorService executorService, String decryptionFolderPath) {
         return new TritonServerRemoteManager();
     }
 
     @Override
-    boolean isConfigurationValid() {
+    protected boolean isConfigurationValid() {
         return !isNullOrEmpty(this.options.getAddress());
     }
 
     @Override
-    boolean isModelEncryptionEnabled() {
+    protected boolean isModelEncryptionEnabled() {
         return false; // Feature not supported for remote instances
     }
 
     @Override
-    String getServerAddress() {
+    protected String getServerAddress() {
         return this.options.getAddress();
     }
 }

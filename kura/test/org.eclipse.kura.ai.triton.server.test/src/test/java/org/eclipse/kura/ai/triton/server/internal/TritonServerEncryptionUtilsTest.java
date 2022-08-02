@@ -11,7 +11,7 @@
  *  Eurotech
  ******************************************************************************/
 
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.internal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,6 +32,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.kura.KuraIOException;
+import org.eclipse.kura.ai.triton.server.internal.TritonServerEncryptionUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

@@ -13,6 +13,7 @@
 package org.eclipse.kura.ai.triton.server;
 
 import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
+import org.eclipse.kura.ai.triton.server.internal.TritonServerServiceAbs;
 import org.eclipse.kura.executor.CommandExecutorService;
 
 /**
@@ -24,7 +25,7 @@ import org.eclipse.kura.executor.CommandExecutorService;
 public class TritonServerServiceOrigImpl extends TritonServerServiceAbs {
 
     @Override
-    TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
+    protected TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
             CommandExecutorService executorService, String decryptionFolderPath) {
         if (options.isLocalEnabled()) {
             return new TritonServerNativeManager(options, executorService, decryptionFolderPath);
@@ -34,7 +35,7 @@ public class TritonServerServiceOrigImpl extends TritonServerServiceAbs {
     }
 
     @Override
-    boolean isConfigurationValid() {
+    protected boolean isConfigurationValid() {
         if (!this.options.isLocalEnabled()) {
             return !isNullOrEmpty(this.options.getAddress());
         }
@@ -42,12 +43,12 @@ public class TritonServerServiceOrigImpl extends TritonServerServiceAbs {
     }
 
     @Override
-    boolean isModelEncryptionEnabled() {
+    protected boolean isModelEncryptionEnabled() {
         return this.options.isLocalEnabled() && this.options.isModelEncryptionPasswordSet();
     }
 
     @Override
-    String getServerAddress() {
+    protected String getServerAddress() {
         if (this.options.isLocalEnabled()) {
             return "localhost";
         } else {

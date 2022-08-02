@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  ******************************************************************************/
-package org.eclipse.kura.ai.triton.server;
+package org.eclipse.kura.ai.triton.server.internal;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -41,7 +41,8 @@ import org.eclipse.kura.ai.inference.ModelInfoBuilder;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
-import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
+import org.eclipse.kura.ai.triton.server.DataType;
+import org.eclipse.kura.ai.triton.server.TritonServerServiceOptions;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -96,14 +97,14 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.cryptoService = cryptoService;
     }
 
-    abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
+    protected abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
             CommandExecutorService executorService, String decryptionFolderPath);
 
-    abstract boolean isConfigurationValid();
+    protected abstract boolean isConfigurationValid();
 
-    abstract boolean isModelEncryptionEnabled();
+    protected abstract boolean isModelEncryptionEnabled();
 
-    abstract String getServerAddress();
+    protected abstract String getServerAddress();
 
     protected void activate(Map<String, Object> properties) {
         logger.info("Activate TritonServerService...");

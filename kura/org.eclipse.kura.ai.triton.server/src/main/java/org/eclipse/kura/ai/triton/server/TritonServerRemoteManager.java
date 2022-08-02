@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.triton.server;
 
+import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
+
 public class TritonServerRemoteManager implements TritonServerInstanceManager {
 
     private boolean isRunning = false;

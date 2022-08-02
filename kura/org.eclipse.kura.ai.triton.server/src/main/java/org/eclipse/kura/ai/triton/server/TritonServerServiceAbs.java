@@ -41,6 +41,7 @@ import org.eclipse.kura.ai.inference.ModelInfoBuilder;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
+import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;

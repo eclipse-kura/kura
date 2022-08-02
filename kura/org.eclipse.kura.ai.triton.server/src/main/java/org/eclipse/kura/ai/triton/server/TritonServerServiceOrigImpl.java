@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.eclipse.kura.ai.triton.server;
 
+import org.eclipse.kura.ai.triton.server.internal.TritonServerInstanceManager;
 import org.eclipse.kura.executor.CommandExecutorService;
 
 /**

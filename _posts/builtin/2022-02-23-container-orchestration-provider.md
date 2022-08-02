@@ -65,7 +65,13 @@ Containers may be configured using the following fields:
 - **Environment Variables (optional)** - This field accepts a comma-separated list of environment variables, which will be set inside the container when spun up.
 
 - **Entrypoint Override (optional)** - This field accepts a comma-separated list which is used to override the command used to start a container. Example: ```./test.sh,-v,-d,--human-readable```.
-  
+
+- **Memory (optional)** - This field allows the configuration of the maximum amount of memory the container can use in bytes. The value is a positive integer, optionally followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. The minimum and default values depends by the native container orchestrator. If left empty, the memory assigned to the container will be set to a default value.
+
+ - **CPUs (optional)** - This value specifies how many CPUs a container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource.
+
+- **GPUs (optional)** - This field configures how many Nvidia GPUs a container can use. Allowed values are 'all' or an integer number.
+
 - **Volume Mount (optional)** - This field accepts a comma-separated list of system-to-container file mounts. This allows for the container to access files on the host machine.
   
 - **Peripheral Device (optional)** - This field accepts a comma-separated list of device paths. This parameter allows for devices to be passed through from the host to the container.

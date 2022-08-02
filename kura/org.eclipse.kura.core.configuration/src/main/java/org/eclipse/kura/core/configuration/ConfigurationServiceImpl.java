@@ -936,13 +936,13 @@ public class ConfigurationServiceImpl implements ConfigurationService, OCDServic
                     logger.error(
                             "Invalid pid for returned Configuration of SelfConfiguringComponent with pid: {} Ignoring it.",
                             pid);
-                    return null;
+                    return cc;
                 }
 
                 OCD ocd = tempCc.getDefinition();
                 if (ocd != null) {
                     Map<String, Object> props = ComponentUtil.getDefaultProperties(ocd, this.ctx);
-                    return new ComponentConfigurationImpl(pid, (Tocd) ocd, props);
+                    cc = new ComponentConfigurationImpl(pid, (Tocd) ocd, props);
                 }
             } catch (KuraException e) {
                 logger.error(GETTING_CONFIGURATION_ERROR, pid, e);

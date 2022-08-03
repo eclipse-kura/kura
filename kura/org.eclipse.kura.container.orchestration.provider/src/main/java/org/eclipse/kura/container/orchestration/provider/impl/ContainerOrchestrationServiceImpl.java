@@ -586,6 +586,11 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             HostConfig configuration) {
 
         Optional<String> gpus = containerDescription.getGpus();
+        
+        if (gpus.isPresent() && gpus.get().equals("")) {
+            return configuration;
+        }
+
         gpus.ifPresent(gpu -> configuration.withDeviceRequests(ImmutableList
                 .of(new DeviceRequest().withDriver("nvidia").withCount(gpu.equals("all") ? -1 : Integer.parseInt(gpu))
                         .withCapabilities(ImmutableList.of(ImmutableList.of("gpu"))))));
@@ -612,7 +617,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                         Binding.bindPort(containerDescription.getContainerPortsExternal().get(index)));
             }
 
-            commandBuilder.withPortBindings(portbindings);
+            commandBuilder = commandBuilder.withPortBindings(portbindings);
 
         } else {
             logger.error("portsExternal and portsInternal must be int[] of the same size or they do not exist: {}",

@@ -57,6 +57,7 @@ public class ContainerInstanceOptions {
             500);
     private static final Property<String> CONTAINER_NETWORKING_MODE = new Property<>("container.networkMode", "");
     private static final Property<String> CONTAINER_ENTRY_POINT = new Property<>("container.entrypoint", "");
+    private static final Property<Boolean> CONTAINER_RESTART_FAILURE = new Property<>("container.restart.onfailure", false);
 
     private final boolean enabled;
     private final String image;
@@ -79,6 +80,7 @@ public class ContainerInstanceOptions {
     private final int imageDownloadTimeout;
     private final Optional<String> containerNetworkingMode;
     private final List<String> containerEntryPoint;
+    private final boolean restartOnFailure;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -106,6 +108,7 @@ public class ContainerInstanceOptions {
         this.imageDownloadTimeout = IMAGES_DOWNLOAD_TIMEOUT.get(properties);
         this.containerNetworkingMode = CONTAINER_NETWORKING_MODE.getOptional(properties);
         this.containerEntryPoint = parseStringListSplitByComma(CONTAINER_ENTRY_POINT.get(properties));
+        this.restartOnFailure = CONTAINER_RESTART_FAILURE.get(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -228,6 +231,10 @@ public class ContainerInstanceOptions {
     public String getLoggingType() {
         return this.containerLoggerType;
     }
+    
+    public boolean getRestartOnFailure() {
+        return this.restartOnFailure;
+    }
 
     public Map<String, String> getLoggerParameters() {
         return this.containerLoggingParameters;
@@ -272,7 +279,7 @@ public class ContainerInstanceOptions {
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
-                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint()).build();
+                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint()).setRestartOnFailure(getRestartOnFailure()).build();
     }
 
     private List<Integer> parsePortString(String ports) {

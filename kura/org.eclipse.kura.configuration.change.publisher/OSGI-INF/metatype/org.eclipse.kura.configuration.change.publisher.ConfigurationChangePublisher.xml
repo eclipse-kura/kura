@@ -9,7 +9,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="$EVT/$ACCOUNT_NAME/$CLIENT_ID/CONF/V1"
+            default="CONF/V1"
             description="The message topic to use.">
         </AD>
 

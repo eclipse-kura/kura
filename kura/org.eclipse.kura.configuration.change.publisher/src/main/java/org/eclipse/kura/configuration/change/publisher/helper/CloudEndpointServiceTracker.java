@@ -10,14 +10,13 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.configuration.change.publisher.utils.trackers;
+package org.eclipse.kura.configuration.change.publisher.helper;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.kura.cloudconnection.CloudEndpoint;
 import org.eclipse.kura.configuration.ConfigurationService;
-import org.eclipse.kura.configuration.change.publisher.utils.CloudStackTrackerListener;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
@@ -26,30 +25,27 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class CloudEndpointServiceTracker extends ServiceTracker<CloudEndpoint, CloudEndpoint> {
 
-    private Set<CloudStackTrackerListener> listeners = new HashSet<>();
+    private Set<CloudEndpointTrackerListener> listeners = new HashSet<>();
 
     public CloudEndpointServiceTracker(BundleContext context, String endpointPid) throws InvalidSyntaxException {
         super(context, context.createFilter(String.format("(&(%s=%s)(%s=%s))", Constants.OBJECTCLASS,
                 CloudEndpoint.class.getName(), ConfigurationService.KURA_SERVICE_PID, endpointPid)), null);
     }
 
-    public void registerCloudStackTrackerListener(CloudStackTrackerListener listener) {
+    public void registerCloudStackTrackerListener(CloudEndpointTrackerListener listener) {
         this.listeners.add(listener);
     }
 
-    public void unregisterCloudStackTrackerListener(CloudStackTrackerListener listener) {
+    public void unregisterCloudStackTrackerListener(CloudEndpointTrackerListener listener) {
         this.listeners.remove(listener);
     }
 
     @Override
     public CloudEndpoint addingService(ServiceReference<CloudEndpoint> reference) {
         CloudEndpoint endpoint = super.addingService(reference);
-        
-        String dataServicePid = (String) reference.getProperty("DataService.target");
-        dataServicePid = dataServicePid.replace("(kura.service.pid=", "").replace(")", "");
 
-        for (CloudStackTrackerListener listener : this.listeners) {
-            listener.onCloudEndpointAdded(endpoint, dataServicePid);
+        for (CloudEndpointTrackerListener listener : this.listeners) {
+            listener.onCloudEndpointAdded(endpoint);
         }
 
         return endpoint;
@@ -59,7 +55,7 @@ public class CloudEndpointServiceTracker extends ServiceTracker<CloudEndpoint, C
     public void removedService(ServiceReference<CloudEndpoint> reference, CloudEndpoint service) {
         super.removedService(reference, service);
 
-        for (CloudStackTrackerListener listener : this.listeners) {
+        for (CloudEndpointTrackerListener listener : this.listeners) {
             listener.onCloudEndpointRemoved(service);
         }
     }

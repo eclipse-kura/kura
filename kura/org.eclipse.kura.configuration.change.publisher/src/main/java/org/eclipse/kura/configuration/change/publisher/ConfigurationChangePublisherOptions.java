@@ -15,9 +15,12 @@ package org.eclipse.kura.configuration.change.publisher;
 import java.util.Map;
 
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
+import org.eclipse.kura.core.cloud.CloudServiceOptions;
 
 public class ConfigurationChangePublisherOptions {
     
+    protected static final String TOPIC_PREFIX = "$EVT";
+
     protected static final String TOPIC_PROP_NAME = "topic";
     protected static final String QOS_PROP_NAME = "qos";
     protected static final String RETAIN_PROP_NAME = "retain";
@@ -54,7 +57,16 @@ public class ConfigurationChangePublisherOptions {
     }
 
     public String getTopic() {
-        return this.topic;
+        String noSeparatorOnExtremes = this.topic;
+        if (noSeparatorOnExtremes.startsWith(CloudServiceOptions.getTopicSeparator())) {
+            noSeparatorOnExtremes = noSeparatorOnExtremes.substring(1);
+        }
+
+        if (noSeparatorOnExtremes.endsWith(CloudServiceOptions.getTopicSeparator())) {
+            noSeparatorOnExtremes = noSeparatorOnExtremes.substring(0, noSeparatorOnExtremes.length() - 1);
+        }
+
+        return noSeparatorOnExtremes;
     }
 
     public int getQos() {
@@ -67,6 +79,10 @@ public class ConfigurationChangePublisherOptions {
 
     public int getPriority() {
         return this.priority;
+    }
+
+    public String getTopicPrefix() {
+        return TOPIC_PREFIX;
     }
 
     private static final class Property<T> {

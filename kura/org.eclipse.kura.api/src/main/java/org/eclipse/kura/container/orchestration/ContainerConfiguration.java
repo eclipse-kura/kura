@@ -229,7 +229,7 @@ public class ContainerConfiguration {
      * Returns boolean which determines if container will restart on failure
      * 
      * @return
-     * @since 2.5
+     * @since 2.4
      */
     public boolean getRestartOnFailure() {
         return this.containerRestartOnFailure;
@@ -397,7 +397,7 @@ public class ContainerConfiguration {
         /**
          * Set if container will restart on failure
          * 
-         * @since 2.5
+         * @since 2.4
          */
         public ContainerConfigurationBuilder setRestartOnFailure(boolean containerRestartOnFailure) {
             this.containerRestartOnFailure = containerRestartOnFailure;

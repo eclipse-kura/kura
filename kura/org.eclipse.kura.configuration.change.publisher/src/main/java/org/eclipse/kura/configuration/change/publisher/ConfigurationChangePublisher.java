@@ -36,7 +36,6 @@ import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.configuration.change.publisher.helper.CloudEndpointServiceHelper;
 import org.eclipse.kura.core.cloud.CloudPublisherDeliveryListener;
 import org.eclipse.kura.core.cloud.CloudServiceOptions;
-import org.eclipse.kura.message.KuraPayload;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
@@ -111,10 +110,7 @@ public class ConfigurationChangePublisher
         publishMessageProps.put(PRIORITY.name(), this.options.getPriority());
         publishMessageProps.put(CONTROL.name(), true);
 
-        // return this.cloudHelper.publish(new KuraMessage(message.getPayload(), publishMessageProps));
-        KuraPayload p = new KuraPayload();
-        p.addMetric("test", "testvalue");
-        return this.cloudHelper.publish(new KuraMessage(p, publishMessageProps));
+        return this.cloudHelper.publish(new KuraMessage(message.getPayload(), publishMessageProps));
     }
 
     @Override

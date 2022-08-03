@@ -46,6 +46,9 @@ public class ContainerConfigurationTest {
     private static final Map<String, String> CONTAINER_LOGGER_PARAMETERS = Collections.singletonMap("key2", "val2");
     private static final String CONTAINER_LOGGER_TYPE = "test2";
     private static final List<String> CONTAINER_DEVICE_LIST = Arrays.asList("/dev/gpio1", "/dev/gpio2");
+    private static final Long MEMORY = 1000L;
+    private static final Float CPUS = 1.3F;
+    private static final String GPUS = "all";
     private ContainerConfiguration firstContainerConfig;
     private ContainerConfiguration secondContainerConfig;
     private ContainerConfigurationBuilder containerConfigurationBuilder;
@@ -81,17 +84,17 @@ public class ContainerConfigurationTest {
     @Test
     public void testContainerDoesntEquals() {
         givenContainerOne();
-        givenContainerTwoDiffrent();
+        givenContainerTwoDifferent();
 
         whenContainersCompared();
 
-        thenFirstContainerDoesntEqualSeccond();
+        thenFirstContainerDoesntEqualSecond();
     }
 
     @Test
     public void testContainerHashCode() {
         givenContainerOne();
-        givenContainerTwoDiffrent();
+        givenContainerTwoDifferent();
 
         whenContainerTwoHash();
 
@@ -133,9 +136,11 @@ public class ContainerConfigurationTest {
                 .setInternalPorts(CONTAINER_PORTS_INTERNAL).setEnvVars(CONTAINER_ENV_VARS)
                 .setDeviceList(CONTAINER_DEVICE_LIST).setVolumes(CONTAINER_VOLUMES).setPrivilegedMode(false)
                 .setFrameworkManaged(false).setLoggerParameters(CONTAINER_LOGGER_PARAMETERS)
-                .setLoggingType(CONTAINER_LOGGER_TYPE).setContainerNetowrkConfiguration(
+                .setLoggingType(CONTAINER_LOGGER_TYPE)
+                .setContainerNetowrkConfiguration(
                         new ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder()
-                                .setNetworkMode(Optional.of("bridge")).build());
+                                .setNetworkMode(Optional.of("bridge")).build())
+                .setMemory(Optional.of(MEMORY)).setCpus(Optional.of(CPUS)).setGpus(Optional.of(GPUS));
     }
 
     private void givenContainerOne() {
@@ -143,7 +148,7 @@ public class ContainerConfigurationTest {
         whenContainerConfigurationBuilt();
     }
 
-    private void givenContainerTwoDiffrent() {
+    private void givenContainerTwoDifferent() {
 
         givenContainerBuilder();
         this.seccondImageConfig = new ImageConfiguration.ImageConfigurationBuilder().setImageName("different")
@@ -190,9 +195,12 @@ public class ContainerConfigurationTest {
         assertFalse(this.firstContainerConfig.isContainerPrivileged());
         assertFalse(this.firstContainerConfig.isFrameworkManaged());
         assertEquals(0, this.firstContainerConfig.getImageConfiguration().getimageDownloadTimeoutSeconds());
+        assertEquals(Optional.of(MEMORY), this.firstContainerConfig.getMemory());
+        assertEquals(Optional.of(CPUS), this.firstContainerConfig.getCpus());
+        assertEquals(Optional.of(GPUS), this.firstContainerConfig.getGpus());
     }
 
-    private void thenFirstContainerDoesntEqualSeccond() {
+    private void thenFirstContainerDoesntEqualSecond() {
         assertFalse(this.comparisonResult);
     }
 

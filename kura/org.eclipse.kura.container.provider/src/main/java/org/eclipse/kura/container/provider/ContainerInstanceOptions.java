@@ -57,7 +57,11 @@ public class ContainerInstanceOptions {
             500);
     private static final Property<String> CONTAINER_NETWORKING_MODE = new Property<>("container.networkMode", "");
     private static final Property<String> CONTAINER_ENTRY_POINT = new Property<>("container.entrypoint", "");
-    private static final Property<Boolean> CONTAINER_RESTART_FAILURE = new Property<>("container.restart.onfailure", false);
+    private static final Property<Boolean> CONTAINER_RESTART_FAILURE = new Property<>("container.restart.onfailure",
+            false);
+    private static final Property<String> CONTAINER_MEMORY = new Property<>("container.memory", "");
+    private static final Property<Float> CONTAINER_CPUS = new Property<>("container.cpus", 1F);
+    private static final Property<String> CONTAINER_GPUS = new Property<>("container.gpus", "all");
 
     private final boolean enabled;
     private final String image;
@@ -81,6 +85,9 @@ public class ContainerInstanceOptions {
     private final Optional<String> containerNetworkingMode;
     private final List<String> containerEntryPoint;
     private final boolean restartOnFailure;
+    private final Optional<Long> containerMemory;
+    private final Optional<Float> containerCpus;
+    private final Optional<String> containerGpus;
 
     public ContainerInstanceOptions(final Map<String, Object> properties) {
         if (isNull(properties)) {
@@ -109,6 +116,9 @@ public class ContainerInstanceOptions {
         this.containerNetworkingMode = CONTAINER_NETWORKING_MODE.getOptional(properties);
         this.containerEntryPoint = parseStringListSplitByComma(CONTAINER_ENTRY_POINT.get(properties));
         this.restartOnFailure = CONTAINER_RESTART_FAILURE.get(properties);
+        this.containerMemory = parseMemoryString(CONTAINER_MEMORY.getOptional(properties));
+        this.containerCpus = CONTAINER_CPUS.getOptional(properties);
+        this.containerGpus = CONTAINER_GPUS.getOptional(properties);
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -176,6 +186,32 @@ public class ContainerInstanceOptions {
         return stringList;
     }
 
+    private Optional<Long> parseMemoryString(Optional<String> value) {
+        if (value.isPresent() && !value.get().trim().isEmpty()) {
+            String stringValue = value.get().trim();
+            long result = 0;
+            switch (stringValue.charAt(stringValue.length() - 1)) {
+            case 'b':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                break;
+            case 'k':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                break;
+            case 'm':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                break;
+            case 'g':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                break;
+            default:
+                result = Long.parseLong(stringValue);
+            }
+            return Optional.of(result);
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public boolean isEnabled() {
         return this.enabled;
     }
@@ -231,7 +267,7 @@ public class ContainerInstanceOptions {
     public String getLoggingType() {
         return this.containerLoggerType;
     }
-    
+
     public boolean getRestartOnFailure() {
         return this.restartOnFailure;
     }
@@ -266,10 +302,22 @@ public class ContainerInstanceOptions {
         return this.containerEntryPoint;
     }
 
+    public Optional<Long> getMemory() {
+        return this.containerMemory;
+    }
+
+    public Optional<Float> getCpus() {
+        return this.containerCpus;
+    }
+
+    public Optional<String> getGpus() {
+        return this.containerGpus;
+    }
+
     private ImageConfiguration buildImageConfig() {
-        return new ImageConfiguration.ImageConfigurationBuilder().setImageName(image).setImageTag(imageTag)
-                .setImageDownloadTimeoutSeconds(imageDownloadTimeout).setRegistryCredentials(getRegistryCredentials())
-                .build();
+        return new ImageConfiguration.ImageConfigurationBuilder().setImageName(this.image).setImageTag(this.imageTag)
+                .setImageDownloadTimeoutSeconds(this.imageDownloadTimeout)
+                .setRegistryCredentials(getRegistryCredentials()).build();
     }
 
     public ContainerConfiguration getContainerConfiguration() {
@@ -279,7 +327,9 @@ public class ContainerInstanceOptions {
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
-                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint()).setRestartOnFailure(getRestartOnFailure()).build();
+                .setLoggerParameters(getLoggerParameters()).setEntryPoint(getEntryPoint())
+                .setRestartOnFailure(getRestartOnFailure()).setMemory(getMemory()).setCpus(getCpus()).setGpus(getGpus())
+                .build();
     }
 
     private List<Integer> parsePortString(String ports) {
@@ -297,12 +347,12 @@ public class ContainerInstanceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerDevice, this.containerEnv, this.containerLoggerType,
-                this.containerLoggingParameters, this.containerName, this.containerVolumeString, this.containerVolumes,
+        return Objects.hash(this.containerCpus, this.containerDevice, this.containerEntryPoint, this.containerEnv,
+                this.containerGpus, this.containerLoggerType, this.containerLoggingParameters, this.containerMemory,
+                this.containerName, this.containerNetworkingMode, this.containerVolumeString, this.containerVolumes,
                 this.enabled, this.externalPorts, this.image, this.imageDownloadTimeout, this.imageTag,
                 this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
-                this.registryURL, this.registryUsername, this.retryInterval, this.containerEntryPoint,
-                this.containerNetworkingMode);
+                this.registryURL, this.registryUsername, this.retryInterval);
     }
 
     @Override
@@ -310,15 +360,20 @@ public class ContainerInstanceOptions {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ContainerInstanceOptions)) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
         ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
-        return Objects.equals(this.containerDevice, other.containerDevice)
+        return Objects.equals(this.containerCpus, other.containerCpus)
+                && Objects.equals(this.containerDevice, other.containerDevice)
+                && Objects.equals(this.containerEntryPoint, other.containerEntryPoint)
                 && Objects.equals(this.containerEnv, other.containerEnv)
+                && Objects.equals(this.containerGpus, other.containerGpus)
                 && Objects.equals(this.containerLoggerType, other.containerLoggerType)
                 && Objects.equals(this.containerLoggingParameters, other.containerLoggingParameters)
+                && Objects.equals(this.containerMemory, other.containerMemory)
                 && Objects.equals(this.containerName, other.containerName)
+                && Objects.equals(this.containerNetworkingMode, other.containerNetworkingMode)
                 && Objects.equals(this.containerVolumeString, other.containerVolumeString)
                 && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
                 && Objects.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
@@ -329,8 +384,6 @@ public class ContainerInstanceOptions {
                 && Objects.equals(this.registryPassword, other.registryPassword)
                 && Objects.equals(this.registryURL, other.registryURL)
                 && Objects.equals(this.registryUsername, other.registryUsername)
-                && Objects.equals(this.containerNetworkingMode, other.containerNetworkingMode)
-                && Objects.equals(this.containerEntryPoint, other.containerEntryPoint)
                 && this.retryInterval == other.retryInterval;
     }
 

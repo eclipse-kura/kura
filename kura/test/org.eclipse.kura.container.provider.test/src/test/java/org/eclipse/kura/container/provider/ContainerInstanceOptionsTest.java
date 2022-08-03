@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
-import org.eclipse.kura.util.configuration.Property;
 import org.junit.Test;
 
 public class ContainerInstanceOptionsTest {
@@ -51,8 +50,11 @@ public class ContainerInstanceOptionsTest {
     private static final String DEFAULT_REGISTRY_USERNAME = "";
     private static final String DEFAULT_REGISTRY_PASSWORD = "";
     private static final int DEFAULT_IMAGES_DOWNLOAD_TIMEOUT = 500;
-    private static final String DEFAULT_CONTAINER_NETWORKING_MODE = ""; 
+    private static final String DEFAULT_CONTAINER_NETWORKING_MODE = "";
     private static final String DEFAULT_CONTAINER_ENTRY_POINT = "";
+    private static final String DEFAULT_CONTAINER_MEMORY = "";
+    private static final String DEFAULT_CONTAINER_CPUS = "";
+    private static final String DEFAULT_CONTAINER_GPUS = "";
 
     private static final String CONTAINER_ENV = "container.env";
     private static final String CONTAINER_PORTS_INTERNAL = "container.ports.internal";
@@ -74,6 +76,9 @@ public class ContainerInstanceOptionsTest {
     private static final String IMAGES_DOWNLOAD_TIMEOUT = "container.image.download.timeout";
     private static final String CONTAINER_NETWORKING_MODE = "container.networkMode";
     private static final String CONTAINER_ENTRY_POINT = "container.entrypoint";
+    private static final String CONTAINER_MEMORY = "container.memory";
+    private static final String CONTAINER_CPUS = "container.cpus";
+    private static final String CONTAINER_GPUS = "container.gpus";
 
     private Map<String, Object> properties;
 
@@ -617,13 +622,118 @@ public class ContainerInstanceOptionsTest {
 
         thenIsNotNullContainerDescriptor();
     }
-    
+
     @Test
     public void testExtraCommaInEntryPointFeild() {
         givenDifferentProperties();
         givenDiffrentConfigurableGenericDockerServiceOptions();
-        
+
         thenCheckIfExtraCommasAreIgnored();
+    }
+
+    @Test
+    public void testMemoryOptionEmpty() {
+        givenDefaultProperties();
+        givenMemoryProperty("");
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerMemoryIsEmpty();
+    }
+
+    @Test
+    public void testMemoryOptionNoSuffix() {
+        testMemoryOption("1234", 1234L);
+    }
+
+    @Test
+    public void testMemoryOptionByteSuffix() {
+        testMemoryOption("12345b", 12345L);
+    }
+
+    @Test
+    public void testMemoryOptionKiloSuffix() {
+        testMemoryOption("1111k", 1137664L);
+    }
+
+    @Test
+    public void testMemoryOptionMegaSuffix() {
+        testMemoryOption("2222m", 2329935872L);
+    }
+
+    @Test
+    public void testMemoryOptionGigaSuffix() {
+        testMemoryOption("7g", 7516192768L);
+    }
+
+    @Test
+    public void testCpusOptionEmpty() {
+        givenDefaultProperties();
+        givenCpusProperty(null);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerCpusIsEmpty();
+    }
+
+    @Test
+    public void testCpusOption() {
+        givenDefaultProperties();
+        givenCpusProperty(1.78F);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerCpusIsNotEmpty();
+        thenContainerCpusIs(1.78F);
+    }
+
+    @Test
+    public void testGpusOptionEmpty() {
+        givenDefaultProperties();
+        givenGpusProperty(null);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerGpusIsEmpty();
+    }
+
+    @Test
+    public void testCpusOptionWithNumber() {
+        givenDefaultProperties();
+        givenGpusProperty("2");
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerGpusIsNotEmpty();
+        thenContainerGpusIs("2");
+    }
+
+    @Test
+    public void testCpusOptionAll() {
+        givenDefaultProperties();
+        givenGpusProperty("all");
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerGpusIsNotEmpty();
+        thenContainerGpusIs("all");
+    }
+
+    private void testMemoryOption(String stringValue, Long longValue) {
+        givenDefaultProperties();
+        givenMemoryProperty(stringValue);
+        givenConfigurableGenericDockerServiceOptions();
+
+        whenGetContainerDescriptor();
+
+        thenContainerMemoryIsNotEmpty();
+        thenContainerMemoryIs(longValue);
     }
 
     private void givenNullProperties() {
@@ -654,6 +764,9 @@ public class ContainerInstanceOptionsTest {
         this.properties.put(IMAGES_DOWNLOAD_TIMEOUT, DEFAULT_IMAGES_DOWNLOAD_TIMEOUT);
         this.properties.put(CONTAINER_NETWORKING_MODE, DEFAULT_CONTAINER_NETWORKING_MODE);
         this.properties.put(CONTAINER_ENTRY_POINT, DEFAULT_CONTAINER_ENTRY_POINT);
+        this.properties.put(CONTAINER_MEMORY, DEFAULT_CONTAINER_MEMORY);
+        this.properties.put(CONTAINER_CPUS, DEFAULT_CONTAINER_CPUS);
+        this.properties.put(CONTAINER_GPUS, DEFAULT_CONTAINER_GPUS);
     }
 
     private void givenDifferentProperties() {
@@ -676,12 +789,32 @@ public class ContainerInstanceOptionsTest {
         this.newProperties.put(IMAGES_DOWNLOAD_TIMEOUT, 100);
         this.newProperties.put(CONTAINER_NETWORKING_MODE, "none");
         this.newProperties.put(CONTAINER_ENTRY_POINT, "./test.py,-v,-m,--human-readable,,,");
+        this.newProperties.put(CONTAINER_MEMORY, "100m");
+        this.newProperties.put(CONTAINER_CPUS, "1.5");
+    }
+
+    private void givenMemoryProperty(String memory) {
+        if (this.properties != null) {
+            this.properties.put(CONTAINER_MEMORY, memory);
+        }
+    }
+
+    private void givenCpusProperty(Float cpus) {
+        if (this.properties != null) {
+            this.properties.put(CONTAINER_CPUS, cpus);
+        }
+    }
+
+    private void givenGpusProperty(String gpus) {
+        if (this.properties != null) {
+            this.properties.put(CONTAINER_GPUS, gpus);
+        }
     }
 
     private void givenConfigurableGenericDockerServiceOptions() {
         this.cgdso = new ContainerInstanceOptions(this.properties);
     }
-    
+
     private void givenDiffrentConfigurableGenericDockerServiceOptions() {
         this.cgdso = new ContainerInstanceOptions(this.newProperties);
     }
@@ -936,8 +1069,44 @@ public class ContainerInstanceOptionsTest {
     private void thenIsNotNullContainerDescriptor() {
         assertNotNull(this.containerDescriptor);
     }
-    
+
     private void thenCheckIfExtraCommasAreIgnored() {
-        assertEquals(Arrays.asList("./test.py","-v","-m","--human-readable"), this.cgdso.getEntryPoint());
+        assertEquals(Arrays.asList("./test.py", "-v", "-m", "--human-readable"), this.cgdso.getEntryPoint());
+    }
+
+    private void thenContainerMemoryIsEmpty() {
+        assertFalse(this.containerDescriptor.getMemory().isPresent());
+    }
+
+    private void thenContainerMemoryIsNotEmpty() {
+        assertTrue(this.containerDescriptor.getMemory().isPresent());
+    }
+
+    private void thenContainerMemoryIs(Long value) {
+        assertEquals(this.containerDescriptor.getMemory().get(), value);
+    }
+
+    private void thenContainerCpusIsEmpty() {
+        assertFalse(this.containerDescriptor.getCpus().isPresent());
+    }
+
+    private void thenContainerCpusIsNotEmpty() {
+        assertTrue(this.containerDescriptor.getCpus().isPresent());
+    }
+
+    private void thenContainerCpusIs(Float value) {
+        assertEquals(this.containerDescriptor.getCpus().get(), value);
+    }
+
+    private void thenContainerGpusIsEmpty() {
+        assertFalse(this.containerDescriptor.getGpus().isPresent());
+    }
+
+    private void thenContainerGpusIsNotEmpty() {
+        assertTrue(this.containerDescriptor.getGpus().isPresent());
+    }
+
+    private void thenContainerGpusIs(String value) {
+        assertEquals(this.containerDescriptor.getGpus().get(), value);
     }
 }

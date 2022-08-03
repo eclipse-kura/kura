@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.configuration.change.publisher.ConfigurationChangePublisher" 
+        name="ConfigurationChangePublisher" 
+        description="The ConfigurationChangePublisher defines a CloudPublisher instance that allows to publish configuration change events.">
+
+		<AD id="topic"
+            name="Topic"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="$EVT/$ACCOUNT_NAME/$CLIENT_ID/CONF/V1"
+            description="The message topic to use.">
+        </AD>
+
+        <AD id="qos"
+            name="Qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="The desired quality of service for the log messages that have to be published. If Qos is 0,
+            the log message is delivered at most once, or it is not delivered at all. If Qos is set to 1, the message
+            is always delivered at least once.">
+            <Option label="0" value="0" />
+            <Option label="1" value="1" />
+        </AD>
+
+        <AD id="retain"
+            name="Retain"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Default retaing flag for the published messages.">
+        </AD>
+
+        <AD id="priority"
+            name="Priority"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="7"
+            description='Message priority. Priority level 0 (highest) should be used sparingly and reserved for
+            messages that should be sent with the minimum latency. Default is set to 7.'>
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.configuration.change.publisher.ConfigurationChangePublisher"
+    	factoryPid="org.eclipse.kura.configuration.change.publisher.ConfigurationChangePublisher">
+        <Object ocdref="org.eclipse.kura.configuration.change.publisher.ConfigurationChangePublisher"/>
+    </Designate>
+</MetaData>

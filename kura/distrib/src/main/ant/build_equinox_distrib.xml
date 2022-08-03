@@ -233,6 +233,8 @@
 		<antcall target="filesystem-logprovider-config" />
 		
 		<antcall target="container-orchestrator-config" />
+
+		<antcall target="configuration-change-publisher-config" />
 		
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
@@ -732,6 +734,8 @@ fi]]>
 		<antcall target="filesystem-logprovider-jar" />
 		
 		<antcall target="container-orchestrator-jar" />
+
+		<antcall target="configuration-change-publisher-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -1629,6 +1633,13 @@ fi]]>
                 value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar@4:start" />
         </propertyfile>
     </target>
+
+	<target name="configuration-change-publisher-config">
+		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.configuration.change.publisher_${org.eclipse.kura.configuration.change.publisher.version}.jar@4:start" />
+		</propertyfile>
+	</target>
 	
 	<target name="emulator-jars" if="is.nn">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
@@ -1853,6 +1864,14 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+		</zip>
+	</target>
+
+	<target name="configuration-change-publisher-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.configuration.change.publisher_${org.eclipse.kura.configuration.change.publisher.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

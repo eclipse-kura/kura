@@ -138,8 +138,6 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     @Override
     public void onConfigurationChanged(String pid) {
         if (this.acceptNotifications) {
-            retrieveLastSnapshotId();
-
             this.notificationsQueue.add(new Notification(pid));
 
             if (this.futureSendQueue != null) {
@@ -188,6 +186,8 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     }
 
     private void sendQueue() {
+        retrieveLastSnapshotId();
+        
         List<String> changedPids = new ArrayList<>();
         for (Notification notification : this.notificationsQueue) {
             changedPids.add(notification.changedPid);

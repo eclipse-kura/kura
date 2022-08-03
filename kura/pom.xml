@@ -130,6 +130,7 @@
         <module>org.eclipse.kura.wire.ai.component.provider</module>
 
         <module>org.eclipse.kura.container.provider</module>
+        <module>org.eclipse.kura.event.publisher</module>
 
         <module>org.eclipse.kura.configuration.change.manager</module>
 

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2022 Eurotech and/or its affiliates. All rights reserved.
+-->
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="org.eclipse.kura.event.publisher.EventPublisher" 
+        name="EventPublisher">
+
+		<AD id="topic.prefix"
+            name="Topic prefix"
+            type="String"
+            cardinality="0"
+            required="false"
+            default="$EVT"
+            description="The topic prefix to use for events publishing. Can be left empty.">
+        </AD>
+
+		<AD id="topic"
+            name="Topic"
+            type="String"
+            cardinality="0"
+            required="true"
+            default=""
+            description="The message topic to use for publishing events.">
+        </AD>
+
+        <AD id="qos"
+            name="Qos"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="0"
+            description="The desired quality of service for the log messages that have to be published. If Qos is 0,
+            the log message is delivered at most once, or it is not delivered at all. If Qos is set to 1, the message
+            is always delivered at least once.">
+            <Option label="0" value="0" />
+            <Option label="1" value="1" />
+        </AD>
+
+        <AD id="retain"
+            name="Retain"
+            type="Boolean"
+            cardinality="0"
+            required="true"
+            default="false"
+            description="Default retaing flag for the published messages.">
+        </AD>
+
+        <AD id="priority"
+            name="Priority"
+            type="Integer"
+            cardinality="0"
+            required="true"
+            default="7"
+            description='Message priority. Priority level 0 (highest) should be used sparingly and reserved for
+            messages that should be sent with the minimum latency. Default is set to 7.'>
+        </AD>
+    </OCD>
+    
+    <Designate pid="org.eclipse.kura.event.publisher.EventPublisher"
+    	factoryPid="org.eclipse.kura.event.publisher.EventPublisher">
+        <Object ocdref="org.eclipse.kura.event.publisher.EventPublisher"/>
+    </Designate>
+</MetaData>

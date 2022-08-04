@@ -132,7 +132,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     }
 
     private byte[] createJsonFromNotificationsQueue() {
-        GsonBuilder builder = new GsonBuilder().setPrettyPrinting();
+        GsonBuilder builder = new GsonBuilder();
         builder.setExclusionStrategies(new ExclusionStrategy() {
 
             @Override

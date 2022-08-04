@@ -43,13 +43,27 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     private class ChangedConfiguration {
 
         protected long timestamp;
-        @SuppressWarnings("unused")
         protected String pid;
 
         public ChangedConfiguration(String pid) {
             this.timestamp = new Date().getTime();
             this.pid = pid;
         }
+
+        @Override
+        public boolean equals(Object other) {
+            if (!(other instanceof ChangedConfiguration)) {
+                return false;
+            }
+
+            return ((ChangedConfiguration) other).pid.equals(this.pid);
+        }
+
+        @Override
+        public int hashCode() {
+            return pid.hashCode();
+        }
+
     }
 
     private ConfigurationChangeManagerOptions options;
@@ -121,7 +135,10 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     @Override
     public void onConfigurationChanged(String pid) {
         if (this.acceptNotifications) {
-            this.notificationsQueue.add(new ChangedConfiguration(pid));
+            ChangedConfiguration conf = new ChangedConfiguration(pid);
+            if (!this.notificationsQueue.contains(conf)) {
+                this.notificationsQueue.add(conf);
+            }
 
             if (this.futureSendQueue != null) {
                 this.futureSendQueue.cancel(false);

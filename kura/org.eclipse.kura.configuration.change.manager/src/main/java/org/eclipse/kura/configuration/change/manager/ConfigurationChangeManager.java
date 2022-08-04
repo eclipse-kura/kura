@@ -12,25 +12,19 @@
  *******************************************************************************/
 package org.eclipse.kura.configuration.change.manager;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
-import org.eclipse.kura.configuration.ComponentConfiguration;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.message.KuraPayload;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -38,49 +32,38 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.GsonBuilder;
+
 public class ConfigurationChangeManager implements ConfigurableComponent, ServiceTrackerListener {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationChangeManager.class);
-    
-    private static final String METRIC_CHANGED_PIDS = "changed.pids";
-    private static final String METRIC_LAST_SNAPSHOT_ID = "last.snapshot.id";
-    private static final String METRIC_NON_PERSISTED_CHANGED_PIDS = "non.persisted.changed.pids";
+
+    private class ChangedConfiguration {
+
+        protected long timestamp;
+        @SuppressWarnings("unused")
+        protected String pid;
+
+        public ChangedConfiguration(String pid) {
+            this.timestamp = new Date().getTime();
+            this.pid = pid;
+        }
+    }
 
     private ConfigurationChangeManagerOptions options;
-    private ConfigurationService configurationService;
     private CloudPublisher cloudPublisher;
 
     private ScheduledExecutorService scheduledSendQueueExecutor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> futureSendQueue;
     private volatile boolean acceptNotifications = false;
-    private Queue<Notification> notificationsQueue = new LinkedList<>();
-    private long lastSnapshotId = 0L;
+    private Queue<ChangedConfiguration> notificationsQueue = new LinkedList<>();
     private ComponentsServiceTracker serviceTracker;
-
-    private class Notification {
-
-        protected long timestamp;
-        protected String changedPid;
-
-        public Notification(String changedPid) {
-            this.timestamp = new Date().getTime();
-            this.changedPid = changedPid;
-        }
-    }
 
     /*
      * Dependencies
      */
-
-    public void setConfigurationService(ConfigurationService configurationService) {
-        this.configurationService = configurationService;
-    }
-
-    public void unsetConfigurationService(ConfigurationService configurationService) {
-        if (this.configurationService == configurationService) {
-            this.configurationService = null;
-        }
-    }
 
     public void setCloudPublisher(CloudPublisher cloudPublisher) {
         this.cloudPublisher = cloudPublisher;
@@ -138,81 +121,48 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     @Override
     public void onConfigurationChanged(String pid) {
         if (this.acceptNotifications) {
-            this.notificationsQueue.add(new Notification(pid));
+            this.notificationsQueue.add(new ChangedConfiguration(pid));
 
             if (this.futureSendQueue != null) {
                 this.futureSendQueue.cancel(false);
             }
-            this.futureSendQueue = scheduledSendQueueExecutor.schedule(() -> sendQueue(), this.options.getSendDelay(),
+            this.futureSendQueue = scheduledSendQueueExecutor.schedule(this::sendQueue, this.options.getSendDelay(),
                     TimeUnit.SECONDS);
         }
     }
 
-    private void retrieveLastSnapshotId() {
-        try {
-            this.lastSnapshotId = Collections.max(this.configurationService.getSnapshots());
-        } catch (KuraException e) {
-            logger.error("Error getting last snapshot ID.", e);
-        }
-    }
+    private byte[] createJsonFromNotificationsQueue() {
+        GsonBuilder builder = new GsonBuilder().setPrettyPrinting();
+        builder.setExclusionStrategies(new ExclusionStrategy() {
 
-    private String getCsvFromPidsList(List<String> pids) {
-        StringBuilder csvModifiedPids = new StringBuilder();
-        for (String pid : pids) {
-            csvModifiedPids.append(pid);
-            csvModifiedPids.append(",");
-        }
-        
-        if(csvModifiedPids.length() > 1) {
-            return csvModifiedPids.substring(0, csvModifiedPids.length() - 1);
-        } else {
-            return csvModifiedPids.toString();
-        }
-    }
+            @Override
+            public boolean shouldSkipClass(Class<?> arg0) {
+                return false;
+            }
 
-    private List<String> getNonPersistedPidsFrom(List<String> pids) {
-        List<String> nonPersistedPids = new ArrayList<>(pids);
-        
-        try {
-            List<ComponentConfiguration> persistedConfigs = this.configurationService.getSnapshot(this.lastSnapshotId);
-            List<String> persistedPids = persistedConfigs.stream().map(ComponentConfiguration::getPid).collect(Collectors.toList());
+            @Override
+            public boolean shouldSkipField(FieldAttributes arg0) {
+                return arg0.getName().equals("timestamp");
+            }
 
-            nonPersistedPids.removeAll(persistedPids);
-        } catch (KuraException e) {
-            logger.error("Error retrieving configurations from last snapshot.", e);
-        }
-
-        return nonPersistedPids;
+        });
+        return builder.create().toJson(this.notificationsQueue).getBytes();
     }
 
     private void sendQueue() {
-        retrieveLastSnapshotId();
-        
-        List<String> changedPids = new ArrayList<>();
-        for (Notification notification : this.notificationsQueue) {
-            changedPids.add(notification.changedPid);
-        }
-
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date(this.notificationsQueue.peek().timestamp));
-
-        payload.addMetric(METRIC_CHANGED_PIDS, getCsvFromPidsList(changedPids));
-        payload.addMetric(METRIC_LAST_SNAPSHOT_ID, this.lastSnapshotId);
-        payload.addMetric(METRIC_NON_PERSISTED_CHANGED_PIDS, getCsvFromPidsList(getNonPersistedPidsFrom(changedPids)));
-
-        KuraMessage kuraMessage = new KuraMessage(payload);
-
-        logger.info("\nMessage to send:\n{}\n", kuraMessage.getPayload().metrics());
+        payload.setBody(createJsonFromNotificationsQueue());
         
+        this.notificationsQueue.clear();
+
         if(this.cloudPublisher != null) {
             try {
-                this.cloudPublisher.publish(kuraMessage);
+                this.cloudPublisher.publish(new KuraMessage(payload));
             } catch(KuraException e) {
                 logger.error("Error publishing configuration change event.", e);
             }
         }
-
-        this.notificationsQueue.clear();
     }
 
 }

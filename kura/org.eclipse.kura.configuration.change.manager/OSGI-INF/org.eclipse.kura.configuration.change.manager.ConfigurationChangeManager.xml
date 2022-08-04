@@ -21,17 +21,10 @@
     <implementation class="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"/>
     <property name="service.pid" value="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"/>
     <property name="kura.service.pid" type="String" value="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"/>
-       
+
     <service>
         <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
     </service>
-
-    <reference interface="org.eclipse.kura.configuration.ConfigurationService"
-		cardinality="1..1"
-		name="ConfigurationService"
-		policy="static"
-		bind="setConfigurationService"
-		unbind="unsetConfigurationService"/>
 		
 	<reference name="CloudPublisher"
 		policy="dynamic"

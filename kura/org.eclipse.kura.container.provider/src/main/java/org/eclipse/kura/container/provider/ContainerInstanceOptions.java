@@ -118,7 +118,7 @@ public class ContainerInstanceOptions {
         this.restartOnFailure = CONTAINER_RESTART_FAILURE.get(properties);
         this.containerMemory = parseMemoryString(CONTAINER_MEMORY.getOptional(properties));
         this.containerCpus = CONTAINER_CPUS.getOptional(properties);
-        this.containerGpus = CONTAINER_GPUS.getOptional(properties);
+        this.containerGpus = parseGpusString(CONTAINER_GPUS.getOptional(properties));
     }
 
     private Map<String, String> parseVolume(String volumeString) {
@@ -209,6 +209,14 @@ public class ContainerInstanceOptions {
             return Optional.of(result);
         } else {
             return Optional.empty();
+        }
+    }
+
+    private Optional<String> parseGpusString(Optional<String> gpus) {
+        if (gpus.isPresent() && gpus.get().isEmpty()) {
+            return Optional.empty();
+        } else {
+            return gpus;
         }
     }
 

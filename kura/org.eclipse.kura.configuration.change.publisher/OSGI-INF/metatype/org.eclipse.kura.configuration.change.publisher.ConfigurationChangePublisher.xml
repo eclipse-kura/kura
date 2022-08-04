@@ -2,14 +2,25 @@
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="org.eclipse.kura.configuration.change.publisher.ConfigurationChangePublisher" 
         name="ConfigurationChangePublisher" 
-        description="The ConfigurationChangePublisher defines a CloudPublisher instance that allows to publish configuration change events.">
+        description="The ConfigurationChangePublisher defines a CloudPublisher instance that allows to publish configuration change events.
+        By default, the topic is set to $EVT/#account_id/#client_id/CONF/V1/CHANGE. #account_id and #client_id will be properly replaced in
+        the DataTransport layer.">
+
+		<AD id="topic.prefix"
+            name="Topic prefix"
+            type="String"
+            cardinality="0"
+            required="true"
+            default="$EVT"
+            description="The topic prefix to use.">
+        </AD>
 
 		<AD id="topic"
             name="Topic"
             type="String"
             cardinality="0"
             required="true"
-            default="CONF/V1"
+            default="CONF/V1/CHANGE"
             description="The message topic to use.">
         </AD>
 

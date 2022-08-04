@@ -192,7 +192,11 @@ public class PKCS11KeystoreServiceImpl extends BaseKeystoreService {
 
             final Constructor<?> ctor = providerClass.getConstructor(InputStream.class);
 
-            return (Provider) ctor.newInstance(new ByteArrayInputStream(config.getBytes()));
+            final Provider newProvider = (Provider) ctor.newInstance(new ByteArrayInputStream(config.getBytes()));
+
+            Security.addProvider(newProvider);
+
+            return newProvider;
 
         } catch (final Exception e) {
             logger.warn("failed to load PKCS11 provider", e);

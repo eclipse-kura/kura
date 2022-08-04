@@ -21,6 +21,7 @@ import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -188,7 +189,10 @@ public class ConfigurationChangePublisher
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append(this.options.getTopicPrefix()).append(topicSeparator);
+        Optional<String> topicPrefix = this.options.getTopicPrefix();
+        if (topicPrefix.isPresent()) {
+            sb.append(topicPrefix.get()).append(topicSeparator);
+        }
         sb.append(accountName).append(topicSeparator);
         sb.append(clientId).append(topicSeparator).append(appTopic);
 

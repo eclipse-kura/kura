@@ -10,9 +10,9 @@
             name="Topic prefix"
             type="String"
             cardinality="0"
-            required="true"
+            required="false"
             default="$EVT"
-            description="The topic prefix to use.">
+            description="The topic prefix to use. Can be left empty.">
         </AD>
 
 		<AD id="topic"

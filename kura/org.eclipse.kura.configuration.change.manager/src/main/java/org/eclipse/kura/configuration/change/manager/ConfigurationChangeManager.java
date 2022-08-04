@@ -136,9 +136,10 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     public void onConfigurationChanged(String pid) {
         if (this.acceptNotifications) {
             ChangedConfiguration conf = new ChangedConfiguration(pid);
-            if (!this.notificationsQueue.contains(conf)) {
-                this.notificationsQueue.add(conf);
+            if (this.notificationsQueue.contains(conf)) {
+                this.notificationsQueue.remove(conf);
             }
+            this.notificationsQueue.add(conf);
 
             if (this.futureSendQueue != null) {
                 this.futureSendQueue.cancel(false);

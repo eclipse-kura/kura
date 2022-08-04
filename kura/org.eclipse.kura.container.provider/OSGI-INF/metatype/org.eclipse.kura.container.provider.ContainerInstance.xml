@@ -100,17 +100,17 @@
         <AD id="container.memory" name="Memory"
             description="The maximum amount of memory the container can use in bytes. Set it as a positive integer, optionally followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. 
             The minimum allowed value is platform dependent (i.e. 6m). If left empty, the memory assigned to the container will be set to a default value by the native container orchestrator."
-            type="String" cardinality="1"
+            type="String" cardinality="0"
             required="false" default="" />
             
         <AD id="container.cpus" name="CPUs"
             description="Specify how many CPUs a container can use. Decimal values are allowed, so if set to 1.5, the container will use at most one and a half cpu resource."
-            type="Float" cardinality="1"
+            type="Float" cardinality="0"
             required="false" default="" />
 
         <AD id="container.gpus" name="GPUs"
             description="Specify how many Nvidia GPUs a container can use. Allowed values are 'all' or an integer number."
-            type="String" cardinality="1"
+            type="String" cardinality="0"
             required="false" default="" />
                         
         <AD id="container.volume" name="Volume Mount"

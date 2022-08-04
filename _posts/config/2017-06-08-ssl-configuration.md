@@ -4,27 +4,32 @@ title:  "SSL Configuration"
 categories: [config]
 ---
 
-The Ssl Service manages the configuration of the SSL connections. It provides APIs to manage the trust certificates, private keys, and public certificates. It also enforces best practices that are not enabled by default in the Java VM, such as, enabling hostname verification, disabling the legacy SSL-2.0-compatible Client Hello, and disabling the Nagle algorithm.
+A Ssl Service instance manages the configuration of the SSL connections. 
+It uses the associated KeystoreService to access the trust certificates, private keys pairs needed to setup a SSL connection. It also enforces best practices that are not enabled by default in the Java VM, such as, enabling hostname verification, disabling the legacy SSL-2.0-compatible Client Hello, and disabling the Nagle algorithm.
 
-To use this service, select the **SSL Configuration** option located in **Settings** as shown in the screen capture below.
+The list of all available SSL Service instances is available in the **SSL Configuration** tab of the **Security** section, accessible only by the users with the corresponding permission.
 
 ![]({{ site.baseurl }}/assets/images/config/SSLService.png)
 
-The service provides the following configuration parameters:
+By default, the framework creates a SSLManagerService instance with the `org.eclipse.kura.ssl.SslManagerService` PID. This instance is generally used by all the core services of the framework.
 
-- **Default protocol** - defines the allowed SSL protocol.
+A new SSL Service instance can be created using the **New** Button, by specifying the desired factory and the Service PID that will be associated with this new instance.
 
-- **Hostname verification** - indicates whether hostname verification is enabled or disabled.
+![]({{ site.baseurl }}/assets/images/config/SSLServiceNew.png)
 
-- **Keystore path** - specifies the location of the Key Store files.
+An instance of the default `org.eclipse.kura.ssl.SslManagerService` factory has the following configuration parameters:
 
-- **Keystore password** - specifies the keystore access password. (Required field.)
+![]({{ site.baseurl }}/assets/images/config/SSLServiceConfig.png)
 
-- **Cipher suites** - defines the allowed cipher suites.
+- **Keystore Target Filter** - Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the SSL key store.
 
-At first boot, ESF verifies the accessibility of the default keystore provided with the distribution. If the keystore results accessible, ESF creates a new password that used to access and manage the keystore.
+- **Truststore Target Filter** - Specifies, as an OSGi target filter, the pid of the KeystoreService used to manage the SSL trust store. If the target service cannot be found, the service configured with the Keystore Target Filter parameter will be used as truststore.
 
-The SSL keystore password can be freely changed with a new password, by specifying its value in the _Keystore Password_ field. At every boot, ESF verifies the coherence of the keystore in order to prevent a possible keystore tampering.
+- **ssl.default.protocol** - defines the allowed SSL protocol.
+
+- **ssl.hostname.verification** - indicates whether hostname verification is enabled or disabled.
+
+- **ssl.default.cipherSuites** - defines the allowed cipher suites.
 
 ## SSL Certificates Management
 

@@ -35,7 +35,10 @@ This project leverages the following third party content.
 
 ### Maven Dependencies
 
-maven/mavencentral/com.eclipsesource.jaxrs/jersey-min/2.22.2, CDDL-1.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND (Apache-2.0 AND LGPL-2.1-or-later AND MPL-1.1) AND (CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND Apache-2.0 AND (Apache-2.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND CC0-1.0 AND (Apache-2.0 AND CC0-1.0) AND (Apache-2.0 AND CC-PDDC) AND (CDDL-1.0 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND (CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND W3C) AND (CC0-1.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)) AND (CC-PDDC AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND MIT) AND (CDDL-1.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND MIT), restricted, #3084
+maven/mavencentral/com.eclipsesource.jaxrs/jersey-min/2.22.2, (CDDL-1.1 OR GPL-2.0-only OR GPL-2.0-only with Classpath-exception-2.0) AND (MPL-1.1 OR LGPL-2.1-or-later OR Apache-2.0) AND Apache-2.0 AND LicenseRef-Public-Domain, approved, #3084
+maven/mavencentral/com.eclipsesource.jaxrs/provider-gson/2.3, EPL-1.0, approved, #3091
+maven/mavencentral/com.eclipsesource.jaxrs/provider-multipart/2.2, EPL-1.0, approved, #3092
+maven/mavencentral/com.eclipsesource.jaxrs/provider-security/2.2, EPL-1.0, approved, #3093
 maven/mavencentral/com.eclipsesource.jaxrs/publisher/5.3.1, EPL-1.0, approved, #3085
 maven/mavencentral/com.eclipsesource.minimal-json/minimal-json/0.9.5, MIT, approved, CQ10061
 maven/mavencentral/com.fasterxml.jackson.core/jackson-annotations/2.10.3, Apache-2.0, approved, CQ21280
@@ -49,6 +52,7 @@ maven/mavencentral/com.github.docker-java/docker-java/3.2.12, Apache-2.0, approv
 maven/mavencentral/com.github.hypfvieh/bluez-dbus-osgi/0.1.4, MIT, approved, clearlydefined
 maven/mavencentral/com.github.rodionmoiseev.c10n/c10n-core/1.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.google.code.findbugs/jsr305/3.0.1, Apache-2.0, approved, #20
+maven/mavencentral/com.google.code.gson/gson/2.9.0, Apache-2.0, approved, CQ24148
 maven/mavencentral/com.google.guava/guava/25.0-jre, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.google.protobuf/protobuf-java/3.19.3, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/com.h2database/h2/2.1.214, (EPL-1.0 AND MPL-2.0) AND (EPL-1.0 AND MPL-2.0 AND LGPL-3.0-or-later) AND BSD-3-Clause AND LicenseRef-Public-Domain, approved, #2713
@@ -177,11 +181,71 @@ maven/mavencentral/org.jboss.logging/jboss-logging/3.3.2.Final, Apache-2.0, appr
 maven/mavencentral/org.jooq/jool/0.9.10, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.knowhowlab.osgi/monitoradmin/1.0.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.osgi/osgi.annotation/6.0.1, Apache-2.0, approved, CQ11704
+maven/mavencentral/org.quartz-scheduler/quartz/2.3.2, Apache-2.0, approved, CQ22979
 maven/mavencentral/org.slf4j/jcl-over-slf4j/1.7.32, Apache-2.0, approved, CQ12843
 maven/mavencentral/org.slf4j/slf4j-api/1.7.32, MIT, approved, CQ13368
-
+maven/mavencentral/org.usb4java/libusb4java/1.2.0, MIT, approved, #3088
+maven/mavencentral/org.usb4java/usb4java-javax/1.2.0, MIT, approved, #3090
+maven/mavencentral/org.usb4java/usb4java/1.2.0, MIT, approved, #3089
 
 ### Additional Dependencies
+
+maven/mavencentral/javax.usb/usb-api/1.0.2, MIT, approved, CQ7834
+jdk.dio/1.0.0, GPL+CE, approved, CQ9194
+com.eurotech/libsocket-can-java/1.0.0, MIT, approved, CQ24095
+javax.el_2.2.0.v201303151357, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.cm_1.4.400.v20200422-1833, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.transforms.hook_1.2.500.v20190714-1852, EPL-2.0, approved, eclipse.platform
+javax.servlet_3.1.0.v201410161800, EPL-2.0, approved, eclipse.platform
+org.eclipse.core.expressions_3.7.0.v20200720-1126, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.weaving.hook_1.2.700.v20200422-1833, EPL-2.0, approved, eclipse.platform
+javax.servlet.jsp_2.2.0.v201112011158.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.supplement_1.10.0.v20200612-0806.jar, EPL-2.0, approved, eclipse.platform
+org.apache.felix.gogo.command_1.0.2.v20170914-1324.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.registry_3.9.0.v20200625-1425.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.launcher_1.5.800.v20200727-1323.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.event_1.5.500.v20200616-0800.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.http.servlet_1.6.600.v20200707-1543.jar, EPL-2.0, approved, eclipse.platform
+org.apache.felix.gogo.shell_1.1.0.v20180713-1646.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.log.stream_1.0.300.v20200828-1034.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.jsp.jasper.registry_1.1.400.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.osgi_3.16.0.v20200828-0759.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.bidi_1.3.0.v20200612-1624.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.transforms.xslt_1.1.100.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.weaving.caching.j9_1.1.400.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.core.variables_3.4.800.v20200120-1101.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.concurrent_1.1.500.v20200106-1437.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.osgi.services_3.9.0.v20200511-1725.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.jsp.jasper_1.1.500.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.apache.felix.scr_2.1.16.v20200110-1820.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.osgi.util_3.5.300.v20190708-1141.jar, EPL-2.0, approved, eclipse.platform
+org.apache.felix.gogo.runtime_1.1.0.v20180713-1646.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.frameworkadmin_2.1.400.v20191002-0702.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.common_3.13.0.v20200828-1034.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.region_1.5.0.v20200807-1629.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.console.jaas.fragment_1.0.300.v20200111-0718.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.device_1.1.0.v20200810-0747.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.core.runtime_3.19.0.v20200724-1004.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.http.jetty_3.7.400.v20200123-1333.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.core.contenttype_3.7.800.v20200724-0804.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.metatype_1.5.300.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.console_1.4.200.v20200828-1034.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.frameworkadmin.equinox_1.1.400.v20200319-1546.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.ds_1.6.200.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.weaving.caching_1.1.400.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.coordinator_1.3.800.v20200422-1833.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.app_1.5.0.v20200717-0620.jar, EPL-2.0, approved, eclipse.platform
+org.eclipse.equinox.http.registry_1.2.0.v20200614-1851.jar, EPL-2.0, approved, eclipse.platform
+org.tigris.mtoolkit.iagent.rpc_3.0.0.20110411-0918.jar, EPL-1.0, approved, CQ7880
+com.codeminders.hidapi natives 1.1, New BSD License, approved, CQ7871
+Google Web Toolkit GWT User Library 2.8.0, Apache-2.0, approved, CQ12311
+soda.dk.comm, EPL-1.0, approved, CQ8156
+org.hamcrest.core 1.1, New BSD License, approved, CQ7842
+org.apache.felix.useradmin_1.0.4.k1, Apache-2.0, approved, CQ23078
+com.codeminders.hidapi 1.1, New BSD License, approved, CQ7833
+com.eurotech.gpsd4java_1.0.0.jar, Apache-2.0, approved, CQ23923
+org.moka7 1.0.2, EPL-1.0, approved, CQ12777
+org.eclipse.paho.client.mqttv3 1.2.1.k2, EPL-1.0, approved, eclipse.platform
 
 ## Cryptography
 

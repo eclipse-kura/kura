@@ -84,6 +84,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
     private DockerClient dockerClient;
     private CryptoService cryptoService;
+    private List<ExposedPort> exposedPorts;
 
     public void setDockerClient(DockerClient dockerClient) {
         this.dockerClient = dockerClient;
@@ -478,6 +479,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 configuration = configuration.withPrivileged(containerDescription.isContainerPrivileged());
             }
 
+            commandBuilder.withExposedPorts(this.exposedPorts);
+
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
         } catch (Exception e) {
@@ -601,19 +604,21 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
                 && containerDescription.getContainerPortsExternal() != null
                 && containerDescription.getContainerPortsExternal().size() == containerDescription
                         .getContainerPortsInternal().size()) {
-            List<ExposedPort> exposedPorts = new LinkedList<>();
+            List<ExposedPort> exposedPortsList = new LinkedList<>();
             Ports portbindings = new Ports();
 
             for (int index = 0; index < containerDescription.getContainerPortsInternal().size(); index++) {
 
                 ExposedPort tempExposedPort = new ExposedPort(
                         containerDescription.getContainerPortsInternal().get(index));
-                exposedPorts.add(tempExposedPort);
+                exposedPortsList.add(tempExposedPort);
                 portbindings.bind(tempExposedPort,
                         Binding.bindPort(containerDescription.getContainerPortsExternal().get(index)));
             }
 
             commandBuilder.withPortBindings(portbindings);
+
+            this.exposedPorts = exposedPortsList;
 
         } else {
             logger.error("portsExternal and portsInternal must be int[] of the same size or they do not exist: {}",

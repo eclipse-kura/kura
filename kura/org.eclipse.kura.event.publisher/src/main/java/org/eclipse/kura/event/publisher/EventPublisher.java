@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.configuration.change.publisher;
+package org.eclipse.kura.event.publisher;
 
 import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
 import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
@@ -34,19 +34,19 @@ import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.configuration.change.publisher.helper.CloudEndpointServiceHelper;
 import org.eclipse.kura.core.cloud.CloudPublisherDeliveryListener;
 import org.eclipse.kura.core.cloud.CloudServiceOptions;
+import org.eclipse.kura.event.publisher.helper.CloudEndpointServiceHelper;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigurationChangePublisher
+public class EventPublisher
         implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudPublisherDeliveryListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(ConfigurationChangePublisher.class);
+    private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
     private static final String TOPIC_PATTERN_STRING = "\\$([^\\s/]+)";
     private static final Pattern TOPIC_PATTERN = Pattern.compile(TOPIC_PATTERN_STRING);
@@ -56,7 +56,7 @@ public class ConfigurationChangePublisher
     private Set<CloudDeliveryListener> cloudDeliveryListeners = new HashSet<>();
     private Set<CloudConnectionListener> cloudConnectionListeners = new HashSet<>();
 
-    private ConfigurationChangePublisherOptions options;
+    private EventPublisherOptions options;
     private final ExecutorService worker = Executors.newCachedThreadPool();
 
     private CloudEndpointServiceHelper cloudHelper;
@@ -79,7 +79,7 @@ public class ConfigurationChangePublisher
     public void updated(Map<String, Object> properties) throws InvalidSyntaxException {
         logger.debug("Updating ConfigurationChangePublisher...");
         
-        this.options = new ConfigurationChangePublisherOptions(properties);
+        this.options = new EventPublisherOptions(properties);
         this.cloudHelper = new CloudEndpointServiceHelper(this.bundleContext, this.options.getCloudEndpointPid());
 
         logger.debug("Updating ConfigurationChangePublisher... Done.");

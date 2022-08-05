@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.configuration.change.publisher.helper;
+package org.eclipse.kura.event.publisher.helper;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;

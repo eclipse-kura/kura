@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Configuration Change Publisher
-Bundle-SymbolicName: org.eclipse.kura.configuration.change.publisher;singleton:=true
+Bundle-Name: Event Publisher
+Bundle-SymbolicName: org.eclipse.kura.event.publisher;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: EUROTECH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

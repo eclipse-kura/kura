@@ -234,7 +234,7 @@
 		
 		<antcall target="container-orchestrator-config" />
 
-		<antcall target="configuration-change-publisher-config" />
+		<antcall target="event-publisher-config" />
 		
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
@@ -735,7 +735,7 @@ fi]]>
 		
 		<antcall target="container-orchestrator-jar" />
 
-		<antcall target="configuration-change-publisher-jar" />
+		<antcall target="event-publisher-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -1634,10 +1634,10 @@ fi]]>
         </propertyfile>
     </target>
 
-	<target name="configuration-change-publisher-config">
+	<target name="event-publisher-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.configuration.change.publisher_${org.eclipse.kura.configuration.change.publisher.version}.jar@4:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar@4:start" />
 		</propertyfile>
 	</target>
 	
@@ -1868,10 +1868,10 @@ fi]]>
 		</zip>
 	</target>
 
-	<target name="configuration-change-publisher-jar">
+	<target name="event-publisher-jar">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
 			<zipfileset
-				file="${project.build.directory}/plugins/org.eclipse.kura.configuration.change.publisher_${org.eclipse.kura.configuration.change.publisher.version}.jar"
+				file="${project.build.directory}/plugins/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

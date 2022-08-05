@@ -10,7 +10,7 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-package org.eclipse.kura.configuration.change.publisher;
+package org.eclipse.kura.event.publisher;
 
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +19,7 @@ import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
 import org.eclipse.kura.core.cloud.CloudServiceOptions;
 import org.eclipse.kura.util.configuration.Property;
 
-public class ConfigurationChangePublisherOptions {
+public class EventPublisherOptions {
     
     protected static final String TOPIC_PREFIX_PROP_NAME = "topic.prefix";
     protected static final String TOPIC_PROP_NAME = "topic";
@@ -27,7 +27,7 @@ public class ConfigurationChangePublisherOptions {
     protected static final String RETAIN_PROP_NAME = "retain";
     protected static final String PRIORITY_PROP_NAME = "priority";
 
-    protected static final String DEFAULT_TOPIC = "CONF/V1/CHANGE";
+    protected static final String DEFAULT_TOPIC = "EVENT_TOPIC";
     protected static final int DEFAULT_QOS = 0;
     protected static final boolean DEFAULT_RETAIN = false;
     protected static final int DEFAULT_PRIORITY = 7;
@@ -48,7 +48,7 @@ public class ConfigurationChangePublisherOptions {
     private boolean retain;
     private int priority;
 
-    public ConfigurationChangePublisherOptions(final Map<String, Object> properties) {
+    public EventPublisherOptions(final Map<String, Object> properties) {
         this.cloudEndpointPid = PROPERTY_CLOUD_SERVICE_PID.get(properties);
         this.topicPrefix = PROPERTY_TOPIC_PREFIX.getOptional(properties);
         this.topic = PROPERTY_TOPIC.get(properties);

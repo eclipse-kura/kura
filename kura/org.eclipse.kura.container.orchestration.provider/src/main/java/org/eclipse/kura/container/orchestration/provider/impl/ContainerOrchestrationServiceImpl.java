@@ -454,14 +454,14 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
 
             commandBuilder = containerEntrypointHandler(containerDescription, commandBuilder);
 
-            if (containerDescription.getRestartOnFailure()) {
-                commandBuilder = commandBuilder.withRestartPolicy(RestartPolicy.unlessStoppedRestart());
-            }
-
             // Host Configuration Related
             configuration = containerVolumeMangamentHandler(containerDescription, configuration);
 
             configuration = containerDevicesHandler(containerDescription, configuration);
+            
+            if (containerDescription.getRestartOnFailure()) {
+                configuration = configuration.withRestartPolicy(RestartPolicy.unlessStoppedRestart());
+            }
 
             configuration = containerPortManagementHandler(containerDescription, configuration);
 

@@ -282,7 +282,7 @@ public class ContainerConfiguration {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
                 this.containerLoggingType, this.containerName, this.containerPortsExternal, this.containerPortsInternal,
                 this.containerPrivileged, this.containerVolumes, this.cpus, this.entryPoint, this.gpus,
-                this.imageConfig, this.isFrameworkManaged, this.memory, this.networkConfiguration);
+                this.imageConfig, this.isFrameworkManaged, this.memory, this.networkConfiguration, this.containerRestartOnFailure);
     }
 
     @Override
@@ -307,7 +307,8 @@ public class ContainerConfiguration {
                 && Objects.equals(this.gpus, other.gpus) && Objects.equals(this.imageConfig, other.imageConfig)
                 && Objects.equals(this.isFrameworkManaged, other.isFrameworkManaged)
                 && Objects.equals(this.memory, other.memory)
-                && Objects.equals(this.networkConfiguration, other.networkConfiguration);
+                && Objects.equals(this.networkConfiguration, other.networkConfiguration)
+                && Objects.equals(this.containerRestartOnFailure, other.containerRestartOnFailure);
     }
 
     public static final class ContainerConfigurationBuilder {

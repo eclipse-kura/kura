@@ -61,8 +61,8 @@ import com.github.dockerjava.api.model.LogConfig.LoggingType;
 import com.github.dockerjava.api.model.Ports;
 import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.api.model.PullResponseItem;
-import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.api.model.RestartPolicy;
+import com.github.dockerjava.api.model.Volume;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
@@ -276,7 +276,8 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.dockerClient.startContainerCmd(id).exec();
         } catch (Exception e) {
-            logger.error("Could not start container {}. It could be already running or not exist at all", id);
+            logger.error("Could not start container {}. It could be already running or not exist at all. Caused by {}",
+                    id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
     }
@@ -330,7 +331,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.dockerClient.stopContainerCmd(id).exec();
         } catch (Exception e) {
-            logger.error("Could not stop container {}.", id);
+            logger.error("Could not stop container {}. Caused by {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
     }
@@ -342,7 +343,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             this.dockerClient.removeContainerCmd(id).exec();
             this.frameworkManagedContainers.removeIf(c -> id.equals(c.id));
         } catch (Exception e) {
-            logger.error("Could not remove container {}.", id);
+            logger.error("Could not remove container {}. Caused by {}", id, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR);
         }
     }
@@ -451,9 +452,9 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             commandBuilder = containerEnviromentVariablesHandler(containerDescription, commandBuilder);
 
             commandBuilder = containerEntrypointHandler(containerDescription, commandBuilder);
-            
+
             if (containerDescription.getRestartOnFailure()) {
-                commandBuilder = commandBuilder.withRestartPolicy(RestartPolicy.unlessStoppedRestart());                
+                commandBuilder = commandBuilder.withRestartPolicy(RestartPolicy.unlessStoppedRestart());
             }
 
             // Host Configuration Related
@@ -480,7 +481,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             return commandBuilder.withHostConfig(configuration).exec().getId();
 
         } catch (Exception e) {
-            logger.error("failed to create container", e);
+            logger.error("Failed to create container", e);
             throw new KuraException(KuraErrorCode.PROCESS_EXECUTION_ERROR);
         } finally {
             if (!isNull(commandBuilder)) {
@@ -563,7 +564,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             try {
                 configuration.withMemory(memory.get());
             } catch (NumberFormatException e) {
-                logger.warn("Memory value {} not valid", memory.get());
+                logger.warn("Memory value {} not valid. Caused by {}", memory.get(), e);
             }
         }
 
@@ -824,6 +825,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
             } catch (InterruptedException e) {
                 throw e;
             } catch (Exception e) {
+                logger.error("Cannot pull container. Caused by {}", e);
                 throw new KuraException(KuraErrorCode.IO_ERROR, "Unable to pull container");
             }
         }
@@ -883,7 +885,7 @@ public class ContainerOrchestrationServiceImpl implements ConfigurableComponent,
         try {
             this.dockerClient.removeImageCmd(imageId).exec();
         } catch (Exception e) {
-            logger.error("Could not remove image {}.", imageId);
+            logger.error("Could not remove image {}. Caused by {}", imageId, e);
             throw new KuraException(KuraErrorCode.OS_COMMAND_ERROR, "Delete Container Image",
                     "500 (server error). Image is most likely in use by a container.");
         }

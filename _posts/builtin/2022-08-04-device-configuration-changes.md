@@ -7,9 +7,9 @@ categories: [builtin]
 ESF can detect changes to the components and publish them using a selected Cloud Publisher. There are two main components that enable this:
 
 - `org.eclipse.kura.configuration.change.manager`, and
-- `org.eclipse.kura.configuration.change.publisher`
+- `org.eclipse.kura.event.publisher`
 
-The `org.eclipse.kura.configuration.change.manager` is responsible for detecting changes to any of the configurations currently running on the system and to publish a notification to a user-defined cloud publisher. By default, the `org.eclipse.kura.configuration.change.publisher` is used.
+The `org.eclipse.kura.configuration.change.manager` is responsible for detecting changes to any of the configurations currently running on the system and to publish a notification to a user-defined cloud publisher. By default, the `org.eclipse.kura.event.publisher` is used.
 
 ## Configuration Change Manager
 
@@ -34,9 +34,9 @@ The collected PIDs are sent to the Cloud Publisher as a `KuraMessage` with a pay
 
 In the example above, a *ClockService* update triggered the delay timer, which was then reset by a configuration update on the *FilesystemLogProvider*. Afterward, no configuration updates reset the timer so the message containing the two PIDs was sent after expiration.
 
-## Configuration Change Publisher
+## Event Publisher
 
-The `org.eclipse.kura.configuration.change.publisher` does the actual publishing on a user-defined topic of the form:
+By default, the `org.eclipse.kura.event.publisher` used by the configuration change manager does the actual publishing on a user-defined topic of the form:
 
 `$EVT/#account_id/#client_id/CONF/V1/CHANGE`
 

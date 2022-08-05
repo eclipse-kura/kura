@@ -317,23 +317,23 @@
                                     <version>${com.eclipsesource.jaxrs.jersey-min.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.eclipsesource.jaxrs.publisher</artifactId>
+                                    <groupId>com.eclipsesource.jaxrs</groupId>
+                                    <artifactId>publisher</artifactId>
                                     <version>${com.eclipsesource.jaxrs.publisher.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.eclipsesource.jaxrs.provider.gson</artifactId>
+                                    <groupId>com.eclipsesource.jaxrs</groupId>
+                                    <artifactId>provider-gson</artifactId>
                                     <version>${com.eclipsesource.jaxrs.provider.gson.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.eclipsesource.jaxrs.provider.security</artifactId>
+                                    <groupId>com.eclipsesource.jaxrs</groupId>
+                                    <artifactId>provider-security</artifactId>
                                     <version>${com.eclipsesource.jaxrs.provider.security.version}</version>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.eclipse.kura</groupId>
-                                    <artifactId>com.eclipsesource.jaxrs.provider.multipart</artifactId>
+                                    <groupId>com.eclipsesource.jaxrs</groupId>
+                                    <artifactId>provider-multipart</artifactId>
                                     <version>${com.eclipsesource.jaxrs.provider.multipart.version}</version>
                                 </artifactItem>
                                 <artifactItem>
@@ -592,10 +592,10 @@
                                 <move file="target/source/plugins/osgi.annotation.jar" tofile="target/source/plugins/osgi.annotation_${osgi.annotation.version}.jar"/>
                                 <move file="target/source/plugins/org.moka7.jar" tofile="target/source/plugins/org.moka7_${org.moka7.version}.jar"/>
                                 <move file="target/source/plugins/com.eclipsesource.jaxrs.jersey-min.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.jersey-min_${com.eclipsesource.jaxrs.jersey-min.version}.jar"/>
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.publisher.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.version}.jar"/>
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.gson.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.version}.jar"/>
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.security.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.version}.jar"/>
-                                <move file="target/source/plugins/com.eclipsesource.jaxrs.provider.multipart.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.multipart_${com.eclipsesource.jaxrs.provider.multipart.version}.jar"/>
+                                <move file="target/source/plugins/publisher.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.publisher_${com.eclipsesource.jaxrs.publisher.jar.version}.jar"/>
+                                <move file="target/source/plugins/provider-gson.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.gson_${com.eclipsesource.jaxrs.provider.gson.jar.version}.jar"/>
+                                <move file="target/source/plugins/provider-security.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.security_${com.eclipsesource.jaxrs.provider.security.jar.version}.jar"/>
+                                <move file="target/source/plugins/provider-multipart.jar" tofile="target/source/plugins/com.eclipsesource.jaxrs.provider.multipart_${com.eclipsesource.jaxrs.provider.multipart.jar.version}.jar"/>
                                 <move file="target/source/plugins/gson.jar" tofile="target/source/plugins/com.google.gson_${com.google.gson.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.xml.bind-api.jar" tofile="target/source/plugins/jakarta.xml.bind-api_${jakarta.xml.bind-api.version}.jar"/>
                                 <move file="target/source/plugins/jakarta.activation-api.jar" tofile="target/source/plugins/jakarta.activation-api_${jakarta.activation-api.version}.jar"/>

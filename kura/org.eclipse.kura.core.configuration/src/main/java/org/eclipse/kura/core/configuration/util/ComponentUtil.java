@@ -353,7 +353,7 @@ public class ComponentUtil {
         // then split it by comma-separate list
         // keeping in mind the possible escape sequence "\,"
         String defaultValue = attrDef.getDefault();
-        if (defaultValue == null) {
+        if (defaultValue == null || defaultValue.isEmpty()) {
             return null;
         }
 

@@ -360,7 +360,7 @@ public class ContainerInstanceOptions {
                 this.containerName, this.containerNetworkingMode, this.containerVolumeString, this.containerVolumes,
                 this.enabled, this.externalPorts, this.image, this.imageDownloadTimeout, this.imageTag,
                 this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
-                this.registryURL, this.registryUsername, this.retryInterval);
+                this.registryURL, this.registryUsername, this.retryInterval, this.restartOnFailure);
     }
 
     @Override
@@ -392,7 +392,8 @@ public class ContainerInstanceOptions {
                 && Objects.equals(this.registryPassword, other.registryPassword)
                 && Objects.equals(this.registryURL, other.registryURL)
                 && Objects.equals(this.registryUsername, other.registryUsername)
-                && this.retryInterval == other.retryInterval;
+                && this.retryInterval == other.retryInterval
+                && this.restartOnFailure == other.restartOnFailure;
     }
 
 }

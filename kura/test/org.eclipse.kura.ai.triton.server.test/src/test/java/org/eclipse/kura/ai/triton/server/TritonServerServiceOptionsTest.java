@@ -19,7 +19,6 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.kura.ai.triton.server.TritonServerServiceOptions;
 import org.junit.Test;
 
 public class TritonServerServiceOptionsTest {
@@ -228,6 +227,115 @@ public class TritonServerServiceOptionsTest {
         thenGrpcMaxMessageSizeIsEqualTo(4194304);
     }
 
+    @Test
+    public void shouldReturnNotPresentForOptionalParametersIfNotSet() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.cpus", null);
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerMemoryIsPresent(false);
+        thenContainerCpusIsPresent(false);
+        thenContainerGpusIsPresent(false);
+    }
+
+    @Test
+    public void containerCpusPropertyShouldWork() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.cpus", 1.78F);
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerCpusIsPresent(true);
+        thenContainerCpusIsEqualTo(1.78F);
+    }
+
+    @Test
+    public void containerGpusPropertyShouldWork() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.gpus", "2");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerGpusIsPresent(true);
+        thenContainerGpusIsEqualTo("2");
+    }
+
+    @Test
+    public void containerGpusPropertyShouldWorkWithAll() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.gpus", "all");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerGpusIsPresent(true);
+        thenContainerGpusIsEqualTo("all");
+    }
+
+    @Test
+    public void containerMemoryPropertyShouldWork() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.memory", "1234");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerMemoryIsPresent(true);
+        thenContainerMemoryIsEqualTo(1234L);
+    }
+
+    @Test
+    public void containerMemoryPropertyShouldWorkWithByteSuffix() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.memory", "12345b");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerMemoryIsPresent(true);
+        thenContainerMemoryIsEqualTo(12345L);
+    }
+
+    @Test
+    public void containerMemoryPropertyShouldWorkWithKiloSuffix() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.memory", "1111k");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerMemoryIsPresent(true);
+        thenContainerMemoryIsEqualTo(1137664L);
+    }
+
+    @Test
+    public void containerMemoryPropertyShouldWorkWithMegaSuffix() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.memory", "2222m");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerMemoryIsPresent(true);
+        thenContainerMemoryIsEqualTo(2329935872L);
+    }
+
+    @Test
+    public void containerMemoryPropertyShouldWorkWithGigaSuffix() {
+        givenPropertyWith("server.address", "localhost");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("enable.local", Boolean.FALSE);
+        givenPropertyWith("container.memory", "7g");
+        givenServiceOptionsBuiltWith(properties);
+
+        thenContainerMemoryIsPresent(true);
+        thenContainerMemoryIsEqualTo(7516192768L);
+    }
+
     /*
      * Given
      */
@@ -303,6 +411,30 @@ public class TritonServerServiceOptionsTest {
 
     private void thenHashCodesShouldNotMatch() {
         assertNotEquals(this.hashCode, this.otherHashCode);
+    }
+
+    private void thenContainerMemoryIsPresent(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerMemory().isPresent());
+    }
+
+    private void thenContainerMemoryIsEqualTo(Long expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerMemory().get());
+    }
+
+    private void thenContainerCpusIsPresent(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerCpus().isPresent());
+    }
+
+    private void thenContainerCpusIsEqualTo(Float expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerCpus().get());
+    }
+
+    private void thenContainerGpusIsPresent(boolean expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerGpus().isPresent());
+    }
+
+    private void thenContainerGpusIsEqualTo(String expectedResult) {
+        assertEquals(expectedResult, this.options.getContainerGpus().get());
     }
 
 }

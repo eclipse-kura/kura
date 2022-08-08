@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -61,7 +61,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
 
         @Override
         public int hashCode() {
-            return pid.hashCode();
+            return this.pid.hashCode();
         }
 
     }
@@ -69,10 +69,10 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     private ConfigurationChangeManagerOptions options;
     private CloudPublisher cloudPublisher;
 
-    private ScheduledExecutorService scheduledSendQueueExecutor = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduledSendQueueExecutor = Executors.newScheduledThreadPool(1);
     private ScheduledFuture<?> futureSendQueue;
     private volatile boolean acceptNotifications = false;
-    private Queue<ChangedConfiguration> notificationsQueue = new LinkedList<>();
+    private final Queue<ChangedConfiguration> notificationsQueue = new LinkedList<>();
     private ComponentsServiceTracker serviceTracker;
 
     /*
@@ -84,7 +84,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
     }
 
     public void unsetCloudPublisher(CloudPublisher cloudPublisher) {
-        if(this.cloudPublisher == cloudPublisher) {
+        if (this.cloudPublisher == cloudPublisher) {
             this.cloudPublisher = null;
         }
     }
@@ -144,8 +144,8 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
             if (this.futureSendQueue != null) {
                 this.futureSendQueue.cancel(false);
             }
-            this.futureSendQueue = scheduledSendQueueExecutor.schedule(this::sendQueue, this.options.getSendDelay(),
-                    TimeUnit.SECONDS);
+            this.futureSendQueue = this.scheduledSendQueueExecutor.schedule(this::sendQueue,
+                    this.options.getSendDelay(), TimeUnit.SECONDS);
         }
     }
 
@@ -171,13 +171,13 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
         KuraPayload payload = new KuraPayload();
         payload.setTimestamp(new Date(this.notificationsQueue.peek().timestamp));
         payload.setBody(createJsonFromNotificationsQueue());
-        
+
         this.notificationsQueue.clear();
 
-        if(this.cloudPublisher != null) {
+        if (this.cloudPublisher != null) {
             try {
                 this.cloudPublisher.publish(new KuraMessage(payload));
-            } catch(KuraException e) {
+            } catch (KuraException e) {
                 logger.error("Error publishing configuration change event.", e);
             }
         }

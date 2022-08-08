@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -22,8 +22,8 @@ public class ConfigurationChangeManagerOptions {
     static final long DEFAULT_DETECTION_DELAY = 120000;
     static final long DEFAULT_SEND_DELAY = 10;
 
-    private boolean enabled;
-    private long sendDelay;
+    private final boolean enabled;
+    private final long sendDelay;
 
     public ConfigurationChangeManagerOptions(Map<String, Object> properties) {
         this.enabled = (boolean) properties.getOrDefault(KEY_ENABLED, DEFAULT_ENABLED);

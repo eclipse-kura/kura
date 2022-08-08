@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2022 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -27,7 +27,7 @@ import org.osgi.util.tracker.ServiceTracker;
 @SuppressWarnings("rawtypes")
 public class ComponentsServiceTracker extends ServiceTracker {
 
-    private Set<ServiceTrackerListener> listeners;
+    private final Set<ServiceTrackerListener> listeners;
     private static final String FILTER_EXCLUDE_CONF_CHANGE_MANAGER_FACTORY = "(!(service.factoryPid=org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager))";
 
     @SuppressWarnings("unchecked")

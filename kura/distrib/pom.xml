@@ -1901,11 +1901,8 @@
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.ai.triton.server_${org.eclipse.kura.ai.triton.server.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.container.orchestration.provider_${org.eclipse.kura.container.orchestration.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
-<<<<<<< HEAD
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.configuration.change.manager_${org.eclipse.kura.configuration.change.manager.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
-=======
                                         <copy file="${project.build.directory}/plugins/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar" todir="${project.build.directory}/staging/target-definition/equinox_3.16.0/repository/plugins" />
->>>>>>> d33558e561 (feat: added org.eclipse.kura.event.publisher)
                                     </target>
                                 </configuration>
                             </execution>

@@ -21,12 +21,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraRuntimeException;
 
 public class TritonServerServiceOptions {
 
+    private static final String PROPERTY_CONTAINER_IMAGE = "container.image";
+    private static final String PROPERTY_CONTAINER_TAG = "container.image.tag";
+    private static final String CONTAINER_MEMORY = "container.memory";
+    private static final String CONTAINER_CPUS = "container.cpus";
+    private static final String CONTAINER_GPUS = "container.gpus";
     private static final String PROPERTY_ADDRESS = "server.address";
     private static final String PROPERTY_PORTS = "server.ports";
     private static final String PROPERTY_LOCAL_MODEL_REPOSITORY_PATH = "local.model.repository.path";
@@ -49,6 +55,9 @@ public class TritonServerServiceOptions {
     private final int timeout;
     private final int nRetries;
     private final int grpcMaxMessageSize;
+    private final Optional<Long> containerMemory;
+    private final Optional<Float> containerCpus;
+    private final Optional<String> containerGpus;
 
     public TritonServerServiceOptions(final Map<String, Object> properties) {
         requireNonNull(properties, "Properties cannot be null");
@@ -96,6 +105,28 @@ public class TritonServerServiceOptions {
         } else {
             this.grpcMaxMessageSize = DEFAULT_MAX_GRPC_MESSAGE_SIZE;
         }
+
+        final Object propertyContainerMemory = properties.get(CONTAINER_MEMORY);
+        if (propertyContainerMemory instanceof String) {
+            this.containerMemory = parseMemoryString(Optional.of((String) propertyContainerMemory));
+        } else {
+            this.containerMemory = Optional.empty();
+        }
+
+        final Object propertyContainerCpus = properties.get(CONTAINER_CPUS);
+        if (propertyContainerCpus instanceof Float) {
+            this.containerCpus = Optional.of((Float) propertyContainerCpus);
+        } else {
+            this.containerCpus = Optional.empty();
+        }
+
+        final Object propertyContainerGpus = properties.get(CONTAINER_GPUS);
+        if (propertyContainerGpus instanceof String) {
+            this.containerGpus = parseGpusString(Optional.of((String) propertyContainerGpus));
+        } else {
+            this.containerGpus = Optional.empty();
+        }
+
     }
 
     public String getAddress() {
@@ -121,6 +152,14 @@ public class TritonServerServiceOptions {
 
     public int getMetricsPort() {
         return this.metricsPort;
+    }
+
+    public String getContainerImage() {
+        return getStringProperty(PROPERTY_CONTAINER_IMAGE);
+    }
+
+    public String getContainerImageTag() {
+        return getStringProperty(PROPERTY_CONTAINER_TAG);
     }
 
     public String getModelRepositoryPath() {
@@ -173,6 +212,18 @@ public class TritonServerServiceOptions {
         return this.grpcMaxMessageSize;
     }
 
+    public Optional<Long> getContainerMemory() {
+        return this.containerMemory;
+    }
+
+    public Optional<Float> getContainerCpus() {
+        return this.containerCpus;
+    }
+
+    public Optional<String> getContainerGpus() {
+        return this.containerGpus;
+    }
+
     private String getStringProperty(String propertyName) {
         String stringProperty = "";
         final Object stringPropertyObj = this.properties.get(propertyName);
@@ -180,6 +231,40 @@ public class TritonServerServiceOptions {
             stringProperty = (String) stringPropertyObj;
         }
         return stringProperty;
+    }
+
+    private Optional<Long> parseMemoryString(Optional<String> value) {
+        if (value.isPresent() && !value.get().trim().isEmpty()) {
+            String stringValue = value.get().trim();
+            long result = 0;
+            switch (stringValue.charAt(stringValue.length() - 1)) {
+            case 'b':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1));
+                break;
+            case 'k':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1024L;
+                break;
+            case 'm':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1048576L;
+                break;
+            case 'g':
+                result = Long.parseLong(stringValue.substring(0, stringValue.length() - 1)) * 1073741824L;
+                break;
+            default:
+                result = Long.parseLong(stringValue);
+            }
+            return Optional.of(result);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private Optional<String> parseGpusString(Optional<String> gpus) {
+        if (gpus.isPresent() && gpus.get().isEmpty()) {
+            return Optional.empty();
+        } else {
+            return gpus;
+        }
     }
 
     @Override
@@ -199,7 +284,9 @@ public class TritonServerServiceOptions {
         TritonServerServiceOptions other = (TritonServerServiceOptions) obj;
         return this.grpcPort == other.grpcPort && this.httpPort == other.httpPort && this.isLocal == other.isLocal
                 && this.metricsPort == other.metricsPort && this.timeout == other.timeout
-                && this.nRetries == other.nRetries && Objects.equals(this.properties, other.properties);
+                && this.containerCpus == other.containerCpus && this.containerGpus == other.containerGpus
+                && this.containerMemory == other.containerMemory && this.nRetries == other.nRetries
+                && Objects.equals(this.properties, other.properties);
     }
 
 }

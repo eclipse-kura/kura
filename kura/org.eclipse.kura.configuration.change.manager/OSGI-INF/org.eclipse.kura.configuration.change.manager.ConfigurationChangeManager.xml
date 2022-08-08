@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+        Eurotech
+-->
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+	configuration-policy="require"
+	enabled="true"
+	immediate="true"
+	name="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"
+	activate="activate" modified="updated" deactivate="deactivate">
+    
+    <implementation class="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"/>
+    <property name="service.pid" value="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"/>
+    <property name="kura.service.pid" type="String" value="org.eclipse.kura.configuration.change.manager.ConfigurationChangeManager"/>
+
+    <service>
+        <provide interface="org.eclipse.kura.configuration.ConfigurableComponent"/>
+    </service>
+		
+	<reference name="CloudPublisher"
+		policy="dynamic"
+		bind="setCloudPublisher"
+		unbind="unsetCloudPublisher"
+		cardinality="0..1"
+		interface="org.eclipse.kura.cloudconnection.publisher.CloudPublisher"/>
+  
+</scr:component>

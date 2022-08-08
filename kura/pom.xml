@@ -131,6 +131,8 @@
 
         <module>org.eclipse.kura.container.provider</module>
 
+        <module>org.eclipse.kura.configuration.change.manager</module>
+
         <module>features</module>
         <module>emulator</module>
 

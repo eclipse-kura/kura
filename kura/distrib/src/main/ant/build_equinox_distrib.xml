@@ -233,7 +233,7 @@
 		<antcall target="filesystem-logprovider-config" />
 		
 		<antcall target="container-orchestrator-config" />
-		
+		<antcall target="configuration.change.manager-config" />
 
 		<!-- Conditional entries. Check for jar presence, and invoke relevant ant
 			target -->
@@ -732,6 +732,8 @@ fi]]>
 		<antcall target="filesystem-logprovider-jar" />
 		
 		<antcall target="container-orchestrator-jar" />
+		
+		<antcall target="configuration.change.manager-jar" />
 
 		<!-- Conditional inclusion of jar files in the distribution jar -->
 		<antcall target="web2-jar" />
@@ -1853,6 +1855,21 @@ fi]]>
 				prefix="${build.output.name}/${plugins.folder}" />
 			<zipfileset
 				file="${project.build.directory}/plugins/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar"
+				prefix="${build.output.name}/${plugins.folder}" />
+		</zip>
+	</target>
+
+	<target name="configuration.change.manager-config">
+		<propertyfile
+			file="${project.build.directory}/${build.output.name}/config.ini">
+			<entry key="osgi.bundles" operation="+"
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.configuration.change.manager_${org.eclipse.kura.configuration.change.manager.version}.jar@4:start" />
+		</propertyfile>
+	</target>
+	<target name="configuration.change.manager-jar">
+		<zip destfile="${project.build.directory}/${build.output.name}.zip" update="true">
+			<zipfileset
+				file="${project.build.directory}/plugins/org.eclipse.kura.configuration.change.manager_${org.eclipse.kura.configuration.change.manager.version}.jar"
 				prefix="${build.output.name}/${plugins.folder}" />
 		</zip>
 	</target>

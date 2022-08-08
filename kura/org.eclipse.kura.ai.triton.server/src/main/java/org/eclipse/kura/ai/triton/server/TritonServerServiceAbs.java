@@ -42,6 +42,7 @@ import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
 import org.eclipse.kura.ai.inference.TensorDescriptorBuilder;
 import org.eclipse.kura.configuration.ConfigurableComponent;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.slf4j.Logger;
@@ -78,6 +79,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
     private static final String TEMP_DIRECTORY_PREFIX = "decrypted_models";
 
     private CommandExecutorService commandExecutorService;
+    private ContainerOrchestrationService containerOrchestrationService;
     private CryptoService cryptoService;
     protected TritonServerServiceOptions options;
     private TritonServerInstanceManager tritonServerInstanceManager;
@@ -91,12 +93,17 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.commandExecutorService = executorService;
     }
 
+    public void setContainerOrchestratorService(ContainerOrchestrationService containerOrchestrationService) {
+        this.containerOrchestrationService = containerOrchestrationService;
+    }
+
     public void setCryptoService(CryptoService cryptoService) {
         this.cryptoService = cryptoService;
     }
 
     abstract TritonServerInstanceManager createInstanceManager(TritonServerServiceOptions options,
-            CommandExecutorService executorService, String decryptionFolderPath);
+            CommandExecutorService executorService, ContainerOrchestrationService orchestrationService,
+            String decryptionFolderPath);
 
     abstract boolean isConfigurationValid();
 
@@ -149,7 +156,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         }
 
         this.tritonServerInstanceManager = createInstanceManager(this.options, this.commandExecutorService,
-                this.decryptionFolderPath);
+                this.containerOrchestrationService, this.decryptionFolderPath);
         logger.info("Created {} type", this.tritonServerInstanceManager.getClass().getSimpleName());
 
         this.tritonServerInstanceManager.start();

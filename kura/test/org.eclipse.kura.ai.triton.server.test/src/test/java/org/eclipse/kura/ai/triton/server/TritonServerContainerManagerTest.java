@@ -319,6 +319,7 @@ public class TritonServerContainerManagerTest {
 
     private void givenOrchestratorIsNotConnected() {
         when(this.orc.listImageInstanceDescriptors()).thenThrow(new IllegalStateException());
+        when(this.orc.listContainerDescriptors()).thenThrow(new IllegalStateException());
     }
 
     private void givenTritonContainerIsRunning() {

@@ -217,6 +217,24 @@ public class TritonServerContainerManagerTest {
     }
 
     @Test
+    public void startMethodShouldWorkWhenAlreadyRunning() {
+        givenPropertyWith("container.image", TRITON_IMAGE_NAME);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockContainerOrchestrationService();
+        givenTritonImageIsAvailable();
+        givenTritonContainerIsRunning();
+        givenLocalManagerBuiltWith(this.options, this.orc, MOCK_DECRYPT_FOLDER);
+
+        whenStartIsCalled();
+
+        thenContainerOrchestrationStartContainerWasNotCalled();
+    }
+
+    @Test
     public void containerManagerShouldUseDecryptionFolderIfPasswordIsSet() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);

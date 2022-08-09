@@ -98,7 +98,10 @@ public class TritonServerContainerManager implements TritonServerInstanceManager
         try {
             String containerID = this.containerOrchestrationService.startContainer(containerConfiguration);
             logger.info("Nvidia Triton Container started. Container ID: {}", containerID);
-        } catch (KuraException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            logger.info("Nvidia Triton Container start interrupted.", e);
+            Thread.currentThread().interrupt();
+        } catch (KuraException e) {
             logger.info("Nvidia Triton Container not started.", e);
         }
     }

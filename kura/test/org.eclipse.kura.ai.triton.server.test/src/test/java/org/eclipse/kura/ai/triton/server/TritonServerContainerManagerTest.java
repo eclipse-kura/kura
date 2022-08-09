@@ -118,6 +118,23 @@ public class TritonServerContainerManagerTest {
     }
 
     @Test
+    public void stopMethodShouldWorkWhenNotRunning() {
+        givenPropertyWith("container.image", TRITON_IMAGE_NAME);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockContainerOrchestrationService();
+        givenTritonContainerIsNotRunning();
+        givenLocalManagerBuiltWith(this.options, this.orc, MOCK_DECRYPT_FOLDER);
+
+        whenStopIsCalled();
+
+        thenContainerOrchestrationStopContainerWasNotCalled();
+        thenContainerOrchestrationDeleteContainerWasNotCalled();
+    }
+
+    @Test
     public void killMethodShouldWork() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
@@ -369,6 +386,24 @@ public class TritonServerContainerManagerTest {
         try {
             verify(this.orc, never()).startContainer((ContainerConfiguration) any(Object.class));
         } catch (KuraException | InterruptedException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    private void thenContainerOrchestrationStopContainerWasNotCalled() {
+        try {
+            verify(this.orc, never()).stopContainer(any(String.class));
+        } catch (KuraException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    private void thenContainerOrchestrationDeleteContainerWasNotCalled() {
+        try {
+            verify(this.orc, never()).deleteContainer(any(String.class));
+        } catch (KuraException e) {
             e.printStackTrace();
             fail();
         }

@@ -187,6 +187,24 @@ public class TritonServerContainerManagerTest {
     }
 
     @Test
+    public void startMethodShouldWorkIfImageIsAvailableWithDifferentTag() {
+        givenPropertyWith("container.image", TRITON_IMAGE_NAME);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", TRITON_REPOSITORY_PATH);
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
+        givenServiceOptionsBuiltWith(properties);
+
+        givenMockContainerOrchestrationService();
+        givenTritonImageWithDifferentTagIsAvailable();
+        givenTritonContainerIsNotRunning();
+        givenLocalManagerBuiltWith(this.options, this.orc, MOCK_DECRYPT_FOLDER);
+
+        whenStartIsCalled();
+
+        thenContainerOrchestrationStartContainerWasNotCalled();
+    }
+
+    @Test
     public void startMethodShouldWorkIfImageIsAvailable() {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
@@ -327,6 +345,14 @@ public class TritonServerContainerManagerTest {
         ImageInstanceDescriptor imageDescriptor = mock(ImageInstanceDescriptor.class);
         when(imageDescriptor.getImageName()).thenReturn(TRITON_IMAGE_NAME);
         when(imageDescriptor.getImageTag()).thenReturn(TRITON_IMAGE_TAG);
+
+        when(this.orc.listImageInstanceDescriptors()).thenReturn(Arrays.asList(imageDescriptor));
+    }
+
+    private void givenTritonImageWithDifferentTagIsAvailable() {
+        ImageInstanceDescriptor imageDescriptor = mock(ImageInstanceDescriptor.class);
+        when(imageDescriptor.getImageName()).thenReturn(TRITON_IMAGE_NAME);
+        when(imageDescriptor.getImageTag()).thenReturn("py3-min");
 
         when(this.orc.listImageInstanceDescriptors()).thenReturn(Arrays.asList(imageDescriptor));
     }

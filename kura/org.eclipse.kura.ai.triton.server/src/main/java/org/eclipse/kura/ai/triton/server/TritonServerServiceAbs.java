@@ -93,7 +93,7 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         this.commandExecutorService = executorService;
     }
 
-    public void setContainerOrchestratorService(ContainerOrchestrationService containerOrchestrationService) {
+    public void setContainerOrchestrationService(ContainerOrchestrationService containerOrchestrationService) {
         this.containerOrchestrationService = containerOrchestrationService;
     }
 

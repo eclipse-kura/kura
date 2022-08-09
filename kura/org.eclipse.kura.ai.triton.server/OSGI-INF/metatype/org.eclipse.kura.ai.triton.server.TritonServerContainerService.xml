@@ -20,8 +20,7 @@
 
         <AD id="container.image"
             name="Image name"
-            description="The image the container will be created with. The value will need to be expressed in the form registryURL/imagename in case of a custom registry.
-            Please fill the following registry credentials in case of pulling from a custom or authenticated Docker hub registry."
+            description="The image the container will be created with."
             type="String"
             cardinality="1"
             required="true"
@@ -29,7 +28,7 @@
         </AD>
 
         <AD id="container.image.tag" name="Image tag"
-            description="Describes which image version that should be pulled from the container registry."
+            description="Describes which image version that should be used for creating the container."
             type="String"
             cardinality="1"
             required="true"

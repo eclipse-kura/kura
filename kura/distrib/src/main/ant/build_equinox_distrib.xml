@@ -1640,7 +1640,7 @@ fi]]>
 	<target name="event-publisher-config">
 		<propertyfile file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
-				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar@4:start" />
+				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.event.publisher_${org.eclipse.kura.event.publisher.version}.jar@6" />
 		</propertyfile>
 	</target>
 	

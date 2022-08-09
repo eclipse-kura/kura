@@ -4,7 +4,8 @@ title:  "Device Configuration Changes"
 categories: [builtin]
 ---
 
-ESF can detect changes to the components and publish them using a selected Cloud Publisher. There are two main components that enable this:
+Eclipse Kura can detect changes to the components and publish them using a selected Cloud Publisher. 
+There are two main components that enable this:
 
 - `org.eclipse.kura.configuration.change.manager`, and
 - `org.eclipse.kura.event.publisher`
@@ -36,7 +37,7 @@ In the example above, a *ClockService* update triggered the delay timer, which w
 
 ## Event Publisher
 
-By default, the `org.eclipse.kura.event.publisher` used by the configuration change manager does the actual publishing on a user-defined topic of the form:
+By default, the `org.eclipse.kura.event.publisher` used by the configuration change manager requires the actual publishing on a user-defined topic of the form:
 
 `$EVT/#account_id/#client_id/CONF/V1/CHANGE`
 

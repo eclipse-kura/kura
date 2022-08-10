@@ -69,7 +69,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     }
 
     @Test
-    public void isModelEncryptionEnabledWorkWithContainerConfiguration() throws IOException {
+    public void isModelEncryptionEnabledWorkWhenPasswordIsNotSet() throws IOException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
         givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", "/fake-repository-path");

@@ -38,6 +38,8 @@ import org.eclipse.kura.KuraRuntimeException;
 import org.eclipse.kura.ai.inference.ModelInfo;
 import org.eclipse.kura.ai.inference.Tensor;
 import org.eclipse.kura.ai.inference.TensorDescriptor;
+import org.eclipse.kura.container.orchestration.ContainerOrchestrationService;
+import org.eclipse.kura.container.orchestration.ImageInstanceDescriptor;
 import org.eclipse.kura.crypto.CryptoService;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -71,6 +73,9 @@ import io.grpc.testing.GrpcCleanupRule;
 
 public abstract class TritonServerServiceStepDefinitions {
 
+    protected static final String TRITON_IMAGE_NAME = "tritonserver";
+    protected static final String TRITON_IMAGE_TAG = "latest";
+
     protected TritonServerServiceAbs tritonServerService;
     protected boolean methodCalled;
     protected boolean exceptionCaught;
@@ -97,6 +102,7 @@ public abstract class TritonServerServiceStepDefinitions {
     private boolean isEngineReady;
     private CommandExecutorService ces;
     private CryptoService cry;
+    private ContainerOrchestrationService orc;
 
     protected void givenTritonServerServiceImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceImpl(properties, tritonModelRepoStub, true);
@@ -108,6 +114,10 @@ public abstract class TritonServerServiceStepDefinitions {
 
     protected void givenTritonServerServiceNativeImpl(Map<String, Object> properties) throws IOException {
         this.tritonServerService = createTritonServerServiceNativeImpl(properties, tritonModelRepoStub, true);
+    }
+
+    protected void givenTritonServerServiceContainerImpl(Map<String, Object> properties) throws IOException {
+        this.tritonServerService = createTritonServerServiceContainerImpl(properties, tritonModelRepoStub, true);
     }
 
     protected void givenTritonServerServiceImplNotActive() throws IOException {
@@ -384,6 +394,46 @@ public abstract class TritonServerServiceStepDefinitions {
         tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
 
         return tritonServerServiceImpl;
+    }
+
+    private TritonServerServiceAbs createTritonServerServiceContainerImpl(Map<String, Object> properties,
+            List<String> tritonModelRepoStub, boolean activate) throws IOException {
+
+        TritonServerServiceAbs tritonServerServiceImpl = new TritonServerServiceContainerImpl();
+
+        this.orc = mock(ContainerOrchestrationService.class);
+        setTritonDockerImageAsAvailable();
+        setTritonDockerContainerAsNotRunning();
+        tritonServerServiceImpl.setContainerOrchestrationService(orc);
+
+        this.cry = mock(CryptoService.class);
+        tritonServerServiceImpl.setCryptoService(cry);
+
+        if (activate) {
+            tritonServerServiceImpl.activate(properties);
+        }
+
+        GRPCInferenceServiceGrpc.GRPCInferenceServiceImplBase serviceImpl = createGRPCMock(tritonModelRepoStub);
+
+        String serverName = InProcessServerBuilder.generateName();
+        grpcCleanup.register(
+                InProcessServerBuilder.forName(serverName).directExecutor().addService(serviceImpl).build().start());
+        ManagedChannel channel = grpcCleanup
+                .register(InProcessChannelBuilder.forName(serverName).directExecutor().build());
+        tritonServerServiceImpl.setGrpcStub(GRPCInferenceServiceGrpc.newBlockingStub(channel));
+
+        return tritonServerServiceImpl;
+    }
+
+    private void setTritonDockerImageAsAvailable() {
+        ImageInstanceDescriptor imageDescriptor = mock(ImageInstanceDescriptor.class);
+        when(imageDescriptor.getImageName()).thenReturn(TRITON_IMAGE_NAME);
+        when(imageDescriptor.getImageTag()).thenReturn(TRITON_IMAGE_TAG);
+        when(this.orc.listImageInstanceDescriptors()).thenReturn(Arrays.asList(imageDescriptor));
+    }
+
+    private void setTritonDockerContainerAsNotRunning() {
+        when(this.orc.listImageInstanceDescriptors()).thenReturn(Arrays.asList());
     }
 
     private TritonServerServiceAbs createTritonServerServiceRemoteImpl(Map<String, Object> properties,

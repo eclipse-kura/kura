@@ -96,7 +96,7 @@ The Kura Triton Server component is the implementation of the inference engine A
 
 > **Requirement**:
 > 1. Triton Server container image already installed on the device. For instructions refer to the installation section in this page.
-> 2. Kura's Container Orchestration Service enabled
+> 2. Kura's Container Orchestration Service enabled.
 
 ![triton_container_server]({{ site.baseurl }}/assets/images/builtin/triton_container_server.png)
 
@@ -116,7 +116,6 @@ The parameters used to configure the Triton Service are the following:
  - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
 
 > **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
-
 
 ## Triton Server Service component [deprecated since 5.2.0]
 

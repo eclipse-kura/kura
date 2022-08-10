@@ -34,7 +34,7 @@ public final class KuraLogLineParser {
     public static final String DEFAULT_SYSLOG_IDENTIFIER = "Kura";
     public static final String DEFAULT_STACKTRACE = "";
 
-    private static final Pattern PID_PATTERN = Pattern.compile("\\[\\w+( \\w*)+\\]");
+    private static final Pattern PID_PATTERN = Pattern.compile("\\[[A-Za-z0-9 ]*\\]");
 
     private long timestamp;
     private String pid;

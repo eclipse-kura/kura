@@ -49,7 +49,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     @Test
     public void isConfigurationValidWorksWithInvalidImageTag() throws IOException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
-        givenPropertyWith("container.image.tag", null);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", "/fake-repository-path");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenTritonServerServiceContainerImpl(this.properties);
@@ -60,7 +60,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     @Test
     public void isConfigurationValidWorksWithInvalidModelRepository() throws IOException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
-        givenPropertyWith("container.image.tag", null);
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
         givenPropertyWith("local.model.repository.path", "");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenTritonServerServiceContainerImpl(this.properties);
@@ -71,8 +71,8 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     @Test
     public void isModelEncryptionEnabledWorkWithContainerConfiguration() throws IOException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
-        givenPropertyWith("container.image.tag", null);
-        givenPropertyWith("local.model.repository.path", "");
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", "/fake-repository-path");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenTritonServerServiceContainerImpl(this.properties);
 
@@ -82,9 +82,9 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     @Test
     public void isModelEncryptionEnabledWorksWhenPasswordIsSet() throws IOException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
-        givenPropertyWith("container.image.tag", null);
-        givenPropertyWith("local.model.repository.path", "");
-        givenPropertyWith("", new Integer[] { 4000, 4001, 4002 });
+        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("local.model.repository.path", "/fake-repository-path");
+        givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenPropertyWith("local.model.repository.password", "keyboards");
         givenTritonServerServiceContainerImpl(this.properties);
 

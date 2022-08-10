@@ -49,7 +49,7 @@ public class TritonServerServiceContainerImplTest extends TritonServerServiceSte
     @Test
     public void isConfigurationValidWorksWithInvalidImageTag() throws IOException {
         givenPropertyWith("container.image", TRITON_IMAGE_NAME);
-        givenPropertyWith("container.image.tag", TRITON_IMAGE_TAG);
+        givenPropertyWith("container.image.tag", null);
         givenPropertyWith("local.model.repository.path", "/fake-repository-path");
         givenPropertyWith("server.ports", new Integer[] { 4000, 4001, 4002 });
         givenTritonServerServiceContainerImpl(this.properties);

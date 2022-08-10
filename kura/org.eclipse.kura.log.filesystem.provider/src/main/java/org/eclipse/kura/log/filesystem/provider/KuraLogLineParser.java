@@ -17,6 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.kura.log.LogEntry;
 import org.slf4j.Logger;
@@ -32,6 +34,8 @@ public final class KuraLogLineParser {
     public static final String DEFAULT_SYSLOG_IDENTIFIER = "Kura";
     public static final String DEFAULT_STACKTRACE = "";
 
+    private static final Pattern PID_PATTERN = Pattern.compile("\\[\\w+( \\w*)+\\]");
+
     private long timestamp;
     private String pid;
     private String priority;
@@ -39,6 +43,7 @@ public final class KuraLogLineParser {
     private final String transport;
     private String syslogIdentifier;
     private String stacktrace;
+    private boolean pidWhitespaceReplaced;
 
     private static KuraLogLineParser instance;
 
@@ -72,13 +77,16 @@ public final class KuraLogLineParser {
      * _SOURCE_REALTIME_TIMESTAMP [PID] PRIORITY MESSAGE_WITH_POSSIBLE_SPACES
      */
     private void parseKuraLog() {
-        String[] splits = this.message.split(" ");
+        String[] splits = innerTrimPid(this.message).split(" ");
         if (splits.length >= 3) {
             instance.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss,S", splits[0]);
 
             instance.pid = splits[1];
             instance.pid = instance.pid.replace("[", "");
             instance.pid = instance.pid.replace("]", "");
+
+            instance.pid = instance.pidWhitespaceReplaced ? instance.pid.replace("-", " ") : instance.pid;
+
             instance.priority = splits[2];
             StringBuilder sb = new StringBuilder();
             for (int i = 3; i < splits.length; i++) {
@@ -87,6 +95,21 @@ public final class KuraLogLineParser {
             }
             instance.message = sb.toString().trim();
         }
+    }
+
+    private String innerTrimPid(String message) {
+
+        String trimmedMessage = message;
+
+        Matcher pidMatcher = PID_PATTERN.matcher(message);
+
+        if (pidMatcher.find()) {
+            String foundPid = pidMatcher.group();
+            trimmedMessage = trimmedMessage.replace(foundPid, foundPid.replace(" ", "-"));
+            instance.pidWhitespaceReplaced = true;
+        }
+
+        return trimmedMessage;
     }
 
     private long parseStringToEpoch(String format, String date) {

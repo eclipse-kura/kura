@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -27,6 +27,8 @@ public class KuraLogLineParserTest {
     private static final String EXAMPLE_GENERIC_LOG_LINE = "20211112 - this is a generic log line";
     private static final String EXAMPLE_STACKTRACE = "java.lang.UnsupportedOperationException: null\n    at java.util.Collections$UnmodifiableMap.put(Collections.java:1459) ~[?:1.8.0_282]";
     private static final String EXAMPLE_KURA_LOG_LINE_WITH_EXCEPTION = "14:01:17.971 [Thread-2] ERROR org.eclipse.kura.log.filesystem.provider.FilesystemLogProvider - Unexpected exception in FilesystemLogProvider.";
+
+    private static final String EXAMPLE_KURA_LOG_LINE_WITH_PID_WHITESPACE = "2022-08-10T11:03:30,545 [ConfigurationListener Event Queue] INFO  o.e.k.e.p.ExamplePublisher - Activating ExamplePublisher... Done.";
 
     private String logLine;
     private String filePath;
@@ -99,6 +101,23 @@ public class KuraLogLineParserTest {
                 "Kura", // syslogid
                 this.filePath, // transport
                 EXAMPLE_STACKTRACE); // stacktrace
+    }
+
+    @Test
+    public void shouldParseCorrectKuraEntryWithPidWithWhitespace() throws ParseException {
+        givenKuraLogLine(EXAMPLE_KURA_LOG_LINE_WITH_PID_WHITESPACE);
+
+        whenParseLogLine();
+
+        thenLogEntryIs(
+                new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss,S").parse("2022-08-10T11:03:30,545").toInstant()
+                        .getEpochSecond(), // timestamp
+                "ConfigurationListener Event Queue", // pid
+                "o.e.k.e.p.ExamplePublisher - Activating ExamplePublisher... Done.", // message
+                "INFO", // priority
+                "Kura", // syslogid
+                this.filePath, // transport
+                ""); // stacktrace
     }
 
     /*

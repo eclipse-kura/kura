@@ -21,7 +21,6 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Optional;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import javax.annotation.Priority;
 import javax.servlet.http.HttpServletRequest;
@@ -45,14 +44,13 @@ import org.slf4j.LoggerFactory;
 @Priority(200)
 public class PasswordAuthenticationProvider implements AuthenticationProvider {
 
-    private static final String PASSWORD_AUTH_FAILED_MSG = "{} Rest - Failure - Password Authentication failed";
+    private static final String PASSWORD_AUTH_FAILED_MSG = "{} Rest - Failure - Authentication failed as username or password not matching";
 
     private static final Logger logger = LoggerFactory.getLogger(PasswordAuthenticationProvider.class);
 
     private static final String KURA_USER_PREFIX = "kura.user.";
     private static final String KURA_NEED_PASSWORD_CHANGE = "kura.need.password.change";
     private static final String KURA_PASSWORD_CREDENTIAL = "kura.password";
-    private static final Pattern COLON = Pattern.compile("[:]");
 
     private static final Logger auditLogger = LoggerFactory.getLogger("AuditLogger");
 
@@ -121,7 +119,7 @@ public class PasswordAuthenticationProvider implements AuthenticationProvider {
 
         try {
             if (cryptoService.sha256Hash(credentials.password).equals(storedPasswordHash)) {
-                auditLogger.info("{} Rest - Success - Password Authentication succeeded", auditContext);
+                auditLogger.info("{} Rest - Success - Authentication succeeded via password provider", auditContext);
                 return Optional.of(() -> credentials.username);
             } else {
                 auditLogger.warn(PASSWORD_AUTH_FAILED_MSG, auditContext);

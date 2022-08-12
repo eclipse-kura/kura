@@ -21,6 +21,7 @@ import org.eclipse.kura.KuraException;
 import org.eclipse.kura.core.net.AbstractNetInterface;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.NetworkConfigurationVisitor;
+import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.executor.CommandExecutorService;
 import org.eclipse.kura.linux.net.iptables.LinuxFirewall;
 import org.eclipse.kura.linux.net.iptables.NATRule;
@@ -74,7 +75,7 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
             // get relevant interfaces
             for (NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig : networkConfig
                     .getNetInterfaceConfigs()) {
-                String interfaceName = netInterfaceConfig.getName();
+                String interfaceName = getInterfaceName(netInterfaceConfig);
                 NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusUnknown;
                 boolean isNat = false;
 
@@ -109,5 +110,13 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
         }
 
         return natConfigs;
+    }
+
+    private String getInterfaceName(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
+        if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
+            return "ppp" + ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
+        } else {
+            return netInterfaceConfig.getName();
+        }
     }
 }

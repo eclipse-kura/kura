@@ -137,7 +137,7 @@ public class SslManagerServiceImpl implements SslManagerService, ConfigurableCom
     }
 
     public void unsetTruststoreKeystoreService(KeystoreService keystoreService) {
-        if (this.keystoreService == truststoreKeystoreService) {
+        if (this.truststoreKeystoreService == keystoreService) {
 
             this.truststoreKeystoreService = null;
             this.truststoreKeystoreServicePid = Optional.empty();

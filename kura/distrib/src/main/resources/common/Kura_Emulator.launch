@@ -158,6 +158,7 @@
         <setEntry value="org.eclipse.kura.wire.component.conditional.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.join.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.component.provider@default:default"/>
+        <setEntry value="org.eclipse.kura.wire.db.component.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.h2db.component.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.helper.provider@default:default"/>
         <setEntry value="org.eclipse.kura.wire.provider@default:default"/>

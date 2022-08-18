@@ -589,6 +589,52 @@ public class MqttDataTransportTest {
     }
 
     @Test
+    public void connectionShouldFailIfSeparateTruststoreIsUnset() throws Exception {
+        try (final Fixture fixture = new Fixture()) {
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_TRUSTSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID, KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttTrustStore.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_KEYSTORE_PID,
+                    KEYSTORE_SERVICE_FACTORY_PID,
+                    KeystoreServiceOptions.defaultConfiguration()
+                            .withKeystorePath(mqttKeyStoreKeyOnly.getAbsolutePath()).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            fixture.createFactoryConfiguration(ConfigurableComponent.class, TEST_SSL_MANAGER_SERVICE_PID,
+                    SSL_MANAGER_SERVICE_FACTORY_PID,
+                    SslManagerServiceOptions.defaultConfiguration().withKeystoreTargetFilter(TEST_KEYSTORE_FILTER)
+                            .withTruststoreTargetFilter(TEST_TRUSTSTORE_FILTER).withHostnameVerification(false)
+                            .toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            final DataTransportService test = fixture
+                    .createFactoryConfiguration(DataTransportService.class, TEST_MQTT_DATA_TRANSPORT_PID,
+                            MQTT_DATA_TRANSPORT_FACTORY_PID,
+                            MqttDataTransportOptions.defaultConfiguration().withBrokerUrl("mqtts://localhost:8889")
+                                    .withSslManagerTargetFilter(TEST_SSL_MANAGER_SERVICE_FILTER).toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            WireTestUtil
+                    .updateComponentConfiguration(configurationService, TEST_SSL_MANAGER_SERVICE_PID,
+                            SslManagerServiceOptions.defaultConfiguration()
+                                    .withTruststoreTargetFilter("(kura.service.pid=changeit)").toProperties())
+                    .get(30, TimeUnit.SECONDS);
+
+            assertNotNull(test);
+            try {
+                test.connect();
+            } catch (final KuraConnectException e) {
+                return;
+            }
+
+            fail("connection should have failed");
+        }
+    }
+
+    @Test
     public void shouldNotConnectOverMqttsWithClientSideAuthWithWrongTruststore() throws Exception {
         try (final Fixture fixture = new Fixture()) {
 

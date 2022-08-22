@@ -82,6 +82,8 @@ Containers may be configured using the following fields:
 
 - **Logger Parameters (optional)** - This field accepts a comma-separated list of logging parameters.
 
+- -**Restart Container On Failure** - This flag will set the "unless-stopped" restart policy in the container. This policy will ensure that the container always restarts if a failure occurs. However, the container will not restart if a manual shutdown is performed.
+
 After specifying container parameters, ensure to set **Enabled** to **true** and press **Apply**. The container engine will then pull the respective image, spin up and start the container. If the gateway or the framework are power cycled, and the container and Container Orchestration Service are set to **enabled**, the framework will automatically start the container again upon startup.
 
 ![Supported-Container-Configuration]({{ site.baseurl }}/assets/images/builtin/container_orchestrator/container_configuration.png)

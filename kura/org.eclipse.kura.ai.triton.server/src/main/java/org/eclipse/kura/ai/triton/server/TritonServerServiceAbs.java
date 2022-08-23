@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.eclipse.kura.KuraException;
@@ -142,6 +143,15 @@ public abstract class TritonServerServiceAbs implements InferenceEngineService, 
         logger.info("Deactivate TritonServerService...");
         stopManagedInstance();
         this.grpcChannel.shutdownNow();
+        try {
+            boolean isTerminated = this.grpcChannel.awaitTermination(5, TimeUnit.SECONDS);
+            if (!isTerminated) {
+                logger.warn("Unable to terminate grpc channel gracefully");
+            }
+        } catch (InterruptedException e) {
+            logger.warn("Unable to terminate grpc channel gracefully", e);
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void startManagedInstance() {

@@ -44,8 +44,10 @@ COMMIT
 -A input-kura -i enp2s0 -p tcp -m tcp --dport 8000 -j ACCEPT
 -A input-kura -i enp3s0 -p udp -m udp --dport 67 -j ACCEPT
 -A input-kura -i enp2s0 -p udp -m udp --dport 67 -j ACCEPT
+-A input-kura -i wlp4s0 -p udp -m udp --dport 67 -j ACCEPT
 -A input-kura -i enp3s0 -p udp -m udp --dport 53 -j ACCEPT
 -A input-kura -i enp2s0 -p udp -m udp --dport 53 -j ACCEPT
+-A input-kura -i wlp4s0 -p udp -m udp --dport 53 -j ACCEPT
 -A input-kura -s 127.0.0.1/32 -p tcp -m tcp --dport 5002 -j ACCEPT
 -A input-kura -i enp3s0 -p tcp -m tcp --dport 1450 -j ACCEPT
 -A input-kura -i enp2s0 -p tcp -m tcp --dport 1450 -j ACCEPT

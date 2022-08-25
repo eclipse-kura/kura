@@ -27,10 +27,10 @@ import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
 import org.eclipse.kura.net.modem.ModemConfig;
-import org.eclipse.kura.net.modem.ModemConnectionStatus;
-import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.eclipse.kura.net.modem.ModemConfig.AuthType;
 import org.eclipse.kura.net.modem.ModemConfig.PdpType;
+import org.eclipse.kura.net.modem.ModemConnectionStatus;
+import org.eclipse.kura.net.modem.ModemConnectionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,23 +57,35 @@ public class ModemConfigurationInterpreter {
     private ModemConfigurationInterpreter() {
 
     }
-    
-    public static List<NetConfig> populateConfiguration(NetInterfaceAddressConfig netInterfaceAddress,
-            Map<String, Object> props, String interfaceName, int pppNum)
-            throws KuraException {
-        List<NetConfig> netConfigs = new ArrayList<>();
 
-        if (isNull(props)) {
-            return netConfigs;
-        }
-        
+    public static List<NetConfig> populateConfiguration(NetInterfaceAddressConfig netInterfaceAddress,
+            Map<String, Object> props, String interfaceName) throws KuraException {
+
         // build the prefixes for all the properties associated with this interface
         StringBuilder sbPrefix = new StringBuilder();
         sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
 
         String netIfPrefix = sbPrefix.append("config.").toString();
 
+        int pppNum = getPPPNum(netIfPrefix, props);
+        return populateConfiguration(netInterfaceAddress, props, interfaceName, pppNum);
+    }
+
+    public static List<NetConfig> populateConfiguration(NetInterfaceAddressConfig netInterfaceAddress,
+            Map<String, Object> props, String interfaceName, int pppNum) throws KuraException {
+        List<NetConfig> netConfigs = new ArrayList<>();
+
+        if (isNull(props)) {
+            return netConfigs;
+        }
+
         ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = (ModemInterfaceAddressConfigImpl) netInterfaceAddress;
+
+        // build the prefixes for all the properties associated with this interface
+        StringBuilder sbPrefix = new StringBuilder();
+        sbPrefix.append(NET_INTERFACE).append(interfaceName).append(".");
+
+        String netIfPrefix = sbPrefix.append("config.").toString();
 
         // connection type
         String configConnType = netIfPrefix + "connection.type";
@@ -298,6 +310,11 @@ public class ModemConfigurationInterpreter {
     private static String getApn(String prefix, Map<String, Object> properties) {
         String key = prefix + "apn";
         return (String) properties.get(key);
+    }
+
+    private static int getPPPNum(String prefix, Map<String, Object> properties) {
+        String key = prefix + "pppNum";
+        return (int) properties.getOrDefault(key, 0);
     }
 
 }

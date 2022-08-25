@@ -36,7 +36,7 @@ It is high raccomanded to install the custom Intel kernel provided in the guide.
 To install Kura with its dependencies on the Intel Up², perform the
 following steps:
 
-1. Boot the Intel Up² with the Ubuntu Image 20.04.3.
+1. Boot the Intel Up² with the Ubuntu Image 20.04.4.
 
 2. Make sure your device is connected to internet.
 

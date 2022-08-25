@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2011, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  *******************************************************************************/
@@ -33,6 +33,7 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
 import org.eclipse.kura.net.firewall.RuleType;
+import org.eclipse.kura.net.modem.ModemConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +115,16 @@ public class FirewallAutoNatConfigWriter implements NetworkConfigurationVisitor 
 
     private String getInterfaceName(NetInterfaceConfig<? extends NetInterfaceAddressConfig> netInterfaceConfig) {
         if (netInterfaceConfig instanceof ModemInterfaceConfigImpl) {
-            return "ppp" + ((ModemInterfaceConfigImpl) netInterfaceConfig).getPppNum();
+            int pppNumber = 0;
+            ModemInterfaceConfigImpl modemInterfaceConfig = (ModemInterfaceConfigImpl) netInterfaceConfig;
+            List<NetConfig> netConfigs = modemInterfaceConfig.getNetConfigs();
+            for (NetConfig netConfig : netConfigs) {
+                if (netConfig instanceof ModemConfig) {
+                    ModemConfig modemConfig = (ModemConfig) netConfig;
+                    pppNumber = modemConfig.getPppNumber();
+                }
+            }
+            return "ppp" + pppNumber;
         } else {
             return netInterfaceConfig.getName();
         }

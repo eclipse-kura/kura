@@ -360,16 +360,10 @@ public class ComponentUtil {
         Object[] objectValues = null;
         Scalar type = attrDef.getType();
         if (type != null) {
-
-            // split the default value in separate string
-            // if cardinality is greater than 0 or abs(1)
-            String[] defaultValues = new String[] { defaultValue };
-            int cardinality = attrDef.getCardinality();
-            if (cardinality != 0 && cardinality != 1 && cardinality != -1) {
-                defaultValues = StringUtil.splitValues(defaultValue);
-            }
+            String[] defaultValues = StringUtil.splitValues(defaultValue);
 
             // convert string values into object values
+            int cardinality = attrDef.getCardinality();
             objectValues = getObjectValue(type, defaultValues, ctx);
             if (objectValues != null && (cardinality == 0 || cardinality == 1 || cardinality == -1)) {
 

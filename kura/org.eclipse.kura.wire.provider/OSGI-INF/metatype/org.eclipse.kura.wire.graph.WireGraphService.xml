@@ -23,7 +23,7 @@
             type="String"
             cardinality="0"
             required="true"
-            default="{&quot;components&quot;:[],&quot;wires&quot;:[]}"
+            default="{&quot;components&quot;:[]\,&quot;wires&quot;:[]}"
             description="The default wire graph JSON">
         </AD>
     </OCD>

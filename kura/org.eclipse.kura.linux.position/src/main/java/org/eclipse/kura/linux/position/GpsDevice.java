@@ -210,20 +210,13 @@ public class GpsDevice {
             }
 
             final boolean isLastPositionValid = GpsDevice.this.nmeaParser.isValidPosition();
+            boolean isCurrentPositionValid = false;
 
             try {
-                final boolean isValid;
-
                 synchronized (this) {
-                    isValid = GpsDevice.this.nmeaParser.parseSentence(sentence);
+                    isCurrentPositionValid = GpsDevice.this.nmeaParser.parseSentence(sentence);
                     GpsDevice.this.lastSentence = sentence;
                 }
-
-                if (isValid != isLastPositionValid && GpsDevice.this.listener != null) {
-                    GpsDevice.this.listener.onLockStatusChanged(isValid);
-                    logger.info("{}", GpsDevice.this);
-                }
-
             } catch (ParseException e) {
                 final Code code = e.getCode();
                 if (code == Code.BAD_CHECKSUM) {
@@ -235,6 +228,14 @@ public class GpsDevice {
                 }
             } catch (Exception e) {
                 logger.warn("Unexpected exception parsing NMEA sentence", e);
+            }
+
+            if (isCurrentPositionValid != isLastPositionValid && GpsDevice.this.listener != null) {
+                GpsDevice.this.listener.onLockStatusChanged(isCurrentPositionValid);
+
+                if (isCurrentPositionValid) {
+                    logger.info("{}", GpsDevice.this);
+                }
             }
         }
 

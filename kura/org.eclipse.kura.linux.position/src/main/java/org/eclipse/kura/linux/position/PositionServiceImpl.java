@@ -247,10 +247,10 @@ public class PositionServiceImpl
 
     private void setLock(boolean hasLock) {
         if (hasLock && !this.hasLock) {
-            logger.debug("posting PositionLockedEvent");
+            logger.info("Position locked.");
             this.eventAdmin.postEvent(new PositionLockedEvent(Collections.emptyMap()));
         } else if (!hasLock && this.hasLock) {
-            logger.debug("posting PositionLostEvent");
+            logger.info("Position fix lost.");
             this.eventAdmin.postEvent(new PositionLostEvent(Collections.emptyMap()));
         }
         this.hasLock = hasLock;

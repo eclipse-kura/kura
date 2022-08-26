@@ -841,7 +841,7 @@ public class NetworkConfiguration {
             List<NetConfig> modemNetConfigs = IpConfigurationInterpreter.populateConfiguration(props, interfaceName,
                     modemInterfaceAddressConfig.getAddress(), interfaceConfig.isVirtual());
             modemNetConfigs.addAll(ModemConfigurationInterpreter.populateConfiguration(
-                    modemInterfaceAddressConfig, props, interfaceName, ((ModemInterfaceConfigImpl) interfaceConfig).getPppNum()));
+                    modemInterfaceAddressConfig, props, interfaceName));
             ((ModemInterfaceAddressConfigImpl) modemInterfaceAddressConfig).setNetConfigs(modemNetConfigs);
 
             List<ModemInterfaceAddressConfig> modemInterfaceAddressConfigs = new ArrayList<>();

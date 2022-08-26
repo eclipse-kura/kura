@@ -1,12 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2017, 2021 Eurotech and/or its affiliates and others
- * 
+ *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
  * which is available at https://www.eclipse.org/legal/epl-2.0/
- * 
+ *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *  Eurotech
  ******************************************************************************/
@@ -30,6 +30,8 @@ import org.eclipse.kura.core.net.NetInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.NetworkConfiguration;
 import org.eclipse.kura.core.net.WifiInterfaceAddressConfigImpl;
 import org.eclipse.kura.core.net.WifiInterfaceConfigImpl;
+import org.eclipse.kura.core.net.modem.ModemInterfaceAddressConfigImpl;
+import org.eclipse.kura.core.net.modem.ModemInterfaceConfigImpl;
 import org.eclipse.kura.core.testutil.TestUtil;
 import org.eclipse.kura.executor.Command;
 import org.eclipse.kura.executor.CommandExecutorService;
@@ -38,9 +40,11 @@ import org.eclipse.kura.linux.net.iptables.NATRule;
 import org.eclipse.kura.net.NetConfig;
 import org.eclipse.kura.net.NetConfigIP4;
 import org.eclipse.kura.net.NetInterfaceAddressConfig;
+import org.eclipse.kura.net.NetInterfaceConfig;
 import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.firewall.FirewallAutoNatConfig;
 import org.eclipse.kura.net.firewall.FirewallNatConfig;
+import org.eclipse.kura.net.modem.ModemInterfaceAddressConfig;
 import org.eclipse.kura.net.wifi.WifiInterfaceAddressConfig;
 import org.junit.Test;
 
@@ -123,6 +127,52 @@ public class FirewallAutoNatConfigTest {
         return config;
     }
 
+    private NetworkConfiguration prepareModemNetworkConfiguration(String intfName, String destinationInterface) {
+        NetworkConfiguration config = new NetworkConfiguration();
+
+        WifiInterfaceConfigImpl netInterfaceConfig = new WifiInterfaceConfigImpl(intfName);
+        config.addNetInterfaceConfig(netInterfaceConfig);
+
+        List<WifiInterfaceAddressConfig> interfaceAddressConfigs = new ArrayList<>();
+        WifiInterfaceAddressConfigImpl wifiInterfaceAddressConfig = new WifiInterfaceAddressConfigImpl();
+
+        List<NetConfig> netConfigs = new ArrayList<>();
+        FirewallAutoNatConfig natConfig = new FirewallAutoNatConfig();
+        natConfig.setDestinationInterface(destinationInterface);
+        natConfig.setSourceInterface(intfName);
+        natConfig.setMasquerade(true);
+        netConfigs.add(natConfig);
+        NetConfigIP4 netConfig = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledLAN, true);
+        netConfigs.add(netConfig);
+        FirewallNatConfig natConfig2 = new FirewallNatConfig(intfName, destinationInterface, "TCP", "", "", true);
+        netConfigs.add(natConfig2);
+        wifiInterfaceAddressConfig.setNetConfigs(netConfigs);
+
+        interfaceAddressConfigs.add(wifiInterfaceAddressConfig);
+        netInterfaceConfig.setNetInterfaceAddresses(interfaceAddressConfigs);
+
+        NetInterfaceConfig<?> netInterfaceConfig2 = new ModemInterfaceConfigImpl(destinationInterface);
+        config.addNetInterfaceConfig(netInterfaceConfig2);
+
+        List<ModemInterfaceAddressConfig> interfaceAddressConfigs2 = new ArrayList<>();
+        ModemInterfaceAddressConfigImpl ethInterfaceAddressConfig = new ModemInterfaceAddressConfigImpl();
+
+        netConfigs = new ArrayList<>();
+        natConfig = new FirewallAutoNatConfig();
+        natConfig.setDestinationInterface(destinationInterface);
+        natConfig.setSourceInterface(intfName);
+        natConfig.setMasquerade(true);
+        netConfigs.add(natConfig);
+        NetConfigIP4 netConfigIP4 = new NetConfigIP4(NetInterfaceStatus.netIPv4StatusEnabledWAN, true);
+        netConfigs.add(netConfigIP4);
+        ethInterfaceAddressConfig.setNetConfigs(netConfigs);
+
+        interfaceAddressConfigs2.add(ethInterfaceAddressConfig);
+        ((ModemInterfaceConfigImpl) netInterfaceConfig2).setNetInterfaceAddresses(interfaceAddressConfigs2);
+
+        return config;
+    }
+
     @Test
     public void testWriterNatConfigs() throws Throwable {
         String intfName = "testinterface";
@@ -131,6 +181,25 @@ public class FirewallAutoNatConfigTest {
         FirewallAutoNatConfigWriter writer = new FirewallAutoNatConfigWriter();
 
         NetworkConfiguration config = prepareNetworkConfiguration(intfName, destinationInterface, true, false);
+
+        LinkedHashSet<NATRule> natConfigs = (LinkedHashSet<NATRule>) TestUtil.invokePrivate(writer, "getNatConfigs",
+                config);
+
+        assertNotNull(natConfigs);
+        assertEquals(1, natConfigs.size());
+        NATRule natRule = natConfigs.iterator().next();
+        assertEquals(destinationInterface, natRule.getDestinationInterface());
+        assertEquals(intfName, natRule.getSourceInterface());
+    }
+
+    @Test
+    public void testWriterModemNatConfigs() throws Throwable {
+        String intfName = "testinterface";
+        String destinationInterface = "ppp0";
+
+        FirewallAutoNatConfigWriter writer = new FirewallAutoNatConfigWriter();
+
+        NetworkConfiguration config = prepareModemNetworkConfiguration(intfName, destinationInterface);
 
         LinkedHashSet<NATRule> natConfigs = (LinkedHashSet<NATRule>) TestUtil.invokePrivate(writer, "getNatConfigs",
                 config);

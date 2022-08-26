@@ -51,6 +51,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.username", "username");
         properties.put("net.interface.ppp.config.enabled", null);
         properties.put("net.interface.ppp.config.gpsEnabled", null);
+        properties.put("net.interface.ppp.config.pppNum", null);
 
         ModemConfig expected = new ModemConfig();
         expected.setApn("apn");
@@ -69,6 +70,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setResetTimeout(5);
         expected.setLcpEchoFailure(0);
         expected.setLcpEchoInterval(0);
+        expected.setPppNumber(0);
 
         ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl();
 
@@ -106,6 +108,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.username", "username");
         properties.put("net.interface.ppp.config.enabled", true);
         properties.put("net.interface.ppp.config.gpsEnabled", true);
+        properties.put("net.interface.ppp.config.pppNum", 0);
 
         ModemConfig expected = new ModemConfig();
         expected.setApn("apn");
@@ -127,6 +130,7 @@ public class ModemConfigurationInterpreterTest {
         expected.setUsername("username");
         expected.setEnabled(true);
         expected.setGpsEnabled(true);
+        expected.setPppNumber(0);
 
         ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl();
 
@@ -164,6 +168,7 @@ public class ModemConfigurationInterpreterTest {
         properties.put("net.interface.ppp.config.username", "username");
         properties.put("net.interface.ppp.config.enabled", true);
         properties.put("net.interface.ppp.config.gpsEnabled", true);
+        properties.put("net.interface.ppp.config.pppNum", 0);
 
         ModemConfig expected = new ModemConfig();
         expected.setApn("apn");
@@ -185,11 +190,72 @@ public class ModemConfigurationInterpreterTest {
         expected.setUsername("username");
         expected.setEnabled(true);
         expected.setGpsEnabled(true);
+        expected.setPppNumber(1);
 
         ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl();
 
         List<NetConfig> netConfigs = ModemConfigurationInterpreter.populateConfiguration(modemInterfaceAddressImpl,
-                properties, "ppp", 0);
+                properties, "ppp", 1);
+
+        assertNotNull(netConfigs);
+        assertEquals(1, netConfigs.size());
+
+        ModemConfig modemConfig = (ModemConfig) netConfigs.get(0);
+
+        assertEquals(expected, modemConfig);
+    }
+    
+    @Test
+    public void testGetModemConfigAllOverload() throws Throwable {
+
+        HashMap<String, Object> properties = new HashMap<>();
+        properties.put("net.interface.ppp.config.apn", "apn");
+        properties.put("net.interface.ppp.config.authType", "AUTO");
+        properties.put("net.interface.ppp.config.dataCompression", 1);
+        properties.put("net.interface.ppp.config.dialString", "dialString");
+        properties.put("net.interface.ppp.config.headerCompression", 2);
+        properties.put("net.interface.ppp.config.ipAddress", "10.0.0.1");
+        properties.put("net.interface.ppp.config.password", "password");
+        properties.put("net.interface.ppp.config.pdpType", "IP");
+        properties.put("net.interface.ppp.config.persist", true);
+        properties.put("net.interface.ppp.config.maxFail", 5);
+        properties.put("net.interface.ppp.config.idle", 6);
+        properties.put("net.interface.ppp.config.activeFilter", "activeFilter");
+        properties.put("net.interface.ppp.config.resetTimeout", 7);
+        properties.put("net.interface.ppp.config.lcpEchoInterval", 8);
+        properties.put("net.interface.ppp.config.lcpEchoFailure", 9);
+        properties.put("net.interface.ppp.config.profileId", 10);
+        properties.put("net.interface.ppp.config.username", "username");
+        properties.put("net.interface.ppp.config.enabled", true);
+        properties.put("net.interface.ppp.config.gpsEnabled", true);
+        properties.put("net.interface.ppp.config.pppNum", 2);
+
+        ModemConfig expected = new ModemConfig();
+        expected.setApn("apn");
+        expected.setAuthType(AuthType.AUTO);
+        expected.setDataCompression(1);
+        expected.setDialString("dialString");
+        expected.setHeaderCompression(2);
+        expected.setIpAddress(IPAddress.parseHostAddress("10.0.0.1"));
+        expected.setPassword("password");
+        expected.setPdpType(PdpType.IP);
+        expected.setPersist(true);
+        expected.setMaxFail(5);
+        expected.setIdle(6);
+        expected.setActiveFilter("activeFilter");
+        expected.setResetTimeout(7);
+        expected.setLcpEchoInterval(8);
+        expected.setLcpEchoFailure(9);
+        expected.setProfileID(10);
+        expected.setUsername("username");
+        expected.setEnabled(true);
+        expected.setGpsEnabled(true);
+        expected.setPppNumber(2);
+
+        ModemInterfaceAddressConfigImpl modemInterfaceAddressImpl = new ModemInterfaceAddressConfigImpl();
+
+        List<NetConfig> netConfigs = ModemConfigurationInterpreter.populateConfiguration(modemInterfaceAddressImpl,
+                properties, "ppp");
 
         assertNotNull(netConfigs);
         assertEquals(1, netConfigs.size());

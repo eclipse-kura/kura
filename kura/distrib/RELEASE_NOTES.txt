@@ -107,6 +107,7 @@ Known Issues:
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
+  * #4126: GPS fix never lost on serial provider
   * #4133: Intermittent error parsing Kura log timestamp
   * #3913: Potential incorrect keystore password after rollback to snapshot0
   * #3796: Server manager does not close properly

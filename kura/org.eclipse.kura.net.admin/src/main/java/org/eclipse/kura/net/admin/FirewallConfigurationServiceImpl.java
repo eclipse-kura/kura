@@ -364,7 +364,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setId(FirewallConfiguration.OPEN_PORTS_PROP_NAME);
         tad.setName(FirewallConfiguration.OPEN_PORTS_PROP_NAME);
         tad.setType(Tscalar.STRING);
-        tad.setCardinality(1);
+        tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_OPEN_PORTS_VALUE);
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
@@ -374,7 +374,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setId(FirewallConfiguration.PORT_FORWARDING_PROP_NAME);
         tad.setName(FirewallConfiguration.PORT_FORWARDING_PROP_NAME);
         tad.setType(Tscalar.STRING);
-        tad.setCardinality(1);
+        tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_PORT_FORWARDING_VALUE);
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));
@@ -384,7 +384,7 @@ public class FirewallConfigurationServiceImpl implements FirewallConfigurationSe
         tad.setId(FirewallConfiguration.NAT_PROP_NAME);
         tad.setName(FirewallConfiguration.NAT_PROP_NAME);
         tad.setType(Tscalar.STRING);
-        tad.setCardinality(1);
+        tad.setCardinality(0);
         tad.setRequired(true);
         tad.setDefault(FirewallConfiguration.DFLT_NAT_VALUE);
         tad.setDescription(NetworkAdminConfigurationMessages.getMessage(NetworkAdminConfiguration.PLATFORM_INTERFACES));

@@ -343,10 +343,13 @@ public class Tad implements AD {
 
     /**
      * Sets the value of the default property.
+     * Commas ',' need to be escaped with '\' if not intended to separate
+     * elements of the array.
      *
      * @param value
      *            allowed object is
-     *            {@link String }
+     *            {@link String }.
+     *            If cardinality = n > 1 is specified, then must contain at most n String elements separated by ','.
      *
      */
     public void setDefault(String value) {

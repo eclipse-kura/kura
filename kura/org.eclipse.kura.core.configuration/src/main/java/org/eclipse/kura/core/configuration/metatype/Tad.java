@@ -349,7 +349,7 @@ public class Tad implements AD {
      * @param value
      *            allowed object is
      *            {@link String }.
-     *            If cardinality > 1 is specified, then must contain a String with two elements separated with ','.
+     *            If cardinality = n > 1 is specified, then must contain at most n String elements separated by ','.
      *
      */
     public void setDefault(String value) {

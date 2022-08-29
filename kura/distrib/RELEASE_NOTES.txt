@@ -46,6 +46,10 @@ Target Environments:
   * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine  
 
 Bug Fixes:
+  * ed12b9f778 - [core.configuration] default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
+  * 44155a56a9 - PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
+  * 2d60fcb446 - Fixed SSLManager service truststore unset method (#4118) [backport release-5.2.0] (#4119) (nicolatimeus)
+  * 2a8bbfe202 - added missing db dependency in dev-env [backport release-5.2.0] (#4116) (github-actions[bot])
   * 3ec0148231 - [net.admin] Fixed cellular interface name in nat rules (#4110) (Pierantonio Merlino)
   * 358c5abc2f - Updated misleading Password Rest Provider message (#4105) (Matteo Maiero)
   * 99192b4970 - [log.filesystem.provider] Fixed parsing pid with spaces in log lines. (#4108) (Salvatore Coppola)
@@ -138,6 +142,12 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * ed12b9f778 - fix(core.configuration): default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
+  * 44155a56a9 - fix: PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
+  * 2d60fcb446 - fix: Fixed SSLManager service truststore unset method (#4118) [backport release-5.2.0] (#4119) (nicolatimeus)
+  * 744f961f61 - style: added list to dependencies [backport release-5.2.0] (#4120) (github-actions[bot])
+  * 2a8bbfe202 - fix: added missing db dependency in dev-env [backport release-5.2.0] (#4116) (github-actions[bot])
+  * 5885f9936f - chore: add Kura 5.2.0 release notes (#4114) (github-actions[bot])
   * ee6bbb2dde - chore: automated uptick to 5.2.0 (#4111) (github-actions[bot])
   * 3ec0148231 - fix(net.admin): Fixed cellular interface name in nat rules (#4110) (Pierantonio Merlino)
   * 358c5abc2f - fix: Updated misleading Password Rest Provider message (#4105) (Matteo Maiero)

@@ -19,6 +19,8 @@ Before running Kura's Triton Server Service, you must install the Triton Inferen
 
 A release of Triton for JetPack is provided in the tar file in the Triton Inference Server [release notes](https://github.com/triton-inference-server/server/releases). Full documentation is available [here](https://github.com/triton-inference-server/server/blob/main/docs/jetson.md).
 
+> **Note**: Please note that the latest supported version of the Triton Inference Server for the Jetson Nano is the **[2.19.0](https://github.com/triton-inference-server/server/releases/tag/v2.19.0)** supporting [JetPack 4.6.1](https://developer.nvidia.com/embedded/jetpack).
+
 Installation steps:
 - Before running the executable you need to install the [Runtime Dependencies for Triton](https://github.com/triton-inference-server/server/blob/main/docs/jetson.md#runtime-dependencies-for-triton).
 - After doing so you can extract the tar file and run the executable in the `bin` folder.

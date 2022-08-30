@@ -46,6 +46,7 @@ Target Environments:
   * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
   * ed12b9f778 - [core.configuration] default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
   * 44155a56a9 - PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
   * 2d60fcb446 - Fixed SSLManager service truststore unset method (#4118) [backport release-5.2.0] (#4119) (nicolatimeus)
@@ -144,6 +145,7 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
   * ed12b9f778 - fix(core.configuration): default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
   * 44155a56a9 - fix: PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
   * 2d60fcb446 - fix: Fixed SSLManager service truststore unset method (#4118) [backport release-5.2.0] (#4119) (nicolatimeus)

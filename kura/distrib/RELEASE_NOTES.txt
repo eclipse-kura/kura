@@ -1,7 +1,7 @@
 Eclipse Kura - 5.2.0 - August 2022
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces new framework features for EDGE AI with model encryption, 
+This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces new framework features for EDGE AI with model encryption,
 an improved Container management with entrypoint and networking support, Device Configuration Twin contract and a new PKCS11 Keystore Service provider.
 
 
@@ -43,7 +43,7 @@ Target Environments:
     * Raspberry Pi 3/4 based on Ubuntu 20.04 (64 bits)
     * Intel Up Squared board running Ubuntu 20.04
     * Nvidia Jetson Nano board running Ubuntu 18
-  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine  
+  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
   * ed12b9f778 - [core.configuration] default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
@@ -95,10 +95,10 @@ Target Platform Updates (since Eclipse Kura 5.1.0):
 
 Known Issues:
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is 
+  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
     built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
-    The issue impact is limited, if the dataservice reconnect option is enabled.  
+  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
+    The issue impact is limited, if the dataservice reconnect option is enabled.
   * The implementation of the CryptoService performs encryption using a
     password that is hardcoded and published.
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.

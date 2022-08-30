@@ -31,7 +31,7 @@
 
     <properties>
         <!--  keep this aligned with the value in: kura.target-platform.build.properties -->
-        <org.apache.activemq.artemis.upstream.version>2.6.4</org.apache.activemq.artemis.upstream.version>
+        <org.apache.activemq.artemis.upstream.version>2.24.0</org.apache.activemq.artemis.upstream.version>
     </properties>
 
     <dependencies>

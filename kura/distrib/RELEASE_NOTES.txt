@@ -1,7 +1,7 @@
 Eclipse Kura - 5.2.0 - August 2022
 -------------------------------------------------------------------------------------------------
 Description:
-This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces new framework features for EDGE AI with model encryption, 
+This minor release of Eclipse Kura, compatible with Java 8 and OSGi R7, introduces new framework features for EDGE AI with model encryption,
 an improved Container management with entrypoint and networking support, Device Configuration Twin contract and a new PKCS11 Keystore Service provider.
 
 
@@ -43,9 +43,14 @@ Target Environments:
     * Raspberry Pi 3/4 based on Ubuntu 20.04 (64 bits)
     * Intel Up Squared board running Ubuntu 20.04
     * Nvidia Jetson Nano board running Ubuntu 18
-  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine  
+  * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
+  * ed12b9f778 - [core.configuration] default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
+  * 44155a56a9 - PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
+  * 2d60fcb446 - Fixed SSLManager service truststore unset method (#4118) [backport release-5.2.0] (#4119) (nicolatimeus)
+  * 2a8bbfe202 - added missing db dependency in dev-env [backport release-5.2.0] (#4116) (github-actions[bot])
   * 3ec0148231 - [net.admin] Fixed cellular interface name in nat rules (#4110) (Pierantonio Merlino)
   * 358c5abc2f - Updated misleading Password Rest Provider message (#4105) (Matteo Maiero)
   * 99192b4970 - [log.filesystem.provider] Fixed parsing pid with spaces in log lines. (#4108) (Salvatore Coppola)
@@ -91,10 +96,10 @@ Target Platform Updates (since Eclipse Kura 5.1.0):
 
 Known Issues:
   * The nvidia-jetson-nano doesn't support the Unprivileged Command Service (see #3598)
-  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is 
+  * isc-dhcp-server fails upon first Kura installation on Raspberry Pi Bullseye. This is due to how the isc-dhcp-server installer package is
     built and run immediately after installation.
-  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection. 
-    The issue impact is limited, if the dataservice reconnect option is enabled.  
+  * An update to the sslmanagerservice where the pid of the keystoreservice is updated can lead to an error in the following reconnection.
+    The issue impact is limited, if the dataservice reconnect option is enabled.
   * The implementation of the CryptoService performs encryption using a
     password that is hardcoded and published.
   * Modem: Ublox Lisa U201 may not be able to establish PPP connection when CHAP/PAP authentication is required.
@@ -103,6 +108,8 @@ Known Issues:
   * Hardware watchdog: not implemented on all platforms
   * Only one WAN interface is currently supported. A warning in displayed
     in the WEB UI if the user attempts to enable more than one WAN interface
+  * #4133: Intermittent error parsing Kura log timestamp
+  * #4126: GPS fix never lost on serial provider
   * #3913: Potential incorrect keystore password after rollback to snapshot0
   * #3796: Server manager does not close properly
   * #3211: Kura Docker | Bluetooth error in log during starting service
@@ -138,6 +145,13 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
+  * ed12b9f778 - fix(core.configuration): default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
+  * 44155a56a9 - fix: PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
+  * 2d60fcb446 - fix: Fixed SSLManager service truststore unset method (#4118) [backport release-5.2.0] (#4119) (nicolatimeus)
+  * 744f961f61 - style: added list to dependencies [backport release-5.2.0] (#4120) (github-actions[bot])
+  * 2a8bbfe202 - fix: added missing db dependency in dev-env [backport release-5.2.0] (#4116) (github-actions[bot])
+  * 5885f9936f - chore: add Kura 5.2.0 release notes (#4114) (github-actions[bot])
   * ee6bbb2dde - chore: automated uptick to 5.2.0 (#4111) (github-actions[bot])
   * 3ec0148231 - fix(net.admin): Fixed cellular interface name in nat rules (#4110) (Pierantonio Merlino)
   * 358c5abc2f - fix: Updated misleading Password Rest Provider message (#4105) (Matteo Maiero)

@@ -21,9 +21,9 @@ The following KeystoreService factories are available:
 
 ## FilesystemKeystoreServiceImpl
 
-The `org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl` factory provides a KeystoreService implementation that stores the private keys and certificates as a file, the user can customise the following options:
+The `org.eclipse.kura.core.keystore.FilesystemKeystoreServiceImpl` factory provides a KeystoreService implementation that stores the private keys and certificates as a file. The user can customise the following options:
 - **Keystore Path**: identifies the path in the filesystem. If the keystore file does not exists, a new file will be created. The value cannot be empty.
-- ** Keystore Password**: the corresponding keystore password
+- **Keystore Password**: the corresponding keystore password
 - **Randomize Password**: a boolean flag that allows the user to specify if the keystore password needs to be randomised at the next framework boot. If set **true**, the framework will try to access the identified keystore and randomise the password. The new password will be persisted in the framework snapshot. Once successfully randomised, the flag will be automatically set to false by the framework.
 
 ## PKCS11KeystoreServiceImpl

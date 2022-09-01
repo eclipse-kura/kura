@@ -46,6 +46,7 @@ Target Environments:
   * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 72e7adfd9b - [distrib] Aligned snapshot_0.xml with iptables.init in Intel UP2 profile. (#4139) (Salvatore Coppola)
   * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
   * ed12b9f778 - [core.configuration] default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
   * 44155a56a9 - PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])
@@ -145,6 +146,8 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 72e7adfd9b - fix(distrib): Aligned snapshot_0.xml with iptables.init in Intel UP2 profile. (#4139) (Salvatore Coppola)
+  * 724251cb17 - chore: updated Kura 5.2.0 release notes (#4132) (Mattia Dal Ben)
   * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
   * ed12b9f778 - fix(core.configuration): default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
   * 44155a56a9 - fix: PPP interface number wrongly set [backport release-5.2.0] (#4127) (github-actions[bot])

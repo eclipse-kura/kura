@@ -117,21 +117,9 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
 
         private void readLinesAndNotifyListeners(RandomAccessFile file) throws IOException {
             String line = readUntilNewLine(file);
-            while (line != null) {
+            String stacktrace = readStacktrace(file);
 
-                String message = line;
-
-                // look ahead for stacktrace
-                StringBuilder stacktrace = new StringBuilder();
-                line = readUntilNewLine(file);
-                while (line != null && isStacktrace(line)) {
-                    stacktrace.append(line);
-                    stacktrace.append("\n");
-                    line = readUntilNewLine(file);
-                }
-
-                notifyListeners(message, stacktrace.toString().trim());
-            }
+            notifyListeners(line, stacktrace);
         }
 
         private synchronized String readUntilNewLine(RandomAccessFile file) throws IOException {
@@ -150,6 +138,24 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             } while (newChar != '\n');
 
             return resultLine.toString();
+        }
+
+        private String readStacktrace(RandomAccessFile file) throws IOException {
+            StringBuilder stacktrace = new StringBuilder();
+            long lastReadPosition = file.getFilePointer();
+
+            String maybeStacktrace = readUntilNewLine(file);
+
+            while (isStacktrace(maybeStacktrace)) {
+                stacktrace.append(maybeStacktrace);
+                stacktrace.append("\n");
+                lastReadPosition = file.getFilePointer();
+                maybeStacktrace = readUntilNewLine(file);
+            }
+
+            file.seek(lastReadPosition);
+
+            return stacktrace.toString().trim();
         }
 
         private boolean isStacktrace(String line) {

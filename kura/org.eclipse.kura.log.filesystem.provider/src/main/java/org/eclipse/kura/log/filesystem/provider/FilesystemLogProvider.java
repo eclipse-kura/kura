@@ -20,6 +20,7 @@ import java.io.RandomAccessFile;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.eclipse.kura.configuration.ConfigurableComponent;
 import org.eclipse.kura.log.LogEntry;
@@ -85,23 +86,9 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
 
         @Override
         public void run() {
-            long filePointer = 0;
-
             try (RandomAccessFile file = new RandomAccessFile(this.logFile, "r")) {
                 while (this.follow) {
-                    long fileLength = this.logFile.length();
-                    if (fileLength < filePointer) {
-                        filePointer = fileLength;
-                    }
-
-                    if (filePointer < fileLength) {
-                        file.seek(filePointer);
-                        readLinesAndNotifyListeners(file);
-                        if (filePointer < file.getFilePointer()) {
-                            filePointer = file.getFilePointer();
-                        }
-                    }
-
+                    readLinesAndNotifyListeners(file);
                     sleep(SAMPLE_INTERVAL);
                 }
             } catch (FileNotFoundException fnf) {
@@ -116,38 +103,45 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         }
 
         private void readLinesAndNotifyListeners(RandomAccessFile file) throws IOException {
-            String line = readUntilNewLine(file);
-            String stacktrace = readStacktrace(file);
+            Optional<String> line = readUntilNewLine(file);
 
-            notifyListeners(line, stacktrace);
+            if (line.isPresent()) {
+                String stacktrace = readStacktrace(file);
+                notifyListeners(line.get(), stacktrace);
+            }
         }
 
-        private synchronized String readUntilNewLine(RandomAccessFile file) throws IOException {
+        private Optional<String> readUntilNewLine(RandomAccessFile file) throws IOException {
             StringBuilder resultLine = new StringBuilder();
             long pointerToLastSuccessfulRead = file.getFilePointer();
-            char newChar = 0;
 
-            do {
-                try {
-                    newChar = (char) file.readByte();
-                    resultLine.append(newChar);
-                    pointerToLastSuccessfulRead = file.getFilePointer();
-                } catch (EOFException eof) {
-                    file.seek(pointerToLastSuccessfulRead);
-                }
-            } while (newChar != '\n');
+            if (pointerToLastSuccessfulRead < file.length()) {
+                char newChar = 0;
 
-            return resultLine.toString();
+                do {
+                    try {
+                        newChar = (char) file.readByte();
+                        resultLine.append(newChar);
+                        pointerToLastSuccessfulRead = file.getFilePointer();
+                    } catch (EOFException eof) {
+                        file.seek(pointerToLastSuccessfulRead);
+                    }
+                } while (newChar != '\n');
+
+                return Optional.of(resultLine.toString());
+            } else {
+                return Optional.empty();
+            }
         }
 
         private String readStacktrace(RandomAccessFile file) throws IOException {
             StringBuilder stacktrace = new StringBuilder();
             long lastReadPosition = file.getFilePointer();
 
-            String maybeStacktrace = readUntilNewLine(file);
+            Optional<String> maybeStacktrace = readUntilNewLine(file);
 
-            while (isStacktrace(maybeStacktrace)) {
-                stacktrace.append(maybeStacktrace);
+            while (maybeStacktrace.isPresent() && isStacktrace(maybeStacktrace.get())) {
+                stacktrace.append(maybeStacktrace.get());
                 stacktrace.append("\n");
                 lastReadPosition = file.getFilePointer();
                 maybeStacktrace = readUntilNewLine(file);
@@ -167,7 +161,7 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
             return line.length() > 4 && !line.substring(0, 4).matches("\\d{4}") && !line.startsWith("<");
         }
 
-        private void notifyListeners(String message, String stacktrace) {
+        private synchronized void notifyListeners(String message, String stacktrace) {
             if (message != null) {
                 for (LogListener listener : FilesystemLogProvider.this.registeredListeners) {
                     LogEntry entry = KuraLogLineParser.createLogEntry(message, FilesystemLogProvider.this.filePath,

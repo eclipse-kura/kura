@@ -88,18 +88,6 @@
     </properties>
     
     <profiles>
-        <!--<profile>
-            <id>default</id>
-            <activation>
-                <property>
-                    <name>skip.libsocket-can</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <modules>
-                <module>p2-repo-common</module>
-            </modules>
-        </profile>-->
         <profile>
             <id>can</id>
             <activation>
@@ -109,7 +97,7 @@
                 </property>
             </activation>
             <modules>
-                <module>org.eclipse.kura.libsocket-can</module>
+                <module>org.eclipse.kura.libsocket-can-osgi</module>
             </modules>
         </profile>
         <profile>

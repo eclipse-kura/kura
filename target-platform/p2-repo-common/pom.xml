@@ -23,14 +23,6 @@
     <properties>
         <skip.libsocket-can>true</skip.libsocket-can>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.eclipse.kura</groupId>
-            <artifactId>org.eclipse.kura.libsocket-can</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-            <optional>true</optional>
-        </dependency>
-  </dependencies>
     <profiles>
         <profile>
             <id>can</id>
@@ -40,6 +32,13 @@
                     <value>false</value>
                 </property>
             </activation>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.kura</groupId>
+                        <artifactId>libsocket-can-osgi</artifactId>
+                        <version>1.0.0-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
             <build>
                 <plugins>
                     <plugin>
@@ -47,7 +46,7 @@
                         <version>2.9</version>
                         <executions>
                             <execution>
-                                <id>copy-bundles-for-publishing</id>
+                                <id>copy-can-bundle-for-publishing</id>
                                 <phase>process-resources</phase>
                                 <goals>
                                     <goal>copy</goal>
@@ -56,8 +55,8 @@
                                     <artifactItems>
                                         <artifactItem>
                                             <groupId>org.eclipse.kura</groupId>
-                                            <artifactId>org.eclipse.kura.libsocket-can</artifactId>
-                                            <version>${org.eclipse.kura.libsocket-can.version}</version>
+                                            <artifactId>libsocket-can-osgi</artifactId>
+                                            <version>${org.eclipse.kura.libsocket-can-osgi.version}</version>
                                         </artifactItem>
                                     </artifactItems>
                                     <stripVersion>true</stripVersion>
@@ -71,14 +70,14 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>setup</id>
+                                <id>setup-can</id>
                                 <phase>process-resources</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <move file="target/source/plugins/org.eclipse.kura.libsocket-can.jar" tofile="target/source/plugins/org.eclipse.kura.libsocket-can_${org.eclipse.kura.libsocket-can.version}.jar"/>
+                                        <move file="target/source/plugins/libsocket-can-osgi.jar" tofile="target/source/plugins/libsocket-can-osgi_${libsocket-can-osgi.version}.jar"/>
                                     </tasks>
                                 </configuration>
                             </execution>

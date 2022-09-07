@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+    
+    Contributors:
+     Eurotech
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     
@@ -13,34 +27,6 @@
     <packaging>bundle</packaging>
     <name>libsocket-can</name>
     <description>Eclipse Kura wrapper for libsocket-can</description>
-
-    <!--<properties>
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
-    </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.usb4java</groupId>
-            <artifactId>org.usb4java</artifactId>
-            <version>1.2.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/lib/usb4java-1.2.0.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.usb4java</groupId>
-            <artifactId>org.usb4java.linux-arm</artifactId>
-            <version>1.2.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-arm.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.usb4java</groupId>
-            <artifactId>org.usb4java.linux-x86_64</artifactId>
-            <version>1.2.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/src/lib/libusb4java-1.2.0-linux-x86_64.jar</systemPath>
-        </dependency>
-    </dependencies>-->
     
     <dependencies>
         <dependency>
@@ -64,26 +50,6 @@
         </resources>
         
         <plugins>
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.1</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>lib</outputDirectory>
-                            <excludeGroupIds>p2.eclipse-plugin,org.eclipse.kura</excludeGroupIds>
-                            <excludeTransitive>true</excludeTransitive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -123,17 +89,6 @@
                 </configuration>
             </plugin>
             
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.7.2</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <java.library.path>${project.basedir}/src/main/lib</java.library.path>
-                    </systemPropertyVariables>
-                </configuration>
-            </plugin>-->
-            
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -165,19 +120,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            
-            <!--<plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
         </plugins>
         <pluginManagement>
             <plugins>

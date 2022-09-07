@@ -522,6 +522,11 @@
                                     <artifactId>gpsd4java</artifactId>
                                     <version>${com.eurotech.gpsd4java.version}</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.eclipse.kura</groupId>
+                                    <artifactId>org.eclipse.kura.libsocket-can</artifactId>
+                                    <version>${org.eclipse.kura.libsocket-can.version}</version>
+                                </artifactItem>
                             </artifactItems>
                             <stripVersion>true</stripVersion>
                             <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
@@ -631,6 +636,7 @@
                                 <move file="target/source/plugins/bcutil-jdk18on.jar" tofile="target/source/plugins/bcutil_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/bcpg-jdk18on.jar" tofile="target/source/plugins/bcpg_${org.bouncycastle.version}.jar"/>
                                 <move file="target/source/plugins/gpsd4java.jar" tofile="target/source/plugins/com.eurotech.gpsd4java_${com.eurotech.gpsd4java.version}.jar"/>
+                                <move file="target/source/plugins/org.eclipse.kura.libsocket-can.jar" tofile="target/source/plugins/org.eclipse.kura.libsocket-can_${org.eclipse.kura.libsocket-can.version}.jar"/>
                             </tasks>
                         </configuration>
                     </execution>

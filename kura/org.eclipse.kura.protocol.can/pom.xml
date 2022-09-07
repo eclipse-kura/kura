@@ -32,17 +32,17 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../test/org.eclipse.kura.protocol.can.test/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 
-	<dependencies>
+	<!--<dependencies>
 		<dependency>
 			<groupId>com.eurotech</groupId>
 			<artifactId>libsocket-can-java</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-	</dependencies>
+	</dependencies>-->
 
 	<build>
 		<plugins>
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>2.1</version>
@@ -71,11 +71,10 @@
 						<fileset>
 							<directory>lib</directory>
 							<followSymlinks>false</followSymlinks>
-							<!-- <includes> <include>abc</include> </includes> -->
 						</fileset>
 					</filesets>
 				</configuration>
-			</plugin>
+			</plugin>-->
 			
 			<plugin>
 				<groupId>de.dentrassi.maven</groupId>

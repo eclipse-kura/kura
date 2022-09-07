@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.kura.log.filesystem.provider;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -115,22 +116,40 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         }
 
         private void readLinesAndNotifyListeners(RandomAccessFile file) throws IOException {
-            String line = file.readLine();
+            String line = readUntilNewLine(file);
             while (line != null) {
 
                 String message = line;
 
                 // look ahead for stacktrace
                 StringBuilder stacktrace = new StringBuilder();
-                line = file.readLine();
+                line = readUntilNewLine(file);
                 while (line != null && isStacktrace(line)) {
                     stacktrace.append(line);
                     stacktrace.append("\n");
-                    line = file.readLine();
+                    line = readUntilNewLine(file);
                 }
 
                 notifyListeners(message, stacktrace.toString().trim());
             }
+        }
+
+        private synchronized String readUntilNewLine(RandomAccessFile file) throws IOException {
+            StringBuilder resultLine = new StringBuilder();
+            long pointerToLastSuccessfulRead = file.getFilePointer();
+            char newChar = 0;
+
+            do {
+                try {
+                    newChar = (char) file.readByte();
+                    resultLine.append(newChar);
+                    pointerToLastSuccessfulRead = file.getFilePointer();
+                } catch (EOFException eof) {
+                    file.seek(pointerToLastSuccessfulRead);
+                }
+            } while (newChar != '\n');
+
+            return resultLine.toString();
         }
 
         private boolean isStacktrace(String line) {

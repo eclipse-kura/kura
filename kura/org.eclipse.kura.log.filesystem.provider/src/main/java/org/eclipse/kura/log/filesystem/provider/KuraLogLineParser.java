@@ -57,7 +57,7 @@ public final class KuraLogLineParser {
         this.stacktrace = stacktrace;
     }
 
-    public static LogEntry createLogEntry(String message, String filepath, String stacktrace) {
+    public static synchronized LogEntry createLogEntry(String message, String filepath, String stacktrace) {
         instance = new KuraLogLineParser(message, filepath, stacktrace);
 
         if (filepath.contains("kura.log")) {

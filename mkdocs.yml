@@ -2,7 +2,6 @@ site_name: Eclipse Kura™ Documentation
 
 nav:
     - Introduction:
-      - Overview: intro/intro.md
       - Raspberry Pi - Raspbian Quick Start: intro/raspberry-pi-raspbian-quick-start.md
       - Raspberry Pi - Ubuntu 20 Quick Start: intro/raspberry-pi-ubuntu-20-quick-start.md
       - Docker Quick Start: intro/docker-quick-start.md

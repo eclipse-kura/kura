@@ -1,4 +1,16 @@
 <?xml version="1.0"?>
+<!--
+    Copyright (c) 2011, 2022 Eurotech and/or its affiliates and others
+  
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+ 
+    SPDX-License-Identifier: EPL-2.0
+ 
+    Contributors:
+     Eurotech
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -8,6 +20,73 @@
     </parent>
     <artifactId>p2-repo-common</artifactId>
     <packaging>pom</packaging>
+    <properties>
+        <skip.libsocket-can>true</skip.libsocket-can>
+    </properties>
+    <profiles>
+        <profile>
+            <id>can</id>
+            <activation>
+                <property>
+                    <name>skip.libsocket-can</name>
+                    <value>false</value>
+                </property>
+            </activation>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.kura</groupId>
+                        <artifactId>libsocket-can-osgi</artifactId>
+                        <version>1.0.0</version>
+                    </dependency>
+                </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.9</version>
+                        <executions>
+                            <execution>
+                                <id>copy-can-bundle-for-publishing</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.eclipse.kura</groupId>
+                                            <artifactId>libsocket-can-osgi</artifactId>
+                                            <version>${org.eclipse.kura.libsocket-can-osgi.version}</version>
+                                        </artifactItem>
+                                    </artifactItems>
+                                    <stripVersion>true</stripVersion>
+                                    <outputDirectory>${project.basedir}/target/source/plugins</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <!--  rename bundles with version appended -->
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>setup-can</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <move file="target/source/plugins/libsocket-can-osgi.jar" tofile="target/source/plugins/libsocket-can-osgi_${libsocket-can-osgi.version}.jar"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>

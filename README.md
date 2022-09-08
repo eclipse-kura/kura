@@ -32,3 +32,24 @@ pip3 install --upgrade pip
 ```bash
 pip3 install -r requirements.txt
 ```
+
+You're now ready do build the documentation sources locally.
+
+### Building the docs
+
+`mike` is the tool to use for building and versioning the documentation. Modify the markdown files and edit `mkdocs.yml` file accordingly.
+
+To build the documentation and see the changes on your local machine:
+
+```bash
+mike deploy [version]
+```
+
+Usually `[version]` should match the branch you're on. Let's say you're updating the documentation for `docs-develop` you'll the need to run `mike deploy docs-develop`. This command will create a folder in you current path names `site`, here you'll find the built documentation sources. You can serve them through a local webserver using:
+
+```bash
+mike serve
+```
+
+> **Note**: If you can't see your docs it might be because you haven't set a default version to serve. Run the following command for setting the default version to be served by `mike`:
+> `mike set-default [version]`

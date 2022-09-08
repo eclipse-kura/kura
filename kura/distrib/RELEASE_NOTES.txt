@@ -46,6 +46,7 @@ Target Environments:
   * Kura is also available as a pre-built Docker container for Ubi 8 and Alpine
 
 Bug Fixes:
+  * 8d37d4674f - [log.filesystem.provider] prevent EOF ending incomplete lines and refactor of parser [backport 5.2.0] (#4149) (Marcello Rinaldo Martina)
   * 72e7adfd9b - [distrib] Aligned snapshot_0.xml with iptables.init in Intel UP2 profile. (#4139) (Salvatore Coppola)
   * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])
   * ed12b9f778 - [core.configuration] default values of metatype are always splitted in array before parsing [backport 5.2.0] (#4130) (Marcello Rinaldo Martina)
@@ -146,6 +147,9 @@ Known Issues:
   * #222:  CloudConnectionStatusServiceImpl does not cancel workers on component deactivation
 
 Changelog:
+  * 8d37d4674f - fix(log.filesystem.provider): prevent EOF ending incomplete lines and refactor of parser [backport 5.2.0] (#4149) (Marcello Rinaldo Martina)
+  * ecf69d412b - refactor(protocol.can): Add a wrapper for the libsocket-can [backport release-5.2.0] (#4147) (github-actions[bot])
+  * de26d4a78b - chore(release notes): Update release notes (#4142) (Pierantonio Merlino)
   * 72e7adfd9b - fix(distrib): Aligned snapshot_0.xml with iptables.init in Intel UP2 profile. (#4139) (Salvatore Coppola)
   * 724251cb17 - chore: updated Kura 5.2.0 release notes (#4132) (Mattia Dal Ben)
   * 5e5958afea - fix: org.eclipse.kura.core.net exported version internal API [backport release-5.2.0] (#4134) (github-actions[bot])

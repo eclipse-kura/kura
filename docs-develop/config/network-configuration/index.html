@@ -1,0 +1,2292 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Network Configuration - Eclipse Kura™ Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#network-configuration" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+Eclipse Kura™ 5.2.0 is available! Check out the new release at: <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura Downloads</a>.
+
+          </div>
+        </aside>
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
+<a href="../../.."> 
+    <strong>Click here to go to latest stable release.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Eclipse Kura™ Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Network Configuration
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../intro/intro/" class="md-tabs__link">
+        Introduction
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../console/" class="md-tabs__link md-tabs__link--active">
+        Configuration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../builtin/intro/" class="md-tabs__link">
+        Built-in services
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../admin/directory-layout/" class="md-tabs__link">
+        Administration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../cloud-api/overview/" class="md-tabs__link">
+        Cloud Connection API and usage
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    Eclipse Kura™ Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Introduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Introduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intro/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-raspbian-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspbian Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+        Raspberry Pi - Ubuntu 20 Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+        NVIDIA Jetson Nano&trade; - Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../console/" class="md-nav__link">
+        Gateway Administration Console
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../device-information/" class="md-nav__link">
+        Device Information
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gateway-status/" class="md-nav__link">
+        Gateway Status
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Network Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Network Configuration
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tcpip-configuration" class="md-nav__link">
+    TCP/IP Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dhcp-nat-configuration" class="md-nav__link">
+    DHCP &amp; NAT Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-linux-configuration" class="md-nav__link">
+    Network Linux Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-properties" class="md-nav__link">
+    Network Configuration properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-properties" class="md-nav__link">
+    Common properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-properties" class="md-nav__link">
+    IPv4 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-server-properties" class="md-nav__link">
+    IPv4 DHCP Server properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-client-properties" class="md-nav__link">
+    IPv4 DHCP Client properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-master-access-point-properties" class="md-nav__link">
+    WiFi Master (Access Point) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-infra-station-mode-properties" class="md-nav__link">
+    WiFi Infra (Station Mode) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cellular-modem-properties" class="md-nav__link">
+    Cellular Modem properties
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-recipes" class="md-nav__link">
+    Network Configuration recipes
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#disable-a-network-interface" class="md-nav__link">
+    Disable a network interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-wan-with-dhcp-client-enabled-and-custom-dns-server" class="md-nav__link">
+    Configure an ethernet interface for WAN with DHCP client enabled and custom DNS server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-lan-with-dhcp-server-enabled-and-nat-disabled" class="md-nav__link">
+    Configure an ethernet interface for LAN with DHCP server enabled and NAT disabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-access-point-with-dhcp-server-and-nat-enabled" class="md-nav__link">
+    Configure a wireless interface as access point with DHCP server and NAT enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled" class="md-nav__link">
+    Configure a wireless interface as station mode with DHCP client enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-a-cellular-interface" class="md-nav__link">
+    Enable a cellular interface
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ethernet-configuration/" class="md-nav__link">
+        Ethernet Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../wi-fi-configuration/" class="md-nav__link">
+        Wi-Fi Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../firewall-configuration/" class="md-nav__link">
+        Firewall Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-services/" class="md-nav__link">
+        Cloud Connections
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloud-service-configuration/" class="md-nav__link">
+        Cloud Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data-service-configuration/" class="md-nav__link">
+        Data Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../connection-monitors/" class="md-nav__link">
+        Connection Monitors in DataService
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../message-publishing-backoff-delay/" class="md-nav__link">
+        Message Publishing Backoff Delay
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mqttdata-transport-service-configuration/" class="md-nav__link">
+        MqttData Transport Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ssl-configuration/" class="md-nav__link">
+        SSL Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../auth/" class="md-nav__link">
+        Gateway Administration Console Authentication
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../threat-manager/" class="md-nav__link">
+        Network Threat Manager
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Built-in services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Built-in services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Built-in services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/intro/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/simple-artemis-mqtt-broker-service/" class="md-nav__link">
+        Simple Artemis MQTT Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/activemq-artemis-broker-service/" class="md-nav__link">
+        ActiveMQ Artemis Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/clock-service/" class="md-nav__link">
+        Clock Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/deployment-service/" class="md-nav__link">
+        Deployment Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/cloudcat/" class="md-nav__link">
+        Cloudcat
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/command-service/" class="md-nav__link">
+        Command Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/h2-database/" class="md-nav__link">
+        H2 Database - Features and Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/h2-database-external-connections/" class="md-nav__link">
+        H2 database - Connecting external applications
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/position-service/" class="md-nav__link">
+        Position Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/rest-service/" class="md-nav__link">
+        REST Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/watchdog-service/" class="md-nav__link">
+        Watchdog Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/nvidiatm-triton-server-inference-engine/" class="md-nav__link">
+        Nvidia™ Triton Server inference engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/container-orchestration-provider/" class="md-nav__link">
+        Container Orchestration Provider
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Administration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Administration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/directory-layout/" class="md-nav__link">
+        Directory Layout
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/snapshot-management/" class="md-nav__link">
+        Snapshots Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/application-management/" class="md-nav__link">
+        Application Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-ec/" class="md-nav__link">
+        Remote Management with Everyware Cloud
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-kapua/" class="md-nav__link">
+        Remote Management with Eclipse Kapua
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keystore-management/" class="md-nav__link">
+        Keystores Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keys-and-certificates/" class="md-nav__link">
+        Keys and Certificates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Cloud Connection API and usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connection API and usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connection API and usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/user-guide/" class="md-nav__link">
+        User guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/app-dev-guide/" class="md-nav__link">
+        Application developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/stack-dev-guide/" class="md-nav__link">
+        Cloud connection developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/stack-components/" class="md-nav__link">
+        Built-in Cloud Services
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#tcpip-configuration" class="md-nav__link">
+    TCP/IP Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dhcp-nat-configuration" class="md-nav__link">
+    DHCP &amp; NAT Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-linux-configuration" class="md-nav__link">
+    Network Linux Configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-properties" class="md-nav__link">
+    Network Configuration properties
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-properties" class="md-nav__link">
+    Common properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-properties" class="md-nav__link">
+    IPv4 properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-server-properties" class="md-nav__link">
+    IPv4 DHCP Server properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipv4-dhcp-client-properties" class="md-nav__link">
+    IPv4 DHCP Client properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-master-access-point-properties" class="md-nav__link">
+    WiFi Master (Access Point) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wifi-infra-station-mode-properties" class="md-nav__link">
+    WiFi Infra (Station Mode) properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cellular-modem-properties" class="md-nav__link">
+    Cellular Modem properties
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#network-configuration-recipes" class="md-nav__link">
+    Network Configuration recipes
+  </a>
+  
+    <nav class="md-nav" aria-label="Network Configuration recipes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#disable-a-network-interface" class="md-nav__link">
+    Disable a network interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-wan-with-dhcp-client-enabled-and-custom-dns-server" class="md-nav__link">
+    Configure an ethernet interface for WAN with DHCP client enabled and custom DNS server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-an-ethernet-interface-for-lan-with-dhcp-server-enabled-and-nat-disabled" class="md-nav__link">
+    Configure an ethernet interface for LAN with DHCP server enabled and NAT disabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-access-point-with-dhcp-server-and-nat-enabled" class="md-nav__link">
+    Configure a wireless interface as access point with DHCP server and NAT enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled" class="md-nav__link">
+    Configure a wireless interface as station mode with DHCP client enabled
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enable-a-cellular-interface" class="md-nav__link">
+    Enable a cellular interface
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="network-configuration">Network Configuration</h1>
+<p>To configure the gateway network interfaces using the Administration Console, select the <strong>Network</strong> option located in the <strong>System</strong> area. With this option selected, the <strong>Network</strong> display appears with a list of available interfaces. Configuration tabs for the selected interface appear on the right side of the screen.</p>
+<p>By default, the loopback (lo) interface is selected when the network interfaces are displayed. Choose the desired network interface (e.g., eth0, eth1, wlan0, ppp0) and apply the necessary configuration changes using the tabs on the right. Submit the modified configuration by clicking the <strong>Apply</strong> button.</p>
+<p>In case of typing errors, the <strong>Reset</strong> button can be used to reload the prior configuration on the screen.
+Since the network configuration shown on the screen may not be synchronized with the current state of the system, it can be updated pressing the <strong>Refresh</strong> button. This can be used also to force the reload of specific parameters like the RSSI or dynamic IP addresses. The refresh procedure reads all the needed parameters from the system and can take several seconds before updating.</p>
+<div class="admonition warn">
+<p>It is recommended that the <strong>TCP/IP</strong> tab is configured first since it defines how the interface is going to be used.</p>
+</div>
+<h2 id="tcpip-configuration">TCP/IP Configuration</h2>
+<p>The <strong>TCP/IP</strong> tab contains the following configuration parameters:</p>
+<ul>
+<li><strong>Status</strong></li>
+<li>Disabled - disables the selected interface (i.e., administratively down).</li>
+<li>Enabled for LAN - designates the interface for a local network. It can be set as a DHCP server for hosts on the local network and can serve as a default gateway for those hosts; however, it cannot be set as an actual gateway interface for this device. That is, packets must be routed from this interface to another interface that is configured as WAN.</li>
+<li>
+<p>Enabled for WAN - designates the interface as a gateway to an external network.</p>
+</li>
+<li>
+<p><strong>Configure</strong></p>
+</li>
+<li>Manually - allows manual entry of the <em>IP Address</em> and <em>Netmask</em> fields, if the interface is configured as LAN; allows manual entry of the <em>IP Address</em>, <em>Netmask</em>, <em>Gateway</em>, and <em>DNS Servers</em> fields, if the interface is designated as WAN.</li>
+<li>
+<p>Using DHCP - configures the interface as a DHCP client obtaining the IP address from a network DHCP server.</p>
+</li>
+<li>
+<p><strong>IP Address</strong> - defines the IP address of the interface, if manually configured.</p>
+</li>
+<li>
+<p><strong>Subnet Mask</strong> - defines the subnet mask of the interface, if manually configured.</p>
+</li>
+<li>
+<p><strong>Gateway</strong> - specifies the default gateway for the unit. (Required field if the interface is designated as WAN and manually configured.)</p>
+</li>
+<li>
+<p><strong>DNS Servers</strong> - provides a list of space separated DNS servers, if the interface is designated as WAN and is manually configured.  </p>
+</li>
+<li>
+<p><strong>Search Domains</strong> - not implemented.</p>
+</li>
+</ul>
+<p>If the network interface is <em>Enabled for LAN</em> and manually configured (i.e., not a DHCP client), the <strong>DHCP &amp; NAT</strong> tab allows the DHCP server to be configured and/or NAT (IP forwarding with masquerading) to be enabled.</p>
+<p><img alt="Net TCPIP" src="../images/NetTCPIP.png" /></p>
+<h2 id="dhcp-nat-configuration">DHCP &amp; NAT Configuration</h2>
+<p>The <strong>DHCP &amp; NAT</strong> tab contains the following configuration parameters:</p>
+<ul>
+<li><strong>Router Mode</strong></li>
+<li>DHCP and NAT - indicates that both DHCP server and NAT are enabled.</li>
+<li>DHCP Only - indicates that DHCP server is enabled and NAT is disabled.</li>
+<li>NAT Only - indicates that NAT is enabled and DHCP server is disabled.</li>
+<li>
+<p>Off - indicates that both DHCP server and NAT are disabled.</p>
+</li>
+<li>
+<p><strong>DHCP Beginning Address</strong> - specifies the first address of DHCP pool (i.e., first available client IP address).</p>
+</li>
+<li>
+<p><strong>DHCP Ending Address</strong> - specifies the last address of DHCP pool (i.e., last IP address that can be assigned to a client).</p>
+</li>
+<li>
+<p><strong>DHCP Subnet Mask</strong> - defines the subnet mask that is assigned to a client.</p>
+</li>
+<li>
+<p><strong>DHCP Default Lease Time</strong> - sets the default time (in seconds) that the client retains the provided IP address. It must be greater than 0.</p>
+</li>
+<li>
+<p><strong>DHCP Max Lease Time</strong> - sets the maximum time (in seconds) that the client retains the provided IP address. It must be greater than 0.</p>
+</li>
+<li>
+<p><strong>Pass DNS Servers through DHCP</strong> - enables DNS Proxy (i.e., passing DNS servers through DHCP).</p>
+</li>
+</ul>
+<p>If NAT is enabled and there is another interface designated as WAN (e.g., ppp0), the following iptables rules are added to the <em>custom automatic NAT service rules</em> section of the <code>/etc/init.d/firewall</code> script:</p>
+<pre><code># custom automatic NAT service rules (if NAT option is enabled for LAN interface)
+iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+iptables -A FORWARD -i ppp0 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i eth0 -o ppp0 -j ACCEPT
+</code></pre>
+<p>Also, IP forwarding is enabled in the kernel as follows:</p>
+<pre><code># allow forwarding if any masquerade is defined
+echo 1 &gt; /proc/sys/net/ipv4/ip_forward
+</code></pre>
+<p>The rules shown above create an <em>Overloaded</em> (i.e., many-to-one) NAT. This type of network address translation maps multiple IP addresses on the LAN side to a single IP address on the WAN side, allowing internet access from hosts on a local network via a gateway (WAN) interface. Note that for NAT rules to be added, it is insufficient to enable NATing through the <strong>DHCP &amp; NAT</strong> tab of the LAN interface; there must also be another interface designated as WAN.</p>
+<p><img alt="Net DHCPNAT" src="../images/NetDHCPNAT.png" /></p>
+<h2 id="network-linux-configuration">Network Linux Configuration</h2>
+<p>When applying a new network configuration, Kura changes the configuration files of the Linux networking subsystem. Please read the following note before proceeding with manual changes in the Linux networking configuration.</p>
+<div class="admonition warn">
+<p>Manual editing of the Linux networking configuration file is NOT recommended when the gateway configuration is being managed through Kura. While Linux may correctly accept manual changes, Kura may not be able to interpret the new configuration resulting in an inconsistent state.</p>
+</div>
+<h2 id="network-configuration-properties">Network Configuration properties</h2>
+<p>The Network configuration can be modified using the ESF Gateway Administration Console, as described above, using the Configuration Service or by appling a proper <a href="../../admin/snapshot-management/">snapshot</a>.
+The following table describes all the properties related to the Network Configuration.</p>
+<h3 id="common-properties">Common properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interfaces</td>
+<td>String</td>
+<td>Comma-separated list of the interface names in the device</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.type</td>
+<td>String</td>
+<td>The type of the network interface; possible values are: ETHERNET, WIFI, MODEM and LOOPBACK</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.mode</td>
+<td>String</td>
+<td>For wifi interfaces, specify the modality; possible values are INFRA and MASTER</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.nat.enabled</td>
+<td>Boolean</td>
+<td>Enable the NAT feature</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv4-properties">IPv4 properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.ip4.status</td>
+<td>String</td>
+<td>The status of the interface for the IPv4 configuration; possibile values are: netIPv4StatusDisabled, netIPv4StatusUnmanaged, netIPv4StatusL2Only, netIPv4StatusEnabledLAN, netIPv4StatusEnabledWAN, netIPv4StatusUnknown</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.ip4.address</td>
+<td>String</td>
+<td>The IPv4 address assigned to the network interface</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.ip4.prefix</td>
+<td>Short</td>
+<td>The IPv4 netmask assigned to the network interface</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.ip4.gateway</td>
+<td>String</td>
+<td>The IPv4 address of the default gateway</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.ip4.dnsServers</td>
+<td>String</td>
+<td>Comma-separated list of dns servers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv4-dhcp-server-properties">IPv4 DHCP Server properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.enabled</td>
+<td>Boolean</td>
+<td>Specify if the DHCP server is enabled</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.rangeStart</td>
+<td>String</td>
+<td>First IP address available for clients</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.rangeEnd</td>
+<td>String</td>
+<td>Last IP address available for clients</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.defaultLeaseTime</td>
+<td>Integer</td>
+<td>The default lease time</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.maxLeaseTime</td>
+<td>Integer</td>
+<td>The maximum lease time</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.prefix</td>
+<td>Short</td>
+<td>The netmask for the available IP addresses</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpServer4.passDns</td>
+<td>Boolean</td>
+<td>Specify if the DNS server addresses has to be passed through DHCP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ipv4-dhcp-client-properties">IPv4 DHCP Client properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dhcpClient4.enabled</td>
+<td>Boolean</td>
+<td>Specify if the DHCP client is enabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wifi-master-access-point-properties">WiFi Master (Access Point) properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.driver</td>
+<td>String</td>
+<td>The driver used for the connection</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.passphrase</td>
+<td>Password</td>
+<td>The password for the access point</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.ssid</td>
+<td>String</td>
+<td>The SSID of the access point</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.securityType</td>
+<td>String</td>
+<td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.mode</td>
+<td>String</td>
+<td>The mode of the wireless connection; for the access point mode set it to MASTER</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.channel</td>
+<td>String</td>
+<td>The channel to be used for the access point</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.radioMode</td>
+<td>String</td>
+<td>Specify the 802.11 radio mode; possible values are RADIO_MODE_80211a, RADIO_MODE_80211b, RADIO_MODE_80211g, RADIO_MODE_80211nHT20, RADIO_MODE_80211_AC</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.master.ignoreSSID</td>
+<td>Boolean</td>
+<td>Specify if the SSID broadcast is ignored</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wifi-infra-station-mode-properties">WiFi Infra (Station Mode) properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.ssid</td>
+<td>String</td>
+<td>The SSID of the wireless network to connect to</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.channel</td>
+<td>String</td>
+<td>The channel of the wireless network to connect to</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.bgscan</td>
+<td>String</td>
+<td>Set the background scans; possible values are None, Simple and Learn</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.passphrase</td>
+<td>Password</td>
+<td>The password for the wireless network</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.ignoreSSID</td>
+<td>Boolean</td>
+<td>Specify if a scan for SSID is required before attempting to associate</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.mode</td>
+<td>String</td>
+<td>The mode of the wireless connection; for station mode set to INFRA</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.pingAccessPoint</td>
+<td>Boolean</td>
+<td>Enable pinging the access point after connection is established</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.driver</td>
+<td>String</td>
+<td>The driver used for the connection</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.wifi.infra.securityType</td>
+<td>String</td>
+<td>The security protocol for the wireless network; possible values are SECURITY_NONE, SECURITY_WEP, SECURITY_WPA, SECURITY_WPA2, SECURITY_WPA_WPA2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cellular-modem-properties">Cellular Modem properties</h3>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.enabled</td>
+<td>Boolean</td>
+<td>Enable the interface</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.idle</td>
+<td>Integer</td>
+<td>The idle option of the PPP daemon</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.password</td>
+<td>Password</td>
+<td>The password used for the connection</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.pdpType</td>
+<td>String</td>
+<td>The PdP type; possible values are IP, PPP and IPv6</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.maxFail</td>
+<td>Integer</td>
+<td>The maxfail option of the PPP daemon</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.authType</td>
+<td>String</td>
+<td>The authentication type; possible values are None, Auto, CHAP and PAP</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.lpcEchoInterval</td>
+<td>Integer</td>
+<td>the lcp-echo-interval option of the PPP daemon</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.activeFilter</td>
+<td>String</td>
+<td>The active-filter option of the PPP daemon</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.lpcEchoFailure</td>
+<td>Integer</td>
+<td>The lcp-echo-failure option of the PPP daemon</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.diversityEnabled</td>
+<td>Boolean</td>
+<td>Enable the LTE diversity antenna</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.resetTimeout</td>
+<td>Integer</td>
+<td>The modem reset timeout in minutes</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.gpsEnabled</td>
+<td>Boolean</td>
+<td>Enable the GPS device in the modem if available</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.persist</td>
+<td>Boolean</td>
+<td>The persist option of the PPP daemon</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.apn</td>
+<td>String</td>
+<td>The modem Access Point Name</td>
+</tr>
+<tr>
+<td>net.interface.\&lt;interface&gt;.config.dialString</td>
+<td>String</td>
+<td>The dial string used for connecting to the APN</td>
+</tr>
+</tbody>
+</table>
+<h2 id="network-configuration-recipes">Network Configuration recipes</h2>
+<p>This section presents some snapshot examples to perform basic operations on networking. The snippets can be modified adapting them to the required configuration (i.e. changing the interface name in the property to be applied).</p>
+<p>{% include alerts.html message='Be aware that an inconsitent or wrong configuration can compromise the network functionality of the gateway. Try the new configuration on a test device before appling it in a production environment!</p>
+<p>Moreover, if a property is not present in the new snapshot, the old value is used for the configuration. So, the best practice is to set all the needed properties in the snapshot.' %}</p>
+<h3 id="disable-a-network-interface">Disable a network interface</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;esf:configurations xmlns:esf=&quot;http://eurotech.com/esf/2.0&quot; xmlns:ocd=&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;&gt;
+    &lt;esf:configuration pid=&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;&gt;
+        &lt;esf:properties&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.type&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;ETHERNET&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.status&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;netIPv4StatusDisabled&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+        &lt;/esf:properties&gt;
+    &lt;/esf:configuration&gt;
+&lt;/esf:configurations&gt;
+</code></pre>
+<h3 id="configure-an-ethernet-interface-for-wan-with-dhcp-client-enabled-and-custom-dns-server">Configure an ethernet interface for WAN with DHCP client enabled and custom DNS server</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;esf:configurations xmlns:esf=&quot;http://eurotech.com/esf/2.0&quot; xmlns:ocd=&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;&gt;
+    &lt;esf:configuration pid=&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;&gt;
+        &lt;esf:properties&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.type&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;ETHERNET&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.dnsServers&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;1.2.3.4&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpClient4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.status&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;netIPv4StatusEnabledWAN&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+        &lt;/esf:properties&gt;
+    &lt;/esf:configuration&gt;
+&lt;/esf:configurations&gt;
+</code></pre>
+<h3 id="configure-an-ethernet-interface-for-lan-with-dhcp-server-enabled-and-nat-disabled">Configure an ethernet interface for LAN with DHCP server enabled and NAT disabled</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;esf:configurations xmlns:esf=&quot;http://eurotech.com/esf/2.0&quot; xmlns:ocd=&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;&gt;
+    &lt;esf:configuration pid=&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;&gt;
+        &lt;esf:properties&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.type&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;ETHERNET&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.dnsServers&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpClient4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.status&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;netIPv4StatusEnabledLAN&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.rangeEnd&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;192.168.4.110&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.defaultLeaseTime&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;900&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.prefix&quot; type=&quot;Short&quot;&gt;
+                &lt;esf:value&gt;24&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.passDns&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.rangeStart&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;192.168.4.100&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.dhcpServer4.maxLeaseTime&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;900&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.address&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;192.168.4.1&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.prefix&quot; type=&quot;Short&quot;&gt;
+                &lt;esf:value&gt;24&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.ip4.gateway&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.enp5s0.config.nat.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+        &lt;/esf:properties&gt;
+    &lt;/esf:configuration&gt;
+&lt;/esf:configurations&gt;
+</code></pre>
+<h3 id="configure-a-wireless-interface-as-access-point-with-dhcp-server-and-nat-enabled">Configure a wireless interface as access point with DHCP server and NAT enabled</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;esf:configurations xmlns:esf=&quot;http://eurotech.com/esf/2.0&quot; xmlns:ocd=&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;&gt;
+    &lt;esf:configuration pid=&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;&gt;
+        &lt;esf:properties&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.type&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;WIFI&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.status&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;netIPv4StatusEnabledLAN&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.gateway&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.dnsServers&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.prefix&quot; type=&quot;Short&quot;&gt;
+                &lt;esf:value&gt;24&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.address&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;172.16.1.1&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpClient4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.rangeStart&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;172.16.1.100&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.maxLeaseTime&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;900&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.defaultLeaseTime&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;900&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.rangeEnd&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;172.16.1.110&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.prefix&quot; type=&quot;Short&quot;&gt;
+                &lt;esf:value&gt;24&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.passDns&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.nat.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.mode&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;MASTER&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.driver&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;nl80211&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;true&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.passphrase&quot; type=&quot;Password&quot;&gt;
+                &lt;esf:value&gt;ZW5hYmxlbWVwbGVhc2U=&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.ssid&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;kura_gateway_19&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.securityType&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;SECURITY_WPA2&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.mode&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;MASTER&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.channel&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;11&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.radioMode&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;RADIO_MODE_80211g&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.ignoreSSID&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.master.pairwiseCiphers&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;CCMP&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+        &lt;/esf:properties&gt;
+    &lt;/esf:configuration&gt;
+&lt;/esf:configurations&gt;
+</code></pre>
+<h3 id="configure-a-wireless-interface-as-station-mode-with-dhcp-client-enabled">Configure a wireless interface as station mode with DHCP client enabled</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;esf:configurations xmlns:esf=&quot;http://eurotech.com/esf/2.0&quot; xmlns:ocd=&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;&gt;
+    &lt;esf:configuration pid=&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;&gt;
+        &lt;esf:properties&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.type&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;WIFI&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.status&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;netIPv4StatusEnabledLAN&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.ip4.dnsServers&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpClient4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.dhcpServer4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.mode&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;INFRA&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.ssid&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;MyWirelessNetwork&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.bgscan&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;true&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.passphrase&quot; type=&quot;Password&quot;&gt;
+                &lt;esf:value&gt;MyPasswordBase64&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.ignoreSSID&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.mode&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;INFRA&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.pingAccessPoint&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.driver&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;nl80211&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.wlp1s0.config.wifi.infra.securityType&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;SECURITY_WPA2&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+        &lt;/esf:properties&gt;
+    &lt;/esf:configuration&gt;
+&lt;/esf:configurations&gt;
+</code></pre>
+<h3 id="enable-a-cellular-interface">Enable a cellular interface</h3>
+<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;esf:configurations xmlns:esf=&quot;http://eurotech.com/esf/2.0&quot; xmlns:ocd=&quot;http://www.osgi.org/xmlns/metatype/v1.2.0&quot;&gt;
+    &lt;esf:configuration pid=&quot;org.eclipse.kura.net.admin.NetworkConfigurationService&quot;&gt;
+        &lt;esf:properties&gt;  
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.type&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;MODEM&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.ip4.status&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;netIPv4StatusEnabledWAN&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.ip4.dnsServers&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.dhcpClient4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.dhcpServer4.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.idle&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;95&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;true&quot; name=&quot;net.interface.1-1.config.password&quot; type=&quot;Password&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.pdpType&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;IP&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.ipAddress&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value/&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.maxFail&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;5&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.authType&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;NONE&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.lcpEchoInterval&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;0&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.enabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.activeFilter&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;inbound&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.lcpEchoFailure&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;0&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.diversityEnabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.resetTimeout&quot; type=&quot;Integer&quot;&gt;
+                &lt;esf:value&gt;5&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.gpsEnabled&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;false&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.persist&quot; type=&quot;Boolean&quot;&gt;
+                &lt;esf:value&gt;true&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.dialString&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;atd*99***2#&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+            &lt;esf:property array=&quot;false&quot; encrypted=&quot;false&quot; name=&quot;net.interface.1-1.config.apn&quot; type=&quot;String&quot;&gt;
+                &lt;esf:value&gt;web.omnitel.it&lt;/esf:value&gt;
+            &lt;/esf:property&gt;
+        &lt;/esf:properties&gt;
+    &lt;/esf:configuration&gt;
+&lt;/esf:configurations&gt;
+</code></pre>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../gateway-status/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Gateway Status" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Gateway Status
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../ethernet-configuration/" class="md-footer__link md-footer__link--next" aria-label="Next: Ethernet Configuration" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Ethernet Configuration
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

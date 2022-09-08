@@ -1,0 +1,1708 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>H2 Database - Features and Usage - Eclipse Kura™ Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#h2-database-features-and-usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+Eclipse Kura™ 5.2.0 is available! Check out the new release at: <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura Downloads</a>.
+
+          </div>
+        </aside>
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
+<a href="../../.."> 
+    <strong>Click here to go to latest stable release.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Eclipse Kura™ Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              H2 Database - Features and Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../intro/intro/" class="md-tabs__link">
+        Introduction
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../config/console/" class="md-tabs__link">
+        Configuration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../intro/" class="md-tabs__link md-tabs__link--active">
+        Built-in services
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../admin/directory-layout/" class="md-tabs__link">
+        Administration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../cloud-api/overview/" class="md-tabs__link">
+        Cloud Connection API and usage
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    Eclipse Kura™ Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Introduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Introduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intro/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-raspbian-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspbian Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+        Raspberry Pi - Ubuntu 20 Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+        NVIDIA Jetson Nano&trade; - Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/console/" class="md-nav__link">
+        Gateway Administration Console
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/device-information/" class="md-nav__link">
+        Device Information
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/gateway-status/" class="md-nav__link">
+        Gateway Status
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/network-configuration/" class="md-nav__link">
+        Network Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/ethernet-configuration/" class="md-nav__link">
+        Ethernet Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/wi-fi-configuration/" class="md-nav__link">
+        Wi-Fi Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/firewall-configuration/" class="md-nav__link">
+        Firewall Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cloud-services/" class="md-nav__link">
+        Cloud Connections
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cloud-service-configuration/" class="md-nav__link">
+        Cloud Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/data-service-configuration/" class="md-nav__link">
+        Data Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/connection-monitors/" class="md-nav__link">
+        Connection Monitors in DataService
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/message-publishing-backoff-delay/" class="md-nav__link">
+        Message Publishing Backoff Delay
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/mqttdata-transport-service-configuration/" class="md-nav__link">
+        MqttData Transport Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/ssl-configuration/" class="md-nav__link">
+        SSL Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/auth/" class="md-nav__link">
+        Gateway Administration Console Authentication
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/threat-manager/" class="md-nav__link">
+        Network Threat Manager
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Built-in services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Built-in services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Built-in services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../simple-artemis-mqtt-broker-service/" class="md-nav__link">
+        Simple Artemis MQTT Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../activemq-artemis-broker-service/" class="md-nav__link">
+        ActiveMQ Artemis Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clock-service/" class="md-nav__link">
+        Clock Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-service/" class="md-nav__link">
+        Deployment Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cloudcat/" class="md-nav__link">
+        Cloudcat
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../command-service/" class="md-nav__link">
+        Command Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          H2 Database - Features and Usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        H2 Database - Features and Usage
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#supported-features" class="md-nav__link">
+    Supported Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    Limitations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changes-to-database-related-components" class="md-nav__link">
+    Changes to database related components
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-h2-database-instance" class="md-nav__link">
+    Creating a new H2 database instance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-a-database-instance-for-existing-kura-components" class="md-nav__link">
+    Selecting a database instance for existing Kura components
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-the-tcp-server" class="md-nav__link">
+    Enabling the TCP Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-the-web-console" class="md-nav__link">
+    Enabling the Web console
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changing-the-password" class="md-nav__link">
+    Changing the password
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#persistence-modes" class="md-nav__link">
+    Persistence Modes
+  </a>
+  
+    <nav class="md-nav" aria-label="Persistence Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-memory" class="md-nav__link">
+    In memory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#most-persistent" class="md-nav__link">
+    Most persistent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mostly-persistent" class="md-nav__link">
+    Mostly persistent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filesystem-tuning" class="md-nav__link">
+    Filesystem tuning
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../h2-database-external-connections/" class="md-nav__link">
+        H2 database - Connecting external applications
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../position-service/" class="md-nav__link">
+        Position Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rest-service/" class="md-nav__link">
+        REST Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../watchdog-service/" class="md-nav__link">
+        Watchdog Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nvidiatm-triton-server-inference-engine/" class="md-nav__link">
+        Nvidia™ Triton Server inference engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../container-orchestration-provider/" class="md-nav__link">
+        Container Orchestration Provider
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Administration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Administration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/directory-layout/" class="md-nav__link">
+        Directory Layout
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/snapshot-management/" class="md-nav__link">
+        Snapshots Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/application-management/" class="md-nav__link">
+        Application Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-ec/" class="md-nav__link">
+        Remote Management with Everyware Cloud
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-kapua/" class="md-nav__link">
+        Remote Management with Eclipse Kapua
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keystore-management/" class="md-nav__link">
+        Keystores Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keys-and-certificates/" class="md-nav__link">
+        Keys and Certificates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Cloud Connection API and usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connection API and usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connection API and usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/user-guide/" class="md-nav__link">
+        User guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/app-dev-guide/" class="md-nav__link">
+        Application developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/stack-dev-guide/" class="md-nav__link">
+        Cloud connection developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/stack-components/" class="md-nav__link">
+        Built-in Cloud Services
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#supported-features" class="md-nav__link">
+    Supported Features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    Limitations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changes-to-database-related-components" class="md-nav__link">
+    Changes to database related components
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-h2-database-instance" class="md-nav__link">
+    Creating a new H2 database instance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-a-database-instance-for-existing-kura-components" class="md-nav__link">
+    Selecting a database instance for existing Kura components
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-the-tcp-server" class="md-nav__link">
+    Enabling the TCP Server
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#enabling-the-web-console" class="md-nav__link">
+    Enabling the Web console
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changing-the-password" class="md-nav__link">
+    Changing the password
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#persistence-modes" class="md-nav__link">
+    Persistence Modes
+  </a>
+  
+    <nav class="md-nav" aria-label="Persistence Modes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#in-memory" class="md-nav__link">
+    In memory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#most-persistent" class="md-nav__link">
+    Most persistent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mostly-persistent" class="md-nav__link">
+    Mostly persistent
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#filesystem-tuning" class="md-nav__link">
+    Filesystem tuning
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="h2-database-features-and-usage">H2 Database: Features and Usage</h1>
+<p>Starting from version 3.1.0, Eclipse Kura includes the <a href="http://www.h2database.com/html/main.html">H2 database engine</a>. This document provides a description of the main features of the H2 database integrated with Eclipse Kura and gives some basic information about its usage.</p>
+<h3 id="supported-features">Supported Features</h3>
+<p>Eclipse Kura supports the following H2 database features:</p>
+<ul>
+<li>
+<p><strong>Persistence modes</strong>: The H2 implementation currently supports in-memory and file-based database instances. See
+<a href="#persistence-modes">Persistence Modes</a> for more details.</p>
+</li>
+<li>
+<p><strong>Multiple database instances</strong>: It is possible to create and configure multiple database instances from the Kura Web UI, these instances can be selectively consumed by applications. A default database instance is created automatically.</p>
+</li>
+<li>
+<p><strong>TCP Server</strong>: The current implementation allows external processes to access the database instances managed by Kura using TCP. This enables the integration of external applications that can share data with Kura components using the database.</p>
+</li>
+<li>
+<p><strong>Web based console</strong>: It is possible to start the H2 Web console directly from the Kura Web UI. The console can be used to inspect the database contents and perform arbitrary queries for debug purposes.</p>
+</li>
+<li>
+<p><strong>Basic credential management</strong>: The current implementation allows to change the password of the admin DB user from the Kura Web UI. This allows to restrict access to existing database instances.</p>
+</li>
+</ul>
+<h3 id="limitations">Limitations</h3>
+<p>The following list briefly describes some limitations of the H2 database integrated with Eclipse Kura:</p>
+<ul>
+<li>
+<p><strong>Private in-memory instances</strong>: Only named in-memory instances are supported (e.g. <code>jdbc:h2:mem:&lt;dbname&gt;</code>, where <code>&lt;dbname&gt;</code> is not the empty string), private instances represented by the <code>jdbc:h2:mem:</code> URL are currently not supported.</p>
+</li>
+<li>
+<p><strong>Remote connections</strong>: The current implementation only supports embedded database instances. Connecting to remote instances using the <code>jdbc:h2:tcp:*</code> and <code>jdbc:h2:ssl:*</code> connector URLs is not supported.</p>
+</li>
+</ul>
+<h3 id="changes-to-database-related-components">Changes to database related components</h3>
+<p>The DataService in Eclipse Kura uses the H2 database by default for implementing the message store. However, there is no support for migrating an old HSQLDB database to the new H2.</p>
+<p>The new <code>H2DbWireRecordFilter</code> and <code>H2DbWireRecordStore</code> Wire components have been added. These components provide the same functionalities offered by the HSQL based <code>DbWireRecordFilter</code> and <code>DbWireRecordStore</code> components, but using the H2 database. The legacy components will continue to be available in order to keep backward compatibility, but will be deprecated since Kura 3.1.0 and should not be used for new installations.</p>
+<h3 id="usage">Usage</h3>
+<h4 id="creating-a-new-h2-database-instance">Creating a new H2 database instance</h4>
+<p>To create a new H2 database instance, use the following procedure:</p>
+<ol>
+<li>Open the Kura Web UI press and on the <code>+</code> button in the side menu, under the <strong>Services</strong> section. A pop-up dialog should appear.</li>
+<li>Select <code>org.eclipse.kura.core.db.H2DbService</code> from the <strong>Factories</strong> drop down list, enter an arbitrary name for the new instance and click <strong>Apply</strong>.
+<img alt="New instance" src="../images/database/new_instance.png" /></li>
+<li>An entry for the newly created instance should appear in the side menu under <strong>Services</strong>, click on it to review its configuration:
+<img alt="Instance configuration" src="../images/database/instance_config.png" /></li>
+<li>Change the settings if needed and then click <strong>Apply</strong>.</li>
+</ol>
+<p>For more information about the DB URL format see http://www.h2database.com/html/features.html and <a href="#persistence-modes">Persistence Modes</a>.</p>
+<p>It is not possible to create different DB instances that manage the same DB url. When creating a new instance please make sure that the URL specified in the <strong>db.connector.url</strong> field is not managed by another instance.</p>
+<h4 id="selecting-a-database-instance-for-existing-kura-components">Selecting a database instance for existing Kura components</h4>
+<p>A database instance is identified by its <em>Kura service pid</em>. The pid for the default instance is <code>org.eclipse.kura.db.H2DbService</code>, the pid for instances created using the Web UI is the string entered in the <strong>Name</strong> field at step 2 of the previous section.</p>
+<p>The built-in Kura components that use database functionalities allow user to specify which instance to use in their configuration. These components are the <code>DataService</code> component of the cloud stack and the <code>H2DbWireRecordFilter</code> and <code>H2DbWireRecordStore</code> wire components.</p>
+<p>The configuration of each component contains a property that allows specifying the service pid of the desired instance:</p>
+<ul>
+<li>
+<p><strong>DataService</strong>
+<img alt="Data Service" src="../images/database/dataservice.png" />
+The pid of the database instance can be specified using the <strong>store.db.service.pid</strong> field.</p>
+</li>
+<li>
+<p><strong>DbWireRecordFilter</strong>
+<img alt="Db Filter" src="../images/database/dbfilter.png" />
+The pid of the database instance can be specified using the <strong>db.service.pid</strong> field.</p>
+</li>
+<li>
+<p><strong>DbWireRecordStore</strong>
+<img alt="Db Store" src="../images/database/dbstore.png" />
+The pid of the database instance can be specified using the <strong>db.service.pid</strong> field.</p>
+</li>
+</ul>
+<h4 id="enabling-the-tcp-server">Enabling the TCP Server</h4>
+<p>The TCP server can be used by creating an <code>H2DbServer</code> instance:</p>
+<ol>
+<li>
+<p>Open the Kura Web UI press and on the <code>+</code> button in the side menu, under the <strong>Services</strong> section. A pop-up dialog should appear.</p>
+</li>
+<li>
+<p>Select <code>org.eclipse.kura.core.db.H2DbServer</code> from the <strong>Factories</strong> drop down list, enter an arbitrary name for the new instance and click <strong>Apply</strong>.
+<img alt="New instance" src="../images/database/new_server_instance.png" /></p>
+</li>
+<li>Click on the name of the new server instance in the left side of the Web Ui. The configuration of the server component will appear:
+<img alt="Server" src="{{ site.baseurl }}/assets/images/database/server.png" /></li>
+<li>
+<p>Set the <strong>db.server.type</strong> field to <code>TCP</code></p>
+</li>
+<li>
+<p>Review the server options under <strong>db.server.commandline</strong>, check http://www.h2database.com/javadoc/org/h2/tools/Server.html for more information about the available options.</p>
+</li>
+</ol>
+<p>The default settings, <code>-tcpPort 9123 -tcpAllowOthers -ifExists</code>, configure the server to bind on port 9123, to allow connections from any host and to allow access only to existing databases.</p>
+<ol>
+<li>
+<p>Set the <strong>db.server.enabled</strong> to <code>true</code>.</p>
+</li>
+<li>
+<p>The server is now listening on the specified port.</p>
+</li>
+</ol>
+<p>Make sure to review the firewall configuration in order to ensure that the server is reachable from the external process.</p>
+<h4 id="enabling-the-web-console">Enabling the Web console</h4>
+<p>In order to enable the H2 Web console, proceed as follows:</p>
+<ol>
+<li>
+<p>Create a new <code>H2DbServer</code> instance like in the previous section.</p>
+</li>
+<li>
+<p>Set the <strong>db.server.type</strong> field to <code>WEB</code></p>
+</li>
+<li>
+<p>Enter appropriate parameters for the Web server in the <strong>db.server.commandline</strong> field. An example of valid settings can be <code>-webPort 9123 -webAllowOthers -ifExists</code>.</p>
+</li>
+<li>
+<p>Set the <strong>db.server.enabled</strong> to <code>true</code>.</p>
+</li>
+<li>
+<p>The server is now listening on the specified port. Make sure to review the firewall configuration in order to ensure that the server is reachable from the external process.</p>
+</li>
+<li>
+<p>Use a browser to access the console. Open the <code>http://&lt;device-ip&gt;:&lt;web-console-port&gt;</code> URL, where <code>&lt;device-ip&gt;</code> is the IP address of the Kura device and <code>&lt;web-console-port&gt;</code> is the port specified at step 3.</p>
+</li>
+</ol>
+<p><img alt="" src="../images/database/console1.png" /></p>
+<p>{:start="7"}
+7. Enter the DB URL as specified in the Kura configuration in the <strong>JDBC URL</strong> field and the credentials. Click on <strong>Connect</strong>, you should be able to access the console.</p>
+<p><img alt="" src="../images/database/console2.png" /></p>
+<h4 id="changing-the-password">Changing the password</h4>
+<p>The prerequisite for being able to change the password is that</p>
+<ol>
+<li>
+<p>Open the configuration of the desired database instance in the Kura Web UI.</p>
+</li>
+<li>
+<p>Enter the new password in the <strong>db.password</strong> field.</p>
+</li>
+<li>
+<p>Click <strong>Apply</strong>.</p>
+</li>
+</ol>
+<div class="admonition warn"></div>
+<p>If the H2DbServer instance fails to open a database, it will delete and recreate all database files. This behavior is aimed at preventing potential issues caused by incorrect credentials in the configuration snapshots. It is highly recommended to perform a backup of an existing database before trying to open it using a H2DbService instance and before changing the password.</p>
+<h3 id="persistence-modes">Persistence Modes</h3>
+<p>The H2 database support several levels of persistence modes.</p>
+<h4 id="in-memory">In memory</h4>
+<p>An in-memory database instance can be created using the following URL structure: <code>jdbc:h2:mem:&lt;dbname&gt;</code>, where <code>&lt;dbname&gt;</code> is a non-empty string that represents the database name.
+This configuration is suggested for database instances that are frequently updated.
+Examples:</p>
+<ul>
+<li><code>jdbc:h2:mem:kuradb</code></li>
+<li><code>jdbc:h2:mem:mydb</code></li>
+</ul>
+<p>The default database instance is in-memory by default and uses the <code>jdbc:h2:mem:kuradb</code> URL.</p>
+<h4 id="most-persistent">Most persistent</h4>
+<p>A persistent database instance can be created using the <code>jdbc:h2:file:&lt;dbpath&gt;</code>, where <code>&lt;dbpath&gt;</code> is a non-empty string that represents the database path.</p>
+<p>If no URL parameters are supplied the database will enable the transaction log by default. The transaction log is used to restore the database to a consistent state after a crash or power failure. This provides good protection against data losses but causes a lot of writes to the storage device, reducing both performance and the lifetime of flash-based storage devices.</p>
+<p>This configuration is suggested for database instances that are rarely updated.
+Examples:</p>
+<ul>
+<li><code>jdbc:h2:file:/opt/db/mydb</code></li>
+</ul>
+<p>Make sure to use absolute paths in the db URL since H2 does not support db paths relative to the working directory.</p>
+<h4 id="mostly-persistent">Mostly persistent</h4>
+<p>The transaction log can be disabled by appending the <code>LOG=0</code> parameter to the DB URL. In this way it is possible to reduce the stress on the underlying storage device and increase performance, at the expense of a higher probability of losing data in case of power failure.</p>
+<p>In order to reduce the probability of data losses the H2DbService performs periodic checkpoints on the database. A checkpoint forces all pending modifications to be committed to the storage device. The interval in seconds between two consecutive checkpoints can be configured using the <strong>db.checkpoint.interval.seconds</strong> property.</p>
+<p>This configuration is suggested for database instances with intermediate update rates.
+Examples:</p>
+<ul>
+<li><code>jdbc:h2:file:/opt/db/mydb;LOG=0</code></li>
+</ul>
+<h4 id="filesystem-tuning">Filesystem tuning</h4>
+<p>The H2 database might become corrupted [1] in case of power failure.
+In case of file-backed database (e.g. mostly or most persistent), the following database mount options can improve database reliability, reducing the database corruption probability at the expense of reduced performance and lifetime of the flash storage devices:</p>
+<ul>
+<li><code>data=journal</code>: From EXT4(5) Linux MAN Page:</li>
+</ul>
+<blockquote>
+<p>All data is committed into the journal prior to being written into the main filesystem.</p>
+</blockquote>
+<p>This setting only applies to ext3/ext4 filesystems.</p>
+<ul>
+<li><code>sync</code>: From mount(8) Linux MAN Page:</li>
+</ul>
+<blockquote>
+<p>All I/O to the filesystem should be done synchronously. In case of media with limited number of write cycles (e.g. some flash drives) "sync" may cause life-cycle shortening.</p>
+</blockquote>
+<p>After some long running tests [1], it appears that the <code>data=journal</code> option alone is enough to reduce corruption probability (no corruption observed during the test).</p>
+<p>[1] https://github.com/eclipse/kura/issues/2169</p>
+<p>In order to apply the options above, perform the following steps:</p>
+<p>1 - Edit the <code>/etc/fstab</code> row for the filesystem containing the database file, appending the desired options to the fourth column, using comma as separator. For example on Raspbian an <code>/etc/fstab</code> file with <code>data=journal</code> enabled will look like the following:</p>
+<pre><code>proc            /proc           proc    defaults          0       0
+PARTUUID=3920f25c-01  /boot           vfat    defaults          0       2
+PARTUUID=3920f25c-02  /               ext4    defaults,noatime,data=journal  0       1
+# a swapfile is not a swap partition, no line here
+#   use  dphys-swapfile swap[on|off]  for that
+</code></pre>
+<p>2 - If the database resides on the root filesystem, the <code>data=journal</code> option must be specified in the kernel command line as well, by appending <code>rootflags=data=journal</code>. On Raspbian this can be done by editing the <code>/boot/cmdline.txt</code> file:</p>
+<pre><code>dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=PARTUUID=3920f25c-02 rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait rootflags=data=journal
+</code></pre>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../command-service/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Command Service" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Command Service
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../h2-database-external-connections/" class="md-footer__link md-footer__link--next" aria-label="Next: H2 database - Connecting external applications" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              H2 database - Connecting external applications
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

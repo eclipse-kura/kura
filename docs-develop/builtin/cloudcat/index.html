@@ -1,0 +1,1589 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Cloudcat - Eclipse Kura™ Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#cloudcat" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+Eclipse Kura™ 5.2.0 is available! Check out the new release at: <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura Downloads</a>.
+
+          </div>
+        </aside>
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
+<a href="../../.."> 
+    <strong>Click here to go to latest stable release.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Eclipse Kura™ Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Cloudcat
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../intro/intro/" class="md-tabs__link">
+        Introduction
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../config/console/" class="md-tabs__link">
+        Configuration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../intro/" class="md-tabs__link md-tabs__link--active">
+        Built-in services
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../admin/directory-layout/" class="md-tabs__link">
+        Administration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../cloud-api/overview/" class="md-tabs__link">
+        Cloud Connection API and usage
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    Eclipse Kura™ Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Introduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Introduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intro/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-raspbian-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspbian Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+        Raspberry Pi - Ubuntu 20 Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+        NVIDIA Jetson Nano&trade; - Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/console/" class="md-nav__link">
+        Gateway Administration Console
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/device-information/" class="md-nav__link">
+        Device Information
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/gateway-status/" class="md-nav__link">
+        Gateway Status
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/network-configuration/" class="md-nav__link">
+        Network Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/ethernet-configuration/" class="md-nav__link">
+        Ethernet Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/wi-fi-configuration/" class="md-nav__link">
+        Wi-Fi Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/firewall-configuration/" class="md-nav__link">
+        Firewall Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cloud-services/" class="md-nav__link">
+        Cloud Connections
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cloud-service-configuration/" class="md-nav__link">
+        Cloud Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/data-service-configuration/" class="md-nav__link">
+        Data Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/connection-monitors/" class="md-nav__link">
+        Connection Monitors in DataService
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/message-publishing-backoff-delay/" class="md-nav__link">
+        Message Publishing Backoff Delay
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/mqttdata-transport-service-configuration/" class="md-nav__link">
+        MqttData Transport Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/ssl-configuration/" class="md-nav__link">
+        SSL Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/auth/" class="md-nav__link">
+        Gateway Administration Console Authentication
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/threat-manager/" class="md-nav__link">
+        Network Threat Manager
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Built-in services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Built-in services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Built-in services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intro/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../simple-artemis-mqtt-broker-service/" class="md-nav__link">
+        Simple Artemis MQTT Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../activemq-artemis-broker-service/" class="md-nav__link">
+        ActiveMQ Artemis Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clock-service/" class="md-nav__link">
+        Clock Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment-service/" class="md-nav__link">
+        Deployment Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Cloudcat
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Cloudcat
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#instance-creation" class="md-nav__link">
+    Instance creation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-configuration" class="md-nav__link">
+    Service configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-case-example" class="md-nav__link">
+    Use case example
+  </a>
+  
+    <nav class="md-nav" aria-label="Use case example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-the-embedded-artemis-broker-instance" class="md-nav__link">
+    Enable the embedded Artemis broker instance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect-a-cloudservice-instance-to-the-artemis-broker" class="md-nav__link">
+    Connect a CloudService instance to the Artemis broker
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-and-configure-a-cloudcat-instance" class="md-nav__link">
+    Create and configure a CloudCat instance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-external-javascript-application" class="md-nav__link">
+    Create the external Javascript application
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../command-service/" class="md-nav__link">
+        Command Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../h2-database/" class="md-nav__link">
+        H2 Database - Features and Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../h2-database-external-connections/" class="md-nav__link">
+        H2 database - Connecting external applications
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../position-service/" class="md-nav__link">
+        Position Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rest-service/" class="md-nav__link">
+        REST Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../watchdog-service/" class="md-nav__link">
+        Watchdog Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nvidiatm-triton-server-inference-engine/" class="md-nav__link">
+        Nvidia™ Triton Server inference engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../container-orchestration-provider/" class="md-nav__link">
+        Container Orchestration Provider
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Administration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Administration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/directory-layout/" class="md-nav__link">
+        Directory Layout
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/snapshot-management/" class="md-nav__link">
+        Snapshots Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/application-management/" class="md-nav__link">
+        Application Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-ec/" class="md-nav__link">
+        Remote Management with Everyware Cloud
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-kapua/" class="md-nav__link">
+        Remote Management with Eclipse Kapua
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keystore-management/" class="md-nav__link">
+        Keystores Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keys-and-certificates/" class="md-nav__link">
+        Keys and Certificates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Cloud Connection API and usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connection API and usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connection API and usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/user-guide/" class="md-nav__link">
+        User guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/app-dev-guide/" class="md-nav__link">
+        Application developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/stack-dev-guide/" class="md-nav__link">
+        Cloud connection developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cloud-api/stack-components/" class="md-nav__link">
+        Built-in Cloud Services
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#instance-creation" class="md-nav__link">
+    Instance creation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-configuration" class="md-nav__link">
+    Service configuration
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#use-case-example" class="md-nav__link">
+    Use case example
+  </a>
+  
+    <nav class="md-nav" aria-label="Use case example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#enable-the-embedded-artemis-broker-instance" class="md-nav__link">
+    Enable the embedded Artemis broker instance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#connect-a-cloudservice-instance-to-the-artemis-broker" class="md-nav__link">
+    Connect a CloudService instance to the Artemis broker
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-and-configure-a-cloudcat-instance" class="md-nav__link">
+    Create and configure a CloudCat instance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-external-javascript-application" class="md-nav__link">
+    Create the external Javascript application
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="cloudcat">Cloudcat</h1>
+<p>The CloudCat Service replicates messages published to one CloudService instance to another one, performing the following operations:</p>
+<ol>
+<li>The service obtains two CloudClients from two different CloudService instances specified in the service configuration.</li>
+<li>For each CloudClient, the service subscribes to a set of topics specified in the configuration.</li>
+<li>Message received by the service on one of the two CloudClients will be re-published on the other one.</li>
+</ol>
+<p>This service allows for example to share an existing cloud connection to external applications using the Artemis broker. An example of this use case will be presented below.</p>
+<h2 id="instance-creation">Instance creation</h2>
+<p>In order to create an instance of the CloudCat component perform the following steps:</p>
+<ol>
+<li>Press the <strong>+</strong> button under <strong>Services</strong> in the Kura Web UI.</li>
+<li>Select <code>org.eclipse.kura.misc.cloudcat.CloudCat</code> from the Factory drop down list.</li>
+<li>Enter a unique name for the new instance in the <strong>Name</strong> field and press <strong>Apply</strong>.</li>
+</ol>
+<h2 id="service-configuration">Service configuration</h2>
+<p>In order to review the configuration of a CloudCat instance, click on the corresponding entry under <strong>Services</strong>:</p>
+<p><img alt="cloudcat" src="../images/cloudcat.png" /></p>
+<p>The following configuration options are available:</p>
+<ul>
+<li><strong>Relay Enable</strong>: Enables or disables the CloudCat instance</li>
+<li><strong>First/Second Cloud Service PID</strong>: These properties specify the Kura Service Pid of the CloudService instances to be used.</li>
+<li><strong>First/Second CloudClient App ID</strong>: The application ID to be used by the CloudCat service on each cloud service.</li>
+<li><strong>First/Second CloudClient Control Subscriptions</strong>: A list of control topics to subscribe to on each CloudClient as a comma separated list of <code>control-app-topic;Qos</code> pairs.</li>
+<li><strong>First/Second CloudClient Control Subscriptions</strong>: A list of data topics to subscribe to on each CloudClient as a comma separated list of <code>data-app-topic;Qos</code> pairs.</li>
+</ul>
+<p>The CloudCat service will replicate all messages received on each of the control or data topics specified in the configuration to the other CloudClient, the complete topics will have the following structure</p>
+<ul>
+<li><strong>Data Topics</strong>: <code>#account-name/#client-id/#app-id/#data-app-topic</code></li>
+<li><strong>Control Topics</strong>: <code>#control-topic-prefix/#account-name/#client-id/#app-id/#control-app-topic</code></li>
+</ul>
+<p>where:</p>
+<ul>
+<li><code>#account-name</code> is the value of the <strong>topic.context.account-name</strong> configuration property of the MQTTDataTransport instance in use.</li>
+<li><code>#client-id</code> is the value of the <strong>client-id</strong> configuration property of the MQTTDataTransport instance in use, if this parameter is empty, the MAC address of the primary network interface of the device will be used.</li>
+<li><code>#control-topic-prefix</code> if the value of the <strong>topic.control-prefix</strong> configuration property of the CloudService instance in use.</li>
+<li><code>#app-id</code>, <code>#data-app-topic</code>, <code>#control-app-topic</code> are obtained from the CloudCat configuration as described above.</li>
+</ul>
+<p>When a CloudCat instance forwards a message from one CloudClient to another, only the <code>#data-app-topic</code> or <code>#control-app-topic</code> part of the topic is preserved, the remaining parts are translated to match the configuration of the CloudService on which the messages are published.</p>
+<blockquote>
+<p>Note: The set of topics specified for data or control topic subscriptions on each CloudService instance should be disjoint. If this condition is not verified, and a CloudCat instance is subscribed to the same topic on each CloudService instance, message loops may occur.</p>
+</blockquote>
+<h2 id="use-case-example">Use case example</h2>
+<p>The example below shows how to share a cloud connection managed by Kura with an external javascript application using the embedded Artemis broker and CloudCat:</p>
+<h3 id="enable-the-embedded-artemis-broker-instance">Enable the embedded Artemis broker instance</h3>
+<ol>
+<li>Connect the default CloudService instance to your favorite cloud platform.</li>
+<li>Enable the <strong>Simple Artemis MQTT Broker</strong> service by configuring it as follows:</li>
+<li><strong>Enabled</strong>:  <code>true</code></li>
+<li><strong>MQTT address</strong>: <code>0.0.0.0</code></li>
+<li><strong>MQTT port</strong>: <code>1883</code></li>
+<li><strong>User name</strong>: <code>artemis</code></li>
+<li><strong>Password of the user</strong>: <code>foo</code> (or any other password)</li>
+<li>Open the <strong>MQTT port</strong> specified above in the firewall configuration.</li>
+</ol>
+<h3 id="connect-a-cloudservice-instance-to-the-artemis-broker">Connect a CloudService instance to the Artemis broker</h3>
+<ol>
+<li>Navigate to the <strong>Cloud Services</strong> section of the Web UI</li>
+<li>Click on the <strong>New</strong> button and create a new CloudService instance with the <code>org.eclipse.kura.cloud.CloudService-ARTEMIS</code> <strong>Cloud Service PID</strong>.</li>
+<li>Configure the new instance as follows:</li>
+<li><strong>MqttDataTransport-ARTEMIS</strong> -&gt; <strong>broker-url</strong>: <code>mqtt://localhost:1883/</code></li>
+<li><strong>MqttDataTransport-ARTEMIS</strong> -&gt; <strong>topic.context.account-name</strong>: <code>artemis</code></li>
+<li><strong>MqttDataTransport-ARTEMIS</strong> -&gt; <strong>username</strong>: <code>artemis</code></li>
+<li><strong>MqttDataTransport-ARTEMIS</strong> -&gt; <strong>password</strong>: <code>foo</code>, (or any other password used at step 2)</li>
+<li><strong>MqttDataTransport-ARTEMIS</strong> -&gt; <strong>client-id</strong>: <code>cloudcat-relay</code></li>
+<li><strong>CloudService-ARTEMIS</strong> -&gt; <strong>encode.gzip</strong>: <code>false</code></li>
+<li><strong>CloudService-ARTEMIS</strong> -&gt; <strong>enable.default.subscriptions</strong>: <code>false</code></li>
+<li><strong>CloudService-ARTEMIS</strong> -&gt; <strong>birth.cert.policy</strong>: <code>Disable publishing</code></li>
+<li><strong>CloudService-ARTEMIS</strong> -&gt; <strong>payload.encoding</strong>: <code>Simple JSON</code></li>
+<li><strong>DataService-ARTEMIS</strong> -&gt; <strong>connect.auto-on-startup</strong>: <code>true</code></li>
+</ol>
+<p>The settings above define a "raw" CloudService that uses JSON as payload encoding and does not perform gzip compression. This is intended to use a message format that is easily manageable by an external Javascript application. Default subscriptions and birth certificate publishing can be disabled as these features are not needed when connecting to the embedded Artemis broker.</p>
+<h3 id="create-and-configure-a-cloudcat-instance">Create and configure a CloudCat instance</h3>
+<ol>
+<li>Create a new CloudCat instance as shown above.</li>
+<li>Configure the instance as follows:</li>
+<li><strong>Relay Enable</strong>: <code>true</code></li>
+<li><strong>First CloudService PID</strong>: <code>org.eclipse.kura.cloud.CloudService</code></li>
+<li><strong>Second CloudService PID</strong>: <code>org.eclipse.kura.cloud.CloudService-ARTEMIS</code></li>
+<li><strong>First CloudClient App ID</strong>: <code>cloudcat</code></li>
+<li><strong>Second CloudClient App ID</strong>: <code>external-app</code></li>
+<li><strong>First CloudClient Control Subscriptions</strong>: leave blank</li>
+<li><strong>Second CloudClient Control Subscriptions</strong>: leave blank</li>
+<li><strong>First CloudClient Data Subscriptions</strong>: <code>in;0</code></li>
+<li><strong>Second CloudClient Data Subscriptions</strong>: <code>out;0</code></li>
+</ol>
+<h3 id="create-the-external-javascript-application">Create the external Javascript application</h3>
+<p>Create an HTML file containing the following code:</p>
+<pre><code class="language-html">&lt;html&gt;
+&lt;head&gt;
+  &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js&quot; type=&quot;text/javascript&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+  &lt;script&gt;
+
+  var HOST = 'gateway-ip'
+  var CLIENT_ID = 'external-app'
+  var USER_NAME = 'artemis'
+  var PASSWORD = 'foo'
+  var PUBLISH_TOPIC = USER_NAME + '/cloudcat-relay/external-app/out'
+  var SUBSCRIBE_TOPIC = USER_NAME + '/cloudcat-relay/external-app/in'
+  var PUBLISH_RATE_SECONDS = 10
+
+  var log = (function () {
+    var body = document.getElementsByTagName(&quot;body&quot;)[0];
+    return function (message) {
+      var paragraph = document.createElement('p')
+      paragraph.textContent = message
+      body.appendChild(paragraph)
+    }
+  })()
+
+  var subscribe = function(topic) {
+    log('subscribing to ' + topic + '...')
+    client.subscribe(topic, {
+      onSuccess: function() {
+        log('subscribed to ' + topic)
+        client.onMessageArrived = function (message) {
+          log('received message on topic ' + message.destinationName)
+          log('payload: ' + message.payloadString)
+        }
+      },
+      onFailure: log
+    })
+  }
+
+  var startPublishing = function(topic) {
+    setInterval(function () {
+      try {
+        client.send(topic, JSON.stringify({
+          metrics: {
+            intMetric: 1,
+            stringMetric: 'test string'
+          }
+        }))
+      } catch (err) {
+        log(err)
+      }
+    }, PUBLISH_RATE_SECONDS * 1000)
+  }
+
+  var client = new Paho.MQTT.Client(HOST, 1883, '/', CLIENT_ID)
+  client.connect({
+    timeout: 30,
+    userName: USER_NAME,
+    password: PASSWORD,
+    useSSL: false,
+    onSuccess: function () {
+      log('connected')
+      startPublishing(PUBLISH_TOPIC)
+      subscribe(SUBSCRIBE_TOPIC)
+    },
+    onFailure: function (err) {
+      log('connection failed')
+      log(JSON.stringify(err))
+    }
+  })
+
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Modify the <code>HOST</code> constant in the code by replacing <code>gateway-ip</code> with the IP address of the gateway in use, and then open the created file in a browser.</p>
+<p>This application uses the Paho javascript MQTT library to connect to the broker instance using WebSocket, the application subscribes to the <code>artemis/cloudcat-relay/external-app/in</code> topic and publishes messages to <code>artemis/cloudcat-relay/external-app/out</code>.
+The topics above are mapped to the following topics on the device cloud connection by the CloudCat service:</p>
+<table>
+<thead>
+<tr>
+<th>Artemis Topic</th>
+<th>Cloud Topic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>artemis/cloudcat-relay/external-app/in</code></td>
+<td><code>#account-name/#client-id/cloudcat/in</code></td>
+</tr>
+<tr>
+<td><code>artemis/cloudcat-relay/external-app/out</code></td>
+<td><code>#account-name/#client-id/cloudcat/out</code></td>
+</tr>
+</tbody>
+</table>
+<p>Where <code>#account-name</code> and <code>#client-id</code> are the identifiers used on the cloud platform.</p>
+<p>Messages published by the application can be viewed by using the Web console of the cloud platform used under the <code>#account-name/#client-id/cloudcat/out</code> topic.</p>
+<p>Messages published on the <code>#account-name/#client-id/cloudcat/in</code> topic on the cloud platform will be received by the CloudCat and then forwarded to the external application that will log them on the browser window.</p>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../deployment-service/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Deployment Service" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Deployment Service
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../command-service/" class="md-footer__link md-footer__link--next" aria-label="Next: Command Service" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Command Service
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1634 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      <link rel="icon" href="../../assets/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Overview - Eclipse Kura™ Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4051b5">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+        <aside class="md-banner">
+          <div class="md-banner__inner md-grid md-typeset">
+            
+Eclipse Kura™ 5.2.0 is available! Check out the new release at: <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura Downloads</a>.
+
+          </div>
+        </aside>
+      
+    </div>
+    
+      <div data-md-component="outdated" hidden>
+        <aside class="md-banner md-banner--warning">
+          
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You are viewing the documentation relative to the develop branch or to an outdated version. This means the features might be different than the ones of the latest stable release, or not yet published.
+<a href="../../.."> 
+    <strong>Click here to go to latest stable release.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          
+        </aside>
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-header__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Eclipse Kura™ Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../intro/intro/" class="md-tabs__link">
+        Introduction
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../config/console/" class="md-tabs__link">
+        Configuration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../builtin/intro/" class="md-tabs__link">
+        Built-in services
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../admin/directory-layout/" class="md-tabs__link">
+        Administration
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="./" class="md-tabs__link md-tabs__link--active">
+        Cloud Connection API and usage
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Eclipse Kura™ Documentation" class="md-nav__button md-logo" aria-label="Eclipse Kura™ Documentation" data-md-component="logo">
+      
+  <img src="../../assets/kura_logo_small.png" alt="logo">
+
+    </a>
+    Eclipse Kura™ Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_1">
+          Introduction
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Introduction
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intro/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-raspbian-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspbian Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
+        Raspberry Pi - Ubuntu 20 Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../intro/nvidia-jetson-nano-quick-start/" class="md-nav__link">
+        NVIDIA Jetson Nano&trade; - Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2">
+          Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Configuration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Configuration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/console/" class="md-nav__link">
+        Gateway Administration Console
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/device-information/" class="md-nav__link">
+        Device Information
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/gateway-status/" class="md-nav__link">
+        Gateway Status
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/network-configuration/" class="md-nav__link">
+        Network Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/ethernet-configuration/" class="md-nav__link">
+        Ethernet Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/wi-fi-configuration/" class="md-nav__link">
+        Wi-Fi Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/firewall-configuration/" class="md-nav__link">
+        Firewall Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cloud-services/" class="md-nav__link">
+        Cloud Connections
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/cloud-service-configuration/" class="md-nav__link">
+        Cloud Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/data-service-configuration/" class="md-nav__link">
+        Data Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/connection-monitors/" class="md-nav__link">
+        Connection Monitors in DataService
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/message-publishing-backoff-delay/" class="md-nav__link">
+        Message Publishing Backoff Delay
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/mqttdata-transport-service-configuration/" class="md-nav__link">
+        MqttData Transport Service Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/ssl-configuration/" class="md-nav__link">
+        SSL Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/auth/" class="md-nav__link">
+        Gateway Administration Console Authentication
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../config/threat-manager/" class="md-nav__link">
+        Network Threat Manager
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Built-in services
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Built-in services" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Built-in services
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/intro/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/simple-artemis-mqtt-broker-service/" class="md-nav__link">
+        Simple Artemis MQTT Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/activemq-artemis-broker-service/" class="md-nav__link">
+        ActiveMQ Artemis Broker Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/clock-service/" class="md-nav__link">
+        Clock Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/deployment-service/" class="md-nav__link">
+        Deployment Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/cloudcat/" class="md-nav__link">
+        Cloudcat
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/command-service/" class="md-nav__link">
+        Command Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/h2-database/" class="md-nav__link">
+        H2 Database - Features and Usage
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/h2-database-external-connections/" class="md-nav__link">
+        H2 database - Connecting external applications
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/position-service/" class="md-nav__link">
+        Position Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/rest-service/" class="md-nav__link">
+        REST Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/watchdog-service/" class="md-nav__link">
+        Watchdog Service
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/nvidiatm-triton-server-inference-engine/" class="md-nav__link">
+        Nvidia™ Triton Server inference engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../builtin/container-orchestration-provider/" class="md-nav__link">
+        Container Orchestration Provider
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Administration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Administration" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Administration
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/directory-layout/" class="md-nav__link">
+        Directory Layout
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/snapshot-management/" class="md-nav__link">
+        Snapshots Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/application-management/" class="md-nav__link">
+        Application Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-ec/" class="md-nav__link">
+        Remote Management with Everyware Cloud
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/remote-management-with-kapua/" class="md-nav__link">
+        Remote Management with Eclipse Kapua
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keystore-management/" class="md-nav__link">
+        Keystores Management
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../admin/keys-and-certificates/" class="md-nav__link">
+        Keys and Certificates
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Cloud Connection API and usage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Cloud Connection API and usage" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Cloud Connection API and usage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Overview
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Overview
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivations" class="md-nav__link">
+    Motivations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    Concepts
+  </a>
+  
+    <nav class="md-nav" aria-label="Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cloudendpoint" class="md-nav__link">
+    CloudEndpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloudconnectionmanager" class="md-nav__link">
+    CloudConnectionManager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishers-and-subscribers" class="md-nav__link">
+    Publishers and Subscribers
+  </a>
+  
+    <nav class="md-nav" aria-label="Publishers and Subscribers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cloudpublisher" class="md-nav__link">
+    CloudPublisher
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloudsubscriber" class="md-nav__link">
+    CloudSubscriber
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-and-control" class="md-nav__link">
+    Command and control
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-connection-lifecycle" class="md-nav__link">
+    Cloud Connection lifecycle
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backwards-compatibility" class="md-nav__link">
+    Backwards compatibility
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-guide/" class="md-nav__link">
+        User guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../app-dev-guide/" class="md-nav__link">
+        Application developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stack-dev-guide/" class="md-nav__link">
+        Cloud connection developer guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stack-components/" class="md-nav__link">
+        Built-in Cloud Services
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#motivations" class="md-nav__link">
+    Motivations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    Concepts
+  </a>
+  
+    <nav class="md-nav" aria-label="Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cloudendpoint" class="md-nav__link">
+    CloudEndpoint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloudconnectionmanager" class="md-nav__link">
+    CloudConnectionManager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#publishers-and-subscribers" class="md-nav__link">
+    Publishers and Subscribers
+  </a>
+  
+    <nav class="md-nav" aria-label="Publishers and Subscribers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cloudpublisher" class="md-nav__link">
+    CloudPublisher
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloudsubscriber" class="md-nav__link">
+    CloudSubscriber
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#command-and-control" class="md-nav__link">
+    Command and control
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cloud-connection-lifecycle" class="md-nav__link">
+    Cloud Connection lifecycle
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backwards-compatibility" class="md-nav__link">
+    Backwards compatibility
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+
+<h1 id="overview">Overview</h1>
+<p>This section describes the new cloud related concepts and APIs introduced in Kura 4.0.</p>
+<h2 id="motivations">Motivations</h2>
+<p>Before Kura 4.0, Cloud APIs were quite tied to Kapua messaging conventions and to the MQTT protocol. Defining custom stacks that support other cloud platforms was possible, but the resulting implementations were affected by the following limitations:</p>
+<ul>
+<li>
+<p>The legacy APIs assume that the underlying messaging protocol is MQTT. This assumption spans across all API layers, from the low level <code>MQTTDataTrasport</code> to the high level <code>CloudClient</code>. This makes quite difficult to implement cloud stacks that use other protocols like AMQP or HTTP.</p>
+</li>
+<li>
+<p>The <code>CloudClient</code> API, which was the recommended way for applications to interface with a cloud stack, enforce the following MQTT topic structure:</p>
+</li>
+</ul>
+<pre><code>#account-name/#device-id/#app-id/&lt;app-topic&gt;
+</code></pre>
+<p>This topic hierarchy, which is Kapua related, might be too restrictive or too loose for other cloud platforms, for example:</p>
+<ul>
+<li>
+<p>The <strong>Eclipse IoT</strong> working group namespace allows authenticated devices to omit the <code>accont-name</code> and <code>device-id</code> parameters in the topic. Moreover, telemetry, alert and event message topics must start respectively the <code>t/</code>, <code>a/</code> and <code>e/</code> prefixes. Adhering to this specification is not possible for a cloud stack that implements the legacy APIs.</p>
+</li>
+<li>
+<p>The <strong>AWS</strong> cloud platform allows publishing on virtually any topic, using a <code>CloudClient</code> would be quite restrictive in this case. A way for overcoming this limitation for an application might be using the DataService layer directly, adversely affecting portability.</p>
+</li>
+<li>
+<p>The <strong>Cumulocity</strong> cloud platform allows publishing only on a limited set of topics, and most of the application generated information is placed in the payload encoded in CSV. Using <code>CloudClient</code> in this case makes difficult for the cloud stack to enforce that the messages are published on the correct topics.</p>
+</li>
+</ul>
+<p>Moreover, the cloud stack in this case must also convert from <code>KuraPayload</code> to CSV, this can be currently achieved only by introducing rigid conversion rules, that might not be enough to support all message formats.</p>
+<ul>
+<li>Applications that use the current APIs are not portable across cloud platforms. For example if an appliaction intends to publish on Cumulocity or AWS, it should be probably aware of the underlying cloud platform.</li>
+</ul>
+<h2 id="concepts">Concepts</h2>
+<p>The main interfaces of the new set of APIs and their interactions are depicted in the diagram below:</p>
+<p><img alt="Overview" src="https://s3-us-west-2.amazonaws.com/kura-repo/kura-github-wiki-images/generic-cloud-services/Overview.jpg" /></p>
+<p>As shown in the above diagram new APIs introduce the concept of <strong>Cloud Connection</strong>, a set of related services that allow to manage the communication to/from a remote cloud platform.</p>
+<p>The services that compose a <strong>Cloud Connection</strong> can implement the following cloud-specific interfaces:</p>
+<ul>
+<li>
+<p><strong>CloudEndpoint</strong> (required): Each Cloud Connection is identified by a single instance of <strong>CloudEndpoint</strong> that implements low level specificities for the communication with the remote cloud platform.</p>
+</li>
+<li>
+<p><strong>CloudConnectionManager</strong> (optional): Exposes methods that allow to manage long-lived connections. The implementor of <strong>CloudEndpoint</strong> can implement this interface as well if the cloud platform support long-lived connections (for example by using the MQTT protocol).</p>
+</li>
+<li>
+<p><strong>RequestHandlerRegistry</strong> (optional): Manages the command and control functionalities if supported by the cloud platform.</p>
+</li>
+<li>
+<p><strong>CloudPublisher</strong> (optional): Allows applications to publish messages to the cloud platform in a portable way.</p>
+</li>
+<li>
+<p><strong>CloudSubscriber</strong> (optional): Allows applications to receive messages from the cloud platform in a portable way.</p>
+</li>
+<li>
+<p><strong>CloudConnectionFactory</strong> (required): Manages the lifecycle of Cloud Connections.</p>
+</li>
+</ul>
+<p>A <strong>Cloud Connection</strong> can also include services that do not provide any of the interfaces above but compose the internal implementation.</p>
+<h3 id="cloudendpoint">CloudEndpoint</h3>
+<p>Every Cloud Connection must contain a single <code>CloudEndpoint</code> instance.
+The <code>kura.service.pid</code> of the <code>CloudEndpoint</code> identifies the whole Cloud Connection.</p>
+<p>The <code>CloudEndpoint</code> provides some low level methods that can be used to interact with the remote cloud platform.</p>
+<p>For example the interface provides the <code>publish()</code> and <code>subscribe()</code> methods that allow to publish or receive messages from the cloud platform in form of <code>KuraMessage</code>s.
+Those methods are designed for internal use and are not intended to be used by end-user applications.</p>
+<p>The format of the <code>KuraMessage</code> provided to/received from a <code>CloudEndpoint</code> is implementation specific: the <code>CloudEndpoint</code> expects some properties to be set in the KuraMessage to be able to correctly publish a message (e.g. MQTT topic). These properties are specified by the particular <code>CloudEndpoint</code>, and should be documented by the implementor.</p>
+<p>The recommended way for applications to publish and receive messages involves using the Publisher and Subscriber APIs described below.
+If an application directly uses the methods above, it will lose portability and will be tied to the specific Cloud Connection implementation.</p>
+<h3 id="cloudconnectionmanager">CloudConnectionManager</h3>
+<p>If the messaging protocol implemented by a Cloud Connection supports long-lived connection, then its <code>CloudEndpoint</code> can also implement and provide the <code>CloudConnectionManager</code> interface.</p>
+<p>This interface exposes some methods that can be used to manage the connection like <code>connect()</code>, <code>disconnect()</code> and <code>isConnected()</code>; it also supports monitoring connection state using the <code>CloudConnectionListener</code> interface.</p>
+<h3 id="publishers-and-subscribers">Publishers and Subscribers</h3>
+<p>The limitations of the current model described above are addressed by the introduction of the <code>CloudPublisher</code> and <code>CloudSubscriber</code> APIs, that replace the <code>CloudClient</code> as the recommended interface between applications and cloud stacks. <code>CloudPublisher</code> and <code>CloudSubscriber</code> are service interfaces defined as follows:</p>
+<pre><code class="language-java">public interface CloudPublisher {
+
+    public String publish(KuraMessage message) throws KuraException;
+
+    public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener);
+
+    public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener);
+
+    public void registerCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener);
+
+    public void unregisterCloudDeliveryListener(CloudDeliveryListener cloudDeliveryListener);
+
+}
+</code></pre>
+<pre><code class="language-java">public interface CloudSubscriber {
+
+    public void registerCloudSubscriberListener(CloudSubscriberListener listener);
+
+    public void unregisterCloudSubscriberListener(CloudSubscriberListener listener);
+
+    public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener);
+
+    public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener);
+
+}
+</code></pre>
+<h4 id="cloudpublisher">CloudPublisher</h4>
+<p>The <code>CloudPublisher</code> interface should be used by applications for publishing messages using the single <code>publish()</code> method. This method accepts a <code>KuraMessage</code> which is basically a <code>KuraPayload</code> that can be enriched with metadata.</p>
+<p>The main difference with the <code>CloudClient</code> APIs is that the <code>publish()</code> method does not require the application to specify any information related to message destinations.
+This allows to write portable applications that are unaware of the low level details of the destination cloud platform, such as the message format and the transport protocol.</p>
+<h4 id="cloudsubscriber">CloudSubscriber</h4>
+<p>An application designed to receive messages from the cloud must now attach a listener  (<code>CloudSubscriberListener</code>) to a <code>CloudSubscriber</code> instance.</p>
+<p>In this case, the message source cannot be specified by the application but is defined by the subscriber instance, in the same way as the <code>CloudPublisher</code> defines destination for published messages.</p>
+<p>The low level details necessary for message delivery and reception (e.g. the MQTT topic and the conversion between <code>KuraMessage</code> and the message format used on the wire) are managed by the publisher/subscriber, typically these details are stored in the service configuration.</p>
+<p>While in the previous model an application was responsible to actively obtain a <code>CloudClient</code> instance from a <code>CloudService</code>, now the relation between the application and a CloudPublisher or CloudSubscriber instance is represented as an OSGi service reference. Applications should allow the user to modify this reference in configuration, making it easy to switch between different cloud publisher/subscriber instances and different cloud platforms.</p>
+<p>Publisher/subscriber instances are now typically instantiated and configured by the end user using the Web UI.</p>
+<p>Publisher/subscriber instances are related to a <code>CloudEnpoint</code> instance using an OSGi service reference encoded in well known configuration property specified in the APIs (<code>CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME</code>). This allows the user to create those instances in a dedicated section of the Web UI.</p>
+<h3 id="command-and-control">Command and control</h3>
+<p>Another field in which the current Kura cloud related APIs can be generalized is related to command and control. In the previous model this aspect was covered by the <code>Cloudlet</code> APIs that are now replaced by <code>RequestHandler</code> APIs</p>
+<p>Legacy <code>Cloudlet</code> implementations are defined by extending a base class, <code>Cloudlet</code>, which takes care of handling the invocation of the <code>doGet()</code>, <code>doPut()</code>, <code>doPost()</code> ... methods, and of correlating request and response messages. Messages were sent and received through a <code>CloudClient</code>.</p>
+<p>More explicitly, <code>Cloudlet</code> only works with control topics whose structure is</p>
+<pre><code>$EDC/&lt;account-name&gt;/&lt;device-id&gt;/&lt;app-id&gt;/&lt;method&gt;/&lt;resource-path&gt;
+</code></pre>
+<p>and also expects the identifier of the sender and the correlation identifier in the <code>KuraPayload</code>.</p>
+<p>In the previous model, there is no way for a cloud stack implementor to customize the aspects above, which are hardcoded in the <code>Cloudlet</code> base class.</p>
+<p>The new model delegates these aspects to some component of the cloud stack, and requires applications that want to support command and control to register themselves as <code>RequestHandler</code> to a <code>RequestHandlerRegistry</code> instance.</p>
+<p>In order to ease porting old applications to the new model, some of the concepts of the old Cloudlet APIs are still present, this can be seen by looking at the <code>RequestHandler</code> interface definition:</p>
+<pre><code class="language-java">public interface RequestHandler {
+
+    public KuraMessage doGet(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
+
+    public KuraMessage doPut(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
+
+    public KuraMessage doPost(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
+
+    public  KuraMessage doDel(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
+
+    public KuraMessage doExec(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
+}
+</code></pre>
+<p>A <code>RequestHandler</code> invocation involves the following parameters:</p>
+<p>Request parameters:</p>
+<ul>
+<li><strong>method</strong>: (GET, PUT, POST, DEL, EXEC) that identifies the <code>RequestHandler</code> method to be called</li>
+<li><strong>request message</strong>: A set of key-value pairs and/or binary body contained in the <code>KuraPayload</code> wrapped inside the <code>KuraMessage</code>.</li>
+<li><strong>resources</strong>: A <code>List&lt;String&gt;</code> of positional parameters available under the well known <code>args</code> key in the provided <code>KuraMessage</code> properties.</li>
+</ul>
+<p>Response parameters:</p>
+<ul>
+<li><strong>response message</strong>: A set of key-value pairs and/or binary body contained in the <code>KuraPayload</code> wrapped inside the returned <code>KuraMessage</code>.</li>
+<li><strong>status</strong>: A numeric code reporting operation completion state, determined as follows:</li>
+<li>200, if <code>RequestHandler</code> methods returns without throwing exceptions.</li>
+<li>400, if <code>RequestHandler</code> methods throws a <code>KuraException</code> with <code>KuraErrorCode</code> == BAD_REQUEST</li>
+<li>404, if <code>RequestHandler</code> methods throws a <code>KuraException</code> with <code>KuraErrorCode</code> == NOT_FOUND</li>
+<li>500, if <code>RequestHandler</code> methods throws a <code>KuraException</code> with other error codes.</li>
+<li><strong>exception message</strong>: The message of the <code>KuraException</code> thrown by the <code>RequestHandler</code> methods, if any.</li>
+<li><strong>exception stack trace</strong>: The stack trace of the <code>KuraException</code> thrown by the <code>RequestHandler</code> methods, if any.</li>
+</ul>
+<p>The parameters above are the same involved in current Cloudlet calls. The request id and requester client id parameters are no longer part of the API, because are related to the to the way Kapua correlates requests and response. In the new API, request and response identifiers are not specified and not forwarded to the Cloudlet, this allows the CloudletService implementation to adopt the platform specific conventions for message correlation.</p>
+<p>The Cloudlet parameters must be present in the request and response messages encoded in some format. A user that intends to call a Kura Cloudlet, for example through platform-specific REST APIs must be aware of these parameters. The user must supply request parameters in request message and must be able to extract response data from received message. The actual encoding of these parameters inside the messages depends on the particular platform.</p>
+<p>The fact that set of Cloudlet parameters are roughly the same involved in current Cloudlet calls allows existing Cloudlet based applications to continue to work without changes to the protocol.</p>
+<h2 id="cloud-connection-lifecycle">Cloud Connection lifecycle</h2>
+<p><code>CloudEndpoint</code> instance lifecycle is managed by a <code>CloudConnectionFactory</code> instance.
+A cloud connection implementor must register a <code>CloudConnectionFactory</code> instance in the framework that is responsible of creating and destroying the <code>CloudEndpoint</code> instances.</p>
+<p>The <code>CloudConnectionFactory</code> will be typically invoked by the Web UI, and is defined as follows:</p>
+<pre><code class="language-java">public interface CloudConnectionFactory {
+
+    public static final String KURA_CLOUD_CONNECTION_FACTORY_PID = &quot;kura.cloud.connection.factory.pid&quot;;
+
+    public String getFactoryPid();
+
+    public void createConfiguration(String pid) throws KuraException;
+
+    public List&lt;String&gt; getStackComponentsPids(String pid) throws KuraException;
+
+    public void deleteConfiguration(String pid) throws KuraException;
+
+    public Set&lt;String&gt; getManagedCloudConnectionPids() throws KuraException;
+
+}
+</code></pre>
+<p>The <code>createConfiguration()</code> and <code>deleteConfiguration()</code> methods are responsible of creating/destroying a <code>CloudEndpoint</code> instance, specified by the provided <code>kura.service.pid</code>, and all the related services.</p>
+<p>The <code>getManagedCloudConnectionPids()</code> returns the set of <code>kura.service.pid</code> managed by the factory.</p>
+<p>The <code>getStackComponentsPids(String pid)</code> returns the list of the <code>kura.service.pid</code>s of the <code>ConfigurableComponent</code>s that are associated with the <code>CloudEndpoint</code> with the specified pid. The Web Ui will render the configuration of those components in separated tabs, in the dedicated CloudConnections section.</p>
+<h2 id="backwards-compatibility">Backwards compatibility</h2>
+<p>In order to ease the transition to the new model, legacy APIs like <code>CloudService</code> and <code>CloudClient</code> are still supported in Kura 4.0.0, even if deprecated.</p>
+<p>The default Kapua oriented <code>CloudService</code> implementation is still available and can be used by legacy applications without changes.
+The default <code>CloudService</code> instance in Kura 4.0 also implements the new <code>CloudEndpoint</code> and <code>CloudConnectionManager</code> interfaces.</p>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../../admin/keys-and-certificates/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Keys and Certificates" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Keys and Certificates
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../user-guide/" class="md-footer__link md-footer__link--next" aria-label="Next: User guide" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              User guide
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "announce.dismiss"], "search": "../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>

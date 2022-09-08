@@ -158,7 +158,7 @@ public class KuraLogLineParserTest {
 
     private void whenParseLogLine() {
         this.parsedLogEntry = null;
-        this.parsedLogEntry = KuraLogLineParser.createLogEntry(this.logLine, this.filePath, this.stacktrace);
+        this.parsedLogEntry = new KuraLogLineParser(this.logLine, this.filePath, this.stacktrace).createLogEntry();
     }
 
     /*

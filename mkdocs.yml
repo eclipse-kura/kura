@@ -82,4 +82,3 @@ markdown_extensions:
 extra:
   version:
     provider: mike
-    default: stable

@@ -1,4 +1,7 @@
-![KuraLogo](./assets/kura_logo_400.png)
+<figure markdown>
+  ![KuraLogo](./assets/kura_logo_400.png)
+  <figcaption></figcaption>
+</figure>
 
 # Welcome to the Eclipse Kura™ Documentation
 

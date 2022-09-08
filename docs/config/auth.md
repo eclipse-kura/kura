@@ -1,0 +1,53 @@
+# Gateway Administration Console Authentication
+
+The Kura Gateway Administration Console supports multiple login identities with associated permissions and HTTPS client-side authentication with certificates.
+
+Kura introduces a centralized authentication and authorization framework based on the OSGi UserAdmin specification. This framework introduces the concepts of identities and permissions:
+
+- **Identity**: A Kura identity is related to authentication. An identity has a name and a set of associated credentials, for example, a password.
+
+- **Permission**: A Kura permission is related to authorization. Zero or more permissions can be assigned to a given identity. Each permission allows to access a set of resources and/or perform certain operations. Permissions can be defined by applications.
+
+The authentication and authorization framework only allows to define and store identities and permissions, it does not provide an implementation of authentication methods and/or session management. These aspects are left to applications.
+
+## Permissions
+
+The Kura Gateway Administration Console defines the following permissions, that restrict the operations that the identity is allowed to perform:
+
+- **kura.cloud.connection.admin**: Allows to manage cloud connections using Cloud Connections tab.
+- **kura.packages.admin**: Allows to install deployment packages using the Packages tab.
+- **kura.device**: Allows interaction with the Device and Status tabs.
+- **kura.network.admin**: Allows to manage network connectivity and firewall configuration using the Network and Firewall tabs.
+- **kura.wires.admin**: Allows to manage Wire Graph and Driver and Asset configurations using the Wires and Drivers and Assets tabs.
+- **kura.admin**: This permission implies all the other permissions, including the ones defined by external applications.
+
+## Default Identities
+
+Kura provides the following identities by default.
+
+| Identity | Permissions |
+| :--- | :--- |
+| **admin** | kura.admin |
+| | |
+| **appadmin** | kura.cloud.connection.admin |
+| | kura.packages.admin |
+| | kura.wires.admin |
+| | |
+| **netadmin** | kura.cloud.connection.admin |
+| *(not available for no-network profiles)* | kura.device |
+| | kura.network.admin |
+
+![Identities section](./images/IdentitiesSection.png)
+
+## Managing Identities and Permissions
+
+Managing identities and associated permissions can be done from the **Identities** section of the web UI. With the controls available in the interface it is possible to:
+
+- Create new identities with the **New Identity** button.
+- Change password of existing identity with **Change Password** button.
+- Delete identities with the **Delete Identity** button.
+- Assign permissions to identities by selecting the identity and ticking the corresponding permissions.
+- Disable password-based authentication by selecting **Password authentication enabled** to *false*.
+
+!!! warn ""
+    The default password for the *admin* identity is **admin**. It is recommended changing the default password after initial setup and before deployment, as well as limiting access to the Kura Gateway Administration Console to a trusted local network interface using appropriate firewall rules.

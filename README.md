@@ -52,4 +52,7 @@ mike serve
 ```
 
 > **Note**: If you can't see your docs it might be because you haven't set a default version to serve. Run the following command for setting the default version to be served by `mike`:
-> `mike set-default [version]`
+> ```bash
+> mike set-default [version]
+> ```
+> where `[version]` is the one you used in the `deploy` command before.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021 Eurotech and/or its affiliates and others
+ * Copyright (c) 2021, 2022 Eurotech and/or its affiliates and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -164,8 +164,8 @@ public class FilesystemLogProvider implements ConfigurableComponent, LogProvider
         private synchronized void notifyListeners(String message, String stacktrace) {
             if (message != null) {
                 for (LogListener listener : FilesystemLogProvider.this.registeredListeners) {
-                    LogEntry entry = KuraLogLineParser.createLogEntry(message, FilesystemLogProvider.this.filePath,
-                            stacktrace);
+                    LogEntry entry = new KuraLogLineParser(message, FilesystemLogProvider.this.filePath, stacktrace)
+                            .createLogEntry();
                     listener.newLogEntry(entry);
                 }
             }

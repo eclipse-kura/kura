@@ -40,35 +40,31 @@ public final class KuraLogLineParser {
     private String pid;
     private String priority;
     private String message;
-    private final String transport;
+    private final String filepath;
     private String syslogIdentifier;
     private String stacktrace;
     private boolean pidWhitespaceReplaced;
 
-    private static KuraLogLineParser instance;
-
-    private KuraLogLineParser(String message, String filepath, String stacktrace) {
+    public KuraLogLineParser(String message, String filepath, String stacktrace) {
         this.timestamp = DEFAULT_TIMESTAMP;
         this.pid = DEFAULT_PID;
         this.priority = DEFAULT_PRIORITY;
         this.message = message;
-        this.transport = filepath;
+        this.filepath = filepath;
         this.syslogIdentifier = DEFAULT_SYSLOG_IDENTIFIER;
         this.stacktrace = stacktrace;
     }
 
-    public static synchronized LogEntry createLogEntry(String message, String filepath, String stacktrace) {
-        instance = new KuraLogLineParser(message, filepath, stacktrace);
-
-        if (filepath.contains("kura.log")) {
-            instance.parseKuraLog();
+    public LogEntry createLogEntry() {
+        if (this.filepath.contains("kura.log")) {
+            parseKuraLog();
         }
 
-        if (filepath.contains("kura-audit.log")) {
-            instance.parseKuraAuditLog();
+        if (this.filepath.contains("kura-audit.log")) {
+            parseKuraAuditLog();
         }
 
-        return instance.generateLogEntry();
+        return generateLogEntry();
     }
 
     /*
@@ -79,21 +75,21 @@ public final class KuraLogLineParser {
     private void parseKuraLog() {
         String[] splits = innerTrimPid(this.message).split(" ");
         if (splits.length >= 3) {
-            instance.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss,S", splits[0]);
+            this.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss,S", splits[0]);
 
-            instance.pid = splits[1];
-            instance.pid = instance.pid.replace("[", "");
-            instance.pid = instance.pid.replace("]", "");
+            this.pid = splits[1];
+            this.pid = this.pid.replace("[", "");
+            this.pid = this.pid.replace("]", "");
 
-            instance.pid = instance.pidWhitespaceReplaced ? instance.pid.replace("-", " ") : instance.pid;
+            this.pid = this.pidWhitespaceReplaced ? this.pid.replace("-", " ") : this.pid;
 
-            instance.priority = splits[2];
+            this.priority = splits[2];
             StringBuilder sb = new StringBuilder();
             for (int i = 3; i < splits.length; i++) {
                 sb.append(splits[i]);
                 sb.append(" ");
             }
-            instance.message = sb.toString().trim();
+            this.message = sb.toString().trim();
         }
     }
 
@@ -106,7 +102,7 @@ public final class KuraLogLineParser {
         if (pidMatcher.find()) {
             String foundPid = pidMatcher.group();
             trimmedMessage = trimmedMessage.replace(foundPid, foundPid.replace(" ", "-"));
-            instance.pidWhitespaceReplaced = true;
+            this.pidWhitespaceReplaced = true;
         }
 
         return trimmedMessage;
@@ -131,30 +127,30 @@ public final class KuraLogLineParser {
     private void parseKuraAuditLog() {
         String[] splits = this.message.split(" ");
         if (splits.length >= 11) {
-            instance.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss.SSSXXX", splits[1]);
+            this.timestamp = parseStringToEpoch("yyyy-MM-dd'T'hh:mm:ss.SSSXXX", splits[1]);
 
-            instance.syslogIdentifier = splits[3];
-            instance.stacktrace += splits[8].replace("exception=", "").replace("\"", "");
-            instance.priority = splits[9].replace("priority=", "").replace("\"", "");
-            instance.pid = splits[10].replace("thread=", "").replace("\"", "").replace("]", "");
+            this.syslogIdentifier = splits[3];
+            this.stacktrace += splits[8].replace("exception=", "").replace("\"", "");
+            this.priority = splits[9].replace("priority=", "").replace("\"", "");
+            this.pid = splits[10].replace("thread=", "").replace("\"", "").replace("]", "");
             StringBuilder sb = new StringBuilder();
             for (int i = 11; i < splits.length; i++) {
                 sb.append(splits[i]);
                 sb.append(" ");
             }
-            instance.message = sb.toString().trim();
+            this.message = sb.toString().trim();
         }
     }
 
     private LogEntry generateLogEntry() {
         Map<String, Object> entryProperties = new HashMap<>();
-        entryProperties.put("_PID", instance.pid);
-        entryProperties.put("MESSAGE", instance.message);
-        entryProperties.put("PRIORITY", instance.priority);
-        entryProperties.put("SYSLOG_IDENTIFIER", instance.syslogIdentifier);
-        entryProperties.put("_TRANSPORT", instance.transport);
-        entryProperties.put("STACKTRACE", instance.stacktrace);
+        entryProperties.put("_PID", this.pid);
+        entryProperties.put("MESSAGE", this.message);
+        entryProperties.put("PRIORITY", this.priority);
+        entryProperties.put("SYSLOG_IDENTIFIER", this.syslogIdentifier);
+        entryProperties.put("_TRANSPORT", this.filepath);
+        entryProperties.put("STACKTRACE", this.stacktrace);
 
-        return new LogEntry(entryProperties, instance.timestamp);
+        return new LogEntry(entryProperties, this.timestamp);
     }
 }

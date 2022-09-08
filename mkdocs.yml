@@ -60,8 +60,17 @@ theme:
   favicon: assets/favicon.png
   custom_dir: overrides
   palette:
-    primary: indigo # red, pink, purple, deep purple, indigo (default), blue, light blue, cyan, teal, green, light green, lime, yellow, amber, orange, deep orange, brown, grey, blue grey, black
-    scheme: default # slate for dark theme
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
   features:
     - navigation.instant
     - navigation.tracking
@@ -70,6 +79,14 @@ theme:
     - navigation.top # enable the back-to-top button
     - announce.dismiss # enable custom announcements, they will dismiss by scrolling down
 
+  icon:
+    repo: fontawesome/brands/github # Alternate icon for repo link
+
+# Repo link
+repo_name: eclipse/kura
+repo_url: https://github.com/eclipse/kura
+edit_uri: "" # Remove edit button
+
 plugins:
   - search
 
@@ -77,6 +94,11 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 
 extra:
   version:

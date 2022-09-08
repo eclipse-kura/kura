@@ -102,8 +102,7 @@
                         <Bundle-Version>${project.version}</Bundle-Version>
                         <Include-Resource>
                             ${project.basedir}/lib,
-                            ${project.basedir}/about.html,
-                            about_files=${project.basedir}/about_files/
+                            ${project.basedir}/about.html
                         </Include-Resource>
                         <Bundle-ClassPath>.,libsocket-can-java.jar</Bundle-ClassPath>
                         <Export-Package>

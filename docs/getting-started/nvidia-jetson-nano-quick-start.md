@@ -61,7 +61,7 @@ following steps:
 
     The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
 
-    ![Proceed trusting the source](./images/untrusted_cert3.png)
+    ![Proceed trusting the source](./images/untrusted_cert.png)
 
     Once trusted the source, the user will be redirected to a login page where the default **username** is:
 

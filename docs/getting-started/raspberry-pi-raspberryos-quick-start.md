@@ -27,6 +27,8 @@ in order to enable it follow the instructions available [here](https://www.raspb
 
 If you're using the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager) you can directly enable SSH before writing the operating system into the SD card by clicking on the "setting" icon.
 
+![Enable SSH Raspberry Pi Imager](./images/imager-enable-ssh.png)
+
 ## Eclipse Kura&trade; Installation
 
 To install Eclipse Kura with its dependencies on the Raspberry Pi, perform the

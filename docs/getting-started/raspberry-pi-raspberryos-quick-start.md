@@ -2,23 +2,14 @@
 
 ## Overview
 
-This section provides Eclipse Kura&trade; quick installation procedures for the
-Raspberry Pi and the Kura development environment.
+This section provides Eclipse Kura&trade; quick installation procedures for the Raspberry Pi and the Kura development environment.
 
 !!! warning
     This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
 
-This quickstart has been tested using the following image:
+This quickstart has been tested using the latest Raspberry Pi OS 32 bit images which are available for download through [the official Raspberry Pi foundation site](https://www.raspberrypi.com/software/operating-systems/) and the Raspberry Pi Imager.
 
-```
-2021-10-30-raspios-bullseye-armhf.zip
-```
-
-downloaded from
-
-```
-https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf.zip
-```
+For additional details on OS compatibility refer to the [Kura&trade; release notes](https://www.eclipse.org/kura/downloads.php).
 
 ## Enable SSH Access
 

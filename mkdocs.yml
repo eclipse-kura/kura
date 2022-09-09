@@ -7,6 +7,26 @@ nav:
       - Docker Quick Start: intro/docker-quick-start.md
       - Intel Up² Quick Start: intro/intel-up-2-quick-start.md
       - NVIDIA Jetson Nano&trade; - Quick Start: intro/nvidia-jetson-nano-quick-start.md
+    - Gateway Configuration:
+      - Gateway Administration Console: gateway-configuration/gateway-administration-console.md
+      - Gateway Status: gateway-configuration/gateway-status.md
+      - Device Information: gateway-configuration/device-information.md
+      - Network Configuration:
+        - Network Configuration: gateway-configuration/network-configuration.md
+        - Ethernet Configuration: gateway-configuration/ethernet-configuration.md
+        - Wi-Fi Configuration: gateway-configuration/wifi-configuration.md
+        - Cellular Configuration: gateway-configuration/cellular-configuration.md
+      - Firewall Configuration: gateway-configuration/firewall-configuration.md
+      - Cloud Connections:
+        - Cloud Connections: gateway-configuration/cloud-connections.md
+        - Cloud Service Configuration: gateway-configuration/cloud-service-configuration.md
+        - Data Service Configuration: gateway-configuration/data-service-configuration.md
+        - Data Transport Service Configuration: gateway-configuration/data-transport-service-configuration.md
+      - Keystores Management: gateway-configuration/keystores-management.md
+      - Keys and Certificates: gateway-configuration/keys-and-certificates.md
+      - SSL Configuration: gateway-configuration/ssl-configuration.md
+      - Web Console Configuration: gateway-configuration/web-console-configuration.md
+      - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
 
 theme:
   name: material

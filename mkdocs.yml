@@ -1,12 +1,12 @@
 site_name: Eclipse Kura™ Documentation
 
 nav:
-    - Introduction:
-      - Raspberry Pi - Raspbian Quick Start: intro/raspberry-pi-raspbian-quick-start.md
-      - Raspberry Pi - Ubuntu 20 Quick Start: intro/raspberry-pi-ubuntu-20-quick-start.md
-      - Docker Quick Start: intro/docker-quick-start.md
-      - Intel Up² Quick Start: intro/intel-up-2-quick-start.md
-      - NVIDIA Jetson Nano&trade; - Quick Start: intro/nvidia-jetson-nano-quick-start.md
+    - Getting Started:
+      - Raspberry Pi - Raspbian Quick Start: getting-started/raspberry-pi-raspbian-quick-start.md
+      - Raspberry Pi - Ubuntu 20 Quick Start: getting-started/raspberry-pi-ubuntu-20-quick-start.md
+      - Docker Quick Start: getting-started/docker-quick-start.md
+      - Intel Up² Quick Start: getting-started/intel-up-2-quick-start.md
+      - NVIDIA Jetson Nano&trade; - Quick Start: getting-started/nvidia-jetson-nano-quick-start.md
     - Gateway Configuration:
       - Gateway Administration Console: gateway-configuration/gateway-administration-console.md
       - Gateway Status: gateway-configuration/gateway-status.md

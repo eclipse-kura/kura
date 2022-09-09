@@ -37,6 +37,20 @@ You're now ready do build the documentation sources locally.
 
 ### Building the docs
 
+#### Simple build
+
+MkDocs comes with a built-in dev-server that lets you preview your documentation as you work on it. Make sure you're in the same directory as the `mkdocs.yml` configuration file and you have activated the Python virtual environment, then start the server by running:
+
+```bash
+mkdocs serve
+```
+
+Open up [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser, and you'll see the docs built from your current sources.
+
+The MkDocs dev-server also supports auto-reloading, and will rebuild your documentation whenever anything in the configuration file, documentation directory, or theme directory changes.
+
+#### Complete build
+
 `mike` is the tool to use for building and versioning the documentation. Modify the markdown files and edit `mkdocs.yml` file accordingly.
 
 To build the documentation and see the changes on your local machine:

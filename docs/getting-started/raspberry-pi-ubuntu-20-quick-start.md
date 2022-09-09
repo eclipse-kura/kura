@@ -5,14 +5,14 @@
 This section provides Eclipse Kura&trade; quick installation procedures for the
 Raspberry Pi.
 
-!!! warn ""
-    This quickstart will install the version of Kura with the administrative web UI and network configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php).
+!!! warning
+    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
 
-This quickstart has been tested using the Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the sd card through [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
+This quickstart has been tested using the latest Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the SD card through [Raspberry Pi Imager](https://www.raspberrypi.com/software/).
 
 The official images can be also found on the [Project Page](https://ubuntu.com/download/raspberry-pi). Further information on the Ubuntu installation for Raspberry Pi can be found [here](https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi).
 
-!!! warn ""
+!!! warning
     Please note that, at the time of this writing, only 64 bit OS image is supported.
 
 ## Enable SSH Access
@@ -30,18 +30,20 @@ following steps:
 
 3. Upgrade the system:
 
-   ```
-   sudo apt update
-   sudo apt upgrade
-   ```
+    ```bash
+    sudo apt update
+    ```
+    ```bash
+    sudo apt upgrade
+    ```
 
 4. Download the Kura package with:
 
     ```
-    wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer.deb
+    wget http://download.eclipse.org/kura/releases/<version>/kura_<version>_raspberry-pi-ubuntu-20_installer.deb
     ```
 
-    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.1.0).
+    Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.2.0).
 
 5. Install Kura with:
 

@@ -22,10 +22,6 @@
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.cbb835fc.min.css">
         
-          
-          
-          <meta name="theme-color" content="#4051b5">
-        
       
       
     
@@ -51,12 +47,16 @@
   
     
     
+      
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="">
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -129,6 +129,28 @@ You are viewing the documentation relative to the develop branch or to an outdat
       </div>
     </div>
     
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
     
     
       <label class="md-header__button md-icon" for="__search">
@@ -164,6 +186,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
   </div>
 </div>
     
+    
+      <div class="md-header__source">
+        <a href="https://github.com/eclipse/kura" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    eclipse/kura
+  </div>
+</a>
+      </div>
     
   </nav>
   
@@ -289,6 +323,18 @@ You are viewing the documentation relative to the develop branch or to an outdat
     </a>
     Eclipse Kura™ Documentation
   </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/eclipse/kura" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    eclipse/kura
+  </div>
+</a>
+    </div>
   
   <ul class="md-nav__list" data-md-scrollfix>
     
@@ -1280,58 +1326,57 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h2 id="implement-cloudendpoint-and-cloudconnectionmanager">Implement CloudEndpoint and CloudConnectionManager</h2>
 <p>In order to leverage the new APIs, and be managed by the Kura Web UI, the Cloud Connection implementation bundle must implement CloudEndpont and, if log-lived connections are supported, the CloudConnectionManager interface must be implemented as well.</p>
 <p>The ending class should be something as follows:</p>
-<pre><code class="language-java">
-public class CloudConnectionManagerImpl
-        implements CloudConnectionManager, CloudEndpoint, ... {
-
-    @Override
-    public boolean isConnected() {
-        ...
-    }
-
-    @Override
-    public void connect() throws KuraConnectException {
-        ...
-    }
-
-    @Override
-    public void disconnect() {
-        ...
-    }
-
-    @Override
-    public Map&lt;String, String&gt; getInfo() {
-        ...
-    }
-
-    @Override
-    public void registerCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
-        ...
-    }
-
-    @Override
-    public void unregisterCloudConnectionListener(CloudConnectionListener cloudConnectionListener) {
-        ...
-    }
-}
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">CloudConnectionManagerImpl</span><span class="w"></span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">        </span><span class="kd">implements</span><span class="w"> </span><span class="n">CloudConnectionManager</span><span class="p">,</span><span class="w"> </span><span class="n">CloudEndpoint</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">isConnected</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="p">...</span><span class="w"></span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">connect</span><span class="p">()</span><span class="w"> </span><span class="kd">throws</span><span class="w"> </span><span class="n">KuraConnectException</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="p">...</span><span class="w"></span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">disconnect</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">        </span><span class="p">...</span><span class="w"></span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getInfo</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">        </span><span class="p">...</span><span class="w"></span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">registerCloudConnectionListener</span><span class="p">(</span><span class="n">CloudConnectionListener</span><span class="w"> </span><span class="n">cloudConnectionListener</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">        </span><span class="p">...</span><span class="w"></span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">unregisterCloudConnectionListener</span><span class="p">(</span><span class="n">CloudConnectionListener</span><span class="w"> </span><span class="n">cloudConnectionListener</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="w">        </span><span class="p">...</span><span class="w"></span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">    </span><span class="p">}</span><span class="w"></span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <p>A corresponding component definition should be provided in the OSGI-INF folder exposing the implementation of CloudEndpoint and CloudConnectionManager interfaces.</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;scr:component xmlns:scr=&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot; activate=&quot;activate&quot; configuration-policy=&quot;require&quot; deactivate=&quot;deactivate&quot; enabled=&quot;true&quot; immediate=&quot;true&quot; modified=&quot;updated&quot; name=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;&gt;
-   &lt;implementation class=&quot;org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudConnectionManagerImpl&quot;/&gt;
-   &lt;service&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.configuration.ConfigurableComponent&quot;/&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.cloudconnection.CloudConnectionManager&quot;/&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.cloudconnection.CloudEndpoint&quot;/&gt;
-      &lt;!-- ... --&gt;
-   &lt;/service&gt;
-
-   &lt;!-- ... --&gt;
-
-   &lt;property name=&quot;kura.ui.service.hide&quot; type=&quot;Boolean&quot; value=&quot;true&quot;/&gt;
-   &lt;property name=&quot;kura.ui.factory.hide&quot; type=&quot;String&quot; value=&quot;true&quot;/&gt;
-&lt;/scr:component&gt;
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">&lt;scr:component</span> <span class="na">xmlns:scr=</span><span class="s">&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot;</span> <span class="na">activate=</span><span class="s">&quot;activate&quot;</span> <span class="na">configuration-policy=</span><span class="s">&quot;require&quot;</span> <span class="na">deactivate=</span><span class="s">&quot;deactivate&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">immediate=</span><span class="s">&quot;true&quot;</span> <span class="na">modified=</span><span class="s">&quot;updated&quot;</span> <span class="na">name=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>   <span class="nt">&lt;implementation</span> <span class="na">class=</span><span class="s">&quot;org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.CloudConnectionManagerImpl&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   <span class="nt">&lt;service&gt;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.configuration.ConfigurableComponent&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.CloudConnectionManager&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.CloudEndpoint&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>      <span class="cm">&lt;!-- ... --&gt;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>   <span class="nt">&lt;/service&gt;</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>   <span class="cm">&lt;!-- ... --&gt;</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.service.hide&quot;</span> <span class="na">type=</span><span class="s">&quot;Boolean&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.factory.hide&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="nt">&lt;/scr:component&gt;</span>
+</code></pre></div>
 <p>In order to be fully compliant with the Web UI requirements, the CloudConnection component definition should provide two properties <code>kura.ui.service.hide</code> and <code>kura.ui.factory.hide</code> to hide the component from the left side part of the UI dedicated to display the services list.</p>
 <h2 id="implement-the-cloudconnectionfactory-interface">Implement the CloudConnectionFactory interface</h2>
 <p>The CloudConnectionFactory is responsible to manage the cloud connection instance lifecycle by creating the CloudEndpoint instance and all the required services needed to publish or receive messages from the cloud platform.</p>
@@ -1341,50 +1386,50 @@ The <code>createConfiguration()</code> method receives a PID that will be used f
 <p>The <code>deleteConfiguration()</code> method deletes from the framework the CloudEndpoint instance identified by the PID passed as argument and all the related services. In the Eclipse IOT WG example, it not only deletes the CloudEndpoint instance but also the corresponding DataService and MqttDataTransport instances.</p>
 <p>The <code>getStackComponentsPids()</code> method return a List of String that represent the kura.service.pid of the configurable components that are part of a Cloud Connection instance. This method is used by the Web UI to get the list of configurable components that need to be displayed to the end user.</p>
 <p>The <code>getManagedCloudConnectionPids()</code> method will return the list of kura.service.pid of all the CloudEndpoints managed by the factory.</p>
-<p>The factory component definition should be defined as follows:</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;scr:component xmlns:scr=&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot; name=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory&quot;&gt;
-   &lt;implementation class=&quot;org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.factory.DefaultCloudConnectionFactory&quot;/&gt;
-   &lt;reference bind=&quot;setConfigurationService&quot; cardinality=&quot;1..1&quot; interface=&quot;org.eclipse.kura.configuration.ConfigurationService&quot; name=&quot;ConfigurationService&quot; policy=&quot;static&quot; unbind=&quot;unsetConfigurationService&quot;/&gt;
-   &lt;service&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory&quot;/&gt;
-   &lt;/service&gt;
-   &lt;property name=&quot;osgi.command.scope&quot; type=&quot;String&quot; value=&quot;kura.cloud&quot;/&gt;
-   &lt;property name=&quot;osgi.command.function&quot; type=&quot;String&quot;&gt;
-      createConfiguration
-   &lt;/property&gt;
-   &lt;property name=&quot;kura.ui.csf.pid.default&quot; type=&quot;String&quot; value=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;/&gt;
-   &lt;property name=&quot;kura.ui.csf.pid.regex&quot; type=&quot;String&quot; value=&quot;^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$&quot;/&gt;
-   &lt;property name=&quot;service.pid&quot; type=&quot;String&quot; value=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory&quot;/&gt;
-&lt;/scr:component&gt;
-</code></pre>
-<p>In particular, it should expose in the <code>service</code> section the fact that the factory implements <code>org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory</code></p>
-<pre><code class="language-xml">   &lt;service&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory&quot;/&gt;
-   &lt;/service&gt;
-</code></pre>
-<p>Important properties that need to be specified to have a better Web UI experience are the following:</p>
-<pre><code class="language-xml">&lt;property name=&quot;kura.ui.csf.pid.default&quot; type=&quot;String&quot; value=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;/&gt;
-&lt;property name=&quot;kura.ui.csf.pid.regex&quot; type=&quot;String&quot; value=&quot;^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$&quot;/&gt;
-</code></pre>
-<p>those allow to specify the form of the expected PID that the end user should provide when creating a new cloud connection.</p>
+<p>The factory component definition should be defined as follows:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">&lt;scr:component</span> <span class="na">xmlns:scr=</span><span class="s">&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot;</span> <span class="na">name=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>   <span class="nt">&lt;implementation</span> <span class="na">class=</span><span class="s">&quot;org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.factory.DefaultCloudConnectionFactory&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>   <span class="nt">&lt;reference</span> <span class="na">bind=</span><span class="s">&quot;setConfigurationService&quot;</span> <span class="na">cardinality=</span><span class="s">&quot;1..1&quot;</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.configuration.ConfigurationService&quot;</span> <span class="na">name=</span><span class="s">&quot;ConfigurationService&quot;</span> <span class="na">policy=</span><span class="s">&quot;static&quot;</span> <span class="na">unbind=</span><span class="s">&quot;unsetConfigurationService&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>   <span class="nt">&lt;service&gt;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>   <span class="nt">&lt;/service&gt;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;osgi.command.scope&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;kura.cloud&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;osgi.command.function&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>      createConfiguration
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>   <span class="nt">&lt;/property&gt;</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.csf.pid.default&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.csf.pid.regex&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;service.pid&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.DefaultCloudConnectionFactory&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="nt">&lt;/scr:component&gt;</span>
+</code></pre></div></p>
+<p>In particular, it should expose in the <code>service</code> section the fact that the factory implements <code>org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory</code>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>   <span class="nt">&lt;service&gt;</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.factory.CloudConnectionFactory&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>   <span class="nt">&lt;/service&gt;</span>
+</code></pre></div></p>
+<p>Important properties that need to be specified to have a better Web UI experience are the following:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.csf.pid.default&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.csf.pid.regex&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager(\-[a-zA-Z0-9]+)?$&quot;</span><span class="nt">/&gt;</span>
+</code></pre></div>
+those allow to specify the form of the expected PID that the end user should provide when creating a new cloud connection.</p>
 <h2 id="provide-a-cloudpublisher-implementation">Provide a CloudPublisher implementation</h2>
 <p>To provide a CloudPublisher implementation, other than implementing CloudPublisher API in a java class, the developer must provide a component definition in the OSGI-INF folder that should be like the following:</p>
-<pre><code class="language-xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-&lt;scr:component xmlns:scr=&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot; activate=&quot;activate&quot; configuration-policy=&quot;require&quot; deactivate=&quot;deactivate&quot; enabled=&quot;true&quot; immediate=&quot;true&quot; modified=&quot;updated&quot; name=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher&quot;&gt;
-   &lt;implementation class=&quot;org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.publisher.CloudPublisherImpl&quot;/&gt;
-   &lt;service&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.cloudconnection.publisher.CloudPublisher&quot;/&gt;
-      &lt;provide interface=&quot;org.eclipse.kura.configuration.ConfigurableComponent&quot;/&gt;
-   &lt;/service&gt;
-   &lt;property name=&quot;cloud.connection.factory.pid&quot; type=&quot;String&quot; value=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;/&gt;
-   &lt;property name=&quot;service.pid&quot; type=&quot;String&quot; value=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher&quot;/&gt;
-   &lt;property name=&quot;kura.ui.service.hide&quot; type=&quot;Boolean&quot; value=&quot;true&quot;/&gt;
-   &lt;property name=&quot;kura.ui.factory.hide&quot; type=&quot;String&quot; value=&quot;true&quot;/&gt;
-   &lt;property name=&quot;kura.ui.csf.pid.default&quot; type=&quot;String&quot; value=&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher&quot;/&gt;
-   &lt;property name=&quot;kura.ui.csf.pid.regex&quot; type=&quot;String&quot; value=&quot;^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\-[a-zA-Z0-9]+)?$&quot;/&gt;
-&lt;/scr:component&gt;
-</code></pre>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;scr:component</span> <span class="na">xmlns:scr=</span><span class="s">&quot;http://www.osgi.org/xmlns/scr/v1.1.0&quot;</span> <span class="na">activate=</span><span class="s">&quot;activate&quot;</span> <span class="na">configuration-policy=</span><span class="s">&quot;require&quot;</span> <span class="na">deactivate=</span><span class="s">&quot;deactivate&quot;</span> <span class="na">enabled=</span><span class="s">&quot;true&quot;</span> <span class="na">immediate=</span><span class="s">&quot;true&quot;</span> <span class="na">modified=</span><span class="s">&quot;updated&quot;</span> <span class="na">name=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher&quot;</span><span class="nt">&gt;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>   <span class="nt">&lt;implementation</span> <span class="na">class=</span><span class="s">&quot;org.eclipse.kura.internal.cloudconnection.eclipseiot.mqtt.cloud.publisher.CloudPublisherImpl&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>   <span class="nt">&lt;service&gt;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.publisher.CloudPublisher&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>      <span class="nt">&lt;provide</span> <span class="na">interface=</span><span class="s">&quot;org.eclipse.kura.configuration.ConfigurableComponent&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>   <span class="nt">&lt;/service&gt;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;cloud.connection.factory.pid&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.ConnectionManager&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;service.pid&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.service.hide&quot;</span> <span class="na">type=</span><span class="s">&quot;Boolean&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.factory.hide&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;true&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.csf.pid.default&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>   <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;kura.ui.csf.pid.regex&quot;</span> <span class="na">type=</span><span class="s">&quot;String&quot;</span> <span class="na">value=</span><span class="s">&quot;^org.eclipse.kura.cloudconnection.eclipseiot.mqtt.CloudPublisher(\-[a-zA-Z0-9]+)?$&quot;</span><span class="nt">/&gt;</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="nt">&lt;/scr:component&gt;</span>
+</code></pre></div>
 <p>As can be seen in the previous snippet, the Publisher exposes itself in the framework as a <code>ConfigurableComponent</code> and as a <code>CloudPublisher</code>.</p>
 <p>The component definition must contain the following well-known properties:</p>
 <ul>
@@ -1460,6 +1505,37 @@ As an example, for the Eclipse IoT WG bundle, the CloudEndpoint registers itself
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
       Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/eclipse/kura" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://gitter.im/eclipse/kura" target="_blank" rel="noopener" title="gitter.im" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M66.4 322.5H16V0h50.4v322.5zM166.9 76.1h-50.4V512h50.4V76.1zm100.6 0h-50.4V512h50.4V76.1zM368 76h-50.4v247H368V76z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://hub.docker.com/r/eclipse/kura" target="_blank" rel="noopener" title="hub.docker.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M349.9 236.3h-66.1v-59.4h66.1v59.4zm0-204.3h-66.1v60.7h66.1V32zm78.2 144.8H362v59.4h66.1v-59.4zm-156.3-72.1h-66.1v60.1h66.1v-60.1zm78.1 0h-66.1v60.1h66.1v-60.1zm276.8 100c-14.4-9.7-47.6-13.2-73.1-8.4-3.3-24-16.7-44.9-41.1-63.7l-14-9.3-9.3 14c-18.4 27.8-23.4 73.6-3.7 103.8-8.7 4.7-25.8 11.1-48.4 10.7H2.4c-8.7 50.8 5.8 116.8 44 162.1 37.1 43.9 92.7 66.2 165.4 66.2 157.4 0 273.9-72.5 328.4-204.2 21.4.4 67.6.1 91.3-45.2 1.5-2.5 6.6-13.2 8.5-17.1l-13.3-8.9zm-511.1-27.9h-66v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm78.1 0h-66.1v59.4h66.1v-59.4zm-78.1-72.1h-66.1v60.1h66.1v-60.1z"/></svg>
     </a>
   
 </div>

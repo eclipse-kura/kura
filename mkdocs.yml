@@ -2,7 +2,7 @@ site_name: Eclipse Kura™ Documentation
 
 nav:
     - Getting Started:
-      - Raspberry Pi - Raspbian Quick Start: getting-started/raspberry-pi-raspbian-quick-start.md
+      - Raspberry Pi - Raspberry Pi OS Quick Start: getting-started/raspberry-pi-raspberryos-quick-start.md
       - Raspberry Pi - Ubuntu 20 Quick Start: getting-started/raspberry-pi-ubuntu-20-quick-start.md
       - Docker Quick Start: getting-started/docker-quick-start.md
       - Intel Up² Quick Start: getting-started/intel-up-2-quick-start.md

@@ -33,8 +33,6 @@ nav:
       - Application Management: administration/application-management.md
       - Remote Management with Eclipse Kapua: administration/remote-management-kapua.md
       - Remote Management with Everyware Cloud: administration/remote-management.md
-      - Keys and Certificates: administration/keys-and-certificates.md
-      - Keystore Management: administration/keystore-management.md
       - System Component Inventory: administration/system-component-inventory.md
 
 theme:

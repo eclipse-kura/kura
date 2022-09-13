@@ -6,15 +6,6 @@ categories: [cloud-api]
 
 This section describes the new cloud related concepts and APIs introduced in Kura 4.0.
 
-* [Motivations](#motivations)
-* [Concepts](#concepts)
-  * [CloudEndpoint](#cloudendpoint)
-  * [CloudConnectionManager](#cloudconnectionmanager)
-  * [Publihsers and Subscribers](#publihsers-and-subscribers)
-  * [Command and control](#command-and-control)
-* [Cloud connection lifecycle](#cloud-connection-lifecycle)
-* [Backwards compatibility](#backwards-compatibility)
-
 ## Motivations
 
 Before Kura 4.0, Cloud APIs were quite tied to Kapua messaging conventions and to the MQTT protocol. Defining custom stacks that support other cloud platforms was possible, but the resulting implementations were affected by the following limitations:

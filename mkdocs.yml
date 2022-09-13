@@ -27,6 +27,14 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
+    - Administration:
+      - "administration/directory-layout.md"
+      - "administration/snapshot-management.md"
+      - "administration/application-management.md"
+      - "administration/remote-management-kapua.md"
+      - "administration/remote-management.md"
+      - "administration/keys-and-certificates.md"
+      - "administration/keystore-management.md"
 
 theme:
   name: material

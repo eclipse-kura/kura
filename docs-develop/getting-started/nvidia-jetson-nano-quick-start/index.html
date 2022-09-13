@@ -218,8 +218,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-tabs__item">
-      <a href="../raspberry-pi-raspbian-quick-start/" class="md-tabs__link md-tabs__link--active">
-        Introduction
+      <a href="../raspberry-pi-raspberryos-quick-start/" class="md-tabs__link md-tabs__link--active">
+        Getting Started
       </a>
     </li>
   
@@ -309,14 +309,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
       
         <label class="md-nav__link" for="__nav_1">
-          Introduction
+          Getting Started
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
         <label class="md-nav__title" for="__nav_1">
           <span class="md-nav__icon md-icon"></span>
-          Introduction
+          Getting Started
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -326,8 +326,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../raspberry-pi-raspbian-quick-start/" class="md-nav__link">
-        Raspberry Pi - Raspbian Quick Start
+      <a href="../raspberry-pi-raspberryos-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspberry Pi OS Quick Start
       </a>
     </li>
   
@@ -839,16 +839,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
 <h1 id="nvidia-jetson-nano-quick-start">NVIDIA Jetson Nano&trade; - Quick Start</h1>
 <h2 id="overview">Overview</h2>
 <p>This section provides Eclipse Kura&trade; quick installation procedures for the NVIDIA Jetson Nano&trade;.</p>
-<div class="admonition warn">
-<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not CAN support. For more information on this please visit the <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura download page</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura download page</a></p>
 </div>
-<p>This quickstart has been tested using the following image:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>jetson-nano-jp46-sd-card-image.zip
-</code></pre></div>
-<p>downloaded from</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>https://developer.nvidia.com/jetson-nano-sd-card-image
-</code></pre></div>
-<p>and with the image burned on a SD card with <a href="https://www.balena.io/etcher/">Etcher</a>.</p>
+<p>This quickstart has been tested using the latest Ubuntu 18.04 LTS image provided by NVIDIA <a href="https://developer.nvidia.com/jetson-nano-sd-card-image">here</a> and burned on a SD card with <a href="https://www.balena.io/etcher/">Etcher</a>.</p>
 <p>The official images can be found on the <a href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write">Jetson Nano Developer Kit Getting Starteg Guide</a>. Further information on the Ubuntu installation for the NVIDIA Jetson Nano&trade; can be found <a href="https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#intro">here</a>.</p>
 <h2 id="eclipse-kura-installation">Eclipse Kura&trade; Installation</h2>
 <p>To install Eclipse Kura with its dependencies on the NVIDIA Jetson Nano&trade;, perform the
@@ -862,43 +857,40 @@ following steps:</p>
 </li>
 <li>
 <p>Upgrade the system:</p>
-</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo apt update
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo apt upgrade
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo apt update
 </code></pre></div>
-<ol>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo apt upgrade
+</code></pre></div></p>
+</li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>wget http://download.eclipse.org/kura/releases/&amp;lt;version&amp;gt;/kura_&amp;lt;version&amp;gt;_nvidia-jetson-nano_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
 </code></pre></div>
-<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.1.0).</p>
+<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.2.0).</p>
 </li>
 <li>
 <p>Install Kura with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo apt install ./kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt install ./kura_&lt;version&gt;_nvidia-jetson-nano_installer.deb
 </code></pre></div>
 <p>All the required dependencies will be downloaded and installed.</p>
 </li>
 <li>
 <p>Reboot the NVIDIA Jetson Nano&trade; with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo reboot
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
 <p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
-<p><img alt="Untrusted certificate page" src="../images/untrusted_cert1.png" /></p>
-<p><img alt="Untrusted certificate details" src="../images/untrusted_cert2.png" /></p>
-<p><img alt="Proceed trusting the source" src="../images/untrusted_cert3.png" /></p>
+<p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
 <p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>admin
 </code></pre></div>
 <p>and the default <strong>password</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>admin
 </code></pre></div>
 </li>
 </ol>

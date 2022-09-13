@@ -13,7 +13,7 @@
     
     
       
-        <title>Docker Quick Start - Eclipse Kura™ Documentation</title>
+        <title>Raspberry Pi - Raspberry Pi OS Quick Start - Eclipse Kura™ Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#docker-quick-start" class="md-skip">
+        <a href="#raspberry-pi-raspberry-pi-os-quick-start" class="md-skip">
           Skip to content
         </a>
       
@@ -122,7 +122,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Docker Quick Start
+              Raspberry Pi - Raspberry Pi OS Quick Start
             
           </span>
         </div>
@@ -218,8 +218,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-tabs__item">
-      <a href="../raspberry-pi-raspbian-quick-start/" class="md-tabs__link md-tabs__link--active">
-        Introduction
+      <a href="./" class="md-tabs__link md-tabs__link--active">
+        Getting Started
       </a>
     </li>
   
@@ -309,14 +309,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
       
         <label class="md-nav__link" for="__nav_1">
-          Introduction
+          Getting Started
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
         <label class="md-nav__title" for="__nav_1">
           <span class="md-nav__icon md-icon"></span>
-          Introduction
+          Getting Started
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -324,11 +324,66 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../raspberry-pi-raspbian-quick-start/" class="md-nav__link">
-        Raspberry Pi - Raspbian Quick Start
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Raspberry Pi - Raspberry Pi OS Quick Start
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Raspberry Pi - Raspberry Pi OS Quick Start
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-ssh-access" class="md-nav__link">
+    Enable SSH Access
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eclipse-kura-installation" class="md-nav__link">
+    Eclipse Kura&trade; Installation
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -352,86 +407,11 @@ You are viewing the documentation relative to the develop branch or to an outdat
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Docker Quick Start
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../docker-quick-start/" class="md-nav__link">
         Docker Quick Start
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#command-toolbox" class="md-nav__link">
-    Command Toolbox
-  </a>
-  
-    <nav class="md-nav" aria-label="Command Toolbox">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#list-docker-images" class="md-nav__link">
-    List Docker Images
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#list-running-docker-containers" class="md-nav__link">
-    List Running Docker Containers
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#startstop-a-docker-container" class="md-nav__link">
-    Start/Stop a Docker Container
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -836,43 +816,23 @@ You are viewing the documentation relative to the develop branch or to an outdat
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installation" class="md-nav__link">
-    Installation
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#command-toolbox" class="md-nav__link">
-    Command Toolbox
-  </a>
-  
-    <nav class="md-nav" aria-label="Command Toolbox">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#list-docker-images" class="md-nav__link">
-    List Docker Images
+  <a href="#enable-ssh-access" class="md-nav__link">
+    Enable SSH Access
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#list-running-docker-containers" class="md-nav__link">
-    List Running Docker Containers
+      
+        <li class="md-nav__item">
+  <a href="#eclipse-kura-installation" class="md-nav__link">
+    Eclipse Kura&trade; Installation
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#startstop-a-docker-container" class="md-nav__link">
-    Start/Stop a Docker Container
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -890,30 +850,83 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
 
 
-<h1 id="docker-quick-start">Docker Quick Start</h1>
-<h2 id="installation">Installation</h2>
-<p>Eclipse Kura is also available as a Docker container available in <a href="https://hub.docker.com/r/eclipse/kura/">Docker Hub</a>.</p>
-<p>To download and run, use the following command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>docker run -d -p 443:443 -t eclipse/kura
+<h1 id="raspberry-pi-raspberry-pi-os-quick-start">Raspberry Pi - Raspberry Pi OS Quick Start</h1>
+<h2 id="overview">Overview</h2>
+<p>This section provides Eclipse Kura&trade; quick installation procedures for the Raspberry Pi and the Kura development environment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura download page</a></p>
+</div>
+<p>This quickstart has been tested using the latest Raspberry Pi OS 32 bit images which are available for download through <a href="https://www.raspberrypi.com/software/operating-systems/">the official Raspberry Pi foundation site</a> and the Raspberry Pi Imager.</p>
+<p>For additional details on OS compatibility refer to the <a href="https://www.eclipse.org/kura/downloads.php">Kura&trade; release notes</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please note that, at the time of this writing, only 32 bit OS image is supported.</p>
+</div>
+<h2 id="enable-ssh-access">Enable SSH Access</h2>
+<p>The ssh server is disabled by default on Raspbian images released after November 2016,
+in order to enable it follow the instructions available <a href="https://www.raspberrypi.org/documentation/remote-access/ssh/">here</a>.</p>
+<p>If you're using the <a href="https://github.com/raspberrypi/rpi-imager">Raspberry Pi Imager</a> you can directly enable SSH before writing the operating system into the SD card by clicking on the "setting" icon.</p>
+<p><img alt="Enable SSH Raspberry Pi Imager" src="../images/imager-enable-ssh.png" /></p>
+<h2 id="eclipse-kura-installation">Eclipse Kura&trade; Installation</h2>
+<p>To install Eclipse Kura with its dependencies on the Raspberry Pi, perform the
+following steps:</p>
+<ol>
+<li>
+<p>Boot the Raspberry Pi with the latest Raspbian image (starting from release 5.1.0 Kura is tested with Raspbian 11).</p>
+</li>
+<li>
+<p>Make sure your device is connected to the internet. By default, <code>eth0</code> lan network interface is configured in DHCP mode.</p>
+</li>
+<li>
+<p>Upgrade the system:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo apt update
 </code></pre></div>
-<p>This command will start Kura in background and the Kura Web Ui will be available through port 443.</p>
-<p>Once the image is started you can navigate your browser to <a href="https://localhost">https://localhost</a> and log in using the credentials <code>admin : admin</code>.</p>
-<h2 id="command-toolbox">Command Toolbox</h2>
-<p>Following, a set of useful Docker command that can be used to list and manage Docker containers.
-For more details on Docker commands, please reference the official <a href="https://docs.docker.com/get-started/">Docker documentation</a> </p>
-<h3 id="list-docker-images">List Docker Images</h3>
-<p>To list all the installed Docker images run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>docker images
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo apt upgrade
+</code></pre></div></p>
+</li>
+<li>
+<p>Download the Kura package with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi_installer.deb
 </code></pre></div>
-<h3 id="list-running-docker-containers">List Running Docker Containers</h3>
-<p>To list all the available instances (both running and powered off) run:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>docker ps -a
+<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.1.0).</p>
+</li>
+<li>
+<p>Install Kura with: </p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt-get install ./kura_&lt;version&gt;_raspberry-pi_installer.deb
 </code></pre></div>
-<h3 id="startstop-a-docker-container">Start/Stop a Docker Container</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>docker stop &lt;container id&gt;
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>docker start &lt;container id&gt;
+</li>
+<li>
+<p>It could happen that <code>wlan</code> interface is "soft blocked" by default and needs to be enabled. To see if it is blocked run:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>rfkill list
 </code></pre></div>
-<p>where <code>&lt;container id&gt;</code> is the instance identification number.</p>
+<p>and unblock it with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo rfkill unblock wlan
+</code></pre></div>
+</li>
+<li>
+<p>Set the right Wi-Fi regulatory domain based on your current world region following the instructions <a href="https://www.raspberrypi.org/documentation/computers/configuration.html#using-the-desktop">here</a>. In case of problems, you could try to edit the <code>/etc/default/crda</code> adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-1 alpha-2</a> code of your region</p>
+</li>
+<li>
+<p>Reboot the Raspberry Pi with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>sudo reboot
+</code></pre></div>
+<p>Kura starts on the target platform after reboot.</p>
+</li>
+<li>
+<p>Kura setups a local web ui that is available using a browser via:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>https://&lt;device-ip&gt;
+</code></pre></div>
+<p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
+<p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
+<p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>admin
+</code></pre></div>
+<p>and the default <strong>password</strong> is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>admin
+</code></pre></div>
+</li>
+</ol>
 
               
             </article>
@@ -933,30 +946,15 @@ For more details on Docker commands, please reference the official <a href="http
     
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
-        
-        <a href="../raspberry-pi-ubuntu-20-quick-start/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Raspberry Pi - Ubuntu 20 Quick Start" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Raspberry Pi - Ubuntu 20 Quick Start
-            </div>
-          </div>
-        </a>
-      
       
         
-        <a href="../intel-up-2-quick-start/" class="md-footer__link md-footer__link--next" aria-label="Next: Intel Up² Quick Start" rel="next">
+        <a href="../raspberry-pi-ubuntu-20-quick-start/" class="md-footer__link md-footer__link--next" aria-label="Next: Raspberry Pi - Ubuntu 20 Quick Start" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Intel Up² Quick Start
+              Raspberry Pi - Ubuntu 20 Quick Start
             </div>
           </div>
           <div class="md-footer__button md-icon">

@@ -13,7 +13,7 @@
     
     
       
-        <title>Intel Up² Quick Start - Eclipse Kura™ Documentation</title>
+        <title>Raspberry Pi - Ubuntu 20 Quick Start - Eclipse Kura™ Documentation</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#intel-up2-quick-start" class="md-skip">
+        <a href="#raspberry-pi-ubuntu-20-quick-start" class="md-skip">
           Skip to content
         </a>
       
@@ -122,7 +122,7 @@ You are viewing the documentation relative to the develop branch or to an outdat
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Intel Up² Quick Start
+              Raspberry Pi - Ubuntu 20 Quick Start
             
           </span>
         </div>
@@ -218,8 +218,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-tabs__item">
-      <a href="../raspberry-pi-raspbian-quick-start/" class="md-tabs__link md-tabs__link--active">
-        Introduction
+      <a href="../raspberry-pi-raspberryos-quick-start/" class="md-tabs__link md-tabs__link--active">
+        Getting Started
       </a>
     </li>
   
@@ -309,14 +309,14 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
       
         <label class="md-nav__link" for="__nav_1">
-          Introduction
+          Getting Started
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" aria-label="Introduction" data-md-level="1">
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
         <label class="md-nav__title" for="__nav_1">
           <span class="md-nav__icon md-icon"></span>
-          Introduction
+          Getting Started
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -326,36 +326,8 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
   
     <li class="md-nav__item">
-      <a href="../raspberry-pi-raspbian-quick-start/" class="md-nav__link">
-        Raspberry Pi - Raspbian Quick Start
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../raspberry-pi-ubuntu-20-quick-start/" class="md-nav__link">
-        Raspberry Pi - Ubuntu 20 Quick Start
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../docker-quick-start/" class="md-nav__link">
-        Docker Quick Start
+      <a href="../raspberry-pi-raspberryos-quick-start/" class="md-nav__link">
+        Raspberry Pi - Raspberry Pi OS Quick Start
       </a>
     </li>
   
@@ -378,12 +350,12 @@ You are viewing the documentation relative to the develop branch or to an outdat
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Intel Up² Quick Start
+          Raspberry Pi - Ubuntu 20 Quick Start
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Intel Up² Quick Start
+        Raspberry Pi - Ubuntu 20 Quick Start
       </a>
       
         
@@ -409,6 +381,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#enable-ssh-access" class="md-nav__link">
+    Enable SSH Access
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#eclipse-kura-installation" class="md-nav__link">
     Eclipse Kura&trade; Installation
   </a>
@@ -419,6 +398,34 @@ You are viewing the documentation relative to the develop branch or to an outdat
   
 </nav>
       
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-quick-start/" class="md-nav__link">
+        Docker Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../intel-up-2-quick-start/" class="md-nav__link">
+        Intel Up² Quick Start
+      </a>
     </li>
   
 
@@ -816,6 +823,13 @@ You are viewing the documentation relative to the develop branch or to an outdat
 </li>
       
         <li class="md-nav__item">
+  <a href="#enable-ssh-access" class="md-nav__link">
+    Enable SSH Access
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#eclipse-kura-installation" class="md-nav__link">
     Eclipse Kura&trade; Installation
   </a>
@@ -836,72 +850,71 @@ You are viewing the documentation relative to the develop branch or to an outdat
                 
 
 
-<h1 id="intel-up2-quick-start">Intel Up² Quick Start</h1>
+<h1 id="raspberry-pi-ubuntu-20-quick-start">Raspberry Pi - Ubuntu 20 Quick Start</h1>
 <h2 id="overview">Overview</h2>
 <p>This section provides Eclipse Kura&trade; quick installation procedures for the
-Intel Up² and the Kura development environment.</p>
-<div class="admonition warn">
-<p>This quickstart will install the version of Kura with the administrative web UI and network configuration support but not CAN support. For more information on this please visit the <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura download page</a>.</p>
+Raspberry Pi.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not <a href="https://en.wikipedia.org/wiki/CAN_bus">CAN bus</a> support. For more information on this please visit the <a href="https://www.eclipse.org/kura/downloads.php">Eclipse Kura download page</a></p>
 </div>
-<p>This quickstart has been tested using the following image:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>ubuntu-20.04.4-live-server-amd64.iso
-</code></pre></div>
-<p>downloaded from</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>https://releases.ubuntu.com/20.04/ubuntu-20.04.4-live-server-amd64.iso
-</code></pre></div>
-<p>and with the image burned on an USB stick with <a href="https://www.balena.io/etcher/">balenaEtcher</a>.</p>
-<p>A complete guide on how to install Ubuntu on the Intel Up² can be found <a href="https://wiki.up-community.org/Ubuntu">here</a>.</p>
-<p>It is important, in order to access the HAT, Bluetooth, Wifi functionality, to follow the relative steps provided in the complete guide. Make sure to assign the right execute permissions to <code>kurad</code> user created by the installer as described here: <a href="https://github.com/up-board/up-community/wiki/Ubuntu_20.04#add-groups">Add Groups</a>.</p>
-<p>It is high raccomanded to install the custom Intel kernel provided in the guide.</p>
+<p>This quickstart has been tested using the latest Ubuntu 20.04.3 LTS Live Server for arm64 architecture flashed on the SD card through <a href="https://www.raspberrypi.com/software/">Raspberry Pi Imager</a>.</p>
+<p>The official images can be also found on the <a href="https://ubuntu.com/download/raspberry-pi">Project Page</a>. Further information on the Ubuntu installation for Raspberry Pi can be found <a href="https://ubuntu.com/tutorials/how-to-install-ubuntu-on-your-raspberry-pi">here</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Please note that, at the time of this writing, only 64 bit OS image is supported.</p>
+</div>
+<h2 id="enable-ssh-access">Enable SSH Access</h2>
+<p>On Ubuntu 20.04.3 the ssh access is enabled only for the standard <strong>ubuntu</strong> user. If you desire to remote login as root user, edit the file <code>/etc/ssh/sshd_config</code> (using the root permission) adding the line <code>PermitRootLogin yes</code></p>
 <h2 id="eclipse-kura-installation">Eclipse Kura&trade; Installation</h2>
-<p>To install Kura with its dependencies on the Intel Up², perform the
+<p>To install Eclipse Kura with its dependencies on the Raspberry Pi, perform the
 following steps:</p>
 <ol>
 <li>
-<p>Boot the Intel Up² with the Ubuntu Image 20.04.3.</p>
+<p>Boot the Raspberry Pi with the latest Ubuntu 20.04.3 LTS Server image.</p>
 </li>
 <li>
-<p>Make sure your device is connected to internet.</p>
+<p>Make sure your device is connected to internet. By default, <code>eth0</code> lan network interface is configured in DHCP mode.</p>
 </li>
 <li>
 <p>Upgrade the system:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>sudo apt update
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>sudo apt upgrade
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>sudo apt update
 </code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sudo apt upgrade
+</code></pre></div></p>
 </li>
 <li>
 <p>Download the Kura package with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_intel-up2-ubuntu-20_installer.deb
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>wget http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer.deb
 </code></pre></div>
-<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.1.0).</p>
+<p>Note: replace <code>&lt;version&gt;</code> in the URL above with the version number of the latest release (e.g. 5.2.0).</p>
 </li>
 <li>
-<p>Install Kura with: </p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>apt-get install./ kura_&lt;version&gt;_intel-up2-ubuntu-20_installer.deb
+<p>Install Kura with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>sudo apt install ./kura_&lt;version&gt;_raspberry-pi-ubuntu-20_installer.deb
 </code></pre></div>
+<p>All the required dependencies will be downloaded and installed.</p>
 </li>
 <li>
 <p>Set the right Wi-Fi regulatory domain based on your current world region editing the <code>/etc/default/crda</code> and adding the <a href="https://it.wikipedia.org/wiki/ISO_3166-1_alpha-2">ISO 3166-1 alpha-2</a> code of your region.</p>
 </li>
 <li>
-<p>Reboot the Intel Up² with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>sudo reboot
+<p>Reboot the Raspberry Pi with:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>sudo reboot
 </code></pre></div>
 <p>Kura starts on the target platform after reboot.</p>
 </li>
 <li>
 <p>Kura setups a local web ui that is available using a browser via:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>https://&lt;device-ip&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>https://&lt;device-ip&gt;
 </code></pre></div>
-<p>The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:</p>
-<p><img alt="Untrusted certificate page" src="../images/untrusted_cert1.png" /></p>
-<p><img alt="Untrusted certificate details" src="../images/untrusted_cert2.png" /></p>
-<p><img alt="Proceed trusting the source" src="../images/untrusted_cert3.png" /></p>
+<p>The browser will prompt the user to accept the connection to an endpoint with a self signed certificate, select <code>Accept the risk and continue</code>:</p>
+<p><img alt="Proceed trusting the source" src="../images/untrusted_cert.png" /></p>
 <p>Once trusted the source, the user will be redirected to a login page where the default <strong>username</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>admin
 </code></pre></div>
 <p>and the default <strong>password</strong> is:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>admin
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>admin
 </code></pre></div>
 </li>
 </ol>
@@ -925,7 +938,7 @@ following steps:</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../docker-quick-start/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Docker Quick Start" rel="prev">
+        <a href="../raspberry-pi-raspberryos-quick-start/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Raspberry Pi - Raspberry Pi OS Quick Start" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -934,20 +947,20 @@ following steps:</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Docker Quick Start
+              Raspberry Pi - Raspberry Pi OS Quick Start
             </div>
           </div>
         </a>
       
       
         
-        <a href="../nvidia-jetson-nano-quick-start/" class="md-footer__link md-footer__link--next" aria-label="Next: NVIDIA Jetson Nano&amp;trade; - Quick Start" rel="next">
+        <a href="../docker-quick-start/" class="md-footer__link md-footer__link--next" aria-label="Next: Docker Quick Start" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              NVIDIA Jetson Nano&trade; - Quick Start
+              Docker Quick Start
             </div>
           </div>
           <div class="md-footer__button md-icon">

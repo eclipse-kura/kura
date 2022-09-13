@@ -7,11 +7,11 @@ From the Security section, a user with Security permissions can access the Keyst
 A list of all the framework managed keystores will be available to the user with the Service PID that will be used by other components to reference the selected keystore.
 Associated to the Service PID, the UI shows the Factory PID that identifies the specific KeystoreService API implementation that is providing the service to the framework.
 
-![](imgs/KeystoreConfig1.png)
+![](imgs/KeystoreConfig1.png){ style="border-radius: 7px;"}
 
 In order to modify the configuration of a specific keystore service instance, the user can select one of the available rows, obtaining the corresponding keystore service configuration.
 
-![](imgs/KeystoreConfig2.png)
+![](imgs/KeystoreConfig2.png){ style="border-radius: 7px;"}
 
 The following KeystoreService factories are available:
 

@@ -7,7 +7,7 @@ To simplify the management of such complex objects, the framework provides a ded
 
 The **Certificates List** tab in the **Security** section of the Web UI provides a simple way for the user to get the list of all the managed keys and certificates of the framework:
 
-![](imgs/CertificateList.png)
+![](imgs/CertificateList.png){ style="border-radius: 7px;"}
 
 The page allows the user to add a new Keypair or trusted certificate or to delete an existing element.
 
@@ -16,7 +16,7 @@ Every key pair or trusted certificate is listed by its alias, identified by the 
 If the user needs to add a new entry to one of the managed KeystoreService instances, can click on the **Add** button on the top left part of the page.
 The user will be guided through a process that will allow to identify the type of entry to add:
 
-![](imgs/CertificateListAddEntry.png)
+![](imgs/CertificateListAddEntry.png){ style="border-radius: 7px;"}
 
 It can be either a:
 
@@ -25,7 +25,7 @@ It can be either a:
 
 If the user decides to add a key pair, then the wizard will provide a page like the following:
 
-![](imgs/CertificateListAddKeyPair.png)
+![](imgs/CertificateListAddKeyPair.png){ style="border-radius: 7px;"}
 
 Here the user can specify:
 
@@ -43,7 +43,7 @@ The following cryptographic algorithms are supported for Key Pairs:
 
 Instead, if the user wants to load a Trusted Certificate, the Ui will change as follows:
 
-![](imgs/CertificateListAddCertificate.png)
+![](imgs/CertificateListAddCertificate.png){ style="border-radius: 7px;"}
 
 Here the user can specify:
 

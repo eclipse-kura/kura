@@ -6,7 +6,7 @@ This section describes the remote management of devices running Kura via Eclipse
 
 To remotely manage a device running Kura through the Eclipse Kapua Web Console, select the desired device from the **Devices Table** of the console and open the **Configuration** tab as shown in the screen capture below. Please refer to the **Built-in Services** section for a description of the available **Services** and their configuration parameters.
 
-![](imgs/KapuaConfiguration.png)
+![](imgs/KapuaConfiguration.png){ style="border-radius: 7px;"}
 
 ## Installation of a New Application
 
@@ -14,13 +14,13 @@ As described in  [Application Management](application-management.html), a new ap
 
 To do so, select a connected device and click on the **Packages** tab. Then, click on **Install/Upgrade**. The **Install New Package** window opens allowing the deployment package to be installed from an URL as shown in the screen capture below. Once installed, the new application parameters may be modified in the same way as the Built-in Services. Click on the **Configuration** tab to see the service that corresponds to your application.
 
-![](imgs/KapuaPackages.png)
+![](imgs/KapuaPackages.png){ style="border-radius: 7px;"}
 
 ## Snapshots
 
 As described in [Snapshot Management](snapshot-management.html), the overall Kura configuration, including the new installed applications, is stored in a snapshot xml file. The Eclipse Kapua Console also provides options to **Download**, **Upload and Apply**, or **Rollback** snapshots as shown in the screen capture below.
 
-![](imgs/KapuaSnapshots.png)
+![](imgs/KapuaSnapshots.png){ style="border-radius: 7px;"}
 
 ## Remote Command Execution from Eclipse Kapua Web Console
 
@@ -30,4 +30,4 @@ It is also possible to send a script to execute using the **File** option of the
 
 The zip file is sent embedded in an MQTT message on the device. The Command Service in the device stores the file in /tmp, unzips it, and tries to execute a shell script if one is present. Note that in this case, the Execute parameter cannot be empty; a simple command, such as "ls -l /tmp", may be entered.
 
-![](imgs/KapuaCommand.png)
+![](imgs/KapuaCommand.png){ style="border-radius: 7px;"}

@@ -7,7 +7,7 @@ Each time a configuration change is made to one of the Kura components, a new XM
 ## How to Access Snapshots
 To display snapshots using the [Gateway Administration Console](console.html), select **Settings** from the **System** area, and then click on the **Snapshots** tab. The following three operations are available: **Download**, **Upload and Apply**, and **Rollback**.
 
-![](imgs/snapshots.png)
+![](imgs/snapshots.png){ style="border-radius: 7px;"}
 
 ## How to Use Snapshots
 
@@ -21,10 +21,10 @@ The **Upload and Apply** option  provides the ability to import an XML file from
 
 {% include alerts.html message='Carefully select the file to be uploaded. An incorrect file may crash Kura and make it unresponsive.' %}
 
-![](imgs/snapshotsUpload.png)
+![](imgs/snapshotsUpload.png){ style="border-radius: 7px;"}
 
 ### Rollback
 
 The **Rollback** option provides the ability to restore the system to a previous configuration.
 
-![](imgs/snapshotsRollback.png)
+![](imgs/snapshotsRollback.png){ style="border-radius: 7px;"}

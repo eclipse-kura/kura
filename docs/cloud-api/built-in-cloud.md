@@ -8,7 +8,7 @@ Eclipse Kura provides by default a set of services used to connect to a cloud pl
 
 The `CloudService` API is deprecated since Kura 4.0.
 The functionalities provided by `CloudService` are now provided by the `CloudEndpoint` and `CloudConnectionManager` service interfaces.
-See the [section](/kura/cloud-api/1-overview.html) describing the Kura 4.0 cloud connection model for more details.
+See the [section](../overview/) describing the Kura 4.0 cloud connection model for more details.
 
 The `DataService` and `MqttDataTrasport` APIs are not deprecated in Kura 4.0.
 

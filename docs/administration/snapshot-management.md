@@ -7,13 +7,22 @@ Each time a configuration change is made to one of the Kura components, a new XM
 ## How to Access Snapshots
 To display snapshots using the [Gateway Administration Console](console.html), select **Settings** from the **System** area, and then click on the **Snapshots** tab. The following three operations are available: **Download**, **Upload and Apply**, and **Rollback**.
 
-![](imgs/snapshots.png){ style="border-radius: 7px;"}
+![](imgs/snapshots.png)
 
 ## How to Use Snapshots
 
 ### Download
 
-The **Download** option provides the ability to save a snapshot XML file onto your computer. This file may then be edited, uploaded back to the device, or transferred to another equivalent device.
+The **Download** option provides the ability to save a snapshot file onto your computer. This file may then be edited, uploaded back to the device, or transferred to another equivalent device.
+
+Starting from Kura 5.1, the snapshot can be downloaded in two formats:
+
+* **XML**: The original XML snapshot format.
+* **JSON**: The JSON format used by the [Configuration v2 REST APIs and CONF-V2 request handler](doc:configuration-v2-rest-apis-and-conf-v2-request-handler). For example the downloaded snapshot can be used as is as a body for the [PUT/configurableComponents/configurations/_update](doc:configuration-v2-rest-apis-and-conf-v2-request-handler#putconfigurablecomponentsconfigurations_update) request. The `takeSnapshot` parameter specified by the CONF-V2 request is missing from the downloaded JSON file, if that parameter is not specified, a new snapshot will be created by default.
+
+Pressing the **Download** button will trigger a dialog that allows choosing the desired format.
+
+![](imgs/snapshotsDownload.png)
 
 ### Upload and Apply
 

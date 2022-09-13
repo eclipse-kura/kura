@@ -15,6 +15,11 @@ Upon a successful installation, the new component appears in the Services list (
 Kura allows the installation and update of running applications via the Eclipse Kura Marketplace.
 The **Packages** page has, in the top part of the page a section dedicated to the Eclipse Kura Marketplace.
 
+<figure markdown>
+  ![](images/marketplaceInstall.png){ style="border-radius: 7px;"}
+  <figcaption></figcaption>
+</figure>
+
 Dragging an application reference taken from the Eclipse Kura Marketplace to the specific area of the ESF Web Administrative Console will instruct ESF to download and install the corresponding package, as seen below:
 
 ![](images/packageMarketplace.png)

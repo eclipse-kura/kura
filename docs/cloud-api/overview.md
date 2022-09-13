@@ -9,19 +9,15 @@ Before Kura 4.0, Cloud APIs were quite tied to Kapua messaging conventions and t
 * The legacy APIs assume that the underlying messaging protocol is MQTT. This assumption spans across all API layers, from the low level `MQTTDataTrasport` to the high level `CloudClient`. This makes quite difficult to implement cloud stacks that use other protocols like AMQP or HTTP.
 
 * The `CloudClient` API, which was the recommended way for applications to interface with a cloud stack, enforce the following MQTT topic structure:
-
   ```
   #account-name/#device-id/#app-id/<app-topic>
   ```
-
   This topic hierarchy, which is Kapua related, might be too restrictive or too loose for other cloud platforms, for example:
 
-  * The **Eclipse IoT** working group namespace allows authenticated devices to omit the `accont-name` and `device-id` parameters in the topic. Moreover, telemetry, alert and event message topics must start respectively the `t/`, `a/` and `e/` prefixes. Adhering to this specification is not possible for a cloud stack that implements the legacy APIs.
-
-  * The **AWS** cloud platform allows publishing on virtually any topic, using a `CloudClient` would be quite restrictive in this case. A way for overcoming this limitation for an application might be using the DataService layer directly, adversely affecting portability.
-
-  * The **Cumulocity** cloud platform allows publishing only on a limited set of topics, and most of the application generated information is placed in the payload encoded in CSV. Using `CloudClient` in this case makes difficult for the cloud stack to enforce that the messages are published on the correct topics.
-  Moreover, the cloud stack in this case must also convert from `KuraPayload` to CSV, this can be currently achieved only by introducing rigid conversion rules, that might not be enough to support all message formats.
+    * The **Eclipse IoT** working group namespace allows authenticated devices to omit the `accont-name` and `device-id` parameters in the topic. Moreover, telemetry, alert and event message topics must start respectively the `t/`, `a/` and `e/` prefixes. Adhering to this specification is not possible for a cloud stack that implements the legacy APIs.
+    * The **AWS** cloud platform allows publishing on virtually any topic, using a `CloudClient` would be quite restrictive in this case. A way for overcoming this limitation for an application might be using the DataService layer directly, adversely affecting portability.
+    * The **Cumulocity** cloud platform allows publishing only on a limited set of topics, and most of the application generated information is placed in the payload encoded in CSV. Using `CloudClient` in this case makes difficult for the cloud stack to enforce that the messages are published on the correct topics.
+    Moreover, the cloud stack in this case must also convert from `KuraPayload` to CSV, this can be currently achieved only by introducing rigid conversion rules, that might not be enough to support all message formats.
 
 * Applications that use the current APIs are not portable across cloud platforms. For example if an appliaction intends to publish on Cumulocity or AWS, it should be probably aware of the underlying cloud platform.
 

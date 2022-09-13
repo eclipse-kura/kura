@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Application developer guide"
-categories: [cloud-api]
----
+# Application developer guide
 
 This guide will provide information on how an application developer can leverage the new Generic Cloud Services APIs, in order to be able to properly use the CloudPublisher/CloudSubscriber API, publish a message, being notified of message delivery and of connection status changes.
 

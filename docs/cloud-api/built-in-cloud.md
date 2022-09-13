@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Built-in Cloud Services"
-categories: [cloud-api]
----
+# Built-in Cloud Services
 
 Eclipse Kura provides by default a set of services used to connect to a cloud platform. The following sections describe the services and how to configure them.
 

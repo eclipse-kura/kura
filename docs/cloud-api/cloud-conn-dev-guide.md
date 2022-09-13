@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Cloud connection developer guide"
-categories: [cloud-api]
----
+# Cloud connection developer guide
 
 This guide will provide information on how a cloud connection developer can leverage the new Generic Cloud Services APIs.
 

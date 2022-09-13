@@ -1,8 +1,4 @@
----
-layout: page
-title:  "User guide"
-categories: [cloud-api]
----
+# User guide
 
 This guide will illustrate the steps required for configuring an application that uses the new Cloud Connection APIs to publish messages to the Kapua platform.
 

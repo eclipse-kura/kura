@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Overview"
-categories: [cloud-api]
----
+# Overview
 
 This section describes the new cloud related concepts and APIs introduced in Kura 4.0.
 

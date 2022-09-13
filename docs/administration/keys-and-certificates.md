@@ -63,16 +63,16 @@ The **org.eclipse.kura.core.keystore** bundle exposes a REST endpoint under the 
 The ESF REST APIs for Keys and Certificates support the following calls and are allowed to any user with **rest.keystores** permission.
 
 Method | Path                                                                 | Roles Allowed | Encoding | Request Parameters | Description
-------------------------------------------------------------------------------|---------------|------------------
-GET    | /                                                                    | keystores     | JSON     | None                         | Returns the list of all the KeystoreService instances. |
-GET    | /entries                                                             | keystores     | JSON     | None                         | Returns the list of all the entries managed by the KeystoreService instances. |
-GET    | /entries?keystoreServicePid={keystoreServicePid}                     | keystores     | JSON     | keystoreServicePid           | Returns the list of all the entries managed by the specified KeystoreService instance. |
-GET    | /entries?alias={alias}                                               | keystores     | JSON     | alias                        | Returns the list of all the entries specified by the defined alias and managed in all the available  KeystoreService instances in the framework. |
-GET    | /entries/entry?keystoreServicePid={keystoreServicePid}&alias={alias} | keystores     | JSON     | keystoreServicePid and alias | Returns the entry identified by the specified keystoreServicePid and alias. |
-POST   | /entries/csr                                                         | keystores     | JSON     | The reference to the key pair in a specified KeystoreService instance that will be used to generate the CSR. The request has to be associated with additional parameters that identify the algorithm used to compute and sign the CSR and the DN or the corresponding public key that needs to be countersigned. | Generates a CSR for the specified key pair in the specified KeystoreService instance, based on the parameters provided in the request |
-POST   | /entries/certificate                                                 | keystores     | JSON     | The reference to the KeystoreService instance and the alias that will be used for storage. A type filed identifies the type of key that needs to be managed. | This request allows the user to upload a TrustedCertificate. |
-POST   | /entries/keypair                                                     | keystores     | JSON     | To generate a new KeyPair directly in the device, the request format need to follow the references in the following paragraphs | This request allows the user to generate a new KeyPair into the device. |
-DELETE | /entries                                                             | keystores     | JSON     | A JSON identifying the resource to delete. The format of the request is described in in one of the following sections | Deletes the entry in the specified KeystoreService instance |
+-------|----------------------------------------------------------------------|---------------|----------|--------------------|---------------
+GET    | `/`                                                                    | keystores     | JSON     | None                         | Returns the list of all the KeystoreService instances. |
+GET    | `/entries`                                                             | keystores     | JSON     | None                         | Returns the list of all the entries managed by the KeystoreService instances. |
+GET    | `/entries?keystoreServicePid={keystoreServicePid}`                     | keystores     | JSON     | keystoreServicePid           | Returns the list of all the entries managed by the specified KeystoreService instance. |
+GET    | `/entries?alias={alias}`                                               | keystores     | JSON     | alias                        | Returns the list of all the entries specified by the defined alias and managed in all the available  KeystoreService instances in the framework. |
+GET    | `/entries/entry?keystoreServicePid={keystoreServicePid}&alias={alias}` | keystores     | JSON     | keystoreServicePid and alias | Returns the entry identified by the specified keystoreServicePid and alias. |
+POST   | `/entries/csr`                                                         | keystores     | JSON     | The reference to the key pair in a specified KeystoreService instance that will be used to generate the CSR. The request has to be associated with additional parameters that identify the algorithm used to compute and sign the CSR and the DN or the corresponding public key that needs to be countersigned. | Generates a CSR for the specified key pair in the specified KeystoreService instance, based on the parameters provided in the request |
+POST   | `/entries/certificate`                                                 | keystores     | JSON     | The reference to the KeystoreService instance and the alias that will be used for storage. A type filed identifies the type of key that needs to be managed. | This request allows the user to upload a TrustedCertificate. |
+POST   | `/entries/keypair`                                                     | keystores     | JSON     | To generate a new KeyPair directly in the device, the request format need to follow the references in the following paragraphs | This request allows the user to generate a new KeyPair into the device. |
+DELETE | `/entries`                                                             | keystores     | JSON     | A JSON identifying the resource to delete. The format of the request is described in in one of the following sections | Deletes the entry in the specified KeystoreService instance |
 
 ### List All the KeystoreServices
 
@@ -292,7 +292,7 @@ DELETE | /entries                                                             | 
 }
 ```
 
-## KEYS-V1 Request Handler
+## KEYS-V1 Request Handler
 
 Mapping the previously defined REST APIs, the framework exposed to the remote cloud platforms a request handler named KEYS-V1 that allows the remote user to list and manage the keystores, the keys and the certificates in the framework.
 The request handler exposes also the capability to generate on the edge a CSR that can be countersigned remotely by a trusted CA.

@@ -35,6 +35,7 @@ nav:
       - "administration/remote-management.md"
       - "administration/keys-and-certificates.md"
       - "administration/keystore-management.md"
+      - "administration/system-component-inventory.md"
 
 theme:
   name: material

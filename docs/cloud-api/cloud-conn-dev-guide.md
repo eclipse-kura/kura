@@ -6,12 +6,6 @@ categories: [cloud-api]
 
 This guide will provide information on how a cloud connection developer can leverage the new Generic Cloud Services APIs.
 
-- [Implement CloudEndpoint and CloudConnectionManager](#implement-cloudendpoint-and-cloudconnectionmanager)
-- [Implement the CloudConnectionFactory interface](#implement-the-cloudconnectionfactory-interface)
-- [Provide a CloudPublisher implementation](#provide-a-cloudpublisher-implementation)
-- [Provide a CloudSubscriber implementation](#provide-a-cloudsubscriber-implementation)
-- [Implement RequestHandler support](#implement-requesthandler-support)  
-
 As reference, this guide will use the Eclipse IoT WG namespace implementation bundle available [here](https://github.com/eclipse/kura/tree/develop/kura/org.eclipse.kura.cloudconnection.eclipseiot.mqtt.provider)
 
 ## Implement CloudEndpoint and CloudConnectionManager

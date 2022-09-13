@@ -40,4 +40,4 @@ Require-Bundle: org.eclipse.kura.http.server.manager;bundle-version="1.1.0",
  org.eclipse.kura.rest.wire.provider;bundle-version="0.0.0",
  org.eclipse.kura.wire.component.provider;bundle-version="1.1.0",
  org.eclipse.kura.driver.helper.provider;bundle-version="1.1.0",
- org.eclipse.kura.util.test.driver;bundle-version="5.2.0"
+ org.eclipse.kura.util.test.driver;bundle-version="5.3.0"

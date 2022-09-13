@@ -83,7 +83,7 @@ After specifying container parameters, ensure to set **Enabled** to **true** and
 
 ## Stopping the container
 
-!!! warn
+!!! warning
     Stopping a container will delete it in an irreversible way. Please be sure to only use stateless containers and/or save their data in external volumes.
 
 To stop the container without deleting the component, set the **Enabled** field to **false**, and then press **Apply**. This will delete the running container, but leave this component available for running the container again in the future. If you want to completely remove the container and component, press the **Delete** button to the top right of the screen, and press **Yes** on the confirmation dialogue.

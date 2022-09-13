@@ -28,6 +28,7 @@ The Configuration Service REST APIs are exposed by the  `org.eclipse.kura.rest.c
 ### Get all the factory components pids
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/factoryComponents`
+
 **Response**:
 ```JSON
 [
@@ -65,6 +66,7 @@ The Configuration Service REST APIs are exposed by the  `org.eclipse.kura.rest.c
 ### Create component from factory
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/factoryComponents`
+
 **Request body**:
 ```JSON
 {
@@ -91,6 +93,7 @@ The request must be provided with the following elements:
 ### List the tracked configurable component Pids
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents`
+
 **Response**:
 ```JSON
 [
@@ -139,6 +142,7 @@ The request must be provided with the following elements:
 ### Lists all the component configurations of all the ConfigurableComponents
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents/configurations`
+
 **Response**:
 ```JSON
 [
@@ -375,6 +379,7 @@ The request must be provided with the following elements:
 ### List the configurations of all the ConfigurableComponents that match a filter
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents/configurations/byFilter/(service.pid=org.eclipse.kura.clock.ClockService)`
+
 **Response**:
 ```JSON
 [
@@ -610,6 +615,7 @@ The request must be provided with the following elements:
 ### Get the configuration of the ConfigurableComponent matching a pid
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents/configurations/byPid/org.eclipse.kura.clock.ClockService`
+
 **Response**:
 ```JSON
 {
@@ -843,6 +849,7 @@ The request must be provided with the following elements:
 ### Get the default configuration of the ConfigurableComponent matching a pid
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents/configurations/byPid/org.eclipse.kura.clock.ClockService/_default`
+
 **Response**:
 ```JSON
 {
@@ -1061,6 +1068,7 @@ The request must be provided with the following elements:
 ### Update the component configuration identified matching a pid
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents/configurations/byPid/org.eclipse.kura.clock.ClockService/_update`
+
 **Request body**:
 ```JSON
 {
@@ -1103,6 +1111,7 @@ The request must be provided with the following elements:
 ### Update the configuration of multiple configurable components
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/configurableComponents/configurations/_update`
+
 **Request body**:
 ```JSON
 {
@@ -1125,6 +1134,7 @@ The request must be provided with the following elements:
 ### List all the available snapshot IDs
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/snapshots`
+
 **Response**:
 ```JSON
 [
@@ -1140,6 +1150,7 @@ The request must be provided with the following elements:
 ### Get the content of a given snapshot
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/snapshots/{id}`
+
 **Response**:
 ```JSON
 [
@@ -1215,6 +1226,7 @@ The request must be provided with the following elements:
 ### Trigger the framework to take and persist a snapshot
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/snapshots/_write`
+
 **Response**:
 ```JSON
 1631095409516
@@ -1231,6 +1243,7 @@ The request must be provided with the following elements:
 ### Upload a snapshot as XML
 
 **Request**: URL - `https://<gateway-ip>/services/configuration/v1/snapshots/_upload`
+
 **Request body**:
 ```XML
 <?xml version="1.0" encoding="UTF-8"?><esf:configurations xmlns:esf="http://eurotech.com/esf/2.0" xmlns:ocd="http://www.osgi.org/xmlns/metatype/v1.2.0">

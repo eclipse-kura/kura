@@ -2,15 +2,15 @@
 
 Kura provides a built-in REST Service based on the [osgi-jax-rs-connector](https://github.com/hstaudacher/osgi-jax-rs-connector) project.
 
-By default, REST service providers register their services using the context path ```/services```. The REST service provides the **BASIC** Authentication support and HTTPS client certificate authentication support.
+By default, REST service providers register their services using the context path `/services`. The REST service provides the **BASIC** Authentication support and HTTPS client certificate authentication support.
 
 REST API access is available on all HTTP ports defined in the [HTTP/HTTPS Configuration](doc:httphttps-configuration) section, unless access is restricted to dedicated ports using the corresponding configuration parameter (see below).
 
 Certificate authentication support is only available on the **HTTPS With Certificate Authentication Ports** configured in [HTTP/HTTPS Configuration](doc:httphttps-configuration) section.
 
-Kura Identity names and passwords can be used for **BASIC** Authentication. Certificate authentication follows the same rules as [Gateway Administration Console Authentication](doc:security-configuration).
+Kura Identity names and passwords can be used for **BASIC** Authentication. Certificate authentication follows the same rules as [Gateway Administration Console Authentication](../gateway-configuration/gateway-administration-console-authentication.md).
 
-!!! warn
+!!! warning
     If the [forced password change](doc:security-configuration#forced-password-change-on-login) feature for a given identity is enabled, REST API password authentication will be blocked for that identity until the password is updated by the user or the feature is manually disabled. Certificate authentication will continue to be allowed even if the forced password change feature is enabled.
 
 JAX-RS roles are mapped to Kura permissions, the name of a permission associated with a JAX-RS role is the _rest._ prefix followed by the role name. For example the _assets_ role is mapped to the _rest.assets_ permission. REST related permissions can be assigned to an identity using the Gateway Administration Console in the **Identities** section.

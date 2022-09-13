@@ -10,7 +10,7 @@ This service exposes the following configuration parameters:
 - **Broker XML** - Broker XML configuration. An empty broker configuration will disable the broker.
 - **Required protocols** - A comma seperated list of all required protocol factories (e.g. AMQP or MQTT)
 - **User configuration** - (Required) - User configuration in the format: user=password|role1,role2,...
-- **Default user name*** - The name of the default user
+- **Default user name** - The name of the default user
 
 Please refer to the [official documentation](https://activemq.apache.org/artemis/docs.html) for more details on how to configure the ActiveMQ broker service.
 

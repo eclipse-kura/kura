@@ -6,7 +6,7 @@ To run a command simply fill the **Execute** field with the command and click th
 
 Once the file is selected and **Execute** is clicked, the zip file is sent embedded in an MQTT message on the device. The Command Service in the device stores the file in /tmp, unzips it, and tries to execute a shell script if one is present in the file. Note that in this case, the Execute parameter cannot be empty; a simple command, such as `ls -l /tmp`, may be entered.
 
-!!! warn
+!!! warning
     When decompressed, the script loses its executable attribute. To fix this problem, if you plan to execute a script, the command entered into the **Execute** line must trigger the execution:
     ** bash [name of the script] **.
 

@@ -35,7 +35,7 @@ Pull the image using the following command.
 $ docker pull nvcr.io/nvidia/tritonserver:<xx.yy>-py3
 ```
 
-Where \<xx.yy\> is the version of Triton that you want to pull.
+Where `<xx.yy>` is the version of Triton that you want to pull.
 
 ### Native Triton installation on supported devices
 
@@ -69,7 +69,8 @@ The parameters used to configure the Triton Service are the following:
     io.grpc.StatusRuntimeException: RESOURCE_EXHAUSTED: gRPC message exceeds maximum size 4194304
     ```
 
-> **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
+!!! note
+    Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
 
 
@@ -91,7 +92,8 @@ The parameters used to configure the Triton Service are the following:
 - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
 - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
 
-> **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
+!!! note
+    Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
 
 
@@ -141,7 +143,8 @@ The parameters used to configure the Triton Service are the following:
 - **Timeout (in seconds) for time consuming tasks**: Timeout (in seconds) for time consuming tasks like server startup, shutdown or model load. If the task exceeds the timeout, the operation will be terminated with an error.
 - **Max. GRPC message size (bytes)**: this field controls the maximum allowed size for the GRPC calls to the server instance.
 
-> **Note**: Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
+!!! note
+    Pay attention on the ports used for communicating with the Triton Server. The default ports are the 8000-8002, but these are tipically used by Kura for debug purposes.
 
 ### Configuration for a local native Triton Server with Triton Server Service component [deprecated since 5.2.0]
 

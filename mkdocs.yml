@@ -27,6 +27,8 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
+    - Cloud Platforms Connection:
+      - cloud-platform/kura-ec-cloud.md
 
 theme:
   name: material

@@ -1,57 +1,50 @@
-# Raspberry Pi - Raspbian Quick Start
+# Raspberry Pi - Raspberry Pi OS Quick Start
 
 ## Overview
 
-This section provides Eclipse Kura&trade; quick installation procedures for the
-Raspberry Pi and the Kura development environment.
+This section provides Eclipse Kura&trade; quick installation procedures for the Raspberry Pi and the Kura development environment.
 
-!!! warn ""
-    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not CAN support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
+!!! warning
+    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
 
-This quickstart has been tested using the following image:
+This quickstart has been tested using the latest Raspberry Pi OS 32 bit images which are available for download through [the official Raspberry Pi foundation site](https://www.raspberrypi.com/software/operating-systems/) and the Raspberry Pi Imager.
 
-```
-2021-10-30-raspios-bullseye-armhf.zip
-```
+For additional details on OS compatibility refer to the [Kura&trade; release notes](https://www.eclipse.org/kura/downloads.php).
 
-downloaded from
-
-```
-https://downloads.raspberrypi.org/raspios_armhf/images/raspios_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf.zip
-```
+!!! warning
+    Please note that, at the time of this writing, only 32 bit OS image is supported.
 
 ## Enable SSH Access
 
 The ssh server is disabled by default on Raspbian images released after November 2016,
-in order to enable it to follow the instructions available at the following URL:
+in order to enable it follow the instructions available [here](https://www.raspberrypi.org/documentation/remote-access/ssh/).
 
-```
-https://www.raspberrypi.org/documentation/remote-access/ssh/
-```
+If you're using the [Raspberry Pi Imager](https://github.com/raspberrypi/rpi-imager) you can directly enable SSH before writing the operating system into the SD card by clicking on the "setting" icon.
+
+![Enable SSH Raspberry Pi Imager](./images/imager-enable-ssh.png)
 
 ## Eclipse Kura&trade; Installation
-
-!!! warn ""
-    The last Raspbian Stretch adopts the new [Consistent Network Device Naming](https://www.freedesktop.org/wiki/Software/systemd/PredictableNetworkInterfaceNames/). To correctly run Eclipse Kura on the Raspberry Pi, it should be disabled adding the `net.ifnames=0` parameter at the end of the `/boot/cmdline.txt` file.
 
 To install Eclipse Kura with its dependencies on the Raspberry Pi, perform the
 following steps:
 
 1. Boot the Raspberry Pi with the latest Raspbian image (starting from release 5.1.0 Kura is tested with Raspbian 11).
 
-2. Make sure your device is connected to internet. By default, `eth0` lan network interface is configured in DHCP mode.
+2. Make sure your device is connected to the internet. By default, `eth0` lan network interface is configured in DHCP mode.
 
 3. Upgrade the system:
    
-   ```
-   sudo apt update
-   sudo apt upgrade
-   ```
+    ```bash
+    sudo apt update
+    ```
+    ```bash
+    sudo apt upgrade
+    ```
    
 4. Download the Kura package with:
 
     ```
-    http://download.eclipse.org/kura/releases/&lt;version&gt;/kura_&lt;version&gt;_raspberry-pi_installer.deb
+    wget http://download.eclipse.org/kura/releases/<version>/kura_<version>_raspberry-pi_installer.deb
     ```
 
     Note: replace `<version>` in the URL above with the version number of the latest release (e.g. 5.1.0).
@@ -92,11 +85,7 @@ following steps:
 
     The browser will prompt the user to accept the connection to an endpoint with an untrusted certificate:
 
-    ![Untrusted certificate page](./images/untrusted_cert1.png)
-
-    ![Untrusted certificate details](./images/untrusted_cert2.png)
-
-    ![Proceed trusting the source](./images/untrusted_cert3.png)
+    ![Proceed trusting the source](./images/untrusted_cert.png)
 
     Once trusted the source, the user will be redirected to a login page where the default **username** is:
 

@@ -46,7 +46,7 @@ Kura regularly updates two log files in the **/var/log** directory:
 
 The default logger level in this file is set to INFO. This level may be modified for the whole application or for a specific package as shown in the following example:
 
-```
+```xml
 <Loggers>
     <Logger name="org.eclipse" level="info" additivity="false">
         <AppenderRef ref="RollingFile"/>

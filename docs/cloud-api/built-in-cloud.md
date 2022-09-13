@@ -24,7 +24,7 @@ The CloudService allows a single connection to a remote server to be shared acro
 
 To use this service, select the **CloudServices** option located in the **System** area and select the **CloudService** tab as shown in the screen capture below.
 
-![](imgs/cloudService.png){ style="border-radius: 7px;"}
+![](images/cloudService.png){ style="border-radius: 7px;"}
 
 The CloudService provides the following configuration parameters:
 
@@ -48,7 +48,7 @@ In order to overcome the potential latencies introduced by buffering messages, t
 
 To use this service, select the **DataService** option located in the **System** area and select the **CloudService** tab as shown in the screen capture below.
 
-![](imgs/dataService.png){ style="border-radius: 7px;"}
+![](images/dataService.png){ style="border-radius: 7px;"}
 
 The DataService offers methods and configuration options to manage the connection to the remote server including the following (all required) parameters described below.
 
@@ -66,7 +66,7 @@ The DataService offers methods and configuration options to manage the connectio
 
 The MqttDataTransport service provides the ability to connect to a remote broker, publish messages, subscribe to topics, receive messages on the subscribed topics, and disconnect from the remote message broker. To use this service, select the **MqttDataTransport** option located in the **System** area and select the **CloudService** tab as shown in the screen capture below.
 
-![](imgs/mqttDataTransport.png){ style="border-radius: 7px;"}
+![](images/mqttDataTransport.png){ style="border-radius: 7px;"}
 
 The MqttDataTransport service provides the following configuration parameters:
 

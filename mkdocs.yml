@@ -31,8 +31,8 @@ nav:
       - Overview: cloud-api/overview.md
       - User Guide: cloud-api/user-guide.md
       - Application Developer Guide: cloud-api/app-dev-guide.md
-      - Cloud Connection Developer Guide: cloud-api/stack-dev-guide.md
-      - Built-in Cloud Services: cloud-api/stack-components.md
+      - Cloud Connection Developer Guide: cloud-api/cloud-conn-dev-guide.md
+      - Built-in Cloud Services: cloud-api/built-in-cloud.md
 
 theme:
   name: material

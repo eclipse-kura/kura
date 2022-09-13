@@ -4,11 +4,11 @@
 
 After developing your application and generating a deployment package that contains the bundles to be deployed (refer to the Development section for more information), you may install it on the gateway using the **Packages** option in the **System** area of the Kura Gateway Administration Console as shown below.
 
-![](imgs/packageInstall.png)
+![](images/packageInstall.png)
 
 Upon a successful installation, the new component appears in the Services list (shown as the _Heater_ example in these screen captures). Its configuration may be modified according to the defined parameters as shown the _Heater_ display that follows.
 
-![](imgs/packageConfig.png)
+![](images/packageConfig.png)
 
 ## Eclipse Kura Marketplace
 
@@ -17,7 +17,7 @@ The **Packages** page has, in the top part of the page a section dedicated to th
 
 Dragging an application reference taken from the Eclipse Kura Marketplace to the specific area of the ESF Web Administrative Console will instruct ESF to download and install the corresponding package, as seen below:
 
-![](imgs/packageMarketplace.png)
+![](images/packageMarketplace.png)
 
 ## Package Signature
 
@@ -25,6 +25,6 @@ Once the selected application deployment package (dp) file is installed, it will
 The value of the signature field can be **true** if all the bundles contained in the deployment package are digitally signed, or **false** if at least one of the bundles is not signed.
 
 <figure markdown>
-  ![](imgs/dpsignature.png){ style="border-radius: 7px;"}
+  ![](images/dpsignature.png){ style="border-radius: 7px;"}
   <figcaption></figcaption>
 </figure>

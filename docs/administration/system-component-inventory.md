@@ -13,7 +13,7 @@ The feature is particularly important for a system administrator because allows 
 From the local Kura Web UI, the list of system components is available in the **System Packages** tab of the **Device** section.
 Once selected, the user will get the list of all the system installed components.
 
-![](imgs/systemComponentInventory.png)
+![](images/systemComponentInventory.png)
 
 The component's inventory list is available also via REST APIs and, with the same contract, from the cloud.
 The Mqtt contract defined for this component is available [here](mqtt-namespace#remote-gateway-inventory-via-mqtt)

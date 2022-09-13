@@ -28,7 +28,8 @@ Pressing the **Download** button will trigger a dialog that allows choosing the 
 
 The **Upload and Apply** option  provides the ability to import an XML file from your computer and upload it onto the device. This function updates every service in Kura with the parameters defined in the XML file.
 
-{% include alerts.html message='Carefully select the file to be uploaded. An incorrect file may crash Kura and make it unresponsive.' %}
+!!! warning
+    Carefully select the file to be uploaded. An incorrect file may crash Kura and make it unresponsive.
 
 ![](imgs/snapshotsUpload.png)
 

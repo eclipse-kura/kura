@@ -28,14 +28,14 @@ nav:
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
     - Administration:
-      - "administration/directory-layout.md"
-      - "administration/snapshot-management.md"
-      - "administration/application-management.md"
-      - "administration/remote-management-kapua.md"
-      - "administration/remote-management.md"
-      - "administration/keys-and-certificates.md"
-      - "administration/keystore-management.md"
-      - "administration/system-component-inventory.md"
+      - Directory Layout: administration/directory-layout.md
+      - Snapshot Management: administration/snapshot-management.md
+      - Application Management: administration/application-management.md
+      - Remote Management with Eclipse Kapua: administration/remote-management-kapua.md
+      - Remote Management with Everyware Cloud: administration/remote-management.md
+      - Keys and Certificates: administration/keys-and-certificates.md
+      - Keystore Management: administration/keystore-management.md
+      - System Component Inventory: administration/system-component-inventory.md
 
 theme:
   name: material

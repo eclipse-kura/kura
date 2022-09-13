@@ -144,11 +144,11 @@ As can be seen in the previous snippet, the Publisher exposes itself in the fram
 
 The component definition must contain the following well-known properties:
 
-- **cloud.connection.factory.pid**: this property must be set to the kura.service.pid of the factory that created the cloud connection which the publisher belongs. It is used by the Web UI to enforce that the correct cloud publisher implementation is used in a specific cloud endpoint.  
-- **kura.ui.service.hide**: as specified before for the Cloud Endpoint
-- **kura.ui.factory.hide**: as specified before for the Cloud Endpoint
-- **kura.ui.csf.pid.default**: as specified before for the Cloud Factory. It is an optional property.
-- **kura.ui.csf.pid.regex**: as specified before for the Cloud Factory. It is an optional property.
+- `cloud.connection.factory.pid`: this property must be set to the kura.service.pid of the factory that created the cloud connection which the publisher belongs. It is used by the Web UI to enforce that the correct cloud publisher implementation is used in a specific cloud endpoint.  
+- `kura.ui.service.hide`: as specified before for the Cloud Endpoint
+- `kura.ui.factory.hide`: as specified before for the Cloud Endpoint
+- `kura.ui.csf.pid.default`: as specified before for the Cloud Factory. It is an optional property.
+- `kura.ui.csf.pid.regex`: as specified before for the Cloud Factory. It is an optional property.
 
 The relation between the CloudPublisher instance and the CloudEndpoint is defined by a [configuration property](https://github.com/eclipse/kura/blob/develop/kura/org.eclipse.kura.api/src/main/java/org/eclipse/kura/cloudconnection/CloudConnectionConstants.java#L30) set by the Web UI at CloudPublisher creation.
 

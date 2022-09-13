@@ -30,10 +30,10 @@ The **Upload and Apply** option  provides the ability to import an XML file from
 
 {% include alerts.html message='Carefully select the file to be uploaded. An incorrect file may crash Kura and make it unresponsive.' %}
 
-![](imgs/snapshotsUpload.png){ style="border-radius: 7px;"}
+![](imgs/snapshotsUpload.png)
 
 ### Rollback
 
 The **Rollback** option provides the ability to restore the system to a previous configuration.
 
-![](imgs/snapshotsRollback.png){ style="border-radius: 7px;"}
+![](imgs/snapshotsRollback.png)

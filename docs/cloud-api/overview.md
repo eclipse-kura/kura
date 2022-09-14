@@ -148,7 +148,7 @@ public interface RequestHandler {
 
     public KuraMessage doPost(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
 
-    public  KuraMessage doDel(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
+    public KuraMessage doDel(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
 
     public KuraMessage doExec(RequestHandlerContext context, KuraMessage reqMessage) throws KuraException;
 }

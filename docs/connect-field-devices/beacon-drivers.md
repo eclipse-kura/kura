@@ -4,7 +4,7 @@ Eclipse Kura provides a set of drivers specifically developed to manage BLE Beac
 
 ## Features
 
-The iBeacon&trade; and Eddystone&trade; drivers are designed to listen for incoming beacon packets and to recognize the specific protocols. Of course it's not possible to write data to the beacons, since this is outside the protocol specification. On the Eddystone&trade; driver, moreover, the frame format to be filtered can be chosen from the channel definition. For more information about Eddystone&trade; frame format, see [here](https://developers.google.com/beacons/eddystone).
+The iBeacon&trade; and Eddystone&trade; drivers are designed to listen for incoming beacon packets and to recognize the specific protocols. Of course it's not possible to write data to the beacons, since this is outside the protocol specification. On the Eddystone&trade; driver, moreover, the frame format to be filtered can be chosen from the channel definition. For more information about Eddystone&trade; frame format, see [here](https://github.com/google/eddystone).
  
 ## Installation
 

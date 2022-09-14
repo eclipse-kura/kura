@@ -30,6 +30,7 @@ nav:
     - Cloud Platforms Connection:
       - cloud-platform/kura-ec-cloud.md
       - cloud-platform/kura-kapua.md
+      - cloud-platform/kura-hono.md
 
 theme:
   name: material

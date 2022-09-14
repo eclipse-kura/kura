@@ -2,7 +2,7 @@
 
 This Driver implements the s7comm protocol and can be used to interact with Siemens S7 PLCs using different abstractions, such as the Wires framework, the Asset model or by directly using the Driver itself.
 
-The Driver is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/s7-driver-eclipse-kura-3xy) and [4.x](https://marketplace.eclipse.org/content/s7-driver-eclipse-kura-4xy).
+The Driver is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/s7-driver-eclipse-kura-3xy) and [4.x/5.x](https://marketplace.eclipse.org/content/s7-driver-eclipse-kura-4xy).
 It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
 
 ## Features
@@ -38,16 +38,16 @@ When performing operations that deal with numeric data, two data types are invol
 
 2. The S7 type of the data on the PLC. This value type is specified by the **s7.data.type** configuration property. The following S7 data types are supported:
 
-| S7 Data Type | Size                                                                   | Sign     |
-|--------------|------------------------------------------------------------------------|----------|
-| INT          | 16 bits                                                                | signed   |
-| DINT         | 32 bits                                                                | signed   |
-| WORD         | 16 bits                                                                | unsigned |
-| DWORD        | 32 bits                                                                | unsigned |
-| REAL         | 32 bits                                                                | signed   |
-| BOOL         | 1 bit                                                                  | n.d.     |
-| BYTE         | 1 byte                                                                 | unsigned |
-| CHAR         | 1 byte (only supported as char arrays using the String Java data type) | n.d.     |
+    | S7 Data Type   | Size                                                                   | Sign       |
+    |----------------|------------------------------------------------------------------------|------------|
+    | `INT`          | 16 bits                                                                | `signed`   |
+    | `DINT`         | 32 bits                                                                | `signed`   |
+    | `WORD`         | 16 bits                                                                | `unsigned` |
+    | `DWORD`        | 32 bits                                                                | `unsigned` |
+    | `REAL`         | 32 bits                                                                | `signed`   |
+    | `BOOL`         | 1 bit                                                                  | n.d.       |
+    | `BYTE`         | 1 byte                                                                 | `unsigned` |
+    | `CHAR`         | 1 byte (only supported as char arrays using the String Java data type) | n.d.       |
 
 The Driver automatically adapts the data type used by external applications and the S7 device depending on the value of the two configuration properties mentioned above.
 
@@ -55,15 +55,15 @@ The adaptation process involves the following steps:
 
 - Each device data type is internally converted by the driver from/to a Java type large enough to represent the value of the device data without losing precision. The type mappings are the following:
 
-| S7 Data Type | Java Type |
-|--------------|-----------|
-| INT          | int       |
-| DINT         | int       |
-| WORD         | int       |
-| DWORD        | long      |
-| REAL         | float     |
-| BOOL         | boolean   |
-| BYTE         | int       |
+    | S7 Data Type   | Java Type   |
+    |----------------|-------------|
+    | `INT`          | `int`       |
+    | `DINT`         | `int`       |
+    | `WORD`         | `int`       |
+    | `DWORD`        | `long`      |
+    | `REAL`         | `float`     |
+    | `BOOL`         | `boolean`   |
+    | `BYTE`         | `int`       |
 
 - If the **value type** of the channel does not match the Java type specified in mapping above, a conversion is performed by the Driver to convert it to/from the matching type, choosing appropriately between the `Number.toInt()`, `Number.toLong()`, `Number.toFloat()` or `Number.toDouble()` methods.
 Precision losses may occur if the Java type used by the external application is not suitable to represent all possible values of the device data type.

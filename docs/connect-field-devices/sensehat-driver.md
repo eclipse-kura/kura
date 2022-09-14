@@ -37,7 +37,7 @@ The driver will attempt to convert the value obtained from the sensor into the d
 
 Example sensors Asset configuration:
 
-![sensors]({{ site.baseurl }}/assets/images/wires/SensehatSensors.png)
+![](images/SensehatSensors.png){ style="border-radius: 7px;" }
 
 ## Joystick
 
@@ -66,7 +66,7 @@ Joystick related channels can be only used for reading and both in polling and e
 
 Example joystick Asset configuration:
 
-![joystick]({{ site.baseurl }}/assets/images/wires/SensehatJoystick.png)
+![](images/SensehatJoystick.png){ style="border-radius: 7px;" }
 
 ## LED Matrix
 
@@ -151,7 +151,7 @@ Writes to a **LED_MATRIX_ROTATION** channel can be performed using any numeric t
 
 Example framebuffer Asset configuration:
 
-![fb]({{ site.baseurl }}/assets/images/wires/SensehatFb.png)
+![](images/SensehatFb.png){ style="border-radius: 7px;" }
 
 ## Examples
 

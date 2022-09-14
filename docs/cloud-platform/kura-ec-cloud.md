@@ -12,7 +12,7 @@ The Kura Gateway Administrative Console exposes all services necessary for conne
 
 ### CloudService
 
-The default settings for the CloudService are typically adequate for connecting to Everyware Cloud. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](}/cloud-api/5-stack-components.html#cloudservice).
+The default settings for the CloudService are typically adequate for connecting to Everyware Cloud. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](#cloudservice).
 
 ![](images/cloudService.png)
 
@@ -21,7 +21,7 @@ The default settings for the CloudService are typically adequate for connecting 
 
 ### DataService
 
-The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](}/cloud-api/5-stack-components.html#dataservice).
+The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](#dataservice).
 
 In order for Kura to connect to Everyware Cloud on startup, the *connect.auto-on-startup* option must be set to `true`. If this value is changed from `false` to `true`, Kura will immediately begin the connection process. It is recommended that the CloudService and MqttDataTransport are configured before setting the *connect.auto-on-startup* option to `true`.
 
@@ -41,7 +41,7 @@ While the majority of default settings in the MqttDataTransport can be left unch
 !!! note
     When connecting to Everyware Cloud, the *username* must have proper permissions. Information on users and permissions can be found [here](http://everywarecloud.eurotech.com/doc/ECDevGuide/latest/2.02-Managing-Cloud-Users.asp).
 
-For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](}/cloud-api/5-stack-components.html#mqttdatatransport).
+For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](#mqttdatatransport).
 
 ![](images/dataTransport.png)
 

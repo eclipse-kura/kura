@@ -29,6 +29,7 @@ nav:
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
     - Cloud Platforms Connection:
       - cloud-platform/kura-ec-cloud.md
+      - cloud-platform/kura-kapua.md
 
 theme:
   name: material

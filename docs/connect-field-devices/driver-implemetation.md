@@ -4,7 +4,7 @@ A **Driver** encapsulates the communication protocol and its configuration param
 
 The Driver API abstracts the specificities of the end Fieldbus protocols providing a clean and easy to use set of calls that can be used to develop end-applications.
 
-Using the Driver APIs, an application can simply use the connect and disconnect methods to open or close the connection with the Field device. Furthermore, the read and write methods allow exchanging​ data with the Field device.  
+Using the Driver APIs, an application can simply use the connect and disconnect methods to open or close the connection with the Field device. Furthermore, the read and write methods allow exchanging data with the Field device.  
 
 A Driver instance can be associated with an Asset to abstract even more the low-level specificities and allow an easy and portable development of the Java applications that need to interact with sensors, actuators, and PLCs.
 
@@ -13,12 +13,12 @@ The Asset will use the Driver's protocol-specific channel descriptor to compose 
 ## Driver Configuration 
 Generally, a Driver instance is a configurable component which parameters can be updated in the **Drivers and Assets** section of the Kura Administrative User Interface.
 
-![driver_config]({{ site.baseurl }}/assets/images/drivers_and_assets/Driver_config.png)
+![](images/Driver_config.png)
 
 ## Supported Field Protocols and Availability
 
 Drivers will be provided as add-ons available in the [Eclipse IoT Marketplace](https://marketplace.eclipse.org/category/categories/eclipse-kura).
-Please see [here](/kura/devices/2-field-protocols.html) for a complete list.
+Please see [here](../field-protocols) for a complete list.
 
 ## Driver-Specific Optimizations
 

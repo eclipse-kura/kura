@@ -16,7 +16,7 @@ The Kura Gateway Administrative Console exposes all services necessary for conne
 
 The default settings for the CloudService are typically adequate for connecting to a Kapua instance. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](#cloudservice).
 
-![](images/kapuaCloudService.png)
+![](images/cloudService.png)
 
 !!! warning
     The "*Simple JSON*" payload encoding is not supported by Kapua. Use the default "*Kura Protobuf*" encoding instead.
@@ -30,19 +30,19 @@ In order for Kura to connect to Eclipse Kapua on startup, the *connect.auto-on-s
 !!! note
     Changing the value of *connect.auto-on-startup* from `true` to `false` **will not** disconnect the client from the broker. This setting simply implies that Kura will not automatically connect on the next start of Kura.
 
-![](images/kapuaDataService.png)
+![](images/dataService.png)
 
 ### MqttDataTransport
 
 While the majority of default settings in the MqttDataTransport can be left unchanged, the following parameters must be modified:
 
-- **broker-url** - defines the MQTT broker URL that was provided when the Eclipse Kapua account was established.
-- **topic.context.account-name** - defines the account name of the account to which the device is attempting to connect.
-- **username** - identifies the user to be used when creating the connection.
+- **broker-url** - defines the MQTT broker URL that was provided when the Kapua account was established.
+- **topic.context.account-name** - defines the account name of the account to which the device is attempting to connect. In the MqttDataTransport configuration screen capture shown below, the *account name* is `account-name`
+- **username** - identifies the user to be used when creating the connection. In the MqttDataTransport configuration screen capture shown below, the *username* is `username`.
 
 For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](#mqttdatatransport).
 
-![](images/kapuaMQTTDataTransport.png)
+![](images/dataTransport.png)
 
 ## Connect/Disconnect
 

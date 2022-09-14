@@ -35,7 +35,7 @@ The first step involves the registration of the new device on AWS, this operatio
 
     Devices on the AWS IoT platform are called *things*, in order to register a new thing select **Manage** -> **Things** from the left side menu and then press the **Create** button, in the top right section of the screen. Select **Create a single thing**.
 
-    ![new_thing]({{ site.baseurl }}/assets/images/aws/new_thing.png)
+    ![](images/awsNewThing.png)
 
     Enter a name for the new device and then press the **Next** button, from now on `kura-gateway` will be used as the device name.
 
@@ -49,7 +49,7 @@ The first step involves the registration of the new device on AWS, this operatio
 
     You should see a screen like the following:
 
-    ![keys.png]({{ site.baseurl }}/assets/images/aws/keys.png)
+    ![](images/awsKeys.png)
 
     Download the 3 files listed in the table and store them in a safe place, they will be needed later, also copy the link to the root CA for AWS IoT in order to be able to retrieve it later from the device.
 
@@ -62,7 +62,7 @@ The first step involves the registration of the new device on AWS, this operatio
     A policy can also be attached to a certificate later on perforiming the following steps:
 
     Enter the device configuration section, by clicking on **Manage** -> **Things** and then clicking on the newly created device. Click on **Security** on the left panel and then click on the certificate entry (it is identified by an hex code), select **Policies** in the left menu, you should see this screen:
-     ![policies]({{ site.baseurl }}/assets/images/aws/policies.png)
+     ![](images/awsPolicies.png)
 
     Click on **Actions** in the top left section of the page and then click on **Attach policy**, select the default policy previously created and then press the **Attach** button.
 
@@ -74,39 +74,43 @@ The following steps should be performed on the device, this guide is based on Ku
 
     The first step for using the device keys obtained at the previous step is to create a new Java keystore containing the Root Certificate used by the Amazon IoT platform, this can be done executing the following commands on the device:
 
-    ```
+    ```bash
     sudo mkdir /opt/eclipse/kura/security
+    ```
+    ```bash
     cd /opt/eclipse/kura/security
+    ```
+    ```bash
     curl https://www.amazontrust.com/repository/AmazonRootCA1.pem > /tmp/root-CA.pem
+    ```
+    ```bash
     sudo keytool -import -trustcacerts -alias aws -file /tmp/root-CA.pem -keystore cacerts.ks -storepass changeit
     ```
 
-    If the last command reports that the certificate already exist in the system-wide store type `yes` to proceed.
-
-    The code above will generate a new keystore with `changeit` as password, change it if needed.
+    If the last command reports that the certificate already exist in the system-wide store type `yes` to proceed. The code above will generate a new keystore with `changeit` as password, change it if needed.
 
 8.  Configure the SSL parameters using the Kura Web UI.
 
     1.  Open the Kura Web Console and enter select the **Settings** entry in the left side menu and then click on **SSL Configuration**, you should see this screen:
 
-        ![ssl_config]({{ site.baseurl }}/assets/images/aws/ssl_config.png)
+        ![](images/awsSSLConfig.png)
 
         Change the **Keystore path** parameter to `/opt/eclipse/kura/security/cacerts.ks` if needed.
 
         Change the settings in the form to match the screen above, **set Default protocol to TLSv1.2**, enter `changeit` as **Keystore Password** (or the password defined at step 7).
 
-        > **Warning**: steps from 8.2 to 8.6 will not work on Kura 3.2.0 due to a [known issue](https://github.com/eclipse/kura/issues/2125). On this version,
-        private key and device certificate need to be manually added to the keystore using the command line. If you are running Kura 3.2.0, proceed with step 8.7.
+        !!! warning
+            Steps from 8.2 to 8.6 will not work on Kura 3.2.0 due to a [known issue](https://github.com/eclipse/kura/issues/2125). On this version, private key and device certificate need to be manually added to the keystore using the command line. If you are running Kura 3.2.0, proceed with step 8.7.
 
     2.  Open the Kura Web Console and enter select the **Settings** entry in the left side menu and then click on **Device SSL Certificate**, you should see this screen:
 
-        ![kura_settings]({{ site.baseurl }}/assets/images/aws/kura_settings.png)
+        ![](images/awsKuraSettings.png)
 
         Enter `aws-ssl` in the **Storage Alias** field.
 
     3.  The private key needs to be converted to the PKCS8 format, this step can be performed executing the following command on a Linux or OSX based machine:
 
-        ```
+        ```bash
         openssl pkcs8 -topk8 -inform PEM -outform PEM -in xxxxxxxxxx-private.pem.key -out outKey.pem -nocrypt
         ```
 
@@ -118,7 +122,7 @@ The following steps should be performed on the device, this guide is based on Ku
 
         You should see a screen like this
 
-        ![keys_config]({{ site.baseurl }}/assets/images/aws/keys_config.png)
+        ![](images/awsKeysConfig.png)
 
     6. Click the **Apply** button to confirm.
 
@@ -126,7 +130,7 @@ The following steps should be performed on the device, this guide is based on Ku
 
         On the host machine, open a terminal window in the folder containing the files downloaded at step 5 and execute the following command:
 
-        ```
+        ```bash
         openssl pkcs12 -export -in xxxxxxxxxx-certificate.pem.crt -inkey xxxxxxxxxx-private.pem.key -name aws-ssl -out aws-ssl.p12
         ```
 
@@ -136,7 +140,7 @@ The following steps should be performed on the device, this guide is based on Ku
 
         Copy the obtained `aws-ssl.p12` file to the device into the `/tmp` folder using scp:
 
-        ```
+        ```bash
         scp ./aws-ssl.p12 pi@<device-address>:/tmp
         ```
 
@@ -144,7 +148,7 @@ The following steps should be performed on the device, this guide is based on Ku
 
         Open a ssh connection to the device and enter the following command:
 
-        ```
+        ```bash
         sudo keytool -importkeystore -deststorepass changeit -destkeystore /opt/eurotech/esf/security/cacerts.ks -srckeystore /tmp/aws-ssl.p12 -srcstoretype PKCS12
         ```
 
@@ -163,13 +167,13 @@ The following steps should be performed on the device, this guide is based on Ku
 
     2. Set the broker URL in the **MqttDataTransport-AWS** tab, it can be obtained from the AWS IoT Web Console clicking on the **Settings** entry in the bottom left section of the page, the URL will look like the following:
 
-        ```
+        ```bash
         a1rm1xxxxxxxxx.iot.us-east-1.amazonaws.com
         ```
 
         The mqtts protocol must be used, the value for the **broker-url** field derived from the URL above is the following:  
 
-        ```
+        ```bash
         mqtts://a1rm1xxxxxxxxx.iot.us-east-1.amazonaws.com:8883/
         ```
 

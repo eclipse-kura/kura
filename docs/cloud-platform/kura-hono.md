@@ -14,11 +14,17 @@ From the Cloud Connections section,
 
 the user needs to create a new connection:
 
-![](images/newCloudConnection1.png)
+<figure markdown>
+  ![](images/newCloudConnection1.png){ style="border-radius: 5px;" }
+  <figcaption></figcaption>
+</figure>
 
 by specifying a valid PID:
 
-![](images/newCloudConnection2.png)
+<figure markdown>
+  ![](images/newCloudConnection2.png){ style="border-radius: 5px;" }
+  <figcaption></figcaption>
+</figure>
 
 The result should be like the one depicted in the following image:
 
@@ -51,9 +57,10 @@ In order for Kura to connect to Eclipse Hono on startup, the *connect.auto-on-st
 
 While the majority of default settings in the MqttDataTransport can be left unchanged, the following parameters must be modified:
 
-- **broker-url** - defines the MQTT broker URL related to the target Eclipse Hono instance.
-- **topic.context.account-name** - defines the account name of the account to which the device is attempting to connect.
-- **username** - identifies the user to be used when creating the connection.
+- **broker-url** - defines the MQTT broker URL that was provided when the Eurotech Everyware Cloud account was established. In the MqttDataTransport configuration screen capture shown below, the *broker-url* is `mqtt://broker-url:1883`
+- **topic.context.account-name** - defines the account name of the account to which the device is attempting to connect. In the MqttDataTransport configuration screen capture shown below, the *account name* is `account-name`
+- **username** - identifies the user to be used when creating the connection. In the MqttDataTransport configuration screen capture shown below, the *username* is `username`.
+
 
 For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](#mqttdatatransport).
 

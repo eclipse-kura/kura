@@ -13,7 +13,7 @@ This section provides a guide on connecting an Eclipse Kura&trade; device to the
 
 The first step involves the registration of the new device on AWS, this operation can be done using the AWS Web Console or with the AWS CLI command line tool, in this guide the Web based console will be used.
 
-#### 1. Access the AWS IoT management console.
+#### 1. Access the AWS IoT management console.
 
 This can be done by logging in the AWS console and selecting **IoT Core** from the services list, in the **Internet of Things** section.
 

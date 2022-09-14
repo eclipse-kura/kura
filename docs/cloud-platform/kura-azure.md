@@ -1,4 +1,4 @@
-# Azuee IoT Hub&trade; platform
+# Azure IoT Hub&trade; platform
 
 Starting from release 3.0, Eclipse Kura can connect to the Azure IoT Hub using the MQTT protocol. When doing so, Kura applications can send device-to-cloud messages. More information on the Azure IoT Hub and its support for the MQTT protocol can be found [here](https://docs.microsoft.com/en-us/azure/iot-hub/iot-hub-mqtt-support). This document outlines how to configure and connect a Kura application to the Azure IoT Hub.
 
@@ -104,7 +104,7 @@ In order for Kura to connect to Azure IoT Hub on startup, the *connect.auto-on-s
 !!! note
     Changing the value of *connect.auto-on-startup* from true to false **will not** disconnect the client from the broker. This setting simply implies that Kura will not automatically connect on the next start of Kura.
 
-![data_service](images/DataService.png)
+![data_service](images/azureDataService.png)
 
 ## CloudService
 
@@ -120,7 +120,7 @@ The default settings for the CloudService should be modified as follow to allow 
 
 The screen capture shown below displays the default settings for the CloudService.
 
-![cloud_service](images/CloudService.png)
+![cloud_service](images/azureCloudService.png)
 
 ## How to connect and disconnect from the cloud platform
 

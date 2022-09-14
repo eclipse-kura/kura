@@ -31,6 +31,8 @@ nav:
       - cloud-platform/kura-ec-cloud.md
       - cloud-platform/kura-kapua.md
       - cloud-platform/kura-hono.md
+      - cloud-platform/kura-aws-cloud.md
+      - cloud-platform/kura-azure.md
 
 theme:
   name: material

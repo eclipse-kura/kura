@@ -7,7 +7,7 @@ An **Asset** is a logical representation of a field device, described by a list 
 To further describe the concept of Channel and Asset, the following table shows a set of PLC register addresses as provided in a typical PLC documentation.
 
 Name               | Entity          | Address |
--------------------|---------------------------|
+-------------------|-----------------|---------|
 LED1               | COILS           | 2049    |
 LED2               | COILS           | 2050    |
 LED3               | COILS           | 2051    |
@@ -24,7 +24,7 @@ Reset Quad Counter | COILS           | 3084    |
 
 The corresponding Channels definition in the Asset is as follows:
 
-![channels]({{ site.baseurl }}/assets/images/drivers_and_assets/Devkit.png)
+![](images/Devkit.png)
 
 As shown in the previous image, the Channel definition in an Asset results easily mappable to what available in a generic PLC documentation. 
 

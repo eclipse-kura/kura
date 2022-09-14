@@ -6,9 +6,9 @@ Everyware Cloud provides an easy mechanism for connecting cloud-ready devices to
 
 The Kura Gateway Administrative Console exposes all services necessary for connecting to Everyware Cloud. The reference links listed below outline each service involved in the Everyware Cloud connection. It is recommended that each section be reviewed.
 
-- [CloudService](}/cloud-api/5-stack-components.html#cloudservice)
-- [DataService](}/cloud-api/5-stack-components.html#dataservice)
-- [MqttDataTransport](}/cloud-api/5-stack-components.html#mqttdatatransport)
+- [CloudService](#cloudservice)
+- [DataService](}#dataservice)
+- [MqttDataTransport](#mqttdatatransport)
 
 ### CloudService
 

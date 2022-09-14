@@ -1,8 +1,4 @@
----
-layout: page
-title:  "S7comm Driver"
-categories: [devices]
----
+# S7comm Driver
 
 This Driver implements the s7comm protocol and can be used to interact with Siemens S7 PLCs using different abstractions, such as the Wires framework, the Asset model or by directly using the Driver itself.
 

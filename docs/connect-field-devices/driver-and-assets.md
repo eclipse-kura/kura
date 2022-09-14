@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Drivers, Assets and Channels"
-categories: [devices]
----
+# Drivers, Assets and Channels
 
 Eclipse Kura introduces a model based on the concepts of **Drivers** and **Assets** to simplify the communication with the field devices attached to a gateway.
 

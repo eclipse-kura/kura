@@ -1,8 +1,4 @@
----
-layout: page
-title:  "OPC UA Driver"
-categories: [devices]
----
+# OPC UA Driver
 
 This Driver implements the client side of the OPC UA protocol using the Driver model. The Driver can be used to interact as a client with OPC UA servers using different abstractions, such as the Wires framework, the Asset model or by directly using the Driver itself.
 

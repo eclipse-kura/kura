@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Driver implementation"
-categories: [devices]
----
+# Driver implementation
 
 A **Driver** encapsulates the communication protocol and its configuration parameters.
 

@@ -1,8 +1,4 @@
----
-layout: page
-title:  "RaspberryPi SenseHat driver"
-categories: [devices]
----
+# RaspberryPi SenseHat driver
 
 The SenseHat driver allows to interact to a RaspberryPi SenseHat device using Kura Driver, Asset and Wires frameworks.
 The driver allows access to the following resources:

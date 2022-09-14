@@ -1,8 +1,4 @@
----
-layout: page
-title:  "GPIO Driver"
-categories: [devices]
----
+# GPIO Driver
 
 The GPIO Driver manages the General Purpose IOs on a gateway using the Driver model. Based on the GPIO Service, the driver can be used in the Wires framework, the Asset model or directly using the Driver itself.
 

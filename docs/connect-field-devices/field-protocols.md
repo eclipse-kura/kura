@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Field Protocols"
-categories: [devices]
----
+# Field Protocols
 
 Eclipse Kura provides support for field protocol implementations as add-ons deployable directly from the [Eclipse Marketplace for IoT](https://marketplace.eclipse.org/taxonomy/term/4397%2C4396/title) site. Moreover, several devices are supported using the Kura Driver model.
 

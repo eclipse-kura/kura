@@ -1,8 +1,4 @@
----
-layout: page
-title:  "Asset implementation"
-categories: [devices]
----
+# Asset implementation
 
 An **Asset** is a logical representation of a field device, described by a list of **Channels**. The Asset uses a specific Driver instance to communicate with the underlying device and it models a generic device resource as a **Channel**. A register in a PLC or a GATT Characteristic in a Bluetooth device are examples of Channels. In this way, each Asset has multiple Channels for reading and writing data from/to an Industrial Device.
 

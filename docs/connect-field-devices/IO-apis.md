@@ -1,8 +1,4 @@
----
-layout: page
-title:  "I/O APIs"
-categories: [devices]
----
+# I/O APIs
 
 The full Eclipse Kura API reference is available [here](http://download.eclipse.org/kura/docs/api/4.0.0/apidocs/index-all.html).
 

@@ -12,7 +12,7 @@ The GPIO Driver includes the following features:
 
 ## Installation
 
-As the other Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) and [4.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
+As the other Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-3xy) and [4.x/5.x](https://marketplace.eclipse.org/content/gpio-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
 
 ## Instance creation
 
@@ -40,10 +40,10 @@ The GPIO Driver channel can be configured with the following parameters:
 
 In this section a simple example on the GPIO Driver using a RaspberryPi will be presented. Before configuring the Driver, arrange a setup as shown in the following picture, using a breadboard, a led, a 120-ohm resistor and some wires. Connect the yellow wire to a ground pin on the RasperryPi connector (i.e. pin 6) and the red one to pin 40 (a.k.a. gpio21).
 
-![gpio_rpi]({{ site.baseurl }}/assets/images/drivers_and_assets/GPIOLed.jpg)
+![](images/GPIOLed.jpg){ style="border-radius: 7px;" }
 
 From the **Drivers and Assets** tab, create a new GPIO Driver, call it **GPIODriver** and add an Asset as shown in the following picture.
 
-![gpio_driver]({{ site.baseurl }}/assets/images/drivers_and_assets/GPIOAssetConfigKura.png)
+![](images/GPIOAssetConfigKura.png){ style="border-radius: 7px;" }
 
 The asset is configured to manage a gpio, called **LED**, as an output and drives it writing a boolean value. The **LED** channel is attached to the gpio21 on the RaspberryPi. In the **Data** tab, fill the **Value** form with true and press **Apply**: the green led will switch on. Writing a false will switch off the led.

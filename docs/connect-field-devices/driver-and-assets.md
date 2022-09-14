@@ -27,7 +27,7 @@ Reset Quad Counter | COILS           | 3084    |
 
 The corresponding Channels definition in the Asset is as follows:
 
-![channels]({{ site.baseurl }}/assets/images/drivers_and_assets/Devkit.png)
+![](images/Devkit.png)
 
 As shown in the previous image, the Channel definition in an Asset results easily mappable to what available in a generic PLC documentation. 
 
@@ -37,12 +37,12 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 Kura provides a specific section of the UI to allow users to manage the different instances of Drivers and Assets.
 Using the Kura Web UI the user can instantiate and manage Drivers
 
-![driver_config]({{ site.baseurl }}/assets/images/drivers_and_assets/Driver_config.png)
+![](images/Driver_config.png)
 
 but also can manage Assets instances based on existing drivers.
 
-![asset_config]({{ site.baseurl }}/assets/images/drivers_and_assets/Asset_config.png)
+![](images/Asset_config.png)
 
 The user interface allows also to perform specific reads on the configured Assets' channels clicking on the Data tab for the selected Asset.
 
-![asset_data]({{ site.baseurl }}/assets/images/drivers_and_assets/Asset_data.png)
+![](images/Asset_data.png)

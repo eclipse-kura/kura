@@ -27,12 +27,6 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
-    - Connect Field Devices:
-      - connect-field-devices/driver-and-assets.md
-      - connect-field-devices/asset-implemetation.md
-      - connect-field-devices/driver-implemetation.md
-      - connect-field-devices/IO-apis.md
-      - connect-field-devices/field-protocols.md
       - Drivers:
         - OPC UA Driver: connect-field-devices/opcua-driver.md
         - S7comm Driver: connect-field-devices/s7-driver.md
@@ -82,6 +76,12 @@ nav:
       - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
       - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
       - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
+    - Connect Field Devices:
+      - connect-field-devices/driver-and-assets.md
+      - connect-field-devices/asset-implemetation.md
+      - connect-field-devices/driver-implemetation.md
+      - connect-field-devices/IO-apis.md
+      - connect-field-devices/field-protocols.md
 
 theme:
   name: material

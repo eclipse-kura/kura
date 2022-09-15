@@ -67,6 +67,10 @@ nav:
       - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
       - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
       - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
+      - Apache Camel&trade; Integration:
+        - Apache Camel&trade; integration: cloud-platform/apache-camel-integration/kura-camel.md
+        - Apache Camel&trade; as application: cloud-platform/apache-camel-integration/kura-camel-app.md
+        - Apache Camel&trade; Cloud Service: cloud-platform/apache-camel-integration/kura-camel-cloud.md
 
 theme:
   name: material

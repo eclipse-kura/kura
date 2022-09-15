@@ -34,14 +34,14 @@ nav:
       - connect-field-devices/driver-implemetation.md
       - connect-field-devices/IO-apis.md
       - Drivers:
-        - connect-field-devices/opcua-driver.md
-        - connect-field-devices/s7-driver.md
-        - connect-field-devices/gpio-driver.md
-        - connect-field-devices/sensortag-driver.md
-        - connect-field-devices/sensehat-driver.md
-        - connect-field-devices/ibeacon-driver.md
-        - connect-field-devices/eddystone-driver.md
-        - connect-field-devices/xdk-driver.md
+        - OPC UA Driver: connect-field-devices/opcua-driver.md
+        - S7comm Driver: connect-field-devices/s7-driver.md
+        - GPIO Driver: connect-field-devices/gpio-driver.md
+        - TI SensorTag Driver: connect-field-devices/sensortag-driver.md
+        - RaspberryPi SenseHat driver: connect-field-devices/sensehat-driver.md
+        - iBeacon&trade; Driver: connect-field-devices/ibeacon-driver.md
+        - Eddystone&trade; Driver: connect-field-devices/eddystone-driver.md
+        - Xdk Driver: connect-field-devices/xdk-driver.md
 
 theme:
   name: material

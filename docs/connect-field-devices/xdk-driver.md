@@ -3,8 +3,8 @@
 Eclipse Kura provides a specific driver that can be used to interact with Bosch Xdk110 devices. The driver is available only for gateways that support the new Bluetooth LE APIs. 
 It can be used in to the Wires framework, the Asset model or directly using the Driver itself.
 
-!!! warning
-    The Xdk driver can only be used with Xdk110 with VirtualXdkDemo installed and with firmware version > 3.5.0. If your device has an older firmware, please update it.
+!!! info
+    The Xdk driver can only be used with Xdk110 with VirtualXdkDemo installed and with firmware version > **3.5.0**. If your device has an older firmware, please update it.
 
 ## Features
 
@@ -59,8 +59,8 @@ The XDK-Workbench is the tool that can be used to develop software for the Xdk11
 
 The Virtual XDK application user guide contains all the information regarding the XDK110 UUIDs and data formats [here](http://xdk.bosch-connectivity.com/xdk_docs/html/_x_d_k__v_i_r_t_u_a_l__x_d_k__a_p_p__u_s_e_r__g_u_i_d_e.html). 
 
-!!! warning
-    To switch between quaternion and sensor representation, the XDK110 needs to be instructed using the 55b741d5-7ada-11e4-82f8-0800200c9a66 UUID. Set it to `0x01` to enable Quaternions.
+!!! info
+    To switch between quaternion and sensor representation, the XDK110 needs to be instructed using the `55b741d5-7ada-11e4-82f8-0800200c9a66` UUID. Set it to `0x01` to enable Quaternions.
 
 If quaternion representation is enabled, the data format is as follows:
 

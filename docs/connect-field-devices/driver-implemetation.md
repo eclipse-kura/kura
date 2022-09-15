@@ -30,7 +30,7 @@ public void read(List<ChannelRecord> records) throws ConnectionException;
 
 Typically, since the records to read do not change until the Asset configuration is changed by the user, a Driver can perform some optimisations to efficiently read the requested records at once. For example, a Modbus driver can read a range of holding registers using a single request.
 
-Since these operations are costly, the ESF API adds methods to ask the driver to prepare reading a given list of records and execute the prepared read:
+Since these operations are costly, the Kura API adds methods to ask the driver to prepare reading a given list of records and execute the prepared read:
 
 ```
 public PreparedRead prepareRead(List<ChannelRecord> records);

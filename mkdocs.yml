@@ -27,6 +27,12 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
+    - Cloud Connection API and Usage:
+      - Overview: cloud-api/overview.md
+      - User Guide: cloud-api/user-guide.md
+      - Application Developer Guide: cloud-api/app-dev-guide.md
+      - Cloud Connection Developer Guide: cloud-api/cloud-conn-dev-guide.md
+      - Built-in Cloud Services: cloud-api/built-in-cloud.md
 
 theme:
   name: material

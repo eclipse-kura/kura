@@ -7,14 +7,12 @@ Eclipse Kapua™ is a modular platform providing the services required to manage
 The Kura Gateway Administrative Console exposes all services necessary for connecting to Eclipse Kapua. The reference links listed below outline each service involved in the cloud connection. It is recommended that each section be reviewed.
 
 - [CloudService](#cloudservice)
-
 - [DataService](#dataservice)
-
 - [MqttDataTransport](#mqttdatatransport)
 
 ### CloudService
 
-The default settings for the CloudService are typically adequate for connecting to a Kapua instance. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](#cloudservice).
+The default settings for the CloudService are typically adequate for connecting to a Kapua instance. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](../cloud-api/built-in-cloud.md#cloudservice).
 
 ![](images/cloudService.png)
 
@@ -23,7 +21,7 @@ The default settings for the CloudService are typically adequate for connecting 
 
 ### DataService
 
-The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](#dataservice).
+The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](../cloud-api/built-in-cloud.md#dataservice).
 
 In order for Kura to connect to Eclipse Kapua on startup, the *connect.auto-on-startup* option must be set to `true`. If this value is changed from `false` to `true`, Kura will immediately begin the connection process. It is recommended that the CloudService and MqttDataTransport are configured before setting the *connect.auto-on-startup* option to `true`.
 
@@ -40,7 +38,7 @@ While the majority of default settings in the MqttDataTransport can be left unch
 - **topic.context.account-name** - defines the account name of the account to which the device is attempting to connect. In the MqttDataTransport configuration screen capture shown below, the *account name* is `account-name`
 - **username** - identifies the user to be used when creating the connection. In the MqttDataTransport configuration screen capture shown below, the *username* is `username`.
 
-For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](#mqttdatatransport).
+For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](../cloud-api/built-in-cloud.md#mqttdatatransport).
 
 ![](images/dataTransport.png)
 

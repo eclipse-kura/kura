@@ -7,12 +7,12 @@ Everyware Cloud provides an easy mechanism for connecting cloud-ready devices to
 The Kura Gateway Administrative Console exposes all services necessary for connecting to Everyware Cloud. The reference links listed below outline each service involved in the Everyware Cloud connection. It is recommended that each section be reviewed.
 
 - [CloudService](#cloudservice)
-- [DataService](}#dataservice)
+- [DataService](#dataservice)
 - [MqttDataTransport](#mqttdatatransport)
 
 ### CloudService
 
-The default settings for the CloudService are typically adequate for connecting to Everyware Cloud. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](#cloudservice).
+The default settings for the CloudService are typically adequate for connecting to Everyware Cloud. The screen capture shown below displays the default settings for the CloudService. For details about each setting, please refer to [CloudService](../cloud-api/built-in-cloud.md#cloudservice).
 
 ![](images/cloudService.png)
 
@@ -21,7 +21,7 @@ The default settings for the CloudService are typically adequate for connecting 
 
 ### DataService
 
-The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](#dataservice).
+The majority of default settings in the DataService can be left unchanged. A screen capture of the DataService configuration is shown below. For complete details about the DataService configuration parameters, please refer to [DataService](../cloud-api/built-in-cloud.md#dataservice).
 
 In order for Kura to connect to Everyware Cloud on startup, the *connect.auto-on-startup* option must be set to `true`. If this value is changed from `false` to `true`, Kura will immediately begin the connection process. It is recommended that the CloudService and MqttDataTransport are configured before setting the *connect.auto-on-startup* option to `true`.
 
@@ -41,7 +41,7 @@ While the majority of default settings in the MqttDataTransport can be left unch
 !!! note
     When connecting to Everyware Cloud, the *username* must have proper permissions. Information on users and permissions can be found [here](http://everywarecloud.eurotech.com/doc/ECDevGuide/latest/2.02-Managing-Cloud-Users.asp).
 
-For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](#mqttdatatransport).
+For complete details about the MqttDataTransport configuration parameters, please refer to [MqttDataTransport](../cloud-api/built-in-cloud.md#mqttdatatransport).
 
 ![](images/dataTransport.png)
 

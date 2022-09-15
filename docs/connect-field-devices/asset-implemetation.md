@@ -2,7 +2,7 @@
 
 An **Asset** is a logical representation of a field device, described by a list of **Channels**. The Asset uses a specific Driver instance to communicate with the underlying device and it models a generic device resource as a **Channel**. A register in a PLC or a GATT Characteristic in a Bluetooth device are examples of Channels. In this way, each Asset has multiple Channels for reading and writing data from/to an Industrial Device.
 
-Assets can be used as Wire Components to access the resources referenced by the defined channels inside a Wire Graph, see the [Assets as Wire Components](doc:assets-as-a-wire-components) guide for more details. 
+Assets can be used as Wire Components to access the resources referenced by the defined channels inside a Wire Graph, see the [Assets as Wire Components](../kura-wires/assets-as-wire-components.md) guide for more details. 
 
 ## Channel Example
 

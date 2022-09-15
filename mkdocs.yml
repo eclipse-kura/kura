@@ -27,6 +27,12 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
+    - Administration:
+      - Directory Layout: administration/directory-layout.md
+      - Snapshot Management: administration/snapshot-management.md
+      - Application Management: administration/application-management.md
+      - Remote Management with Eclipse Kapua: administration/remote-management-kapua.md
+      - System Component Inventory: administration/system-component-inventory.md
     - Core Services:
       - Introduction: core-services/introduction.md
       - Clock Service: core-services/clock-service.md

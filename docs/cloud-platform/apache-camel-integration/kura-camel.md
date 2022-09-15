@@ -1,4 +1,4 @@
-# Kura Camel overview
+# Apache Camel&trade; integration overview
 
 !!! note
     This document describes the Camel integration for Kura 2.1.0

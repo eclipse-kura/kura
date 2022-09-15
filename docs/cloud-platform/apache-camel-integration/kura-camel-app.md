@@ -1,4 +1,4 @@
-# Camel as Kura application
+# Apache Camel&trade; as a Kura application
 
 As of 2.1.0 Kura provides a set of different ways to implement an application backed by Camel:
 

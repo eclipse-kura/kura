@@ -1,4 +1,4 @@
-# Camel as Kura cloud service
+# Apache Camel&trade; as a Kura cloud service
 
 The default way to create a new cloud service instance backed by Camel is to use the new Web UI for cloud services. A new cloud service instance of the type `org.eclipse.kura.camel.cloud.factory.CamelFactory` has to be created. In addition to that a set of Camel routes have to be provided.
 

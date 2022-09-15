@@ -42,13 +42,13 @@ Download the current distribution of Eclipse for your OS from [Eclipse official 
 The zipped Eclipse file will be downloaded to the local file system and can be saved to a temporary location that can be deleted after Eclipse has been installed. After the file has been downloaded, it should be extracted to the Eclipse installs directory.  The following screen capture shows the installation in Linux using an **eclipse\installs\** directory. The Eclipse executable will then be found in the **eclipse\installs\eclipse\** directory.  
 This installation will be different depending on the operating system.
 
-![Eclipse Install Folder](./images/image1.png)
+![Eclipse Install Folder](./images/development-environment-setup/image1.png)
 
 Because there may potentially be future Eclipse installs extracted into this location, before doing anything else, rename the directory, such as **eclipse\installs\\*juno1*\\**.
 !!! warning
     Once you begin using this Eclipse install, it should NOT be moved or renamed.
 
-![Eclipse Install Folder 2](./images/image2.png)
+![Eclipse Install Folder 2](./images/development-environment-setup/image2.png)
 
 ### Installing mToolkit
 
@@ -76,11 +76,11 @@ If a workspace has not already been defined, or if you are creating a different 
 
 Otherwise, select an existing workspace and click **OK**.  After Eclipse is running, you can select the Eclipse menu **File | Switch Workspace | Other** to create or open a different workspace.
 
-![Workspace Launcher](./images/image3.png)
+![Workspace Launcher](./images/development-environment-setup/image3.png)
 
 After the new workspace opens, click the Workbench icon to display the development environment.
 
-![Workspace](./images/image4.png)
+![Workspace](./images/development-environment-setup/image4.png)
 
 ### Importing the Kura User Workspace
 
@@ -90,7 +90,7 @@ From the Eclipse File menu, select the **Import** option.  In the Import dialog 
 
 Now click the **Select archive file** option button and browse to the archive file, such as *user_workspace_archive_<version>.zip*.
 
-![Import Project](./images/image5.png)
+![Import Project](./images/development-environment-setup/image5.png)
 
 Finally, click **Finish** to import the projects.  At this point, you should have four projects in your workspace.  The four projects are as follows:
 
@@ -102,7 +102,7 @@ Finally, click **Finish** to import the projects.  At this point, you should hav
 
 * target-definition – a set of required bundles that are dependencies of the APIs and Kura.
 
-![Import Project](./images/image6.png)
+![Import Project](./images/development-environment-setup/image6.png)
 
 Eclipse will also report some errors at this point.  See the next section to resolve those errors.
 
@@ -114,18 +114,18 @@ The latest Eclipse IDEs require and configure, by default, a Java 11 environment
 In order to be able to leverage and develop using the new workspace for Kura, the user will be required to perform a one-time operation to specify to the IDE a Java 8 JDK.
 Opening the Eclipse preferences and selecting the Installed JREs in the Java section, the user has to select an installed Java 8 instance. 
 
-![Set JDK 8](./images/image7.png)
+![Set JDK 8](./images/development-environment-setup/image7.png)
 
 After applying the configuration change, the user will be prompted to align also the compiler options. To do so, selecting the Compiler entry in the Java section, the user has to select 1.8 from the list of available Java versions.
 
-![Set Compiler 8](./images/image8.png)
+![Set Compiler 8](./images/development-environment-setup/image8.png)
 
 After applying the changes, the user will be prompted to recompile the environment.
 
 #### Target Definition Setup
 Click the arrow next to the **target-definition** project in the workspace and double-click **kura-equinox_<version>.target** to open it.
 
-![Target Definition Setup](./images/image9.png)
+![Target Definition Setup](./images/development-environment-setup/image9.png)
 
 In the Target Definition window, click the link **Set as Target Platform**.  Doing so will reset the target platform, rebuild the Kura projects, and clear the errors that were reported.  At this point, you are ready to begin developing Kura-based applications for your target platform.
 
@@ -138,11 +138,11 @@ Download the latest Eclipse Installer appropriate for your platform from [Eclips
 * Switch to advanced mode (in simple mode you cannot add a custom installer)
 * Select "Eclipse IDE for Eclipse Committers", select the latest "Product Version" and select a Java 11+ VM. Then click the Next button.
 
-![Eclipse Installer](./images/image10.png)
+![Eclipse Installer](./images/development-environment-setup/image10.png)
 
 * Select "Eclipse Kura" project under the "Eclipse Projects" menu. If it isn't available, add a new installer that you can find [here]( https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup) under the "Github Projects" menu. Then click the Next button.
 
-![Kura Oomph](./images/image11.png)
+![Kura Oomph](./images/development-environment-setup/image11.png)
 
 * Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). Then click the Next button.
 * Leave all Bootstrap Tasks selected and press the Finish button.
@@ -162,6 +162,6 @@ To start the Eclipse Kura emulator, select the "Eclipse Kura Emulator.launch" pr
 -Dkura.have.net.admin=false -Dorg.osgi.framework.storage=/tmp/osgi/framework_storage -Dosgi.clean=true -Dosgi.noShutdown=true -Declipse.ignoreApp=true -Dorg.eclipse.kura.mode=emulator -Dkura.configuration=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/kura.properties -Ddpa.configuration=/tmp/kura/dpa.properties -Dlog4j.configurationFile=file:${workspace_loc}/../git/kura/kura/emulator/org.eclipse.kura.emulator/src/main/resources/log4j.xml -Dkura.data=${workspace_loc}/kura/data -Dkura.snapshots=${workspace_loc}/kura/user/snapshots -Dorg.eclipse.equinox.http.jetty.customizer.class=org.eclipse.kura.jetty.customizer.KuraJettyCustomizer
 ```
 
-![Vm arguments](./images/image12.png)
+![Vm arguments](./images/development-environment-setup/image12.png)
 
 The Eclipse Kura Web UI will be available at the following URL: https://127.0.0.1 with username and password **admin**.

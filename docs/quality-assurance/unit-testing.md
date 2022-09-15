@@ -1,11 +1,6 @@
----
-layout: page
-title:  "Unit Testing"
-categories: [qa]
----
+# Unit Testing
 
-Build-time Testing
-------------
+## Build-time testing
 
 Build-time testing is further divided into unit testing and integration testing.
 
@@ -23,11 +18,11 @@ Unit tests should try to cover as many corner cases in the code as possible. Add
 
 #### Test Location
 
-Kura discourages to introduce test-only dependencies on the implementation level, so all tests are located in their own projects under test/. The proper folder to put the tests in is src/test/java.
+Kura discourages to introduce test-only dependencies on the implementation level, so all tests are located in their own projects under `test/`. The proper folder to put the tests in is `src/test/java`.
 
 #### Code Conventions
 
-* Preferably use &lt;package name>.test as the name of the test project. Add it as a module in test/pom.xml that also serves as maven artifact's parent.
+* Preferably use `<package name>.test` as the name of the test project. Add it as a module in `test/pom.xml` that also serves as maven artifact's parent.
 * Only add `src/main/java` to build.properties' `source..`.
 * Make the bundle a fragment of the class-under-test's bundle so that you gain access to its internal packages.
 * Use the same package for the test as the class under test. Subpackages are OK.
@@ -45,14 +40,14 @@ These test proper behavior in the OSGi environment. Some additional configuratio
 
 #### Test Location
 
-We don't want to mess with the implementation code here, either, so all tests are again located in the test projects under test/. It can be the same project as for unit tests. The proper folder to put the tests in is src/main/java.
+We don't want to mess with the implementation code here, either, so all tests are again located in the test projects under `test/`. It can be the same project as for unit tests. The proper folder to put the tests in is `src/main/java`.
 
 #### Code Conventions
 
-* Preferably use &lt;package name>.test as the name of the test project. Add it as a module in test/pom.xml that also serves as maven artifact's parent.
+* Preferably use `<package name>.test` as the name of the test project. Add it as a module in `test/pom.xml` that also serves as maven artifact's parent.
 * Only add `src/main/java` to build.properties' `source..`.
 * Make the bundle a fragment of the class-under-test's bundle so that you gain access to its internal packages.
-* Use the <package name>.test as the package to put the test in. Also add .test suffix to any subpackages that are also under test.
+* Use the `<package name>.test` as the package to put the test in. Also add `.test` suffix to any subpackages that are also under test.
 * Use the same coding style as [Kura](https://github.com/eclipse/kura/blob/develop/CONTRIBUTING.md#making-your-changes). Try to incorporate the suggestions SonarLint may have for your tests.
 
 #### Running the Tests

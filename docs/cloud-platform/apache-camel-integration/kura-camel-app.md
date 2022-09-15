@@ -20,100 +20,25 @@ The URI syntax of the endpoint is (assuming the default component name): `kura-c
 
 The following URI parameters are supported by the endpoint:
 
-<table>
-<thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
-<tbody>
-
-<tr>
-  <td><code>applicationId</code></td>
-  <td>String</td>
-  <td><em>From URI path</em></td>
-  <td>The application ID used with the Cloud API</td>
-</tr>
-
-<tr>
-  <td><code>topic</code></td>
-  <td>String</td>
-  <td><em>From URI path</em></td>
-  <td>The default topic name to publish/subscribe to when no header value is specified</td>
-</tr>
-
-<tr>
-  <td><code>qos</code></td>
-  <td>Integer</td>
-  <td>0</td>
-  <td>The QoS value when publishing to MQTT</td>
-</tr>
-
-<tr>
-  <td><code>retain</code></td>
-  <td>Boolean</td>
-  <td>false</td>
-  <td>The default retain flag when publishing to MQTT</td>
-</tr>
-
-<tr>
-  <td><code>priority</code></td>
-  <td>Integer</td>
-  <td>5</td>
-  <td>The default priority value</td>
-</tr>
-
-<tr>
-  <td><code>control</code></td>
-  <td>Boolean</td>
-  <td>false</td>
-  <td>Whether to publish/subscribe on the control or data topic hierarchy</td>
-</tr>
-
-<tr>
-  <td><code>deviceId</code></td>
-  <td>String</td>
-  <td><em>empty</em></td>
-  <td>The default device ID when publishing/subscribing to control topics</td>
-</tr>
-
-</tbody>
-</table>
+| Name            | Type    | Default         | Description                                                                      |
+|-----------------|---------|-----------------|----------------------------------------------------------------------------------|
+| `applicationId` | String  | _From URI path_ | The application ID used with the Cloud API                                       |
+| `topic`         | String  | _From URI path_ | The default topic name to publish/subscribe to when no header value is specified |
+| `qos`           | Integer | 0               | The QoS value when publishing to MQTT                                            |
+| `retain`        | Boolean | false           | The default retain flag when publishing to MQTT                                  |
+| `priority`      | Integer | 5               | The default priority value                                                       |
+| `control`       | Boolean | false           | Whether to publish/subscribe on the control or data topic hierarchy              |
+| `deviceId`      | String  | empty           | The default device ID when publishing/subscribing to control topics              |
 
 The following header fields are supported. If a value is not set when publishing it is taken from the endpoint configuration:
 
-<table>
-<thead><tr><th>Name</th><th>Type</th><th>Description</th></tr></thead>
-<tbody>
-
-<tr>
-  <td><code>CamelKuraCloudService.topic</code></td>
-  <td>String</td>
-  <td>The name of the topic to publish to or from which the message was received</td>
-</tr>
-
-<tr>
-  <td><code>CamelKuraCloudService.qos</code></td>
-  <td>Integer</td>
-  <td>The QoS to use when publishing to MQTT</td>
-</tr>
-
-<tr>
-  <td><code>CamelKuraCloudService.retain</code></td>
-  <td>Boolean</td>
-  <td>The value of the retain flag when publishing to MQTT</td>
-</tr>
-
-<tr>
-  <td><code>CamelKuraCloudService.control</code></td>
-  <td>Boolean</td>
-  <td>Whether to publish/subscribe on the control or data topic hierarchy</td>
-</tr>
-
-<tr>
-  <td><code>CamelKuraCloudService.deviceId</code></td>
-  <td>String</td>
-  <td>The device ID when publishing to control topics</td>
-</tr>
-
-</tbody>
-</table>
+| Name                             | Type    | Description                                                                |
+|----------------------------------|---------|----------------------------------------------------------------------------|
+| `CamelKuraCloudService.topic`    | String  | The name of the topic to publish to or from which the message was received |
+| `CamelKuraCloudService.qos`      | Integer | The QoS to use when publishing to MQTT                                     |
+| `CamelKuraCloudService.retain`   | Boolean | The value of the retain flag when publishing to MQTT                       |
+| `CamelKuraCloudService.control`  | Boolean | Whether to publish/subscribe on the control or data topic hierarchy        |
+| `CamelKuraCloudService.deviceId` | String  | The device ID when publishing to control topics                            |
 
 ### Cloud to cloud messaging
 

@@ -9,7 +9,7 @@ The Eddystone&trade; driver is designed to listen for incoming beacon packets an
  
 ## Installation
 
-As the others Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
+As the others Drivers supported by Eclipse Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/eddystone-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../administration/application-management.md).
 
 ## Instance creation
 

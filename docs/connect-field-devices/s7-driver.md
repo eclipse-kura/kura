@@ -3,7 +3,7 @@
 This Driver implements the s7comm protocol and can be used to interact with Siemens S7 PLCs using different abstractions, such as the Wires framework, the Asset model or by directly using the Driver itself.
 
 The Driver is distributed as a deployment package on the Eclipse Marketplace for Kura [3.x](https://marketplace.eclipse.org/content/s7-driver-eclipse-kura-3xy) and [4.x/5.x](https://marketplace.eclipse.org/content/s7-driver-eclipse-kura-4xy).
-It can be installed following the instructions provided [here](/kura/admin/application-management.html#installation-from-eclipse-marketplace).
+It can be installed following the instructions provided [here](/kura/administration/application-management.md).
 
 ## Features
 

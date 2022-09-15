@@ -74,7 +74,7 @@ Bytes | Data | Type
  
 ## Installation
 
-As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/bosch-xdk-driver-eclipse-kura-5). It can be installed following the instructions provided [here](../admin/application-management.html#section-eclipse-kura-marketplace).
+As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/bosch-xdk-driver-eclipse-kura-5). It can be installed following the instructions provided [here](../administration/application-management.md).
 
 ## Instance creation
 

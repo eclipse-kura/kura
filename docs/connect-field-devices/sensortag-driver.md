@@ -3,11 +3,13 @@
 Eclipse Kura provides a specific driver that can be used to interact with Texas Instruments SensorTag devices. The driver is available only for gateways that support the new Bluetooth LE APIs. 
 It can be used in the Wires framework, the Asset model or directly using the Driver itself.
 
-{% include alerts.html message='The SensorTag driver can be used only with TI SensorTags with firmware version >1.20. If your device has an older firmware, please update it.' %}
+!!! warning
+    The SensorTag driver can be used only with TI SensorTags with firmware version >1.20. If your device has an older firmware, please update it.
 
 ## Features
 
 The SensorTag Driver can be used to get the values from all the sensor installed on the tag (both in polling mode and notification):
+
 - ambient and target temperature
 - humidity
 - pressure

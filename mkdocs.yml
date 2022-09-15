@@ -86,8 +86,10 @@ nav:
         - iBeacon&trade; Driver: connect-field-devices/ibeacon-driver.md
         - Eddystone&trade; Driver: connect-field-devices/eddystone-driver.md
         - Xdk Driver: connect-field-devices/xdk-driver.md
-
-
+    - Quality Assurance:
+      - Introduction: quality-assurance/intro.md
+      - Unit Testing: quality-assurance/unit-testing.md
+      - System Testing: quality-assurance/system-testing.md
 
 theme:
   name: material

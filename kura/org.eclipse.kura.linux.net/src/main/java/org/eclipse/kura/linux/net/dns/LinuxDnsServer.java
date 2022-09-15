@@ -287,6 +287,7 @@ public abstract class LinuxDnsServer {
         sb.append("};\n");
         sb.append("\tmax-cache-ttl 30;\n");
         sb.append("\tmax-ncache-ttl 30;\n");
+        sb.append("\tdnssec-enable yes;\n").append("\tdnssec-validation yes;\n").append("\tdnssec-lookaside auto;\n");
         sb.append("};\n") //
                 .append("zone \".\" IN {\n") //
                 .append("\ttype hint;\n") //

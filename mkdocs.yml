@@ -86,10 +86,35 @@ nav:
         - iBeacon&trade; Driver: connect-field-devices/ibeacon-driver.md
         - Eddystone&trade; Driver: connect-field-devices/eddystone-driver.md
         - Xdk Driver: connect-field-devices/xdk-driver.md
+    - Kura Wires:
+      - Introduction: kura-wires/introduction.md
+      - Assets as Wire Components: kura-wires/assets-as-wire-components.md
+      - Single Port Wire Components:
+        - DB Store and Filter: kura-wires/single-port-wire-components/db-store-and-filter.md
+        - FIFO Component: kura-wires/single-port-wire-components/fifo-component.md
+        - AI Wire Component: kura-wires/single-port-wire-components/ai-wire-component.md
+        - Script Filter: kura-wires/single-port-wire-components/script-filter.md
+      - Multiport Wire Components:
+        - Multiport Wire Components: kura-wires/multiport-wire-components/multiport-wire-components.md
+        - Conditional Component: kura-wires/multiport-wire-components/conditional-component.md
+        - Join Component: kura-wires/multiport-wire-components/join-component.md
+        - Mathematical Components Example: kura-wires/multiport-wire-components/mathematical-components-example.md
+      - Usage Examples:
+        - Modbus Application: kura-wires/usage-examples/modbus-application.md
+        - OPC-UA Application: kura-wires/usage-examples/opcua-application.md
+        - TI SensorTag Application: kura-wires/usage-examples/ti-sensortag-application.md
+        - GPIO Driver Application: kura-wires/usage-examples/gpio-driver-application.md
+        - iBeacon&trade; Driver Application: kura-wires/usage-examples/ibeacon-driver-application.md
+        - Eddystone&trade; Driver Application with RuuviTag+: kura-wires/usage-examples/eddystone-driver-application.md
+      - Wires MQTT Namespace: kura-wires/wires-mqtt-namespace.md
+      - WireGraphService Configuration Format: kura-wires/wire-graph-service-configuration-format.md
+      - Wire Service V1 REST APIs and MQTT Request Handler: kura-wires/wire-service-rest-v1.md
+      - References: kura-wires/wire-service-references.md
     - Quality Assurance:
       - Introduction: quality-assurance/intro.md
       - Unit Testing: quality-assurance/unit-testing.md
       - System Testing: quality-assurance/system-testing.md
+
 
 theme:
   name: material

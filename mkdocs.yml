@@ -34,14 +34,14 @@ nav:
       - connect-field-devices/driver-implemetation.md
       - connect-field-devices/IO-apis.md
       - Drivers:
-        - connect-field-devices/gpio-driver.md
         - connect-field-devices/opcua-driver.md
         - connect-field-devices/s7-driver.md
-        - connect-field-devices/sensehat-driver.md
+        - connect-field-devices/gpio-driver.md
         - connect-field-devices/sensortag-driver.md
-        - connect-field-devices/xdk-driver.md
+        - connect-field-devices/sensehat-driver.md
         - connect-field-devices/ibeacon-driver.md
         - connect-field-devices/eddystone-driver.md
+        - connect-field-devices/xdk-driver.md
 
 theme:
   name: material

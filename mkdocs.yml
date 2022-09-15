@@ -27,12 +27,6 @@ nav:
       - SSL Configuration: gateway-configuration/ssl-configuration.md
       - Web Console Configuration: gateway-configuration/web-console-configuration.md
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
-    - Cloud Platforms Connection:
-      - Eurotech Everyware Cloud&trade; platform: cloud-platform/kura-ec-cloud.md
-      - Amazon AWS IoT&trade; platform: cloud-platform/kura-aws-cloud.md
-      - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
-      - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
-      - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
     - Administration:
       - Directory Layout: administration/directory-layout.md
       - Snapshot Management: administration/snapshot-management.md
@@ -67,6 +61,12 @@ nav:
       - Application Developer Guide: cloud-api/app-dev-guide.md
       - Cloud Connection Developer Guide: cloud-api/cloud-conn-dev-guide.md
       - Built-in Cloud Services: cloud-api/built-in-cloud.md
+    - Cloud Platforms Connection:
+      - Eurotech Everyware Cloud&trade; platform: cloud-platform/kura-ec-cloud.md
+      - Amazon AWS IoT&trade; platform: cloud-platform/kura-aws-cloud.md
+      - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
+      - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
+      - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
 
 theme:
   name: material

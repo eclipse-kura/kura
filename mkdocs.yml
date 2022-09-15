@@ -32,7 +32,6 @@ nav:
       - Snapshot Management: administration/snapshot-management.md
       - Application Management: administration/application-management.md
       - Remote Management with Eclipse Kapua: administration/remote-management-kapua.md
-      - Remote Management with Everyware Cloud: administration/remote-management.md
       - System Component Inventory: administration/system-component-inventory.md
 
 theme:

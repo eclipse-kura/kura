@@ -67,6 +67,10 @@ nav:
       - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
       - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
       - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
+    - Quality Assurance:
+      - Introduction: quality-assurance/intro.md
+      - Unit Testing: quality-assurance/unit-testing.md
+      - System Testing: quality-assurance/system-testing.md
 
 theme:
   name: material

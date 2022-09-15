@@ -41,6 +41,8 @@ nav:
         - connect-field-devices/sensehat-driver.md
         - connect-field-devices/sensortag-driver.md
         - connect-field-devices/xdk-driver.md
+        - connect-field-devices/ibeacon-driver.md
+        - connect-field-devices/eddystone-driver.md
 
 theme:
   name: material

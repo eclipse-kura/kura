@@ -24,7 +24,7 @@ As described in [Snapshot Management](../snapshot-management), the overall Kura 
 
 ## Remote Command Execution from Eclipse Kapua Web Console
 
-The Eclipse Kapua Console provides the ability to run system commands directly on the device. Refer to [Command Service](../builtin/command-service) for details on how to configure this service in Kura.
+The Eclipse Kapua Console provides the ability to run system commands directly on the device. Refer to [Command Service](../core-services/command-service) for details on how to configure this service in Kura.
 
 It is also possible to send a script to execute using the **File** option of the **Command** tab in Eclipse Kapua Console as shown in the screen capture below. This script must be compressed into a zip file with the eventual associated resource files. Once the file is selected, click **Execute**.
 

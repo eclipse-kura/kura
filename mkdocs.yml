@@ -33,6 +33,28 @@ nav:
       - Application Management: administration/application-management.md
       - Remote Management with Eclipse Kapua: administration/remote-management-kapua.md
       - System Component Inventory: administration/system-component-inventory.md
+    - Core Services:
+      - Introduction: core-services/introduction.md
+      - Clock Service: core-services/clock-service.md
+      - Deployment Service: core-services/deployment-service.md
+      - Command Service: core-services/command-service.md
+      - Configuration Service:
+        - Configuration Service: core-services/configuration-service.md
+        - Configuration V1 REST APIs: core-services/configuration-service-rest-v1.md
+        - Configuration V2 REST APIs and CONF-V2 Request Handler: core-services/configuration-service-rest-v2.md
+      - H2Db Service: core-services/h2db-service.md
+      - Position Service: core-services/position-service.md
+      - REST Service: core-services/rest-service.md
+      - Watchdog Service: core-services/watchdog-service.md
+      - Simple Artemis MQTT Broker: core-services/simple-artemis-mqtt-broker.md
+      - ActiveMQ Artemis MQTT Broker: core-services/active-mq-artemis-broker.md
+      - Container Orchestration:
+        - Container Orchestration Provider: core-services/container-orchestration-provider.md
+        - Container Orchestration Provider APIs: core-services/container-orchestration-provider-apis.md
+        - Container Orchestration Provider Usage: core-services/container-orchestration-provider-usage.md
+        - Container Orchestration Provider Authenticated Registries: core-services/container-orchestration-provider-authenticated-registries.md
+      - Nvidia™ Triton Server Inference Engine: core-services/nvidia-triton-server-inference-engine.md
+      - Device Configuration Changes: core-services/device-configuration-changes.md
     - Cloud Connection API and Usage:
       - Overview: cloud-api/overview.md
       - User Guide: cloud-api/user-guide.md

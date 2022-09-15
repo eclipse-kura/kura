@@ -8,7 +8,7 @@ Unit testing is focused on testing separate methods or groups of methods, prefer
 
 Integration testing is a more-high-level testing that tests certain functionality on a group of connected services in an approximation of the real environment. It verifies that the services can successfully register in the environment and connect to other services as well as perform their tasks.
 
-Code coverage of the develop branch can be observed in [Jenkins](https://ci.eclipse.org/kura/job/kura-develop/lastBuild/jacoco/).
+Code coverage of the develop branch can be observed in [Jenkins](https://ci.eclipse.org/kura/).
 
 For some tips on running the tests also check [Kura GitHub Wiki](https://github.com/eclipse/kura/wiki/Development-Environment-Tips-and-Tricks).
 

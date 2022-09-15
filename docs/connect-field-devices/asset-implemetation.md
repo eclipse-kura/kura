@@ -2,6 +2,8 @@
 
 An **Asset** is a logical representation of a field device, described by a list of **Channels**. The Asset uses a specific Driver instance to communicate with the underlying device and it models a generic device resource as a **Channel**. A register in a PLC or a GATT Characteristic in a Bluetooth device are examples of Channels. In this way, each Asset has multiple Channels for reading and writing data from/to an Industrial Device.
 
+Assets can be used as Wire Components to access the resources referenced by the defined channels inside a Wire Graph, see the [Assets as Wire Components](doc:assets-as-a-wire-components) guide for more details. 
+
 ## Channel Example
 
 To further describe the concept of Channel and Asset, the following table shows a set of PLC register addresses as provided in a typical PLC documentation.
@@ -39,7 +41,13 @@ Once defined the Channels in an Asset, a simple Java application that leverages 
 - **scale**: an optional scaling factor to be applied only to the numeric values retrieved from the field. It is represented as a double and if the value.type is, for example, an integer, the scaling factor multiplier will be casted to integer before multiplying it to the retrieved value.
 - **offset**: an optional offset value that will be added only to the numeric values retrieved from the field. It is a double in the asset definition, and will be casted to the value.type of the retrieved value before being applied.
 - **unit**: an optional string value that will be added to the asset channel read to represent the unit of measure associated to that specific channel.
-- **listen**: if supported by the associated driver, allows to receive notifications by the driver on events
+- **listen**: if supported by the associated driver, allows to receive notifications by the driver on events. This flag currently has effect only inside Kura Wires.
+
+### Driver specific parameters
+
+The parameters that are not included in list of driver independent parameters above are driver specific. These parameters are used to identify the resource addressed by the channel.
+
+Driver specific parameters are described in the driver documentation.
 
 ## Other Asset Configurations
 

@@ -34,7 +34,6 @@ nav:
       - connect-field-devices/driver-implemetation.md
       - connect-field-devices/IO-apis.md
       - Drivers:
-        - connect-field-devices/beacon-drivers.md
         - connect-field-devices/gpio-driver.md
         - connect-field-devices/opcua-driver.md
         - connect-field-devices/s7-driver.md

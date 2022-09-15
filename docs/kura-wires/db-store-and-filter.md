@@ -1,6 +1,6 @@
 # DB Store and Filter
 
-This tutorial will present how to use DB Store and DB Filter components in Wires using the OPC-UA simulated server already used in [OPC-UA Application](link-TODO).
+This tutorial will present how to use DB Store and DB Filter components in Wires using the OPC-UA simulated server already used in [OPC-UA Application](../connect-field-devices/opcua-driver.md).
 
 The DB Store component allows the wire graphs to interact with the database provided by Kura. It stores in a user-defined table all the envelopes received by the component. The component can be configured as follows:
 

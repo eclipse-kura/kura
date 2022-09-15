@@ -2,7 +2,7 @@
 
 In this section a simple but effective example of the GPIO Driver on Wires will be presented. This example will implement a Wire graph that toggles a digital GPIO. A listener will be attached to an input GPIO externally connected to the first one.
 
-Setup a Raspberry Pi as shown in [GPIO Driver](link-TODO) section. Add a cable from the LED contact near the red cable to pin 37 (gpio 26) on the RaspberryPi.
+Setup a Raspberry Pi as shown in [GPIO Driver](../../connect-field-devices/gpio-driver.md) section. Add a cable from the LED contact near the red cable to pin 37 (gpio 26) on the RaspberryPi.
 
 
 

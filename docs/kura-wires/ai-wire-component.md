@@ -2,7 +2,7 @@
 
 The component allows interacting with an `InferenceEngineService` to perform machine learning-related operations. For boards that are not explicitly made for AI, the component can be installed from the Eclipse Marketplace at [this link](https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5).
 
-An InferenceEngineService is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Nvidia™ Triton Server inference engine](link-TODO).
+An InferenceEngineService is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Nvidia™ Triton Server inference engine](../core-services/nvidia-triton-server-inference-engine.md).
 
 In a normal machine learning flow, the input is preprocessed before it is given to the machine learning algorithm, and the result is processed again to be adapted to the rest of the pipeline.
 

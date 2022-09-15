@@ -13,7 +13,7 @@ In the example provided, we have two components in the Wire Composer:
 
 Those components are available in every default installation of Kura.
 
-In order to show the potentialities of the new APIs, in the Eclipse Kura Marketplace and in the Kura downloads page, are available few more multiport-enabled components for **[Mathematical](link-TODO)** processing.
+In order to show the potentialities of the new APIs, in the Eclipse Kura Marketplace and in the Kura downloads page, are available few more multiport-enabled components for **[Mathematical](./mathematical-components-example.md)** processing.
 
 
 

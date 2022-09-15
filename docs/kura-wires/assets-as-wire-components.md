@@ -1,6 +1,6 @@
 # Assets as Wire Components
 
-An [Asset](link-TODO) can be used inside a Wire Graph, in this case it is represented as node with two ports an input port and an output port. An Asset used in this way is called **WireAsset**.
+An [Asset](../connect-field-devices/driver-and-asset.md) can be used inside a Wire Graph, in this case it is represented as node with two ports an input port and an output port. An Asset used in this way is called **WireAsset**.
 
 
 

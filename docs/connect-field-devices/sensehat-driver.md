@@ -105,15 +105,15 @@ The following resources can be used for modifying framebuffer contents:
 
 * **LED_MATRIX_FB_MONOCHROME**:
 
-A channel of this type allows to set the framebuffer contents in monochrome mode. It can only be used in write mode and its **value.type** must be **BYTE_ARRAY**.
+    A channel of this type allows to set the framebuffer contents in monochrome mode. It can only be used in write mode and its **value.type** must be **BYTE_ARRAY**.
 
-The supplied value must be a byte array of length 64 that represent the state of the 8x8 led matrix.
-The offset in the array of a pixel having coordinates `(x, y)` is `y*8 + x`.
-The back/front color will be used for a pixel if the corresponding byte in the array is zero/non-zero.
+    The supplied value must be a byte array of length 64 that represent the state of the 8x8 led matrix.
+    The offset in the array of a pixel having coordinates `(x, y)` is `y*8 + x`.
+    The back/front color will be used for a pixel if the corresponding byte in the array is zero/non-zero.
 
 * **LED_MATRIX_CHARS**:
 
-A channel of this type allows showing a text message using the LED matrix. It can only be used for writing and its **value.type** must be **STRING**. The characters of the message will be rendered using the front color and the background using the back color.
+    A channel of this type allows showing a text message using the LED matrix. It can only be used for writing and its **value.type** must be **STRING**. The characters of the message will be rendered using the front color and the background using the back color.
 
 #### RGB565 framebuffer
 
@@ -121,33 +121,33 @@ The following resource allows writing the framebuffer using the RGB565 format:
 
 * **LED_MATRIX_FB_RGB565**:
 
-A channel of this type allows to set the framebuffer contents in RGB565 mode. It can only be used in write mode and its **value.type** must be **BYTE_ARRAY**.
+    A channel of this type allows to set the framebuffer contents in RGB565 mode. It can only be used in write mode and its **value.type** must be **BYTE_ARRAY**.
 
-The supplied value must be a byte array of length 128 that represents the state of the 8x8 led matrix.
-Each pixel is represented by two consecutive bytes in the following way:
+    The supplied value must be a byte array of length 128 that represents the state of the 8x8 led matrix.
+    Each pixel is represented by two consecutive bytes in the following way:
 
-```
-|    MSB    |    LSB    |
-|  RRRRRGGG |  GGGBBBBB |
-|  15 ... 8 |  7 ... 0  |
-```
+    ```
+    |    MSB    |    LSB    |
+    |  RRRRRGGG |  GGGBBBBB |
+    |  15 ... 8 |  7 ... 0  |
+    ```
 
-The LSB must be stored first in the array, the offset of the LSB and MSB for a pixel at coordinates `(x, y)` is the following:
+    The LSB must be stored first in the array, the offset of the LSB and MSB for a pixel at coordinates `(x, y)` is the following:
 
-* **LSB**: `2*(y*8 + x)`
-* **MSB**: `2*(y*8 + x) + 1`
+    * **LSB**: `2*(y*8 + x)`
+    * **MSB**: `2*(y*8 + x) + 1`
 
 #### Mode independent resources
 
 * **LED_MATRIX_CLEAR**:
 
-Writing anything to a **LED_MATRIX_CLEAR** channel will clear the framebuffer turning off all leds.
+    Writing anything to a **LED_MATRIX_CLEAR** channel will clear the framebuffer turning off all leds.
 
 * **LED_MATRIX_ROTATION**:
 
-Allows to rotate the framebuffer of 0, 90, 180, and 170 degrees clockwise. Rotation setting will be retained for successive draw operations.
-The default value is 0.
-Writes to a **LED_MATRIX_ROTATION** channel can be performed using any numeric type as **value.type**.
+    Allows to rotate the framebuffer of 0, 90, 180, and 170 degrees clockwise. Rotation setting will be retained for successive draw operations.
+    The default value is 0.
+    Writes to a **LED_MATRIX_ROTATION** channel can be performed using any numeric type as **value.type**.
 
 Example framebuffer Asset configuration:
 

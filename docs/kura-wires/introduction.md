@@ -10,7 +10,7 @@ In this way, the developer can easily prototype its solution without sacrificing
 
 
 
-## Data Model
+## Data Model
 
 The communication over a single graph edge (_Wire_) is message oriented, messages are called **WireEnvelope**s.
 Each **WireEnvelope** contains a list of **WireRecords**.

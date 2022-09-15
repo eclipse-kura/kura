@@ -17,7 +17,7 @@ The following global variables are available to the script:
 
 * [input](#received-envelope): An object that represents the received wire envelope.
 * [output](#creating-and-emitting-wire-records): An object that allows to emit wire records.
-* [logger](#logging): A slf4j logger
+* logger: A slf4j logger
 
 The following utility functions are available:
 

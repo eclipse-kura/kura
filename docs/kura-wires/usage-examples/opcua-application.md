@@ -6,14 +6,14 @@ This tutorial will describe how to collect data from an OPC-UA device and publis
 
 ## Configure OPC-UA server simulator
 
-1. Download the <a href="https://s3.amazonaws.com/kura-resources/opcua_demo_server.dp" about="_blank">OPC-UA server simulator</a> bundle and install it on Kura. It will create a simulated OPC-UA server that exposes some sensors (light, temperature and water sensor) and some actuators (buzzer, led and fan).
+1. Download the [OPC-UA server simulator](https://s3.amazonaws.com/kura-resources/opcua_demo_server.dp) bundle and install it on Kura. It will create a simulated OPC-UA server that exposes some sensors (light, temperature and water sensor) and some actuators (buzzer, led and fan).
 2. On the Kura web interface, select **OPCUA Server demo** in **Services** and set **server.port** to 1234. Click the **Apply** button. This will start an OPC-UA server on port 1234.
 
 
 
 ## Configure Wires OPC-UA application
 
-1. Install the OPC-UA driver from <a href="https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-45" about="_blank">Eclipse Kura Marketplace</a>
+1. Install the OPC-UA driver from [Eclipse Kura Marketplace](https://marketplace.eclipse.org/content/opc-ua-driver-eclipse-kura-45).
 2. Use the local Kura Administrative Web Interface to create a new OPC-UA driver instance:
     - Select **Drivers and Assets**, click the **New Driver** button
     - Select **org.eclipse.kura.driver.opcua**, type in a name, and click **Apply**: a new service will show up under Services.

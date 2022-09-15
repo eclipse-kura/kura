@@ -2,7 +2,7 @@
 
 The component allows interacting with an `InferenceEngineService` to perform machine learning-related operations. For boards that are not explicitly made for AI, the component can be installed from the Eclipse Marketplace at [this link](https://marketplace.eclipse.org/content/ai-wire-component-eclipse-kura-5).
 
-An InferenceEngineService is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Nvidia™ Triton Server inference engine](../core-services/nvidia-triton-server-inference-engine.md).
+An InferenceEngineService is a Kura service that implements a simple API to interface with an Inference Engine. The Inference Engine allows to perform inference on trained Artificial Intelligence models commonly described by a file and some configuration for explaining its input and outputs. An example of Inference Engine implementation is the [Nvidia™ Triton Server inference engine](../../core-services/nvidia-triton-server-inference-engine.md).
 
 In a normal machine learning flow, the input is preprocessed before it is given to the machine learning algorithm, and the result is processed again to be adapted to the rest of the pipeline.
 
@@ -28,7 +28,7 @@ The inputs and outputs will have assigned the corresponding Kura `DataType`, whi
 - `STRING`
 -  `BYTE_ARRAY`
 
-Reference to [Introduction](./introduction.md) for the data types that are allowed to flow through the wires.
+Reference to [Introduction](../introduction.md) for the data types that are allowed to flow through the wires.
 
 The models that manage the input and the output must expect a list of inputs such that:
 
@@ -40,7 +40,7 @@ In the following, two example configurations for Triton Inference Engine models 
 
 ### Input Specification Example
 
-Following, an example of a model configuration for the [Nvidia™ Triton Inference Engine](https://github.com/triton-inference-server/server/blob/main/docs/model_configuration.md). It expects the input from the `WireEnvelope` that contains a record with properties:
+Following, an example of a model configuration for the [Nvidia™ Triton Inference Engine](https://github.com/triton-inference-server/server/blob/main/docs/user_guide/model_configuration.md). It expects the input from the `WireEnvelope` that contains a record with properties:
 
 - `ACCELERATION` of type `Float`
 - `CHANNEL_0` of type `Integer`

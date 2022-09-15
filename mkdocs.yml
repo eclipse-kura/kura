@@ -89,15 +89,16 @@ nav:
     - Kura Wires:
       - Introduction: kura-wires/introduction.md
       - Assets as Wire Components: kura-wires/assets-as-wire-components.md
-      - DB Store and Filter: kura-wires/db-store-and-filter.md
-      - FIFO Component: kura-wires/fifo-component.md
+      - Single Port Wire Components:
+        - DB Store and Filter: kura-wires/single-port-wire-components/db-store-and-filter.md
+        - FIFO Component: kura-wires/single-port-wire-components/fifo-component.md
+        - AI Wire Component: kura-wires/single-port-wire-components/ai-wire-component.md
+        - Script Filter: kura-wires/single-port-wire-components/script-filter.md
       - Multiport Wire Components:
         - Multiport Wire Components: kura-wires/multiport-wire-components/multiport-wire-components.md
         - Conditional Component: kura-wires/multiport-wire-components/conditional-component.md
         - Join Component: kura-wires/multiport-wire-components/join-component.md
         - Mathematical Components Example: kura-wires/multiport-wire-components/mathematical-components-example.md
-      - AI Wire Component: kura-wires/ai-wire-component.md
-      - Script Filter: kura-wires/script-filter.md
       - Usage Examples:
         - Modbus Application: kura-wires/usage-examples/modbus-application.md
         - OPC-UA Application: kura-wires/usage-examples/opcua-application.md

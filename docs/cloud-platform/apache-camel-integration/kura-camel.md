@@ -1,12 +1,7 @@
----
-layout: page
-title:  "Apache Camel™ integration"
-categories: [camel]
----
-
 # Kura Camel overview
 
-{% include note.html message="This document describes the Camel integration for Kura 2.1.0" %}
+!!! note
+    This document describes the Camel integration for Kura 2.1.0
 
 Kura provides two main integration points for Camel:
 
@@ -23,12 +18,10 @@ Kura applications with the routes provided by this Camel context.
 
 Kura comes with the following Camel components pre-installed:
 
-* camel-core
-* camel-core-osgi
-* camel-stream
+* `camel-core`
+* `camel-core-osgi`
+* `camel-stream`
 
-If additional Camel components are required, they can be installed using
-deployment packages (DP), as common with Kura.
+If additional Camel components are required, they can be installed using deployment packages (DP), as common with Kura.
 
-There are pre-packaged DPs available for e.g. AMQP, OPC UA, MQTT and other
-Camel components outside of the Kura project.
+There are pre-packaged DPs available for e.g. AMQP, OPC UA, MQTT and other Camel components outside of the Kura project.

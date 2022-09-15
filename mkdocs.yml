@@ -67,6 +67,25 @@ nav:
       - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
       - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
       - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
+      - Apache Camel&trade; Integration:
+        - Apache Camel&trade; integration: cloud-platform/apache-camel-integration/kura-camel.md
+        - Apache Camel&trade; as application: cloud-platform/apache-camel-integration/kura-camel-app.md
+        - Apache Camel&trade; Cloud Service: cloud-platform/apache-camel-integration/kura-camel-cloud.md
+    - Connect Field Devices:
+      - Drivers, Assets and Channels: connect-field-devices/driver-and-assets.md
+      - Asset implementation: connect-field-devices/asset-implemetation.md
+      - Driver implementation: connect-field-devices/driver-implemetation.md
+      - I/O APIs: connect-field-devices/IO-apis.md
+      - Field Protocols: connect-field-devices/field-protocols.md
+      - Drivers:
+        - OPC UA Driver: connect-field-devices/opcua-driver.md
+        - S7comm Driver: connect-field-devices/s7-driver.md
+        - GPIO Driver: connect-field-devices/gpio-driver.md
+        - TI SensorTag Driver: connect-field-devices/sensortag-driver.md
+        - RaspberryPi SenseHat driver: connect-field-devices/sensehat-driver.md
+        - iBeacon&trade; Driver: connect-field-devices/ibeacon-driver.md
+        - Eddystone&trade; Driver: connect-field-devices/eddystone-driver.md
+        - Xdk Driver: connect-field-devices/xdk-driver.md
     - Quality Assurance:
       - Introduction: quality-assurance/intro.md
       - Unit Testing: quality-assurance/unit-testing.md

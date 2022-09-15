@@ -29,10 +29,10 @@ nav:
       - Gateway Administration Console Authentication: gateway-configuration/gateway-administration-console-authentication.md
     - Connect Field Devices:
       - connect-field-devices/driver-and-assets.md
-      - connect-field-devices/field-protocols.md
       - connect-field-devices/asset-implemetation.md
       - connect-field-devices/driver-implemetation.md
       - connect-field-devices/IO-apis.md
+      - connect-field-devices/field-protocols.md
       - Drivers:
         - OPC UA Driver: connect-field-devices/opcua-driver.md
         - S7comm Driver: connect-field-devices/s7-driver.md

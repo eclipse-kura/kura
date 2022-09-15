@@ -13,7 +13,7 @@ The Asset will use the Driver's protocol-specific channel descriptor to compose 
 ## Driver Configuration 
 Generally, a Driver instance is a configurable component which parameters can be updated in the **Drivers and Assets** section of the Kura Administrative User Interface.
 
-![](images/Driver_config.png)
+![](images/Driver_config.png){ style="border-radius: 7px;" }
 
 ## Supported Field Protocols and Availability
 

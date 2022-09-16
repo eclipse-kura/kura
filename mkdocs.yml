@@ -140,8 +140,6 @@ theme:
   features:
     - navigation.instant
     - navigation.tracking
-    - navigation.tabs # enable the navigation tabs in the header
-    - navigation.tabs.sticky # navigation tabs will lock below the header and always remain visible when scrolling down
     - navigation.top # enable the back-to-top button
     - announce.dismiss # enable custom announcements, they will dismiss by scrolling down
 

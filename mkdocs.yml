@@ -115,6 +115,9 @@ nav:
       - Introduction: quality-assurance/intro.md
       - Unit Testing: quality-assurance/unit-testing.md
       - System Testing: quality-assurance/system-testing.md
+    - References:
+      - MQTT Namespace: references/mqtt-namespace.md
+      - Javadoc: references/javadoc.md
 
 
 theme:

@@ -86,6 +86,7 @@ nav:
         - iBeacon&trade; Driver: connect-field-devices/ibeacon-driver.md
         - Eddystone&trade; Driver: connect-field-devices/eddystone-driver.md
         - Xdk Driver: connect-field-devices/xdk-driver.md
+      - ASSET-V1 MQTT Namespace: connect-field-devices/asset-v1-mqtt-namespace.md
     - Kura Wires:
       - Introduction: kura-wires/introduction.md
       - Assets as Wire Components: kura-wires/assets-as-wire-components.md

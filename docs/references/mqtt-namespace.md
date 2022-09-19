@@ -219,7 +219,7 @@ The applicability of the remote management solution, as inspired by the OSGi com
 
 An application bundle is installed in the gateway to allow for remote management of the configuration properties of the services running in the OSGi container.
 
-For information about the OSGi Configuration Admin Service and the OSGi Meta Type Service, please refer to the [OSGi Service Platform Service Compendium 4.3 Specifications](http://www.osgi.org/Specifications/HomePage).
+For information about the OSGi Configuration Admin Service and the OSGi Meta Type Service, please refer to the [OSGi Service Platform Service R7 Specifications](http://docs.osgi.org/specification/osgi.core/7.0.0/).
 
 The **app_id** for the remote configuration service of an MQTT application is “**CONF-V1**”. The resources it manages are the configuration properties of the OSGi services. Service configurations are represented in XML format.
 
@@ -256,7 +256,7 @@ The following service configuration XML message is an example of a watchdog serv
 
 The service configuration XML message is comprised of the following parts:
 
-* The **Object Class Definition** (OCD), which describes the service attributes that may be configured. (The syntax of the OCD element is described in the [OSGi Service Platform Service Compendium 4.3 Specifications](http://www.osgi.org/Specifications/HomePage), Section 105.3.)
+* The **Object Class Definition** (OCD), which describes the service attributes that may be configured. (The syntax of the OCD element is described in the [OSGi Service Platform Service R7 Specifications](http://docs.osgi.org/specification/osgi.core/7.0.0/))
 
 * The **properties** element, which contains one or more properties with their associated type and values. The type name must match the name provided in the corresponding attribute definition identifier (AD id) contained in the OCD.
 
@@ -277,7 +277,7 @@ This operation provides all service configurations for which remote administrati
 
 #### Read Configuration for a Given Service
 
-This operation provides configurations for a specific service that is identified by an OSGi service persistent identifier (**pid)**.
+This operation provides configurations for a specific service that is identified by an OSGi service persistent identifier **pid**.
 
 * Request Topic:
     * **$EDC/account_name/client_id/CONF-V1/GET/configurations/pid**
@@ -330,7 +330,7 @@ When one such service is selected, a form is dynamically generated based on the 
 
 An application is installed in the gateway to allow for the remote management of the deployment packages installed in the OSGi container.
 
-For information about the OSGi Deployment Admin Service, please refer to the [OSGi Service Platform Service Compendium 4.3 Specifications](http://www.osgi.org/Specifications/HomePage).
+For information about the OSGi Deployment Admin Service, please refer to the [OSGi Service Platform Service R7 Specifications](http://docs.osgi.org/specification/osgi.core/7.0.0/).
 
 The **app_id** for the remote deployment service of an MQTT application is “**DEPLOY-V2**”. The resources it manages are the packages deployed in the OSGi container. Deployment packages are represented in XML format.
 

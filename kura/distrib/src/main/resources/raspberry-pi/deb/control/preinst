@@ -57,7 +57,6 @@ function preInstall {
     rm -fr /tmp/.kura/ >> /tmp/kura_install.log 2>&1
     rm /etc/init.d/firewall >> /tmp/kura_install.log 2>&1
     rm /etc/dhcpd-*.conf >> /tmp/kura_install.log 2>&1
-    rm /etc/named.conf >> /tmp/kura_install.log 2>&1
     rm /etc/wpa_supplicant.conf >> /tmp/kura_install.log 2>&1
     rm /etc/hostapd.conf >> /tmp/kura_install.log 2>&1
     rm /tmp/coninfo-* >> /tmp/kura_install.log 2>&1

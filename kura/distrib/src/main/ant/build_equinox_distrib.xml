@@ -535,8 +535,6 @@ fi]]>
 			<zipfileset file="src/main/resources/common/patch_sysctl.sh"
 				prefix="${build.output.name}/${install.folder}" />
 
-			<zipfileset file="src/main/resources/common/named/named.conf"
-				prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/named/named.ca"
 				prefix="${build.output.name}/${install.folder}" />
 			<zipfileset file="src/main/resources/common/named/named.rfc1912.zones"

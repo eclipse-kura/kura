@@ -5,11 +5,11 @@
 This section provides Eclipse Kura&trade; quick installation procedures for the Raspberry Pi and the Kura development environment.
 
 !!! warning
-    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
+    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://websites.eclipseprojects.io/kura/downloads.php)
 
 This quickstart has been tested using the latest Raspberry Pi OS 32 bit images which are available for download through [the official Raspberry Pi foundation site](https://www.raspberrypi.com/software/operating-systems/) and the Raspberry Pi Imager.
 
-For additional details on OS compatibility refer to the [Kura&trade; release notes](https://www.eclipse.org/kura/downloads.php).
+For additional details on OS compatibility refer to the [Kura&trade; release notes](https://websites.eclipseprojects.io/kura/downloads.php).
 
 !!! warning
     Please note that, at the time of this writing, only 32 bit OS image is supported.

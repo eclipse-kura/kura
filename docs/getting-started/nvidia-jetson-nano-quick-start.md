@@ -5,7 +5,7 @@
 This section provides Eclipse Kura&trade; quick installation procedures for the NVIDIA Jetson Nano&trade;.
 
 !!! warning
-    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
+    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://websites.eclipseprojects.io/kura/downloads.php)
 
 This quickstart has been tested using the latest Ubuntu 18.04 LTS image provided by NVIDIA [here](https://developer.nvidia.com/jetson-nano-sd-card-image) and burned on a SD card with [Etcher](https://www.balena.io/etcher/).
 

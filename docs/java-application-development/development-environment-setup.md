@@ -164,4 +164,4 @@ To start the Eclipse Kura emulator, select the "Eclipse Kura Emulator.launch" pr
 
 ![Vm arguments](./images/development-environment-setup/image12.png)
 
-The Eclipse Kura Web UI will be available at the following URL: https://127.0.0.1 with username and password **admin**.
+The Eclipse Kura Web UI will be available at the following URL: http://127.0.0.1:8080 with username and password **admin**.

@@ -5,7 +5,7 @@
 This section provides Eclipse Kura&trade; quick installation procedures for the Intel Up² and the Kura development environment.
 
 !!! warning
-    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://www.eclipse.org/kura/downloads.php)
+    This quickstart will install the version of Kura with the administrative web UI and network  configuration support but not [CAN bus](https://en.wikipedia.org/wiki/CAN_bus) support. For more information on this please visit the [Eclipse Kura download page](https://websites.eclipseprojects.io/kura/downloads.php)
 
 This quickstart has been tested using the latest Ubuntu 20.04.3 LTS Live Server for amd64 architecture flashed on the SD card with [balenaEtcher](https://www.balena.io/etcher/).
 

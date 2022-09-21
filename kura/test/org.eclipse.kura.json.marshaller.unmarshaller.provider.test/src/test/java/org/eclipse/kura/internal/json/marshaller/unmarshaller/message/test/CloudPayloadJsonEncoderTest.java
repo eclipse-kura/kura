@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -53,6 +53,151 @@ public class CloudPayloadJsonEncoderTest {
         assertEquals(payload.getBody(), decodedPayload.getBody());
         assertEquals(payload.getTimestamp(), decodedPayload.getTimestamp());
         assertEquals(payload.metrics(), decodedPayload.metrics());
+    }
+
+    @Test
+    public void shouldDiscardNonFiniteFloatMetrics() {
+        KuraPayload payload = new KuraPayload();
+
+        payload.addMetric("positive.infinity", Float.POSITIVE_INFINITY);
+        payload.addMetric("negative.infinity", Float.NEGATIVE_INFINITY);
+        payload.addMetric("nan", Float.NaN);
+        payload.addMetric("foo", "bar");
+
+        String result = CloudPayloadJsonEncoder.marshal(payload);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
+
+        assertEquals(payload.getPosition(), decodedPayload.getPosition());
+        assertEquals(payload.getBody(), decodedPayload.getBody());
+        assertEquals(payload.getTimestamp(), decodedPayload.getTimestamp());
+
+        assertNull(decodedPayload.metrics().get("positive.infinity"));
+        assertNull(decodedPayload.metrics().get("negative.infinity"));
+        assertNull(decodedPayload.metrics().get("nan"));
+        assertEquals("bar", decodedPayload.getMetric("foo"));
+    }
+
+    @Test
+    public void shouldDiscardPositiveInfinityInPositionFields() {
+        KuraPayload payload = new KuraPayload();
+        KuraPosition position = new KuraPosition();
+
+        position.setAltitude(Double.POSITIVE_INFINITY);
+        position.setHeading(Double.POSITIVE_INFINITY);
+        position.setLatitude(Double.POSITIVE_INFINITY);
+        position.setLongitude(Double.POSITIVE_INFINITY);
+        position.setPrecision(Double.POSITIVE_INFINITY);
+        position.setSpeed(Double.POSITIVE_INFINITY);
+        position.setSatellites(40);
+
+        payload.setPosition(position);
+
+        String result = CloudPayloadJsonEncoder.marshal(payload);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
+
+        assertNull(decodedPayload.getPosition().getAltitude());
+        assertNull(decodedPayload.getPosition().getHeading());
+        assertNull(decodedPayload.getPosition().getLatitude());
+        assertNull(decodedPayload.getPosition().getLongitude());
+        assertNull(decodedPayload.getPosition().getPrecision());
+        assertNull(decodedPayload.getPosition().getSpeed());
+        assertEquals(40, (int) decodedPayload.getPosition().getSatellites());
+    }
+
+    @Test
+    public void shouldDiscardNegativeInfinityInPositionFields() {
+        KuraPayload payload = new KuraPayload();
+        KuraPosition position = new KuraPosition();
+
+        position.setAltitude(Double.NEGATIVE_INFINITY);
+        position.setHeading(Double.NEGATIVE_INFINITY);
+        position.setLatitude(Double.NEGATIVE_INFINITY);
+        position.setLongitude(Double.NEGATIVE_INFINITY);
+        position.setPrecision(Double.NEGATIVE_INFINITY);
+        position.setSpeed(Double.NEGATIVE_INFINITY);
+        position.setSatellites(40);
+
+        payload.setPosition(position);
+
+        String result = CloudPayloadJsonEncoder.marshal(payload);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
+
+        assertNull(decodedPayload.getPosition().getAltitude());
+        assertNull(decodedPayload.getPosition().getHeading());
+        assertNull(decodedPayload.getPosition().getLatitude());
+        assertNull(decodedPayload.getPosition().getLongitude());
+        assertNull(decodedPayload.getPosition().getPrecision());
+        assertNull(decodedPayload.getPosition().getSpeed());
+        assertEquals(40, (int) decodedPayload.getPosition().getSatellites());
+    }
+
+    @Test
+    public void shouldDiscardNaNInfinityInPositionFields() {
+        KuraPayload payload = new KuraPayload();
+        KuraPosition position = new KuraPosition();
+
+        position.setAltitude(Double.NaN);
+        position.setHeading(Double.NaN);
+        position.setLatitude(Double.NaN);
+        position.setLongitude(Double.NaN);
+        position.setPrecision(Double.NaN);
+        position.setSpeed(Double.NaN);
+        position.setSatellites(40);
+
+        payload.setPosition(position);
+
+        String result = CloudPayloadJsonEncoder.marshal(payload);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
+
+        assertNull(decodedPayload.getPosition().getAltitude());
+        assertNull(decodedPayload.getPosition().getHeading());
+        assertNull(decodedPayload.getPosition().getLatitude());
+        assertNull(decodedPayload.getPosition().getLongitude());
+        assertNull(decodedPayload.getPosition().getPrecision());
+        assertNull(decodedPayload.getPosition().getSpeed());
+        assertEquals(40, (int) decodedPayload.getPosition().getSatellites());
+    }
+
+    @Test
+    public void shoyldDiscardNonFiniteDoubleMetrics() {
+        KuraPayload payload = new KuraPayload();
+
+        payload.addMetric("positive.infinity", Double.POSITIVE_INFINITY);
+        payload.addMetric("negative.infinity", Double.NEGATIVE_INFINITY);
+        payload.addMetric("nan", Double.NaN);
+        payload.addMetric("foo", "bar");
+
+        String result = CloudPayloadJsonEncoder.marshal(payload);
+
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+
+        KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
+
+        assertEquals(payload.getPosition(), decodedPayload.getPosition());
+        assertEquals(payload.getBody(), decodedPayload.getBody());
+        assertEquals(payload.getTimestamp(), decodedPayload.getTimestamp());
+
+        assertNull(decodedPayload.metrics().get("positive.infinity"));
+        assertNull(decodedPayload.metrics().get("negative.infinity"));
+        assertNull(decodedPayload.metrics().get("nan"));
+        assertEquals("bar", decodedPayload.getMetric("foo"));
     }
 
     @Test
@@ -119,7 +264,7 @@ public class CloudPayloadJsonEncoderTest {
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        
+
         KuraPayload decodedPayload = CloudPayloadJsonDecoder.buildFromString(result);
 
         assertEquals(payload.getTimestamp(), decodedPayload.getTimestamp());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017, 2020 Eurotech and/or its affiliates and others
+ * Copyright (c) 2017, 2022 Eurotech and/or its affiliates and others
  * 
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -30,6 +30,8 @@ import java.util.Date;
 
 import org.eclipse.kura.message.KuraPayload;
 import org.eclipse.kura.message.KuraPosition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
@@ -39,6 +41,8 @@ import com.eclipsesource.json.JsonObject;
  *
  */
 public class CloudPayloadJsonEncoder {
+
+    private static final Logger logger = LoggerFactory.getLogger(CloudPayloadJsonEncoder.class);
 
     private CloudPayloadJsonEncoder() {
     }
@@ -80,9 +84,9 @@ public class CloudPayloadJsonEncoder {
             if (object instanceof Boolean) {
                 jsonMetrics.add(name, (Boolean) object);
             } else if (object instanceof Double) {
-                jsonMetrics.add(name, (Double) object);
+                encodeDoubleMetric(jsonMetrics, name, object);
             } else if (object instanceof Float) {
-                jsonMetrics.add(name, (Float) object);
+                encodeFloatMetric(jsonMetrics, name, object);
             } else if (object instanceof Integer) {
                 jsonMetrics.add(name, (Integer) object);
             } else if (object instanceof Long) {
@@ -98,48 +102,80 @@ public class CloudPayloadJsonEncoder {
         json.add(METRICS.value(), jsonMetrics);
     }
 
+    private static void encodeFloatMetric(JsonObject jsonMetrics, String name, Object object) {
+        encodeFloatProperty(jsonMetrics, name, object, "discarding non finite float metric: {}={}");
+    }
+
+    private static void encodeDoubleMetric(JsonObject jsonMetrics, String name, Object object) {
+        encodeDoubleProperty(jsonMetrics, name, object, "discarding non finite double metric: {}={}");
+    }
+
     private static void encodePosition(KuraPayload kuraPayload, JsonObject json) {
         KuraPosition position = kuraPayload.getPosition();
-        if (position != null) {
 
-            JsonObject jsonPosition = Json.object();
-            if (position.getLatitude() != null) {
-                jsonPosition.add(LATITUDE.value(), position.getLatitude());
-            }
-            if (position.getLongitude() != null) {
-                jsonPosition.add(LONGITUDE.value(), position.getLongitude());
-            }
-            if (position.getAltitude() != null) {
-                jsonPosition.add(ALTITUDE.value(), position.getAltitude());
-            }
-            if (position.getHeading() != null) {
-                jsonPosition.add(HEADING.value(), position.getHeading());
-            }
-            if (position.getPrecision() != null) {
-                jsonPosition.add(PRECISION.value(), position.getPrecision());
-            }
-            if (position.getSatellites() != null) {
-                jsonPosition.add(SATELLITES.value(), position.getSatellites());
-            }
-            if (position.getSpeed() != null) {
-                jsonPosition.add(SPEED.value(), position.getSpeed());
-            }
-            if (position.getTimestamp() != null) {
-                jsonPosition.add(CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value(),
-                        position.getTimestamp().getTime());
-            }
-            if (position.getStatus() != null) {
-                jsonPosition.add(STATUS.value(), position.getStatus());
-            }
-
-            json.add(POSITION.value(), jsonPosition);
+        if (position == null) {
+            return;
         }
+
+        JsonObject jsonPosition = Json.object();
+
+        encodePositionDouble(jsonPosition, LATITUDE.value(), position.getLatitude());
+
+        encodePositionDouble(jsonPosition, LONGITUDE.value(), position.getLongitude());
+
+        encodePositionDouble(jsonPosition, ALTITUDE.value(), position.getAltitude());
+
+        encodePositionDouble(jsonPosition, HEADING.value(), position.getHeading());
+
+        encodePositionDouble(jsonPosition, PRECISION.value(), position.getPrecision());
+
+        if (position.getSatellites() != null) {
+            jsonPosition.add(SATELLITES.value(), position.getSatellites());
+        }
+
+        encodePositionDouble(jsonPosition, SPEED.value(), position.getSpeed());
+
+        if (position.getTimestamp() != null) {
+            jsonPosition.add(CloudPayloadJsonFields.CloudPayloadJsonPositionFields.TIMESTAMP.value(),
+                    position.getTimestamp().getTime());
+        }
+        if (position.getStatus() != null) {
+            jsonPosition.add(STATUS.value(), position.getStatus());
+        }
+
+        json.add(POSITION.value(), jsonPosition);
+    }
+
+    private static void encodePositionDouble(final JsonObject object, final String metric, final Double value) {
+        encodeDoubleProperty(object, metric, value, "discarding non finite double metric: position.{}={}");
     }
 
     private static void encodeTimestamp(KuraPayload kuraPayload, JsonObject json) {
         Date timestamp = kuraPayload.getTimestamp();
         if (timestamp != null) {
             json.add(SENTON.value(), timestamp.getTime());
+        }
+    }
+
+    private static void encodeFloatProperty(JsonObject object, String name, Object value, String errorMessageFormat) {
+        final Float floatValue = (Float) value;
+
+        if (Float.isFinite(floatValue)) {
+            object.add(name, floatValue);
+
+        } else {
+            logger.warn(errorMessageFormat, name, floatValue);
+        }
+    }
+
+    private static void encodeDoubleProperty(JsonObject object, String name, Object value, String errorMessageFormat) {
+        final Double doubleValue = (Double) value;
+
+        if (Double.isFinite(doubleValue)) {
+            object.add(name, doubleValue);
+
+        } else {
+            logger.warn(errorMessageFormat, name, doubleValue);
         }
     }
 }

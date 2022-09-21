@@ -73,7 +73,6 @@ nav:
       - Deploy and Debug Applications: java-application-development/deploy-and-debug-applications.md
       - Remote Debugging on Target Platform: java-application-development/remote-debugging-on-target-platform.md
       - Configurable Application: java-application-development/configurable-application.md
-      - Connected Application: java-application-development/connected-application.md
       - Gateway Features:
         - How to Use Serial Ports: java-application-development/gateway-features-how-to-serial-ports.md
         - How to Use GPIO: java-application-development/gateway-features-how-to-use-gpio.md

@@ -79,7 +79,6 @@ nav:
         - How to Use GPIO: java-application-development/how-to-use-gpio.md
         - How to Use Modbus: java-application-development/how-to-use-modbus.md
         - How to Use CAN bus: java-application-development/how-to-use-can-bus.md
-        - How to Use People Counter: java-application-development/how-to-use-people-counter.md
         - How to Use Watchdog: java-application-development/how-to-use-watchdog.md
         - How to Manage Network Settings: java-application-development/how-to-manage-network-settings.md
         - How to Use Legacy Bluetooth LE: java-application-development/how-to-use-legacy-bt-le.md

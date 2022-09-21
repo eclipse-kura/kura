@@ -176,7 +176,7 @@ Bundle-ClassPath: .
 
 ```
 
-In addition, the build.propertiesfile should have org.eclipse.equinox.io listed as an additional bundle similar to below:
+In addition, the build.properties file should have org.eclipse.equinox.io listed as an additional bundle similar to below:
 
 ```
 additional.bundles = org.eclipse.equinox.io

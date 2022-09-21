@@ -1,6 +1,6 @@
 # Device Information
 
-The **Device** section provides several information about the  gateway where ESF is running on. This section can be accessed by selecting the **Device** option located in the **System** area.
+The **Device** section provides several information about the  gateway where Kura is running on. This section can be accessed by selecting the **Device** option located in the **System** area.
 
 ## Profile
 

@@ -149,7 +149,7 @@ If the last command reports that the certificate already exist in the system-wid
     Open a ssh connection to the device and enter the following command:
 
     ```bash
-    sudo keytool -importkeystore -deststorepass changeit -destkeystore /opt/eurotech/esf/security/cacerts.ks -srckeystore /tmp/aws-ssl.p12 -srcstoretype PKCS12
+    sudo keytool -importkeystore -deststorepass changeit -destkeystore /opt/eclipse/kura/security/cacerts.ks -srckeystore /tmp/aws-ssl.p12 -srcstoretype PKCS12
     ```
 
     The command will ask for a password, enter the password defined when creating the `aws-ssl.p12` file.

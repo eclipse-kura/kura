@@ -19,7 +19,7 @@ The Container Orchestrator provider allows the user to pull images from private 
 ### Procedure:
 
 1. Populate the image name field. The username containing the private image must be placed before the image name separated by a forward slash. This is demonstrated below:
-   - **Image Name: ** ```<Docker-Hub username>/<image name>``` for example```eurotech/esf```.
+   - **Image Name: ** ```<Docker-Hub username>/<image name>``` for example```eclipse/kura```.
 
 2. Populate the credential fields: 
 - **Authentication Registry URL:** This field should be left blank.

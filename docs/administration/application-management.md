@@ -20,7 +20,7 @@ The **Packages** page has, in the top part of the page a section dedicated to th
   <figcaption></figcaption>
 </figure>
 
-Dragging an application reference taken from the Eclipse Kura Marketplace to the specific area of the Kura Web Administrative Console will instruct ESF to download and install the corresponding package, as seen below:
+Dragging an application reference taken from the Eclipse Kura Marketplace to the specific area of the Kura Web Administrative Console will instruct Kura to download and install the corresponding package, as seen below:
 
 ![](images/packageMarketplace.png)
 

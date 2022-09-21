@@ -78,7 +78,6 @@ nav:
         - How to Use Serial Ports: java-application-development/how-to-serial-ports.md
         - How to Use GPIO: java-application-development/how-to-use-gpio.md
         - How to Use Modbus: java-application-development/how-to-use-modbus.md
-        - How to Use RS-485 Ports: java-application-development/how-to-use-rs-485-ports.md
         - How to Use CAN bus: java-application-development/how-to-use-can-bus.md
         - How to Use People Counter: java-application-development/how-to-use-people-counter.md
         - How to Use Watchdog: java-application-development/how-to-use-watchdog.md

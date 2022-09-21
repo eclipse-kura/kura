@@ -6,7 +6,7 @@ Since RAM usage is application dependent, it is important to perform some stress
 
 Some of the aspects that should be taken into account are the following:
 
-## Java Heap memory usage"
+## Java Heap memory usage
 
 Java heap is used to store the Java objects and classes at runtime.
 

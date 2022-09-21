@@ -74,20 +74,20 @@ nav:
       - Remote Debugging on Target Platform: java-application-development/remote-debugging-on-target-platform.md
       - Configurable Application: java-application-development/configurable-application.md
       - Connected Application: java-application-development/connected-application.md
-      - Gateway Features:
-        - How to Use Serial Ports: java-application-development/gateway-features-how-to-serial-ports.md
-        - How to Use GPIO: java-application-development/gateway-features-how-to-use-gpio.md
-        - How to Use Modbus: java-application-development/gateway-features-how-to-use-modbus.md
-        - How to Use RS-485 Ports: java-application-development/gateway-features-how-to-use-rs-485-ports.md
-        - How to Use CAN bus: java-application-development/gateway-features-how-to-use-can-bus.md
-        - How to Use People Counter: java-application-development/gateway-features-how-to-use-people-counter.md
-        - How to Use Watchdog: java-application-development/gateway-features-how-to-use-watchdog.md
-        - How to Manage Network Settings: java-application-development/gateway-features-how-to-manage-network-settings.md
-        - How to Use Legacy Bluetooth LE: java-application-development/gateway-features-how-to-use-legacy-bt-le.md
-        - How to Use Legacy Bluetooth LE Beacons: java-application-development/gateway-features-how-to-use-legacy-bt-le-beacons.md
-        - How to Use Legacy Bluetooth LE Beacon Scanner: java-application-development/gateway-features-how-to-use-legacy-bt-beacon-scanner.md
-        - How to Use New Bluetooth LE APIs: java-application-development/gateway-features-how-to-use-new-bt-le-apis.md
-        - How to Use New Beacon APIs: java-application-development/gateway-features-how-to-use-new-beacon-apis.md
+      - How-tos:
+        - How to Use Serial Ports: java-application-development/how-to-serial-ports.md
+        - How to Use GPIO: java-application-development/how-to-use-gpio.md
+        - How to Use Modbus: java-application-development/how-to-use-modbus.md
+        - How to Use RS-485 Ports: java-application-development/how-to-use-rs-485-ports.md
+        - How to Use CAN bus: java-application-development/how-to-use-can-bus.md
+        - How to Use People Counter: java-application-development/how-to-use-people-counter.md
+        - How to Use Watchdog: java-application-development/how-to-use-watchdog.md
+        - How to Manage Network Settings: java-application-development/how-to-manage-network-settings.md
+        - How to Use Legacy Bluetooth LE: java-application-development/how-to-use-legacy-bt-le.md
+        - How to Use Legacy Bluetooth LE Beacons: java-application-development/how-to-use-legacy-bt-le-beacons.md
+        - How to Use Legacy Bluetooth LE Beacon Scanner: java-application-development/how-to-use-legacy-bt-beacon-scanner.md
+        - How to Use New Bluetooth LE APIs: java-application-development/how-to-use-new-bt-le-apis.md
+        - How to Use New Beacon APIs: java-application-development/how-to-use-new-beacon-apis.md
       - RAM Usage Considerations: java-application-development/ram-usage-considerations.md
 
 theme:

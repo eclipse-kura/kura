@@ -1,23 +1,5 @@
 # Deploy and Debug Applications
 
-[Overview](#overview)
-
-* [Prerequisites](#prerequisites)
-
-[Testing the OSGi Plug-in](#_Testing_the_OSGi)
-
-* [Local Emulation Mode](#local-emulation-mode)
-
-* [Remote Target Device](#remote-target-device)
-
-[Connect to OSGi on Target Device](#_Connect_to_OSGi)
-
-* [Manage Bundles on Target Device](#manage-bundles-on-target-device)
-
-* [Set Kura Logger Levels](#set-kura-logger-levels)
-
-[Making Deployment Permanent](#making-deployment-permanent)
-
 ## Overview
 
 This section provides a simple example of how to test and deploy OSGi

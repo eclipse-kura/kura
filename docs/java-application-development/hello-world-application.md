@@ -1,28 +1,5 @@
 # Hello World Application
 
-[Overview](#overview)
-
-[Prerequisites](#prerequisites)
-
-[Hello World Using the Kura Logger](#hello-world-using-the-kura-logger)
-
-* [Create Hello World Plug-in](#create-hello-world-plug-in)
-
-* [Add Dependencies to Manifest](#add-dependencies-to-manifest)
-
-* [Create Java Class](#create-java-class)
-
-* [Resolve Dependencies](#resolve-dependencies)
-
-* [Create Component Class](#create-component-class)
-
-[Deploying the Plug-in](#deploying-the-plug-in)
-
-* [Export the OSGi Bundle](#export-the-osgi-bundle)
-
-* [Create a Deployment Package](#create-a-deployment-package)
-
-
 ## Overview
 
 This section provides a simple example of how to create a Kura “Hello

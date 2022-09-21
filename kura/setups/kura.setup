@@ -90,7 +90,7 @@
     <repository
         url="http://update.eclemma.org/"/>
     <repository
-        url="http://eclipse.sonarlint.org/"/>
+        url="https://eclipse-uc.sonarlint.org/"/>
     <description>Install the tools needed in the IDE to work with the source code for ${scope.project.label}</description>
   </setupTask>
   <setupTask

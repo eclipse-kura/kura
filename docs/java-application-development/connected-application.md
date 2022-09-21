@@ -140,7 +140,7 @@ The available methods for implementation are:
 * onMessageConfirmed: Method called when a published message has been fully acknowledged by the broker (not applicable for qos 0 messages).
 * onMessagePublished: Method called when a message has been transfered from the publishing queue to the DataTransportService.
 
-For more information on the various Kura APIs, please review the [Kura APIs](/ref/api-ref/)
+For more information on the various Kura APIs, please review the [Kura APIs](/references/javadoc/)
 
 ## Run the Bundle
 

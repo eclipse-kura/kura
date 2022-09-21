@@ -1,0 +1,157 @@
+/*******************************************************************************
+ * Copyright (c) 2022 Eurotech and/or its affiliates and others
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *  Eurotech
+ ******************************************************************************/
+
+package org.eclipse.kura.configuration.change.manager.test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions;
+import org.junit.Before;
+import org.junit.Test;
+
+public class ConfigurationChangeManagerOptionsTest {
+
+    private static final String KEY_ENABLED = "enabled";
+    private static final String KEY_SEND_DELAY = "send.delay";
+    private static final boolean DEFAULT_ENABLED = false;
+    private static final long DEFAULT_SEND_DELAY = 10;
+
+    private Map<String, Object> properties;
+    private ConfigurationChangeManagerOptions options;
+    private Object returnValue;
+    private Exception exceptionOccurred;
+
+    /*
+     * Scenarios
+     */
+
+    @Test
+    public void shouldReturnEnabled() {
+        givenProperty(KEY_ENABLED, true);
+        givenOptionsInstatiated();
+
+        whenIsEnabled();
+
+        thenNoExceptionsOccurred();
+        thenReturnValueIs(true);
+    }
+
+    @Test
+    public void shouldReturnDisabled() {
+        givenProperty(KEY_ENABLED, false);
+        givenOptionsInstatiated();
+
+        whenIsEnabled();
+
+        thenNoExceptionsOccurred();
+        thenReturnValueIs(false);
+    }
+
+    @Test
+    public void shouldReturnDefaultEnabledValue() {
+        givenOptionsInstatiated();
+
+        whenIsEnabled();
+
+        thenNoExceptionsOccurred();
+        thenReturnValueIs(DEFAULT_ENABLED);
+    }
+
+    @Test
+    public void shouldReturnCorrectSendDelay() {
+        givenProperty(KEY_SEND_DELAY, 1000L);
+        givenOptionsInstatiated();
+
+        whenGetSendDelay();
+
+        thenNoExceptionsOccurred();
+        thenReturnValueIs(1000L);
+    }
+
+    @Test
+    public void shouldReturnDefaultSendDelay() {
+        givenOptionsInstatiated();
+
+        whenGetSendDelay();
+
+        thenNoExceptionsOccurred();
+        thenReturnValueIs(DEFAULT_SEND_DELAY);
+    }
+
+    /*
+     * Steps
+     */
+
+    /*
+     * Given
+     */
+
+    private void givenProperty(String key, Object value) {
+        this.properties.put(key, value);
+    }
+
+    private void givenOptionsInstatiated() {
+        this.options = new ConfigurationChangeManagerOptions(this.properties);
+    }
+
+    /*
+     * When
+     */
+
+    private void whenIsEnabled() {
+        try {
+            this.returnValue = this.options.isEnabled();
+        } catch (Exception e) {
+            this.exceptionOccurred = e;
+        }
+    }
+
+    private void whenGetSendDelay() {
+        try {
+            this.returnValue = this.options.getSendDelay();
+        } catch (Exception e) {
+            this.exceptionOccurred = e;
+        }
+    }
+
+    /*
+     * Then
+     */
+
+    private void thenNoExceptionsOccurred() {
+        assertNull(this.exceptionOccurred);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> void thenReturnValueIs(T expectedValue) {
+        assertEquals(expectedValue, (T) this.returnValue);
+    }
+
+
+    /*
+     * Utility
+     */
+
+    @Before
+    public void cleanUp() {
+        this.properties = new HashMap<>();
+        this.options = null;
+        this.returnValue = null;
+        this.exceptionOccurred = null;
+    }
+
+}

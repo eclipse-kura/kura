@@ -67,10 +67,31 @@ nav:
       - Azure IoT Hub&trade; platform: cloud-platform/kura-azure.md
       - Eclipse Kapua&trade; platform: cloud-platform/kura-kapua.md
       - Eclipse Hono&trade; platform: cloud-platform/kura-hono.md
-      - Apache Camel&trade; Integration:
-        - Apache Camel&trade; integration: cloud-platform/apache-camel-integration/kura-camel.md
-        - Apache Camel&trade; as application: cloud-platform/apache-camel-integration/kura-camel-app.md
-        - Apache Camel&trade; Cloud Service: cloud-platform/apache-camel-integration/kura-camel-cloud.md
+    - Java Application Development:
+      - Development Environment Setup: java-application-development/development-environment-setup.md
+      - Hello World Application: java-application-development/hello-world-application.md
+      - Deploy and Debug Applications: java-application-development/deploy-and-debug-applications.md
+      - Remote Debugging on Target Platform: java-application-development/remote-debugging-on-target-platform.md
+      - Configurable Application: java-application-development/configurable-application.md
+      - Connected Application: java-application-development/connected-application.md
+      - How-tos:
+        - How to Use Serial Ports: java-application-development/how-to-serial-ports.md
+        - How to Use GPIO: java-application-development/how-to-use-gpio.md
+        - How to Use Modbus: java-application-development/how-to-use-modbus.md
+        - How to Use CAN bus: java-application-development/how-to-use-can-bus.md
+        - How to Use Watchdog: java-application-development/how-to-use-watchdog.md
+        - How to Manage Network Settings: java-application-development/how-to-manage-network-settings.md
+        - How to Use Legacy Bluetooth LE: java-application-development/how-to-use-legacy-bt-le.md
+        - How to Use Legacy Bluetooth LE Beacons: java-application-development/how-to-use-legacy-bt-le-beacons.md
+        - How to Use Legacy Bluetooth LE Beacon Scanner: java-application-development/how-to-use-legacy-bt-beacon-scanner.md
+        - How to Use New Bluetooth LE APIs: java-application-development/how-to-use-new-bt-le-apis.md
+        - How to Use New Beacon APIs: java-application-development/how-to-use-new-beacon-apis.md
+      - RAM Usage Considerations: java-application-development/ram-usage-considerations.md
+      - Contributing: java-application-development/contributing.md
+    - Apache Camel&trade; Integration:
+      - Apache Camel&trade; integration: cloud-platform/apache-camel-integration/kura-camel.md
+      - Apache Camel&trade; as application: cloud-platform/apache-camel-integration/kura-camel-app.md
+      - Apache Camel&trade; Cloud Service: cloud-platform/apache-camel-integration/kura-camel-cloud.md
     - Connect Field Devices:
       - Drivers, Assets and Channels: connect-field-devices/driver-and-assets.md
       - Asset implementation: connect-field-devices/asset-implemetation.md
@@ -118,8 +139,7 @@ nav:
     - References:
       - MQTT Namespace: references/mqtt-namespace.md
       - Javadoc: references/javadoc.md
-
-
+      
 theme:
   name: material
   logo: assets/kura_logo_small.png

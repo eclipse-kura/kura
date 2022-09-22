@@ -18,7 +18,7 @@ Once logged in, the user can modify its password (recommended after the first lo
 
 After confirming the changes, the user will be logged out.
 
-## Accessing the ESF Gateway Administration Console over a Cellular Link
+## Accessing the Kura Gateway Administration Console over a Cellular Link
 
 In order to connect to the Gateway Administration Console via a cellular interface, the following requirements must be met:
 

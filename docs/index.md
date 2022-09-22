@@ -21,11 +21,11 @@ Kura comes with the following services:
 
 * I/O Services
 	* Serial port access through javax.comm 2.0 API or OSGi I/O connection
-    *  USB access and events through javax.usb, HID API, custom extensions
-    *  Bluetooth access through javax.bluetooth or OSGi I/O connection
-    *  Position Service for GPS information from an NMEA stream
-    *  Clock Service for the synchronization of the system clock
-    *  Kura API for GPIO/PWM/I2C/SPI access
+    * USB access and events through javax.usb, HID API, custom extensions
+    * Bluetooth access through javax.bluetooth or OSGi I/O connection
+    * Position Service for GPS information from an NMEA stream
+    * Clock Service for the synchronization of the system clock
+    * Kura API for GPIO/PWM/I2C/SPI access
 * Data Services
     * Store and forward functionality for the telemetry data collected by the gateway and published to remote servers.
     * Policy-driven publishing system, which abstracts the application developer from the complexity of the network layer and the

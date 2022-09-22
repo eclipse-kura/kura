@@ -88,6 +88,58 @@ nav:
         - How to Use New Beacon APIs: java-application-development/how-to-use-new-beacon-apis.md
       - RAM Usage Considerations: java-application-development/ram-usage-considerations.md
       - Contributing: java-application-development/contributing.md
+    - Apache Camel&trade; Integration:
+      - Apache Camel&trade; integration: cloud-platform/apache-camel-integration/kura-camel.md
+      - Apache Camel&trade; as application: cloud-platform/apache-camel-integration/kura-camel-app.md
+      - Apache Camel&trade; Cloud Service: cloud-platform/apache-camel-integration/kura-camel-cloud.md
+    - Connect Field Devices:
+      - Drivers, Assets and Channels: connect-field-devices/driver-and-assets.md
+      - Asset implementation: connect-field-devices/asset-implemetation.md
+      - Driver implementation: connect-field-devices/driver-implemetation.md
+      - I/O APIs: connect-field-devices/IO-apis.md
+      - Field Protocols: connect-field-devices/field-protocols.md
+      - Drivers:
+        - OPC UA Driver: connect-field-devices/opcua-driver.md
+        - S7comm Driver: connect-field-devices/s7-driver.md
+        - GPIO Driver: connect-field-devices/gpio-driver.md
+        - TI SensorTag Driver: connect-field-devices/sensortag-driver.md
+        - RaspberryPi SenseHat driver: connect-field-devices/sensehat-driver.md
+        - iBeacon&trade; Driver: connect-field-devices/ibeacon-driver.md
+        - Eddystone&trade; Driver: connect-field-devices/eddystone-driver.md
+        - Xdk Driver: connect-field-devices/xdk-driver.md
+      - ASSET-V1 MQTT Namespace: connect-field-devices/asset-v1-mqtt-namespace.md
+    - Kura Wires:
+      - Introduction: kura-wires/introduction.md
+      - Assets as Wire Components: kura-wires/assets-as-wire-components.md
+      - Single Port Wire Components:
+        - DB Store and Filter: kura-wires/single-port-wire-components/db-store-and-filter.md
+        - FIFO Component: kura-wires/single-port-wire-components/fifo-component.md
+        - AI Wire Component: kura-wires/single-port-wire-components/ai-wire-component.md
+        - Script Filter: kura-wires/single-port-wire-components/script-filter.md
+      - Multiport Wire Components:
+        - Multiport Wire Components: kura-wires/multiport-wire-components/multiport-wire-components.md
+        - Conditional Component: kura-wires/multiport-wire-components/conditional-component.md
+        - Join Component: kura-wires/multiport-wire-components/join-component.md
+        - Mathematical Components Example: kura-wires/multiport-wire-components/mathematical-components-example.md
+      - Usage Examples:
+        - Modbus Application: kura-wires/usage-examples/modbus-application.md
+        - OPC-UA Application: kura-wires/usage-examples/opcua-application.md
+        - TI SensorTag Application: kura-wires/usage-examples/ti-sensortag-application.md
+        - GPIO Driver Application: kura-wires/usage-examples/gpio-driver-application.md
+        - iBeacon&trade; Driver Application: kura-wires/usage-examples/ibeacon-driver-application.md
+        - Eddystone&trade; Driver Application with RuuviTag+: kura-wires/usage-examples/eddystone-driver-application.md
+      - Wires MQTT Namespace: kura-wires/wires-mqtt-namespace.md
+      - WireGraphService Configuration Format: kura-wires/wire-graph-service-configuration-format.md
+      - Wire Service V1 REST APIs and MQTT Request Handler: kura-wires/wire-service-rest-v1.md
+      - References: kura-wires/wire-service-references.md
+    - Quality Assurance:
+      - Introduction: quality-assurance/intro.md
+      - Unit Testing: quality-assurance/unit-testing.md
+      - System Testing: quality-assurance/system-testing.md
+    - References:
+      - MQTT Namespace: references/mqtt-namespace.md
+      - Javadoc: references/javadoc.md
+      
 theme:
   name: material
   logo: assets/kura_logo_small.png
@@ -112,8 +164,6 @@ theme:
   features:
     - navigation.instant
     - navigation.tracking
-    - navigation.tabs # enable the navigation tabs in the header
-    - navigation.tabs.sticky # navigation tabs will lock below the header and always remain visible when scrolling down
     - navigation.top # enable the back-to-top button
     - announce.dismiss # enable custom announcements, they will dismiss by scrolling down
 

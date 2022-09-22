@@ -1,7 +1,7 @@
 # How to Use Legacy Bluetooth LE Beacons
 
 !!! warning
-    This guide uses the deprecated Kura Bluetooth APIs. Please consider to use the new [ones](/java-application-development/how-to-use-legacy-bt-le-beacons/).
+    This guide uses the deprecated Kura Bluetooth APIs. Please consider to use the new [ones](/java-application-development/how-to-use-new-beacon-apis/).
 
 ## Overview
 

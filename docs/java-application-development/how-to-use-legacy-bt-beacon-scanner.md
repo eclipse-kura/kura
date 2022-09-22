@@ -161,7 +161,7 @@ private double calculateDistance(int rssi, int txpower) {
 
 ## Deploy and Validate the Bundle
 
-In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](deploying-bundles.html#_Install_Single_Bundle).  When the installation is complete, the bundle starts automatically.
+In order to proceed, you need to know the IP address of your embedded gateway that is on the remote target unit. With this information, follow the mToolkit instructions for installing a single bundle to the remote target device [located here](/java-application-development/deploy-and-debug-applications/).  When the installation is complete, the bundle starts automatically.
 
 In the Kura Gateway Administration Console, the BeaconScannerExample tab appears on the left and enables the device to be configured for scanning.
 

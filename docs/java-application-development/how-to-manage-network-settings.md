@@ -384,11 +384,11 @@ Modify the parameters in the connectToWirelessAccessPoint() method with the spec
 
 At this point, the bundle implementation is complete. *Make sure to save all files before proceeding.*
 
-Export the OSGi bundle as a stand-alone plug-in, following the instructions in [Hello World Using the Kura Logger](hello-example.html).
+Export the OSGi bundle as a stand-alone plug-in, following the instructions in [Hello World Using the Kura Logger](/java-application-development/hello-world-application/).
 
 ### Deploy the Bundle
 
-In order to proceed, you need to know the IP address of your embedded gateway that is running Kura. Follow the mToolkit instructions for installing a single bundle to the remote target device located [here](deploying-bundles.html#install-single-bundle-to-target-device). Once the bundle has finished deploying, it will set the device’s network configuration and attempt to connect to a Wi-Fi access point using the configured parameters in the connectToWirelessAccessPoint() method.
+In order to proceed, you need to know the IP address of your embedded gateway that is running Kura. Follow the mToolkit instructions for installing a single bundle to the remote target device located [here](/java-application-development/deploy-and-debug-applications/#install-single-bundle-to-target-device). Once the bundle has finished deploying, it will set the device’s network configuration and attempt to connect to a Wi-Fi access point using the configured parameters in the connectToWirelessAccessPoint() method.
 
 ### Test the Connection to the Access Point
 

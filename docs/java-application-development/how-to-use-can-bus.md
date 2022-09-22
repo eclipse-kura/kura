@@ -2,7 +2,7 @@
 
 The Kura CAN bus protocol implementation is based on the SocketCAN interface, which provides a socket interface to userspace applications. The sockets are designed as can0 and can1. The SocketCAN package is an implementation of Controller Area Network (CAN) protocols. For more information, refer to the following link: <https://www.kernel.org/doc/Documentation/networking/can.txt>.
 
-# Configure the CAN bus Driver
+## Configure the CAN bus Driver
 
 The CAN network must be initialized prior to communications. Verify that the CAN driver module has been enabled in the kernel by issuing the following command:
 
@@ -18,7 +18,7 @@ ip link set can0 up
 ip link set can1 type can bitrate 50000 triple-sampling on
 ip link set can1 up
 ```
-# Use the CAN bus Driver in Kura
+## Use the CAN bus Driver in Kura
 
 To use the Can bus Driver in Kura, the bundle **org.eclipse.kura.protocol.can** must be installed. Refer to the section [Application Management](/administration/application-management/) for more information.
 

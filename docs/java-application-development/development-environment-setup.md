@@ -30,7 +30,8 @@ The Eclipse IDE is an open source development tool that consists of an integrate
 Before installing Eclipse, you should choose directory locations for the Eclipse install and its workspaces.
 
 !!! info
-    The following points should be kept in mind regarding Eclipse installs and workspaces: <br />
+    The following points should be kept in mind regarding Eclipse installs and workspaces:
+
     - The directory location of the Eclipse workspaces should be chosen carefully. 
       Once Eclipse is installed and workspaces are created, they should never be moved to another location in the file system. <br /> 
     - There may be multiple installs of Eclipse (of different or similar versions), and single instances of each install can be run simultaneously; but there should never be more that one instance of a specific install running at the same time (to avoid corruption to the Eclipse environment). <br /> 
@@ -102,7 +103,7 @@ Finally, click **Finish** to import the projects.  At this point, you should hav
 
 * target-definition – a set of required bundles that are dependencies of the APIs and Kura.
 
-![Import Project](./images/development-environment-setup/image6.png)
+    ![Import Project](./images/development-environment-setup/image6.png)
 
 Eclipse will also report some errors at this point.  See the next section to resolve those errors.
 
@@ -138,11 +139,11 @@ Download the latest Eclipse Installer appropriate for your platform from [Eclips
 * Switch to advanced mode (in simple mode you cannot add a custom installer)
 * Select "Eclipse IDE for Eclipse Committers", select the latest "Product Version" and select a Java 11+ VM. Then click the Next button.
 
-![Eclipse Installer](./images/development-environment-setup/image10.png)
+    ![Eclipse Installer](./images/development-environment-setup/image10.png)
 
 * Select "Eclipse Kura" project under the "Eclipse Projects" menu. If it isn't available, add a new installer that you can find [here]( https://raw.githubusercontent.com/eclipse/kura/develop/kura/setups/kura.setup) under the "Github Projects" menu. Then click the Next button.
 
-![Kura Oomph](./images/development-environment-setup/image11.png)
+    ![Kura Oomph](./images/development-environment-setup/image11.png)
 
 * Update Eclipse Kura Git repository's username (prefer the anonymous HTTPS option, link to your fork) and customize further settings if you like (e.g. Root install folder, Installation folder name). Then click the Next button.
 * Leave all Bootstrap Tasks selected and press the Finish button.

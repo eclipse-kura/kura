@@ -23,7 +23,7 @@ The ModbusProtocolDevice service also requires a valid Serial Line or Ethernet c
 
 When a valid configuration is received, the ModbusProtocolDevice service tries to open the communication port. Serial Line communication uses the CommConnection class; Ethernet communication is based on java.net.Socket. When the communication is established, the client makes direct calls to the Modbus functions. The first parameter of each method is the Modbus address of the queried unit. This address must be in the range of 1 - 247.
 
-# Function Codes
+## Function Codes
 
 The following function codes are implemented within the ModbusProtocolDevice service:
 
@@ -53,7 +53,7 @@ All functions throw a **ModbusProtocolException**. Valid exceptions include:
 
 * TRANSACTION_FAILURE
 
-# Code Examples
+## Code Examples
 
 The ModbusProtocolDeviceService is an OSGi declarative service referenced in the client XML definition file:
 ```xml

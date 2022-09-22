@@ -48,7 +48,7 @@ and in the component definition:
             unbind="unsetBluetoothLeIBeaconService"/>
 ```
 
-The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeIBeaconScanner** and **BluetoothLeIBeaconAdvertiser**. As explained [here](bluetooth-le-apis.html#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
+The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeIBeaconScanner** and **BluetoothLeIBeaconAdvertiser**. As explained [here](/java-application-development/how-to-use-new-bt-le-apis/#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
 
 ```java
 this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(adapterName);
@@ -203,7 +203,7 @@ and in the component definition:
             unbind="unsetBluetoothLeEddystoneService"/>
 ```
 
-The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeEddystoneScanner** and **BluetoothLeEddystoneAdvertiser**. As explained [here](bluetooth-le-apis.html#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
+The **BluetoothLeService** is used to get the **BluetoothLeAdapter** to be used with the **BluetoothLeEddystoneScanner** and **BluetoothLeEddystoneAdvertiser**. As explained [here](/java-application-development/how-to-use-new-bt-le-apis/#get-the-bluetooth-adapter), the adapter can be retrieved and powered on as follows:
 
 ```java
 this.bluetoothLeAdapter = this.bluetoothLeService.getAdapter(adapterName);

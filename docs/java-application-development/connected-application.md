@@ -209,9 +209,6 @@ browser window. For the ‘connect.auto-on-startup’ parameter, select
 
 ![](./images/connected-application/image5.png)
 
-<span id="_View_and_Modify" class="anchor"><span
-id="_Modify_Configuration_and" class="anchor"></span></span>
-
 ## Modify Bundle Configuration in Local Web UI
 
 Bundles changes may be made directly in the emulator web UI. Since you

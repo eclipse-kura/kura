@@ -268,10 +268,6 @@ field equal to the **Class** field as shown below:
 
 Click **Finish**.
 
-!!! warning
-    Starting from Kura 3.0, the configuration service will only track "relevant services" that, in their component description files, will provide the ConfigurableComponent or SelfConfigurableComponent interface. The old behavior can be restored by setting the  `org.eclipse.kura.core.configuration.legacyServiceTracking` property to true.
-
-If **Kura 2.1.0 or older versions** are used or the `org.eclipse.kura.core.configuration.legacyServiceTracking` system property is set to true, proceed as follows.
 
 After the Component class has been created, it will
 open in the Workspace. On the Services tab, click the **Add** button

@@ -122,7 +122,8 @@ One or more OSGi bundles can be deployed to a remote device running
 Kura, either by installing separate bundle files or deployment packages
 using Eclipse.
 
-{% include alerts.html message="These steps require Kura to be running on the target device." %}
+!!! warning
+    These steps require Kura to be running on the target device.
 
 This method of deployment is temporary on the remote target device and
 is not persistent after a restart. To make the deployment permanent, see
@@ -147,7 +148,8 @@ installing mToolkit into the Eclipse development environment.
 
 Close the dialog by clicking the **OK** button.
 
-{% include alerts.html message="The remote target device must have port 1450 open in its firewall, in order to allow mToolkit o make a connection to its OSGi framework. If this port is not opened, refer to the section [Open Port for OSGi Remote Connection](#open-port-for-osgi-remote-connection)." %}
+!!! warning
+The remote target device must have port 1450 open in its firewall, in order to allow mToolkit o make a connection to its OSGi framework. If this port is not opened, refer to the section [Open Port for OSGi Remote Connection](#open-port-for-osgi-remote-connection).
 
 Right-click the framework icon name and select **Connect Framework**.
 The list of installed bundles and deployment packages should be

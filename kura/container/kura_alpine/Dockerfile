@@ -39,12 +39,12 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
       cp kura/distrib/src/main/sh/extract.sh kura/distrib/src/main/sh/extract_nn.sh && \
       cd /kura && mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS && \
       cd /kura && mvn -B -f kura/pom.xml clean install $MAVEN_PROPS && \
-      cd /kura && mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-ubuntu-20-nn -nsu && \ 
+      cd /kura && mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pdocker-x86_64-nn -nsu && \ 
     ls -la /kura/kura/distrib/target && \
     apk del maven git && \
     apk --no-cache add procps unzip gzip tar psmisc socat dos2unix openssl net-tools which busybox-extras \
     bluez bluez-deprecated chrony && \
-    /kura/kura/distrib/target/kura_*_intel-up2-ubuntu-20-nn_installer.sh && \
+    /kura/kura/distrib/target/kura_*_docker-x86_64-nn_installer.sh && \
     chmod a+rw -R /opt/eclipse && \
     find /opt/eclipse -type d | xargs chmod a+x && \
     chmod a+rwx /var/log && \
@@ -56,8 +56,6 @@ RUN echo "$GIT_REPO / $GIT_BRANCH / $KURA_COMMIT" && \
     cd /root && \
     rm -Rf /context /kura /root/.m2 && \
     install -m 0777 -d "${KURA_DIR}/data" && \
-    sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
-    xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false ${KURA_DIR}/user/snapshots/snapshot_0.xml && \
     ln -s /bin/bash /usr/bin/bash && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \

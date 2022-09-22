@@ -111,6 +111,9 @@
 		<condition property="is.nn">
 			<contains string="${build.name}" substring="-nn" />
 		</condition>
+        <condition property="is.docker">
+            <contains string="${build.name}" substring="docker" />
+        </condition>
 		<condition property="is.sysv">
 			<and>
 				<contains string="${service.manager}" substring="sysv" />
@@ -1850,7 +1853,7 @@ fi]]>
 		</zip>
 	</target>
 
-	<target name="container-orchestrator-config">
+	<target name="container-orchestrator-config" unless="is.docker">
 		<propertyfile
 			file="${project.build.directory}/${build.output.name}/config.ini">
 			<entry key="osgi.bundles" operation="+"
@@ -1859,7 +1862,7 @@ fi]]>
 				value=", reference:file:${kura.install.dir}/${kura.symlink}/${plugins.folder}/org.eclipse.kura.container.provider_${org.eclipse.kura.container.provider.version}.jar@4:start" />
 		</propertyfile>
 	</target>
-	<target name="container-orchestrator-jar">
+	<target name="container-orchestrator-jar" unless="is.docker">
 		<zip destfile="${project.build.directory}/${build.output.name}.zip"
 			update="true">
 			<zipfileset

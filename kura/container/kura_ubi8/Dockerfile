@@ -42,7 +42,7 @@ ENV \
 
 RUN mvn -B -f target-platform/pom.xml clean install -Pno-mirror $MAVEN_PROPS
 RUN mvn -B -f kura/pom.xml clean install $MAVEN_PROPS
-RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pintel-up2-ubuntu-20-nn -nsu
+RUN mvn -B -f kura/distrib/pom.xml clean install $MAVEN_PROPS -Pdocker-x86_64-nn -nsu
 
 WORKDIR /
 
@@ -72,7 +72,7 @@ RUN true && \
     && \
     microdnf -y clean all && rm -rf /var/cache/yum
 
-COPY --from=builder /kura/kura/distrib/target/kura_*_intel-up2-ubuntu-20-nn_installer.sh /installer.sh
+COPY --from=builder /kura/kura/distrib/target/kura_*_docker-x86_64-nn_installer.sh /installer.sh
 
 ENV \
   KURA_DIR=/opt/eclipse/kura \
@@ -95,11 +95,8 @@ RUN true && \
     test -x "${KURA_DIR}/bin/start_kura.sh" && \
     chmod a+x /usr/local/bin/* && \
     install -m 0777 -d "${KURA_DIR}/data" && \
-    sed -i 's/kura.primary.network.interface/#kura.primary.network.interface/g' ${KURA_DIR}/framework/kura.properties && \
-    xmlstarlet ed -L --update "/esf:configurations/esf:configuration[@pid='org.eclipse.kura.clock.ClockService']/esf:properties/esf:property[@name='enabled']/esf:value" -v false ${KURA_DIR}/user/snapshots/snapshot_0.xml && \
     mkdir -p ${KURA_DIR}/packages && \
     if [ "$PACKED" == "true" ]; then touch /kura.packed && pack-kura; fi && \
-    \
     unpack-kura && \
     dp-install "https://repo1.maven.org/maven2/de/dentrassi/kura/addons/de.dentrassi.kura.addons.utils.fileinstall/0.6.0/de.dentrassi.kura.addons.utils.fileinstall-0.6.0.dp" && \
     add-config-ini "felix.fileinstall.disableNio2=true" && \

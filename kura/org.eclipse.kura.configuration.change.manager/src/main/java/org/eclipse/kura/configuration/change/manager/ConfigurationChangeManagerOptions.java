@@ -16,11 +16,10 @@ import java.util.Map;
 
 public class ConfigurationChangeManagerOptions {
 
-    static final String KEY_ENABLED = "enabled";
-    static final String KEY_SEND_DELAY = "send.delay";
-    static final boolean DEFAULT_ENABLED = false;
-    static final long DEFAULT_DETECTION_DELAY = 120000;
-    static final long DEFAULT_SEND_DELAY = 10;
+    public static final String KEY_ENABLED = "enabled";
+    public static final String KEY_SEND_DELAY = "send.delay";
+    public static final boolean DEFAULT_ENABLED = false;
+    public static final long DEFAULT_SEND_DELAY = 10;
 
     private final boolean enabled;
     private final long sendDelay;

@@ -13,6 +13,10 @@
 
 package org.eclipse.kura.configuration.change.manager.test;
 
+import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.DEFAULT_ENABLED;
+import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.DEFAULT_SEND_DELAY;
+import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.KEY_ENABLED;
+import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.KEY_SEND_DELAY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -24,11 +28,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ConfigurationChangeManagerOptionsTest {
-
-    private static final String KEY_ENABLED = "enabled";
-    private static final String KEY_SEND_DELAY = "send.delay";
-    private static final boolean DEFAULT_ENABLED = false;
-    private static final long DEFAULT_SEND_DELAY = 10;
 
     private Map<String, Object> properties;
     private ConfigurationChangeManagerOptions options;

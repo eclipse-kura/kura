@@ -119,7 +119,7 @@ For example: `cloud=org.eclipse.kura.cloud.CloudService, cloud-2=foobar`
 
 ## Custom Camel routers
 
-If a standard XML route configuration is not enough then it is possible to use XML routes in combination with a custom OSGi bundle or a Java DSL based Camel approach. For this to work a Kura development setup is required, please see [Getting started](kura-setup.html) for more information.
+If a standard XML route configuration is not enough then it is possible to use XML routes in combination with a custom OSGi bundle or a Java DSL based Camel approach. For this to work a Kura development setup is required, please see [Getting started](../../java-application-development/development-environment-setup.md) for more information.
 
 The implementation of such Camel components follow the standard Kura guides for developing components, like, for example, the `ConfigurableComponent` pattern. This section only describes the Camel specifics.
 

@@ -1603,7 +1603,7 @@
                         <version>1.7</version>
                         <executions>
                             <execution>
-                                <id>intel-up2-ubuntu-nn-jars</id>
+                                <id>docker-x86_64-nn-jars</id>
                                 <phase>prepare-package</phase>
                                 <goals>
                                     <goal>run</goal>

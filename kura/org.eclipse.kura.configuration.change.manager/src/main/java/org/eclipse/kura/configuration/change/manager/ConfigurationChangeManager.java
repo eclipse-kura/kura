@@ -93,7 +93,7 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
      * Activation APIs
      */
 
-    protected void activate(final Map<String, Object> properties) throws InvalidSyntaxException {
+    public void activate(final Map<String, Object> properties) throws InvalidSyntaxException {
         logger.info("Activating ConfigurationChangeManager...");
 
         this.acceptNotifications = false;
@@ -112,9 +112,9 @@ public class ConfigurationChangeManager implements ConfigurableComponent, Servic
         this.options = new ConfigurationChangeManagerOptions(properties);
 
         if (this.options.isEnabled()) {
+            this.acceptNotifications = true;
             this.serviceTracker.open(true);
             this.serviceTracker.addServiceTrackerListener(this);
-            this.acceptNotifications = true;
         } else {
             this.acceptNotifications = false;
             this.serviceTracker.removeServiceTrackerListener(this);

@@ -93,7 +93,6 @@ cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf /etc/dhcpd-wlan0.conf
 cp ${INSTALL_DIR}/kura/install/dhcpd-wlan0.conf ${INSTALL_DIR}/kura/.data/dhcpd-wlan0.conf
 
 #set up bind/named
-cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
 mkdir -p /var/named
 chown -R bind /var/named
 cp ${INSTALL_DIR}/kura/install/named.ca /var/named/

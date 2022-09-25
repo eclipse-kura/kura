@@ -252,7 +252,6 @@ function kura_install {
 	BACKUP_FILES+=("/etc/init.d/kura*")
 	BACKUP_FILES+=("/etc/init.d/firewall")
 	BACKUP_FILES+=("/etc/dhcpd-*.conf")
-	BACKUP_FILES+=("/etc/named.conf")
 	BACKUP_FILES+=("/etc/wpa_supplicant.conf")
 	BACKUP_FILES+=("/etc/hostapd.conf")
 	BACKUP_FILES+=("/etc/ppp/chat")

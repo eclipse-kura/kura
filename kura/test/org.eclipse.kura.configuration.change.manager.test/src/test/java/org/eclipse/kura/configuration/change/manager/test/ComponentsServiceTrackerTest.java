@@ -13,7 +13,6 @@
 
 package org.eclipse.kura.configuration.change.manager.test;
 
-import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,7 +21,6 @@ import static org.mockito.Mockito.when;
 import org.eclipse.kura.configuration.ConfigurationService;
 import org.eclipse.kura.configuration.change.manager.ComponentsServiceTracker;
 import org.eclipse.kura.configuration.change.manager.ServiceTrackerListener;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -36,7 +34,6 @@ public class ComponentsServiceTrackerTest {
 
     private ComponentsServiceTracker tracker;
     private ServiceTrackerListener listener;
-    private boolean exceptionOccurred;
 
     /*
      * Scenarios
@@ -49,7 +46,6 @@ public class ComponentsServiceTrackerTest {
 
         whenAddingServiceWithKuraPid("example1");
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotified("example1");
     }
 
@@ -60,7 +56,6 @@ public class ComponentsServiceTrackerTest {
 
         whenAddingServiceWithServiceFactoryPid("example1");
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotified("example1");
     }
 
@@ -71,7 +66,6 @@ public class ComponentsServiceTrackerTest {
 
         whenAddingServiceWithServicePid("example1");
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotified("example1");
     }
 
@@ -82,7 +76,6 @@ public class ComponentsServiceTrackerTest {
 
         whenAddingServiceWithUnknownProperty();
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotNotified();
     }
 
@@ -93,7 +86,6 @@ public class ComponentsServiceTrackerTest {
 
         whenModifiedService("modified-pid");
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotified("modified-pid");
     }
 
@@ -104,7 +96,6 @@ public class ComponentsServiceTrackerTest {
 
         whenRemovedService("removed-pid");
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotified("removed-pid");
     }
 
@@ -116,7 +107,6 @@ public class ComponentsServiceTrackerTest {
 
         whenRemovedService("removed-pid2");
 
-        thenNoExceptionsOccurred();
         thenListenerIsNotNotified();
     }
 
@@ -188,12 +178,7 @@ public class ComponentsServiceTrackerTest {
         ServiceReference<Object> ref = (ServiceReference<Object>) mock(ServiceReference.class);
         when(ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).thenReturn(kuraPid);
 
-        try {
-            this.tracker.modifiedService(ref, new Object());
-        } catch (Exception e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        this.tracker.modifiedService(ref, new Object());
     }
 
     private void whenRemovedService(String kuraPid) {
@@ -201,30 +186,16 @@ public class ComponentsServiceTrackerTest {
         ServiceReference<Object> ref = (ServiceReference<Object>) mock(ServiceReference.class);
         when(ref.getProperty(ConfigurationService.KURA_SERVICE_PID)).thenReturn(kuraPid);
 
-        try {
-            this.tracker.removedService(ref, new Object());
-        } catch (Exception e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        this.tracker.removedService(ref, new Object());
     }
 
     private void callAddingService(ServiceReference<Object> reference) {
-        try {
-            this.tracker.addingService(reference);
-        } catch (Exception e) {
-            e.printStackTrace();
-            this.exceptionOccurred = true;
-        }
+        this.tracker.addingService(reference);
     }
 
     /*
      * Then
      */
-
-    private void thenNoExceptionsOccurred() {
-        assertFalse(this.exceptionOccurred);
-    }
 
     private void thenListenerIsNotified(String changedPid) {
         verify(this.listener, times(1)).onConfigurationChanged(changedPid);
@@ -232,15 +203,6 @@ public class ComponentsServiceTrackerTest {
 
     private void thenListenerIsNotNotified() {
         verify(this.listener, times(0)).onConfigurationChanged(Mockito.any());
-    }
-
-    /*
-     * Utilities
-     */
-
-    @Before
-    public void cleanup() {
-        this.exceptionOccurred = false;
     }
 
 }

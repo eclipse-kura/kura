@@ -36,7 +36,6 @@ public class ConfigurationChangeManagerTest {
     private MockCloudPublisher mockPublisher = new MockCloudPublisher();
     private MockServiceTracker mockServiceTracker = new MockServiceTracker();
     private ConfigurationChangeManager configurationChangeManager = new ConfigurationChangeManager();
-    private boolean occurredException;
 
     /*
      * Scenarios
@@ -48,7 +47,6 @@ public class ConfigurationChangeManagerTest {
 
         whenConfigurationChanges("test.pid");
 
-        thenNoExceptionsOccurred();
         thenNoMessagesPublished(0L);
     }
 
@@ -58,7 +56,6 @@ public class ConfigurationChangeManagerTest {
 
         whenConfigurationChanges("test1", "test2");
 
-        thenNoExceptionsOccurred();
         thenMessagePublished(2L, "test1", "test2");
     }
 
@@ -68,7 +65,6 @@ public class ConfigurationChangeManagerTest {
 
         whenConfigurationChanges("pid1", "pid2", "pid3", "pid4", "pid5", "pid5");
 
-        thenNoExceptionsOccurred();
         thenMessagePublished(10L, "pid1", "pid2", "pid3", "pid4", "pid5");
     }
 
@@ -97,14 +93,14 @@ public class ConfigurationChangeManagerTest {
      */
 
     private void whenConfigurationChanges(String... changedPids) {
-        try {
-            for (String pid : changedPids) {
-                this.mockServiceTracker.simulateConfigChange(pid);
-            }
-        } catch (Exception e) {
-            this.occurredException = true;
+        for (String pid : changedPids) {
+            this.mockServiceTracker.simulateConfigChange(pid);
         }
     }
+
+    /*
+     * Then
+     */
 
     private void thenNoMessagesPublished(long sendDelaySec)
             throws InterruptedException, ExecutionException {
@@ -125,14 +121,6 @@ public class ConfigurationChangeManagerTest {
     }
 
     /*
-     * Then
-     */
-
-    private void thenNoExceptionsOccurred() {
-        assertFalse(this.occurredException);
-    }
-
-    /*
      * Utilities
      */
 
@@ -140,7 +128,6 @@ public class ConfigurationChangeManagerTest {
     public void cleanup() throws InvalidSyntaxException {
         this.configurationChangeManager.setCloudPublisher(this.mockPublisher);
         this.mockServiceTracker.setServiceTrackerListener(this.configurationChangeManager);
-        this.occurredException = false;
     }
 
 }

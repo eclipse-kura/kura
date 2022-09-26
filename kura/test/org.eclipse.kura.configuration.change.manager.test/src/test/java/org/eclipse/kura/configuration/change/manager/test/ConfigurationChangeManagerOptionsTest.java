@@ -18,7 +18,6 @@ import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeM
 import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.KEY_ENABLED;
 import static org.eclipse.kura.configuration.change.manager.ConfigurationChangeManagerOptions.KEY_SEND_DELAY;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,7 +31,6 @@ public class ConfigurationChangeManagerOptionsTest {
     private Map<String, Object> properties;
     private ConfigurationChangeManagerOptions options;
     private Object returnValue;
-    private Exception exceptionOccurred;
 
     /*
      * Scenarios
@@ -45,7 +43,6 @@ public class ConfigurationChangeManagerOptionsTest {
 
         whenIsEnabled();
 
-        thenNoExceptionsOccurred();
         thenReturnValueIs(true);
     }
 
@@ -56,7 +53,6 @@ public class ConfigurationChangeManagerOptionsTest {
 
         whenIsEnabled();
 
-        thenNoExceptionsOccurred();
         thenReturnValueIs(false);
     }
 
@@ -66,7 +62,6 @@ public class ConfigurationChangeManagerOptionsTest {
 
         whenIsEnabled();
 
-        thenNoExceptionsOccurred();
         thenReturnValueIs(DEFAULT_ENABLED);
     }
 
@@ -77,7 +72,6 @@ public class ConfigurationChangeManagerOptionsTest {
 
         whenGetSendDelay();
 
-        thenNoExceptionsOccurred();
         thenReturnValueIs(1000L);
     }
 
@@ -87,7 +81,6 @@ public class ConfigurationChangeManagerOptionsTest {
 
         whenGetSendDelay();
 
-        thenNoExceptionsOccurred();
         thenReturnValueIs(DEFAULT_SEND_DELAY);
     }
 
@@ -112,28 +105,16 @@ public class ConfigurationChangeManagerOptionsTest {
      */
 
     private void whenIsEnabled() {
-        try {
-            this.returnValue = this.options.isEnabled();
-        } catch (Exception e) {
-            this.exceptionOccurred = e;
-        }
+        this.returnValue = this.options.isEnabled();
     }
 
     private void whenGetSendDelay() {
-        try {
-            this.returnValue = this.options.getSendDelay();
-        } catch (Exception e) {
-            this.exceptionOccurred = e;
-        }
+        this.returnValue = this.options.getSendDelay();
     }
 
     /*
      * Then
      */
-
-    private void thenNoExceptionsOccurred() {
-        assertNull(this.exceptionOccurred);
-    }
 
     @SuppressWarnings("unchecked")
     private <T> void thenReturnValueIs(T expectedValue) {
@@ -150,7 +131,6 @@ public class ConfigurationChangeManagerOptionsTest {
         this.properties = new HashMap<>();
         this.options = null;
         this.returnValue = null;
-        this.exceptionOccurred = null;
     }
 
 }

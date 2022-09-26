@@ -12,11 +12,14 @@
  *******************************************************************************/
 package org.eclipse.kura.event.publisher;
 
-import static org.eclipse.kura.core.message.MessageConstants.CONTROL;
-import static org.eclipse.kura.core.message.MessageConstants.FULL_TOPIC;
-import static org.eclipse.kura.core.message.MessageConstants.PRIORITY;
-import static org.eclipse.kura.core.message.MessageConstants.QOS;
-import static org.eclipse.kura.core.message.MessageConstants.RETAIN;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.CONTROL;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.FULL_TOPIC;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.PRIORITY;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.QOS;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.RETAIN;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.TOPIC_ACCOUNT_TOKEN;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.TOPIC_CLIENT_ID_TOKEN;
+import static org.eclipse.kura.event.publisher.EventPublisherConstants.TOPIC_SEPARATOR;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,17 +37,14 @@ import org.eclipse.kura.cloudconnection.listener.CloudDeliveryListener;
 import org.eclipse.kura.cloudconnection.message.KuraMessage;
 import org.eclipse.kura.cloudconnection.publisher.CloudPublisher;
 import org.eclipse.kura.configuration.ConfigurableComponent;
-import org.eclipse.kura.core.cloud.CloudPublisherDeliveryListener;
-import org.eclipse.kura.core.cloud.CloudServiceOptions;
 import org.eclipse.kura.event.publisher.helper.CloudEndpointServiceHelper;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class EventPublisher
-        implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudPublisherDeliveryListener {
+        implements CloudPublisher, ConfigurableComponent, CloudConnectionListener, CloudDeliveryListener {
 
     private static final Logger logger = LoggerFactory.getLogger(EventPublisher.class);
 
@@ -65,8 +65,7 @@ public class EventPublisher
      * Activation APIs
      */
 
-    public void activate(ComponentContext componentContext, Map<String, Object> properties)
-            throws InvalidSyntaxException {
+    public void activate(ComponentContext componentContext, Map<String, Object> properties) {
         logger.debug("Activating ConfigurationChangePublisher...");
 
         this.bundleContext = componentContext.getBundleContext();
@@ -76,7 +75,7 @@ public class EventPublisher
         logger.debug("Activating ConfigurationChangePublisher... Done.");
     }
 
-    public void updated(Map<String, Object> properties) throws InvalidSyntaxException {
+    public void updated(Map<String, Object> properties) {
         logger.debug("Updating ConfigurationChangePublisher...");
         
         this.options = new EventPublisherOptions(properties);
@@ -105,11 +104,11 @@ public class EventPublisher
         String fullTopic = encodeFullTopic(resolvedAppTopic);
 
         Map<String, Object> publishMessageProps = new HashMap<>();
-        publishMessageProps.put(FULL_TOPIC.name(), fullTopic);
-        publishMessageProps.put(QOS.name(), this.options.getQos());
-        publishMessageProps.put(RETAIN.name(), this.options.isRetain());
-        publishMessageProps.put(PRIORITY.name(), this.options.getPriority());
-        publishMessageProps.put(CONTROL.name(), true);
+        publishMessageProps.put(FULL_TOPIC, fullTopic);
+        publishMessageProps.put(QOS, this.options.getQos());
+        publishMessageProps.put(RETAIN, this.options.isRetain());
+        publishMessageProps.put(PRIORITY, this.options.getPriority());
+        publishMessageProps.put(CONTROL, true);
 
         return this.cloudHelper.publish(new KuraMessage(message.getPayload(), publishMessageProps));
     }
@@ -154,11 +153,11 @@ public class EventPublisher
     }
 
     /*
-     * CloudPublisherDeliveryListener APIs
+     * CloudDeliveryListener APIs
      */
 
     @Override
-    public void onMessageConfirmed(String messageId, String topic) {
+    public void onMessageConfirmed(String messageId) {
         this.cloudDeliveryListeners
                 .forEach(listener -> this.worker.execute(() -> listener.onMessageConfirmed(messageId)));
     }
@@ -183,9 +182,9 @@ public class EventPublisher
     }
 
     private String encodeFullTopic(String appTopic) {
-        String accountName = CloudServiceOptions.getTopicAccountToken();
-        String clientId = CloudServiceOptions.getTopicClientIdToken();
-        String topicSeparator = CloudServiceOptions.getTopicSeparator();
+        String accountName = TOPIC_ACCOUNT_TOKEN;
+        String clientId = TOPIC_CLIENT_ID_TOKEN;
+        String topicSeparator = TOPIC_SEPARATOR;
 
         StringBuilder sb = new StringBuilder();
 

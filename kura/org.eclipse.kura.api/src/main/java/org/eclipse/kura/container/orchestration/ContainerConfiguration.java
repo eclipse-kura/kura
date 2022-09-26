@@ -17,11 +17,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+
 
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
@@ -39,8 +41,7 @@ import org.osgi.annotation.versioning.ProviderType;
 public class ContainerConfiguration {
 
     private String containerName;
-    private List<Integer> containerPortsExternal;
-    private List<Integer> containerPortsInternal;
+    private List<ContainerPort> containerPorts;
     private List<String> containerEnvVars;
     private List<String> containerDevices;
     private Map<String, String> containerVolumes;
@@ -85,7 +86,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsExternal() {
-        return this.containerPortsExternal;
+        return ContainerPort.continerPortsListExternal(this.containerPorts);
     }
 
     /**
@@ -94,7 +95,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-        return this.containerPortsInternal;
+    	return ContainerPort.continerPortsListInternal(this.containerPorts);
     }
 
     /**
@@ -280,7 +281,7 @@ public class ContainerConfiguration {
     @Override
     public int hashCode() {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
-                this.containerLoggingType, this.containerName, this.containerPortsExternal, this.containerPortsInternal,
+                this.containerLoggingType, this.containerName, this.containerPorts,
                 this.containerPrivileged, this.containerVolumes, this.cpus, this.entryPoint, this.gpus,
                 this.imageConfig, this.isFrameworkManaged, this.memory, this.networkConfiguration, this.containerRestartOnFailure);
     }
@@ -299,8 +300,7 @@ public class ContainerConfiguration {
                 && Objects.equals(this.containerLoggerParameters, other.containerLoggerParameters)
                 && Objects.equals(this.containerLoggingType, other.containerLoggingType)
                 && Objects.equals(this.containerName, other.containerName)
-                && Objects.equals(this.containerPortsExternal, other.containerPortsExternal)
-                && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
+                && Objects.equals(this.containerPorts, other.containerPorts)
                 && Objects.equals(this.containerPrivileged, other.containerPrivileged)
                 && Objects.equals(this.containerVolumes, other.containerVolumes)
                 && Objects.equals(this.cpus, other.cpus) && Objects.equals(this.entryPoint, other.entryPoint)
@@ -316,6 +316,7 @@ public class ContainerConfiguration {
         private String containerName;
         private List<Integer> containerPortsExternal = new ArrayList<>();
         private List<Integer> containerPortsInternal = new ArrayList<>();
+        private List<ContainerPort> containerPorts = new ArrayList<>();
         private List<String> containerEnvVars = new LinkedList<>();
         private List<String> containerDevices = new LinkedList<>();
         private Map<String, String> containerVolumes = new HashMap<>();
@@ -468,11 +469,21 @@ public class ContainerConfiguration {
         }
 
         public ContainerConfiguration build() {
+        	
+        	//If Legacy API is used convert to new API
+        	if (!this.containerPortsExternal.isEmpty() || !this.containerPortsInternal.isEmpty()) {
+        		Iterator<Integer> extPort = this.containerPortsExternal.iterator();
+        		Iterator<Integer> intPort = this.containerPortsInternal.iterator();
+        		
+        		while(extPort.hasNext() && intPort.hasNext()) {
+        			this.containerPorts.add(new ContainerPort(intPort.next(), extPort.next()));
+        		}
+        	}
+        	
             ContainerConfiguration result = new ContainerConfiguration();
 
             result.containerName = requireNonNull(this.containerName, "Request Container Name cannot be null");
-            result.containerPortsExternal = this.containerPortsExternal;
-            result.containerPortsInternal = this.containerPortsInternal;
+            result.containerPorts = this.containerPorts;
             result.containerEnvVars = this.containerEnvVars;
             result.containerDevices = this.containerDevices;
             result.containerVolumes = this.containerVolumes;

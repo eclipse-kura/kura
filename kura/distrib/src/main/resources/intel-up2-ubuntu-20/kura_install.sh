@@ -103,7 +103,6 @@ if [ $? -eq 0 ] ; then
 fi
 
 #set up bind/named
-cp ${INSTALL_DIR}/kura/install/named.conf /etc/bind/named.conf
 mkdir -p /var/named
 chown -R bind /var/named
 cp ${INSTALL_DIR}/kura/install/named.ca /var/named/

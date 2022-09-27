@@ -61,8 +61,6 @@ import org.eclipse.kura.net.NetInterfaceStatus;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.NetworkAdminService;
 import org.eclipse.kura.net.admin.event.NetworkConfigurationChangeEvent;
-import org.eclipse.kura.net.admin.monitor.InterfaceStateBuilder;
-import org.eclipse.kura.net.admin.monitor.WifiInterfaceState;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriter;
 import org.eclipse.kura.net.admin.visitor.linux.WpaSupplicantConfigWriterFactory;
 import org.eclipse.kura.net.dhcp.DhcpLease;
@@ -1015,7 +1013,6 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
             NetInterfaceStatus status = NetInterfaceStatus.netIPv4StatusDisabled;
             WifiMode wifiMode = WifiMode.MASTER;
             WifiConfig wifiConfig = null;
-            WifiInterfaceState wifiInterfaceState = null;
             if (type == NetInterfaceType.WIFI) {
                 List<NetInterfaceConfig<? extends NetInterfaceAddressConfig>> wifiNetInterfaceConfigs = getWifiInterfaceConfigs();
 
@@ -1026,25 +1023,18 @@ public class NetworkAdminServiceImpl implements NetworkAdminService, EventHandle
                         wifiNetInterfaceAddressConfigs);
 
                 wifiMode = wifiInterfaceAddressConfig.getMode();
-                boolean isL2Only = false;
                 for (NetConfig netConfig : wifiInterfaceAddressConfig.getConfigs()) {
                     if (netConfig instanceof NetConfigIP4) {
                         status = ((NetConfigIP4) netConfig).getStatus();
-                        isL2Only = ((NetConfigIP4) netConfig).getStatus() == NetInterfaceStatus.netIPv4StatusL2Only;
                         logger.debug("Interface status is set to {}", status);
                     } else if (netConfig instanceof WifiConfig && ((WifiConfig) netConfig).getMode() == wifiMode) {
                         wifiConfig = (WifiConfig) netConfig;
                     }
                 }
-                InterfaceStateBuilder builder = new InterfaceStateBuilder(this.executorService);
-                builder.setInterfaceName(interfaceName);
-                builder.setWifiMode(wifiMode);
-                builder.setL2OnlyInterface(isL2Only);
-                wifiInterfaceState = builder.buildWifiInterfaceState();
             }
 
-            if (!this.linuxNetworkUtil.hasAddress(interfaceName)
-                    || type == NetInterfaceType.WIFI && wifiInterfaceState != null && !wifiInterfaceState.isLinkUp()) {
+            if (!this.linuxNetworkUtil.hasAddress(interfaceName) || type == NetInterfaceType.WIFI
+                    && !this.linuxNetworkUtil.isLinkUp(NetInterfaceType.WIFI, interfaceName)) {
 
                 logger.info("bringing interface {} up", interfaceName);
 

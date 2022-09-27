@@ -15,11 +15,9 @@ package org.eclipse.kura.net.admin.monitor;
 import org.eclipse.kura.KuraErrorCode;
 import org.eclipse.kura.KuraException;
 import org.eclipse.kura.executor.CommandExecutorService;
-import org.eclipse.kura.linux.net.ConnectionInfoImpl;
 import org.eclipse.kura.linux.net.util.LinuxNetworkUtil;
 import org.eclipse.kura.linux.net.wifi.HostapdManager;
 import org.eclipse.kura.linux.net.wifi.WpaSupplicantManager;
-import org.eclipse.kura.net.ConnectionInfo;
 import org.eclipse.kura.net.IPAddress;
 import org.eclipse.kura.net.NetInterfaceType;
 import org.eclipse.kura.net.wifi.WifiMode;
@@ -125,8 +123,7 @@ public class InterfaceStateBuilder {
             this.link = this.linuxNetworkUtil.isLinkUp(this.type, this.interfaceName);
             logger.debug("InterfaceState() :: {} - link?={}", this.interfaceName, this.link);
             logger.debug("InterfaceState() :: {} - up?={}", this.interfaceName, this.up);
-            ConnectionInfo connInfo = new ConnectionInfoImpl(this.interfaceName);
-            this.ipAddress = connInfo.getIpAddress();
+            this.ipAddress = getCurrentIpAddress(interfaceName);
             this.carrierChanges = this.linuxNetworkUtil.getCarrierChanges(this.interfaceName);
         }
         return new InterfaceState(this.interfaceName, this.up, this.link, this.ipAddress, this.carrierChanges);
@@ -141,8 +138,7 @@ public class InterfaceStateBuilder {
         this.link = this.linuxNetworkUtil.isLinkUp(NetInterfaceType.WIFI, this.interfaceName);
         logger.debug("InterfaceState() :: {} - link?={}", this.interfaceName, this.link);
         logger.debug("InterfaceState() :: {} - up?={}", this.interfaceName, this.up);
-        ConnectionInfo connInfo = new ConnectionInfoImpl(this.interfaceName);
-        this.ipAddress = connInfo.getIpAddress();
+        this.ipAddress = getCurrentIpAddress(interfaceName);
         setWifiLinkState(this.interfaceName, this.wifiMode);
         this.carrierChanges = this.linuxNetworkUtil.getCarrierChanges(this.interfaceName);
         return new WifiInterfaceState(this.interfaceName, this.up, this.link, this.ipAddress, this.carrierChanges);
@@ -169,6 +165,21 @@ public class InterfaceStateBuilder {
                     this.link = false;
                 }
             }
+        }
+    }
+
+    private IPAddress getCurrentIpAddress(final String interfaceName) {
+        try {
+            final String currentIpAddress = this.linuxNetworkUtil.getCurrentIpAddress(interfaceName);
+
+            if (ipAddress != null) {
+                return IPAddress.parseHostAddress(currentIpAddress);
+            } else {
+                return null;
+            }
+        } catch (final Exception e) {
+            logger.warn("Cannot obtain current IP address", e);
+            return null;
         }
     }
 }

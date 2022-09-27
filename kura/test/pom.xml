@@ -846,6 +846,7 @@
         <module>org.eclipse.kura.asset.provider.test</module>
         <module>org.eclipse.kura.asset.helper.provider.test</module>
         <module>org.eclipse.kura.camel.test</module>
+        <module>org.eclipse.kura.configuration.change.manager.test</module>
         <module>org.eclipse.kura.core.certificates.test</module>
         <module>org.eclipse.kura.core.comm.test</module>
         <module>org.eclipse.kura.core.configuration.test</module>

@@ -60,35 +60,6 @@ public class ContainerPort {
 		return protocolList;
 	}
 	
-	public static List<ContainerPort> parsePortString(String portString){
-		List<ContainerPort> portList = new LinkedList<>();
-	
-		//expects a string link this "80:80/tcp, 443:443/tcp 888:888/udp".
-		for(String portToken : portString.split(",")) {
-			PortInternetProtocol pIP = PortInternetProtocol.TCP;
-			
-			if (portToken.split("/").length > 1) {
-				switch(portToken.split("/")[1].toUpperCase().trim()) {
-				case "UDP":
-					pIP = PortInternetProtocol.UDP;
-					break;
-				case "SCTP":
-					pIP = PortInternetProtocol.SCTP;
-					break;
-				default:
-					pIP = PortInternetProtocol.TCP;
-					break;
-				}
-			}
-			int portInternal = Integer.parseInt(portToken.split("/")[0].split(":")[0]);
-			int portExternal = Integer.parseInt(portToken.split("/")[0].split(":")[1]);
-			
-			portList.add(new ContainerPort(portInternal, portExternal, pIP));
-		}
-		
-		return portList;
-	}
-	
     // Overriding equals() to compare two Complex objects
     @Override
     public boolean equals(Object o) {

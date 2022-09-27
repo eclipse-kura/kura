@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration.ContainerNetworkConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ImageConfiguration.ImageConfigurationBuilder;
 import org.osgi.annotation.versioning.ProviderType;
@@ -81,6 +80,15 @@ public class ContainerConfiguration {
     }
 
     /**
+     * Returns the list of mapped ports that will be mapped to the given container
+     *
+     * @return
+     */
+    public List<ContainerPort> getContainerPorts() {
+        return this.containerPorts;
+    }
+
+    /**
      * Returns the list of external ports that will be mapped to the given container
      *
      * @return
@@ -95,7 +103,7 @@ public class ContainerConfiguration {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-    	return ContainerPort.continerPortsListInternal(this.containerPorts);
+        return ContainerPort.continerPortsListInternal(this.containerPorts);
     }
 
     /**
@@ -281,9 +289,9 @@ public class ContainerConfiguration {
     @Override
     public int hashCode() {
         return Objects.hash(this.containerDevices, this.containerEnvVars, this.containerLoggerParameters,
-                this.containerLoggingType, this.containerName, this.containerPorts,
-                this.containerPrivileged, this.containerVolumes, this.cpus, this.entryPoint, this.gpus,
-                this.imageConfig, this.isFrameworkManaged, this.memory, this.networkConfiguration, this.containerRestartOnFailure);
+                this.containerLoggingType, this.containerName, this.containerPorts, this.containerPrivileged,
+                this.containerVolumes, this.cpus, this.entryPoint, this.gpus, this.imageConfig, this.isFrameworkManaged,
+                this.memory, this.networkConfiguration, this.containerRestartOnFailure);
     }
 
     @Override
@@ -469,17 +477,17 @@ public class ContainerConfiguration {
         }
 
         public ContainerConfiguration build() {
-        	
-        	//If Legacy API is used convert to new API
-        	if (!this.containerPortsExternal.isEmpty() || !this.containerPortsInternal.isEmpty()) {
-        		Iterator<Integer> extPort = this.containerPortsExternal.iterator();
-        		Iterator<Integer> intPort = this.containerPortsInternal.iterator();
-        		
-        		while(extPort.hasNext() && intPort.hasNext()) {
-        			this.containerPorts.add(new ContainerPort(intPort.next(), extPort.next()));
-        		}
-        	}
-        	
+
+            // If Legacy API is used convert to new API
+            if (!this.containerPortsExternal.isEmpty() || !this.containerPortsInternal.isEmpty()) {
+                Iterator<Integer> extPort = this.containerPortsExternal.iterator();
+                Iterator<Integer> intPort = this.containerPortsInternal.iterator();
+
+                while (extPort.hasNext() && intPort.hasNext()) {
+                    this.containerPorts.add(new ContainerPort(intPort.next(), extPort.next()));
+                }
+            }
+
             ContainerConfiguration result = new ContainerConfiguration();
 
             result.containerName = requireNonNull(this.containerName, "Request Container Name cannot be null");

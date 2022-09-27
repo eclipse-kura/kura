@@ -162,10 +162,7 @@
             tofile="${project.build.directory}/${build.output.name}/config.ini" />
 
         <!-- Copy jdk.dio files -->
-        <copy file="src/main/resources/${build.name}/jdk.dio.properties"
-            tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
-        <copy file="src/main/resources/common/jdk.dio.policy"
-            tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
+        <antcall target="copy-jdk-dio-resources" />
 
         <copy file="src/main/resources/common/cacerts.ks"
             tofile="${project.build.directory}/${build.output.name}/cacerts.ks" />
@@ -817,6 +814,13 @@ fi]]>
             <entry key="org.osgi.service.http.port" operation="="
                 value="${http.port}" />
         </propertyfile>
+    </target>
+
+    <target name="copy-jdk-dio-resources" unless="is.docker">
+        <copy file="src/main/resources/${build.name}/jdk.dio.properties"
+            tofile="${project.build.directory}/${build.output.name}/jdk.dio.properties" />
+        <copy file="src/main/resources/common/jdk.dio.policy"
+            tofile="${project.build.directory}/${build.output.name}/jdk.dio.policy" />
     </target>
 
     <!-- OSGi base configs -->

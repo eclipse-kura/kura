@@ -16,25 +16,24 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.kura.cloudconnection.CloudConnectionConstants;
-import org.eclipse.kura.core.cloud.CloudServiceOptions;
 import org.eclipse.kura.util.configuration.Property;
 
 public class EventPublisherOptions {
     
-    protected static final String TOPIC_PREFIX_PROP_NAME = "topic.prefix";
-    protected static final String TOPIC_PROP_NAME = "topic";
-    protected static final String QOS_PROP_NAME = "qos";
-    protected static final String RETAIN_PROP_NAME = "retain";
-    protected static final String PRIORITY_PROP_NAME = "priority";
+    public static final String TOPIC_PREFIX_PROP_NAME = "topic.prefix";
+    public static final String TOPIC_PROP_NAME = "topic";
+    public static final String QOS_PROP_NAME = "qos";
+    public static final String RETAIN_PROP_NAME = "retain";
+    public static final String PRIORITY_PROP_NAME = "priority";
 
-    protected static final String DEFAULT_TOPIC = "EVENT_TOPIC";
-    protected static final int DEFAULT_QOS = 0;
-    protected static final boolean DEFAULT_RETAIN = false;
-    protected static final int DEFAULT_PRIORITY = 7;
+    public static final String DEFAULT_TOPIC = "EVENT_TOPIC";
+    public static final int DEFAULT_QOS = 0;
+    public static final boolean DEFAULT_RETAIN = false;
+    public static final int DEFAULT_PRIORITY = 7;
+    public static final String DEFAULT_ENDPOINT_PID = "org.eclipse.kura.cloud.CloudService";
 
     private static final Property<String> PROPERTY_CLOUD_SERVICE_PID = new Property<>(
-            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(),
-            "org.eclipse.kura.cloud.CloudService");
+            CloudConnectionConstants.CLOUD_ENDPOINT_SERVICE_PID_PROP_NAME.value(), DEFAULT_ENDPOINT_PID);
     private static final Property<String> PROPERTY_TOPIC_PREFIX = new Property<>(TOPIC_PREFIX_PROP_NAME, String.class);
     private static final Property<String> PROPERTY_TOPIC = new Property<>(TOPIC_PROP_NAME, DEFAULT_TOPIC);
     private static final Property<Integer> PROPERTY_QOS = new Property<>(QOS_PROP_NAME, DEFAULT_QOS);
@@ -91,11 +90,11 @@ public class EventPublisherOptions {
 
     private String removeTopicSeparatorsFromExtremes(String input) {
         String result = new String(input);
-        if (result.startsWith(CloudServiceOptions.getTopicSeparator())) {
+        if (result.startsWith(EventPublisherConstants.TOPIC_SEPARATOR)) {
             result = result.substring(1);
         }
 
-        if (result.endsWith(CloudServiceOptions.getTopicSeparator())) {
+        if (result.endsWith(EventPublisherConstants.TOPIC_SEPARATOR)) {
             result = result.substring(0, result.length() - 1);
         }
 

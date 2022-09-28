@@ -402,44 +402,42 @@ public class ContainerInstanceOptions {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.containerCpus, this.containerDevice, this.containerEntryPoint, this.containerEnv,
-                this.containerGpus, this.containerLoggerType, this.containerLoggingParameters, this.containerMemory,
-                this.containerName, this.containerNetworkingMode, this.containerVolumeString, this.containerVolumes,
-                this.enabled, this.externalPorts, this.image, this.imageDownloadTimeout, this.imageTag,
-                this.internalPorts, this.maxDownloadRetries, this.privilegedMode, this.registryPassword,
-                this.registryURL, this.registryUsername, this.retryInterval, this.restartOnFailure);
+        return Objects.hash(containerCpus, containerDevice, containerEntryPoint, containerEnv, containerGpus,
+                containerLoggerType, containerLoggingParameters, containerMemory, containerName,
+                containerNetworkingMode, containerPortProtocol, containerVolumeString, containerVolumes, enabled,
+                externalPorts, image, imageDownloadTimeout, imageTag, internalPorts, maxDownloadRetries, privilegedMode,
+                registryPassword, registryURL, registryUsername, restartOnFailure, retryInterval);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if ((obj == null) || (getClass() != obj.getClass())) {
+        if (obj == null)
             return false;
-        }
+        if (getClass() != obj.getClass())
+            return false;
         ContainerInstanceOptions other = (ContainerInstanceOptions) obj;
-        return Objects.equals(this.containerCpus, other.containerCpus)
-                && Objects.equals(this.containerDevice, other.containerDevice)
-                && Objects.equals(this.containerEntryPoint, other.containerEntryPoint)
-                && Objects.equals(this.containerEnv, other.containerEnv)
-                && Objects.equals(this.containerGpus, other.containerGpus)
-                && Objects.equals(this.containerLoggerType, other.containerLoggerType)
-                && Objects.equals(this.containerLoggingParameters, other.containerLoggingParameters)
-                && Objects.equals(this.containerMemory, other.containerMemory)
-                && Objects.equals(this.containerName, other.containerName)
-                && Objects.equals(this.containerNetworkingMode, other.containerNetworkingMode)
-                && Objects.equals(this.containerVolumeString, other.containerVolumeString)
-                && Objects.equals(this.containerVolumes, other.containerVolumes) && this.enabled == other.enabled
-                && Objects.equals(this.externalPorts, other.externalPorts) && Objects.equals(this.image, other.image)
-                && this.imageDownloadTimeout == other.imageDownloadTimeout
-                && Objects.equals(this.imageTag, other.imageTag)
-                && Objects.equals(this.internalPorts, other.internalPorts)
-                && this.maxDownloadRetries == other.maxDownloadRetries && this.privilegedMode == other.privilegedMode
-                && Objects.equals(this.registryPassword, other.registryPassword)
-                && Objects.equals(this.registryURL, other.registryURL)
-                && Objects.equals(this.registryUsername, other.registryUsername)
-                && this.retryInterval == other.retryInterval && this.restartOnFailure == other.restartOnFailure;
+        return Objects.equals(containerCpus, other.containerCpus)
+                && Objects.equals(containerDevice, other.containerDevice)
+                && Objects.equals(containerEntryPoint, other.containerEntryPoint)
+                && Objects.equals(containerEnv, other.containerEnv)
+                && Objects.equals(containerGpus, other.containerGpus)
+                && Objects.equals(containerLoggerType, other.containerLoggerType)
+                && Objects.equals(containerLoggingParameters, other.containerLoggingParameters)
+                && Objects.equals(containerMemory, other.containerMemory)
+                && Objects.equals(containerName, other.containerName)
+                && Objects.equals(containerNetworkingMode, other.containerNetworkingMode)
+                && Objects.equals(containerPortProtocol, other.containerPortProtocol)
+                && Objects.equals(containerVolumeString, other.containerVolumeString)
+                && Objects.equals(containerVolumes, other.containerVolumes) && enabled == other.enabled
+                && Objects.equals(externalPorts, other.externalPorts) && Objects.equals(image, other.image)
+                && imageDownloadTimeout == other.imageDownloadTimeout && Objects.equals(imageTag, other.imageTag)
+                && Objects.equals(internalPorts, other.internalPorts) && maxDownloadRetries == other.maxDownloadRetries
+                && privilegedMode == other.privilegedMode && Objects.equals(registryPassword, other.registryPassword)
+                && Objects.equals(registryURL, other.registryURL)
+                && Objects.equals(registryUsername, other.registryUsername)
+                && restartOnFailure == other.restartOnFailure && retryInterval == other.retryInterval;
     }
 
 }

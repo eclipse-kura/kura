@@ -298,7 +298,7 @@ public class ContainerInstance implements ConfigurableComponent, ContainerOrches
             } catch (Exception e) {
                 logger.error("Error stopping microservice {}", this.options.getContainerName(), e);
             }
-            
+
             try {
                 ContainerInstance.this.containerOrchestrationService.deleteContainer(this.containerId);
             } catch (Exception e) {

@@ -99,6 +99,7 @@ public class ContainerInstanceDescriptor {
      * Returns the list of external ports that will be mapped to the given container
      *
      * @return
+     * @since 2.5
      */
     public List<Integer> getContainerPortsExternal() {
         return ContainerPort.continerPortsListExternal(this.containerPorts);
@@ -182,6 +183,12 @@ public class ContainerInstanceDescriptor {
             return this;
         }
 
+        /**
+         * 
+         * @param containerPorts
+         * @return
+         * @since 2.5
+         */
         public ContainerInstanceDescriptorBuilder setContainerPorts(List<ContainerPort> containerPorts) {
             this.containerPorts = containerPorts;
             return this;

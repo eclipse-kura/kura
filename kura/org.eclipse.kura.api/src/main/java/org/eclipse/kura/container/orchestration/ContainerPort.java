@@ -4,6 +4,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 
+ * @author eurotech
+ *
+ * @since 2.5
+ */
 public class ContainerPort {
 
     private int internalPort;

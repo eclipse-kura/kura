@@ -17,6 +17,7 @@ import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,6 @@ public class ContainerInstanceOptions {
     private static final Property<String> CONTAINER_NAME = new Property<>("kura.service.pid", "kura_test_container");
     private static final Property<String> CONTAINER_PORTS_EXTERNAL = new Property<>("container.ports.external", "");
     private static final Property<String> CONTAINER_PORTS_INTERNAL = new Property<>("container.ports.internal", "");
-    private static final Property<String> CONTAINER_PORTS = new Property<>("container.ports", "");
     private static final Property<String> CONTAINER_ENV = new Property<>("container.env", "");
     private static final Property<String> CONTAINER_VOLUME = new Property<>("container.volume", "");
     private static final Property<String> CONTAINER_DEVICE = new Property<>("container.device", "");
@@ -73,7 +73,7 @@ public class ContainerInstanceOptions {
     private final String containerName;
     private final List<Integer> internalPorts;
     private final List<Integer> externalPorts;
-    private final List<ContainerPort> containerPorts;
+    private final List<PortInternetProtocol> containerPortProtocol;
     private final String containerEnv;
     private final String containerVolumeString;
     private final String containerDevice;
@@ -104,8 +104,8 @@ public class ContainerInstanceOptions {
         this.imageTag = CONTAINER_IMAGE_TAG.get(properties);
         this.containerName = CONTAINER_NAME.get(properties);
         this.internalPorts = parsePortString(CONTAINER_PORTS_INTERNAL.get(properties));
+        this.containerPortProtocol = parsePortStringProtocol(CONTAINER_PORTS_INTERNAL.get(properties));
         this.externalPorts = parsePortString(CONTAINER_PORTS_EXTERNAL.get(properties));
-        this.containerPorts = parseFullPortString(CONTAINER_PORTS.get(properties));
         this.containerEnv = CONTAINER_ENV.get(properties);
         this.containerVolumeString = CONTAINER_VOLUME.get(properties);
         this.containerVolumes = parseVolume(this.containerVolumeString);
@@ -335,13 +335,17 @@ public class ContainerInstanceOptions {
     }
 
     private ContainerConfigurationBuilder buildPortConfig(ContainerConfigurationBuilder cc) {
-        if (!this.containerPorts.isEmpty()) {
-            cc.setContainerPorts(this.containerPorts);
-        } else {
-            // fallback to old api
-            cc.setExternalPorts(getContainerPortsExternal());
-            cc.setInternalPorts(getContainerPortsInternal());
+        List<ContainerPort> containerPorts = new LinkedList<>();
+
+        Iterator<Integer> externalIt = this.externalPorts.iterator();
+        Iterator<Integer> internalIt = this.internalPorts.iterator();
+        Iterator<PortInternetProtocol> ipIt = this.containerPortProtocol.iterator();
+
+        while (externalIt.hasNext() && internalIt.hasNext() && ipIt.hasNext()) {
+            containerPorts.add(new ContainerPort(externalIt.next(), internalIt.next(), ipIt.next()));
         }
+
+        cc.setContainerPorts(containerPorts);
 
         return cc;
     }
@@ -363,40 +367,37 @@ public class ContainerInstanceOptions {
             String[] tempString = ports.trim().replace(" ", "").split(",");
 
             for (String element : tempString) {
-                tempArray.add(Integer.parseInt(element.trim().replace("-", "")));
+                tempArray.add(Integer.parseInt(element.trim().replace("-", "").split(":")[0]));
             }
         }
 
         return tempArray;
     }
 
-    private List<ContainerPort> parseFullPortString(String portString) {
-        List<ContainerPort> portList = new LinkedList<>();
-
-        // expects a string link this "80:80/tcp, 443:443/tcp 888:888/udp".
-        for (String portToken : portString.split(",")) {
-            PortInternetProtocol pIP = PortInternetProtocol.TCP;
-
-            if (portToken.split("/").length > 1) {
-                switch (portToken.split("/")[1].toUpperCase().trim()) {
-                case "UDP":
-                    pIP = PortInternetProtocol.UDP;
-                    break;
-                case "SCTP":
-                    pIP = PortInternetProtocol.SCTP;
-                    break;
-                default:
-                    pIP = PortInternetProtocol.TCP;
-                    break;
+    private List<PortInternetProtocol> parsePortStringProtocol(String ports) {
+        List<PortInternetProtocol> tempArray = new ArrayList<>();
+        if (!ports.isEmpty()) {
+            for (String portToken : ports.trim().replace(" ", "").split(",")) {
+                if (portToken.split(":").length > 1) {
+                    switch (portToken.split(":")[1].toUpperCase().trim()) {
+                    case "UDP":
+                        tempArray.add(PortInternetProtocol.UDP);
+                        break;
+                    case "SCTP":
+                        tempArray.add(PortInternetProtocol.SCTP);
+                        break;
+                    default:
+                        tempArray.add(PortInternetProtocol.TCP);
+                        break;
+                    }
+                } else {
+                    // if setting is not used add TCP by default.
+                    tempArray.add(PortInternetProtocol.TCP);
                 }
             }
-            int portInternal = Integer.parseInt(portToken.split("/")[0].split(":")[0]);
-            int portExternal = Integer.parseInt(portToken.split("/")[0].split(":")[1]);
-
-            portList.add(new ContainerPort(portInternal, portExternal, pIP));
         }
 
-        return portList;
+        return tempArray;
     }
 
     @Override

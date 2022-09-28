@@ -337,12 +337,12 @@ public class ContainerInstanceOptions {
     private ContainerConfigurationBuilder buildPortConfig(ContainerConfigurationBuilder cc) {
         List<ContainerPort> containerPorts = new LinkedList<>();
 
-        Iterator<Integer> externalIt = this.externalPorts.iterator();
         Iterator<Integer> internalIt = this.internalPorts.iterator();
+        Iterator<Integer> externalIt = this.externalPorts.iterator();
         Iterator<PortInternetProtocol> ipIt = this.containerPortProtocol.iterator();
 
         while (externalIt.hasNext() && internalIt.hasNext() && ipIt.hasNext()) {
-            containerPorts.add(new ContainerPort(externalIt.next(), internalIt.next(), ipIt.next()));
+            containerPorts.add(new ContainerPort(internalIt.next(), externalIt.next(), ipIt.next()));
         }
 
         cc.setContainerPorts(containerPorts);

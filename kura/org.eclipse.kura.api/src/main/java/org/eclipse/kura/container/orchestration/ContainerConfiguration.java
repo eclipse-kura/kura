@@ -351,8 +351,8 @@ public class ContainerConfiguration {
         }
 
         /**
-         * Set the {@link ContainerPort} list
-         *
+         * Set a list of {@link ContainerPort}, to express which ports to expose and what protocol to use.
+         * 
          * @since 2.5
          */
         public ContainerConfigurationBuilder setContainerPorts(List<ContainerPort> containerPorts) {
@@ -360,11 +360,24 @@ public class ContainerConfiguration {
             return this;
         }
 
+        /**
+         * Accepts a list<Integer> of ports to be exposed. Assumes all ports are TCP. To use other Internet protocols
+         * please see the {@link setContainerPorts} method. Ensure that the number of elements in this list is the same
+         * as the number of elements set with {@link setInternalPorts}.
+         * 
+         */
         public ContainerConfigurationBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
         }
 
+        /**
+         * Accepts a list<Integer> of ports to be open internally within the container. Assumes all ports are TCP. To
+         * use other Internet protocols please see the {@link setContainerPorts} method.
+         * Ensure that the number of elements in this list is the same as the
+         * number of elements set with {@link setExternalPorts}.
+         * 
+         */
         public ContainerConfigurationBuilder setInternalPorts(List<Integer> containerPortsInternal) {
             this.containerPortsInternal = new ArrayList<>(containerPortsInternal);
             return this;
@@ -488,8 +501,7 @@ public class ContainerConfiguration {
 
         public ContainerConfiguration build() {
 
-            // If Legacy API is used convert to new API
-            if (!this.containerPortsExternal.isEmpty() || !this.containerPortsInternal.isEmpty()) {
+            if (this.containerPorts.isEmpty()) {
                 Iterator<Integer> extPort = this.containerPortsExternal.iterator();
                 Iterator<Integer> intPort = this.containerPortsInternal.iterator();
 

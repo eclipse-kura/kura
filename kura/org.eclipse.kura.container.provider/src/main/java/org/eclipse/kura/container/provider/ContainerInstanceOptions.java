@@ -25,9 +25,12 @@ import java.util.Optional;
 
 import org.eclipse.kura.configuration.Password;
 import org.eclipse.kura.container.orchestration.ContainerConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerConfiguration.ContainerConfigurationBuilder;
 import org.eclipse.kura.container.orchestration.ContainerNetworkConfiguration;
+import org.eclipse.kura.container.orchestration.ContainerPort;
 import org.eclipse.kura.container.orchestration.ImageConfiguration;
 import org.eclipse.kura.container.orchestration.PasswordRegistryCredentials;
+import org.eclipse.kura.container.orchestration.PortInternetProtocol;
 import org.eclipse.kura.container.orchestration.RegistryCredentials;
 import org.eclipse.kura.util.configuration.Property;
 
@@ -39,6 +42,7 @@ public class ContainerInstanceOptions {
     private static final Property<String> CONTAINER_NAME = new Property<>("kura.service.pid", "kura_test_container");
     private static final Property<String> CONTAINER_PORTS_EXTERNAL = new Property<>("container.ports.external", "");
     private static final Property<String> CONTAINER_PORTS_INTERNAL = new Property<>("container.ports.internal", "");
+    private static final Property<String> CONTAINER_PORTS = new Property<>("container.ports", "");
     private static final Property<String> CONTAINER_ENV = new Property<>("container.env", "");
     private static final Property<String> CONTAINER_VOLUME = new Property<>("container.volume", "");
     private static final Property<String> CONTAINER_DEVICE = new Property<>("container.device", "");
@@ -69,6 +73,7 @@ public class ContainerInstanceOptions {
     private final String containerName;
     private final List<Integer> internalPorts;
     private final List<Integer> externalPorts;
+    private final List<ContainerPort> containerPorts;
     private final String containerEnv;
     private final String containerVolumeString;
     private final String containerDevice;
@@ -100,6 +105,7 @@ public class ContainerInstanceOptions {
         this.containerName = CONTAINER_NAME.get(properties);
         this.internalPorts = parsePortString(CONTAINER_PORTS_INTERNAL.get(properties));
         this.externalPorts = parsePortString(CONTAINER_PORTS_EXTERNAL.get(properties));
+        this.containerPorts = parseFullPortString(CONTAINER_PORTS.get(properties));
         this.containerEnv = CONTAINER_ENV.get(properties);
         this.containerVolumeString = CONTAINER_VOLUME.get(properties);
         this.containerVolumes = parseVolume(this.containerVolumeString);
@@ -328,10 +334,21 @@ public class ContainerInstanceOptions {
                 .setRegistryCredentials(getRegistryCredentials()).build();
     }
 
+    private ContainerConfigurationBuilder buildPortConfig(ContainerConfigurationBuilder cc) {
+        if (!this.containerPorts.isEmpty()) {
+            cc.setContainerPorts(this.containerPorts);
+        } else {
+            // fallback to old api
+            cc.setExternalPorts(getContainerPortsExternal());
+            cc.setInternalPorts(getContainerPortsInternal());
+        }
+
+        return cc;
+    }
+
     public ContainerConfiguration getContainerConfiguration() {
-        return ContainerConfiguration.builder().setContainerName(getContainerName())
-                .setImageConfiguration(buildImageConfig()).setExternalPorts(getContainerPortsExternal())
-                .setInternalPorts(getContainerPortsInternal()).setEnvVars(getContainerEnvList())
+        return buildPortConfig(ContainerConfiguration.builder()).setContainerName(getContainerName())
+                .setImageConfiguration(buildImageConfig()).setEnvVars(getContainerEnvList())
                 .setVolumes(getContainerVolumeList()).setPrivilegedMode(this.privilegedMode)
                 .setDeviceList(getContainerDeviceList()).setFrameworkManaged(true).setLoggingType(getLoggingType())
                 .setContainerNetowrkConfiguration(buildContainerNetworkConfig())
@@ -351,6 +368,35 @@ public class ContainerInstanceOptions {
         }
 
         return tempArray;
+    }
+
+    private List<ContainerPort> parseFullPortString(String portString) {
+        List<ContainerPort> portList = new LinkedList<>();
+
+        // expects a string link this "80:80/tcp, 443:443/tcp 888:888/udp".
+        for (String portToken : portString.split(",")) {
+            PortInternetProtocol pIP = PortInternetProtocol.TCP;
+
+            if (portToken.split("/").length > 1) {
+                switch (portToken.split("/")[1].toUpperCase().trim()) {
+                case "UDP":
+                    pIP = PortInternetProtocol.UDP;
+                    break;
+                case "SCTP":
+                    pIP = PortInternetProtocol.SCTP;
+                    break;
+                default:
+                    pIP = PortInternetProtocol.TCP;
+                    break;
+                }
+            }
+            int portInternal = Integer.parseInt(portToken.split("/")[0].split(":")[0]);
+            int portExternal = Integer.parseInt(portToken.split("/")[0].split(":")[1]);
+
+            portList.add(new ContainerPort(portInternal, portExternal, pIP));
+        }
+
+        return portList;
     }
 
     @Override
@@ -392,8 +438,7 @@ public class ContainerInstanceOptions {
                 && Objects.equals(this.registryPassword, other.registryPassword)
                 && Objects.equals(this.registryURL, other.registryURL)
                 && Objects.equals(this.registryUsername, other.registryUsername)
-                && this.retryInterval == other.retryInterval
-                && this.restartOnFailure == other.restartOnFailure;
+                && this.retryInterval == other.retryInterval && this.restartOnFailure == other.restartOnFailure;
     }
 
 }

@@ -14,6 +14,7 @@
 package org.eclipse.kura.container.orchestration;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,8 +34,7 @@ public class ContainerInstanceDescriptor {
     private String containerImage;
     private String containerImageTag;
     private String containerID;
-    private List<Integer> containerPortsExternal;
-    private List<Integer> containerPortsInternal;
+    private List<ContainerPort> containerPorts = new ArrayList<>();
     private ContainerState containerState = ContainerState.STOPPING;
     private boolean isFrameworkManaged;
 
@@ -101,7 +101,7 @@ public class ContainerInstanceDescriptor {
      * @return
      */
     public List<Integer> getContainerPortsExternal() {
-        return this.containerPortsExternal;
+        return ContainerPort.continerPortsListExternal(this.containerPorts);
     }
 
     /**
@@ -110,13 +110,13 @@ public class ContainerInstanceDescriptor {
      * @return
      */
     public List<Integer> getContainerPortsInternal() {
-        return this.containerPortsInternal;
+        return ContainerPort.continerPortsListInternal(this.containerPorts);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.containerID, this.containerImage, this.containerImageTag, this.containerName,
-                this.containerPortsExternal, this.containerPortsInternal, this.containerState, this.isFrameworkManaged);
+                this.containerPorts, this.containerState, this.isFrameworkManaged);
     }
 
     @Override
@@ -132,8 +132,7 @@ public class ContainerInstanceDescriptor {
                 && Objects.equals(this.containerImage, other.containerImage)
                 && Objects.equals(this.containerImageTag, other.containerImageTag)
                 && Objects.equals(this.containerName, other.containerName)
-                && Objects.equals(this.containerPortsExternal, other.containerPortsExternal)
-                && Objects.equals(this.containerPortsInternal, other.containerPortsInternal)
+                && Objects.equals(this.containerPorts, other.containerPorts)
                 && this.containerState == other.containerState && this.isFrameworkManaged == other.isFrameworkManaged;
     }
 
@@ -154,6 +153,7 @@ public class ContainerInstanceDescriptor {
         private String containerId = "";
         private List<Integer> containerPortsExternal = new ArrayList<>();
         private List<Integer> containerPortsInternal = new ArrayList<>();
+        private List<ContainerPort> containerPorts = new ArrayList<>();
         private ContainerState containerState = ContainerState.STOPPING;
         private boolean isFrameworkManaged;
 
@@ -182,6 +182,11 @@ public class ContainerInstanceDescriptor {
             return this;
         }
 
+        public ContainerInstanceDescriptorBuilder setContainerPorts(List<ContainerPort> containerPorts) {
+            this.containerPorts = containerPorts;
+            return this;
+        }
+
         public ContainerInstanceDescriptorBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;
@@ -200,12 +205,21 @@ public class ContainerInstanceDescriptor {
         public ContainerInstanceDescriptor build() {
             ContainerInstanceDescriptor containerDescriptor = new ContainerInstanceDescriptor();
 
+            // If Legacy API is used convert to new API
+            if (!this.containerPortsExternal.isEmpty() || !this.containerPortsInternal.isEmpty()) {
+                Iterator<Integer> extPort = this.containerPortsExternal.iterator();
+                Iterator<Integer> intPort = this.containerPortsInternal.iterator();
+
+                while (extPort.hasNext() && intPort.hasNext()) {
+                    this.containerPorts.add(new ContainerPort(intPort.next(), extPort.next()));
+                }
+            }
+
             containerDescriptor.containerName = this.containerName;
             containerDescriptor.containerImage = this.containerImage;
             containerDescriptor.containerImageTag = this.containerImageTag;
             containerDescriptor.containerID = this.containerId;
-            containerDescriptor.containerPortsExternal = this.containerPortsExternal;
-            containerDescriptor.containerPortsInternal = this.containerPortsInternal;
+            containerDescriptor.containerPorts = this.containerPorts;
             containerDescriptor.containerState = this.containerState;
             containerDescriptor.isFrameworkManaged = this.isFrameworkManaged;
 

@@ -350,6 +350,16 @@ public class ContainerConfiguration {
             return this;
         }
 
+        /**
+         * Set the {@link ContainerPort} list
+         *
+         * @since 2.5
+         */
+        public ContainerConfigurationBuilder setContainerPorts(List<ContainerPort> containerPorts) {
+            this.containerPorts = containerPorts;
+            return this;
+        }
+
         public ContainerConfigurationBuilder setExternalPorts(List<Integer> containerPortsExternal) {
             this.containerPortsExternal = new ArrayList<>(containerPortsExternal);
             return this;

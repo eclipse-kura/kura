@@ -16,7 +16,9 @@ For more information on the problem, please see [this](https://github.com/eclips
 
 ## Installation
 
-As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/sensehat-example-driver-eclipse-kura-3xy) and [here](https://marketplace.eclipse.org/content/sensehat-example-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../administration/application-management.md).
+As the others Drivers supported by Kura, it is distributed as a deployment package on the Eclipse Marketplace [here](https://marketplace.eclipse.org/content/sensehat-example-driver-eclipse-kura-4xy). It can be installed following the instructions provided [here](../administration/application-management.md).
+
+In order to use the driver, the Sensehat Support Library Bundle for Eclipse Kura needs to be installed as a prerequisite dependency. It is available from Eclipse Marketplace [here](https://marketplace.eclipse.org/content/sensehat-support-library-bundle-eclipse-kura-45).
 
 ## Sensors
 

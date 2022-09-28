@@ -10,7 +10,6 @@
  * Contributors:
  *  Eurotech
  *******************************************************************************/
-
 package org.eclipse.kura.container.orchestration;
 
 /**

@@ -18,7 +18,6 @@ import java.util.Objects;
  * 
  * This class is used to represent a port mapping within a container.
  * 
- * @author eurotech
  *
  * @since 2.5
  */
